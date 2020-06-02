@@ -4,6 +4,9 @@
 #include <vector>
 #include <string>
 
+#include "json/json.hpp"
+using json = nlohmann::json;
+
 namespace ige::scene
 {
     class SceneObject;
@@ -42,6 +45,12 @@ namespace ige::scene
 
         //! Destroyed
         virtual void onDestroy();
+
+        //! Serialize
+        void to_json(json& j, const Component& obj);
+
+        //! Deserialize 
+        void from_json(const json& j, Component& obj);
 
     protected:
         //! Reference to owner object

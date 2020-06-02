@@ -6,7 +6,7 @@
 namespace ige::scene
 {
     //! Constructor
-    SceneObject::SceneObject(int id, std::string name, std::shared_ptr<SceneObject> parent) 
+    SceneObject::SceneObject(uint64_t id, std::string name, std::shared_ptr<SceneObject> parent) 
                     : m_id(id), m_name(name), m_parent(parent) 
     {
 
@@ -21,7 +21,8 @@ namespace ige::scene
     //! Destructor
     SceneObject::~SceneObject()
     {
-        m_components.clear();        
+        m_components.clear();
+        setParent(nullptr);       
         removeChildren();
     }
 
@@ -43,11 +44,11 @@ namespace ige::scene
         child->setParent(shared_from_this());
 
         // Insert to the first available slot.
-        for (auto& current : m_children)
+        for (auto& currObject : m_children)
         {
-            if (!current)
+            if (!currObject)
             {
-                current = child;
+                currObject = child;
                 return;
             }
         }
@@ -63,12 +64,12 @@ namespace ige::scene
             return false;
 
         // Remove from vector by nullptr assignment
-        for (auto& current : m_children)
+        for (auto& currObject : m_children)
         {
-            if (current == child)
+            if (currObject == child)
             {
-                current->setParent(nullptr);
-                current = nullptr;
+                currObject->setParent(nullptr);
+                currObject = nullptr;
                 return true;
             }
         }
@@ -78,7 +79,7 @@ namespace ige::scene
     }
 
     //! Get all children
-    std::vector<std::shared_ptr<SceneObject>> SceneObject::getChildren() const
+    std::vector<std::shared_ptr<SceneObject>>& SceneObject::getChildren()
     {
         return m_children;
     }
@@ -117,6 +118,55 @@ namespace ige::scene
         return false;
     }
 
+    //! Get components list
+    std::vector<std::shared_ptr<Component>>& SceneObject::getComponents()
+    {
+        return m_components;
+    }
+
+    //! Get component count
+    size_t SceneObject::getComponentsCount()
+    {
+        return m_components.size();
+    }
+
+    //! Get component by type
+    template<typename T>
+    inline std::shared_ptr<T> SceneObject::getComponent()
+    {
+        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
+
+        for (auto it = m_components.begin(); it != m_components.end(); ++it)
+        {
+            auto result = std::dynamic_pointer_cast<T>(*it);
+            if (result)
+                return result;
+        }
+        return nullptr;
+    }
+
+    //! Find object by id
+    std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const
+    {
+        if(m_id == id) return std::const_pointer_cast<SceneObject>(shared_from_this());
+        std::for_each(m_children.begin(), m_children.end(), [&](auto child) {
+            auto ret = child->findObjectById(id);
+            if(ret) return ret;
+        });
+        return nullptr;
+    }
+
+    //! Find object by name
+    std::shared_ptr<SceneObject> SceneObject::findObjectByName(std::string name) const
+    {
+        if(m_name == name) return std::const_pointer_cast<SceneObject>(shared_from_this());
+        std::for_each(m_children.begin(), m_children.end(), [&](auto child) {
+            auto ret = child->findObjectByName(name);
+            if(ret) return ret;
+        });
+        return nullptr;
+    }
+
     //! Update function
     void SceneObject::onUpdate(float dt)
     {        
@@ -144,21 +194,27 @@ namespace ige::scene
         }
     }
     
-    /**
-    * Enable or disable the actor
-    * @param isActive
-    */
+    //! Enable or disable the actor    
     void SceneObject::setActive(bool isActive)
     {
         m_isActive = isActive;
     }
 
-    /**
-    * Check active
-    * @return true/false
-    */
+    //! Check active    
     bool SceneObject::isActive() const
     {
         return m_isActive;
+    }
+
+    //! Serialize
+    void SceneObject::to_json(json& j, const SceneObject& obj)
+    {
+        
+    }
+
+    //! Deserialize 
+    void SceneObject::from_json(const json& j, SceneObject& obj)
+    {
+
     }
 }
