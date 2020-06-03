@@ -1,4 +1,5 @@
 #include "TransformComponent.h"
+#include "FigureComponent.h"
 #include "SceneObject.h"
 
 namespace ige::scene {
@@ -168,8 +169,10 @@ namespace ige::scene {
 
     void TransformComponent::updateWorldMatrix()
     {
+        // Update world matrix
         m_worldMatrix = hasParent() ? getParent()->getWorldMatrix() * m_localMatrix : m_localMatrix;
 
+        // Update world position
         m_worldPosition.X(m_worldMatrix[0][3]);
         m_worldPosition.Y(m_worldMatrix[1][3]);
         m_worldPosition.Z(m_worldMatrix[2][3]);
@@ -181,6 +184,7 @@ namespace ige::scene {
             { m_worldMatrix[0][2], m_worldMatrix[1][2], m_worldMatrix[2][2]},
         };
 
+        // Update world scale
         m_worldScale.X(columns[0].Length());
         m_worldScale.Y(columns[1].Length());
         m_worldScale.Z(columns[2].Length());
@@ -200,15 +204,31 @@ namespace ige::scene {
             columns[2] /= m_worldScale.Z();
         }
 
+        // Update world rotation
         Mat3 rotationMatrix(columns[0], columns[1], columns[2]);
         m_worldRotation = Quat(rotationMatrix);
 
+        // Update figure transformation info
+        if(hasOwner())
+        {
+            auto figureComponent = getOwner()->getComponent<FigureComponent>();
+            if(figureComponent && figureComponent->getFigure())
+            {
+                figureComponent->getFigure()->SetPosition(m_worldPosition);
+                figureComponent->getFigure()->SetRotation(m_worldRotation);
+                figureComponent->getFigure()->SetScale(m_worldScale);
+            }
+        }
+        
+        // Notify all children
         notifyObservers(ETransformMessage::TRANSFORM_CHANGED);
     }
 
     void TransformComponent::addObserver(std::shared_ptr<ITransformObserver> observer)
     {
-        m_observers.emplace(observer);
+        // Avoid add `this`, should never happened
+        if(shared_from_this() != observer)
+            m_observers.emplace(observer);
     }
 
     void TransformComponent::removeObserver(std::shared_ptr<ITransformObserver> observer)

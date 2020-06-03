@@ -149,10 +149,12 @@ namespace ige::scene
     std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const
     {
         if(m_id == id) return std::const_pointer_cast<SceneObject>(shared_from_this());
-        std::for_each(m_children.begin(), m_children.end(), [&](auto child) {
-            auto ret = child->findObjectById(id);
-            if(ret) return ret;
-        });
+        for(int i = 0; i < m_children.size(); ++i)
+        {
+            if(m_children[i] == nullptr) continue;
+            auto ret = m_children[i]->findObjectById(id);
+            if (ret) return ret;
+        }
         return nullptr;
     }
 
@@ -160,10 +162,12 @@ namespace ige::scene
     std::shared_ptr<SceneObject> SceneObject::findObjectByName(std::string name) const
     {
         if(m_name == name) return std::const_pointer_cast<SceneObject>(shared_from_this());
-        std::for_each(m_children.begin(), m_children.end(), [&](auto child) {
-            auto ret = child->findObjectByName(name);
-            if(ret) return ret;
-        });
+        for(int i = 0; i < m_children.size(); ++i)
+        {
+            if(m_children[i] == nullptr) continue;
+            auto ret = m_children[i]->findObjectByName(name);
+            if (ret) return ret;
+        }
         return nullptr;
     }
 

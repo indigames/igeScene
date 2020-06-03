@@ -33,6 +33,9 @@ namespace ige::scene {
         //! Destructor
         virtual ~TransformComponent();
         
+        //! Get component name
+        virtual std::string getName() const override { return "TransformComponent"; }
+
         //! Get parent transform component
         std::shared_ptr<TransformComponent> getParent() const { return m_parent.lock(); }
 
@@ -104,9 +107,6 @@ namespace ige::scene {
 
         //! Get world forward vector
         virtual Vec3 getWorldForward() const;
-
-        //! Enable `this` pointer as shared_pointer
-        //using std::enable_shared_from_this<TransformComponent>::shared_from_this;
 
     protected:
         //! Update local transform matrix

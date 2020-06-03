@@ -23,8 +23,14 @@ namespace ige::scene
         //! Destructor
         virtual ~Component();
 
+        //! Get owner object
+        virtual std::shared_ptr<SceneObject> getOwner() const { return m_owner.lock(); }
+
+        //! Check if owner was set
+        virtual bool hasOwner() const { return getOwner() != nullptr; }
+
         //! Returns the name of the component
-		virtual std::string getName() = 0;
+		virtual std::string getName() const = 0;
         
         //! Awake
         virtual void onAwake();
