@@ -5,37 +5,16 @@
 namespace ige::scene
 {
     //! Constructor
-    FigureComponent::FigureComponent(std::shared_ptr<SceneObject> owner)
+    FigureComponent::FigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path)
         : Component(owner) 
-    {}
-
-    //! Destructor
-    FigureComponent::~FigureComponent() {}
-
-    //! Load figure
-    bool FigureComponent::loadFigure(const std::string& path)
     {
-        m_figure = std::make_shared<Figure>(path.c_str());
-        if (m_figure)
-        {
-            m_figure->Build();
-            m_figure->Initialize();
-            return true;
-        }
-        return false;
+        m_figure = std::make_shared<Figure>(ResourceCreator::Instance().NewFigure(path.c_str()));
     }
 
-    //! Load figure from other figure
-    bool FigureComponent::loadFromFigure(const Figure& figure)
+    //! Destructor
+    FigureComponent::~FigureComponent() 
     {
-        m_figure = std::make_shared<Figure>((Figure*) &figure);
-        if (m_figure)
-        {
-            m_figure->Build();
-            m_figure->Initialize();
-            return true;
-        }
-        return false;
+        m_figure = nullptr;
     }
 
     //! Bind animation

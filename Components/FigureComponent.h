@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        FigureComponent(std::shared_ptr<SceneObject> owner);
+        FigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path);
 
         //! Destructor
         virtual ~FigureComponent();
@@ -23,12 +23,6 @@ namespace ige::scene
         //! Get associated figure
         virtual std::shared_ptr<Figure> getFigure() const { return m_figure; }
 
-        //! Load figure from storage
-        virtual bool loadFigure(const std::string& path);
-
-        //! Load figure from other figure
-        virtual bool loadFromFigure(const Figure& figure);
-        
         //! Bind animation
         virtual void bindAnim(Figure::AnimatorSlot slot, const std::string& name);
 

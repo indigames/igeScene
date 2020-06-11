@@ -5,10 +5,10 @@
 namespace ige::scene
 {
     //! Constructor
-    CameraComponent::CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name)
+    CameraComponent::CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name, Figure* parentFigure)
         : Component(owner)
     {
-        m_camera = std::make_shared<Camera>(name.c_str());
+        m_camera = std::make_shared<Camera>(ResourceCreator::Instance().NewCamera(name.c_str(), parentFigure));
     }
 
     //! Destructor

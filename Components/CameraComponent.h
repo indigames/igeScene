@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name);
+        CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name, Figure* parentFigure = nullptr);
 
         //! Destructor
         virtual ~CameraComponent();
