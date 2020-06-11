@@ -1,7 +1,7 @@
 #include <algorithm>
 
-#include "Component.h"
 #include "SceneObject.h"
+#include "components/Component.h"
 
 namespace ige::scene
 {

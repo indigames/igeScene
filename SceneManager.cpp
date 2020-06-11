@@ -1,8 +1,8 @@
 #include <algorithm>
 
-#include "Component.h"
 #include "SceneObject.h"
 #include "SceneManager.h"
+#include "components/Component.h"
 
 #define SERIALIZE_VERSION "0.0.1"
 

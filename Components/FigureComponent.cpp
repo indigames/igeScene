@@ -1,4 +1,6 @@
 #include "FigureComponent.h"
+#include "TransformComponent.h"
+#include "SceneObject.h"
 
 namespace ige::scene
 {
@@ -66,11 +68,35 @@ namespace ige::scene
     //! Update
     void FigureComponent::onUpdate(float dt)
     {
-        if (m_figure)
+        if (m_figure == nullptr) return;
+
+        std::shared_ptr<TransformComponent> transCmp = nullptr;
+
+        if(getOwner() != nullptr)
         {
-            m_figure->Step(dt);
-            m_figure->Render();
+            // Update transform from transform component
+            transCmp = getOwner()->getComponent<TransformComponent>();
+            if(transCmp != nullptr)
+            {
+                m_figure->SetPosition(transCmp->getPosition());
+                m_figure->SetRotation(transCmp->getRotation());
+                m_figure->SetScale(transCmp->getScale());
+            }
         }
+
+        // Update        
+        m_figure->Step(dt);        
+
+        if(transCmp != nullptr)
+        {
+            // Sync transform to transform component
+            transCmp->setPosition(m_figure->GetPosition());
+            transCmp->setRotation(m_figure->GetRotation());
+            transCmp->setScale(m_figure->GetScale());
+        }
+
+        // Render
+        m_figure->Render();
     }
 
     //! Serialize

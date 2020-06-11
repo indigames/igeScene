@@ -2,7 +2,7 @@
 
 #include <set>
 
-#include "pyxieMathutil.h"
+#include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
 #include "Component.h"

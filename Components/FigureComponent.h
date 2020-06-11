@@ -1,8 +1,7 @@
 #pragma once
 
-#include "pyxieFigure.h"
+#include "utils/PyxieHeaders.h"
 using namespace pyxie;
-using Figure = pyxie::pyxieFigure;
 
 #include "Component.h"
 
