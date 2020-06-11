@@ -53,6 +53,8 @@ namespace ige::scene
     protected:
         //! Scene root node
         std::shared_ptr<SceneObject> m_root;
+        std::shared_ptr<SceneObject> m_editorCamera;
+        std::shared_ptr<SceneObject> m_editorEnvironment;
 
         //! Object ID counter
         uint64_t m_nextObjectID = 1;

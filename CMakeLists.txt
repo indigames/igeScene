@@ -45,11 +45,9 @@ elseif(APPLE)
     endif()
 endif()
 
-file(GLOB SRC
+file(GLOB_RECURSE SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/**/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/**/*.cpp"
 )
 
 set(INCLUDES

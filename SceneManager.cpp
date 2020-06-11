@@ -4,6 +4,10 @@
 #include "SceneManager.h"
 #include "components/Component.h"
 
+#include "components/CameraComponent.h"
+#include "components/TransformComponent.h"
+#include "components/EnvironmentComponent.h"
+
 #define SERIALIZE_VERSION "0.0.1"
 
 namespace ige::scene
@@ -60,8 +64,18 @@ namespace ige::scene
 
     bool SceneManager::createEmptyScene()
     {
-        // TODO: implement this
-        return false;
+        m_root = createObject("root");
+        m_root->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+
+        m_editorCamera = createObject("editor_camera", m_root);
+        m_editorCamera->addComponent<TransformComponent>(Vec3(0.f, 0.f, 10.f));
+        m_editorCamera->addComponent<CameraComponent>("camera");
+        
+        m_editorEnvironment = createObject("editor_environment");
+        m_editorEnvironment->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+        m_editorEnvironment->addComponent<EnvironmentComponent>("environment");
+
+        return true;
     }
 
     bool SceneManager::loadScene(const std::string& path)

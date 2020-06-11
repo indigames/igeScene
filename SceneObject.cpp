@@ -7,7 +7,7 @@ namespace ige::scene
 {
     //! Constructor
     SceneObject::SceneObject(uint64_t id, std::string name, std::shared_ptr<SceneObject> parent) 
-                    : m_id(id), m_name(name), m_parent(parent) 
+                    : m_id(id), m_name(name), m_parent(parent), m_isActive(false)
     {
 
     }
@@ -129,22 +129,7 @@ namespace ige::scene
     {
         return m_components.size();
     }
-
-    //! Get component by type
-    template<typename T>
-    inline std::shared_ptr<T> SceneObject::getComponent()
-    {
-        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
-
-        for (auto it = m_components.begin(); it != m_components.end(); ++it)
-        {
-            auto result = std::dynamic_pointer_cast<T>(*it);
-            if (result)
-                return result;
-        }
-        return nullptr;
-    }
-
+        
     //! Find object by id
     std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const
     {

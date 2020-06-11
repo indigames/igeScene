@@ -10,6 +10,7 @@ using json = nlohmann::json;
 namespace ige::scene
 {
     class Component;
+    class TransformComponent;
 
     /**
     * SceneObject represents an object in scene hierarchy
@@ -67,7 +68,15 @@ namespace ige::scene
 
         //! Get component by type
         template<typename T>
-	    inline std::shared_ptr<T> getComponent();
+        inline std::shared_ptr<T> getComponent();
+
+        //! Add component by type
+        template<typename T, typename ... Args>
+        T& addComponent(Args&&... args);
+
+        //! Remove component by type
+        template<typename T>
+        bool removeComponent();
 
         //! Find object by id
         std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const;
@@ -111,4 +120,56 @@ namespace ige::scene
         //! Components vector
         std::vector<std::shared_ptr<Component>> m_components;
     };
+
+    //! Get component by type
+    template<typename T>
+    inline std::shared_ptr<T> SceneObject::getComponent()
+    {
+        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
+
+        for (auto it = m_components.begin(); it != m_components.end(); ++it)
+        {
+            auto result = std::dynamic_pointer_cast<T>(*it);
+            if (result)
+                return result;
+        }
+        return nullptr;
+    }
+
+    //! Add component by type
+    template<typename T, typename ...Args>
+    inline T& SceneObject::addComponent(Args&& ...args)
+    {
+        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
+        auto found = getComponent<T>();
+        if (!found)
+        {
+            auto instance = std::make_shared<T>(shared_from_this(), args...);
+            m_components.push_back(instance);
+            return *(instance.get());
+        }
+        else
+        {
+            return *found;
+        }
+    }
+
+    //! Remove component by type
+    template<typename T>
+    inline bool SceneObject::removeComponent()
+    {
+        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
+        std::shared_ptr<T> result(nullptr);
+        for (auto it = m_components.begin(); it != m_components.end(); ++it)
+        {
+            result = std::dynamic_pointer_cast<T>(*it);
+            if (result)
+            {
+                m_components.erase(it);
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
