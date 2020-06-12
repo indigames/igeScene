@@ -7,9 +7,11 @@
 #include "json/json.hpp"
 using json = nlohmann::json;
 
+#include "event/Event.h"
+#include "components/Component.h"
+
 namespace ige::scene
 {
-    class Component;
     class TransformComponent;
 
     /**
@@ -34,16 +36,16 @@ namespace ige::scene
         inline std::string getName() const { return m_name; }
 
         //! Set parent
-        virtual void setParent(std::shared_ptr<SceneObject> parent);
+        virtual void setParent(const std::shared_ptr<SceneObject>& parent);
 
         // Get parent
         virtual std::shared_ptr<SceneObject> getParent() const;
 
         //! Adds a child.
-        virtual void addChild(std::shared_ptr<SceneObject> child);
+        virtual void addChild(const std::shared_ptr<SceneObject>& child);
 
         //! Remove a childs.
-        virtual bool removeChild(std::shared_ptr<SceneObject> child);
+        virtual bool removeChild(const std::shared_ptr<SceneObject>& child);
 
         //! Get children list
         virtual std::vector<std::shared_ptr<SceneObject>>& getChildren();
@@ -55,10 +57,10 @@ namespace ige::scene
         virtual void removeChildren();
 
         //! Add a component
-        virtual void addComponent(std::shared_ptr<Component> component);
+        virtual void addComponent(const std::shared_ptr<Component>& component);
 
         //! Remove a component
-        virtual bool removeComponent(std::shared_ptr<Component> component);
+        virtual bool removeComponent(const std::shared_ptr<Component>& component);
 
         //! Get components list
         virtual std::vector<std::shared_ptr<Component>>& getComponents();
@@ -89,6 +91,9 @@ namespace ige::scene
         virtual void onFixedUpdate(float dt);
         virtual void onLateUpdate(float dt);
         
+        //! Render function
+        virtual void onRender();
+
         //! Enable or disable the actor		
         inline void setActive(bool isActive);
 
@@ -101,6 +106,10 @@ namespace ige::scene
         //! Deserialize 
         void from_json(const json& j, SceneObject& obj);
         
+        //! Internal event
+        Event<std::shared_ptr<Component>>& getComponentAddedEvent() { return m_componentAddedEvent; }
+        Event<std::shared_ptr<Component>>& getComponentRemovedEvent() { return m_componentRemovedEvent; }
+
     protected:
         //! Node ID
         uint64_t m_id;
@@ -119,6 +128,10 @@ namespace ige::scene
 
         //! Components vector
         std::vector<std::shared_ptr<Component>> m_components;
+
+        //! Internal events
+        Event<std::shared_ptr<Component>> m_componentAddedEvent;
+        Event<std::shared_ptr<Component>> m_componentRemovedEvent;
     };
 
     //! Get component by type
@@ -129,7 +142,13 @@ namespace ige::scene
 
         for (auto it = m_components.begin(); it != m_components.end(); ++it)
         {
+            std::string t_type = typeid(T).name();
+            std::string it_type = (*it)->getName();
+            //if(it_type == t_type)
+            //    return std::dynamic_pointer_cast<T>(*it);
             auto result = std::dynamic_pointer_cast<T>(*it);
+            if(it_type == "CameraComponent" && result)
+                return result;
             if (result)
                 return result;
         }
@@ -146,6 +165,7 @@ namespace ige::scene
         {
             auto instance = std::make_shared<T>(shared_from_this(), args...);
             m_components.push_back(instance);
+            m_componentAddedEvent.invoke(instance);
             return *(instance.get());
         }
         else
@@ -166,6 +186,7 @@ namespace ige::scene
             if (result)
             {
                 m_components.erase(it);
+                m_componentAddedEvent.invoke(result);
                 return true;
             }
         }

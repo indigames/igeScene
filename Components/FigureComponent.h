@@ -3,7 +3,7 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "Component.h"
+#include "components/Component.h"
 
 namespace ige::scene
 {
@@ -20,9 +20,6 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "FigureComponent"; }
 
-        //! Get associated figure
-        virtual std::shared_ptr<Figure> getFigure() const { return m_figure; }
-
         //! Bind animation
         virtual void bindAnim(Figure::AnimatorSlot slot, const std::string& name);
 
@@ -35,14 +32,20 @@ namespace ige::scene
         //! Update
         void onUpdate(float dt);
 
+        //! Render
+        void onRender();
+
         //! Serialize
         void to_json(json& j, const Component& obj);
 
         //! Deserialize 
         void from_json(const json& j, Component& obj);
 
+        //! Get associated figure
+        Figure* getFigure() { return m_figure; }
+
     protected:
         //! Associated figure object
-        std::shared_ptr<Figure> m_figure = nullptr;
+        Figure* m_figure = nullptr;
     };
 }

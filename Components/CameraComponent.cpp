@@ -1,6 +1,6 @@
-#include "CameraComponent.h"
-#include "TransformComponent.h"
-#include "SceneObject.h"
+#include "components/CameraComponent.h"
+#include "components/TransformComponent.h"
+#include "scene/SceneObject.h"
 
 namespace ige::scene
 {
@@ -8,7 +8,7 @@ namespace ige::scene
     CameraComponent::CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name, Figure* parentFigure)
         : Component(owner)
     {
-        m_camera = std::make_shared<Camera>(ResourceCreator::Instance().NewCamera(name.c_str(), parentFigure));
+        m_camera = ResourceCreator::Instance().NewCamera(name.c_str(), parentFigure);
     }
 
     //! Destructor
@@ -30,22 +30,20 @@ namespace ige::scene
             transCmp = getOwner()->getComponent<TransformComponent>();
             if(transCmp != nullptr)
             {
-                m_camera->SetPosition(transCmp->getPosition());
-                m_camera->SetRotation(transCmp->getRotation());
+                m_camera->SetPosition(transCmp->getWorldPosition());
+                m_camera->SetRotation(transCmp->getWorldRotation());
             }
         }
 
-        // Update        
-        m_camera->Step(dt);        
+        // Update
+        m_camera->Step(dt);
+    }
 
-        if(transCmp != nullptr)
-        {
-            // Sync transform to transform component
-            transCmp->setPosition(m_camera->GetPosition());
-            transCmp->setRotation(m_camera->GetRotation());            
-        }
+    //! Render
+    void CameraComponent::onRender()
+    {
+        if (m_camera == nullptr) return;
 
-        // Render
         m_camera->Render();
     }
 

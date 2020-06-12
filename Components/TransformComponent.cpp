@@ -1,20 +1,15 @@
-#include "TransformComponent.h"
-#include "FigureComponent.h"
-#include "SceneObject.h"
+#include "components/TransformComponent.h"
+#include "scene/SceneObject.h"
 
 namespace ige::scene {
     TransformComponent::TransformComponent(std::shared_ptr<SceneObject> owner, const Vec3& pos, const Quat& rot, const Vec3& scale)
         : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale)
     {
-        updateLocalMatrix();
+        m_bLocalDirty = true;
 
-        if(owner)
+        if(owner && owner->getParent())
         {
-            auto pTransform = owner->getComponent<TransformComponent>();
-            if(pTransform)
-            {
-                setParent(pTransform->getParent());
-            }
+            setParent(owner->getParent()->getComponent<TransformComponent>());
         }
     }
 
@@ -26,23 +21,33 @@ namespace ige::scene {
 
     void TransformComponent::setParent(std::shared_ptr<TransformComponent> parent)
     {
-        if(m_parent.lock() != parent)
-        {
-            m_parent = parent;
-            getParent()->addObserver(shared_from_this());
-
-            updateWorldMatrix();
-        }
+        m_parent = parent;
+        getParent()->addObserver(this);
+        m_bWorldDirty = true;
     }
 
     void TransformComponent::removeParent()
     {
         if(hasParent())
         {
-            getParent()->removeObserver(shared_from_this());
-
+            getParent()->removeObserver(this);
             m_parent.reset();
+            m_bWorldDirty = true;
+        }
+    }
+
+    void TransformComponent::onUpdate(float dt)
+    {
+        if (m_bLocalDirty)
+        {
+            updateLocalMatrix();
+            m_bLocalDirty = false;
+        }
+
+        if (m_bWorldDirty)
+        {
             updateWorldMatrix();
+            m_bWorldDirty = false;
         }
     }
 
@@ -66,16 +71,16 @@ namespace ige::scene {
         if(m_localPosition != pos)
         {
             m_localPosition = Vec3(pos);
-            updateLocalMatrix();
+            m_bLocalDirty = true;
         }        
     }
 
-    Vec3 TransformComponent::getPosition() const
+    const Vec3& TransformComponent::getPosition() const
     {
         return m_localPosition;
     }
 
-    Vec3 TransformComponent::getWorldPosition() const
+    const Vec3& TransformComponent::getWorldPosition() const
     {
         return m_worldPosition;
     }
@@ -85,16 +90,16 @@ namespace ige::scene {
         if(m_localRotation != rot)
         {
             m_localRotation = Quat(rot);
-            updateLocalMatrix();
+            m_bLocalDirty = true;
         }        
     }
 
-    Quat TransformComponent::getRotation() const
+    const Quat& TransformComponent::getRotation() const
     {
         return m_localRotation;
     }
 
-    Quat TransformComponent::getWorldRotation() const
+    const Quat& TransformComponent::getWorldRotation() const
     {
         return m_worldRotation;
     }
@@ -104,56 +109,56 @@ namespace ige::scene {
         if(m_localScale != scale)
         {
             m_localScale = Vec3(scale);
-            updateLocalMatrix();
+            m_bLocalDirty = true;
         }     
     }
 
-    Vec3 TransformComponent::getScale() const
+    const Vec3& TransformComponent::getScale() const
     {
         return m_localScale;
     }
 
-    Vec3 TransformComponent::getWorldScale() const
+    const Vec3& TransformComponent::getWorldScale() const
     {
         return m_worldScale;
     }
 
-    Mat4 TransformComponent::getLocalMatrix() const
+    const Mat4& TransformComponent::getLocalMatrix() const
     {
         return m_localMatrix;
     }
 
-    Mat4 TransformComponent::getWorldMatrix() const
+    const Mat4& TransformComponent::getWorldMatrix() const
     {
         return m_worldMatrix;
     }
 
-    Vec3 TransformComponent::getLocalRight() const
+    const Vec3& TransformComponent::getLocalRight() const
     {
         return m_localPosition.xAxis();
     }
 
-    Vec3 TransformComponent::getLocalUp() const
+    const Vec3& TransformComponent::getLocalUp() const
     {
         return m_localPosition.yAxis();
     }
 
-    Vec3 TransformComponent::getLocalForward() const
+    const Vec3& TransformComponent::getLocalForward() const
     {
         return m_localPosition.zAxis();
     }
 
-    Vec3 TransformComponent::getWorldRight() const
+    const Vec3& TransformComponent::getWorldRight() const
     {
         return m_worldPosition.xAxis();
     }
 
-    Vec3 TransformComponent::getWorldUp() const
+    const Vec3& TransformComponent::getWorldUp() const
     {
         return m_worldPosition.yAxis();
     }
 
-    Vec3 TransformComponent::getWorldForward() const
+    const Vec3& TransformComponent::getWorldForward() const
     {
         return m_worldPosition.zAxis();
     }
@@ -163,8 +168,7 @@ namespace ige::scene {
         m_localMatrix.Identity();
         vmath_mat4_from_rottrans(m_localRotation.P(), m_localPosition.P(), m_localMatrix.P());
         vmath_mat_appendScale(m_localMatrix.P(), m_localScale.P(), 4, 4, m_localMatrix.P());
-
-        updateWorldMatrix();
+        m_bWorldDirty = true;
     }
 
     void TransformComponent::updateWorldMatrix()
@@ -208,39 +212,27 @@ namespace ige::scene {
         Mat3 rotationMatrix(columns[0], columns[1], columns[2]);
         m_worldRotation = Quat(rotationMatrix);
 
-        // Update figure transformation info
-        if(hasOwner())
-        {
-            auto figureComponent = getOwner()->getComponent<FigureComponent>();
-            if(figureComponent && figureComponent->getFigure())
-            {
-                figureComponent->getFigure()->SetPosition(m_worldPosition);
-                figureComponent->getFigure()->SetRotation(m_worldRotation);
-                figureComponent->getFigure()->SetScale(m_worldScale);
-            }
-        }
-        
         // Notify all children
         notifyObservers(ETransformMessage::TRANSFORM_CHANGED);
     }
 
-    void TransformComponent::addObserver(std::shared_ptr<ITransformObserver> observer)
+    void TransformComponent::addObserver(TransformComponent* observer)
     {
         // Avoid add `this`, should never happened
-        if(shared_from_this() != observer)
-            m_observers.emplace(observer);
+        if(observer && observer != this) m_observers.emplace(observer);
     }
 
-    void TransformComponent::removeObserver(std::shared_ptr<ITransformObserver> observer)
+    void TransformComponent::removeObserver(TransformComponent* observer)
     {
-        m_observers.erase(observer);
+        if(observer) m_observers.erase(observer);
     }
 
     void TransformComponent::notifyObservers(const ETransformMessage &message)
     {
-        std::for_each(m_observers.begin(), m_observers.end(), [&](auto observer) {
+        for( auto observer: m_observers) 
+        {
             observer->onNotified(message);
-        });
+        }
     }
 
     void TransformComponent::onNotified(const ETransformMessage &message)
@@ -248,17 +240,17 @@ namespace ige::scene {
         switch (message)
         {
         case ETransformMessage::TRANSFORM_CHANGED:
-            updateWorldMatrix();
+            m_bWorldDirty = true;
             break;
 
         case ETransformMessage::TRANSFORM_DESTROYED:
             m_localPosition = m_worldPosition;
             m_localRotation = m_worldRotation;
             m_localScale = m_worldScale;
-            updateLocalMatrix();
+            m_bLocalDirty = true;
 
             m_parent.reset();
-            updateWorldMatrix();
+            m_bWorldDirty = true;
             break;
         }
     }

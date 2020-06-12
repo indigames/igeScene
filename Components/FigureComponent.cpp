@@ -1,19 +1,22 @@
-#include "FigureComponent.h"
-#include "TransformComponent.h"
-#include "SceneObject.h"
+#include "components/FigureComponent.h"
+#include "components/TransformComponent.h"
+#include "scene/SceneObject.h"
 
 namespace ige::scene
 {
     //! Constructor
     FigureComponent::FigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path)
-        : Component(owner) 
+        : Component(owner)
     {
-        m_figure = std::make_shared<Figure>(ResourceCreator::Instance().NewFigure(path.c_str()));
+        m_figure = ResourceCreator::Instance().NewFigure(path.c_str());
+        m_figure->WaitInitialize();
     }
 
     //! Destructor
     FigureComponent::~FigureComponent() 
     {
+        if(m_figure)
+            m_figure->DecReference();
         m_figure = nullptr;
     }
 
@@ -57,24 +60,21 @@ namespace ige::scene
             transCmp = getOwner()->getComponent<TransformComponent>();
             if(transCmp != nullptr)
             {
-                m_figure->SetPosition(transCmp->getPosition());
-                m_figure->SetRotation(transCmp->getRotation());
-                m_figure->SetScale(transCmp->getScale());
+                m_figure->SetPosition(transCmp->getWorldPosition());
+                m_figure->SetRotation(transCmp->getWorldRotation());
+                m_figure->SetScale(transCmp->getWorldScale());
             }
         }
 
-        // Update        
-        m_figure->Step(dt);        
+        // Update
+        m_figure->Step(dt);
+    }
 
-        if(transCmp != nullptr)
-        {
-            // Sync transform to transform component
-            transCmp->setPosition(m_figure->GetPosition());
-            transCmp->setRotation(m_figure->GetRotation());
-            transCmp->setScale(m_figure->GetScale());
-        }
+    //! Update
+    void FigureComponent::onRender()
+    {
+        if (m_figure == nullptr) return;
 
-        // Render
         m_figure->Render();
     }
 

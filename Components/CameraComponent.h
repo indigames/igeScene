@@ -3,7 +3,7 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "Component.h"
+#include "components/Component.h"
 
 namespace ige::scene
 {
@@ -20,16 +20,13 @@ namespace ige::scene
         //! Get component name
         std::string getName() const override { return "CameraComponent"; }
 
-        //! Get camera
-        Camera* getCamera() const { return m_camera.get(); }
-
         //! Position
-        void setPosition(const Vec3& pos) { m_camera->SetPosition(pos);  }
-        const Vec3& getPosition() const { return m_camera->GetPosition(); }
+        void setPosition(const Vec3& pos) { m_camera->SetCameraPosition(pos);  }
+        const Vec3& getPosition() const { return m_camera->GetCameraPosition(); }
 
         //! Rotation
-        void setRotation(const Quat& rot) { m_camera->SetRotation(rot);  }
-        const Quat& getRotation() const { return m_camera->GetRotation(); }
+        void setRotation(const Quat& rot) { m_camera->SetCameraRotation(rot);  }
+        const Quat& getRotation() const { return m_camera->GetCameraRotation(); }
 
         //! Aspect ratio
         float getAspectRatio() const { return m_camera->GetAspectRate(); }
@@ -50,6 +47,27 @@ namespace ige::scene
         //! Far plane
         float getFarPlane() const { return m_camera->GetFarPlane(); }
         void setFarPlane(float val) { m_camera->SetFarPlane(val); }
+
+        //! Pan (Y-axis)
+        float getPan() const { return m_camera->GetPan(); }
+        void setPan(float pan) { m_camera->SetPan(pan); }
+        
+        //! Tilt (X-axis)
+        float getTilt() const { return m_camera->GetTilt(); }
+        void setTilt(float tilt) { m_camera->SetTilt(tilt); }
+
+        //! Roll (Z-axis)
+        float getRoll() const { return m_camera->GetRoll(); }
+        void setRoll(float roll) { m_camera->SetRoll(roll); }
+        
+        //! Targets
+        void setTarget(const Vec3& tar) { m_camera->SetTarget(tar); }
+        Vec3 getTarget() const { return m_camera->GetTarget(); }
+        Vec3 getWorldTarget() const { return m_camera->GetWorldTarget(); }
+
+        //! Lock on target
+        void lockonTarget(bool lockon = true) { m_camera->LockonTarget(lockon); }
+        bool getLockon() { return m_camera->GetLockon(); }
 
         //! Ortho Graphic
         void setOrthoProjection(bool ortho) { m_camera->SetOrthographicProjection(ortho);}
@@ -90,14 +108,20 @@ namespace ige::scene
         //! Update
         virtual void onUpdate(float dt);
 
+        //! Update
+        virtual void onRender();
+
         //! Serialize
         void to_json(json& j, const Component& obj);
 
         //! Deserialize 
         void from_json(const json& j, Component& obj);
 
+        //! Get camera
+        Camera* getCamera() { return m_camera; }
+
     protected:
         //! Internal camera
-        std::shared_ptr<Camera> m_camera;
+        Camera* m_camera;
     };
 }

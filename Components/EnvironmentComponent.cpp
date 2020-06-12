@@ -1,6 +1,6 @@
-#include "EnvironmentComponent.h"
-#include "TransformComponent.h"
-#include "SceneObject.h"
+#include "components/EnvironmentComponent.h"
+#include "components/TransformComponent.h"
+#include "scene/SceneObject.h"
 
 namespace ige::scene
 {
@@ -8,17 +8,26 @@ namespace ige::scene
     EnvironmentComponent::EnvironmentComponent(std::shared_ptr<SceneObject> owner, const std::string& name, Figure* parentFigure)
         : Component(owner)
     {
-        m_environment = std::make_shared<Environment>(ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), parentFigure));
+        m_environment = ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), parentFigure);
+        m_environment->IncReference();
     }
 
     //! Destructor
     EnvironmentComponent::~EnvironmentComponent() 
     {
+        if (m_environment)
+            m_environment->DecReference();
         m_environment = nullptr;
     }
     
     //! Update
     void EnvironmentComponent::onUpdate(float dt)
+    {
+        if (m_environment == nullptr) return;
+    }
+
+    //! Render
+    void EnvironmentComponent::onRender()
     {
         if (m_environment == nullptr) return;
 

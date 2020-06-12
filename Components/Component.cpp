@@ -1,5 +1,5 @@
-#include "Component.h"
-#include "SceneObject.h"
+#include "components/Component.h"
+#include "scene/SceneObject.h"
 
 namespace ige::scene
 {
@@ -35,6 +35,9 @@ namespace ige::scene
     void Component::onFixedUpdate(float dt) {}
 
     void Component::onLateUpdate(float dt) {}
+
+    //! Render
+    void Component::onRender() {}
 
     //! Destroyed
     void Component::onDestroy() {}

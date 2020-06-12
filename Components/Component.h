@@ -49,6 +49,9 @@ namespace ige::scene
         virtual void onFixedUpdate(float dt);
         virtual void onLateUpdate(float dt);
 
+        //! Render
+        virtual void onRender();
+
         //! Destroyed
         virtual void onDestroy();
 

@@ -3,7 +3,7 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "Component.h"
+#include "components/Component.h"
 
 namespace ige::scene
 {
@@ -91,13 +91,19 @@ namespace ige::scene
         //! Update
         virtual void onUpdate(float dt);
 
+        //! Render
+        virtual void onRender();
+        
         //! Serialize
         void to_json(json& j, const Component& obj);
 
         //! Deserialize 
         void from_json(const json& j, Component& obj);
 
+        //! Get internal environment
+        Environment* getEnvironment() { return m_environment; }
+
     protected:
-        std::shared_ptr<Environment> m_environment;
+        Environment* m_environment;
     };
 }

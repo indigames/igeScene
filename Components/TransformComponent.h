@@ -5,7 +5,7 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "Component.h"
+#include "components/Component.h"
 
 namespace ige::scene {
 
@@ -16,19 +16,12 @@ namespace ige::scene {
         TRANSFORM_DESTROYED
     };
 
-    //! Transform observer
-    class ITransformObserver: public std::enable_shared_from_this<ITransformObserver>
-    {
-    public:
-        virtual void onNotified(const ETransformMessage &message) = 0;
-    };
-
     //! Transform observable(as parent) and also observer(as child)
-    class TransformComponent: public Component, ITransformObserver
+    class TransformComponent: public Component, public std::enable_shared_from_this<TransformComponent>
     {
     public:
         //! Constructor
-        TransformComponent(std::shared_ptr<SceneObject> owner, const Vec3& pos = Vec3(), const Quat& rot = Quat(), const Vec3& scale = Vec3());
+        TransformComponent(std::shared_ptr<SceneObject> owner, const Vec3& pos = Vec3(), const Quat& rot = Quat(), const Vec3& scale = Vec3(1.f, 1.f, 1.f));
 
         //! Destructor
         virtual ~TransformComponent();
@@ -61,52 +54,55 @@ namespace ige::scene {
         virtual void setPosition(const Vec3& pos);
 
         //! Get local position
-        virtual Vec3 getPosition() const;
+        virtual const Vec3& getPosition() const;
 
         //! Get world position
-        virtual Vec3 getWorldPosition() const;
+        virtual const Vec3& getWorldPosition() const;
 
         //! Set local rotation
         virtual void setRotation(const Quat& rot);
 
         //! Get local rotation
-        virtual Quat getRotation() const;
+        virtual const Quat& getRotation() const;
 
         //! get world rotation
-        virtual Quat getWorldRotation() const;
+        virtual const Quat& getWorldRotation() const;
 
         //! Set local scale
         virtual void setScale(const Vec3& scale);
 
         //! Get local scale
-        virtual Vec3 getScale() const;
+        virtual const Vec3& getScale() const;
 
         //! Get world scale
-        virtual Vec3 getWorldScale() const;
+        virtual const Vec3& getWorldScale() const;
 
         //! Get local transform matrix
-        virtual Mat4 getLocalMatrix() const;
+        virtual const Mat4& getLocalMatrix() const;
 
         //! Get world transform matrix
-        virtual Mat4 getWorldMatrix() const;
+        virtual const Mat4& getWorldMatrix() const;
 
         //! Get local right vector
-        virtual Vec3 getLocalRight() const;
+        virtual const Vec3& getLocalRight() const;
 
         //! Get local up vector
-        virtual Vec3 getLocalUp() const;
+        virtual const Vec3& getLocalUp() const;
 
         //! Get local forward vector
-        virtual Vec3 getLocalForward() const;     
+        virtual const Vec3& getLocalForward() const;
         
         //! Get world right vector
-        virtual Vec3 getWorldRight() const;
+        virtual const Vec3& getWorldRight() const;
 
         //! Get world up vector
-        virtual Vec3 getWorldUp() const;
+        virtual const Vec3& getWorldUp() const;
 
         //! Get world forward vector
-        virtual Vec3 getWorldForward() const;
+        virtual const Vec3& getWorldForward() const;
+
+        //! Update
+        virtual void onUpdate(float dt);
 
     protected:
         //! Update local transform matrix
@@ -116,16 +112,16 @@ namespace ige::scene {
         virtual void updateWorldMatrix();
 
         //! Add observer
-        virtual void addObserver(std::shared_ptr<ITransformObserver> observer);
+        virtual void addObserver(TransformComponent* observer);
 
         //! Remove observer
-        virtual void removeObserver(std::shared_ptr<ITransformObserver> observer);
+        virtual void removeObserver(TransformComponent* observer);
 
         //! Notify to all observers
         virtual void notifyObservers(const ETransformMessage &message);
         
         //! Handle notification from parent
-        void onNotified(const ETransformMessage &message) override;
+        virtual void onNotified(const ETransformMessage &message);
 
     protected:
         //! Local transform
@@ -144,7 +140,11 @@ namespace ige::scene {
         std::weak_ptr<TransformComponent> m_parent;
 
         //! Transform observers
-        std::set<std::shared_ptr<ITransformObserver>> m_observers;
+        std::set<TransformComponent*> m_observers;
+
+        //! Dirty flag
+        bool m_bLocalDirty = false;
+        bool m_bWorldDirty = false;
     };
 }
 
