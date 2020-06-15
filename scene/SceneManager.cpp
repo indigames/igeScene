@@ -38,6 +38,11 @@ namespace ige::scene
          if(m_currScene) m_currScene->lateUpdate(dt);
     }
 
+    void SceneManager::render()
+    {
+        if (m_currScene) m_currScene->render();
+    }
+
     std::shared_ptr<Scene> SceneManager::createEmptyScene()
     {
         auto scene = std::make_shared<Scene>("EmptyScene");

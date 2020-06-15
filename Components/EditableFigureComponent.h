@@ -7,19 +7,19 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    //! FigureComponent
-    class FigureComponent : public Component
+    //! EditableFigureComponent
+    class EditableFigureComponent : public Component
     {
     public:
         //! Constructor
-        FigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path, Figure* figure = nullptr);
+        EditableFigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path, EditableFigure* figure = nullptr);
 
         //! Destructor
-        virtual ~FigureComponent();
+        virtual ~EditableFigureComponent();
 
         //! Get component name
-        virtual std::string getName() const override { return "FigureComponent"; }
-
+        virtual std::string getName() const override { return "EditableFigureComponent"; }
+        
         //! Update
         void onUpdate(float dt);
 
@@ -33,10 +33,10 @@ namespace ige::scene
         void from_json(const json& j, Component& obj);
 
         //! Get associated figure
-        Figure* getFigure() { return m_figure; }
+        EditableFigure* getEditableFigure() { return m_figure; }
 
     protected:
-        //! Associated figure object
-        Figure* m_figure = nullptr;
+        //! Associated EditableFigure object
+        EditableFigure* m_figure = nullptr;
     };
 }

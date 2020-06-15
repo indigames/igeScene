@@ -30,6 +30,9 @@ namespace ige::scene
         //! Late update
         virtual void lateUpdate(float dt);
 
+        //! render
+        virtual void render();
+
         //! Create empty scene
         std::shared_ptr<Scene> createEmptyScene();
 

@@ -1,19 +1,19 @@
-#include "components/FigureComponent.h"
+#include "components/EditableFigureComponent.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
 
 namespace ige::scene
 {
     //! Constructor
-    FigureComponent::FigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path, Figure* figure)
+    EditableFigureComponent::EditableFigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path, EditableFigure* figure)
         : Component(owner)
     {
-        m_figure = (figure != nullptr) ? figure : ResourceCreator::Instance().NewFigure(path.c_str());
+        m_figure = figure != nullptr ? figure : ResourceCreator::Instance().NewEditableFigure(path.c_str());
         m_figure->WaitInitialize();
     }
 
     //! Destructor
-    FigureComponent::~FigureComponent() 
+    EditableFigureComponent::~EditableFigureComponent() 
     {
         if(m_figure)
             m_figure->DecReference();
@@ -21,7 +21,7 @@ namespace ige::scene
     }
 
     //! Update
-    void FigureComponent::onUpdate(float dt)
+    void EditableFigureComponent::onUpdate(float dt)
     {
         if (m_figure == nullptr) return;
 
@@ -39,12 +39,11 @@ namespace ige::scene
             }
         }
 
-        // Update
-        m_figure->Step(dt);
+        m_figure->Pose();
     }
 
     //! Update
-    void FigureComponent::onRender()
+    void EditableFigureComponent::onRender()
     {
         if (m_figure == nullptr) return;
 
@@ -52,13 +51,13 @@ namespace ige::scene
     }
 
     //! Serialize
-    void FigureComponent::to_json(json& j, const Component& obj)
+    void EditableFigureComponent::to_json(json& j, const Component& obj)
     {
 
     }
 
     //! Deserialize
-    void FigureComponent::from_json(const json& j, Component& obj)
+    void EditableFigureComponent::from_json(const json& j, Component& obj)
     {
 
     }

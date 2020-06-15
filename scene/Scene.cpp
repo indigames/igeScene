@@ -6,7 +6,10 @@
 #include "components/CameraComponent.h"
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
+#include "components/EditableFigureComponent.h"
 #include "components/EnvironmentComponent.h"
+
+#include "utils/GraphicsHelper.h"
 
 #define SERIALIZE_VERSION "0.0.1"
 
@@ -24,8 +27,6 @@ namespace ige::scene
     Scene::~Scene()
     {
         m_root = nullptr;
-        m_editorCamera = nullptr;
-        m_editorEnvironment = nullptr;
         m_showcase = nullptr;
     }
     
@@ -34,24 +35,24 @@ namespace ige::scene
         m_root = createObject("root");
         m_root->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
 
-        m_editorCamera = createObject("editor_camera", m_root);
-        m_editorCamera->addComponent<TransformComponent>(Vec3(0.f, 0.f, 10.f));
-        auto cam = m_editorCamera->addComponent<CameraComponent>("camera");
-        cam.lockonTarget(false);
-        cam.setOrthoProjection(true);
-        cam.setPosition(Vec3(0.f, 0.f, 10.f));        
+        auto camera = createObject("camera", m_root);
+        camera->addComponent<TransformComponent>(Vec3(0.f, 5.f, 10.f));
+        auto cameraComp = camera->addComponent<CameraComponent>("camera");
+        cameraComp.lockonTarget(false);
 
-        m_editorEnvironment = createObject("editor_environment");
-        m_editorEnvironment->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
-        auto env = m_editorEnvironment->addComponent<EnvironmentComponent>("environment");
-        env.setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
-        env.setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+        auto env = createObject("environment", m_root);
+        env->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+        auto envComp = env->addComponent<EnvironmentComponent>("environment");
+        envComp.setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
+        envComp.setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
 
         auto grid = createObject("grid", m_root);
-        grid->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f), Quat(), Vec3(10.f, 10.f, 10.f));
-        auto fig = grid->addComponent<FigureComponent>("Trees_Object");
-        fig.getFigure()->SetPosition({ 0.f, 0.f, 0.f });
-        fig.getFigure()->SetScale({ 10.f, 10.f, 10.f });
+        grid->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f), Quat::RotationX(PI / 2.f), Vec3(1.f, 1.f, 1.f));
+        grid->addComponent<EditableFigureComponent>("grid", GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "grid"));
+
+        auto tree = createObject("tree", m_root);
+        tree->addComponent<TransformComponent>(Vec3(20.f, 40.f, 0.f), Quat(), Vec3(1.f, 1.f, 1.f));
+        tree->addComponent<FigureComponent>("Trees_Object");
 
         return true;
     }
@@ -59,11 +60,7 @@ namespace ige::scene
     void Scene::update(float dt)
     {        
         m_root->onUpdate(dt);
-
         m_showcase->Update(dt);
-        m_editorCamera->getComponent<CameraComponent>()->getCamera()->Render();
-        m_root->onRender();
-        m_showcase->Render();
     }
 
     void Scene::fixedUpdate(float dt)
@@ -74,6 +71,13 @@ namespace ige::scene
     void Scene::lateUpdate(float dt)
     {
          m_root->onLateUpdate(dt);
+    }
+
+    void Scene::render()
+    {
+        m_root->findObjectByName("camera")->getComponent<CameraComponent>()->getCamera()->Render();
+        m_root->onRender();
+        m_showcase->Render();
     }
 
     std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent)

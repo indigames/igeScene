@@ -30,8 +30,8 @@ namespace ige::scene
             transCmp = getOwner()->getComponent<TransformComponent>();
             if(transCmp != nullptr)
             {
-                m_camera->SetPosition(transCmp->getWorldPosition());
-                m_camera->SetRotation(transCmp->getWorldRotation());
+                m_camera->SetPosition(transCmp->getPosition());
+                m_camera->SetRotation(transCmp->getRotation());
             }
         }
 

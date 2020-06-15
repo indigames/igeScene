@@ -38,6 +38,9 @@ namespace ige::scene
         //! Late update
         virtual void lateUpdate(float dt);
 
+        //! Render
+        virtual void render();
+
         //! Create scene object
         virtual std::shared_ptr<SceneObject> createObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
 
@@ -65,8 +68,6 @@ namespace ige::scene
     protected:
         //! Scene root node
         std::shared_ptr<SceneObject> m_root;
-        std::shared_ptr<SceneObject> m_editorCamera;
-        std::shared_ptr<SceneObject> m_editorEnvironment;
 
         //! Scene showcase
         Showcase* m_showcase;
