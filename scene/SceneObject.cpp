@@ -82,9 +82,9 @@ namespace ige::scene
         // Remove from vector by nullptr assignment
         for (auto& currObject : m_children)
         {
-            if (currObject == child)
+            if (currObject != nullptr && currObject == child)
             {
-                currObject->setParent(nullptr);
+                if(currObject->hasParent()) currObject->setParent(nullptr);
                 currObject = nullptr;
                 return true;
             }
