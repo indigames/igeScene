@@ -23,9 +23,6 @@ namespace ige::scene
         //! Constructor
         SceneObject(uint64_t id, std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
 
-        //! Copy Constructor
-        SceneObject(const SceneObject& other);
-
         //! Destructor
         virtual ~SceneObject();
 
@@ -37,6 +34,9 @@ namespace ige::scene
 
         //! Set parent
         virtual void setParent(const std::shared_ptr<SceneObject>& parent);
+
+        // Has parent
+        virtual bool hasParent() const { return getParent() != nullptr; };
 
         // Get parent
         virtual std::shared_ptr<SceneObject> getParent() const;
@@ -109,6 +109,12 @@ namespace ige::scene
         //! Internal event
         Event<std::shared_ptr<Component>>& getComponentAddedEvent() { return m_componentAddedEvent; }
         Event<std::shared_ptr<Component>>& getComponentRemovedEvent() { return m_componentRemovedEvent; }
+        
+        //! Public events: Created, Destroyed, Attached, Detached
+        static Event<SceneObject&>& getCreatedEvent() { return s_createdEvent; }
+        static Event<SceneObject&>& getDestroyedEvent() { return s_destroyedEvent; }
+        static Event<SceneObject&>& getAttachedEvent() { return s_attachedEvent; }
+        static Event<SceneObject&>& getDetachedEvent() { return s_detachedEvent; }
 
     protected:
         //! Node ID
@@ -132,6 +138,12 @@ namespace ige::scene
         //! Internal events
         Event<std::shared_ptr<Component>> m_componentAddedEvent;
         Event<std::shared_ptr<Component>> m_componentRemovedEvent;
+
+        //! Public events
+        static Event<SceneObject&> s_destroyedEvent;
+        static Event<SceneObject&> s_createdEvent;
+        static Event<SceneObject&> s_attachedEvent;
+        static Event<SceneObject&> s_detachedEvent;
     };
 
     //! Get component by type

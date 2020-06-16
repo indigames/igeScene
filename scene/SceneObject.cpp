@@ -5,34 +5,47 @@
 
 namespace ige::scene
 {
+    //! Static member initialization
+    Event<SceneObject&> SceneObject::s_destroyedEvent;
+    Event<SceneObject&> SceneObject::s_createdEvent;
+    Event<SceneObject&> SceneObject::s_attachedEvent;
+    Event<SceneObject&> SceneObject::s_detachedEvent;
+
     //! Constructor
     SceneObject::SceneObject(uint64_t id, std::string name, std::shared_ptr<SceneObject> parent) 
         : m_id(id), m_name(name), m_parent(parent), m_isActive(true)
     {
-
-    }
-
-    //! Copy Constructor
-    SceneObject::SceneObject(const SceneObject& other)
-    {
-        m_id = other.getId();
+        getCreatedEvent().invoke(*this);
     }
 
     //! Destructor
     SceneObject::~SceneObject()
     {
+        getDestroyedEvent().invoke(*this);
+
         for (auto comp : m_components) {
             comp = nullptr;
         }
         m_components.clear();
-        setParent(nullptr);       
+        setParent(nullptr);
         removeChildren();
     }
 
     //! Set parent
     void SceneObject::setParent(const std::shared_ptr<SceneObject>& parent)
     {
-        m_parent = parent;
+        if (parent)
+        {
+            m_parent = parent;
+            getAttachedEvent().invoke(*this);
+        }
+        else
+        {
+            if(getParent())
+                getParent()->removeChild(shared_from_this());
+            getDetachedEvent().invoke(*this);
+            m_parent = parent;
+        }        
     }
 
     // Get parent

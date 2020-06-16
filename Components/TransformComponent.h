@@ -102,7 +102,7 @@ namespace ige::scene {
         virtual const Vec3& getWorldForward() const;
 
         //! Update
-        virtual void onUpdate(float dt);
+        virtual void onUpdate(float dt) override;
 
     protected:
         //! Update local transform matrix

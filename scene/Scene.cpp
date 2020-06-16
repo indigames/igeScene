@@ -47,11 +47,11 @@ namespace ige::scene
         envComp.setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
 
         auto grid = createObject("grid", m_root);
-        grid->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f), Quat::RotationX(PI / 2.f), Vec3(1.f, 1.f, 1.f));
+        grid->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f), Quat::RotationX(PI / 2.f));
         grid->addComponent<EditableFigureComponent>("grid", GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "grid"));
 
         auto tree = createObject("tree", m_root);
-        tree->addComponent<TransformComponent>(Vec3(20.f, 40.f, 0.f), Quat(), Vec3(1.f, 1.f, 1.f));
+        tree->addComponent<TransformComponent>(Vec3(20.f, 20.f, 0.f));
         tree->addComponent<FigureComponent>("Trees_Object");
 
         return true;

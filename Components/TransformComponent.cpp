@@ -253,5 +253,8 @@ namespace ige::scene {
             m_bWorldDirty = true;
             break;
         }
+
+        // Update new transform
+        onUpdate(0.f);
     }
 }

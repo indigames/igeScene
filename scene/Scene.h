@@ -65,6 +65,9 @@ namespace ige::scene
         //! Component added event
         void onComponentRemoved(std::shared_ptr<Component> component);
 
+        //! Get root of scene nodes tree
+        std::shared_ptr<SceneObject>& getRoot() { return m_root; };
+
     protected:
         //! Scene root node
         std::shared_ptr<SceneObject> m_root;
