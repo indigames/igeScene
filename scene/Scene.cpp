@@ -75,14 +75,16 @@ namespace ige::scene
 
     void Scene::render()
     {
-        m_root->findObjectByName("camera")->getComponent<CameraComponent>()->getCamera()->Render();
+        auto camera = m_root->findObjectByName("camera");
+        if(camera != nullptr) camera->getComponent<CameraComponent>()->getCamera()->Render();
+
         m_root->onRender();
         m_showcase->Render();
     }
 
     std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent)
     {
-        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent);
+        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get());
         sceneObject->getComponentAddedEvent().addListener(std::bind(&Scene::onComponentAdded, this, std::placeholders::_1));
         sceneObject->getComponentRemovedEvent().addListener(std::bind(&Scene::onComponentRemoved, this, std::placeholders::_1));
         if(parent != nullptr) parent->addChild(sceneObject);
@@ -99,7 +101,13 @@ namespace ige::scene
             return true;
         }
         
-        return m_root->removeChild(obj);        
+        return m_root->removeChild(obj);
+    }
+
+    //! Remove scene object by its id
+    bool Scene::removeObjectById(uint64_t id)
+    {
+        return removeObject(findObjectById(id));
     }
     
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id) const

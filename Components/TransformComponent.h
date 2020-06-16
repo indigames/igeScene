@@ -17,7 +17,7 @@ namespace ige::scene {
     };
 
     //! Transform observable(as parent) and also observer(as child)
-    class TransformComponent: public Component, public std::enable_shared_from_this<TransformComponent>
+    class TransformComponent: public Component
     {
     public:
         //! Constructor
@@ -30,13 +30,13 @@ namespace ige::scene {
         virtual std::string getName() const override { return "TransformComponent"; }
 
         //! Get parent transform component
-        std::shared_ptr<TransformComponent> getParent() const { return m_parent.lock(); }
+        TransformComponent* getParent() const { return m_parent; }
 
         //! Check if has parent transform component
         bool hasParent() const { return  getParent() != nullptr; }
 
         //! Assign parent transform component
-        void setParent(std::shared_ptr<TransformComponent> parent);
+        void setParent(TransformComponent* parent);
 
         //! Remove parent transform component
         void removeParent();
@@ -137,7 +137,7 @@ namespace ige::scene {
         Mat4 m_worldMatrix;
 
         //! Parent tranformation
-        std::weak_ptr<TransformComponent> m_parent;
+        TransformComponent* m_parent;
 
         //! Transform observers
         std::set<TransformComponent*> m_observers;

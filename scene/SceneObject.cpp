@@ -12,7 +12,7 @@ namespace ige::scene
     Event<SceneObject&> SceneObject::s_detachedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(uint64_t id, std::string name, std::shared_ptr<SceneObject> parent) 
+    SceneObject::SceneObject(uint64_t id, std::string name, SceneObject* parent)
         : m_id(id), m_name(name), m_parent(parent), m_isActive(true)
     {
         getCreatedEvent().invoke(*this);
@@ -23,7 +23,7 @@ namespace ige::scene
     {
         getDestroyedEvent().invoke(*this);
 
-        for (auto comp : m_components) {
+        for (auto& comp : m_components) {
             comp = nullptr;
         }
         m_components.clear();
@@ -32,7 +32,7 @@ namespace ige::scene
     }
 
     //! Set parent
-    void SceneObject::setParent(const std::shared_ptr<SceneObject>& parent)
+    void SceneObject::setParent(SceneObject* parent)
     {
         if (parent)
         {
@@ -41,23 +41,22 @@ namespace ige::scene
         }
         else
         {
-            if(getParent())
-                getParent()->removeChild(shared_from_this());
+            // if (hasParent()) getParent()->removeChild(shared_from_this());
+            m_parent = nullptr;
             getDetachedEvent().invoke(*this);
-            m_parent = parent;
         }        
     }
 
     // Get parent
-    std::shared_ptr<SceneObject> SceneObject::getParent() const
+    SceneObject* SceneObject::getParent() const
     {
-        return m_parent.lock();
+        return m_parent;
     }
 
     //! Adds a child.
     void SceneObject::addChild(const std::shared_ptr<SceneObject>& child)
     {
-        child->setParent(shared_from_this());
+        child->setParent(this);
 
         // Insert to the first available slot.
         for (auto& currObject : m_children)
@@ -69,7 +68,7 @@ namespace ige::scene
             }
         }
 
-        // Add at back of vector.        
+        // Add at back of vector.
         m_children.push_back(child);
     }
 
@@ -110,7 +109,7 @@ namespace ige::scene
     void SceneObject::removeChildren()
     {
        for(auto child: m_children) {
-            child->setParent(nullptr);
+            if(child != nullptr) child->setParent(nullptr);
             child = nullptr;
         }
         m_children.clear();
@@ -184,7 +183,7 @@ namespace ige::scene
             
             for (auto obj : m_children)
             {
-                obj->onUpdate(dt);
+                if(obj != nullptr) obj->onUpdate(dt);
             }
         }
     }
@@ -199,7 +198,7 @@ namespace ige::scene
 
         for (auto obj : m_children)
         {
-            obj->onFixedUpdate(dt);
+            if (obj != nullptr) obj->onFixedUpdate(dt);
         }
     }
 
@@ -213,7 +212,7 @@ namespace ige::scene
 
         for (auto obj : m_children)
         {
-            obj->onLateUpdate(dt);
+            if (obj != nullptr) obj->onLateUpdate(dt);
         }
     }
     
@@ -227,7 +226,7 @@ namespace ige::scene
 
         for (auto obj : m_children)
         {
-            obj->onRender();
+            if (obj != nullptr) obj->onRender();
         }
     }
 

@@ -21,7 +21,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SceneObject(uint64_t id, std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
+        SceneObject(uint64_t id, std::string name = "", SceneObject* parent = nullptr);
 
         //! Destructor
         virtual ~SceneObject();
@@ -33,13 +33,13 @@ namespace ige::scene
         inline std::string getName() const { return m_name; }
 
         //! Set parent
-        virtual void setParent(const std::shared_ptr<SceneObject>& parent);
+        virtual void setParent(SceneObject* parent);
 
         // Has parent
         virtual bool hasParent() const { return getParent() != nullptr; };
 
         // Get parent
-        virtual std::shared_ptr<SceneObject> getParent() const;
+        virtual SceneObject* getParent() const;
 
         //! Adds a child.
         virtual void addChild(const std::shared_ptr<SceneObject>& child);
@@ -127,7 +127,7 @@ namespace ige::scene
         bool m_isActive;
 
         //! Pointer to parent, use weak_ptr avoid dangling issue
-        std::weak_ptr<SceneObject> m_parent;
+        SceneObject* m_parent;
 
         //! Children vector
         std::vector<std::shared_ptr<SceneObject>> m_children;
@@ -154,13 +154,7 @@ namespace ige::scene
 
         for (auto it = m_components.begin(); it != m_components.end(); ++it)
         {
-            std::string t_type = typeid(T).name();
-            std::string it_type = (*it)->getName();
-            //if(it_type == t_type)
-            //    return std::dynamic_pointer_cast<T>(*it);
             auto result = std::dynamic_pointer_cast<T>(*it);
-            if(it_type == "CameraComponent" && result)
-                return result;
             if (result)
                 return result;
         }

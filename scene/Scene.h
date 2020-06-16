@@ -47,6 +47,9 @@ namespace ige::scene
         //! Remove scene object
         virtual bool removeObject(std::shared_ptr<SceneObject> obj);
         
+        //! Remove scene object by its name
+        virtual bool removeObjectById(uint64_t id);
+
         //! Find object in hierarchy by it's id
         virtual std::shared_ptr<SceneObject> findObjectById(uint64_t id) const;
 

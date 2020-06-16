@@ -3,26 +3,28 @@
 
 namespace ige::scene {
     TransformComponent::TransformComponent(std::shared_ptr<SceneObject> owner, const Vec3& pos, const Quat& rot, const Vec3& scale)
-        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale)
+        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale), m_parent(nullptr)
     {
         m_bLocalDirty = true;
 
         if(owner && owner->getParent())
         {
-            setParent(owner->getParent()->getComponent<TransformComponent>());
+            setParent(owner->getParent()->getComponent<TransformComponent>().get());
         }
     }
 
     TransformComponent::~TransformComponent() 
     {
-        m_parent.reset();
+        removeParent();
         notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
+        m_observers.clear();
     }
 
-    void TransformComponent::setParent(std::shared_ptr<TransformComponent> parent)
+    void TransformComponent::setParent(TransformComponent* parent)
     {
+        removeParent();
         m_parent = parent;
-        getParent()->addObserver(this);
+        if(hasParent()) getParent()->addObserver(this);
         m_bWorldDirty = true;
     }
 
@@ -30,8 +32,8 @@ namespace ige::scene {
     {
         if(hasParent())
         {
-            getParent()->removeObserver(this);
-            m_parent.reset();
+            if (hasParent()) getParent()->removeObserver(this);
+            m_parent = nullptr;
             m_bWorldDirty = true;
         }
     }
@@ -249,7 +251,7 @@ namespace ige::scene {
             m_localScale = m_worldScale;
             m_bLocalDirty = true;
 
-            m_parent.reset();
+            m_parent = nullptr;
             m_bWorldDirty = true;
             break;
         }
