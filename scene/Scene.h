@@ -45,7 +45,7 @@ namespace ige::scene
         virtual std::shared_ptr<SceneObject> createObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
 
         //! Remove scene object
-        virtual bool removeObject(std::shared_ptr<SceneObject> obj);
+        virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);
         
         //! Remove scene object by its name
         virtual bool removeObjectById(uint64_t id);
@@ -79,7 +79,7 @@ namespace ige::scene
         Showcase* m_showcase;
 
         //! Object ID counter
-        uint64_t m_nextObjectID = 1;
+        uint64_t m_nextObjectID = 0;
 
         //! Scene name
         std::string m_name;

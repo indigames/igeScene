@@ -179,15 +179,15 @@ namespace ige::scene {
         m_worldMatrix = hasParent() ? getParent()->getWorldMatrix() * m_localMatrix : m_localMatrix;
 
         // Update world position
-        m_worldPosition.X(m_worldMatrix[0][3]);
-        m_worldPosition.Y(m_worldMatrix[1][3]);
-        m_worldPosition.Z(m_worldMatrix[2][3]);
+        m_worldPosition.X(m_worldMatrix[3][0]);
+        m_worldPosition.Y(m_worldMatrix[3][1]);
+        m_worldPosition.Z(m_worldMatrix[3][2]);
 
         Vec3 columns[3] = 
         {
-            { m_worldMatrix[0][0], m_worldMatrix[1][0], m_worldMatrix[2][0]},
-            { m_worldMatrix[0][1], m_worldMatrix[1][1], m_worldMatrix[2][1]},
-            { m_worldMatrix[0][2], m_worldMatrix[1][2], m_worldMatrix[2][2]},
+            { m_worldMatrix[0][0], m_worldMatrix[0][1], m_worldMatrix[0][2]},
+            { m_worldMatrix[1][0], m_worldMatrix[1][1], m_worldMatrix[1][2]},
+            { m_worldMatrix[2][0], m_worldMatrix[2][1], m_worldMatrix[2][2]},
         };
 
         // Update world scale

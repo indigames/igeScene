@@ -51,7 +51,7 @@ namespace ige::scene
         grid->addComponent<EditableFigureComponent>("grid", GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "grid"));
 
         auto tree = createObject("tree", m_root);
-        tree->addComponent<TransformComponent>(Vec3(20.f, 20.f, 0.f));
+        tree->addComponent<TransformComponent>(Vec3(0.f, 0.f, -10.f));
         tree->addComponent<FigureComponent>("Trees_Object");
 
         return true;
@@ -91,7 +91,7 @@ namespace ige::scene
         return sceneObject;
     }
 
-    bool Scene::removeObject(std::shared_ptr<SceneObject> obj)
+    bool Scene::removeObject(const std::shared_ptr<SceneObject>& obj)
     {
         if(!obj) return false;
 
@@ -112,11 +112,13 @@ namespace ige::scene
     
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id) const
     {
+        if (m_root == nullptr) return nullptr;
         return m_root->findObjectById(id);
     }
 
     std::shared_ptr<SceneObject> Scene::findObjectByName(std::string name) const
     {
+        if (m_root == nullptr) return nullptr;
         return m_root->findObjectByName(name);
     }
 
