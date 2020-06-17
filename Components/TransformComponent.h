@@ -84,22 +84,22 @@ namespace ige::scene {
         virtual const Mat4& getWorldMatrix() const;
 
         //! Get local right vector
-        virtual const Vec3& getLocalRight() const;
+        virtual Vec3 getLocalRight() const;
 
         //! Get local up vector
-        virtual const Vec3& getLocalUp() const;
+        virtual Vec3 getLocalUp() const;
 
         //! Get local forward vector
-        virtual const Vec3& getLocalForward() const;
+        virtual Vec3 getLocalForward() const;
         
         //! Get world right vector
-        virtual const Vec3& getWorldRight() const;
+        virtual Vec3 getWorldRight() const;
 
         //! Get world up vector
-        virtual const Vec3& getWorldUp() const;
+        virtual Vec3 getWorldUp() const;
 
         //! Get world forward vector
-        virtual const Vec3& getWorldForward() const;
+        virtual Vec3 getWorldForward() const;
 
         //! Update
         virtual void onUpdate(float dt) override;

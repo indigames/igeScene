@@ -135,32 +135,32 @@ namespace ige::scene {
         return m_worldMatrix;
     }
 
-    const Vec3& TransformComponent::getLocalRight() const
+    Vec3 TransformComponent::getLocalRight() const
     {
         return m_localPosition.xAxis();
     }
 
-    const Vec3& TransformComponent::getLocalUp() const
+    Vec3 TransformComponent::getLocalUp() const
     {
         return m_localPosition.yAxis();
     }
 
-    const Vec3& TransformComponent::getLocalForward() const
+    Vec3 TransformComponent::getLocalForward() const
     {
         return m_localPosition.zAxis();
     }
 
-    const Vec3& TransformComponent::getWorldRight() const
+    Vec3 TransformComponent::getWorldRight() const
     {
         return m_worldPosition.xAxis();
     }
 
-    const Vec3& TransformComponent::getWorldUp() const
+    Vec3 TransformComponent::getWorldUp() const
     {
         return m_worldPosition.yAxis();
     }
 
-    const Vec3& TransformComponent::getWorldForward() const
+    Vec3 TransformComponent::getWorldForward() const
     {
         return m_worldPosition.zAxis();
     }

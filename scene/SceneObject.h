@@ -30,7 +30,10 @@ namespace ige::scene
         inline uint64_t getId() const { return m_id; }
 
         //! Get Name
-        inline std::string getName() const { return m_name; }
+        inline const std::string& getName() { return m_name; }
+
+        //! Set Name
+        inline void setName(const std::string& name) { m_name = name; }
 
         //! Set parent
         virtual void setParent(SceneObject* parent);
@@ -95,10 +98,10 @@ namespace ige::scene
         virtual void onRender();
 
         //! Enable or disable the actor		
-        inline void setActive(bool isActive);
+        void setActive(bool isActive);
 
         //! Check active
-        inline bool isActive() const;
+        bool isActive() const;
 
         //! Serialize
         void to_json(json& j, const SceneObject& obj);
