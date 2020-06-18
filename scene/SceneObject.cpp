@@ -127,6 +127,7 @@ namespace ige::scene
         auto it = std::find(m_components.begin(), m_components.end(), component);
         if(it != m_components.end())
         {
+            m_componentRemovedEvent.invoke(std::dynamic_pointer_cast<Component>(*it));
             m_components.erase(it);
             return true;
         }

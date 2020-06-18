@@ -194,8 +194,8 @@ namespace ige::scene
             result = std::dynamic_pointer_cast<T>(*it);
             if (result)
             {
+                m_componentRemovedEvent.invoke(result);
                 m_components.erase(it);
-                m_componentAddedEvent.invoke(result);
                 return true;
             }
         }
