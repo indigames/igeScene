@@ -56,6 +56,9 @@ namespace ige::scene {
         //! Get local position
         virtual const Vec3& getPosition() const;
 
+        //! Set world position
+        virtual void setWorldPosition(const Vec3& pos);
+
         //! Get world position
         virtual const Vec3& getWorldPosition() const;
 
@@ -65,6 +68,9 @@ namespace ige::scene {
         //! Get local rotation
         virtual const Quat& getRotation() const;
 
+        //! Set world rotation
+        virtual void setWorldRotation(const Quat& rot);
+
         //! get world rotation
         virtual const Quat& getWorldRotation() const;
 
@@ -73,6 +79,9 @@ namespace ige::scene {
 
         //! Get local scale
         virtual const Vec3& getScale() const;
+
+        //! Set world scale
+        virtual void setWorldScale(const Vec3& scale);
 
         //! Get world scale
         virtual const Vec3& getWorldScale() const;
@@ -110,6 +119,9 @@ namespace ige::scene {
 
         //! Update world transform matrix
         virtual void updateWorldMatrix();
+
+        //! Update world transform, then adjust local transfrom based on world transform
+        virtual void updateWorldToLocal();
 
         //! Add observer
         virtual void addObserver(TransformComponent* observer);

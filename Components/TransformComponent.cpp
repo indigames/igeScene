@@ -82,6 +82,15 @@ namespace ige::scene {
         return m_localPosition;
     }
 
+    void TransformComponent::setWorldPosition(const Vec3& pos)
+    {
+        if (m_worldPosition != pos)
+        {
+            m_worldPosition = Vec3(pos);
+            updateWorldToLocal();
+        }
+    }
+
     const Vec3& TransformComponent::getWorldPosition() const
     {
         return m_worldPosition;
@@ -101,6 +110,15 @@ namespace ige::scene {
         return m_localRotation;
     }
 
+    void TransformComponent::setWorldRotation(const Quat& rot)
+    {
+        if (m_worldRotation != rot)
+        {
+            m_worldRotation = Quat(rot);
+            updateWorldToLocal();
+        }
+    }
+
     const Quat& TransformComponent::getWorldRotation() const
     {
         return m_worldRotation;
@@ -118,6 +136,15 @@ namespace ige::scene {
     const Vec3& TransformComponent::getScale() const
     {
         return m_localScale;
+    }
+
+    void TransformComponent::setWorldScale(const Vec3& scale)
+    {
+        if (m_worldScale != scale)
+        {
+            m_worldScale = Vec3(scale);
+            updateWorldToLocal();
+        }
     }
 
     const Vec3& TransformComponent::getWorldScale() const
@@ -217,6 +244,57 @@ namespace ige::scene {
         // Notify all children
         notifyObservers(ETransformMessage::TRANSFORM_CHANGED);
     }
+
+    void TransformComponent::updateWorldToLocal()
+    {
+        // Update world matrix
+        m_worldMatrix.Identity();
+        vmath_mat4_from_rottrans(m_worldRotation.P(), m_worldPosition.P(), m_worldMatrix.P());
+        vmath_mat_appendScale(m_worldMatrix.P(), m_worldScale.P(), 4, 4, m_worldMatrix.P());
+
+        // Update local matrix
+        m_localMatrix = hasParent() ? getParent()->getWorldMatrix().Inverse() * m_worldMatrix : m_worldMatrix;
+
+        // Update local position
+        m_localPosition.X(m_localMatrix[3][0]);
+        m_localPosition.Y(m_localMatrix[3][1]);
+        m_localPosition.Z(m_localMatrix[3][2]);
+
+        Vec3 columns[3] =
+        {
+            { m_localMatrix[0][0], m_localMatrix[0][1], m_localMatrix[0][2]},
+            { m_localMatrix[1][0], m_localMatrix[1][1], m_localMatrix[1][2]},
+            { m_localMatrix[2][0], m_localMatrix[2][1], m_localMatrix[2][2]},
+        };
+
+        // Update local scale
+        m_localScale.X(columns[0].Length());
+        m_localScale.Y(columns[1].Length());
+        m_localScale.Z(columns[2].Length());
+
+        if (m_localScale.X())
+        {
+            columns[0] /= m_localScale.X();
+        }
+
+        if (m_localScale.Y())
+        {
+            columns[1] /= m_localScale.Y();
+        }
+
+        if (m_localScale.Z())
+        {
+            columns[2] /= m_localScale.Z();
+        }
+
+        // Update local rotation
+        Mat3 rotationMatrix(columns[0], columns[1], columns[2]);
+        m_localRotation = Quat(rotationMatrix);
+
+        // Notify all children
+        notifyObservers(ETransformMessage::TRANSFORM_CHANGED);
+    }
+
 
     void TransformComponent::addObserver(TransformComponent* observer)
     {

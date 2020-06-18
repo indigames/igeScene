@@ -51,8 +51,16 @@ namespace ige::scene
         grid->addComponent<EditableFigureComponent>("grid", GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "grid"));
 
         auto tree = createObject("tree", m_root);
-        tree->addComponent<TransformComponent>(Vec3(0.f, 0.f, -10.f));
+        tree->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
         tree->addComponent<FigureComponent>("Trees_Object");
+
+        auto tree2 = createObject("tree2", tree);
+        tree2->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+        tree2->addComponent<FigureComponent>("Trees_Object");
+
+        auto tree3 = createObject("tree3", tree2);
+        tree3->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+        tree3->addComponent<FigureComponent>("Trees_Object");
 
         return true;
     }
