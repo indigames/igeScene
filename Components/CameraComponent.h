@@ -50,23 +50,23 @@ namespace ige::scene
 
         //! Pan (Y-axis)
         float getPan() const { return m_camera->GetPan(); }
-        void setPan(float pan) { m_camera->SetPan(pan); }
+        void setPan(float pan);
         
         //! Tilt (X-axis)
         float getTilt() const { return m_camera->GetTilt(); }
-        void setTilt(float tilt) { m_camera->SetTilt(tilt); }
+        void setTilt(float tilt);
 
         //! Roll (Z-axis)
         float getRoll() const { return m_camera->GetRoll(); }
-        void setRoll(float roll) { m_camera->SetRoll(roll); }
+        void setRoll(float roll);
         
         //! Targets
-        void setTarget(const Vec3& tar) { m_camera->SetTarget(tar); }
+        void setTarget(const Vec3& tar);
         Vec3 getTarget() const { return m_camera->GetTarget(); }
         Vec3 getWorldTarget() const { return m_camera->GetWorldTarget(); }
 
         //! Lock on target
-        void lockonTarget(bool lockon = true) { m_camera->LockonTarget(lockon); }
+        void lockonTarget(bool lockon = true);
         bool getLockon() { return m_camera->GetLockon(); }
 
         //! Ortho Graphic

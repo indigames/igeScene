@@ -17,6 +17,101 @@ namespace ige::scene
         m_camera = nullptr;
     }
     
+    //! Pan (Y-axis)
+    void CameraComponent::setPan(float pan)
+    {
+        if (m_camera == nullptr) return;
+        m_camera->SetPan(pan);
+        m_camera->Step(0.f);
+
+        if (getOwner() != nullptr)
+        {
+            // Update transform from transform component
+            auto transCmp = getOwner()->getComponent<TransformComponent>();
+            if (transCmp != nullptr)
+            {
+                transCmp->setWorldPosition(m_camera->GetPosition());
+                transCmp->setWorldRotation(m_camera->GetRotation());
+            }
+        }
+    }
+
+    //! Tilt (X-axis)
+    void CameraComponent::setTilt(float tilt)
+    {
+        if (m_camera == nullptr) return;
+        m_camera->SetTilt(tilt);
+        m_camera->Step(0.f);
+
+        if (getOwner() != nullptr)
+        {
+            // Update transform from transform component
+            auto transCmp = getOwner()->getComponent<TransformComponent>();
+            if (transCmp != nullptr)
+            {
+                transCmp->setWorldPosition(m_camera->GetPosition());
+                transCmp->setWorldRotation(m_camera->GetRotation());
+            }
+        }
+    }
+
+    //! Roll (Z-axis)
+    void CameraComponent::setRoll(float roll)
+    {
+        if (m_camera == nullptr) return;
+        m_camera->SetRoll(roll);
+        m_camera->Step(0.f);
+
+        if (getOwner() != nullptr)
+        {
+            // Update transform from transform component
+            auto transCmp = getOwner()->getComponent<TransformComponent>();
+            if (transCmp != nullptr)
+            {
+                transCmp->setWorldPosition(m_camera->GetPosition());
+                transCmp->setWorldRotation(m_camera->GetRotation());
+            }
+        }
+    }
+
+    // Set lock target vector
+    void CameraComponent::setTarget(const Vec3& tar)
+    {
+        if (m_camera == nullptr) return;
+        m_camera->SetTarget(tar);
+        m_camera->Step(0.f);
+
+        if (getOwner() != nullptr)
+        {
+            // Update transform from transform component
+            auto transCmp = getOwner()->getComponent<TransformComponent>();
+            if (transCmp != nullptr)
+            {
+                transCmp->setWorldPosition(m_camera->GetPosition());
+                transCmp->setWorldRotation(m_camera->GetRotation());
+            }
+        }
+    }
+
+    // Set lock target
+    void CameraComponent::lockonTarget(bool lockon) 
+    {
+        if (m_camera == nullptr) return;        
+        m_camera->LockonTarget(lockon);
+        m_camera->Step(0.f);
+
+        if (getOwner() != nullptr)
+        {
+            // Update transform from transform component
+            auto transCmp = getOwner()->getComponent<TransformComponent>();
+            if (transCmp != nullptr)
+            {
+                transCmp->setWorldPosition(m_camera->GetPosition());
+                transCmp->setWorldRotation(m_camera->GetRotation());
+            }
+        }        
+    }
+
     //! Update
     void CameraComponent::onUpdate(float dt)
     {
@@ -30,13 +125,24 @@ namespace ige::scene
             transCmp = getOwner()->getComponent<TransformComponent>();
             if(transCmp != nullptr)
             {
-                m_camera->SetPosition(transCmp->getPosition());
-                m_camera->SetRotation(transCmp->getRotation());
+                m_camera->SetPosition(transCmp->getWorldPosition());
+                m_camera->SetRotation(transCmp->getWorldRotation());
             }
         }
 
         // Update
         m_camera->Step(dt);
+
+        if (getOwner() != nullptr)
+        {
+            // Update transform from transform component
+            transCmp = getOwner()->getComponent<TransformComponent>();
+            if (transCmp != nullptr)
+            {
+                transCmp->setWorldPosition(m_camera->GetPosition());
+                transCmp->setWorldRotation(m_camera->GetRotation());
+            }
+        }
     }
 
     //! Render
