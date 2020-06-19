@@ -35,16 +35,14 @@ namespace ige::scene
         m_root = createObject("root");
         m_root->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
 
+        auto envComp = m_root->addComponent<EnvironmentComponent>("environment");
+        envComp.setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
+        envComp.setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+
         auto camera = createObject("camera", m_root);
         camera->addComponent<TransformComponent>(Vec3(0.f, 5.f, 10.f));
         auto cameraComp = camera->addComponent<CameraComponent>("camera");
         cameraComp.lockonTarget(false);
-
-        auto env = createObject("environment", m_root);
-        env->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
-        auto envComp = env->addComponent<EnvironmentComponent>("environment");
-        envComp.setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
-        envComp.setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
 
         auto grid = createObject("grid", m_root);
         grid->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f), Quat::RotationX(PI / 2.f));
