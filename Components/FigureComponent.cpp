@@ -5,18 +5,19 @@
 namespace ige::scene
 {
     //! Constructor
-    FigureComponent::FigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path, Figure* figure)
+    FigureComponent::FigureComponent(std::shared_ptr<SceneObject> owner)
         : Component(owner)
     {
-        m_figure = (figure != nullptr) ? figure : ResourceCreator::Instance().NewFigure(path.c_str());
-        m_figure->WaitInitialize();
+        m_figure = nullptr;
     }
 
     //! Destructor
     FigureComponent::~FigureComponent() 
     {
-        if(m_figure)
-            m_figure->DecReference();
+        if (m_figure)
+        {
+             m_figure->DecReference();
+        }
         m_figure = nullptr;
     }
 
@@ -49,6 +50,24 @@ namespace ige::scene
         if (m_figure == nullptr) return;
 
         m_figure->Render();
+    }
+
+
+    void FigureComponent::setPath(const std::string& path)
+    {
+        if (m_path != path) 
+        {
+            if (m_figure != nullptr)
+            {
+                getOnFigureDestroyedEvent().invoke(m_figure);
+                m_figure->DecReference();
+                m_figure = nullptr;
+            }
+
+            m_figure = ResourceCreator::Instance().NewFigure(path.c_str());
+            m_figure->WaitInitialize();
+            getOnFigureCreatedEvent().invoke(m_figure);
+        }
     }
 
     //! Serialize

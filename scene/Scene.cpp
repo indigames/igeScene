@@ -50,15 +50,15 @@ namespace ige::scene
 
         auto tree = createObject("tree", m_root);
         tree->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
-        tree->addComponent<FigureComponent>("Trees_Object");
+        tree->addComponent<FigureComponent>();
 
         auto tree2 = createObject("tree2", tree);
         tree2->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
-        tree2->addComponent<FigureComponent>("Trees_Object");
+        tree2->addComponent<FigureComponent>();
 
         auto tree3 = createObject("tree3", tree2);
         tree3->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
-        tree3->addComponent<FigureComponent>("Trees_Object");
+        tree3->addComponent<FigureComponent>();
 
         return true;
     }
@@ -101,6 +101,9 @@ namespace ige::scene
     {
         if(!obj) return false;
 
+        obj->getComponentAddedEvent().removeAllListeners();
+        obj->getComponentRemovedEvent().removeAllListeners();
+
         if(!m_root || m_root == obj) 
         {
             m_root = nullptr;
@@ -133,13 +136,22 @@ namespace ige::scene
     {
         if (component->getName() == "FigureComponent")
         {
-            auto figure = ((FigureComponent*)(component.get()))->getFigure();
-            m_showcase->Add(figure);
+            auto figureComponent = std::dynamic_pointer_cast<FigureComponent>(component);
+            auto figure = figureComponent->getFigure();
+            if(figure) m_showcase->Add(figure);
+
+            figureComponent->getOnFigureCreatedEvent().addListener([this](auto figure) {
+                if (figure) m_showcase->Add(figure);
+            });
+
+            figureComponent->getOnFigureDestroyedEvent().addListener([this](auto figure) {
+                if (figure) m_showcase->Remove(figure);
+            });
         }
         else if (component->getName() == "EnvironmentComponent")
         {
             auto environment = ((EnvironmentComponent*)(component.get()))->getEnvironment();
-            m_showcase->Add(environment);
+            if(environment) m_showcase->Add(environment);
         }
     }
 
@@ -149,12 +161,15 @@ namespace ige::scene
         if (component->getName() == "FigureComponent")
         {
             auto figure = ((FigureComponent*)(component.get()))->getFigure();
-            m_showcase->Remove(figure);
+            if(figure) m_showcase->Remove(figure);
+
+            ((FigureComponent*)(component.get()))->getOnFigureCreatedEvent().removeAllListeners();
+            ((FigureComponent*)(component.get()))->getOnFigureDestroyedEvent().removeAllListeners();
         }
         else if (component->getName() == "EnvironmentComponent")
         {
             auto environment = ((EnvironmentComponent*)(component.get()))->getEnvironment();
-            m_showcase->Remove(environment);
+            if(environment) m_showcase->Remove(environment);
         }
     }
 

@@ -71,6 +71,9 @@ namespace ige::scene
         //! Get root of scene nodes tree
         std::shared_ptr<SceneObject>& getRoot() { return m_root; };
 
+        //! Get the showcase object
+        Showcase* getShowcase() { return m_showcase; }
+
     protected:
         //! Scene root node
         std::shared_ptr<SceneObject> m_root;
