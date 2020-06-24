@@ -5,10 +5,14 @@
 namespace ige::scene
 {
     //! Constructor
-    FigureComponent::FigureComponent(std::shared_ptr<SceneObject> owner)
-        : Component(owner)
+    FigureComponent::FigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path)
+        : Component(owner), m_figure(nullptr), m_path(path)
     {
-        m_figure = nullptr;
+        if (m_path != "")
+        {
+            m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
+            m_figure->WaitInitialize();
+        }
     }
 
     //! Destructor
