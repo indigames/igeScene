@@ -33,7 +33,14 @@ namespace ige::scene
         inline const std::string& getName() { return m_name; }
 
         //! Set Name
-        inline void setName(const std::string& name) { m_name = name; }
+        inline void setName(const std::string& name) 
+        {
+            if (m_name != name)
+            {
+                m_name = name;
+                s_nameChangedEvent.invoke(*this);
+            }
+        }
 
         //! Set parent
         virtual void setParent(SceneObject* parent);
@@ -64,6 +71,9 @@ namespace ige::scene
 
         //! Remove a component
         virtual bool removeComponent(const std::shared_ptr<Component>& component);
+
+        //! Remove all components
+        virtual bool removeAllComponents();
 
         //! Get components list
         virtual std::vector<std::shared_ptr<Component>>& getComponents();
@@ -118,6 +128,7 @@ namespace ige::scene
         static Event<SceneObject&>& getDestroyedEvent() { return s_destroyedEvent; }
         static Event<SceneObject&>& getAttachedEvent() { return s_attachedEvent; }
         static Event<SceneObject&>& getDetachedEvent() { return s_detachedEvent; }
+        static Event<SceneObject&>& getNameChangedEvent() { return s_nameChangedEvent; }
 
     protected:
         //! Node ID
@@ -147,6 +158,7 @@ namespace ige::scene
         static Event<SceneObject&> s_createdEvent;
         static Event<SceneObject&> s_attachedEvent;
         static Event<SceneObject&> s_detachedEvent;
+        static Event<SceneObject&> s_nameChangedEvent;
     };
 
     //! Get component by type

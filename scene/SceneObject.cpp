@@ -10,6 +10,7 @@ namespace ige::scene
     Event<SceneObject&> SceneObject::s_createdEvent;
     Event<SceneObject&> SceneObject::s_attachedEvent;
     Event<SceneObject&> SceneObject::s_detachedEvent;
+    Event<SceneObject&> SceneObject::s_nameChangedEvent;
 
     //! Constructor
     SceneObject::SceneObject(uint64_t id, std::string name, SceneObject* parent)
@@ -21,14 +22,13 @@ namespace ige::scene
     //! Destructor
     SceneObject::~SceneObject()
     {
+        setParent(nullptr);
+        removeAllComponents();
+        removeChildren();
         getDestroyedEvent().invoke(*this);
 
-        for (auto& comp : m_components) {
-            comp = nullptr;
-        }
-        m_components.clear();
-        setParent(nullptr);
-        removeChildren();
+        getComponentAddedEvent().removeAllListeners();
+        getComponentRemovedEvent().removeAllListeners();
     }
 
     //! Set parent
@@ -89,6 +89,13 @@ namespace ige::scene
             }
         }
         
+        // Recursive remove child
+        for (auto& currObject : m_children)
+        {
+            if (currObject->removeChild(child))
+                return true;
+        }
+
         // Not found, return false
         return false;
     }
@@ -108,7 +115,7 @@ namespace ige::scene
     //! Remove children
     void SceneObject::removeChildren()
     {
-       for(auto child: m_children) {
+       for(auto& child: m_children) {
             if(child != nullptr) child->setParent(nullptr);
             child = nullptr;
         }
@@ -132,6 +139,18 @@ namespace ige::scene
             return true;
         }
         return false;
+    }
+
+    //! Remove all component
+    bool SceneObject::removeAllComponents()
+    {
+        auto it = m_components.begin();
+        while (it != m_components.end())
+        {
+            m_componentRemovedEvent.invoke(*it);
+            it = m_components.erase(it);
+        }
+        return true;
     }
 
     //! Get components list

@@ -26,6 +26,8 @@ namespace ige::scene
 
     Scene::~Scene()
     {
+        m_root->removeChildren();
+        m_root->removeAllComponents();
         m_root = nullptr;
         m_showcase = nullptr;
     }
@@ -33,31 +35,25 @@ namespace ige::scene
     bool Scene::initialize()
     {
         m_root = createObject("root");
-        m_root->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
-
         auto envComp = m_root->addComponent<EnvironmentComponent>("environment");
         envComp.setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
         envComp.setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
 
-        auto camera = createObject("camera", m_root);
-        camera->addComponent<TransformComponent>(Vec3(0.f, 5.f, 10.f));
-        auto cameraComp = camera->addComponent<CameraComponent>("camera");
-        cameraComp.lockonTarget(false);
-
-        auto grid = createObject("grid", m_root);
-        grid->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f), Quat::RotationX(PI / 2.f));
-        grid->addComponent<EditableFigureComponent>("grid", GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "grid"));
+        //auto camera = createObject("camera", m_root);
+        //camera->addComponent<TransformComponent>(Vec3(0.f, 5.f, 10.f));
+        //auto cameraComp = camera->addComponent<CameraComponent>("camera");
+        //cameraComp.lockonTarget(false);
 
         auto tree = createObject("tree", m_root);
-        tree->addComponent<TransformComponent>(Vec3(-5.f, 0.f, 0.f));
+        tree->getComponent<TransformComponent>()->setPosition(Vec3(-5.f, 0.f, 0.f));
         tree->addComponent<FigureComponent>("Trees_Object");
 
         auto tree2 = createObject("tree2", tree);
-        tree2->addComponent<TransformComponent>(Vec3(2.f, 0.f, 0.f));
+        tree2->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, 0.f));
         tree2->addComponent<FigureComponent>("Trees_Object");
 
         auto tree3 = createObject("tree3", tree2);
-        tree3->addComponent<TransformComponent>(Vec3(2.f, 0.f, 0.f));
+        tree3->getComponent<TransformComponent>()->setPosition(Vec3(2.f, 0.f, 0.f));
         tree3->addComponent<FigureComponent>("Trees_Object");
 
         return true;
@@ -94,15 +90,13 @@ namespace ige::scene
         sceneObject->getComponentAddedEvent().addListener(std::bind(&Scene::onComponentAdded, this, std::placeholders::_1));
         sceneObject->getComponentRemovedEvent().addListener(std::bind(&Scene::onComponentRemoved, this, std::placeholders::_1));
         if(parent != nullptr) parent->addChild(sceneObject);
+        sceneObject->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
         return sceneObject;
     }
 
     bool Scene::removeObject(const std::shared_ptr<SceneObject>& obj)
     {
         if(!obj) return false;
-
-        obj->getComponentAddedEvent().removeAllListeners();
-        obj->getComponentRemovedEvent().removeAllListeners();
 
         if(!m_root || m_root == obj) 
         {
@@ -148,6 +142,20 @@ namespace ige::scene
                 if (figure) m_showcase->Remove(figure);
             });
         }
+        else if (component->getName() == "EditableFigureComponent")
+        {
+            auto eFigComp = std::dynamic_pointer_cast<EditableFigureComponent>(component);
+            auto figure = eFigComp->getEditableFigure();
+            if (figure) m_showcase->Add(figure);
+
+            eFigComp->getOnFigureCreatedEvent().addListener([this](auto figure) {
+                if (figure) m_showcase->Add(figure);
+            });
+
+            eFigComp->getOnFigureDestroyedEvent().addListener([this](auto figure) {
+                if (figure) m_showcase->Remove(figure);
+            });
+        }
         else if (component->getName() == "EnvironmentComponent")
         {
             auto environment = ((EnvironmentComponent*)(component.get()))->getEnvironment();
@@ -155,7 +163,7 @@ namespace ige::scene
         }
     }
 
-    //! Component added event
+    //! Component removed event
     void Scene::onComponentRemoved(std::shared_ptr<Component> component)
     {
         if (component->getName() == "FigureComponent")

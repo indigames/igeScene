@@ -3,6 +3,7 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
+#include "event/Event.h"
 #include "components/Component.h"
 
 namespace ige::scene
@@ -12,7 +13,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        EditableFigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path, EditableFigure* figure = nullptr);
+        EditableFigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path = "", EditableFigure* efig = nullptr);
 
         //! Destructor
         virtual ~EditableFigureComponent();
@@ -35,8 +36,23 @@ namespace ige::scene
         //! Get associated figure
         EditableFigure* getEditableFigure() { return m_figure; }
 
+        //! Path
+        void setPath(const std::string& path);
+        const std::string& getPath() { return m_path; }
+
+        //! Events
+        Event<EditableFigure*>& getOnFigureCreatedEvent() { return m_onFigureCreatedEvent; }
+        Event<EditableFigure*>& getOnFigureDestroyedEvent() { return m_onFigureDestroyedEvent; }
+
     protected:
         //! Associated EditableFigure object
         EditableFigure* m_figure = nullptr;
+
+        //! Events
+        Event<EditableFigure*> m_onFigureCreatedEvent;
+        Event<EditableFigure*> m_onFigureDestroyedEvent;
+
+        //! Path
+        std::string m_path;
     };
 }

@@ -5,11 +5,20 @@
 namespace ige::scene
 {
     //! Constructor
-    EditableFigureComponent::EditableFigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path, EditableFigure* figure)
-        : Component(owner)
+    EditableFigureComponent::EditableFigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path, EditableFigure* efig)
+        : Component(owner), m_figure(nullptr), m_path(path)
     {
-        m_figure = figure != nullptr ? figure : ResourceCreator::Instance().NewEditableFigure(path.c_str());
-        m_figure->WaitInitialize();
+        if (efig != nullptr)
+        {
+            m_figure = efig;
+            m_figure->IncReference();
+            m_figure->WaitInitialize();
+        }
+        else if (m_path != "")
+        {
+            m_figure = ResourceCreator::Instance().NewEditableFigure(path.c_str());
+            m_figure->WaitInitialize();
+        }
     }
 
     //! Destructor
@@ -48,6 +57,24 @@ namespace ige::scene
         if (m_figure == nullptr) return;
 
         m_figure->Render();
+    }
+
+    //! Set path
+    void EditableFigureComponent::setPath(const std::string& path)
+    {
+        if (m_path != path)
+        {
+            if (m_figure != nullptr)
+            {
+                getOnFigureDestroyedEvent().invoke(m_figure);
+                m_figure->DecReference();
+                m_figure = nullptr;
+            }
+
+            m_figure = ResourceCreator::Instance().NewEditableFigure(path.c_str());
+            m_figure->WaitInitialize();
+            getOnFigureCreatedEvent().invoke(m_figure);
+        }
     }
 
     //! Serialize
