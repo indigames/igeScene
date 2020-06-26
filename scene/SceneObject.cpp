@@ -22,13 +22,13 @@ namespace ige::scene
     //! Destructor
     SceneObject::~SceneObject()
     {
+        getComponentAddedEvent().removeAllListeners();
+        getComponentRemovedEvent().removeAllListeners();
+
         setParent(nullptr);
         removeAllComponents();
         removeChildren();
         getDestroyedEvent().invoke(*this);
-
-        getComponentAddedEvent().removeAllListeners();
-        getComponentRemovedEvent().removeAllListeners();
     }
 
     //! Set parent

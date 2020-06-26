@@ -2,6 +2,9 @@
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 namespace ige::scene
 {
     //! Constructor
@@ -59,8 +62,12 @@ namespace ige::scene
 
     void FigureComponent::setPath(const std::string& path)
     {
-        if (m_path != path) 
+        auto relPath = fs::relative(fs::path(path), fs::current_path()).string();
+
+        if (m_path != relPath)
         {
+            m_path = relPath;
+
             if (m_figure != nullptr)
             {
                 getOnFigureDestroyedEvent().invoke(m_figure);
@@ -68,7 +75,7 @@ namespace ige::scene
                 m_figure = nullptr;
             }
 
-            m_figure = ResourceCreator::Instance().NewFigure(path.c_str());
+            m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
             m_figure->WaitInitialize();
             getOnFigureCreatedEvent().invoke(m_figure);
         }

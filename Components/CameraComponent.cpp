@@ -94,10 +94,10 @@ namespace ige::scene
     }
 
     // Set lock target
-    void CameraComponent::lockonTarget(bool lockon) 
+    void CameraComponent::lockOnTarget(bool lockOn) 
     {
-        if (m_camera == nullptr) return;        
-        m_camera->LockonTarget(lockon);
+        if (m_camera == nullptr) return;
+        m_camera->LockonTarget(lockOn);
         m_camera->Step(0.f);
 
         if (getOwner() != nullptr)

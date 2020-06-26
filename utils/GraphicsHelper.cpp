@@ -87,8 +87,8 @@ namespace ige::scene
             // efig->SetMaterialParamTexture("mate", "ColorSampler", texture, SAMPLERSTATE_BORDER, SAMPLERSTATE_BORDER, SAMPLERSTATE_LINEAR, SAMPLERSTATE_LINEAR);
             Sampler sampler;
             sampler.samplerSlotNo = 0;
-            sampler.samplerState.wrap_s = SamplerState::BORDER;
-            sampler.samplerState.wrap_t = SamplerState::BORDER;
+            sampler.samplerState.wrap_s = SamplerState::WRAP;
+            sampler.samplerState.wrap_t = SamplerState::WRAP;
             sampler.samplerState.minfilter = SamplerState::LINEAR;
             sampler.samplerState.magfilter = SamplerState::LINEAR;
             sampler.samplerState.mipfilter = SamplerState::LINEAR_MIPMAP_LINEAR;

@@ -6,7 +6,7 @@
 #include "components/CameraComponent.h"
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
-#include "components/EditableFigureComponent.h"
+#include "components/SpriteComponent.h"
 #include "components/EnvironmentComponent.h"
 
 #include "utils/GraphicsHelper.h"
@@ -26,8 +26,6 @@ namespace ige::scene
 
     Scene::~Scene()
     {
-        m_root->removeChildren();
-        m_root->removeAllComponents();
         m_root = nullptr;
         m_showcase = nullptr;
     }
@@ -77,8 +75,8 @@ namespace ige::scene
 
     void Scene::render()
     {
-        auto camera = m_root->findObjectByName("camera");
-        if(camera != nullptr) camera->getComponent<CameraComponent>()->getCamera()->Render();
+        // auto camera = m_root->findObjectByName("camera");
+        // if(camera != nullptr) camera->getComponent<CameraComponent>()->getCamera()->Render();
 
         m_root->onRender();
         m_showcase->Render();
@@ -142,10 +140,10 @@ namespace ige::scene
                 if (figure) m_showcase->Remove(figure);
             });
         }
-        else if (component->getName() == "EditableFigureComponent")
+        else if (component->getName() == "SpriteComponent")
         {
-            auto eFigComp = std::dynamic_pointer_cast<EditableFigureComponent>(component);
-            auto figure = eFigComp->getEditableFigure();
+            auto eFigComp = std::dynamic_pointer_cast<SpriteComponent>(component);
+            auto figure = eFigComp->getFigure();
             if (figure) m_showcase->Add(figure);
 
             eFigComp->getOnFigureCreatedEvent().addListener([this](auto figure) {
@@ -168,16 +166,27 @@ namespace ige::scene
     {
         if (component->getName() == "FigureComponent")
         {
-            auto figure = ((FigureComponent*)(component.get()))->getFigure();
-            if(figure) m_showcase->Remove(figure);
+            auto figComp = std::dynamic_pointer_cast<FigureComponent>(component);
+            auto figure = figComp->getFigure();
+            if (figure) m_showcase->Remove(figure);
 
-            ((FigureComponent*)(component.get()))->getOnFigureCreatedEvent().removeAllListeners();
-            ((FigureComponent*)(component.get()))->getOnFigureDestroyedEvent().removeAllListeners();
+            figComp->getOnFigureDestroyedEvent().removeAllListeners();
+            figComp->getOnFigureDestroyedEvent().removeAllListeners();
+        }
+        else if (component->getName() == "SpriteComponent")
+        {
+            auto eFigComp = std::dynamic_pointer_cast<SpriteComponent>(component);
+            auto figure = eFigComp->getFigure();
+            if (figure) m_showcase->Remove(figure);
+
+            eFigComp->getOnFigureDestroyedEvent().removeAllListeners();
+            eFigComp->getOnFigureDestroyedEvent().removeAllListeners();
         }
         else if (component->getName() == "EnvironmentComponent")
         {
-            auto environment = ((EnvironmentComponent*)(component.get()))->getEnvironment();
-            if(environment) m_showcase->Remove(environment);
+            auto envComp = std::dynamic_pointer_cast<EnvironmentComponent>(component);
+            auto env = envComp->getEnvironment();
+            if (env) m_showcase->Remove(env);
         }
     }
 

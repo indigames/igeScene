@@ -66,8 +66,8 @@ namespace ige::scene
         Vec3 getWorldTarget() const { return m_camera->GetWorldTarget(); }
 
         //! Lock on target
-        void lockonTarget(bool lockon = true);
-        bool getLockon() { return m_camera->GetLockon(); }
+        void lockOnTarget(bool lockOn = true);
+        bool getLockOn() { return m_camera->GetLockon(); }
 
         //! Ortho Graphic
         void setOrthoProjection(bool ortho) { m_camera->SetOrthographicProjection(ortho);}
