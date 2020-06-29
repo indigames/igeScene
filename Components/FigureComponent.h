@@ -46,13 +46,13 @@ namespace ige::scene
 
     protected:
         //! Associated figure object
-        Figure* m_figure = nullptr;
+        Figure* m_figure;
 
         //! Events
         Event<Figure*> m_onFigureCreatedEvent;
         Event<Figure*> m_onFigureDestroyedEvent;
 
         //! Path to figure file
-        std::string m_path = "";
+        std::string m_path;
     };
 }

@@ -50,7 +50,7 @@ namespace ige::scene
 
     protected:
         //! Associated EditableFigure object
-        EditableFigure* m_figure = nullptr;
+        EditableFigure* m_figure;
 
         //! Events
         Event<EditableFigure*> m_onFigureCreatedEvent;

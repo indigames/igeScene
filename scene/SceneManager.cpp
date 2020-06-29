@@ -3,10 +3,22 @@
 #include "scene/SceneManager.h"
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
+
 #include "components/Component.h"
 #include "components/CameraComponent.h"
 #include "components/TransformComponent.h"
 #include "components/EnvironmentComponent.h"
+
+#include <Python.h>
+
+#include "utils/PyxieHeaders.h"
+using namespace pyxie;
+
+#ifdef _WIN32
+#  define DELIMITER ";"
+#else
+#  define DELIMITER ":"
+#endif
 
 #define SERIALIZE_VERSION "0.0.1"
 
@@ -21,10 +33,40 @@ namespace ige::scene
     {
         m_currScene = nullptr;
         m_scenes.clear();
+
+        // Destroy python runtime
+        Py_Finalize();
     }
     
     void SceneManager::update(float dt)
     {
+        if (!m_bInitialized)
+        {
+            // Initialize python runtime
+            std::string root = pyxieFios::Instance().GetRoot();
+            std::string path = root;
+
+            wchar_t pathw[1024];
+            mbstowcs(pathw, path.c_str(), 1024);
+            Py_SetPythonHome(pathw);
+
+            path.append(DELIMITER);
+            path.append("scripts");
+
+            path.append(DELIMITER);
+            path.append(root);
+            path.append("PyLib");
+
+            path.append(DELIMITER);
+            path.append(root);
+            path.append("PyLib/site-packages");
+            mbstowcs(pathw, path.c_str(), 1024);
+            Py_SetPath(pathw);
+
+            Py_Initialize();
+
+            m_bInitialized = true;
+        }
         if(m_currScene) m_currScene->update(dt);
     }
 

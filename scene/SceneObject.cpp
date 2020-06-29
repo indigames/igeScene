@@ -210,43 +210,52 @@ namespace ige::scene
 
     //! Update function
     void SceneObject::onFixedUpdate(float dt)
-    {        
-        for (auto comp : m_components)
+    {
+        if (isActive())
         {
-            comp->onFixedUpdate(dt);
-        }
+            for (auto comp : m_components)
+            {
+                comp->onFixedUpdate(dt);
+            }
 
-        for (auto obj : m_children)
-        {
-            if (obj != nullptr) obj->onFixedUpdate(dt);
+            for (auto obj : m_children)
+            {
+                if (obj != nullptr) obj->onFixedUpdate(dt);
+            }
         }
     }
 
     //! Update function
     void SceneObject::onLateUpdate(float dt)
     {
-        for (auto comp : m_components)
+        if (isActive())
         {
-            comp->onLateUpdate(dt);
-        }
+            for (auto comp : m_components)
+            {
+                comp->onLateUpdate(dt);
+            }
 
-        for (auto obj : m_children)
-        {
-            if (obj != nullptr) obj->onLateUpdate(dt);
+            for (auto obj : m_children)
+            {
+                if (obj != nullptr) obj->onLateUpdate(dt);
+            }
         }
     }
     
     //! Render
     void SceneObject::onRender()
     {
-        for (auto comp : m_components)
+        if (isActive())
         {
-            comp->onRender();
-        }
+            for (auto comp : m_components)
+            {
+                comp->onRender();
+            }
 
-        for (auto obj : m_children)
-        {
-            if (obj != nullptr) obj->onRender();
+            for (auto obj : m_children)
+            {
+                if (obj != nullptr) obj->onRender();
+            }
         }
     }
 

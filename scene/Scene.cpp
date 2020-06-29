@@ -2,12 +2,14 @@
 
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
+
 #include "components/Component.h"
 #include "components/CameraComponent.h"
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
 #include "components/EnvironmentComponent.h"
+#include "components/ScriptComponent.h"
 
 #include "utils/GraphicsHelper.h"
 
@@ -36,11 +38,6 @@ namespace ige::scene
         auto envComp = m_root->addComponent<EnvironmentComponent>("environment");
         envComp.setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
         envComp.setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
-
-        //auto camera = createObject("camera", m_root);
-        //camera->addComponent<TransformComponent>(Vec3(0.f, 5.f, 10.f));
-        //auto cameraComp = camera->addComponent<CameraComponent>("camera");
-        //cameraComp.lockonTarget(false);
 
         auto tree = createObject("tree", m_root);
         tree->getComponent<TransformComponent>()->setPosition(Vec3(-5.f, 0.f, 0.f));
@@ -156,8 +153,9 @@ namespace ige::scene
         }
         else if (component->getName() == "EnvironmentComponent")
         {
-            auto environment = ((EnvironmentComponent*)(component.get()))->getEnvironment();
-            if(environment) m_showcase->Add(environment);
+            auto envComp = std::dynamic_pointer_cast<EnvironmentComponent>(component);
+            auto env = envComp->getEnvironment();
+            if (env) m_showcase->Add(env);
         }
     }
 

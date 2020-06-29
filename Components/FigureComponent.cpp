@@ -62,7 +62,8 @@ namespace ige::scene
 
     void FigureComponent::setPath(const std::string& path)
     {
-        auto relPath = fs::relative(fs::path(path), fs::current_path()).string();
+        auto fsPath = fs::path(path);
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
 
         if (m_path != relPath)
         {

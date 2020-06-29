@@ -45,13 +45,32 @@ elseif(APPLE)
     endif()
 endif()
 
+if(${APP_STYLE} MATCHES "SHARED")
+    find_package(PythonInterp 3.7 REQUIRED)
+    find_package(PythonLibs 3.7 REQUIRED)
+else()
+    set (PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/Include")
+    if (MSVC)
+        list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/PC")
+    elseif (OSX)
+        list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/Mac")
+    elseif (ANDROID)
+        list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/Android")
+    elseif (IOS)
+        list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/IOS")
+    endif ()
+endif()
+
 file(GLOB_RECURSE SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
 
 set(INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${PYTHON_INCLUDE_DIRS}"
     "${CMAKE_CURRENT_SOURCE_DIR}/../pyxCore/pyxcore"
     "${CMAKE_CURRENT_SOURCE_DIR}/../igeVMath"
     "${CMAKE_CURRENT_SOURCE_DIR}/../igeLibs/json/include"
@@ -94,6 +113,15 @@ add_library(${TARGET_NAME} ${APP_STYLE} ${SRC})
 
 target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDES})
 
+# Python37
+set (DEFINITIONS Py_NO_ENABLE_SHARED)
+if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+    set(DEFINITIONS ${DEFINITIONS} _AMD64_)
+else()
+    set(DEFINITIONS ${DEFINITIONS} _X86_)
+endif()
+target_compile_definitions(${TARGET_NAME} PUBLIC ${DEFINITIONS})
+
 if(${APP_STYLE} MATCHES "SHARED")
     set_target_properties(
         ${TARGET_NAME}
@@ -102,5 +130,13 @@ if(${APP_STYLE} MATCHES "SHARED")
             OUTPUT_NAME ${TARGET_NAME}
             LINKER_LANGUAGE C
     )
+    if(WIN32)
+        set_target_properties(
+            ${TARGET_NAME}
+            PROPERTIES
+            SUFFIX ".pyd"
+        )
+    endif()
+    target_link_libraries(${TARGET_NAME} ${PYTHON_LIBRARIES})
 endif()
 

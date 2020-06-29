@@ -53,5 +53,8 @@ namespace ige::scene
         //! Scene root node
         std::shared_ptr<Scene> m_currScene;
         std::vector<std::shared_ptr<Scene>> m_scenes;
+
+        //! Init in main thread
+        bool m_bInitialized = false;
     };
 }
