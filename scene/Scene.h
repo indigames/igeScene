@@ -21,13 +21,16 @@ namespace ige::scene
         Scene(const std::string& name);
 
         //! Destructor
-        virtual ~Scene();     
+        virtual ~Scene();
 
         //! Initialize
         bool initialize();
 
         //! Get name
         const std::string& getName() const { return m_name; }
+
+        //! Get name
+        void setName(const std::string& name) { m_name = name; }
 
         //! Update
         virtual void update(float dt);

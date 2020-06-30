@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#include "utils/Singleton.h"
+
 namespace ige::scene
 {
     class SceneObject;
@@ -12,7 +14,7 @@ namespace ige::scene
     /**
      * Class SceneManager: Manage scene object hierarchy 
      */
-    class SceneManager
+    class SceneManager: public Singleton<SceneManager>
     {
     public:
         //! Constructor
@@ -38,6 +40,9 @@ namespace ige::scene
 
         //! Load scene from IO
         bool loadScene(const std::string& scenePath);
+
+        //! Unload scene
+        bool unloadScene(const std::string& name) { return false; }
 
         //! Save scene
         bool saveScene(const std::string& scenePath);

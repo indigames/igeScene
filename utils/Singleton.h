@@ -24,18 +24,13 @@ namespace ige::scene
         static T* getInstance()
         {
             std::call_once(m_once, [&]() {
-                m_instance.reset(new T());
+                m_instance = std::make_unique<T>();
             });
             return m_instance.get();
         }
 
-        static void setInstance(T* instance) {
-            if (instance != nullptr) {
-                m_instance.reset(new T());
-            }
-            else {
-                m_instance = nullptr;
-            }
+        static void destroy() {
+            m_instance = nullptr;
         }
     };
 

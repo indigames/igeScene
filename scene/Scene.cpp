@@ -20,7 +20,7 @@ namespace ige::scene
     Scene::Scene(const std::string& name)
         : m_name(name)
     {
-        m_showcase = ResourceCreator::Instance().NewShowcase("scene_showcase");
+        m_showcase = ResourceCreator::Instance().NewShowcase("Scene_showcase");
         m_showcase->Initialize();
         m_showcase->WaitInitialize();
         initialize();
