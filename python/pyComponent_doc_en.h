@@ -8,7 +8,7 @@ PyDoc_STRVAR(Component_name_doc,
     "Type: string\n"
 );
 
-// name
+// owner
 PyDoc_STRVAR(Component_owner_doc,
     "The scene object that own this component.\n"\
     "Type: SceneObject\n"

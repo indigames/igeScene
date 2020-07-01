@@ -8,13 +8,12 @@
 #include "python/pyComponent.h"
 #include "python/pyTransformComponent_doc_en.h"
 
-
 namespace ige::scene
 {
     struct PyObject_TransformComponent
     {
 		PyObject_Component super;
-		TransformComponent* component;
+		std::shared_ptr<TransformComponent> component;
 	};
 
     // Type declaration
@@ -25,9 +24,6 @@ namespace ige::scene
 
     // String represent
     PyObject* TransformComponent_str(PyObject_TransformComponent *self);
-
-    // Get name
-    PyObject* TransformComponent_getName(PyObject_TransformComponent* self);
 
     // Get position
     PyObject* TransformComponent_getPosition(PyObject_TransformComponent* self);
