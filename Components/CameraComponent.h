@@ -84,26 +84,27 @@ namespace ige::scene
         //! Get projection matrix
         Mat4& getProjectionMatrix(Mat4& out, bool direct3D = false) { return m_camera->GetProjectionMatrix(out, direct3D); }
 
-		//! Get view inverse matrix
-		Mat4& getViewInverseMatrix(Mat4& out) { return m_camera->GetViewInverseMatrix(out); }
+        //! Get view inverse matrix
+        Mat4& getViewInverseMatrix(Mat4& out) { return m_camera->GetViewInverseMatrix(out); }
 
-		//! get screen matrix
-		Mat4& getScreenMatrix(Mat4& out) { return m_camera->GetScreenMatrix(out); }
+        //! get screen matrix
+        Mat4& getScreenMatrix(Mat4& out) { return m_camera->GetScreenMatrix(out); }
 
         //! Screen scale
-		void setScreenScale(Vec2& v) { m_camera->SetScreenScale(v);}
+        void setScreenScale(Vec2& v) { m_camera->SetScreenScale(v);}
         const Vec2&	getScreenScale() const { return m_camera->GetScreenScale(); }
 
         //! Screen offset
-		void setScreenOffset(Vec2& v) { m_camera->SetScreenOffset(v); }
+        void setScreenOffset(Vec2& v) { m_camera->SetScreenOffset(v); }
         const Vec2&	getScreenOffset() const { return m_camera->GetScreenOffset(); }
 
         //! Screen radian
-		void setScreenRadian(float r) { m_camera->SetScreenRadian(r); }
-		float getScreenRadian() const { return m_camera->GetScreenRadian(); }
+        void setScreenRadian(float r) { m_camera->SetScreenRadian(r); }
+        float getScreenRadian() const { return m_camera->GetScreenRadian(); }
 
         //! Up-axis
-		void setUpAxis(int ax) { m_camera->SetUpAxis(ax); }
+        void setUpAxis(int ax) { m_camera->SetUpAxis(ax); }
+        int getUpAxis() { return m_camera->GetUpAxis(); }
 
         //! Update
         virtual void onUpdate(float dt);

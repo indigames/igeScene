@@ -10,7 +10,7 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    void  TransformComponent_dealloc(PyObject_TransformComponent *self)
+    void TransformComponent_dealloc(PyObject_TransformComponent *self)
     {
         if(self && self->component)
         {
@@ -21,7 +21,7 @@ namespace ige::scene
 
     PyObject* TransformComponent_str(PyObject_TransformComponent *self)
     {
-        return PyUnicode_FromString("C++ TransformTransformComponent object");;
+        return PyUnicode_FromString("C++ TransformComponent object");;
     }
 
     // Get position
@@ -198,7 +198,7 @@ namespace ige::scene
         0,                                           /* tp_getattro */
         0,                                           /* tp_setattro */
         0,                                           /* tp_as_buffer */
-        Py_TPFLAGS_DEFAULT                           /* tp_flags */
+        Py_TPFLAGS_DEFAULT,                          /* tp_flags */
         0,                                           /* tp_doc */
         0,                                           /* tp_traverse */
         0,                                           /* tp_clear */
