@@ -53,4 +53,6 @@ PyDoc_STRVAR(SceneManager_unloadScene_doc,
 
 // currentScene
 PyDoc_STRVAR(SceneManager_currentScene_doc,
-	"Current active scene.\n");
+	"Current active scene.\n"\
+	"Type: Scene\n"
+);

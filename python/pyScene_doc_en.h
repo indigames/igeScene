@@ -74,5 +74,7 @@ PyDoc_STRVAR(Scene_getRoot_doc,
 
 // name
 PyDoc_STRVAR(Scene_name_doc,
-	"Name of scene.\n");
+	"Name of scene.\n"\
+	"Type: string\n"
+);
 

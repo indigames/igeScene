@@ -25,7 +25,7 @@ namespace ige::scene
         return PyUnicode_FromString("C++ SceneObject object");
     }
 
-     // Get ID
+    // Get ID
     PyObject* SceneObject_getId(PyObject_SceneObject* self)
     {
         return PyLong_FromUnsignedLongLong(self->sceneObject->getId());

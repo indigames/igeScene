@@ -25,9 +25,6 @@ namespace ige::scene
     // Get name
     PyObject* Component_getName(PyObject_Component* self);
 
-    // Set name
-    int Component_setName(PyObject_Component* self, PyObject* value);
-
     // Get owner
     PyObject* Component_getOwner(PyObject_Component* self);
 }

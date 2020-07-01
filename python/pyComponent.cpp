@@ -1,4 +1,5 @@
 #include "python/pyComponent.h"
+#include "python/pySceneObject.h"
 
 #include "components/Component.h"
 
@@ -7,57 +8,50 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-	void  Component_dealloc(PyObject_Component *self)
-	{
+    void  Component_dealloc(PyObject_Component *self)
+    {
         if(self && self->component)
         {
-            delete self->component;
             self->component = nullptr;
             Py_TYPE(self)->tp_free(self);
-        }		
-	}
+        }
+    }
 
-	PyObject* Component_str(PyObject_Component *self)
-	{
-		char buf[64];
-		pyxie_snprintf(buf, 64, "Component object");
-		return _PyUnicode_FromASCII(buf, strlen(buf));
-	}
+    PyObject* Component_str(PyObject_Component *self)
+    {
+        return PyUnicode_FromString("C++ Component object");;
+    }
 
     // Get name
     PyObject* Component_getName(PyObject_Component* self)
     {
-        Py_RETURN_NONE;
-    }
-
-    // Set name
-    int Component_setName(PyObject_Component* self, PyObject* value)
-    {
-        return 0;
+        return PyUnicode_FromString(self->component->getName().c_str());
     }
 
     // Get owner
     PyObject* Component_getOwner(PyObject_Component* self)
     {
+        if(self->component && self->component->hasOwner())
+        {
+            auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            obj->sceneObject = self->component->getOwner();
+            return (PyObject*)obj;
+        }
         Py_RETURN_NONE;
     }
 
-    PyMethodDef Scene_methods[] = {
-        // { "initialize", (PyCFunction)Component_initialize, METH_NOARGS, initialize_doc},
-        { NULL,    NULL }
-    };
-
-    PyGetSetDef Scene_getsets[] = {
-        { const_cast<char*>("name"), (getter)Component_getName, (setter)Component_setName, component_name_doc, NULL },
+    PyGetSetDef Component_getsets[] = {
+        { const_cast<char*>("name"), (getter)Component_getName, NULL, Component_name_doc, NULL },
+        { const_cast<char*>("owner"), (getter)Component_getOwner, NULL, Component_owner_doc, NULL },
         { NULL, NULL }
     };
 
-    PyTypeObject pyComponentType = {
+    PyTypeObject PyTypeObject_Component = {
         PyVarObject_HEAD_INIT(NULL, 0)
         "igeScene.Component",               /* tp_name */
-        sizeof(PyObject_Component),            /* tp_basicsize */
+        sizeof(PyObject_Component),         /* tp_basicsize */
         0,                                  /* tp_itemsize */
-        (destructor)Component_dealloc,    /* tp_dealloc */
+        (destructor)Component_dealloc,      /* tp_dealloc */
         0,                                  /* tp_print */
         0,                                  /* tp_getattr */
         0,                                  /* tp_setattr */
@@ -68,7 +62,7 @@ namespace ige::scene
         0,                                  /* tp_as_mapping */
         0,                                  /* tp_hash */
         0,                                  /* tp_call */
-        (reprfunc)Component_str,          /* tp_str */
+        (reprfunc)Component_str,            /* tp_str */
         0,                                  /* tp_getattro */
         0,                                  /* tp_setattro */
         0,                                  /* tp_as_buffer */
@@ -80,9 +74,9 @@ namespace ige::scene
         0,                                  /* tp_weaklistoffset */
         0,                                  /* tp_iter */
         0,                                  /* tp_iternext */
-        Scene_methods,                    /* tp_methods */
+        0,                                  /* tp_methods */  //! [IGE]: no methods
         0,                                  /* tp_members */
-        Scene_getsets,                    /* tp_getset */
+        Component_getsets,                  /* tp_getset */
         0,                                  /* tp_base */
         0,                                  /* tp_dict */
         0,                                  /* tp_descr_get */
