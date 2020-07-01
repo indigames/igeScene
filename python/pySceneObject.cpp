@@ -1,7 +1,13 @@
 #include "python/pySceneObject.h"
 #include "python/pySceneObject_doc_en.h"
 #include "python/pyScene.h"
+
 #include "python/pyComponent.h"
+#include "python/pyTransformComponent.h"
+#include "python/pyCameraComponent.h"
+#include "python/pyFigureComponent.h"
+#include "python/pyEnvironmentComponent.h"
+#include "python/pySpriteComponent.h"
 
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
@@ -208,24 +214,77 @@ namespace ige::scene
         PyObject* obj = nullptr;
         if (PyArg_ParseTuple(value, "O", &obj) && obj)
         {
-            std::shared_ptr<Component> comp = nullptr;
             if(PyUnicode_Check(obj))
             {
-                auto name = std::string(PyUnicode_AsUTF8(obj));
-                comp = self->sceneObject->addComponent(name);
+                auto type = std::string(PyUnicode_AsUTF8(obj));
+                if(type == "TransformComponent")
+                {
+                    auto comp = self->sceneObject->addComponent<TransformComponent>();
+                    if(comp)
+                    {
+                        auto *compObj = PyObject_New(PyObject_TransformComponent, &PyTypeObject_TransformComponent);
+                        compObj->component = comp;
+                        compObj->super.component = compObj->component;
+                        return (PyObject*)compObj;
+                    }
+                }
+                else if(type == "CameraComponent")
+                {
+                    auto comp = self->sceneObject->addComponent<CameraComponent>();                    
+                    if(comp)
+                    {
+                        auto *compObj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
+                        compObj->component = comp;
+                        compObj->super.component = compObj->component;
+                        return (PyObject*)compObj;
+                    }
+                }
+                else if(type == "EnvironmentComponent")
+                {
+                    auto comp = self->sceneObject->addComponent<EnvironmentComponent>();
+                    if(comp)
+                    {
+                        auto *compObj = PyObject_New(PyObject_EnvironmentComponent, &PyTypeObject_EnvironmentComponent);
+                        compObj->component = comp;
+                        compObj->super.component = compObj->component;
+                        return (PyObject*)compObj;
+                    }
+                }
+                else if(type == "FigureComponent")
+                {
+                    auto comp = self->sceneObject->addComponent<FigureComponent>();
+                    if(comp)
+                    {
+                        auto *compObj = PyObject_New(PyObject_FigureComponent, &PyTypeObject_FigureComponent);
+                        compObj->component = comp;
+                        compObj->super.component = compObj->component;
+                        return (PyObject*)compObj;
+                    }
+                }
+                else if(type == "SpriteComponent")
+                {
+                    auto comp = self->sceneObject->addComponent<SpriteComponent>();
+                    if(comp)
+                    {
+                        auto *compObj = PyObject_New(PyObject_SpriteComponent, &PyTypeObject_SpriteComponent);
+                        compObj->component = comp;
+                        compObj->super.component = compObj->component;
+                        return (PyObject*)compObj;
+                    }
+                }
             }
-            else if(obj->ob_type == &PyTypeObject_Component)
+            else if(obj->ob_type == &PyTypeObject_Component
+                    || obj->ob_type == &PyTypeObject_TransformComponent
+                    || obj->ob_type == &PyTypeObject_CameraComponent
+                    || obj->ob_type == &PyTypeObject_EnvironmentComponent
+                    || obj->ob_type == &PyTypeObject_FigureComponent
+                    || obj->ob_type == &PyTypeObject_SpriteComponent
+                )
             {
                 auto componentObj = (PyObject_Component*)obj;
                 self->sceneObject->addComponent(componentObj->component);
-                comp = componentObj->component;
-            }
-            if(comp)
-            {
-                auto *obj = PyObject_New(PyObject_Component, &PyTypeObject_Component);
-                obj->component = comp;
-                return (PyObject*)obj;
-            }
+                return obj;
+            }            
         }
         Py_RETURN_NONE;
     }
@@ -238,12 +297,42 @@ namespace ige::scene
         {
             if(PyUnicode_Check(obj))
             {
-                auto name = std::string(PyUnicode_AsUTF8(obj));
-                auto comp = self->sceneObject->getComponent(name);
-                if(comp) self->sceneObject->removeComponent(comp);
-                Py_RETURN_TRUE;
+                std::shared_ptr<Component> comp = nullptr;
+                auto type = std::string(PyUnicode_AsUTF8(obj));
+                if(type == "TransformComponent")
+                {
+                    comp = self->sceneObject->getComponent<TransformComponent>();
+                }
+                else if(type == "CameraComponent")
+                {
+                    comp = self->sceneObject->getComponent<CameraComponent>();
+                }
+                else if(type == "EnvironmentComponent")
+                {
+                    comp = self->sceneObject->getComponent<EnvironmentComponent>();
+                }
+                else if(type == "FigureComponent")
+                {
+                    comp = self->sceneObject->getComponent<FigureComponent>();
+                }
+                else if(type == "SpriteComponent")
+                {
+                    comp = self->sceneObject->getComponent<SpriteComponent>();
+                }
+
+                if(comp)
+                {
+                    self->sceneObject->removeComponent(comp);
+                    Py_RETURN_TRUE;
+                }                
             }
-            else if(obj->ob_type == &PyTypeObject_Component)
+            else if(obj->ob_type == &PyTypeObject_Component
+                    || obj->ob_type == &PyTypeObject_TransformComponent
+                    || obj->ob_type == &PyTypeObject_CameraComponent
+                    || obj->ob_type == &PyTypeObject_EnvironmentComponent
+                    || obj->ob_type == &PyTypeObject_FigureComponent
+                    || obj->ob_type == &PyTypeObject_SpriteComponent
+                )
             {
                 auto componentObj = (PyObject_Component*)obj;
                 if(self->sceneObject) self->sceneObject->removeComponent(componentObj->component);
@@ -259,12 +348,60 @@ namespace ige::scene
         char* type = nullptr;
         if (PyArg_ParseTuple(value, "s", &type))
         {
-            auto comp =  self->sceneObject->getComponent(std::string(type));
-            if(comp)
+            if(type == "TransformComponent")
             {
-                auto *obj = PyObject_New(PyObject_Component, &PyTypeObject_Component);
-                obj->component = comp;
-                return (PyObject*)obj;
+                auto comp = self->sceneObject->getComponent<TransformComponent>();
+                if(comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_TransformComponent, &PyTypeObject_TransformComponent);
+                    compObj->component = comp;
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if(type == "CameraComponent")
+            {
+                auto comp = self->sceneObject->getComponent<CameraComponent>();
+                if(comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
+                    compObj->component = comp;
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if(type == "EnvironmentComponent")
+            {
+                auto comp = self->sceneObject->getComponent<EnvironmentComponent>();
+                if(comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_EnvironmentComponent, &PyTypeObject_EnvironmentComponent);
+                    compObj->component = comp;
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if(type == "FigureComponent")
+            {
+                auto comp = self->sceneObject->getComponent<FigureComponent>();
+                if(comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_FigureComponent, &PyTypeObject_FigureComponent);
+                    compObj->component = comp;
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if(type == "SpriteComponent")
+            {
+                auto comp = self->sceneObject->getComponent<SpriteComponent>();
+                if(comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_SpriteComponent, &PyTypeObject_SpriteComponent);
+                    compObj->component = comp;
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
             }
         }
         Py_RETURN_NONE;

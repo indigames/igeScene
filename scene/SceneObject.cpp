@@ -3,12 +3,6 @@
 #include "scene/SceneObject.h"
 
 #include "components/Component.h"
-#include "components/CameraComponent.h"
-#include "components/TransformComponent.h"
-#include "components/FigureComponent.h"
-#include "components/SpriteComponent.h"
-#include "components/EnvironmentComponent.h"
-#include "components/ScriptComponent.h"
 
 namespace ige::scene
 {
@@ -134,37 +128,7 @@ namespace ige::scene
     {
         m_components.push_back(component);
     }
-
-    //! Add a component by type
-    std::shared_ptr<Component> SceneObject::addComponent(const std::string& type)
-    {
-        if(type == "TransformComponent")
-        {
-            return addComponent<TransformComponent>();
-        }
-        else if(type == "CameraComponent")
-        {
-            return addComponent<CameraComponent>();
-        }
-        else if(type == "EnvironmentComponent")
-        {
-            return addComponent<EnvironmentComponent>();
-        }
-        else if(type == "FigureComponent")
-        {
-            return addComponent<FigureComponent>();
-        }
-        else if(type == "SpriteComponent")
-        {
-            return addComponent<SpriteComponent>();
-        }
-        else if(type == "ScriptComponent")
-        {
-            return addComponent<ScriptComponent>();
-        }
-        return nullptr;
-    }
-
+  
     //! Remove a component
     bool SceneObject::removeComponent(const std::shared_ptr<Component>& component)
     {
@@ -188,36 +152,6 @@ namespace ige::scene
             it = m_components.erase(it);
         }
         return true;
-    }
-
-    //! Get component by type
-    std::shared_ptr<Component> SceneObject::getComponent(const std::string& type)
-    {        
-        if(type == "TransformComponent")
-        {
-            return getComponent<TransformComponent>();
-        }
-        else if(type == "CameraComponent")
-        {
-            return getComponent<CameraComponent>();
-        }
-        else if(type == "EnvironmentComponent")
-        {
-            return getComponent<EnvironmentComponent>();
-        }
-        else if(type == "FigureComponent")
-        {
-            return getComponent<FigureComponent>();
-        }
-        else if(type == "SpriteComponent")
-        {
-            return getComponent<SpriteComponent>();
-        }
-        else if(type == "ScriptComponent")
-        {
-            return getComponent<ScriptComponent>();
-        }
-        return nullptr;
     }
     
     //! Get components list

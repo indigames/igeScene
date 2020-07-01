@@ -67,17 +67,11 @@ namespace ige::scene
         //! Add a component
         virtual void addComponent(const std::shared_ptr<Component>& component);
 
-        //! Add a component
-        virtual std::shared_ptr<Component> addComponent(const std::string& type);
-
         //! Remove a component
         virtual bool removeComponent(const std::shared_ptr<Component>& component);
 
         //! Remove all components
         virtual bool removeAllComponents();
-
-        //! Get component by type
-        virtual std::shared_ptr<Component> getComponent(const std::string& type);
 
         //! Get components list
         virtual std::vector<std::shared_ptr<Component>>& getComponents();

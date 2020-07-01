@@ -13,9 +13,9 @@ namespace ige::scene
 {
     struct PyObject_FigureComponent
     {
-		PyObject_Component super;
-		FigureComponent* component;
-	};
+        PyObject_Component super;
+        std::shared_ptr<FigureComponent> component;
+    };
 
     // Type declaration
     PyTypeObject PyTypeObject_FigureComponent;
@@ -25,9 +25,6 @@ namespace ige::scene
 
     // String represent
     PyObject* FigureComponent_str(PyObject_FigureComponent *self);
-
-    // Get name
-    PyObject* FigureComponent_getName(PyObject_FigureComponent* self);
 
     // Get path
     PyObject* FigureComponent_getPath(PyObject_FigureComponent* self);
