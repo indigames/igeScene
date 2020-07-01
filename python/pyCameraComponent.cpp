@@ -21,7 +21,7 @@ namespace ige::scene
 
     PyObject* CameraComponent_str(PyObject_CameraComponent *self)
     {
-        return PyUnicode_FromString("C++ CameraComponent object");;
+        return PyUnicode_FromString("C++ CameraComponent object");
     }
 
     // Get position

@@ -16,7 +16,7 @@ namespace ige::scene
 
     PyObject* Component_str(PyObject_Component *self)
     {
-        return PyUnicode_FromString("C++ Component object");;
+        return PyUnicode_FromString("C++ Component object");
     }
 
     // Get name

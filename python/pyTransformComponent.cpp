@@ -21,7 +21,7 @@ namespace ige::scene
 
     PyObject* TransformComponent_str(PyObject_TransformComponent *self)
     {
-        return PyUnicode_FromString("C++ TransformComponent object");;
+        return PyUnicode_FromString("C++ TransformComponent object");
     }
 
     // Get position
