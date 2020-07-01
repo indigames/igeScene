@@ -9,14 +9,14 @@ namespace ige::scene
 {
     struct PyObject_Component
     {
-		PyObject_HEAD
-		Component* component;
-	};
+        PyObject_HEAD
+        std::shared_ptr<Component> component;
+    };
 
     // Type declaration
     PyTypeObject PyTypeObject_Component;
 
-    // Dealloc    
+    // Dealloc
     void  Component_dealloc(PyObject_Component *self);
 
     // String represent

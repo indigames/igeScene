@@ -52,9 +52,6 @@ namespace ige::scene
     // Get children
     PyObject* SceneObject_getChildren(PyObject_SceneObject* self);
 
-    // Find object (by ID, Name)
-    PyObject* SceneObject_findObject(PyObject_SceneObject* self, PyObject* value);
-
     // Remove children
     PyObject* SceneObject_removeChildren(PyObject_SceneObject* self);
 

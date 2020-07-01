@@ -36,8 +36,8 @@ namespace ige::scene
     {
         m_root = createObject("root");
         auto envComp = m_root->addComponent<EnvironmentComponent>("environment");
-        envComp.setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
-        envComp.setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+        envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
+        envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
 
         auto tree = createObject("tree", m_root);
         tree->getComponent<TransformComponent>()->setPosition(Vec3(-5.f, 0.f, 0.f));

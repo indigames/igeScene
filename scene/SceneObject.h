@@ -12,8 +12,6 @@ using json = nlohmann::json;
 
 namespace ige::scene
 {
-    class TransformComponent;
-
     /**
     * SceneObject represents an object in scene hierarchy
     */
@@ -69,11 +67,17 @@ namespace ige::scene
         //! Add a component
         virtual void addComponent(const std::shared_ptr<Component>& component);
 
+        //! Add a component
+        virtual std::shared_ptr<Component> addComponent(const std::string& type);
+
         //! Remove a component
         virtual bool removeComponent(const std::shared_ptr<Component>& component);
 
         //! Remove all components
         virtual bool removeAllComponents();
+
+        //! Get component by type
+        virtual std::shared_ptr<Component> getComponent(const std::string& type);
 
         //! Get components list
         virtual std::vector<std::shared_ptr<Component>>& getComponents();
@@ -87,7 +91,7 @@ namespace ige::scene
 
         //! Add component by type
         template<typename T, typename ... Args>
-        T& addComponent(Args&&... args);
+        std::shared_ptr<T> addComponent(Args&&... args);
 
         //! Remove component by type
         template<typename T>
@@ -178,21 +182,15 @@ namespace ige::scene
 
     //! Add component by type
     template<typename T, typename ...Args>
-    inline T& SceneObject::addComponent(Args&& ...args)
+    inline std::shared_ptr<T> SceneObject::addComponent(Args&& ...args)
     {
         static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
         auto found = getComponent<T>();
-        if (!found)
-        {
-            auto instance = std::make_shared<T>(shared_from_this(), args...);
-            m_components.push_back(instance);
-            m_componentAddedEvent.invoke(instance);
-            return *(instance.get());
-        }
-        else
-        {
-            return *found;
-        }
+        if (found) return found;
+        auto instance = std::make_shared<T>(shared_from_this(), args...);
+        m_components.push_back(instance);
+        m_componentAddedEvent.invoke(instance);
+        return instance;
     }
 
     //! Remove component by type

@@ -52,24 +52,6 @@ PyDoc_STRVAR(SceneObject_getChildren_doc,
 	"    List of children objects\n"
 );
 
-// findObject
-PyDoc_STRVAR(SceneObject_findObject_doc,
-	"Find a object from current scene object (as a tree).\n"\
-	"\n"\
-	"SceneObject().findObject(param: string|number)\n"\
-	"\n"\
-	"Parameters\n"\
-	"----------\n"\
-	"    param : string\n"\
-	"        Name of the scene object to find\n"\
-	"    param : number (unsigned long long)\n"\
-	"        ID of the scene object to find\n"\
-	"Return:\n"\
-	"----------\n"\
-	"    SceneObject: if found\n"\
-	"    None: if not found\n"
-);
-
 // removeChildren
 PyDoc_STRVAR(SceneObject_removeChildren_doc,
 	"Remove all children from current scene object.\n"\
@@ -96,8 +78,8 @@ PyDoc_STRVAR(SceneObject_addComponent_doc,
 	"        Instance of component to add\n"\
 	"Return:\n"\
 	"----------\n"\
-	"    True: if added\n"\
-	"    False: if not added\n"
+	"    Component: if added\n"\
+	"    None: if not added\n"
 );
 
 // removeComponent

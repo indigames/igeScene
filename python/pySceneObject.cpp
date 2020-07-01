@@ -1,6 +1,7 @@
 #include "python/pySceneObject.h"
 #include "python/pySceneObject_doc_en.h"
 #include "python/pyScene.h"
+#include "python/pyComponent.h"
 
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
@@ -40,7 +41,8 @@ namespace ige::scene
     int SceneObject_setName(PyObject_SceneObject* self, PyObject* value)
     {
         char* name = nullptr;
-        if (PyArg_ParseTuple(value, "s", &name)) {
+        if (PyArg_ParseTuple(value, "s", &name))
+        {
             self->sceneObject->setName(std::string(name));
         }
         return 0;
@@ -80,7 +82,8 @@ namespace ige::scene
     int SceneObject_setParent(PyObject_SceneObject* self, PyObject* value)
     {
         PyObject* obj;
-        if (PyArg_ParseTuple(value, "O", &obj)) {
+        if (PyArg_ParseTuple(value, "O", &obj))
+        {
             if(obj && obj->ob_type == &PyTypeObject_SceneObject) {
                 auto sceneObj = (PyObject_SceneObject*)obj;
                 self->sceneObject->setParent(sceneObj->sceneObject.get());
@@ -94,7 +97,8 @@ namespace ige::scene
     PyObject* SceneObject_addChild(PyObject_SceneObject* self, PyObject* value)
     {
         PyObject* obj;
-        if (PyArg_ParseTuple(value, "O", &obj)) {
+        if (PyArg_ParseTuple(value, "O", &obj))
+        {
             if(obj) 
             {
                 if(PyUnicode_Check(obj))
@@ -132,7 +136,8 @@ namespace ige::scene
     PyObject* SceneObject_removeChild(PyObject_SceneObject* self, PyObject* value)
     {
         PyObject* obj;
-        if (PyArg_ParseTuple(value, "O", &obj)) {
+        if (PyArg_ParseTuple(value, "O", &obj))
+        {
             if(obj) 
             {
                 if(PyUnicode_Check(obj))
@@ -186,60 +191,123 @@ namespace ige::scene
         Py_RETURN_NONE;
     }
 
-    // Find object (by ID, Name)
-    PyObject* SceneObject_findObject(PyObject_SceneObject* self, PyObject* value)
-    {
-
-    }
-
     // Remove children
     PyObject* SceneObject_removeChildren(PyObject_SceneObject* self)
     {
-
+        if(self->sceneObject)
+        {
+            self->sceneObject->removeChildren();
+            Py_RETURN_TRUE;
+        }
+        Py_RETURN_FALSE;
     }
 
     // Add component
     PyObject* SceneObject_addComponent(PyObject_SceneObject* self, PyObject* value)
     {
-
+        PyObject* obj = nullptr;
+        if (PyArg_ParseTuple(value, "O", &obj) && obj)
+        {
+            std::shared_ptr<Component> comp = nullptr;
+            if(PyUnicode_Check(obj))
+            {
+                auto name = std::string(PyUnicode_AsUTF8(obj));
+                comp = self->sceneObject->addComponent(name);
+            }
+            else if(obj->ob_type == &PyTypeObject_Component)
+            {
+                auto componentObj = (PyObject_Component*)obj;
+                self->sceneObject->addComponent(componentObj->component);
+                comp = componentObj->component;
+            }
+            if(comp)
+            {
+                auto *obj = PyObject_New(PyObject_Component, &PyTypeObject_Component);
+                obj->component = comp;
+                return (PyObject*)obj;
+            }
+        }
+        Py_RETURN_NONE;
     }
 
     // Remove component
     PyObject* SceneObject_removeComponent(PyObject_SceneObject* self, PyObject* value)
     {
-
+        PyObject* obj = nullptr;
+        if (PyArg_ParseTuple(value, "O", &obj) && obj)
+        {
+            if(PyUnicode_Check(obj))
+            {
+                auto name = std::string(PyUnicode_AsUTF8(obj));
+                auto comp = self->sceneObject->getComponent(name);
+                if(comp) self->sceneObject->removeComponent(comp);
+                Py_RETURN_TRUE;
+            }
+            else if(obj->ob_type == &PyTypeObject_Component)
+            {
+                auto componentObj = (PyObject_Component*)obj;
+                if(self->sceneObject) self->sceneObject->removeComponent(componentObj->component);
+                Py_RETURN_TRUE;
+            }
+        }
+        Py_RETURN_FALSE;
     }
 
     // Get component by type
     PyObject* SceneObject_getComponent(PyObject_SceneObject* self, PyObject* value)
     {
-
+        char* type = nullptr;
+        if (PyArg_ParseTuple(value, "s", &type))
+        {
+            auto comp =  self->sceneObject->getComponent(std::string(type));
+            if(comp)
+            {
+                auto *obj = PyObject_New(PyObject_Component, &PyTypeObject_Component);
+                obj->component = comp;
+                return (PyObject*)obj;
+            }
+        }
+        Py_RETURN_NONE;
     }
 
     // Get components
     PyObject* SceneObject_getComponents(PyObject_SceneObject* self)
     {
-
+        auto len = self->sceneObject->getComponentsCount();
+        if(len > 0)
+        {
+            auto components = self->sceneObject->getComponents();
+            auto compTuple = PyTuple_New(len);
+            for(int i = 0; i < len; ++i)
+            {
+                auto obj = PyObject_New(PyObject_Component, &PyTypeObject_Component);
+                obj->component = components[i];
+                PyTuple_SetItem(compTuple, i, (PyObject*)obj);
+                Py_XDECREF(obj);
+            }
+            return (PyObject*)compTuple;
+        }
+        Py_RETURN_NONE;
     }
 
     // Remove components
     PyObject* SceneObject_removeComponents(PyObject_SceneObject* self)
     {
-
+        self->sceneObject->removeAllComponents();
+        Py_RETURN_TRUE;
     }
     
     // Methods
     PyMethodDef SceneObject_methods[] = {
         { "addChild", (PyCFunction)SceneObject_addChild, METH_VARARGS, SceneObject_addChild_doc },
         { "removeChild", (PyCFunction)SceneObject_removeChild, METH_VARARGS, SceneObject_removeChild_doc },
-        { "getChildren", (PyCFunction)SceneObject_getChildren, METH_VARARGS, SceneObject_getChildren_doc },        
-        { "findObject", (PyCFunction)SceneObject_findObject, METH_VARARGS, SceneObject_findObject_doc },        
-        { "removeChildren", (PyCFunction)SceneObject_removeChildren, METH_VARARGS, SceneObject_removeChildren_doc },        
-        { "addComponent", (PyCFunction)SceneObject_addComponent, METH_VARARGS, SceneObject_addComponent_doc },        
-        { "removeComponent", (PyCFunction)SceneObject_removeComponent, METH_VARARGS, SceneObject_removeComponent_doc },        
-        { "getComponent", (PyCFunction)SceneObject_getComponent, METH_VARARGS, SceneObject_getComponent_doc },        
-        { "getComponents", (PyCFunction)SceneObject_getComponents, METH_VARARGS, SceneObject_getComponents_doc },        
-        { "removeComponents", (PyCFunction)SceneObject_removeComponents, METH_VARARGS, SceneObject_removeComponents_doc },        
+        { "getChildren", (PyCFunction)SceneObject_getChildren, METH_VARARGS, SceneObject_getChildren_doc },
+        { "removeChildren", (PyCFunction)SceneObject_removeChildren, METH_VARARGS, SceneObject_removeChildren_doc },
+        { "addComponent", (PyCFunction)SceneObject_addComponent, METH_VARARGS, SceneObject_addComponent_doc },
+        { "removeComponent", (PyCFunction)SceneObject_removeComponent, METH_VARARGS, SceneObject_removeComponent_doc },
+        { "getComponent", (PyCFunction)SceneObject_getComponent, METH_VARARGS, SceneObject_getComponent_doc },
+        { "getComponents", (PyCFunction)SceneObject_getComponents, METH_VARARGS, SceneObject_getComponents_doc },
+        { "removeComponents", (PyCFunction)SceneObject_removeComponents, METH_VARARGS, SceneObject_removeComponents_doc },
         { NULL, NULL }
     };
 
@@ -255,10 +323,10 @@ namespace ige::scene
     // Type declaration
     PyTypeObject PyTypeObject_SceneObject = {
         PyVarObject_HEAD_INIT(NULL, 0)
-        "igeScene.SceneObject",            /* tp_name */
-        sizeof(PyObject_SceneObject),      /* tp_basicsize */
+        "igeScene.SceneObject",             /* tp_name */
+        sizeof(PyObject_SceneObject),       /* tp_basicsize */
         0,                                  /* tp_itemsize */
-        (destructor)SceneObject_dealloc,   /* tp_dealloc */
+        (destructor)SceneObject_dealloc,    /* tp_dealloc */
         0,                                  /* tp_print */
         0,                                  /* tp_getattr */
         0,                                  /* tp_setattr */
@@ -269,7 +337,7 @@ namespace ige::scene
         0,                                  /* tp_as_mapping */
         0,                                  /* tp_hash */
         0,                                  /* tp_call */
-        (reprfunc)SceneObject_str,         /* tp_str */
+        (reprfunc)SceneObject_str,          /* tp_str */
         0,                                  /* tp_getattro */
         0,                                  /* tp_setattro */
         0,                                  /* tp_as_buffer */
@@ -281,9 +349,9 @@ namespace ige::scene
         0,                                  /* tp_weaklistoffset */
         0,                                  /* tp_iter */
         0,                                  /* tp_iternext */
-        SceneObject_methods,               /* tp_methods */
+        SceneObject_methods,                /* tp_methods */
         0,                                  /* tp_members */
-        SceneObject_getsets,               /* tp_getset */
+        SceneObject_getsets,                /* tp_getset */
         0,                                  /* tp_base */
         0,                                  /* tp_dict */
         0,                                  /* tp_descr_get */
