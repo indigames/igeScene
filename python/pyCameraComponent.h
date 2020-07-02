@@ -6,7 +6,6 @@
 #include "components/CameraComponent.h"
 
 #include "python/pyComponent.h"
-#include "python/pyCameraComponent_doc_en.h"
 
 namespace ige::scene
 {
@@ -17,7 +16,7 @@ namespace ige::scene
 	};
 
     // Type declaration
-    PyTypeObject PyTypeObject_CameraComponent;
+    extern PyTypeObject PyTypeObject_CameraComponent;
 
     // Dealloc
     void  CameraComponent_dealloc(PyObject_CameraComponent *self);

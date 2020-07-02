@@ -1,4 +1,6 @@
 #include "python/pyComponent.h"
+#include "python/pyComponent_doc_en.h"
+
 #include "python/pySceneObject.h"
 
 #include "components/Component.h"
@@ -37,12 +39,14 @@ namespace ige::scene
         Py_RETURN_NONE;
     }
 
+    // Variable definition
     PyGetSetDef Component_getsets[] = {
-        { const_cast<char*>("name"), (getter)Component_getName, NULL, Component_name_doc, NULL },
-        { const_cast<char*>("owner"), (getter)Component_getOwner, NULL, Component_owner_doc, NULL },
+        { "name", (getter)Component_getName, NULL, Component_name_doc, NULL },
+        { "owner", (getter)Component_getOwner, NULL, Component_owner_doc, NULL },
         { NULL, NULL }
     };
 
+    // Type definition
     PyTypeObject PyTypeObject_Component = {
         PyVarObject_HEAD_INIT(NULL, 0)
         "igeScene.Component",                       /* tp_name */

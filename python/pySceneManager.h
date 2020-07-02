@@ -9,12 +9,12 @@ namespace ige::scene
 {
     struct PyObject_SceneManager
     {
-		PyObject_HEAD
-		std::shared_ptr<SceneManager> sceneManager;
-	};
+        PyObject_HEAD
+        SceneManager* sceneManager;
+    };
 
     // Type declaration
-    PyTypeObject PyTypeObject_SceneManager;
+    extern PyTypeObject PyTypeObject_SceneManager;
 
     // Dealloc    
     void  SceneManager_dealloc(PyObject_SceneManager *self);

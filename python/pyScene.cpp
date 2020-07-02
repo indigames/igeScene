@@ -1,5 +1,6 @@
 #include "python/pyScene.h"
 #include "python/pyScene_doc_en.h"
+
 #include "python/pySceneObject.h"
 
 #include "scene/SceneManager.h"
@@ -110,28 +111,31 @@ namespace ige::scene
         PyObject* obj = nullptr;
 		if (PyArg_ParseTuple(args, "O", &obj))
         {
-            if(PyUnicode_Check(obj))
+            if (obj)
             {
-                const char* name = PyUnicode_AsUTF8(obj);
-                auto sceneObject = self->scene->findObjectByName(std::string(name));                
-                if(sceneObject)
+                if (PyUnicode_Check(obj))
                 {
-                    auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                    obj->sceneObject = sceneObject;
-                    return (PyObject*)obj;
+                    const char* name = PyUnicode_AsUTF8(obj);
+                    auto sceneObject = self->scene->findObjectByName(std::string(name));
+                    if (sceneObject)
+                    {
+                        auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+                        obj->sceneObject = sceneObject;
+                        return (PyObject*)obj;
+                    }
                 }
-            }
-            else if(PyNumber_Check(obj))
-            {
-                uint64_t id = PyLong_AsUnsignedLongLong(obj);
-                auto sceneObject = self->scene->findObjectById(id);
-                if(sceneObject)
+                else if (PyNumber_Check(obj))
                 {
-                    auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                    obj->sceneObject = sceneObject;
-                    return (PyObject*)obj;
+                    uint64_t id = PyLong_AsUnsignedLongLong(obj);
+                    auto sceneObject = self->scene->findObjectById(id);
+                    if (sceneObject)
+                    {
+                        auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+                        obj->sceneObject = sceneObject;
+                        return (PyObject*)obj;
+                    }
                 }
-            }
+            }            
         }
         Py_RETURN_NONE;
     }
@@ -141,22 +145,25 @@ namespace ige::scene
     {
         auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
         obj->sceneObject = self->scene->getRoot();
-        return (PyObject*)obj;        
+        return (PyObject*)obj;
     }
 
+    // Methods definition
     PyMethodDef Scene_methods[] = {
-        { "createObject", (PyCFunction)Scene_createObject, METH_VARARGS, Scene_createObject_doc },
-        { "removeObject", (PyCFunction)Scene_removeObject, METH_VARARGS, Scene_removeObject_doc },
-        { "findObject", (PyCFunction)Scene_findObject, METH_VARARGS, Scene_findObject_doc },
-        { "getRoot", (PyCFunction)Scene_getRoot, METH_NOARGS, Scene_getRoot_doc },
-        { NULL, NULL }
+    { "createObject", (PyCFunction)Scene_createObject, METH_VARARGS, Scene_createObject_doc },
+    { "removeObject", (PyCFunction)Scene_removeObject, METH_VARARGS, Scene_removeObject_doc },
+    { "findObject", (PyCFunction)Scene_findObject, METH_VARARGS, Scene_findObject_doc },
+    { "getRoot", (PyCFunction)Scene_getRoot, METH_NOARGS, Scene_getRoot_doc },
+    { NULL, NULL }
     };
 
+    // Variable definition
     PyGetSetDef Scene_getsets[] = {
         { "name", (getter)Scene_getName, (setter)Scene_setName, Scene_name_doc, NULL },
         { NULL, NULL }
     };
 
+    // Type definition
     PyTypeObject PyTypeObject_Scene = {
         PyVarObject_HEAD_INIT(NULL, 0)
         "igeScene.Scene",                   /* tp_name */

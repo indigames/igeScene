@@ -6,18 +6,17 @@
 #include "components/TransformComponent.h"
 
 #include "python/pyComponent.h"
-#include "python/pyTransformComponent_doc_en.h"
 
 namespace ige::scene
 {
     struct PyObject_TransformComponent
     {
-		PyObject_Component super;
-		std::shared_ptr<TransformComponent> component;
-	};
+        PyObject_Component super;
+        std::shared_ptr<TransformComponent> component;
+    };
 
     // Type declaration
-    PyTypeObject PyTypeObject_TransformComponent;
+    extern PyTypeObject PyTypeObject_TransformComponent;
 
     // Dealloc
     void  TransformComponent_dealloc(PyObject_TransformComponent *self);

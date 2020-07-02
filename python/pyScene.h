@@ -8,12 +8,12 @@ namespace ige::scene
 {
     struct PyObject_Scene
     {
-		PyObject_HEAD
-		std::shared_ptr<Scene> scene;
-	};
+        PyObject_HEAD
+        std::shared_ptr<Scene> scene;
+    };
 
     // Type declaration
-    PyTypeObject PyTypeObject_Scene;
+    extern PyTypeObject PyTypeObject_Scene;
 
     // New/dealloc
     PyObject* Scene_new(PyTypeObject *type, PyObject *args, PyObject *kw);

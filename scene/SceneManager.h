@@ -48,7 +48,7 @@ namespace ige::scene
         bool saveScene(const std::string& scenePath);
 
         //! Get current scene
-        std::shared_ptr<Scene> getCurrentScene() { return m_currScene; }
+        std::shared_ptr<Scene>& getCurrentScene() { return m_currScene; }
 
         //! Set current scene
         void setCurrentScene(const std::string& name);

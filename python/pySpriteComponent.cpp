@@ -1,4 +1,5 @@
 #include "python/pySpriteComponent.h"
+#include "python/pySpriteComponent_doc_en.h"
 
 #include "components/SpriteComponent.h"
 

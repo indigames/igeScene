@@ -27,7 +27,7 @@ namespace ige::scene
     PyObject* SceneManager_getInstance()
     {
         auto* self = PyObject_New(PyObject_SceneManager, &PyTypeObject_SceneManager);
-        self->sceneManager = std::make_shared<SceneManager>(SceneManager::getInstance());
+        self->sceneManager = SceneManager::getInstance();
         return (PyObject*)self;
     }
 
@@ -94,9 +94,9 @@ namespace ige::scene
 
     // Methods
     PyMethodDef SceneManager_methods[] = {
-        { "getInstance", (PyCFunction)SceneManager_getInstance, METH_STATIC, SceneManager_getInstance_doc },
+        { "getInstance", (PyCFunction)SceneManager_getInstance, METH_NOARGS | METH_STATIC, SceneManager_getInstance_doc },
         { "loadScene", (PyCFunction)SceneManager_loadScene, METH_VARARGS, SceneManager_loadScene_doc },
-        { "unloadScene", (PyCFunction)SceneManager_unloadScene, METH_VARARGS, SceneManager_unloadScene_doc },        
+        { "unloadScene", (PyCFunction)SceneManager_unloadScene, METH_VARARGS, SceneManager_unloadScene_doc },
         { NULL, NULL }
     };
 

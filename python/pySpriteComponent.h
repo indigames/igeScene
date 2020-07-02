@@ -6,8 +6,6 @@
 #include "components/SpriteComponent.h"
 
 #include "python/pyComponent.h"
-#include "python/pySpriteComponent_doc_en.h"
-
 
 namespace ige::scene
 {
@@ -18,7 +16,7 @@ namespace ige::scene
     };
 
     // Type declaration
-    PyTypeObject PyTypeObject_SpriteComponent;
+    extern PyTypeObject PyTypeObject_SpriteComponent;
 
     // Dealloc
     void  SpriteComponent_dealloc(PyObject_SpriteComponent *self);

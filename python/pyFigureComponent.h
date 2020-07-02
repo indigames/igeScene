@@ -6,7 +6,6 @@
 #include "components/FigureComponent.h"
 
 #include "python/pyComponent.h"
-#include "python/pyFigureComponent_doc_en.h"
 
 
 namespace ige::scene
@@ -18,7 +17,7 @@ namespace ige::scene
     };
 
     // Type declaration
-    PyTypeObject PyTypeObject_FigureComponent;
+    extern PyTypeObject PyTypeObject_FigureComponent;
 
     // Dealloc
     void  FigureComponent_dealloc(PyObject_FigureComponent *self);

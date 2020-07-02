@@ -3,18 +3,17 @@
 #include <Python.h>
 
 #include "components/Component.h"
-#include "python/pyComponent_doc_en.h"
 
 namespace ige::scene
 {
     struct PyObject_SceneObject
     {
-		PyObject_HEAD
-		std::shared_ptr<SceneObject> sceneObject;
-	};
+        PyObject_HEAD
+        std::shared_ptr<SceneObject> sceneObject;
+    };
 
     // Type declaration
-    PyTypeObject PyTypeObject_SceneObject;
+    extern PyTypeObject PyTypeObject_SceneObject;
 
     // Dealloc
     void  SceneObject_dealloc(PyObject_SceneObject *self);

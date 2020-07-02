@@ -1,4 +1,5 @@
 #include "python/pyCameraComponent.h"
+#include "python/pyCameraComponent_doc_en.h"
 
 #include "components/CameraComponent.h"
 
@@ -420,7 +421,7 @@ namespace ige::scene
         vmath_cpy(mat.P(), 16, m4obj->m);
         m4obj->d = 4;
         return (PyObject*)m4obj;
-    }    
+    }
 
     PyGetSetDef CameraComponent_getsets[] = {
         { "position", (getter)CameraComponent_getPosition, (setter)CameraComponent_setPosition, CameraComponent_position_doc, NULL },

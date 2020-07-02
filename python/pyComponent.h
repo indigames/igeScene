@@ -3,7 +3,6 @@
 #include <Python.h>
 
 #include "components/Component.h"
-#include "python/pyComponent_doc_en.h"
 
 namespace ige::scene
 {
@@ -14,7 +13,7 @@ namespace ige::scene
     };
 
     // Type declaration
-    PyTypeObject PyTypeObject_Component;
+    extern PyTypeObject PyTypeObject_Component;
 
     // Dealloc
     void  Component_dealloc(PyObject_Component *self);

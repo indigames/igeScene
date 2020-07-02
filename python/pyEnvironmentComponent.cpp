@@ -1,4 +1,6 @@
 #include "python/pyEnvironmentComponent.h"
+#include "python/pyEnvironmentComponent_doc_en.h"
+
 #include "components/EnvironmentComponent.h"
 
 #include "utils/PyxieHeaders.h"

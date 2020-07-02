@@ -6,18 +6,17 @@
 #include "components/EnvironmentComponent.h"
 
 #include "python/pyComponent.h"
-#include "python/pyEnvironmentComponent_doc_en.h"
 
 namespace ige::scene
 {
     struct PyObject_EnvironmentComponent
     {
-		PyObject_Component super;
-		std::shared_ptr<EnvironmentComponent> component;
-	};
+        PyObject_Component super;
+        std::shared_ptr<EnvironmentComponent> component;
+    };
 
     // Type declaration
-    PyTypeObject PyTypeObject_EnvironmentComponent;
+    extern PyTypeObject PyTypeObject_EnvironmentComponent;
 
     // Dealloc
     void  EnvironmentComponent_dealloc(PyObject_EnvironmentComponent *self);
@@ -306,4 +305,5 @@ namespace ige::scene
 
     // Set Shadow Wideness
     int EnvironmentComponent_setShadowWideness(PyObject_EnvironmentComponent* self, PyObject* value);
+
 }

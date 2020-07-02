@@ -72,6 +72,7 @@ set(INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${PYTHON_INCLUDE_DIRS}"
     "${CMAKE_CURRENT_SOURCE_DIR}/../pyxCore/pyxcore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../igeCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/../igeVMath"
     "${CMAKE_CURRENT_SOURCE_DIR}/../igeLibs/json/include"
 )
@@ -114,7 +115,7 @@ add_library(${TARGET_NAME} ${APP_STYLE} ${SRC})
 target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDES})
 
 # Python37
-set (DEFINITIONS Py_NO_ENABLE_SHARED)
+set (DEFINITIONS Py_NO_ENABLE_SHARED USE_IGE)
 if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     set(DEFINITIONS ${DEFINITIONS} _AMD64_)
 else()

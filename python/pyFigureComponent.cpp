@@ -1,4 +1,5 @@
 #include "python/pyFigureComponent.h"
+#include "python/pyFigureComponent_doc_en.h"
 
 #include "components/FigureComponent.h"
 

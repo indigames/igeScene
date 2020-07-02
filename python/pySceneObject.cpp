@@ -1,5 +1,6 @@
 #include "python/pySceneObject.h"
 #include "python/pySceneObject_doc_en.h"
+
 #include "python/pyScene.h"
 
 #include "python/pyComponent.h"
@@ -78,7 +79,7 @@ namespace ige::scene
         if(self->sceneObject->hasParent())
         {
             auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = std::make_shared<SceneObject>(self->sceneObject->getParent());
+            obj->sceneObject = SceneManager::getInstance()->getCurrentScene()->findObjectById(self->sceneObject->getParent()->getId());
             return (PyObject*)obj;
         }
         Py_RETURN_NONE;
@@ -230,7 +231,7 @@ namespace ige::scene
                 }
                 else if(type == "CameraComponent")
                 {
-                    auto comp = self->sceneObject->addComponent<CameraComponent>();                    
+                    auto comp = self->sceneObject->addComponent<CameraComponent>(std::string("camera##") + std::to_string(self->sceneObject->getId()));
                     if(comp)
                     {
                         auto *compObj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
@@ -241,7 +242,7 @@ namespace ige::scene
                 }
                 else if(type == "EnvironmentComponent")
                 {
-                    auto comp = self->sceneObject->addComponent<EnvironmentComponent>();
+                    auto comp = self->sceneObject->addComponent<EnvironmentComponent>(std::string("environment##") + std::to_string(self->sceneObject->getId()));
                     if(comp)
                     {
                         auto *compObj = PyObject_New(PyObject_EnvironmentComponent, &PyTypeObject_EnvironmentComponent);
@@ -433,7 +434,7 @@ namespace ige::scene
         self->sceneObject->removeAllComponents();
         Py_RETURN_TRUE;
     }
-    
+
     // Methods
     PyMethodDef SceneObject_methods[] = {
         { "addChild", (PyCFunction)SceneObject_addChild, METH_VARARGS, SceneObject_addChild_doc },

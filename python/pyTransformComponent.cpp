@@ -1,4 +1,5 @@
 #include "python/pyTransformComponent.h"
+#include "python/pyTransformComponent_doc_en.h"
 
 #include "components/TransformComponent.h"
 
@@ -167,18 +168,20 @@ namespace ige::scene
         return (PyObject*)m4obj;
     }
 
+    // Variable definition
     PyGetSetDef TransformComponent_getsets[] = {
         { "position", (getter)TransformComponent_getPosition, (setter)TransformComponent_setPosition, TransformComponent_position_doc, NULL },
         { "rotation", (getter)TransformComponent_getRotation, (setter)TransformComponent_setRotation, TransformComponent_rotation_doc, NULL },
         { "scale", (getter)TransformComponent_getScale, (setter)TransformComponent_setScale, TransformComponent_scale_doc, NULL },
         { "localMatrix", (getter)TransformComponent_getLocalMatrix, NULL, TransformComponent_localMatrix_doc, NULL },
-        { "worldPosition", (getter)TransformComponent_getWorldPosition, (setter)TransformComponent_setWorldPosition, TransformComponent_worldPosition_doc, NULL },        
-        { "worldRotation", (getter)TransformComponent_getWorldRotation, (setter)TransformComponent_setWorldRotation, TransformComponent_worldRotation_doc, NULL },        
-        { "worldScale", (getter)TransformComponent_getWorldScale, (setter)TransformComponent_setWorldScale, TransformComponent_worldScale_doc, NULL },        
-        { "worldMatrix", (getter)TransformComponent_getWorldMatrix, NULL, TransformComponent_worldMatrix_doc, NULL },        
+        { "worldPosition", (getter)TransformComponent_getWorldPosition, (setter)TransformComponent_setWorldPosition, TransformComponent_worldPosition_doc, NULL },
+        { "worldRotation", (getter)TransformComponent_getWorldRotation, (setter)TransformComponent_setWorldRotation, TransformComponent_worldRotation_doc, NULL },
+        { "worldScale", (getter)TransformComponent_getWorldScale, (setter)TransformComponent_setWorldScale, TransformComponent_worldScale_doc, NULL },
+        { "worldMatrix", (getter)TransformComponent_getWorldMatrix, NULL, TransformComponent_worldMatrix_doc, NULL },
         { NULL, NULL }
     };
 
+    // Type definition
     PyTypeObject PyTypeObject_TransformComponent = {
         PyVarObject_HEAD_INIT(NULL, 0)
         "igeScene.TransformComponent",               /* tp_name */

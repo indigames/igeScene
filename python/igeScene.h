@@ -2,11 +2,8 @@
 
 #include <Python.h>
 
-namespace ige::scene
-{
-    //! Module initialization
-    PyMODINIT_FUNC _PyInit_igeScene();
+//! Module initialization
+PyMODINIT_FUNC _PyInit_igeScene();
 
-    //! Functions implementation
-    static PyObject* igeScene_getVersion(PyObject* self);
-}
+//! Functions implementation
+static PyObject* igeScene_getVersion(PyObject* self);
