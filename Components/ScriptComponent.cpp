@@ -1,3 +1,5 @@
+#include <Python.h>
+
 #include "components/ScriptComponent.h"
 
 #include <filesystem>

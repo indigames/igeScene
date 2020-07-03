@@ -1,9 +1,10 @@
 #pragma once
 
-#include <Python.h>
-
 #include "components/Component.h"
 #include "event/Event.h"
+
+//! PyObject declaration
+struct _object;
 
 namespace ige::scene
 {
@@ -68,6 +69,6 @@ namespace ige::scene
         Event<const std::string&> m_onScriptChangedEvent;
 
         //! PyObject module
-        PyObject* m_pModule;
+        _object* m_pModule;
     };
 }

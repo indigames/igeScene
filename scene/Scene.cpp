@@ -40,15 +40,15 @@ namespace ige::scene
         envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
 
         auto tree = createObject("tree", m_root);
-        tree->getComponent<TransformComponent>()->setPosition(Vec3(-5.f, 0.f, 0.f));
+        tree->getComponent<TransformComponent>()->setPosition(Vec3(-5.f, 0.f, -10.f));
         tree->addComponent<FigureComponent>("Trees_Object");
 
         auto tree2 = createObject("tree2", tree);
-        tree2->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, 0.f));
+        tree2->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
         tree2->addComponent<FigureComponent>("Trees_Object");
 
         auto tree3 = createObject("tree3", tree2);
-        tree3->getComponent<TransformComponent>()->setPosition(Vec3(2.f, 0.f, 0.f));
+        tree3->getComponent<TransformComponent>()->setPosition(Vec3(8.f, 0.f, -10.f));
         tree3->addComponent<FigureComponent>("Trees_Object");
 
         return true;

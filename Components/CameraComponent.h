@@ -48,14 +48,14 @@ namespace ige::scene
         float getFarPlane() const { return m_camera->GetFarPlane(); }
         void setFarPlane(float val) { m_camera->SetFarPlane(val); }
 
-        //! Pan (Y-axis)
-        float getPan() const { return m_camera->GetPan(); }
-        void setPan(float pan);
-        
         //! Tilt (X-axis)
         float getTilt() const { return m_camera->GetTilt(); }
         void setTilt(float tilt);
 
+        //! Pan (Y-axis)
+        float getPan() const { return m_camera->GetPan(); }
+        void setPan(float pan);
+        
         //! Roll (Z-axis)
         float getRoll() const { return m_camera->GetRoll(); }
         void setRoll(float roll);
