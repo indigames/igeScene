@@ -47,6 +47,15 @@ namespace ige::scene
         tree2->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
         tree2->addComponent<FigureComponent>("Trees_Object");
 
+       /// Just to test performance
+        //for (int i = 0; i < 10000; i++)
+        //{
+        //    auto newTree = createObject(std::string("tree") + std::to_string(i), tree2);
+        //    newTree->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
+        //    newTree->addComponent<FigureComponent>("Trees_Object");
+        //}
+       ///
+
         auto tree3 = createObject("tree3", tree2);
         tree3->getComponent<TransformComponent>()->setPosition(Vec3(8.f, 0.f, -10.f));
         tree3->addComponent<FigureComponent>("Trees_Object");
@@ -55,7 +64,7 @@ namespace ige::scene
     }
 
     void Scene::update(float dt)
-    {        
+    {
         m_root->onUpdate(dt);
         m_showcase->Update(dt);
     }

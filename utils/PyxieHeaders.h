@@ -12,6 +12,7 @@
 #include <pyxieResourceCreator.h>
 #include <pyxieResourceManager.h>
 #include <input/pyxieInputHandler.h>
+#include <input/pyxieTouch.h>
 #include <pyxieFios.h>
 #include <pyxieSystemInfo.h>
 #include <pyxieApplication.h>
@@ -28,6 +29,7 @@ using RenderTarget = pyxie::pyxieRenderTarget;
 using ResourceCreator = pyxie::pyxieResourceCreator;
 using ResourceManager = pyxie::pyxieResourceManager;
 using InputHandler = pyxie::InputHandler;
+using Touch = pyxie::TouchDevice;
 using Application = pyxie::pyxieApplication;
 using SystemInfo = pyxie::pyxieSystemInfo;
 using FileIO = pyxie::pyxieFios;

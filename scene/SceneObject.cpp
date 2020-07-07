@@ -12,10 +12,11 @@ namespace ige::scene
     Event<SceneObject&> SceneObject::s_attachedEvent;
     Event<SceneObject&> SceneObject::s_detachedEvent;
     Event<SceneObject&> SceneObject::s_nameChangedEvent;
+    Event<SceneObject&> SceneObject::s_selectedEvent;
 
     //! Constructor
     SceneObject::SceneObject(uint64_t id, std::string name, SceneObject* parent)
-        : m_id(id), m_name(name), m_parent(parent), m_isActive(true)
+        : m_id(id), m_name(name), m_parent(parent), m_isActive(true), m_isSelected(false)
     {
         getCreatedEvent().invoke(*this);
     }
@@ -194,7 +195,7 @@ namespace ige::scene
 
     //! Update function
     void SceneObject::onUpdate(float dt)
-    {        
+    {
         if (isActive())
         {
             for (auto comp : m_components)
@@ -270,6 +271,25 @@ namespace ige::scene
     bool SceneObject::isActive() const
     {
         return m_isActive;
+    }
+
+    //! Enable or disable the actor
+    void SceneObject::setSelected(bool select)
+    {
+        if(m_isSelected != select)
+        {
+            m_isSelected = select;
+            if(m_isSelected)
+            {
+                getSelectedEvent().invoke(*this);
+            }
+        }
+    }
+
+    //! Check active
+    bool SceneObject::isSelected() const
+    {
+        return m_isSelected;
     }
 
     //! Serialize

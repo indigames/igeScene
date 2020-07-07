@@ -10,6 +10,9 @@ using json = nlohmann::json;
 #include "event/Event.h"
 #include "components/Component.h"
 
+#include "utils/PyxieHeaders.h"
+using namespace pyxie;
+
 namespace ige::scene
 {
     /**
@@ -110,6 +113,12 @@ namespace ige::scene
 
         //! Check active
         bool isActive() const;
+        
+        // Set selected
+        void setSelected(bool select);
+
+        //! Check selected
+        bool isSelected() const;
 
         //! Serialize
         void to_json(json& j, const SceneObject& obj);
@@ -127,6 +136,7 @@ namespace ige::scene
         static Event<SceneObject&>& getAttachedEvent() { return s_attachedEvent; }
         static Event<SceneObject&>& getDetachedEvent() { return s_detachedEvent; }
         static Event<SceneObject&>& getNameChangedEvent() { return s_nameChangedEvent; }
+        static Event<SceneObject&>& getSelectedEvent() { return s_selectedEvent; }
 
     protected:
         //! Node ID
@@ -137,6 +147,9 @@ namespace ige::scene
 
         //! Active/Inactive
         bool m_isActive;
+
+        //! Selected/Unselected
+        bool m_isSelected;
 
         //! Pointer to parent, use weak_ptr avoid dangling issue
         SceneObject* m_parent;
@@ -157,6 +170,7 @@ namespace ige::scene
         static Event<SceneObject&> s_attachedEvent;
         static Event<SceneObject&> s_detachedEvent;
         static Event<SceneObject&> s_nameChangedEvent;
+        static Event<SceneObject&> s_selectedEvent;
     };
 
     //! Get component by type

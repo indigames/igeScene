@@ -1,5 +1,7 @@
 #include "components/TransformComponent.h"
+#include "components/FigureComponent.h"
 #include "scene/SceneObject.h"
+#include "utils/RayOBBChecker.h"
 
 namespace ige::scene {
     TransformComponent::TransformComponent(std::shared_ptr<SceneObject> owner, const Vec3& pos, const Quat& rot, const Vec3& scale)
@@ -50,6 +52,28 @@ namespace ige::scene {
         {
             updateWorldMatrix();
             m_bWorldDirty = false;
+        }
+
+        if(RayOBBChecker::isChecking())
+        {
+            auto figureComp = getOwner()->getComponent<FigureComponent>();
+            if (figureComp)
+            {
+                auto figure = figureComp->getFigure();
+                if (figure)
+                {
+                    float distance;
+                    Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
+                    figure->CalcAABBox(0, aabbMin.P(), aabbMax.P(), 0);
+                    bool intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
+                    getOwner()->setSelected(intersected);
+                }
+            }
+            else
+            {
+                // bool intersected = RayOBBChecker::checkIntersect({ -1.0f, -1.0f, -1.0f }, { 1.0f,  1.0f,  1.0f }, m_worldMatrix, distance);
+                // getOwner()->setSelected(intersected);
+            }
         }
     }
 
