@@ -67,6 +67,12 @@ namespace ige::scene {
                     figure->CalcAABBox(0, aabbMin.P(), aabbMax.P(), 0);
                     bool intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
                     getOwner()->setSelected(intersected);
+
+                    if (intersected)
+                    {
+                        // Scene object found, no more checking
+                        RayOBBChecker::setChecking(false);
+                    }
                 }
             }
             else

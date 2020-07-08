@@ -10,17 +10,17 @@ namespace ige::scene
     {
     public:
         static void screenPosToWorldRay(
-            int x, int y,                       // Screen Position, in pixels, from bottom-left corner of the window
+            int x, int y,                       // Screen space position, in pixels
             int screenWidth, int screenHeight,  // Window size, in pixels
-            const Mat4& viewMatrix,             // Camera position and orientation
-            const Mat4& projectionMatrix        // Camera parameters (ratio, field of view, near and far planes)            
+            const Mat4& viewInversedMatrix,     // View inversed matrix
+            const Mat4& projectionMatrix        // Projection matrix
         );
 
         static bool checkIntersect(            
-            const Vec3& aabb_min,               // Minimum X,Y,Z coords of the mesh when not transformed at all.
-            const Vec3& aabb_max,               // Maximum X,Y,Z coords. Often aabb_min*-1 if your mesh is centered, but it's not always the case.
-            const Mat4& modelMatrix,            // Transformation applied to the mesh (which will thus be also applied to its bounding box)
-            float& intersection_distance        // Output : distance between ray_origin and the intersection with the OBB
+            const Vec3& aabb_min,               // Min AABB coords
+            const Vec3& aabb_max,               // Maximum AABB coords
+            const Mat4& modelMatrix,            // World transformation matrix
+            float& intersection_distance        // Output: intersection distance
         );
         
         static void setChecking(bool checking) { g_isChecking = checking; }
