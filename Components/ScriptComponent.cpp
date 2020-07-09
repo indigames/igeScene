@@ -211,7 +211,8 @@ namespace ige::scene
     void ScriptComponent::setPath(const std::string& path)
     {
         auto scriptName = fs::path(path).stem().string();
-        if (scriptName != "" && m_path != scriptName)
+
+        if (!scriptName.empty() && strcmp(m_path.c_str(), scriptName.c_str()) != 0)
         {
             m_path = scriptName;
             m_bPathDirty = true;

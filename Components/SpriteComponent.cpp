@@ -13,7 +13,7 @@ namespace ige::scene
     SpriteComponent::SpriteComponent(std::shared_ptr<SceneObject> owner, const Vec2& size, const std::string& path)
         : Component(owner), m_figure(nullptr), m_size(size), m_path(path)
     {
-        if (m_path != "")
+        if (!m_path.empty())
         {
             m_figure = GraphicsHelper::getInstance()->createSprite(m_size, m_path.c_str());
             m_figure->WaitInitialize();
@@ -63,7 +63,7 @@ namespace ige::scene
         auto fsPath = fs::path(path);
         auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
 
-        if (m_path != relPath)
+        if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
         {
             m_path = relPath;
 
