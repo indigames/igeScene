@@ -12,21 +12,21 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name, Figure* parentFigure = nullptr);
+        CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name);
 
         //! Destructor
         virtual ~CameraComponent();
 
         //! Get component name
-        std::string getName() const override { return "CameraComponent"; }
+        virtual std::string getName() const override { return "CameraComponent"; }
 
         //! Position
         void setPosition(const Vec3& pos) { m_camera->SetCameraPosition(pos);  }
-        const Vec3& getPosition() const { return m_camera->GetCameraPosition(); }
+        Vec3 getPosition() const { return m_camera->GetCameraPosition(); }
 
         //! Rotation
         void setRotation(const Quat& rot) { m_camera->SetCameraRotation(rot);  }
-        const Quat& getRotation() const { return m_camera->GetCameraRotation(); }
+        Quat getRotation() const { return m_camera->GetCameraRotation(); }
 
         //! Aspect ratio
         float getAspectRatio() const { return m_camera->GetAspectRate(); }
@@ -34,7 +34,7 @@ namespace ige::scene
 
         //! Width/Height based
         inline void setWidthBase(bool enable) { m_camera->SetWidthBase(enable); }
-        inline bool isWidthBase() { return m_camera->IsWidthBase(); }
+        inline bool isWidthBase() const { return m_camera->IsWidthBase(); }
 
         //! FOV
         float getFieldOfView() const { return m_camera->GetFieldOfView(); }
@@ -67,11 +67,11 @@ namespace ige::scene
 
         //! Lock on target
         void lockOnTarget(bool lockOn = true);
-        bool getLockOn() { return m_camera->GetLockon(); }
+        bool getLockOn() const { return m_camera->GetLockon(); }
 
         //! Ortho Graphic
         void setOrthoProjection(bool ortho) { m_camera->SetOrthographicProjection(ortho);}
-        bool isOrthoProjection() { return m_camera->IsOrthographicProjection(); }
+        bool isOrthoProjection() const { return m_camera->IsOrthographicProjection(); }
 
         //! Ortho width
         float getOrthoWidth() const { return m_camera->GetOrthoWidth(); }
@@ -91,11 +91,11 @@ namespace ige::scene
         Mat4& getScreenMatrix(Mat4& out) { return m_camera->GetScreenMatrix(out); }
 
         //! Screen scale
-        void setScreenScale(Vec2& v) { m_camera->SetScreenScale(v);}
+        void setScreenScale(const Vec2& v) { m_camera->SetScreenScale(v);}
         const Vec2&	getScreenScale() const { return m_camera->GetScreenScale(); }
 
         //! Screen offset
-        void setScreenOffset(Vec2& v) { m_camera->SetScreenOffset(v); }
+        void setScreenOffset(const Vec2& v) { m_camera->SetScreenOffset(v); }
         const Vec2&	getScreenOffset() const { return m_camera->GetScreenOffset(); }
 
         //! Screen radian
@@ -104,7 +104,7 @@ namespace ige::scene
 
         //! Up-axis
         void setUpAxis(int ax) { m_camera->SetUpAxis(ax); }
-        int getUpAxis() { return m_camera->GetUpAxis(); }
+        int getUpAxis() const { return m_camera->GetUpAxis(); }
 
         //! Update
         virtual void onUpdate(float dt);
@@ -113,10 +113,10 @@ namespace ige::scene
         virtual void onRender();
 
         //! Serialize
-        void to_json(json& j, const Component& obj);
+        virtual void to_json(json& j) const override;
 
         //! Deserialize 
-        void from_json(const json& j, Component& obj);
+        virtual void from_json(const json& j) override;
 
         //! Get camera
         Camera* getCamera() { return m_camera; }
@@ -124,5 +124,8 @@ namespace ige::scene
     protected:
         //! Internal camera
         Camera* m_camera;
+
+        //! Camera name
+        std::string m_name;
     };
 }

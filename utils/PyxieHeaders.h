@@ -36,3 +36,5 @@ using FileIO = pyxie::pyxieFios;
 using Time = pyxie::pyxieTime;
 using ShaderDescriptor = pyxie::pyxieShaderDescriptor;
 using Drawable = pyxie::pyxieDrawable;
+
+using namespace pyxie;

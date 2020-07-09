@@ -83,14 +83,16 @@ namespace ige::scene
     }
 
     //! Serialize
-    void FigureComponent::to_json(json& j, const Component& obj)
+    void FigureComponent::to_json(json& j) const
     {
-
+        j = json {
+            {"path", m_path}
+        };
     }
 
     //! Deserialize
-    void FigureComponent::from_json(const json& j, Component& obj)
+    void FigureComponent::from_json(const json& j)
     {
-
+        setPath(j.at("path"));
     }
 }

@@ -4,8 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "json/json.hpp"
-using json = nlohmann::json;
+#include "utils/Serialize.h"
 
 namespace ige::scene
 {
@@ -56,13 +55,25 @@ namespace ige::scene
         virtual void onDestroy();
 
         //! Serialize
-        void to_json(json& j, const Component& obj);
+        virtual void to_json(json& j) const = 0;
 
         //! Deserialize 
-        void from_json(const json& j, Component& obj);
+        virtual void from_json(const json& j) = 0;
+        
+        //! Serialize
+        friend void to_json(json& j, const Component& obj);
+
+        //! Deserialize 
+        friend void from_json(const json& j, Component& obj);
 
     protected:
         //! Reference to owner object
         std::weak_ptr<SceneObject> m_owner;
     };
+
+    //! Serialize
+    void to_json(json& j, const Component& obj);
+
+    //! Deserialize 
+    void from_json(const json& j, Component& obj);
 }

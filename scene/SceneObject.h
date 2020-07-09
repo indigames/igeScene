@@ -4,9 +4,6 @@
 #include <vector>
 #include <string>
 
-#include "json/json.hpp"
-using json = nlohmann::json;
-
 #include "event/Event.h"
 #include "components/Component.h"
 
@@ -31,7 +28,7 @@ namespace ige::scene
         inline uint64_t getId() const { return m_id; }
 
         //! Get Name
-        inline const std::string& getName() { return m_name; }
+        inline const std::string& getName() const { return m_name; }
 
         //! Set Name
         inline void setName(const std::string& name) 
@@ -119,16 +116,10 @@ namespace ige::scene
 
         //! Check selected
         bool isSelected() const;
-
-        //! Serialize
-        void to_json(json& j, const SceneObject& obj);
-
-        //! Deserialize 
-        void from_json(const json& j, SceneObject& obj);
         
         //! Internal event
-        Event<std::shared_ptr<Component>>& getComponentAddedEvent() { return m_componentAddedEvent; }
-        Event<std::shared_ptr<Component>>& getComponentRemovedEvent() { return m_componentRemovedEvent; }
+        static Event<SceneObject&, std::shared_ptr<Component>>& getComponentAddedEvent() { return m_componentAddedEvent; }
+        static Event<SceneObject&, std::shared_ptr<Component>>& getComponentRemovedEvent() { return m_componentRemovedEvent; }
         
         //! Public events: Created, Destroyed, Attached, Detached
         static Event<SceneObject&>& getCreatedEvent() { return s_createdEvent; }
@@ -137,6 +128,12 @@ namespace ige::scene
         static Event<SceneObject&>& getDetachedEvent() { return s_detachedEvent; }
         static Event<SceneObject&>& getNameChangedEvent() { return s_nameChangedEvent; }
         static Event<SceneObject&>& getSelectedEvent() { return s_selectedEvent; }
+
+        //! Serialize
+        void to_json(json& j);
+
+        //! Deserialize 
+        void from_json(const json& j);
 
     protected:
         //! Node ID
@@ -161,8 +158,8 @@ namespace ige::scene
         std::vector<std::shared_ptr<Component>> m_components;
 
         //! Internal events
-        Event<std::shared_ptr<Component>> m_componentAddedEvent;
-        Event<std::shared_ptr<Component>> m_componentRemovedEvent;
+        static Event<SceneObject&, std::shared_ptr<Component>> m_componentAddedEvent;
+        static Event<SceneObject&, std::shared_ptr<Component>> m_componentRemovedEvent;
 
         //! Public events
         static Event<SceneObject&> s_destroyedEvent;
@@ -197,7 +194,7 @@ namespace ige::scene
         if (found) return found;
         auto instance = std::make_shared<T>(shared_from_this(), args...);
         m_components.push_back(instance);
-        m_componentAddedEvent.invoke(instance);
+        m_componentAddedEvent.invoke(*this, instance);
         return instance;
     }
 
@@ -212,7 +209,7 @@ namespace ige::scene
             result = std::dynamic_pointer_cast<T>(*it);
             if (result)
             {
-                m_componentRemovedEvent.invoke(result);
+                m_componentRemovedEvent.invoke(*this, result);
                 m_components.erase(it);
                 return true;
             }

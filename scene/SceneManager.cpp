@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <fstream>
 
 #include "scene/SceneManager.h"
 #include "scene/SceneObject.h"
@@ -8,6 +9,7 @@
 #include "components/CameraComponent.h"
 #include "components/TransformComponent.h"
 #include "components/EnvironmentComponent.h"
+#include "components/FigureComponent.h"
 
 #include <Python.h>
 
@@ -88,7 +90,30 @@ namespace ige::scene
     std::shared_ptr<Scene> SceneManager::createEmptyScene()
     {
         auto scene = std::make_shared<Scene>("EmptyScene");
+        scene->initialize();
         m_scenes.push_back(scene);
+
+        auto tree = scene->createObject("tree", scene->getRoot());
+        tree->getComponent<TransformComponent>()->setPosition(Vec3(-5.f, 0.f, -10.f));
+        tree->addComponent<FigureComponent>("Trees_Object");
+
+        auto tree2 = scene->createObject("tree2", tree);
+        tree2->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
+        tree2->addComponent<FigureComponent>("Trees_Object");
+
+        /// Just to test performance
+         //for (int i = 0; i < 10000; i++)
+         //{
+         //    auto newTree = scene->createObject(std::string("tree") + std::to_string(i), tree2);
+         //    newTree->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
+         //    newTree->addComponent<FigureComponent>("Trees_Object");
+         //}
+        ///
+
+        auto tree3 = scene->createObject("tree3", tree2);
+        tree3->getComponent<TransformComponent>()->setPosition(Vec3(8.f, 0.f, -10.f));
+        tree3->addComponent<FigureComponent>("Trees_Object");
+
         return scene;
     }
 
@@ -113,16 +138,29 @@ namespace ige::scene
         m_currScene = scene;
     }
 
-    bool SceneManager::loadScene(const std::string& path)
+    std::shared_ptr<Scene> SceneManager::loadScene(const std::string& path)
     {
-        // TODO: implement this
+        json jScene;
+        std::ifstream file(path);
+        file >> jScene;
+        auto s = jScene.dump();
 
-        return false;
+        auto scene = std::make_shared<Scene>("EmptyScene");
+        scene->from_json(jScene);
+        m_scenes.push_back(scene);
+        return scene;
     }
 
     bool SceneManager::saveScene(const std::string& path)
     {
-        // TODO: implement this
+        if (m_currScene)
+        {
+            json jScene;
+            m_currScene->to_json(jScene);
+            std::ofstream file(path);
+            file << jScene;
+            return true;
+        }
         return false;
     }
 

@@ -59,17 +59,17 @@ namespace ige::scene
         //! Find object in hierarchy by name
         virtual std::shared_ptr<SceneObject> findObjectByName(std::string name) const;
 
-        //! Load scene from IO
-        bool loadScene(const std::string& scenePath);
+        //! Serialize
+        virtual void to_json(json& j) const;
 
-        //! Save scene
-        bool saveScene(const std::string& scenePath);
-
-        //! Component added event
-        void onComponentAdded(std::shared_ptr<Component> component);
+        //! Deserialize 
+        virtual void from_json(const json& j);
 
         //! Component added event
-        void onComponentRemoved(std::shared_ptr<Component> component);
+        void onComponentAdded(SceneObject& obj, std::shared_ptr<Component> component);
+
+        //! Component added event
+        void onComponentRemoved(SceneObject& obj, std::shared_ptr<Component> component);
 
         //! Get root of scene nodes tree
         std::shared_ptr<SceneObject>& getRoot() { return m_root; };

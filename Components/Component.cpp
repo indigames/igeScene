@@ -43,8 +43,14 @@ namespace ige::scene
     void Component::onDestroy() {}
 
     //! Serialize
-    void Component::to_json(json& j, const Component& obj) {}
+    void to_json(json& j, const Component& obj)
+    {
+        obj.to_json(j);
+    }
 
     //! Deserialize 
-    void Component::from_json(const json& j, Component& obj) {}
+    void from_json(const json& j, Component& obj)
+    {
+        obj.from_json(j);
+    }
 }

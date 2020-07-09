@@ -5,15 +5,16 @@
 namespace ige::scene
 {
     //! Constructor
-    CameraComponent::CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name, Figure* parentFigure)
-        : Component(owner)
+    CameraComponent::CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name)
+        : Component(owner), m_name(name)
     {
-        m_camera = ResourceCreator::Instance().NewCamera(name.c_str(), parentFigure);
+        m_camera = ResourceCreator::Instance().NewCamera(name.c_str(), nullptr);
     }
 
     //! Destructor
     CameraComponent::~CameraComponent() 
     {
+        m_camera->DecReference();
         m_camera = nullptr;
     }
     
@@ -154,14 +155,61 @@ namespace ige::scene
     }
 
     //! Serialize
-    void CameraComponent::to_json(json& j, const Component& obj)
+    void CameraComponent::to_json(json& j) const
     {
-
+        j = json {
+            {"name", m_name},
+            {"pos", getPosition()},
+            {"rot", getRotation()},
+            {"aspect", getAspectRatio()},
+            {"wBase", isWidthBase()},
+            {"fov", getFieldOfView()},
+            {"near", getNearPlane()},
+            {"far", getFarPlane()},
+            {"tilt", getTilt()},
+            {"pan", getPan()},
+            {"roll", getRoll()},
+            {"lock", getLockOn()},
+            {"target", getTarget()},
+            {"ortho", isOrthoProjection()},
+            {"orthoW", getOrthoWidth()},
+            {"orthoH", getOrthoHeight()},
+            {"scrScale", getScreenScale()},
+            {"scrOff", getScreenOffset()},
+            {"scrRad", getScreenRadian()},
+            {"up", getUpAxis()},
+        };
     }
 
     //! Deserialize
-    void CameraComponent::from_json(const json& j, Component& obj)
+    void CameraComponent::from_json(const json& j)
     {
+        if(m_camera)
+        {
+            m_camera->DecReference();
+            m_camera = nullptr;
+        }
+        j.at("name").get_to(m_name);
+        m_camera = ResourceCreator::Instance().NewCamera(m_name.c_str(), nullptr);
 
+        setPosition(j.at("pos"));
+        setRotation(j.at("rot"));
+        setAspectRatio(j.at("aspect"));
+        setWidthBase(j.at("wBase"));
+        setFieldOfView(j.at("fov"));
+        setNearPlane(j.at("near"));
+        setFarPlane(j.at("far"));
+        setTilt(j.at("tilt"));
+        setPan(j.at("pan"));
+        setRoll(j.at("roll"));
+        lockOnTarget(j.at("lock"));
+        setTarget(j.at("target"));
+        setOrthoProjection(j.at("ortho"));
+        setOrthoWidth(j.at("orthoW"));
+        setOrthoHeight(j.at("orthoH"));
+        setScreenScale(j.at("scrScale"));
+        setScreenOffset(j.at("scrOff"));
+        setScreenRadian(j.at("scrRad"));
+        setUpAxis(j.at("up"));
     }
 }

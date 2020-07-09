@@ -28,10 +28,10 @@ namespace ige::scene
         void onRender();
 
         //! Serialize
-        void to_json(json& j, const Component& obj);
+        virtual void to_json(json& j) const override;
 
         //! Deserialize 
-        void from_json(const json& j, Component& obj);
+        virtual void from_json(const json& j) override;
 
         //! Get associated figure
         EditableFigure* getFigure() { return m_figure; }

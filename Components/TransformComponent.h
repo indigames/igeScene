@@ -113,6 +113,12 @@ namespace ige::scene {
         //! Update
         virtual void onUpdate(float dt) override;
 
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize 
+        virtual void from_json(const json& j);
+
     protected:
         //! Update local transform matrix
         virtual void updateLocalMatrix();

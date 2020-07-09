@@ -38,11 +38,8 @@ namespace ige::scene
         //! Create empty scene
         std::shared_ptr<Scene> createEmptyScene();
 
-        //! Load scene from IO
-        bool loadScene(const std::string& scenePath);
-
-        //! Unload scene
-        bool unloadScene(const std::string& name) { return false; }
+        //! Load scene
+        std::shared_ptr<Scene> loadScene(const std::string& scenePath);
 
         //! Save scene
         bool saveScene(const std::string& scenePath);

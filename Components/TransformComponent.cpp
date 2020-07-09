@@ -367,4 +367,28 @@ namespace ige::scene {
         // Update new transform
         onUpdate(0.f);
     }
+
+    //! Serialize
+    void TransformComponent::to_json(json& j) const
+    {
+        j = json {
+            {"pos", m_localPosition},
+            {"rot", m_localRotation},
+            {"scale", m_localScale},
+        };
+    }
+
+    //! Deserialize
+    void TransformComponent::from_json(const json& j)
+    {
+        if (hasOwner())
+        {
+            if(getOwner()->hasParent())
+                setParent(getOwner()->getParent()->getComponent<TransformComponent>().get());
+        }
+
+        setPosition(j.at("pos"));
+        setRotation(j.at("rot"));
+        setScale(j.at("scale"));
+    }
 }

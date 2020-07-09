@@ -107,14 +107,18 @@ namespace ige::scene
     }
 
     //! Serialize
-    void SpriteComponent::to_json(json& j, const Component& obj)
+    void SpriteComponent::to_json(json& j) const
     {
-
+        j = json {
+            {"path", m_path},
+            {"size", m_size}
+        };
     }
 
     //! Deserialize
-    void SpriteComponent::from_json(const json& j, Component& obj)
+    void SpriteComponent::from_json(const json& j)
     {
-
+        j.at("size").get_to(m_size);
+        setPath(j.at("path"));
     }
 }

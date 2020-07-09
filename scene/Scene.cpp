@@ -20,15 +20,22 @@ namespace ige::scene
     Scene::Scene(const std::string& name)
         : m_name(name)
     {
-        m_showcase = ResourceCreator::Instance().NewShowcase("Scene_showcase");
+        m_showcase = ResourceCreator::Instance().NewShowcase((name + "_showcase").c_str());
         m_showcase->Initialize();
         m_showcase->WaitInitialize();
-        initialize();
+
+        SceneObject::getComponentAddedEvent().addListener(std::bind(&Scene::onComponentAdded, this, std::placeholders::_1, std::placeholders::_2));
+        SceneObject::getComponentRemovedEvent().addListener(std::bind(&Scene::onComponentRemoved, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     Scene::~Scene()
     {
+        SceneObject::getComponentAddedEvent().removeAllListeners();
+        SceneObject::getComponentRemovedEvent().removeAllListeners();
+
         m_root = nullptr;
+        if(m_showcase)
+            m_showcase->DecReference();
         m_showcase = nullptr;
     }
     
@@ -38,28 +45,6 @@ namespace ige::scene
         auto envComp = m_root->addComponent<EnvironmentComponent>("environment");
         envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
         envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
-
-        auto tree = createObject("tree", m_root);
-        tree->getComponent<TransformComponent>()->setPosition(Vec3(-5.f, 0.f, -10.f));
-        tree->addComponent<FigureComponent>("Trees_Object");
-
-        auto tree2 = createObject("tree2", tree);
-        tree2->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
-        tree2->addComponent<FigureComponent>("Trees_Object");
-
-       /// Just to test performance
-        //for (int i = 0; i < 10000; i++)
-        //{
-        //    auto newTree = createObject(std::string("tree") + std::to_string(i), tree2);
-        //    newTree->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
-        //    newTree->addComponent<FigureComponent>("Trees_Object");
-        //}
-       ///
-
-        auto tree3 = createObject("tree3", tree2);
-        tree3->getComponent<TransformComponent>()->setPosition(Vec3(8.f, 0.f, -10.f));
-        tree3->addComponent<FigureComponent>("Trees_Object");
-
         return true;
     }
 
@@ -81,9 +66,6 @@ namespace ige::scene
 
     void Scene::render()
     {
-        // auto camera = m_root->findObjectByName("camera");
-        // if(camera != nullptr) camera->getComponent<CameraComponent>()->getCamera()->Render();
-
         m_root->onRender();
         m_showcase->Render();
     }
@@ -91,8 +73,6 @@ namespace ige::scene
     std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent)
     {
         auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get());
-        sceneObject->getComponentAddedEvent().addListener(std::bind(&Scene::onComponentAdded, this, std::placeholders::_1));
-        sceneObject->getComponentRemovedEvent().addListener(std::bind(&Scene::onComponentRemoved, this, std::placeholders::_1));
         if(parent != nullptr) parent->addChild(sceneObject);
         sceneObject->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
         return sceneObject;
@@ -130,7 +110,7 @@ namespace ige::scene
     }
 
     //! Component added event
-    void Scene::onComponentAdded(std::shared_ptr<Component> component)
+    void Scene::onComponentAdded(SceneObject& obj, std::shared_ptr<Component> component)
     {
         if (component->getName() == "FigureComponent")
         {
@@ -169,7 +149,7 @@ namespace ige::scene
     }
 
     //! Component removed event
-    void Scene::onComponentRemoved(std::shared_ptr<Component> component)
+    void Scene::onComponentRemoved(SceneObject& obj, std::shared_ptr<Component> component)
     {
         if (component->getName() == "FigureComponent")
         {
@@ -197,16 +177,25 @@ namespace ige::scene
         }
     }
 
-    bool Scene::loadScene(const std::string& path)
+    //! Serialize
+    void Scene::to_json(json& j) const
     {
-        // TODO: implement this
-        
-        return false;
+        j = json {
+            {"name", m_name}
+        };
+
+        json jRoot;
+        m_root->to_json(jRoot);
+        j["root"] = jRoot;
     }
 
-    bool Scene::saveScene(const std::string& path)
+    //! Deserialize 
+    void Scene::from_json(const json& j)
     {
-        // TODO: implement this
-        return false;
+        j.at("name").get_to(m_name);
+        auto jRoot = j.at("root");
+
+        m_root = std::make_shared<SceneObject>(jRoot.at("id"), jRoot.at("name"));
+        m_root->from_json(jRoot);
     }
 }

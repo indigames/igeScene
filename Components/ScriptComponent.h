@@ -21,7 +21,7 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "ScriptComponent"; }
 
-       //! Awake
+        //! Awake
         virtual void onAwake();
 
         //! Start
@@ -45,10 +45,10 @@ namespace ige::scene
         virtual void onDestroy();
 
         //! Serialize
-        void to_json(json& j, const Component& obj);
+        virtual void to_json(json& j) const override;
 
         //! Deserialize 
-        void from_json(const json& j, Component& obj);
+        virtual void from_json(const json& j);
 
         //! Path
         void setPath(const std::string& path);
