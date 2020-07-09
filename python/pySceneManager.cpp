@@ -45,31 +45,6 @@ namespace ige::scene
         Py_RETURN_FALSE;
     }   
 
-    // Unload scene
-    PyObject* SceneManager_unloadScene(PyObject_SceneManager* self, PyObject* value)
-    {
-        PyObject* obj;
-        if (PyArg_ParseTuple(value, "O", &obj)) {
-            if(obj) {
-                if(PyUnicode_Check(obj))
-                {
-                    const char* name = PyUnicode_AsUTF8(obj);
-                    if(self->sceneManager->unloadScene(name)){
-                        Py_RETURN_TRUE;
-                    }
-                }
-                else if (obj->ob_type == &PyTypeObject_Scene)
-                {
-                    auto sceneObj = (PyObject_Scene*)(obj);
-                    if(self->sceneManager->unloadScene(sceneObj->scene->getName())){
-                        Py_RETURN_TRUE;
-                    }
-                }
-            }
-        }
-        Py_RETURN_FALSE;
-    }
-
     // Get current scene
     PyObject* SceneManager_getCurrentScene(PyObject_SceneManager* self)
     {
@@ -96,7 +71,6 @@ namespace ige::scene
     PyMethodDef SceneManager_methods[] = {
         { "getInstance", (PyCFunction)SceneManager_getInstance, METH_NOARGS | METH_STATIC, SceneManager_getInstance_doc },
         { "loadScene", (PyCFunction)SceneManager_loadScene, METH_VARARGS, SceneManager_loadScene_doc },
-        { "unloadScene", (PyCFunction)SceneManager_unloadScene, METH_VARARGS, SceneManager_unloadScene_doc },
         { NULL, NULL }
     };
 

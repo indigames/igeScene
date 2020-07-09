@@ -301,8 +301,7 @@ namespace ige::scene
     void SceneObject::to_json(json& j)
     {
         j = json {
-            {"id", m_id},
-            {"pid", m_pid},
+            {"id", m_id},            
             {"name", m_name},
             {"active", m_isActive},
             {"select", m_isSelected},
@@ -331,8 +330,7 @@ namespace ige::scene
     //! Deserialize 
     void SceneObject::from_json(const json& j)
     {
-        j.at("id").get_to(m_id);
-        j.at("pid").get_to(m_pid);
+        j.at("id").get_to(m_id);        
         j.at("name").get_to(m_name);
         j.at("active").get_to(m_isActive);
         j.at("select").get_to(m_isSelected);

@@ -31,26 +31,6 @@ PyDoc_STRVAR(SceneManager_loadScene_doc,
 	"        Load fail\n"
 );
 
-// unloadScene
-PyDoc_STRVAR(SceneManager_unloadScene_doc,
-	"Unload a scene.\n"\
-	"\n"\
-	"SceneManager.unloadScene(param: string|Scene)\n"\
-	"\n"\
-    "Parameters:\n"\
-	"----------\n"\
-	"    param: string\n"\
-    "        Name of the scene to unload.\n"\
-    "    param: Scene\n"\
-    "        Instance of the scene to unload.\n"\
-	"Return\n"\
-	"----------\n"\
-	"    True:\n"\
-	"        Unload success\n"\
-    "    False:\n"\
-	"        Unload fail\n"
-);
-
 // currentScene
 PyDoc_STRVAR(SceneManager_currentScene_doc,
 	"Current active scene.\n"\
