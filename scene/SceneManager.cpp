@@ -13,6 +13,9 @@
 
 #include <Python.h>
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
@@ -93,27 +96,27 @@ namespace ige::scene
         scene->initialize();
         m_scenes.push_back(scene);
 
-        auto tree = scene->createObject("tree", scene->getRoot());
-        tree->getComponent<TransformComponent>()->setPosition(Vec3(-5.f, 0.f, -10.f));
-        tree->addComponent<FigureComponent>("Trees_Object");
+        //auto tree = scene->createObject("tree", scene->getRoot());
+        //tree->getComponent<TransformComponent>()->setPosition(Vec3(-5.f, 0.f, -10.f));
+        //tree->addComponent<FigureComponent>("Trees_Object");
 
-        auto tree2 = scene->createObject("tree2", tree);
-        tree2->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
-        tree2->addComponent<FigureComponent>("Trees_Object");
+        //auto tree2 = scene->createObject("tree2", tree);
+        //tree2->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
+        //tree2->addComponent<FigureComponent>("Trees_Object");
 
-        /// Just to test performance
+        //auto tree3 = scene->createObject("tree3", tree2);
+        //tree3->getComponent<TransformComponent>()->setPosition(Vec3(8.f, 0.f, -10.f));
+        //tree3->addComponent<FigureComponent>("Trees_Object");
+
+    /// Just to test performance
          //for (int i = 0; i < 10000; i++)
          //{
          //    auto newTree = scene->createObject(std::string("tree") + std::to_string(i), tree2);
          //    newTree->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
          //    newTree->addComponent<FigureComponent>("Trees_Object");
          //}
-        ///
-
-        auto tree3 = scene->createObject("tree3", tree2);
-        tree3->getComponent<TransformComponent>()->setPosition(Vec3(8.f, 0.f, -10.f));
-        tree3->addComponent<FigureComponent>("Trees_Object");
-
+    ///
+        setCurrentScene(scene);
         return scene;
     }
 
@@ -145,7 +148,7 @@ namespace ige::scene
         file >> jScene;
         auto s = jScene.dump();
 
-        auto scene = std::make_shared<Scene>("EmptyScene");
+        auto scene = std::make_shared<Scene>(jScene.at("name"));
         scene->from_json(jScene);
         m_scenes.push_back(scene);
         return scene;
@@ -157,7 +160,8 @@ namespace ige::scene
         {
             json jScene;
             m_currScene->to_json(jScene);
-            std::ofstream file(path);
+            auto savedPath = fs::path(path).append(m_currScene->getName() + ".json").c_str();
+            std::ofstream file(savedPath);
             file << jScene;
             return true;
         }
