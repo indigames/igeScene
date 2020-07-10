@@ -197,7 +197,8 @@ namespace ige::scene
     void Scene::to_json(json& j) const
     {
         j = json {
-            {"name", m_name}
+            {"name", m_name},
+            {"objId", m_nextObjectID}
         };
 
         json jRoot;
@@ -213,5 +214,6 @@ namespace ige::scene
 
         m_root = std::make_shared<SceneObject>(jRoot.at("id"), jRoot.at("name"));
         m_root->from_json(jRoot);
+        j.at("objId").get_to(m_nextObjectID);
     }
 }
