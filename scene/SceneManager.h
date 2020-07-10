@@ -48,13 +48,11 @@ namespace ige::scene
         std::shared_ptr<Scene>& getCurrentScene() { return m_currScene; }
 
         //! Set current scene
-        void setCurrentScene(const std::string& name);
-        void setCurrentScene(std::shared_ptr<Scene> scene);
+        void setCurrentScene(const std::shared_ptr<Scene>& scene);
 
     protected:
         //! Scene root node
         std::shared_ptr<Scene> m_currScene;
-        std::vector<std::shared_ptr<Scene>> m_scenes;
 
         //! Init in main thread
         bool m_bInitialized = false;

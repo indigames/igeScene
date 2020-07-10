@@ -14,8 +14,12 @@ namespace ige::scene
     //! Destructor
     CameraComponent::~CameraComponent() 
     {
-        m_camera->DecReference();
-        m_camera = nullptr;
+        if (m_camera)
+        {
+            m_camera->DecReference();
+            m_camera = nullptr;
+        }
+        ResourceManager::Instance().DeleteDaemon();
     }
     
     //! Pan (Y-axis)
@@ -184,14 +188,6 @@ namespace ige::scene
     //! Deserialize
     void CameraComponent::from_json(const json& j)
     {
-        if(m_camera)
-        {
-            m_camera->DecReference();
-            m_camera = nullptr;
-        }
-        j.at("name").get_to(m_name);
-        m_camera = ResourceCreator::Instance().NewCamera(m_name.c_str(), nullptr);
-
         setPosition(j.at("pos"));
         setRotation(j.at("rot"));
         setAspectRatio(j.at("aspect"));

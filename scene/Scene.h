@@ -26,6 +26,9 @@ namespace ige::scene
         //! Initialize
         bool initialize();
 
+        //! Clear
+        void clear();
+
         //! Get name
         const std::string& getName() const { return m_name; }
 

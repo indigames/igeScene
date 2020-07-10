@@ -9,15 +9,18 @@ namespace ige::scene
         : Component(owner), m_name(name)
     {
         m_environment = ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), nullptr);
-        m_environment->IncReference();
+        m_environment->WaitBuild();
     }
 
     //! Destructor
     EnvironmentComponent::~EnvironmentComponent() 
     {
         if (m_environment)
+        {
             m_environment->DecReference();
-        m_environment = nullptr;
+            m_environment = nullptr;
+        }
+        ResourceManager::Instance().DeleteDaemon();
     }
     
     //! Update
@@ -93,16 +96,6 @@ namespace ige::scene
     //! Deserialize
     void EnvironmentComponent::from_json(const json& j)
     {
-        if(m_environment)
-        {
-            m_environment->DecReference();
-            m_environment = nullptr;
-        }
-
-        j.at("name").get_to(m_name);
-        m_environment = ResourceCreator::Instance().NewEnvironmentSet(m_name.c_str(), nullptr);
-        m_environment->IncReference();
-        
         setAmbientSkyColor(j.at("ambSkyCol"));
         setAmbientGroundColor(j.at("ambGndCol"));
         setAmbientDirection(j.at("ambGndCol"));

@@ -14,7 +14,7 @@ namespace ige::scene
         if (!m_path.empty())
         {
             m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
-            m_figure->WaitInitialize();
+            m_figure->WaitBuild();
         }
     }
 
@@ -24,8 +24,9 @@ namespace ige::scene
         if (m_figure)
         {
              m_figure->DecReference();
+             m_figure = nullptr;
         }
-        m_figure = nullptr;
+        ResourceManager::Instance().DeleteDaemon();
     }
 
     //! Update
@@ -74,6 +75,7 @@ namespace ige::scene
                 getOnFigureDestroyedEvent().invoke(m_figure);
                 m_figure->DecReference();
                 m_figure = nullptr;
+                ResourceManager::Instance().DeleteDaemon();
             }
 
             m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());

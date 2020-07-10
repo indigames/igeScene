@@ -72,6 +72,7 @@ namespace ige::scene
                 getOnFigureDestroyedEvent().invoke(m_figure);
                 m_figure->DecReference();
                 m_figure = nullptr;
+                ResourceManager::Instance().DeleteDaemon();
             }
 
             if (m_path != "")
@@ -95,6 +96,7 @@ namespace ige::scene
                 getOnFigureDestroyedEvent().invoke(m_figure);
                 m_figure->DecReference();
                 m_figure = nullptr;
+                ResourceManager::Instance().DeleteDaemon();
             }
             
             if (m_path != "")

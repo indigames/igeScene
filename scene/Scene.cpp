@@ -30,13 +30,7 @@ namespace ige::scene
 
     Scene::~Scene()
     {
-        SceneObject::getComponentAddedEvent().removeAllListeners();
-        SceneObject::getComponentRemovedEvent().removeAllListeners();
-
-        m_root = nullptr;
-        if(m_showcase)
-            m_showcase->DecReference();
-        m_showcase = nullptr;
+        clear();
     }
     
     bool Scene::initialize()
@@ -46,6 +40,28 @@ namespace ige::scene
         envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
         envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
         return true;
+    }
+
+    void Scene::clear()
+    {
+        if (m_root)
+        {
+            m_root->removeAllComponents();
+            m_root->removeChildren();
+            m_root = nullptr;
+        }
+
+        SceneObject::getComponentAddedEvent().removeAllListeners();
+        SceneObject::getComponentRemovedEvent().removeAllListeners();
+
+        if (m_showcase)
+        {
+            m_showcase->Clear();
+            m_showcase->DecReference();
+            m_showcase = nullptr;
+        }        
+
+        ResourceManager::Instance().DeleteDaemon();
     }
 
     void Scene::update(float dt)
