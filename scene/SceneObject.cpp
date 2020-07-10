@@ -345,7 +345,7 @@ namespace ige::scene
             else if (key == "CameraComponent") comp = addComponent<CameraComponent>(val.at("name"));
             else if (key == "EnvironmentComponent") comp = addComponent<EnvironmentComponent>(val.at("name"));
             else if (key == "FigureComponent") comp = addComponent<FigureComponent>(val.at("path"));
-            else if (key == "SpriteComponent") comp = addComponent<SpriteComponent>(val.at("path"));
+            else if (key == "SpriteComponent") comp = addComponent<SpriteComponent>(val.at("size"), val.at("path"));
             else if (key == "ScriptComponent") comp = addComponent<ScriptComponent>(val.at("path"));
             if (comp) comp->from_json(val);
         }
