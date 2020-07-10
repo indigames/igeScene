@@ -13,6 +13,9 @@
 
 #include <Python.h>
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
@@ -151,7 +154,15 @@ namespace ige::scene
         {
             json jScene;
             m_currScene->to_json(jScene);
-            std::ofstream file(path);
+
+            auto fsPath = fs::path(path);
+            auto ext = fsPath.extension();
+            if (ext.string() != ".json")
+            {
+                fsPath = fsPath.replace_extension(".json");
+            }
+
+            std::ofstream file(fsPath.string());
             file << jScene;
             return true;
         }
