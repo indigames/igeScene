@@ -49,8 +49,8 @@ namespace ige::scene
         }
         else
         {
-            m_parent = nullptr;
             getDetachedEvent().invoke(*this);
+            m_parent = nullptr;            
         }        
     }
 
