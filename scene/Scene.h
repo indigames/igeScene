@@ -50,6 +50,9 @@ namespace ige::scene
         //! Create scene object
         virtual std::shared_ptr<SceneObject> createObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
 
+        //! Create GUI object
+        virtual std::shared_ptr<SceneObject> createGUIObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
+
         //! Remove scene object
         virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);
         

@@ -10,6 +10,7 @@
 #include "components/SpriteComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/ScriptComponent.h"
+#include "components/RectTransform.h"
 
 #include "utils/GraphicsHelper.h"
 
@@ -91,6 +92,14 @@ namespace ige::scene
         auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get());
         if(parent != nullptr) parent->addChild(sceneObject);
         sceneObject->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+        return sceneObject;
+    }
+
+    std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent)
+    {
+        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get());
+        if (parent != nullptr) parent->addChild(sceneObject);
+        sceneObject->addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
         return sceneObject;
     }
 
