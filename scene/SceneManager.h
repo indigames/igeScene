@@ -50,11 +50,20 @@ namespace ige::scene
         //! Set current scene
         void setCurrentScene(const std::shared_ptr<Scene>& scene);
 
+        //! Check if this is editor mode
+        bool isEditor() const { return m_bIsEditor; }
+
+        //! Set editor mode
+        void setIsEditor(bool isEditor) { m_bIsEditor = isEditor; }
+
     protected:
         //! Scene root node
         std::shared_ptr<Scene> m_currScene;
 
         //! Init in main thread
         bool m_bInitialized = false;
+
+        //! Editor mode
+        bool m_bIsEditor = false;
     };
 }

@@ -25,6 +25,10 @@ namespace ige::scene
         m_showcase->Initialize();
         m_showcase->WaitInitialize();
 
+        m_guiShowcase = ResourceCreator::Instance().NewShowcase((name + "_gui_showcase").c_str());
+        m_guiShowcase->Initialize();
+        m_guiShowcase->WaitInitialize();
+        
         SceneObject::getComponentAddedEvent().addListener(std::bind(&Scene::onComponentAdded, this, std::placeholders::_1, std::placeholders::_2));
         SceneObject::getComponentRemovedEvent().addListener(std::bind(&Scene::onComponentRemoved, this, std::placeholders::_1, std::placeholders::_2));
     }
@@ -40,6 +44,8 @@ namespace ige::scene
         auto envComp = m_root->addComponent<EnvironmentComponent>("environment");
         envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
         envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+
+        m_guiShowcase->Add(envComp->getEnvironment());
         return true;
     }
 
@@ -84,7 +90,7 @@ namespace ige::scene
     void Scene::render()
     {
         m_root->onRender();
-        m_showcase->Render();
+        // m_showcase->Render();
     }
 
     std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent)
@@ -137,50 +143,56 @@ namespace ige::scene
     //! Component added event
     void Scene::onComponentAdded(SceneObject& obj, std::shared_ptr<Component> component)
     {
+        auto rectTransform = obj.getComponent<RectTransform>();
+        auto showcase = rectTransform ? m_guiShowcase : m_showcase;
+
         if (component->getName() == "FigureComponent")
         {
             auto figureComponent = std::dynamic_pointer_cast<FigureComponent>(component);
             auto figure = figureComponent->getFigure();
-            if(figure) m_showcase->Add(figure);
+            if(figure) showcase->Add(figure);
 
-            figureComponent->getOnFigureCreatedEvent().addListener([this](auto figure) {
-                if (figure) m_showcase->Add(figure);
+            figureComponent->getOnFigureCreatedEvent().addListener([this, showcase](auto figure) {
+                if (figure) showcase->Add(figure);
             });
 
-            figureComponent->getOnFigureDestroyedEvent().addListener([this](auto figure) {
-                if (figure) m_showcase->Remove(figure);
+            figureComponent->getOnFigureDestroyedEvent().addListener([this, showcase](auto figure) {
+                if (figure) showcase->Remove(figure);
             });
         }
         else if (component->getName() == "SpriteComponent")
         {
             auto eFigComp = std::dynamic_pointer_cast<SpriteComponent>(component);
             auto figure = eFigComp->getFigure();
-            if (figure) m_showcase->Add(figure);
+            if (figure) showcase->Add(figure);
 
-            eFigComp->getOnFigureCreatedEvent().addListener([this](auto figure) {
-                if (figure) m_showcase->Add(figure);
+            eFigComp->getOnFigureCreatedEvent().addListener([this, showcase](auto figure) {
+                if (figure) showcase->Add(figure);
             });
 
-            eFigComp->getOnFigureDestroyedEvent().addListener([this](auto figure) {
-                if (figure) m_showcase->Remove(figure);
+            eFigComp->getOnFigureDestroyedEvent().addListener([this, showcase](auto figure) {
+                if (figure) showcase->Remove(figure);
             });
         }
         else if (component->getName() == "EnvironmentComponent")
         {
             auto envComp = std::dynamic_pointer_cast<EnvironmentComponent>(component);
             auto env = envComp->getEnvironment();
-            if (env) m_showcase->Add(env);
+            if (env) showcase->Add(env);
         }
     }
 
     //! Component removed event
     void Scene::onComponentRemoved(SceneObject& obj, std::shared_ptr<Component> component)
     {
+        auto rectTransform = obj.getComponent<RectTransform>();
+        auto showcase = rectTransform ? m_guiShowcase : m_showcase;
+
         if (component->getName() == "FigureComponent")
         {
             auto figComp = std::dynamic_pointer_cast<FigureComponent>(component);
             auto figure = figComp->getFigure();
-            if (figure) m_showcase->Remove(figure);
+            if (figure) showcase->Remove(figure);
 
             figComp->getOnFigureDestroyedEvent().removeAllListeners();
             figComp->getOnFigureDestroyedEvent().removeAllListeners();
@@ -189,7 +201,7 @@ namespace ige::scene
         {
             auto eFigComp = std::dynamic_pointer_cast<SpriteComponent>(component);
             auto figure = eFigComp->getFigure();
-            if (figure) m_showcase->Remove(figure);
+            if (figure) showcase->Remove(figure);
 
             eFigComp->getOnFigureDestroyedEvent().removeAllListeners();
             eFigComp->getOnFigureDestroyedEvent().removeAllListeners();
@@ -198,7 +210,7 @@ namespace ige::scene
         {
             auto envComp = std::dynamic_pointer_cast<EnvironmentComponent>(component);
             auto env = envComp->getEnvironment();
-            if (env) m_showcase->Remove(env);
+            if (env) showcase->Remove(env);
         }
     }
 

@@ -83,12 +83,18 @@ namespace ige::scene
         //! Get the showcase object
         Showcase* getShowcase() { return m_showcase; }
 
+        //! Get the GUI showcase object
+        Showcase* getGuiShowcase() { return m_guiShowcase; }
+
     protected:
         //! Scene root node
         std::shared_ptr<SceneObject> m_root;
 
         //! Scene showcase
         Showcase* m_showcase;
+
+        //! Scene GUI showcase
+        Showcase* m_guiShowcase;
 
         //! Object ID counter
         uint64_t m_nextObjectID = 0;

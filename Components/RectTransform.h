@@ -74,6 +74,12 @@ namespace ige::scene
             m_right = std::clamp(m_right, 0.0f, 1.0f);
             m_bottom = std::clamp(m_bottom, 0.0f, 1.0f);
         }
+
+        //! Check if stretching by width
+        inline bool isStretchWidth() const { return m_left != m_right; }
+
+        //! Check if stretching by height
+        inline bool isStretchHeight() const { return m_top != m_bottom; }
     };
 
     // Class Offset: represent offsets from the anchors
@@ -108,15 +114,16 @@ namespace ige::scene
     {
     public:
         //! Recompute flags
-        enum class E_RecomputeFlag
+        enum class E_Recompute
         {
-            RectOnly,           //! Only rect changed
-            TransformOnly,      //! Only transform changed
-            RectAndTransform    //! Both rect and transform changed
+            RectOnly,               //! Only rect changed
+            TransformOnly,          //! Only transform changed
+            RectAndTransform,       //! Both rect and transform changed
+            ViewportTransformOnly,  //! Both rect and transform changed
         };
 
         //! Constructor
-        RectTransform(std::shared_ptr<SceneObject> owner, const Vec3& pos = Vec3(), const Quat& rot = Quat(), const Vec3& scale = Vec3(1.f, 1.f, 1.f));
+        RectTransform(std::shared_ptr<SceneObject> owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{64.f, 64.f});
 
         //! Destructor
         virtual ~RectTransform();
@@ -124,14 +131,26 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "RectTransform"; }
         
-        //! Override setPosition method
-        virtual void setPosition(const Vec3& pos) override;
+        //! Get local transform
+        const Mat4& getLocalTransform();
 
-        //! Override setRotation method
-        virtual void setRotation(const Quat& rot) override;
+        //! Get canvas space transform
+        const Mat4& getCanvasSpaceTransform();
 
-        //! Override setScale method
-        virtual void setScale(const Vec3& scale) override;
+        //! Get viewport transform
+        const Mat4& getViewportTransform();
+
+        //! Rotation method        
+        void setRotation(const Quat& rot) override;
+        
+        //! Scale method
+        void setScale(const Vec3& scale) override;
+
+        //! Get local transform matrix
+        const Mat4& getLocalMatrix() const override;
+        
+        //! Get world transform matrix
+        const Mat4& getWorldMatrix() const override;
 
         //! Anchor
         const Anchor& getAnchor() const { return m_anchor; }
@@ -142,37 +161,79 @@ namespace ige::scene
         void setPivot(const Vec2& pivot);
 
         //! Offset
-        const Offset& getOffset() const { return m_offset; }       
+        const Offset& getOffset() const { return m_offset; }
         void setOffset(const Offset& offset);
 
         //! Size
-        const Vec2& getSize() const { return  m_size; }
+        Vec2 getSize();
         void setSize(const Vec2& size);
 
-        //! Get rect
-        const Rect& getRect() const { return  m_rect; }
+        //! Position
+        const Vec3& getPosition() const override;
+        void setPosition(const Vec3& pos) override;
+
+        //! Get rect in canvas space (no scale, no rotate)
+        const Rect& getRect();
 
         //! Recompute flag
-        E_RecomputeFlag getRecomputeMode() const { return m_recomputeFlag; }
-        void setRecomputeFlag(E_RecomputeFlag flag) { m_recomputeFlag = flag; }
+        E_Recompute getRecomputeMode() const { return m_recomputeFlag; }
+        void setRecomputeFlag(E_Recompute flag);
+
+        //! OnUpdate
+        void onUpdate(float dt) override;
+
+        //! Serialize
+        void to_json(json& j) const override { }
+
+        //! Deserialize 
+        void from_json(const json& j) override { }
+        
+    protected:
+        bool hasScale() const;
+        bool hasRotation() const;
+        bool hasScaleOrRotation() const;
+
+        Vec2 getPivotInCanvasSpace();
+        Vec2 getAnchorCenterInCanvasSpace();
 
     protected:
         //! Anchor
         Anchor m_anchor;
 
-        //! Pivot: center of the content
-        Vec2 m_pivot;
-
         // Offset
         Offset m_offset;
 
-        // Size
-        Vec2 m_size;
+        //! Pivot: center of the content
+        Vec2 m_pivot;
 
-        //! Rect
+        //! Position Z
+        float m_posZ;
+
+        //! Cached rect in canvas space (no scale, no rotate)
         Rect m_rect;
+        bool m_rectDirty;
+
+        //! Cached local transform
+        Mat4 m_localTransform;
+        bool m_localTransformDirty;
+
+        //! Cached transform to viewport space
+        Mat4 m_viewportTransform;
+        bool m_viewportTransformDirty;
+
+        //! Cached transform to canvas space
+        Mat4 m_canvasTransform;
+        bool m_canvasTransformDirty;
 
         //! Recompute flags
-        E_RecomputeFlag m_recomputeFlag;
+        E_Recompute m_recomputeFlag;
+
+        //! Associated EditableFigure object
+        EditableFigure* m_figure;
+
+        //! Events
+        Event<EditableFigure*> m_onFigureCreatedEvent;
+        Event<EditableFigure*> m_onFigureDestroyedEvent;
+
     };
 }
