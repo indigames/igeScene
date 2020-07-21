@@ -13,7 +13,7 @@ namespace ige::scene
         PyObject_Scene* self = nullptr;
         if (PyArg_ParseTuple(args, "s", &name)) {
             self = (PyObject_Scene*)type->tp_alloc(type, 0);
-            self->scene = SceneManager::getInstance()->createEmptyScene();
+            self->scene = SceneManager::getInstance()->createEmptyScene(std::string(name));
         }
         return (PyObject*)self;
     }

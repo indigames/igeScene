@@ -40,7 +40,7 @@ namespace ige::scene
     
     bool Scene::initialize()
     {
-        m_root = createObject("root");
+        m_root = createObject(getName());
         auto envComp = m_root->addComponent<EnvironmentComponent>("environment");
         envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
         envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
@@ -73,23 +73,23 @@ namespace ige::scene
 
     void Scene::update(float dt)
     {
-        m_root->onUpdate(dt);
-        m_showcase->Update(dt);
+        if(m_root) m_root->onUpdate(dt);
+        // m_showcase->Update(dt);
     }
 
     void Scene::fixedUpdate(float dt)
     {
-        m_root->onFixedUpdate(dt);
+        if (m_root) m_root->onFixedUpdate(dt);
     }
 
     void Scene::lateUpdate(float dt)
     {
-         m_root->onLateUpdate(dt);
+        if (m_root) m_root->onLateUpdate(dt);
     }
 
     void Scene::render()
     {
-        m_root->onRender();
+        if (m_root) m_root->onRender();
         // m_showcase->Render();
     }
 
