@@ -13,7 +13,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SpriteComponent(std::shared_ptr<SceneObject> owner, const Vec2& size = {32.f, 32.f}, const std::string& texture = "");
+        SpriteComponent(const std::shared_ptr<SceneObject>& owner, const Vec2& size = {32.f, 32.f}, const std::string& texture = "");
 
         //! Destructor
         virtual ~SpriteComponent();

@@ -5,7 +5,7 @@
 namespace ige::scene
 {
     //! Constructor
-    EnvironmentComponent::EnvironmentComponent(std::shared_ptr<SceneObject> owner, const std::string& name)
+    EnvironmentComponent::EnvironmentComponent(const std::shared_ptr<SceneObject>& owner, const std::string& name)
         : Component(owner), m_name(name)
     {
         m_environment = ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), nullptr);

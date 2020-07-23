@@ -8,7 +8,7 @@
 namespace ige::scene 
 {
     //! Constructor
-    Canvas::Canvas(std::shared_ptr<SceneObject> owner):
+    Canvas::Canvas(const std::shared_ptr<SceneObject>& owner):
         Component(owner)
     {}
     

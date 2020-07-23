@@ -13,7 +13,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        FigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path = "");
+        FigureComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path = "");
 
         //! Destructor
         virtual ~FigureComponent();

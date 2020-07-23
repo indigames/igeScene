@@ -8,7 +8,7 @@ namespace fs = std::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    FigureComponent::FigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path)
+    FigureComponent::FigureComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path)
         : Component(owner), m_figure(nullptr), m_path(path)
     {
         if (!m_path.empty())

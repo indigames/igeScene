@@ -6,7 +6,7 @@
 
 namespace ige::scene
 {
-    RectTransform::RectTransform(std::shared_ptr<SceneObject> owner, const Vec3& pos, const Vec2& size)
+    RectTransform::RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos, const Vec2& size)
         : TransformComponent(owner)
     {
         m_posZ = 0.f;

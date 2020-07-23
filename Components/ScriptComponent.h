@@ -13,7 +13,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        ScriptComponent(std::shared_ptr<SceneObject> owner, const std::string& path = "");
+        ScriptComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path = "");
 
         //! Destructor
         virtual ~ScriptComponent();

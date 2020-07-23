@@ -21,7 +21,7 @@ namespace ige::scene {
     {
     public:
         //! Constructor
-        TransformComponent(std::shared_ptr<SceneObject> owner, const Vec3& pos = Vec3(), const Quat& rot = Quat(), const Vec3& scale = Vec3(1.f, 1.f, 1.f));
+        TransformComponent(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Quat& rot = Quat(), const Vec3& scale = Vec3(1.f, 1.f, 1.f));
 
         //! Destructor
         virtual ~TransformComponent();

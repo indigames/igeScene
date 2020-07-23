@@ -152,7 +152,7 @@ namespace ige::scene
         std::shared_ptr<TransformComponent>& getTransform() { return m_transform; }
 
         //! Set transform component
-        void setTransform(std::shared_ptr<TransformComponent> transform) { m_transform = transform; }
+        void setTransform(const std::shared_ptr<TransformComponent>& transform) { m_transform = transform; }
 
     protected:
         //! Node ID

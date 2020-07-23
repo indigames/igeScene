@@ -183,7 +183,7 @@ namespace ige::scene
 
         if (component->getName() == "CameraComponent")
         {
-            auto found = std::find_if(m_cameras.begin(), m_cameras.end(), [&](std::shared_ptr<CameraComponent> cam) {
+            auto found = std::find_if(m_cameras.begin(), m_cameras.end(), [&](const auto& cam) {
                 auto cameraComponent = std::static_pointer_cast<CameraComponent>(component);
                 return strcmp(cam->getCamera()->ResourceName(), cameraComponent->getCamera()->ResourceName()) == 0;
             });

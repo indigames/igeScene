@@ -17,7 +17,7 @@ namespace ige::scene
     {
     public:
         //! Constructor/destructor
-        Canvas(std::shared_ptr<SceneObject> owner);
+        Canvas(const std::shared_ptr<SceneObject>& owner);
         virtual ~Canvas();
 
         //! Get component name

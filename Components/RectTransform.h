@@ -123,7 +123,7 @@ namespace ige::scene
         };
 
         //! Constructor
-        RectTransform(std::shared_ptr<SceneObject> owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{64.f, 64.f});
+        RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{64.f, 64.f});
 
         //! Destructor
         virtual ~RectTransform();

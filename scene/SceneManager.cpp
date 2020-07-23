@@ -114,7 +114,7 @@ namespace ige::scene
 
     void SceneManager::setCurrentScene(const std::string& name)
     {
-        auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](std::shared_ptr<Scene> itr)
+        auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](const auto& itr)
         {
             return itr->getName() == name;
         });
@@ -177,7 +177,7 @@ namespace ige::scene
 
     void SceneManager::unloadScene(const std::string& name)
     {
-        auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](std::shared_ptr<Scene> itr)
+        auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](const auto& itr)
         {
             return itr->getName() == name;
         });
