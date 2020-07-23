@@ -11,7 +11,7 @@ namespace ige::scene {
 
         if(owner && owner->getParent())
         {
-            setParent(owner->getParent()->getComponent<TransformComponent>().get());
+            setParent(owner->getParent()->getTransform().get());
         }
     }
 
@@ -102,7 +102,7 @@ namespace ige::scene {
     {
         if(m_localPosition != pos)
         {
-            m_localPosition = Vec3(pos);
+            m_localPosition = pos;
             m_bLocalDirty = true;
         }        
     }
@@ -116,7 +116,7 @@ namespace ige::scene {
     {
         if (m_worldPosition != pos)
         {
-            m_worldPosition = Vec3(pos);
+            m_worldPosition = pos;
             updateWorldToLocal();
         }
     }
@@ -130,7 +130,7 @@ namespace ige::scene {
     {
         if(m_localRotation != rot)
         {
-            m_localRotation = Quat(rot);
+            m_localRotation = rot;
             m_bLocalDirty = true;
         }        
     }
@@ -144,7 +144,7 @@ namespace ige::scene {
     {
         if (m_worldRotation != rot)
         {
-            m_worldRotation = Quat(rot);
+            m_worldRotation = rot;
             updateWorldToLocal();
         }
     }
@@ -158,7 +158,7 @@ namespace ige::scene {
     {
         if(m_localScale != scale)
         {
-            m_localScale = Vec3(scale);
+            m_localScale = scale;
             m_bLocalDirty = true;
         }     
     }
@@ -172,7 +172,7 @@ namespace ige::scene {
     {
         if (m_worldScale != scale)
         {
-            m_worldScale = Vec3(scale);
+            m_worldScale = scale;
             updateWorldToLocal();
         }
     }
@@ -384,7 +384,7 @@ namespace ige::scene {
         if (hasOwner())
         {
             if(getOwner()->hasParent())
-                setParent(getOwner()->getParent()->getComponent<TransformComponent>().get());
+                setParent(getOwner()->getParent()->getTransform().get());
         }
 
         setPosition(j.at("pos"));

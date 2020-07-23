@@ -33,20 +33,13 @@ namespace ige::scene
     {
         if (m_figure == nullptr) return;
 
-        std::shared_ptr<TransformComponent> transCmp = nullptr;
+        // Update transform from transform component
+        auto transCmp = getOwner()->getTransform();
+        m_figure->SetPosition(transCmp->getWorldPosition());
+        m_figure->SetRotation(transCmp->getWorldRotation());
+        m_figure->SetScale(transCmp->getWorldScale());
 
-        if(getOwner() != nullptr)
-        {
-            // Update transform from transform component
-            transCmp = getOwner()->getComponent<TransformComponent>();
-            if(transCmp != nullptr)
-            {
-                m_figure->SetPosition(transCmp->getWorldPosition());
-                m_figure->SetRotation(transCmp->getWorldRotation());
-                m_figure->SetScale(transCmp->getWorldScale());
-            }
-        }
-
+        // Update
         m_figure->Pose();
     }
 

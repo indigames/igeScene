@@ -121,11 +121,20 @@ namespace ige::scene
         //! Get camera
         Camera* getCamera() { return m_camera; }
 
+        //! Get shooting target
+        std::shared_ptr<SceneObject>& getShootTarget() { return m_shootTarget; }
+
+        //! Set shooting target
+        void setShootTarget(std::shared_ptr<SceneObject>& target) { m_shootTarget = target; }
+
     protected:
         //! Internal camera
         Camera* m_camera;
 
         //! Camera name
         std::string m_name;
+
+        //! Target to shoot
+        std::shared_ptr<SceneObject> m_shootTarget;
     };
 }

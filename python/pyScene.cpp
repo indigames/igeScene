@@ -13,7 +13,7 @@ namespace ige::scene
         PyObject_Scene* self = nullptr;
         if (PyArg_ParseTuple(args, "s", &name)) {
             self = (PyObject_Scene*)type->tp_alloc(type, 0);
-            self->scene = SceneManager::getInstance()->createEmptyScene(std::string(name));
+            self->scene = SceneManager::getInstance()->createScene(std::string(name));
         }
         return (PyObject*)self;
     }
@@ -140,20 +140,21 @@ namespace ige::scene
         Py_RETURN_NONE;
     }
  
-    // Get root object
-    PyObject* Scene_getRoot(PyObject_Scene *self)
+    // Get root 
+    // TODO
+    /*PyObject* Scene_getRoot(PyObject_Scene *self)
     {
         auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
         obj->sceneObject = self->scene->getRoot();
         return (PyObject*)obj;
-    }
+    }*/
 
     // Methods definition
     PyMethodDef Scene_methods[] = {
     { "createObject", (PyCFunction)Scene_createObject, METH_VARARGS, Scene_createObject_doc },
     { "removeObject", (PyCFunction)Scene_removeObject, METH_VARARGS, Scene_removeObject_doc },
     { "findObject", (PyCFunction)Scene_findObject, METH_VARARGS, Scene_findObject_doc },
-    { "getRoot", (PyCFunction)Scene_getRoot, METH_NOARGS, Scene_getRoot_doc },
+    // { "getRoot", (PyCFunction)Scene_getRoot, METH_NOARGS, Scene_getRoot_doc },
     { NULL, NULL }
     };
 

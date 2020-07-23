@@ -93,14 +93,11 @@ namespace ige::scene
         if (m_currScene) m_currScene->render();
     }
 
-    std::shared_ptr<Scene> SceneManager::createEmptyScene(const std::string& name)
+    std::shared_ptr<Scene> SceneManager::createScene(const std::string& name)
     {
         auto scene = std::make_shared<Scene>(name);
-        m_scenes.push_back(scene);
-        getOnSceneAddedEvent().invoke(*scene);
-        setCurrentScene(scene);
-
         scene->initialize();
+        m_scenes.push_back(scene);
         return scene;
     }
 
@@ -124,29 +121,20 @@ namespace ige::scene
 
         if (found != m_scenes.end())
         {
-            if(m_currScene != *found) m_currScene = *found;
+            m_currScene = *found;
         }
     }
 
     std::shared_ptr<Scene> SceneManager::loadScene(const std::string& path)
     {
-        if (m_currScene)
-        {
-            m_currScene->clear();
-            m_currScene = nullptr;
-        }
-
         json jScene;
         std::ifstream file(path);
         file >> jScene;
         auto s = jScene.dump();
 
         auto scene = std::make_shared<Scene>(jScene.at("name"));
-        m_scenes.push_back(scene);
-        getOnSceneAddedEvent().invoke(*scene);
-        setCurrentScene(scene);
-
         scene->from_json(jScene);
+        m_scenes.push_back(scene);
         return scene;
     }
 
@@ -176,8 +164,34 @@ namespace ige::scene
         auto it = std::find(m_scenes.begin(), m_scenes.end(), scene);
         if (it != m_scenes.end())
         {
-            getOnSceneRemovedEvent().invoke(**it);
+            (*it)->clear();
             m_scenes.erase(it);
+        }
+
+        if (m_currScene == scene)
+        {
+            m_currScene->clear();
+            m_currScene = nullptr;
+        }
+    }
+
+    void SceneManager::unloadScene(const std::string& name)
+    {
+        auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](std::shared_ptr<Scene> itr)
+        {
+            return itr->getName() == name;
+        });
+
+        if (found != m_scenes.end())
+        {
+            (*found)->clear();
+            m_scenes.erase(found);
+        }
+
+        if (m_currScene->getName() == name)
+        {
+            m_currScene->clear();
+            m_currScene = nullptr;
         }
     }
 }

@@ -37,19 +37,19 @@ namespace ige::scene
         virtual void render();
 
         //! Create empty scene
-        std::shared_ptr<Scene> createEmptyScene(const std::string& name);
+        std::shared_ptr<Scene> createScene(const std::string& name);
 
         //! Load scene
         std::shared_ptr<Scene> loadScene(const std::string& scenePath);
 
-        //! Save scene
-        bool saveScene(const std::string& scenePath);
-
-        //! unload scene
+        //! Unload scene
         void unloadScene(const std::shared_ptr<Scene>& scene);
 
-        //! Get all scenes
-        std::vector<std::shared_ptr<Scene>>& getAllScenes() { return m_scenes; }
+        //! Unload scene by name
+        void unloadScene(const std::string& sceneName);
+
+        //! Save scene
+        bool saveScene(const std::string& scenePath);
 
         //! Get current scene
         std::shared_ptr<Scene>& getCurrentScene() { return m_currScene; }
@@ -66,10 +66,6 @@ namespace ige::scene
         //! Set editor mode
         void setIsEditor(bool isEditor) { m_bIsEditor = isEditor; }
 
-        //! Internal events
-        Event<Scene&>& getOnSceneAddedEvent() { return m_sceneAddedEvent; }
-        Event<Scene&>& getOnSceneRemovedEvent() { return m_sceneRemovedEvent; }
-
     protected:
         //! Scene root node
         std::shared_ptr<Scene> m_currScene;
@@ -82,9 +78,5 @@ namespace ige::scene
 
         //! Editor mode
         bool m_bIsEditor = false;
-
-        //! Internal events
-        Event<Scene&> m_sceneAddedEvent;
-        Event<Scene&> m_sceneRemovedEvent;
     };
 }

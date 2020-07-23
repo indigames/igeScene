@@ -6,6 +6,7 @@
 
 #include <utils/PyxieHeaders.h>
 #include "components/Component.h"
+#include "components/CameraComponent.h"
 
 namespace ige::scene
 {
@@ -72,29 +73,30 @@ namespace ige::scene
         virtual void from_json(const json& j);
 
         //! Component added event
-        void onComponentAdded(SceneObject& obj, std::shared_ptr<Component> component);
+        void onComponentAdded(SceneObject& obj, const std::shared_ptr<Component>& component);
 
         //! Component added event
-        void onComponentRemoved(SceneObject& obj, std::shared_ptr<Component> component);
+        void onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component);
 
         //! Get root of scene nodes tree
-        std::shared_ptr<SceneObject>& getRoot() { return m_root; };
+        std::vector<std::shared_ptr<SceneObject>>& getRoots() { return m_roots; };
 
-        //! Get the showcase object
-        Showcase* getShowcase() { return m_showcase; }
+        //! Set active camera by name
+        void setActiveCamera(const std::string& cameraName);
 
-        //! Get the GUI showcase object
-        Showcase* getGuiShowcase() { return m_guiShowcase; }
+        //! Set active camera by name
+        void setActiveCamera(const std::shared_ptr<CameraComponent>& camera) { m_activeCamera = camera; }
+
+        //! Get active camera
+        std::shared_ptr<CameraComponent>& getActiveCamera() { return m_activeCamera; }
 
     protected:
         //! Scene root node
-        std::shared_ptr<SceneObject> m_root;
+        std::vector<std::shared_ptr<SceneObject>> m_roots;
 
-        //! Scene showcase
-        Showcase* m_showcase;
-
-        //! Scene GUI showcase
-        Showcase* m_guiShowcase;
+        //! Cache all camera components
+        std::vector<std::shared_ptr<CameraComponent>> m_cameras;
+        std::shared_ptr<CameraComponent> m_activeCamera;
 
         //! Object ID counter
         uint64_t m_nextObjectID = 0;

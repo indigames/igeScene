@@ -302,7 +302,7 @@ namespace ige::scene
                 auto type = std::string(PyUnicode_AsUTF8(obj));
                 if(type == "TransformComponent")
                 {
-                    comp = self->sceneObject->getComponent<TransformComponent>();
+                    comp = self->sceneObject->getTransform();
                 }
                 else if(type == "CameraComponent")
                 {
@@ -351,7 +351,7 @@ namespace ige::scene
         {
             if(type == "TransformComponent")
             {
-                auto comp = self->sceneObject->getComponent<TransformComponent>();
+                auto comp = self->sceneObject->getTransform();
                 if(comp)
                 {
                     auto *compObj = PyObject_New(PyObject_TransformComponent, &PyTypeObject_TransformComponent);
