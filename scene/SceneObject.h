@@ -20,7 +20,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SceneObject(uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false);
+        SceneObject(uint64_t id, std::string name = "", SceneObject* parent = nullptr);
 
         //! Destructor
         virtual ~SceneObject();
@@ -146,13 +146,16 @@ namespace ige::scene
         Showcase* getShowcase() { return m_showcase; }
 
         //! Check whether it's a GUI object
-        bool isGUIObject() const { return m_bIsGUI; }
+        bool isGUIObject() const { return m_transform->getName() == "RectTransform"; }
 
         //! Get transform component
         std::shared_ptr<TransformComponent>& getTransform() { return m_transform; }
 
         //! Set transform component
         void setTransform(const std::shared_ptr<TransformComponent>& transform) { m_transform = transform; }
+
+        //! Get root object
+        SceneObject* getRoot() { return m_root; }
 
     protected:
         //! Node ID
@@ -191,11 +194,11 @@ namespace ige::scene
         static Event<SceneObject&> s_nameChangedEvent;
         static Event<SceneObject&> s_selectedEvent;
 
-        //! GUI object flag
-        bool m_bIsGUI = false;
-
         //! Cache transform component
         std::shared_ptr<TransformComponent> m_transform = nullptr;
+
+        //! Cache root object
+        SceneObject* m_root = nullptr;
     };
 
     //! Get component by type

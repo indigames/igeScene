@@ -24,6 +24,7 @@ namespace ige::scene
     {
         SceneObject::getComponentAddedEvent().addListener(std::bind(&Scene::onComponentAdded, this, std::placeholders::_1, std::placeholders::_2));
         SceneObject::getComponentRemovedEvent().addListener(std::bind(&Scene::onComponentRemoved, this, std::placeholders::_1, std::placeholders::_2));
+        SceneObject::getSelectedEvent().addListener(std::bind(&Scene::onSceneObjectSelected, this, std::placeholders::_1));
     }
 
     Scene::~Scene()
@@ -118,7 +119,7 @@ namespace ige::scene
 
     std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent)
     {
-        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get(), true);
+        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get());
         if (parent != nullptr) parent->addChild(sceneObject);
         auto transform = sceneObject->addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
         sceneObject->setTransform(transform);
@@ -138,10 +139,10 @@ namespace ige::scene
             camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
             camComp->setOrthoProjection(true);
             camComp->setWidthBase(false);
-            camComp->setOrthoHeight(6.f);
+            camComp->setOrthoHeight(4.f);
             camComp->setShootTarget(sceneObject.get());
             m_roots.push_back(sceneObject);
-        }        
+        }
         return sceneObject;
     }
 
@@ -224,6 +225,18 @@ namespace ige::scene
             if (found != m_cameras.end())
             {
                 m_cameras.erase(found);
+            }
+        }
+    }
+
+    void Scene::onSceneObjectSelected(SceneObject& sceneObject)
+    {        
+        for (auto& cam : m_cameras)
+        {
+            if (cam && cam->getShootTarget() && cam->getShootTarget()->getId() == sceneObject.getRoot()->getId())
+            {
+                setActiveCamera(cam);
+                break;
             }
         }
     }

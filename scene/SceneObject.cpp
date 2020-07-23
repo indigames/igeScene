@@ -25,10 +25,12 @@ namespace ige::scene
     Event<SceneObject&> SceneObject::s_selectedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(uint64_t id, std::string name, SceneObject* parent, bool isGui)
-        : m_id(id), m_name(name), m_parent(parent), m_isActive(true), m_isSelected(false), m_bIsGUI(isGui), m_transform(nullptr), m_showcase(nullptr)
+    SceneObject::SceneObject(uint64_t id, std::string name, SceneObject* parent)
+        : m_id(id), m_name(name), m_parent(parent), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_showcase(nullptr)
     {
         getCreatedEvent().invoke(*this);
+
+        m_root = (parent == nullptr) ? this : parent->getRoot();
 
         // Only create showcase for root objects
         if (parent == nullptr)
