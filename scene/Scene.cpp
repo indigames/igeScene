@@ -11,6 +11,7 @@
 #include "components/EnvironmentComponent.h"
 #include "components/ScriptComponent.h"
 #include "components/RectTransform.h"
+#include "components/Canvas.h"
 
 #include "utils/GraphicsHelper.h"
 
@@ -32,19 +33,7 @@ namespace ige::scene
     
     bool Scene::initialize()
     {
-        auto root = createObject(getName());
-        auto envComp = root->addComponent<EnvironmentComponent>("environment");
-        envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
-        envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
-        m_roots.push_back(root);
-
-        auto camObj = createObject("Default Camera", root);
-        camObj->getTransform()->setPosition(Vec3(0.f, 5.f, 20.f));
-        auto camComp = camObj->addComponent<CameraComponent>("default_camera");
-        camComp->lockOnTarget(false);
-        camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
-        camComp->setShootTarget(root);
-        setActiveCamera(camComp);
+        createObject(getName());
         return true;
     }
 
@@ -107,6 +96,23 @@ namespace ige::scene
         if(parent != nullptr) parent->addChild(sceneObject);
         auto transform = sceneObject->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
         sceneObject->setTransform(transform);
+
+        if (parent == nullptr)
+        {
+            // This is a root object, setup default environment and camera
+            auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
+            envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
+            envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+
+            auto camObj = createObject("Default Camera", sceneObject);
+            camObj->getTransform()->setPosition(Vec3(0.f, 5.f, 20.f));
+            auto camComp = camObj->addComponent<CameraComponent>("default_camera");
+            camComp->lockOnTarget(false);
+            camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+            camComp->setShootTarget(sceneObject.get());
+            setActiveCamera(camComp);
+            m_roots.push_back(sceneObject);
+        }
         return sceneObject;
     }
 
@@ -116,6 +122,26 @@ namespace ige::scene
         if (parent != nullptr) parent->addChild(sceneObject);
         auto transform = sceneObject->addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
         sceneObject->setTransform(transform);
+
+        if (parent == nullptr)
+        {
+            // This is a GUI root object, setup default environment, canvas and camera
+            auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
+            envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
+            envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+            sceneObject->addComponent<Canvas>();
+
+            auto camObj = createObject("GUI Camera", sceneObject);
+            camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 20.f));
+            auto camComp = camObj->addComponent<CameraComponent>("default_2d_camera");
+            camComp->lockOnTarget(false);
+            camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+            camComp->setOrthoProjection(true);
+            camComp->setWidthBase(false);
+            camComp->setOrthoHeight(6.f);
+            camComp->setShootTarget(sceneObject.get());
+            m_roots.push_back(sceneObject);
+        }        
         return sceneObject;
     }
 
@@ -126,6 +152,8 @@ namespace ige::scene
         auto found = std::find(m_roots.begin(), m_roots.end(), obj);
         if (found != m_roots.end())
         {
+            if (m_activeCamera->getShootTarget()->getId() == (*found)->getId())
+                setActiveCamera(nullptr);
             m_roots.erase(found);
             return true;
         }
@@ -143,10 +171,12 @@ namespace ige::scene
     
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id) const
     {
-        for (auto& root : m_roots)
+        for (const auto& root : m_roots)
         {
             if (root)
             {
+                if (root->getId() == id)
+                    return root;
                 auto obj = root->findObjectById(id);
                 if (obj) return obj;
             }
@@ -156,10 +186,12 @@ namespace ige::scene
 
     std::shared_ptr<SceneObject> Scene::findObjectByName(std::string name) const
     {
-        for (auto& root : m_roots)
+        for (const auto& root : m_roots)
         {
             if (root)
             {
+                if (root->getName() == name)
+                    return root;
                 auto obj = root->findObjectByName(name);
                 if (obj) return obj;
             }
@@ -179,7 +211,8 @@ namespace ige::scene
     //! Component removed event
     void Scene::onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component)
     {
-        if (m_activeCamera == component) m_activeCamera = nullptr;
+        if (m_activeCamera == component)
+            setActiveCamera(nullptr);
 
         if (component->getName() == "CameraComponent")
         {
@@ -193,21 +226,16 @@ namespace ige::scene
                 m_cameras.erase(found);
             }
         }
-        if (m_cameras.size() > 0) m_activeCamera = m_cameras[0];
     }
 
     //! Set active camera
-    void Scene::setActiveCamera(const std::string& cameraName)
+    void Scene::setActiveCamera(const std::shared_ptr<CameraComponent>& camera)
     {
-        for (const auto& cam : m_cameras)
+        if (m_activeCamera != camera)
         {
-            if (strcmp(cam->getCamera()->ResourceName(), cameraName.c_str()) == 0)
-            {
-                m_activeCamera = cam;
-                return;
-            }
+            getOnActiveCameraChangedEvent().invoke(camera);
+            m_activeCamera = camera;
         }
-        // m_activeCamera = nullptr;
     }
 
     //! Serialize

@@ -161,22 +161,21 @@ namespace ige::scene
 
     void SceneManager::unloadScene(const std::shared_ptr<Scene>& scene)
     {
+        if (m_currScene == scene)
+            m_currScene = nullptr;
+
         auto it = std::find(m_scenes.begin(), m_scenes.end(), scene);
         if (it != m_scenes.end())
         {
-            (*it)->clear();
             m_scenes.erase(it);
-        }
-
-        if (m_currScene == scene)
-        {
-            m_currScene->clear();
-            m_currScene = nullptr;
         }
     }
 
     void SceneManager::unloadScene(const std::string& name)
     {
+        if (m_currScene->getName() == name)
+            m_currScene = nullptr;
+
         auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](const auto& itr)
         {
             return itr->getName() == name;
@@ -184,14 +183,7 @@ namespace ige::scene
 
         if (found != m_scenes.end())
         {
-            (*found)->clear();
             m_scenes.erase(found);
-        }
-
-        if (m_currScene->getName() == name)
-        {
-            m_currScene->clear();
-            m_currScene = nullptr;
         }
     }
 }

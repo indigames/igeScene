@@ -14,11 +14,9 @@ namespace ige::scene
     //! Destructor
     CameraComponent::~CameraComponent() 
     {
-        if (m_camera)
-        {
-            m_camera->DecReference();
-            m_camera = nullptr;
-        }
+        m_shootTarget = nullptr;
+        if (m_camera) m_camera->DecReference();
+        m_camera = nullptr;
         ResourceManager::Instance().DeleteDaemon();
     }
     
@@ -63,7 +61,6 @@ namespace ige::scene
         if (m_camera == nullptr) return;
         auto transCmp = getOwner()->getTransform();
 
-
         m_camera->SetPosition(transCmp->getWorldPosition());
         m_camera->SetRotation(transCmp->getWorldRotation());
         m_camera->SetScale(transCmp->getWorldScale());
@@ -80,7 +77,6 @@ namespace ige::scene
     void CameraComponent::onRender()
     {
         if (m_camera == nullptr) return;
-
         m_camera->Render();
     }
 

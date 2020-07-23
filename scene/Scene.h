@@ -7,6 +7,7 @@
 #include <utils/PyxieHeaders.h>
 #include "components/Component.h"
 #include "components/CameraComponent.h"
+#include "event/Event.h"
 
 namespace ige::scene
 {
@@ -81,14 +82,14 @@ namespace ige::scene
         //! Get root of scene nodes tree
         std::vector<std::shared_ptr<SceneObject>>& getRoots() { return m_roots; };
 
-        //! Set active camera by name
-        void setActiveCamera(const std::string& cameraName);
-
-        //! Set active camera by name
-        void setActiveCamera(const std::shared_ptr<CameraComponent>& camera) { m_activeCamera = camera; }
+        //! Set active camera
+        void setActiveCamera(const std::shared_ptr<CameraComponent>& camera);
 
         //! Get active camera
         std::shared_ptr<CameraComponent>& getActiveCamera() { return m_activeCamera; }
+
+        //! Active camera changed event
+        Event<const std::shared_ptr<CameraComponent>&>& getOnActiveCameraChangedEvent() { return m_onActiveCameraChanged; }
 
     protected:
         //! Scene root node
@@ -103,5 +104,8 @@ namespace ige::scene
 
         //! Scene name
         std::string m_name;
+
+        //! Active camera changed events
+        Event<const std::shared_ptr<CameraComponent>&> m_onActiveCameraChanged;
     };
 }
