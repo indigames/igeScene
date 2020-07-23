@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name);
+        CameraComponent(const std::shared_ptr<SceneObject>& owner, const std::string& name);
 
         //! Destructor
         virtual ~CameraComponent();
@@ -121,11 +121,20 @@ namespace ige::scene
         //! Get camera
         Camera* getCamera() { return m_camera; }
 
+        //! Get shooting target
+        SceneObject* getShootTarget() { return m_shootTarget; }
+
+        //! Set shooting target
+        void setShootTarget(SceneObject* target) { m_shootTarget = target; }
+
     protected:
         //! Internal camera
         Camera* m_camera;
 
         //! Camera name
         std::string m_name;
+
+        //! Target to shoot
+        SceneObject* m_shootTarget;
     };
 }

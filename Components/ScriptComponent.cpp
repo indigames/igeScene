@@ -8,7 +8,7 @@ namespace fs = std::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    ScriptComponent::ScriptComponent(std::shared_ptr<SceneObject> owner, const std::string& path)
+    ScriptComponent::ScriptComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path)
         : Component(owner), m_pModule(nullptr), m_path(path)
     {
         if (!m_path.empty())

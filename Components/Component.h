@@ -17,7 +17,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        Component(std::shared_ptr<SceneObject> owner);
+        Component(const std::shared_ptr<SceneObject>& owner);
         
         //! Destructor
         virtual ~Component();

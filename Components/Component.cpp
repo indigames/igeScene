@@ -4,7 +4,7 @@
 namespace ige::scene
 {
     //! Constructor
-    Component::Component(std::shared_ptr<SceneObject> owner): m_owner(owner) {}
+    Component::Component(const std::shared_ptr<SceneObject>& owner): m_owner(owner) {}
     
     //! Destructor
     Component::~Component() 

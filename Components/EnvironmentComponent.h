@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        EnvironmentComponent(std::shared_ptr<SceneObject> owner, const std::string& name);
+        EnvironmentComponent(const std::shared_ptr<SceneObject>& owner, const std::string& name);
 
         //! Destructor
         virtual ~EnvironmentComponent();

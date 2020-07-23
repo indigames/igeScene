@@ -4,14 +4,14 @@
 #include "utils/RayOBBChecker.h"
 
 namespace ige::scene {
-    TransformComponent::TransformComponent(std::shared_ptr<SceneObject> owner, const Vec3& pos, const Quat& rot, const Vec3& scale)
+    TransformComponent::TransformComponent(const std::shared_ptr<SceneObject>& owner, const Vec3& pos, const Quat& rot, const Vec3& scale)
         : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale), m_parent(nullptr)
     {
         m_bLocalDirty = true;
 
         if(owner && owner->getParent())
         {
-            setParent(owner->getParent()->getComponent<TransformComponent>().get());
+            setParent(owner->getParent()->getTransform().get());
         }
     }
 
@@ -56,29 +56,34 @@ namespace ige::scene {
 
         if(RayOBBChecker::isChecking())
         {
-            auto figureComp = getOwner()->getComponent<FigureComponent>();
+            bool intersected = false;
+            float distance;
+
+            auto owner = getOwner();
+            auto figureComp = owner->getComponent<FigureComponent>();
             if (figureComp)
             {
                 auto figure = figureComp->getFigure();
                 if (figure)
                 {
-                    float distance;
                     Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
-                    figure->CalcAABBox(0, aabbMin.P(), aabbMax.P(), 0);
-                    bool intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
-                    getOwner()->setSelected(intersected);
-
-                    if (intersected)
-                    {
-                        // Scene object found, no more checking
-                        RayOBBChecker::setChecking(false);
-                    }
+                    figure->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
+                    intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
                 }
             }
             else
             {
                 // bool intersected = RayOBBChecker::checkIntersect({ -1.0f, -1.0f, -1.0f }, { 1.0f,  1.0f,  1.0f }, m_worldMatrix, distance);
                 // getOwner()->setSelected(intersected);
+            }
+
+            // Update selected info
+            owner->setSelected(intersected);
+
+            // Scene object found, no more checking
+            if (intersected)
+            {
+                RayOBBChecker::setChecking(false);
             }
         }
     }
@@ -102,7 +107,7 @@ namespace ige::scene {
     {
         if(m_localPosition != pos)
         {
-            m_localPosition = Vec3(pos);
+            m_localPosition = pos;
             m_bLocalDirty = true;
         }        
     }
@@ -116,7 +121,7 @@ namespace ige::scene {
     {
         if (m_worldPosition != pos)
         {
-            m_worldPosition = Vec3(pos);
+            m_worldPosition = pos;
             updateWorldToLocal();
         }
     }
@@ -130,7 +135,7 @@ namespace ige::scene {
     {
         if(m_localRotation != rot)
         {
-            m_localRotation = Quat(rot);
+            m_localRotation = rot;
             m_bLocalDirty = true;
         }        
     }
@@ -144,7 +149,7 @@ namespace ige::scene {
     {
         if (m_worldRotation != rot)
         {
-            m_worldRotation = Quat(rot);
+            m_worldRotation = rot;
             updateWorldToLocal();
         }
     }
@@ -158,7 +163,7 @@ namespace ige::scene {
     {
         if(m_localScale != scale)
         {
-            m_localScale = Vec3(scale);
+            m_localScale = scale;
             m_bLocalDirty = true;
         }     
     }
@@ -172,7 +177,7 @@ namespace ige::scene {
     {
         if (m_worldScale != scale)
         {
-            m_worldScale = Vec3(scale);
+            m_worldScale = scale;
             updateWorldToLocal();
         }
     }
@@ -384,7 +389,7 @@ namespace ige::scene {
         if (hasOwner())
         {
             if(getOwner()->hasParent())
-                setParent(getOwner()->getParent()->getComponent<TransformComponent>().get());
+                setParent(getOwner()->getParent()->getTransform().get());
         }
 
         setPosition(j.at("pos"));

@@ -27,7 +27,7 @@ namespace ige::scene
     PyObject* SceneManager_getInstance()
     {
         auto* self = PyObject_New(PyObject_SceneManager, &PyTypeObject_SceneManager);
-        self->sceneManager = SceneManager::getInstance();
+        self->sceneManager = SceneManager::getInstance().get();
         return (PyObject*)self;
     }
 

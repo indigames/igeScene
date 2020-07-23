@@ -6,6 +6,8 @@
 
 #include <utils/PyxieHeaders.h>
 #include "components/Component.h"
+#include "components/CameraComponent.h"
+#include "event/Event.h"
 
 namespace ige::scene
 {
@@ -50,6 +52,9 @@ namespace ige::scene
         //! Create scene object
         virtual std::shared_ptr<SceneObject> createObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
 
+        //! Create GUI object
+        virtual std::shared_ptr<SceneObject> createGUIObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
+
         //! Remove scene object
         virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);
         
@@ -69,28 +74,41 @@ namespace ige::scene
         virtual void from_json(const json& j);
 
         //! Component added event
-        void onComponentAdded(SceneObject& obj, std::shared_ptr<Component> component);
+        void onComponentAdded(SceneObject& obj, const std::shared_ptr<Component>& component);
 
         //! Component added event
-        void onComponentRemoved(SceneObject& obj, std::shared_ptr<Component> component);
+        void onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component);
+
+        //! Object selected
+        void onSceneObjectSelected(SceneObject& sceneObject);
 
         //! Get root of scene nodes tree
-        std::shared_ptr<SceneObject>& getRoot() { return m_root; };
+        std::vector<std::shared_ptr<SceneObject>>& getRoots() { return m_roots; };
 
-        //! Get the showcase object
-        Showcase* getShowcase() { return m_showcase; }
+        //! Set active camera
+        void setActiveCamera(const std::shared_ptr<CameraComponent>& camera);
+
+        //! Get active camera
+        std::shared_ptr<CameraComponent>& getActiveCamera() { return m_activeCamera; }
+
+        //! Active camera changed event
+        Event<const std::shared_ptr<CameraComponent>&>& getOnActiveCameraChangedEvent() { return m_onActiveCameraChanged; }
 
     protected:
         //! Scene root node
-        std::shared_ptr<SceneObject> m_root;
+        std::vector<std::shared_ptr<SceneObject>> m_roots;
 
-        //! Scene showcase
-        Showcase* m_showcase;
+        //! Cache all camera components
+        std::vector<std::shared_ptr<CameraComponent>> m_cameras;
+        std::shared_ptr<CameraComponent> m_activeCamera;
 
         //! Object ID counter
         uint64_t m_nextObjectID = 0;
 
         //! Scene name
         std::string m_name;
+
+        //! Active camera changed events
+        Event<const std::shared_ptr<CameraComponent>&> m_onActiveCameraChanged;
     };
 }

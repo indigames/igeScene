@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    SpriteComponent::SpriteComponent(std::shared_ptr<SceneObject> owner, const Vec2& size, const std::string& path)
+    SpriteComponent::SpriteComponent(const std::shared_ptr<SceneObject>& owner, const Vec2& size, const std::string& path)
         : Component(owner), m_figure(nullptr), m_size(size), m_path(path)
     {
         if (!m_path.empty())
@@ -33,20 +33,13 @@ namespace ige::scene
     {
         if (m_figure == nullptr) return;
 
-        std::shared_ptr<TransformComponent> transCmp = nullptr;
+        // Update transform from transform component
+        auto transCmp = getOwner()->getTransform();
+        m_figure->SetPosition(transCmp->getWorldPosition());
+        m_figure->SetRotation(transCmp->getWorldRotation());
+        m_figure->SetScale(transCmp->getWorldScale());
 
-        if(getOwner() != nullptr)
-        {
-            // Update transform from transform component
-            transCmp = getOwner()->getComponent<TransformComponent>();
-            if(transCmp != nullptr)
-            {
-                m_figure->SetPosition(transCmp->getWorldPosition());
-                m_figure->SetRotation(transCmp->getWorldRotation());
-                m_figure->SetScale(transCmp->getWorldScale());
-            }
-        }
-
+        // Update
         m_figure->Pose();
     }
 

@@ -5,8 +5,8 @@
 namespace ige::scene
 {
     //! Constructor
-    CameraComponent::CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name)
-        : Component(owner), m_name(name)
+    CameraComponent::CameraComponent(const std::shared_ptr<SceneObject>& owner, const std::string& name)
+        : Component(owner), m_name(name), m_shootTarget(nullptr)
     {
         m_camera = ResourceCreator::Instance().NewCamera(name.c_str(), nullptr);
     }
@@ -14,11 +14,9 @@ namespace ige::scene
     //! Destructor
     CameraComponent::~CameraComponent() 
     {
-        if (m_camera)
-        {
-            m_camera->DecReference();
-            m_camera = nullptr;
-        }
+        m_shootTarget = nullptr;
+        if (m_camera) m_camera->DecReference();
+        m_camera = nullptr;
         ResourceManager::Instance().DeleteDaemon();
     }
     
@@ -27,18 +25,6 @@ namespace ige::scene
     {
         if (m_camera == nullptr) return;
         m_camera->SetPan(pan);
-        m_camera->Step(0.f);
-
-        if (getOwner() != nullptr)
-        {
-            // Update transform from transform component
-            auto transCmp = getOwner()->getComponent<TransformComponent>();
-            if (transCmp != nullptr)
-            {
-                transCmp->setWorldPosition(m_camera->GetPosition());
-                transCmp->setWorldRotation(m_camera->GetRotation());
-            }
-        }
     }
 
     //! Tilt (X-axis)
@@ -46,18 +32,6 @@ namespace ige::scene
     {
         if (m_camera == nullptr) return;
         m_camera->SetTilt(tilt);
-        m_camera->Step(0.f);
-
-        if (getOwner() != nullptr)
-        {
-            // Update transform from transform component
-            auto transCmp = getOwner()->getComponent<TransformComponent>();
-            if (transCmp != nullptr)
-            {
-                transCmp->setWorldPosition(m_camera->GetPosition());
-                transCmp->setWorldRotation(m_camera->GetRotation());
-            }
-        }
     }
 
     //! Roll (Z-axis)
@@ -65,18 +39,6 @@ namespace ige::scene
     {
         if (m_camera == nullptr) return;
         m_camera->SetRoll(roll);
-        m_camera->Step(0.f);
-
-        if (getOwner() != nullptr)
-        {
-            // Update transform from transform component
-            auto transCmp = getOwner()->getComponent<TransformComponent>();
-            if (transCmp != nullptr)
-            {
-                transCmp->setWorldPosition(m_camera->GetPosition());
-                transCmp->setWorldRotation(m_camera->GetRotation());
-            }
-        }
     }
 
     // Set lock target vector
@@ -84,18 +46,6 @@ namespace ige::scene
     {
         if (m_camera == nullptr) return;
         m_camera->SetTarget(tar);
-        m_camera->Step(0.f);
-
-        if (getOwner() != nullptr)
-        {
-            // Update transform from transform component
-            auto transCmp = getOwner()->getComponent<TransformComponent>();
-            if (transCmp != nullptr)
-            {
-                transCmp->setWorldPosition(m_camera->GetPosition());
-                transCmp->setWorldRotation(m_camera->GetRotation());
-            }
-        }
     }
 
     // Set lock target
@@ -103,58 +53,30 @@ namespace ige::scene
     {
         if (m_camera == nullptr) return;
         m_camera->LockonTarget(lockOn);
-        m_camera->Step(0.f);
-
-        if (getOwner() != nullptr)
-        {
-            // Update transform from transform component
-            auto transCmp = getOwner()->getComponent<TransformComponent>();
-            if (transCmp != nullptr)
-            {
-                transCmp->setWorldPosition(m_camera->GetPosition());
-                transCmp->setWorldRotation(m_camera->GetRotation());
-            }
-        }        
     }
 
     //! Update
     void CameraComponent::onUpdate(float dt)
     {
         if (m_camera == nullptr) return;
+        auto transCmp = getOwner()->getTransform();
 
-        std::shared_ptr<TransformComponent> transCmp = nullptr;
-
-        if(getOwner() != nullptr)
-        {
-            // Update transform from transform component
-            transCmp = getOwner()->getComponent<TransformComponent>();
-            if(transCmp != nullptr)
-            {
-                m_camera->SetPosition(transCmp->getWorldPosition());
-                m_camera->SetRotation(transCmp->getWorldRotation());
-            }
-        }
+        m_camera->SetPosition(transCmp->getWorldPosition());
+        m_camera->SetRotation(transCmp->getWorldRotation());
+        m_camera->SetScale(transCmp->getWorldScale());
 
         // Update
         m_camera->Step(dt);
 
-        if (getOwner() != nullptr)
-        {
-            // Update transform from transform component
-            transCmp = getOwner()->getComponent<TransformComponent>();
-            if (transCmp != nullptr)
-            {
-                transCmp->setWorldPosition(m_camera->GetPosition());
-                transCmp->setWorldRotation(m_camera->GetRotation());
-            }
-        }
+        transCmp->setWorldPosition(m_camera->GetPosition());
+        transCmp->setWorldRotation(m_camera->GetRotation());
+        transCmp->setWorldScale(m_camera->GetScale());
     }
 
     //! Render
     void CameraComponent::onRender()
     {
         if (m_camera == nullptr) return;
-
         m_camera->Render();
     }
 

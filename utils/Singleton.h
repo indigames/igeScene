@@ -21,12 +21,12 @@ namespace ige::scene
     public:
         virtual ~Singleton<T>() = default;
 
-        static T* getInstance()
+        static std::unique_ptr<T>& getInstance()
         {
             std::call_once(m_once, [&]() {
                 m_instance = std::make_unique<T>();
             });
-            return m_instance.get();
+            return m_instance;
         }
 
         static void destroy() {
