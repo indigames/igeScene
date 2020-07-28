@@ -1,5 +1,6 @@
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
+#include "components/SpriteComponent.h"
 #include "scene/SceneObject.h"
 #include "utils/RayOBBChecker.h"
 
@@ -73,8 +74,22 @@ namespace ige::scene {
             }
             else
             {
-                // bool intersected = RayOBBChecker::checkIntersect({ -1.0f, -1.0f, -1.0f }, { 1.0f,  1.0f,  1.0f }, m_worldMatrix, distance);
-                // getOwner()->setSelected(intersected);
+                auto spriteComp = owner->getComponent<SpriteComponent>();
+                if (spriteComp)
+                {
+                    auto figure = spriteComp->getFigure();
+                    if (figure)
+                    {
+                        Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
+                        figure->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                        intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
+                    }
+                }
+                else
+                {
+                    // bool intersected = RayOBBChecker::checkIntersect({ -1.0f, -1.0f, -1.0f }, { 1.0f,  1.0f,  1.0f }, m_worldMatrix, distance);
+                    // getOwner()->setSelected(intersected);
+                }
             }
 
             // Update selected info

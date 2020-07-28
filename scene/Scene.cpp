@@ -208,7 +208,7 @@ namespace ige::scene
     { 
         if (component->getName() == "CameraComponent")
         {
-            m_cameras.push_back(std::static_pointer_cast<CameraComponent>(component));
+            m_cameras.push_back(std::dynamic_pointer_cast<CameraComponent>(component));
         }
     }
 
@@ -221,7 +221,7 @@ namespace ige::scene
         if (component->getName() == "CameraComponent")
         {
             auto found = std::find_if(m_cameras.begin(), m_cameras.end(), [&](const auto& cam) {
-                auto cameraComponent = std::static_pointer_cast<CameraComponent>(component);
+                auto cameraComponent = std::dynamic_pointer_cast<CameraComponent>(component);
                 return strcmp(cam->getCamera()->ResourceName(), cameraComponent->getCamera()->ResourceName()) == 0;
             });
 
@@ -249,8 +249,17 @@ namespace ige::scene
     {
         if (m_activeCamera != camera)
         {
+            // Deactive old root node, not update nor render
+            if (m_activeCamera && m_activeCamera->getOwner())
+                m_activeCamera->getOwner()->getRoot()->setActive(false);
+
+            // Invoke callback
             getOnActiveCameraChangedEvent().invoke(camera);
+
+            // Set current node active
             m_activeCamera = camera;
+            if (m_activeCamera && m_activeCamera->getOwner())
+                m_activeCamera->getOwner()->getRoot()->setActive(true);
         }
     }
 
