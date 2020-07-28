@@ -25,11 +25,10 @@ namespace ige::scene
     Event<SceneObject&> SceneObject::s_selectedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(uint64_t id, std::string name, SceneObject* parent)
-        : m_id(id), m_name(name), m_parent(parent), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_showcase(nullptr)
+    SceneObject::SceneObject(uint64_t id, std::string name, SceneObject* parent, bool isGui)
+        : m_id(id), m_name(name), m_parent(parent), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_showcase(nullptr)
     {
-        getCreatedEvent().invoke(*this);
-
+        // Cache root item
         m_root = (parent == nullptr) ? this : parent->getRoot();
 
         // Only create showcase for root objects
@@ -37,6 +36,9 @@ namespace ige::scene
         {
             m_showcase = ResourceCreator::Instance().NewShowcase((m_name + "_" + std::to_string(m_id) + "_showcase").c_str());            
         }
+
+        // Invoke created event
+        getCreatedEvent().invoke(*this);
     }
 
     //! Destructor
@@ -118,7 +120,7 @@ namespace ige::scene
         // Recursive remove child
         for (auto& currObject : m_children)
         {
-            if (currObject->removeChild(child))
+            if (currObject && currObject->removeChild(child))
                 return true;
         }
 
@@ -435,9 +437,12 @@ namespace ige::scene
         auto jChildren = json::array();
         for (const auto& child : m_children)
         {
-            json jChild;
-            child->to_json(jChild);
-            jChildren.push_back(jChild);
+            if (child)
+            {
+                json jChild;
+                child->to_json(jChild);
+                jChildren.push_back(jChild);
+            }            
         }
         j["children"] = jChildren;
     }

@@ -20,7 +20,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SceneObject(uint64_t id, std::string name = "", SceneObject* parent = nullptr);
+        SceneObject(uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false);
 
         //! Destructor
         virtual ~SceneObject();
@@ -146,7 +146,7 @@ namespace ige::scene
         Showcase* getShowcase() { return m_showcase; }
 
         //! Check whether it's a GUI object
-        bool isGUIObject() const { return m_transform->getName() == "RectTransform"; }
+        bool isGUIObject() const { return m_bIsGui; }
 
         //! Get transform component
         std::shared_ptr<TransformComponent>& getTransform() { return m_transform; }
@@ -199,6 +199,9 @@ namespace ige::scene
 
         //! Cache root object
         SceneObject* m_root = nullptr;
+
+        //! Cache isGui
+        bool m_bIsGui = false;
     };
 
     //! Get component by type

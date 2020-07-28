@@ -119,7 +119,7 @@ namespace ige::scene
 
     std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent)
     {
-        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get());
+        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get(), true);
         if (parent != nullptr) parent->addChild(sceneObject);
         auto transform = sceneObject->addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
         sceneObject->setTransform(transform);
@@ -153,8 +153,11 @@ namespace ige::scene
         auto found = std::find(m_roots.begin(), m_roots.end(), obj);
         if (found != m_roots.end())
         {
-            if (m_activeCamera->getShootTarget()->getId() == (*found)->getId())
+            if (m_activeCamera && m_activeCamera->getShootTarget()
+                && m_activeCamera->getShootTarget()->getId() == (*found)->getId())
+            {
                 setActiveCamera(nullptr);
+            }
             m_roots.erase(found);
             return true;
         }
