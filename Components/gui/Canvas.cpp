@@ -1,6 +1,6 @@
 
-#include "components/Canvas.h"
-#include "components/RectTransform.h"
+#include "components/gui/Canvas.h"
+#include "components/gui/RectTransform.h"
 
 #include "scene/SceneObject.h"
 #include "scene/SceneManager.h"

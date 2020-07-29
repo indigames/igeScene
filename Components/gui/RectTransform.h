@@ -123,7 +123,7 @@ namespace ige::scene
         };
 
         //! Constructor
-        RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{64.f, 64.f});
+        RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{4.f, 4.f});
 
         //! Destructor
         virtual ~RectTransform();
@@ -139,19 +139,7 @@ namespace ige::scene
 
         //! Get viewport transform
         const Mat4& getViewportTransform();
-
-        //! Rotation method        
-        void setRotation(const Quat& rot) override;
         
-        //! Scale method
-        void setScale(const Vec3& scale) override;
-
-        //! Get local transform matrix
-        const Mat4& getLocalMatrix() const override;
-        
-        //! Get world transform matrix
-        const Mat4& getWorldMatrix() const override;
-
         //! Anchor
         const Anchor& getAnchor() const { return m_anchor; }
         void setAnchor(const Anchor& anchor);
@@ -171,6 +159,18 @@ namespace ige::scene
         //! Position
         const Vec3& getPosition() const override;
         void setPosition(const Vec3& pos) override;
+
+        //! Rotation
+        void setRotation(const Quat& rot) override;
+
+        //! Scale
+        void setScale(const Vec3& scale) override;
+
+        //! Get local transform matrix
+        const Mat4& getLocalMatrix() const override;
+
+        //! Get world transform matrix
+        const Mat4& getWorldMatrix() const override;
 
         //! Get rect in canvas space (no scale, no rotate)
         const Rect& getRect();
@@ -212,10 +212,6 @@ namespace ige::scene
         //! Cached rect in canvas space (no scale, no rotate)
         Rect m_rect;
         bool m_rectDirty;
-
-        //! Cached local transform
-        Mat4 m_localTransform;
-        bool m_localTransformDirty;
 
         //! Cached transform to viewport space
         Mat4 m_viewportTransform;

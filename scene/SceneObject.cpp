@@ -9,7 +9,8 @@
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
 #include "components/ScriptComponent.h"
-#include "components/RectTransform.h"
+#include "components/gui/RectTransform.h"
+#include "components/gui/UIImage.h"
 
 namespace ige::scene
 {
@@ -204,6 +205,20 @@ namespace ige::scene
                     if (figure) m_showcase->Remove(figure);
                     });
             }
+            else if (component->getName() == "UIImage")
+            {
+                auto eFigComp = std::dynamic_pointer_cast<UIImage>(component);
+                auto figure = eFigComp->getFigure();
+                if (figure) m_showcase->Add(figure);
+
+                eFigComp->getOnFigureCreatedEvent().addListener([this](auto figure) {
+                    if (figure) m_showcase->Add(figure);
+                    });
+
+                eFigComp->getOnFigureDestroyedEvent().addListener([this](auto figure) {
+                    if (figure) m_showcase->Remove(figure);
+                    });
+            }
             else if (component->getName() == "EnvironmentComponent")
             {
                 auto envComp = std::dynamic_pointer_cast<EnvironmentComponent>(component);
@@ -235,6 +250,15 @@ namespace ige::scene
             else if (component->getName() == "SpriteComponent")
             {
                 auto eFigComp = std::dynamic_pointer_cast<SpriteComponent>(component);
+                auto figure = eFigComp->getFigure();
+                if (figure) m_showcase->Remove(figure);
+
+                eFigComp->getOnFigureCreatedEvent().removeAllListeners();
+                eFigComp->getOnFigureDestroyedEvent().removeAllListeners();
+            }
+             else if (component->getName() == "UIImage")
+            {
+                auto eFigComp = std::dynamic_pointer_cast<UIImage>(component);
                 auto figure = eFigComp->getFigure();
                 if (figure) m_showcase->Remove(figure);
 

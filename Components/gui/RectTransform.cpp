@@ -1,6 +1,6 @@
 
-#include "components/RectTransform.h"
-#include "components/Canvas.h"
+#include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
 
 #include "scene/SceneObject.h"
 
@@ -52,17 +52,20 @@ namespace ige::scene
 
     const Mat4& RectTransform::getLocalTransform()
     {
-        if (m_localTransformDirty)
+        if (m_bLocalDirty)
         {
-            m_localTransform.Identity();
+            m_localMatrix.Identity();
 
-            if (hasScaleOrRotation())
+            //if (hasScaleOrRotation())
             {
                 auto pivot = getPivotInCanvasSpace();
 
                 Mat4 transformToPivotSpace;
                 auto pivotVec4 = Vec4(pivot.X(), pivot.Y(), 0.f, 0.f);
                 vmath_mat4_translation((pivotVec4 * (-1.f)).P(), transformToPivotSpace.P());
+
+                Mat4 translate;
+                vmath_mat4_translation(m_localPosition.P(), translate.P());
 
                 Mat4 scaleMat;
                 auto scaleVec4 = Vec4(m_localScale.X(), m_localScale.Y(), m_localScale.Z(), 0.f);
@@ -74,11 +77,11 @@ namespace ige::scene
                 Mat4 transformFromPivotSpace;
                 vmath_mat4_translation(pivotVec4.P(), transformFromPivotSpace.P());
 
-                m_localTransform = transformFromPivotSpace * rotMat * scaleMat * transformToPivotSpace;
+                m_localMatrix = transformFromPivotSpace * rotMat * scaleMat * translate * transformToPivotSpace;
             }
-            m_localTransformDirty = false;
+            m_bLocalDirty = false;
         }
-        return m_localTransform;
+        return m_localMatrix;
     }
 
     //! Get canvas space transform
@@ -96,7 +99,7 @@ namespace ige::scene
                 {
                     m_canvasTransform = parentTransform->getCanvasSpaceTransform();
 
-                    if (hasScaleOrRotation())
+                   // if (hasScaleOrRotation())
                     {
                         auto transformToParent = getLocalTransform();
                         m_canvasTransform = m_canvasTransform * transformToParent;
@@ -113,12 +116,48 @@ namespace ige::scene
     {
         if (m_viewportTransformDirty)
         {
-            getCanvasSpaceTransform(); // Ensure canvas space up-to-date
-            auto canvas = getOwner()->getComponent<Canvas>();
+            m_viewportTransform.Identity();
+            auto canvas = getOwner()->getRoot()->getComponent<Canvas>();
             if (canvas)
             {
-                Mat4 canvasToViewportMatrix = getOwner()->getComponent<Canvas>()->getCanvasToViewportMatrix();
-                m_viewportTransform = canvasToViewportMatrix * m_canvasTransform;
+                auto canvasToViewportMatrix = canvas->getCanvasToViewportMatrix();                
+                m_worldMatrix = m_viewportTransform = canvasToViewportMatrix * getCanvasSpaceTransform();
+
+                // Update world position
+                m_worldPosition.X(m_worldMatrix[3][0]);
+                m_worldPosition.Y(m_worldMatrix[3][1]);
+                m_worldPosition.Z(m_worldMatrix[3][2]);
+
+                Vec3 columns[3] =
+                {
+                    { m_worldMatrix[0][0], m_worldMatrix[0][1], m_worldMatrix[0][2]},
+                    { m_worldMatrix[1][0], m_worldMatrix[1][1], m_worldMatrix[1][2]},
+                    { m_worldMatrix[2][0], m_worldMatrix[2][1], m_worldMatrix[2][2]},
+                };
+
+                // Update world scale
+                m_worldScale.X(columns[0].Length());
+                m_worldScale.Y(columns[1].Length());
+                m_worldScale.Z(columns[2].Length());
+
+                if (m_worldScale.X())
+                {
+                    columns[0] /= m_worldScale.X();
+                }
+
+                if (m_worldScale.Y())
+                {
+                    columns[1] /= m_worldScale.Y();
+                }
+
+                if (m_worldScale.Z())
+                {
+                    columns[2] /= m_worldScale.Z();
+                }
+
+                // Update world rotation
+                Mat3 rotationMatrix(columns[0], columns[1], columns[2]);
+                m_worldRotation = Quat(rotationMatrix);
             }
             m_viewportTransformDirty = false;
         }
@@ -150,21 +189,21 @@ namespace ige::scene
 
     const Mat4& RectTransform::getLocalMatrix() const
     {
-        return m_localTransform;
+        return m_localMatrix;
     }
 
     const Mat4& RectTransform::getWorldMatrix() const
     {
-        return m_canvasTransform;
+        return m_viewportTransform;
     }
 
     //! OnUpdate
     void RectTransform::onUpdate(float dt)
     {
+        getRect();
         getLocalTransform();
         getCanvasSpaceTransform();
-        getViewportTransform();
-        getRect();
+        getViewportTransform();       
     }
 
     void RectTransform::setPosition(const Vec3& pos)
@@ -181,7 +220,7 @@ namespace ige::scene
 
     void RectTransform::setRecomputeFlag(E_Recompute flag)
     {
-        if (flag == E_Recompute::RectOnly && hasScaleOrRotation())
+        if (flag == E_Recompute::RectOnly /*&& hasScaleOrRotation()*/)
         {
             // If has scale or rotation, need recalculate transform            
             flag = E_Recompute::RectAndTransform;
@@ -207,13 +246,13 @@ namespace ige::scene
             m_rectDirty = true;
             break;
         case E_Recompute::TransformOnly:
-            m_localTransformDirty = true;
+            m_bLocalDirty = true;
             m_viewportTransformDirty = true;
             m_canvasTransformDirty = true;            
             break;
         case E_Recompute::RectAndTransform:
             m_rectDirty = true;
-            m_localTransformDirty = true;
+            m_bLocalDirty = true;
             m_viewportTransformDirty = true;
             m_canvasTransformDirty = true;
             break;
@@ -277,7 +316,7 @@ namespace ige::scene
             return;
 
         // If has scale or rotation, need calculate offset in transformed space
-        if (hasScaleOrRotation())
+        //if (hasScaleOrRotation())
         {
             auto rect = getRect();
             auto localTransform = getLocalTransform();
@@ -322,12 +361,12 @@ namespace ige::scene
             // Recalculate rect
             setRecomputeFlag(E_Recompute::RectOnly);
         }
-        else
+        /*else
         {
             // No scale or rotation, just update pivot
             m_pivot = pivot;
             setRecomputeFlag(E_Recompute::TransformOnly);
-        }        
+        }    */    
     }
 
     void RectTransform::setOffset(const Offset& offset) 
@@ -450,17 +489,17 @@ namespace ige::scene
                     rect.m_top = parentRect.m_top + parentSize.Y() * m_anchor.m_top + m_offset.m_top;
                     rect.m_bottom = parentRect.m_top + parentSize.Y() * m_anchor.m_bottom + m_offset.m_bottom;
                 }
-                else
+            }
+            else
+            {
+                auto canvas = getOwner()->getRoot()->getComponent<Canvas>();
+                if (canvas)
                 {
-                    auto canvas = getOwner()->getComponent<Canvas>();
-                    if (canvas)
-                    {
-                        auto size = canvas->getDesignCanvasSize();
-                        rect.m_right = size.X();
-                        rect.m_bottom = size.Y();
-                    }
+                    auto size = canvas->getDesignCanvasSize();
+                    rect.m_right = size.X();
+                    rect.m_bottom = size.Y();
                 }
-            }            
+            }
 
             // Avoid flipped rect
             if(rect.m_left > rect.m_right)
@@ -485,11 +524,11 @@ namespace ige::scene
 
     bool RectTransform::hasRotation() const
     {
-        return m_localRotation.X() != 0.0f || m_localRotation.Y() != 0 || m_localRotation.Z() != 0 || m_localRotation.W() != 0;
+        return m_localRotation.X() != 0.0f || m_localRotation.Y() != 0.f || m_localRotation.Z() != 0.f || m_localRotation.W() != 1.f;
     }
 
     bool RectTransform::hasScaleOrRotation() const
     {
         return hasScale() || hasRotation();
-    }
+    }    
 }

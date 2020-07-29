@@ -10,8 +10,8 @@
 #include "components/SpriteComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/ScriptComponent.h"
-#include "components/RectTransform.h"
-#include "components/Canvas.h"
+#include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
 
 #include "utils/GraphicsHelper.h"
 
@@ -87,8 +87,8 @@ namespace ige::scene
                 target->getShowcase()->Render();
             }
         }
-        for (auto& root : m_roots)
-            if (root) root->onRender();
+        //for (auto& root : m_roots)
+        //    if (root) root->onRender();
     }
 
     std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent)
@@ -130,7 +130,9 @@ namespace ige::scene
             auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
             envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
             envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
-            sceneObject->addComponent<Canvas>();
+
+            auto canvas = sceneObject->addComponent<Canvas>();
+            canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetDeviceW(), SystemInfo::Instance().GetDeviceH()));
 
             auto camObj = createObject("GUI Camera", sceneObject);
             camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 20.f));

@@ -253,7 +253,7 @@ namespace ige::scene {
     void TransformComponent::updateWorldMatrix()
     {
         // Update world matrix
-        m_worldMatrix = hasParent() ? getParent()->getWorldMatrix() * m_localMatrix : m_localMatrix;
+        m_worldMatrix = (hasParent() && getParent()->getName() == "TransformComponent") ? getParent()->getWorldMatrix() * m_localMatrix : m_localMatrix;
 
         // Update world position
         m_worldPosition.X(m_worldMatrix[3][0]);
