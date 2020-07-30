@@ -36,12 +36,7 @@ namespace ige::scene
 
         // Update transform from transform component
         auto transCmp = std::dynamic_pointer_cast<RectTransform>(getOwner()->getTransform());
-        if(m_size != transCmp->getSize())
-        {
-            setSize(transCmp->getSize());
-            return;
-        }
-        
+        setSize(transCmp->getSize());
         m_figure->SetPosition(transCmp->getWorldPosition());
         m_figure->SetRotation(transCmp->getWorldRotation());
         m_figure->SetScale(transCmp->getWorldScale());
