@@ -10,7 +10,7 @@ using namespace pyxie;
 
 #include "event/Event.h"
 
-namespace ige::scene 
+namespace ige::scene
 {
     //! Class Rect: store the bounds of an axis-aligned rectangle
     class Rect
@@ -18,7 +18,7 @@ namespace ige::scene
     public:
         //! Constructors
         Rect() { m_left = m_top = m_right = m_bottom = 0.f; }
-        Rect(float left, float top, float right, float bottom): m_left(left), m_top(top), m_right(right), m_bottom(bottom) {}        
+        Rect(float left, float top, float right, float bottom): m_left(left), m_top(top), m_right(right), m_bottom(bottom) {}
 
         //! Size
         inline float getWidth() const { return m_right - m_left; }
@@ -27,7 +27,7 @@ namespace ige::scene
 
         //! Center
         inline float getCenterX() const { return (m_left + m_right) * 0.5f; }
-        inline float getCenterY() const { return (m_top + m_bottom) * 0.5f; }        
+        inline float getCenterY() const { return (m_top + m_bottom) * 0.5f; }
         inline Vec2 getCenter() const { return Vec2(getCenterX(), getCenterY()); }
 
         //! Translation
@@ -39,7 +39,7 @@ namespace ige::scene
             m_bottom += offset.Y();
         }
 
-        //! Check equal    
+        //! Check equal
         inline bool operator==(const Rect& rhs) const
         {
             return m_left == rhs.m_left && m_right == rhs.m_right && m_top == rhs.m_top && m_bottom == rhs.m_bottom;
@@ -52,7 +52,7 @@ namespace ige::scene
         }
 
         //! Properties
-        float m_left;        
+        float m_left;
         float m_top;
         float m_right;
         float m_bottom;
@@ -65,7 +65,7 @@ namespace ige::scene
         //! Constructor
         Anchor(): Rect(0.5f, 0.5f, 0.5f, 0.5f) {}
         Anchor(float left, float top, float right, float bottom): Rect(left, top, right, bottom) { clampZeroToOne(); }
-      
+
         //! Claim values in range of 0.0f - 1.0f
         void clampZeroToOne()
         {
@@ -108,7 +108,7 @@ namespace ige::scene
             return result;
         }
     };
-    
+
     //! RectTransform: transform of UI elements
     class RectTransform: public TransformComponent
     {
@@ -123,14 +123,14 @@ namespace ige::scene
         };
 
         //! Constructor
-        RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{4.f, 4.f});
+        RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{64.f, 64.f});
 
         //! Destructor
         virtual ~RectTransform();
-        
+
         //! Get component name
         virtual std::string getName() const override { return "RectTransform"; }
-        
+
         //! Get local transform
         const Mat4& getLocalTransform();
 
@@ -139,7 +139,7 @@ namespace ige::scene
 
         //! Get viewport transform
         const Mat4& getViewportTransform();
-        
+
         //! Anchor
         const Anchor& getAnchor() const { return m_anchor; }
         void setAnchor(const Anchor& anchor);
@@ -185,9 +185,9 @@ namespace ige::scene
         //! Serialize
         void to_json(json& j) const override { }
 
-        //! Deserialize 
+        //! Deserialize
         void from_json(const json& j) override { }
-        
+
     protected:
         bool hasScale() const;
         bool hasRotation() const;

@@ -31,7 +31,7 @@ namespace ige::scene
     {
         clear();
     }
-    
+
     bool Scene::initialize()
     {
         createObject(getName());
@@ -141,7 +141,6 @@ namespace ige::scene
             camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
             camComp->setOrthoProjection(true);
             camComp->setWidthBase(false);
-            camComp->setOrthoHeight(4.f);
             camComp->setShootTarget(sceneObject.get());
             m_roots.push_back(sceneObject);
         }
@@ -174,7 +173,7 @@ namespace ige::scene
     {
         return removeObject(findObjectById(id));
     }
-    
+
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id) const
     {
         for (const auto& root : m_roots)
@@ -207,7 +206,7 @@ namespace ige::scene
 
     //! Component added event
     void Scene::onComponentAdded(SceneObject& obj, const std::shared_ptr<Component>& component)
-    { 
+    {
         if (component->getName() == "CameraComponent")
         {
             m_cameras.push_back(std::dynamic_pointer_cast<CameraComponent>(component));
@@ -235,7 +234,7 @@ namespace ige::scene
     }
 
     void Scene::onSceneObjectSelected(SceneObject& sceneObject)
-    {        
+    {
         for (auto& cam : m_cameras)
         {
             if (cam && cam->getShootTarget() && cam->getShootTarget()->getId() == sceneObject.getRoot()->getId())
@@ -282,11 +281,11 @@ namespace ige::scene
                 root->to_json(jRoot);
                 jRoots.push_back(jRoot);
             }
-        }       
+        }
         j["roots"] = jRoots;
     }
 
-    //! Deserialize 
+    //! Deserialize
     void Scene::from_json(const json& j)
     {
         j.at("name").get_to(m_name);

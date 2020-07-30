@@ -106,6 +106,10 @@ namespace ige::scene
                     }
                 }
             }
+            else
+            {
+                m_canvasTransform = getLocalTransform();
+            }
             m_canvasTransformDirty = false;
         }
         return m_canvasTransform;
@@ -120,7 +124,7 @@ namespace ige::scene
             auto canvas = getOwner()->getRoot()->getComponent<Canvas>();
             if (canvas)
             {
-                auto canvasToViewportMatrix = canvas->getCanvasToViewportMatrix();                
+                auto canvasToViewportMatrix = canvas->getCanvasToViewportMatrix();
                 m_worldMatrix = m_viewportTransform = canvasToViewportMatrix * getCanvasSpaceTransform();
 
                 // Update world position
@@ -203,7 +207,7 @@ namespace ige::scene
         getRect();
         getLocalTransform();
         getCanvasSpaceTransform();
-        getViewportTransform();       
+        getViewportTransform();
     }
 
     void RectTransform::setPosition(const Vec3& pos)
@@ -222,7 +226,7 @@ namespace ige::scene
     {
         if (flag == E_Recompute::RectOnly /*&& hasScaleOrRotation()*/)
         {
-            // If has scale or rotation, need recalculate transform            
+            // If has scale or rotation, need recalculate transform
             flag = E_Recompute::RectAndTransform;
         }
 
@@ -236,9 +240,9 @@ namespace ige::scene
                 {
                     childTransform->setRecomputeFlag(flag);
                 }
-            }            
+            }
         }
-        
+
         // Now update flags
         switch (flag)
         {
@@ -248,7 +252,7 @@ namespace ige::scene
         case E_Recompute::TransformOnly:
             m_bLocalDirty = true;
             m_viewportTransformDirty = true;
-            m_canvasTransformDirty = true;            
+            m_canvasTransformDirty = true;
             break;
         case E_Recompute::RectAndTransform:
             m_rectDirty = true;
@@ -259,20 +263,20 @@ namespace ige::scene
         }
     }
 
-    void RectTransform::setAnchor(const Anchor& anchor) 
-    { 
+    void RectTransform::setAnchor(const Anchor& anchor)
+    {
         auto lastAnchor = m_anchor;
         auto lastOffset = m_offset;
         m_anchor = anchor;
 
         // Correct anchor left & right
-        if (m_anchor.m_right < m_anchor.m_left)        
+        if (m_anchor.m_right < m_anchor.m_left)
         {
             if (m_anchor.m_right != lastAnchor.m_right)
                 m_anchor.m_right = m_anchor.m_left;
             else
                 m_anchor.m_left = m_anchor.m_right;
-        }        
+        }
 
         // Correct anchor top & bottom
         if (m_anchor.m_bottom < m_anchor.m_top)
@@ -297,7 +301,7 @@ namespace ige::scene
                 m_offset.m_bottom -= parentSize.Y() * (m_anchor.m_bottom - lastAnchor.m_bottom);
             }
         }
-        
+
         // Avoid negative width and height
         if (m_anchor.m_left == m_anchor.m_right && m_offset.m_left > m_offset.m_right)
             m_offset.m_left = m_offset.m_right = (m_offset.m_left + m_offset.m_right) * 0.5f;
@@ -310,7 +314,7 @@ namespace ige::scene
             setRecomputeFlag(E_Recompute::RectOnly);
     }
 
-    void RectTransform::setPivot(const Vec2& pivot) 
+    void RectTransform::setPivot(const Vec2& pivot)
     {
         if (m_pivot == pivot)
             return;
@@ -366,17 +370,17 @@ namespace ige::scene
             // No scale or rotation, just update pivot
             m_pivot = pivot;
             setRecomputeFlag(E_Recompute::TransformOnly);
-        }    */    
+        }    */
     }
 
-    void RectTransform::setOffset(const Offset& offset) 
+    void RectTransform::setOffset(const Offset& offset)
     {
         auto parent = getOwner()->getParent();
         if (!parent) return;
 
         auto parentRectTransform = parent->getComponent<RectTransform>();
         if (!parentRectTransform) return;
-        
+
         auto lastOffset = m_offset;
         auto newOffset = offset;
 
@@ -395,7 +399,7 @@ namespace ige::scene
             bool rightChanged = newOffset.m_right != lastOffset.m_right;
 
             if (leftChanged && rightChanged)
-            {               
+            {
                 float newValue = left * (1.0f - m_pivot.X()) + right * m_pivot.X();
                 newOffset.m_left = newValue - (parentRect.m_left + parentSize.X() * m_anchor.m_left);
                 newOffset.m_right = newValue - (parentRect.m_left + parentSize.X() * m_anchor.m_right);
@@ -444,28 +448,30 @@ namespace ige::scene
         return getRect().getSize();
     }
 
-    void RectTransform::setSize(const Vec2& size) 
+    void RectTransform::setSize(const Vec2& size)
     {
         auto offset = getOffset();
 
+        // Adjust width
         if (m_anchor.m_left == m_anchor.m_right)
-        {            
+        {
             auto curWidth = m_offset.m_right - m_offset.m_left;
             auto diff = size.X() - curWidth;
             offset.m_left -= diff * m_pivot.X();
-            offset.m_right += diff * (1.0f - m_pivot.X());            
+            offset.m_right += diff * (1.0f - m_pivot.X());
         }
 
+        // Adjust height
         if (m_anchor.m_top == m_anchor.m_bottom)
-        {            
+        {
             auto curHeight = m_offset.m_bottom - m_offset.m_top;
             auto diff = size.Y() - curHeight;
             offset.m_top -= diff * m_pivot.Y();
-            offset.m_bottom += diff * (1.0f - m_pivot.Y());            
+            offset.m_bottom += diff * (1.0f - m_pivot.Y());
         }
 
-        if(m_offset != offset)
-            setOffset(offset);
+        // Set new offset
+        setOffset(offset);
     }
 
 
@@ -474,7 +480,7 @@ namespace ige::scene
         if (m_rectDirty)
         {
             Rect rect;
-            rect.m_left = rect.m_top = 0.f;            
+            rect.m_left = rect.m_top = 0.f;
 
             auto parent = getOwner()->getParent();
             if (parent)
@@ -504,9 +510,9 @@ namespace ige::scene
             // Avoid flipped rect
             if(rect.m_left > rect.m_right)
                 rect.m_left = rect.m_right = rect.getCenterX();
-            
+
             if (rect.m_top > rect.m_bottom)
-                rect.m_top = rect.m_bottom = rect.getCenterY();            
+                rect.m_top = rect.m_bottom = rect.getCenterY();
 
             m_rect = rect;
             m_rectDirty = false;
@@ -518,7 +524,7 @@ namespace ige::scene
     }
 
     bool RectTransform::hasScale() const
-    {        
+    {
         return m_localScale.X() != 1.0f || m_localScale.Y() != 1.0f || m_localScale.Z() != 1.0f;
     }
 
@@ -530,5 +536,5 @@ namespace ige::scene
     bool RectTransform::hasScaleOrRotation() const
     {
         return hasScale() || hasRotation();
-    }    
+    }
 }

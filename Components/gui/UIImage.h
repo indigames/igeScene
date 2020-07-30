@@ -13,14 +13,14 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        UIImage(const std::shared_ptr<SceneObject>& owner, const std::string& texture = "", const Vec2& size = {32.f, 32.f});
+        UIImage(const std::shared_ptr<SceneObject>& owner, const std::string& texture = "", const Vec2& size = {128.f, 128.f});
 
         //! Destructor
         virtual ~UIImage();
 
         //! Get component name
         virtual std::string getName() const override { return "UIImage"; }
-        
+
         //! Update
         void onUpdate(float dt);
 
@@ -30,7 +30,7 @@ namespace ige::scene
         //! Serialize
         virtual void to_json(json& j) const override;
 
-        //! Deserialize 
+        //! Deserialize
         virtual void from_json(const json& j) override;
 
         //! Get associated figure
