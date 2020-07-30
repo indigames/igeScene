@@ -10,6 +10,10 @@ namespace ige::scene {
     {
         m_bLocalDirty = true;
 
+        m_worldPosition = pos;
+        m_worldRotation = rot;
+        m_worldScale = scale;
+
         if(owner && owner->getParent())
         {
             setParent(owner->getParent()->getTransform().get());

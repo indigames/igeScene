@@ -111,7 +111,7 @@ namespace ige::scene
             camComp->lockOnTarget(false);
             camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
             camComp->setShootTarget(sceneObject.get());
-            setActiveCamera(camComp);
+            setActiveCamera(camComp.get());
             m_roots.push_back(sceneObject);
         }
         return sceneObject;
@@ -126,6 +126,9 @@ namespace ige::scene
 
         if (parent == nullptr)
         {
+            // Canvas, pivot at top-left
+            transform->setPivot(Vec2(0.f, 0.f));
+
             // This is a GUI root object, setup default environment, canvas and camera
             auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
             envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
@@ -216,8 +219,8 @@ namespace ige::scene
     //! Component removed event
     void Scene::onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component)
     {
-        if (m_activeCamera == component)
-            setActiveCamera(nullptr);
+        auto cameraComp = std::dynamic_pointer_cast<CameraComponent>(component);
+        if (cameraComp && m_activeCamera == cameraComp.get()) setActiveCamera(nullptr);
 
         if (component->getName() == "CameraComponent")
         {
@@ -239,14 +242,14 @@ namespace ige::scene
         {
             if (cam && cam->getShootTarget() && cam->getShootTarget()->getId() == sceneObject.getRoot()->getId())
             {
-                setActiveCamera(cam);
+                setActiveCamera(cam.get());
                 break;
             }
         }
     }
 
     //! Set active camera
-    void Scene::setActiveCamera(const std::shared_ptr<CameraComponent>& camera)
+    void Scene::setActiveCamera(CameraComponent* camera)
     {
         if (m_activeCamera != camera)
         {

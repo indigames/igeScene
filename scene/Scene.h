@@ -86,13 +86,13 @@ namespace ige::scene
         std::vector<std::shared_ptr<SceneObject>>& getRoots() { return m_roots; };
 
         //! Set active camera
-        void setActiveCamera(const std::shared_ptr<CameraComponent>& camera);
+        void setActiveCamera(CameraComponent* camera);
 
         //! Get active camera
-        std::shared_ptr<CameraComponent>& getActiveCamera() { return m_activeCamera; }
+        CameraComponent* getActiveCamera() { return m_activeCamera; }
 
         //! Active camera changed event
-        Event<const std::shared_ptr<CameraComponent>&>& getOnActiveCameraChangedEvent() { return m_onActiveCameraChanged; }
+        Event<CameraComponent*>& getOnActiveCameraChangedEvent() { return m_onActiveCameraChanged; }
 
     protected:
         //! Scene root node
@@ -100,7 +100,7 @@ namespace ige::scene
 
         //! Cache all camera components
         std::vector<std::shared_ptr<CameraComponent>> m_cameras;
-        std::shared_ptr<CameraComponent> m_activeCamera;
+        CameraComponent* m_activeCamera = nullptr;
 
         //! Object ID counter
         uint64_t m_nextObjectID = 0;
@@ -109,6 +109,6 @@ namespace ige::scene
         std::string m_name;
 
         //! Active camera changed events
-        Event<const std::shared_ptr<CameraComponent>&> m_onActiveCameraChanged;
+        Event<CameraComponent*> m_onActiveCameraChanged;
     };
 }
