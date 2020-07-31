@@ -24,9 +24,8 @@ namespace ige::scene
     Vec2 RectTransform::getPivotInCanvasSpace()
     {
         auto rect = getRect();
-        auto size = getSize();
-        float x = rect.m_left + size.X() * m_pivot.X();
-        float y = rect.m_top + size.Y() * m_pivot.Y();
+        float x = rect.m_left + rect.getWidth() * m_pivot.X();
+        float y = rect.m_top + rect.getHeight() * m_pivot.Y();
         return Vec2(x, y);
     }
 
@@ -35,15 +34,14 @@ namespace ige::scene
         auto parent = getOwner()->getParent();
         if (!parent) return Vec2(0.0f, 0.0f);
 
-        auto parentTransform = parent->getComponent<RectTransform>();
+        auto parentTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
         auto parentRect = parentTransform->getRect();
-        auto parentSize = parentTransform->getSize();
 
         Rect anchorRect;
-        anchorRect.m_left = parentRect.m_left + m_anchor.m_left * parentSize.X();
-        anchorRect.m_right = parentRect.m_left + m_anchor.m_right * parentSize.X();
-        anchorRect.m_top = parentRect.m_top + m_anchor.m_top * parentSize.Y();
-        anchorRect.m_bottom = parentRect.m_top + m_anchor.m_bottom * parentSize.Y();
+        anchorRect.m_left = parentRect.m_left + m_anchor.m_left * parentRect.getWidth();
+        anchorRect.m_right = parentRect.m_left + m_anchor.m_right * parentRect.getWidth();
+        anchorRect.m_top = parentRect.m_top + m_anchor.m_top * parentRect.getHeight();
+        anchorRect.m_bottom = parentRect.m_top + m_anchor.m_bottom * parentRect.getHeight();
 
         return anchorRect.getCenter();
     }
@@ -57,22 +55,10 @@ namespace ige::scene
             if (hasScaleOrRotation())
             {
                 auto pivot = getPivotInCanvasSpace();
-
-                Mat4 transformToPivotSpace;
-                auto pivotInvVec4 = Vec4(-pivot.X(), -pivot.Y(), 0.f, 0.f);
-                vmath_mat4_translation(pivotInvVec4.P(), transformToPivotSpace.P());
-
-                Mat4 scaleMat;
-                auto scaleVec4 = Vec4(m_localScale.X(), m_localScale.Y(), m_localScale.Z(), 0.f);
-                vmath_mat_scale(scaleVec4.P(), 4, scaleMat.P());
-
-                Mat4 rotMat;
-                vmath_mat_from_quat(m_localRotation.P(), 4, rotMat.P());
-
-                Mat4 transformFromPivotSpace;
-                auto pivotVec4 = Vec4(pivot.X(), pivot.Y(), 0.f, 0.f);
-                vmath_mat4_translation(pivotVec4.P(), transformFromPivotSpace.P());
-
+                auto transformToPivotSpace = Mat4::Translate(Vec3(-pivot.X(), -pivot.Y(), 0.f));
+                auto scaleMat = Mat4::Scale(m_localScale);
+                auto rotMat = Mat4::Rotation(m_localRotation);
+                auto transformFromPivotSpace = Mat4::Translate(Vec3(pivot.X(), pivot.Y(), 0.f));
                 m_localMatrix = transformFromPivotSpace * rotMat * scaleMat * transformToPivotSpace;
             }
             m_bLocalDirty = false;
@@ -89,12 +75,32 @@ namespace ige::scene
             auto parent = getOwner()->getParent();
             if (parent)
             {
-                auto parentTransform = parent->getComponent<RectTransform>();
+                auto parentTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
                 m_canvasTransform = parentTransform->getCanvasSpaceTransform();
-                if (hasScaleOrRotation())
+                if (hasScaleOrRotation() || parentTransform->hasScaleOrRotation())
                 {
                     auto transformToParent = getLocalTransform();
-                    m_canvasTransform = m_canvasTransform * transformToParent;
+                    m_worldMatrix = m_canvasTransform = m_canvasTransform * transformToParent;
+
+                    Vec3 columns[3] =
+                    {
+                        { m_worldMatrix[0][0], m_worldMatrix[0][1], m_worldMatrix[0][2]},
+                        { m_worldMatrix[1][0], m_worldMatrix[1][1], m_worldMatrix[1][2]},
+                        { m_worldMatrix[2][0], m_worldMatrix[2][1], m_worldMatrix[2][2]},
+                    };
+
+                    // Update world scale
+                    m_worldScale.X(columns[0].Length());
+                    m_worldScale.Y(columns[1].Length());
+                    m_worldScale.Z(columns[2].Length());
+
+                    if (m_worldScale.X()) columns[0] /= m_worldScale.X();
+                    if (m_worldScale.Y()) columns[1] /= m_worldScale.Y();
+                    if (m_worldScale.Z()) columns[2] /= m_worldScale.Z();
+
+                    // Update world rotation
+                    Mat3 rotationMatrix(columns[0], columns[1], columns[2]);
+                    m_worldRotation = Quat(rotationMatrix);
                 }
             }
             m_canvasTransformDirty = false;
@@ -134,7 +140,6 @@ namespace ige::scene
         if (m_localScale != scale)
         {
             m_localScale = scale;
-            m_worldScale = m_localScale;
             setRecomputeFlag(E_Recompute::TransformOnly);
         }
     }
@@ -244,12 +249,12 @@ namespace ige::scene
         auto parent = getOwner()->getParent();
         if (parent)
         {
-            auto parentRectTransform = parent->getComponent<RectTransform>();
-            auto parentSize = parentRectTransform->getSize();
-            m_offset.m_left -= parentSize.X() * (m_anchor.m_left - lastAnchor.m_left);
-            m_offset.m_right -= parentSize.X() * (m_anchor.m_right - lastAnchor.m_right);
-            m_offset.m_top -= parentSize.Y() * (m_anchor.m_top - lastAnchor.m_top);
-            m_offset.m_bottom -= parentSize.Y() * (m_anchor.m_bottom - lastAnchor.m_bottom);
+            auto parentRectTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
+            auto parentRect = parentRectTransform->getRect();
+            m_offset.m_left -= parentRect.getWidth() * (m_anchor.m_left - lastAnchor.m_left);
+            m_offset.m_right -= parentRect.getWidth() * (m_anchor.m_right - lastAnchor.m_right);
+            m_offset.m_top -= parentRect.getHeight() * (m_anchor.m_top - lastAnchor.m_top);
+            m_offset.m_bottom -= parentRect.getHeight() * (m_anchor.m_bottom - lastAnchor.m_bottom);
         }
 
         // Avoid negative width and height
@@ -276,10 +281,10 @@ namespace ige::scene
             auto localTransform = getLocalTransform();
 
             // Get the rect points
-            auto leftTop = Vec4(rect.m_left, rect.m_top, 0.0f, 0.f);
-            auto rightTop = Vec4(rect.m_right, rect.m_top, 0.0f, 0.f);
-            auto leftBottom = Vec4(rect.m_left, rect.m_bottom, 0.0f, 0.f);
-            auto rightBottom = Vec4(rect.m_right, rect.m_bottom, 0.0f, 0.f);
+            auto leftTop = Vec4(rect.m_left, rect.m_top, 0.0f, 1.0f);
+            auto rightTop = Vec4(rect.m_right, rect.m_top, 0.0f, 1.0f);
+            auto leftBottom = Vec4(rect.m_left, rect.m_bottom, 0.0f, 1.0f);
+            auto rightBottom = Vec4(rect.m_right, rect.m_bottom, 0.0f, 1.0f);
 
             // Apply transformation
             leftTop = localTransform * leftTop;
@@ -300,9 +305,8 @@ namespace ige::scene
             auto transPivot = leftTopVec + (rightVec * pivot.X()) + (downVec * pivot.Y());
 
             // Adjust the size based on transformed pivot
-            auto oldSize = rect.getSize();
-            float newLeft = transPivot.X() - oldSize.X() * pivot.X();
-            float newTop = transPivot.Y() - oldSize.Y() * pivot.Y();
+            float newLeft = transPivot.X() - rect.getWidth() * pivot.X();
+            float newTop = transPivot.Y() - rect.getHeight() * pivot.Y();
             float deltaX = newLeft - rect.m_left;
             float deltaY = newTop - rect.m_top;
 
@@ -328,19 +332,17 @@ namespace ige::scene
         auto parent = getOwner()->getParent();
         if (!parent) return;
 
-        auto parentRectTransform = parent->getComponent<RectTransform>();
+        auto parentRectTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
         if (!parentRectTransform) return;
 
         auto lastOffset = m_offset;
         auto newOffset = offset;
 
         auto parentRect = parentRectTransform->getRect();
-        auto parentSize = parentRectTransform->getSize();
-
-        float left = parentRect.m_left + parentSize.X() * m_anchor.m_left + offset.m_left;
-        float right = parentRect.m_left + parentSize.X() * m_anchor.m_right + offset.m_right;
-        float top = parentRect.m_top + parentSize.Y() * m_anchor.m_top + offset.m_top;
-        float bottom = parentRect.m_top + parentSize.Y() * m_anchor.m_bottom + offset.m_bottom;
+        float left = parentRect.m_left + parentRect.getWidth() * m_anchor.m_left + offset.m_left;
+        float right = parentRect.m_left + parentRect.getWidth() * m_anchor.m_right + offset.m_right;
+        float top = parentRect.m_top + parentRect.getHeight() * m_anchor.m_top + offset.m_top;
+        float bottom = parentRect.m_top + parentRect.getHeight() * m_anchor.m_bottom + offset.m_bottom;
 
         if (left > right)
         {
@@ -351,16 +353,16 @@ namespace ige::scene
             if (leftChanged && rightChanged)
             {
                 float newValue = left * (1.0f - m_pivot.X()) + right * m_pivot.X();
-                newOffset.m_left = newValue - (parentRect.m_left + parentSize.X() * m_anchor.m_left);
-                newOffset.m_right = newValue - (parentRect.m_left + parentSize.X() * m_anchor.m_right);
+                newOffset.m_left = newValue - (parentRect.m_left + parentRect.getWidth() * m_anchor.m_left);
+                newOffset.m_right = newValue - (parentRect.m_left + parentRect.getWidth() * m_anchor.m_right);
             }
             else if (rightChanged)
             {
-                newOffset.m_right = left - (parentRect.m_left + parentSize.X() * m_anchor.m_right);
+                newOffset.m_right = left - (parentRect.m_left + parentRect.getWidth() * m_anchor.m_right);
             }
             else if (leftChanged)
             {
-                newOffset.m_left = right - (parentRect.m_left + parentSize.X() * m_anchor.m_left);
+                newOffset.m_left = right - (parentRect.m_left + parentRect.getWidth() * m_anchor.m_left);
             }
         }
 
@@ -373,16 +375,16 @@ namespace ige::scene
             if (topChanged && bottomChanged)
             {
                 float newValue = top * (1.0f - m_pivot.Y()) + bottom * m_pivot.Y();
-                newOffset.m_top = newValue - (parentRect.m_top + parentSize.Y() * m_anchor.m_top);
-                newOffset.m_bottom = newValue - (parentRect.m_top + parentSize.Y() * m_anchor.m_bottom);
+                newOffset.m_top = newValue - (parentRect.m_top + parentRect.getHeight() * m_anchor.m_top);
+                newOffset.m_bottom = newValue - (parentRect.m_top + parentRect.getHeight() * m_anchor.m_bottom);
             }
             else if (bottomChanged)
             {
-                newOffset.m_bottom = top - (parentRect.m_top + parentSize.Y() * m_anchor.m_bottom);
+                newOffset.m_bottom = top - (parentRect.m_top + parentRect.getHeight() * m_anchor.m_bottom);
             }
             else if (topChanged)
             {
-                newOffset.m_top = bottom - (parentRect.m_top + parentSize.Y() * m_anchor.m_top);
+                newOffset.m_top = bottom - (parentRect.m_top + parentRect.getHeight() * m_anchor.m_top);
             }
         }
 
@@ -435,13 +437,12 @@ namespace ige::scene
             auto parent = getOwner()->getParent();
             if (parent)
             {
-                auto parentRectTransform = parent->getComponent<RectTransform>();
+                auto parentRectTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
                 auto parentRect = parentRectTransform->getRect();
-                auto parentSize = parentRectTransform->getSize();
-                rect.m_left = parentRect.m_left + parentSize.X() * m_anchor.m_left + m_offset.m_left;
-                rect.m_right = parentRect.m_left + parentSize.X() * m_anchor.m_right + m_offset.m_right;
-                rect.m_top = parentRect.m_top + parentSize.Y() * m_anchor.m_top + m_offset.m_top;
-                rect.m_bottom = parentRect.m_top + parentSize.Y() * m_anchor.m_bottom + m_offset.m_bottom;
+                rect.m_left = parentRect.m_left + parentRect.getWidth() * m_anchor.m_left + m_offset.m_left;
+                rect.m_right = parentRect.m_left + parentRect.getWidth() * m_anchor.m_right + m_offset.m_right;
+                rect.m_top = parentRect.m_top + parentRect.getHeight() * m_anchor.m_top + m_offset.m_top;
+                rect.m_bottom = parentRect.m_top + parentRect.getHeight() * m_anchor.m_bottom + m_offset.m_bottom;
             }
             else
             {
@@ -464,18 +465,18 @@ namespace ige::scene
             m_rect = rect;
             m_rectDirty = false;
 
-            auto canvasPivot = getPivotInCanvasSpace();
-            auto posVec2 = canvasPivot - getAnchorCenterInCanvasSpace();
+            auto pivot = getPivotInCanvasSpace();
+            auto posVec2 = pivot - getAnchorCenterInCanvasSpace();
             m_localPosition = Vec3(posVec2.X(), posVec2.Y(), m_posZ);
 
-            auto point4 = Vec4(m_localPosition.X(), m_localPosition.Y(), m_localPosition.Z(), 0.f);
+            auto pivotPosition = Vec4(pivot.X(), pivot.Y(), m_posZ, 1.f);
             if (parent)
             {
-                auto parentRectTransform = parent->getComponent<RectTransform>();
+                auto parentRectTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
                 auto transform = parentRectTransform->getViewportTransform();
-                point4 = transform * point4;
+                pivotPosition = transform * pivotPosition;
             }
-            m_worldPosition = Vec3(point4.X(), point4.Y(), m_posZ);
+            m_worldPosition = Vec3(pivotPosition.X(), pivotPosition.Y(), pivotPosition.Z());
         }
         return m_rect;
     }
