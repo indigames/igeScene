@@ -77,7 +77,7 @@ namespace ige::scene
             {
                 auto parentTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
                 m_canvasTransform = parentTransform->getCanvasSpaceTransform();
-                if (hasScaleOrRotation() || parentTransform->hasScaleOrRotation())
+                if (hasScaleOrRotation())
                 {
                     auto transformToParent = getLocalTransform();
                     m_worldMatrix = m_canvasTransform = m_canvasTransform * transformToParent;
@@ -493,6 +493,13 @@ namespace ige::scene
 
     bool RectTransform::hasScaleOrRotation() const
     {
-        return hasScale() || hasRotation();
+        auto parentHasScaleOrRotation = false;
+        auto parent = getOwner()->getParent();
+        if (parent)
+        {
+            auto parentTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
+            parentHasScaleOrRotation = parentTransform->hasScaleOrRotation();
+        }
+        return parentHasScaleOrRotation || hasScale() || hasRotation();
     }
 }

@@ -30,16 +30,10 @@ namespace ige::scene {
         virtual std::string getName() const override { return "TransformComponent"; }
 
         //! Get parent transform component
-        TransformComponent* getParent() const { return m_parent; }
+        TransformComponent* getParent() const;
 
         //! Check if has parent transform component
         bool hasParent() const { return  getParent() != nullptr; }
-
-        //! Assign parent transform component
-        void setParent(TransformComponent* parent);
-
-        //! Remove parent transform component
-        void removeParent();
 
         //! Translate
         virtual void translate(const Vec3& trans);
@@ -153,9 +147,6 @@ namespace ige::scene {
         Quat m_worldRotation;
         Vec3 m_worldScale;
         Mat4 m_worldMatrix;
-
-        //! Parent tranformation
-        TransformComponent* m_parent;
 
         //! Transform observers
         std::set<TransformComponent*> m_observers;

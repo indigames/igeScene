@@ -6,7 +6,7 @@
 
 namespace ige::scene {
     TransformComponent::TransformComponent(const std::shared_ptr<SceneObject>& owner, const Vec3& pos, const Quat& rot, const Vec3& scale)
-        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale), m_parent(nullptr)
+        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale)
     {
         m_bLocalDirty = true;
 
@@ -14,35 +14,19 @@ namespace ige::scene {
         m_worldRotation = rot;
         m_worldScale = scale;
 
-        if(owner && owner->getParent())
-        {
-            setParent(owner->getParent()->getTransform().get());
-        }
+        if(hasParent()) getParent()->addObserver(this);
     }
 
     TransformComponent::~TransformComponent() 
     {
-        removeParent();
+        if(hasParent()) getParent()->addObserver(this);
         notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
         m_observers.clear();
-    }
+    }    
 
-    void TransformComponent::setParent(TransformComponent* parent)
+    TransformComponent* TransformComponent::getParent() const
     {
-        removeParent();
-        m_parent = parent;
-        if(hasParent()) getParent()->addObserver(this);
-        m_bWorldDirty = true;
-    }
-
-    void TransformComponent::removeParent()
-    {
-        if(hasParent())
-        {
-            if (hasParent()) getParent()->removeObserver(this);
-            m_parent = nullptr;
-            m_bWorldDirty = true;
-        }
+        return (getOwner() && getOwner()->getParent()) ? getOwner()->getParent()->getTransform().get() : nullptr;
     }
 
     void TransformComponent::onUpdate(float dt)
@@ -180,11 +164,11 @@ namespace ige::scene {
 
     void TransformComponent::setScale(const Vec3& scale)
     {
-        if(m_localScale != scale)
+        if (m_localScale != scale)
         {
             m_localScale = scale;
             m_bLocalDirty = true;
-        }     
+        }
     }
 
     const Vec3& TransformComponent::getScale() const
@@ -382,8 +366,6 @@ namespace ige::scene {
             m_localRotation = m_worldRotation;
             m_localScale = m_worldScale;
             m_bLocalDirty = true;
-
-            m_parent = nullptr;
             m_bWorldDirty = true;
             break;
         }
@@ -405,11 +387,6 @@ namespace ige::scene {
     //! Deserialize
     void TransformComponent::from_json(const json& j)
     {
-        if (hasOwner())
-        {
-            if(getOwner()->hasParent())
-                setParent(getOwner()->getParent()->getTransform().get());
-        }
 
         setPosition(j.at("pos"));
         setRotation(j.at("rot"));

@@ -110,7 +110,7 @@ namespace ige::scene
     };
 
     //! RectTransform: transform of UI elements
-    class RectTransform: public TransformComponent
+    class RectTransform : public TransformComponent
     {
     public:
         //! Recompute flags
@@ -123,7 +123,7 @@ namespace ige::scene
         };
 
         //! Constructor
-        RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{64.f, 64.f});
+        RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{ 64.f, 64.f });
 
         //! Destructor
         virtual ~RectTransform();
@@ -187,6 +187,18 @@ namespace ige::scene
 
         //! Deserialize
         void from_json(const json& j) override { }
+
+        //! Add observer: just do nothing
+        void addObserver(TransformComponent* observer) override { }
+
+        //! Remove observer: just do nothing
+        void removeObserver(TransformComponent* observer) override { }
+
+        //! Notify to all observers: just do nothing
+        void notifyObservers(const ETransformMessage& message) override { }
+
+        //! Handle notification from parent: just do nothing
+        void onNotified(const ETransformMessage& message) override { }
 
     protected:
         bool hasScale() const;
