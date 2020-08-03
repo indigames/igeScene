@@ -10,11 +10,11 @@ namespace ige::scene
         : TransformComponent(owner)
     {
         m_posZ = 0.f;
+        m_offset = Offset(0.f, 0.f, 0.f, 0.f);
         setAnchor(Anchor(0.5f, 0.5f, 0.5f, 0.5f));
         setPivot(Vec2(0.5f, 0.5f));
-        setOffset(Offset(-50.f, -50.f, 50.f, 50.f));
         setSize(size);
-        setRecomputeFlag(E_Recompute::RectAndTransform);
+        setDirty();
     }
 
     RectTransform::~RectTransform()
@@ -29,6 +29,20 @@ namespace ige::scene
         return Vec2(x, y);
     }
 
+    Vec2 RectTransform::getPivotInViewportSpace()
+    {
+        auto pivot = getPivotInCanvasSpace();
+        auto pivotVec4 = Vec4(pivot.X(), pivot.Y(), m_posZ, 1.f);
+
+        auto canvas = getOwner()->getRoot()->getComponent<Canvas>();
+        if (canvas)
+        {
+            auto canvasToViewportMatrix = canvas->getCanvasToViewportMatrix();
+            pivotVec4 = canvasToViewportMatrix * pivotVec4;
+        }
+        return Vec2(pivotVec4.X(), pivotVec4.Y());
+    }
+
     Vec2 RectTransform::getAnchorCenterInCanvasSpace()
     {
         auto parent = getOwner()->getParent();
@@ -38,10 +52,10 @@ namespace ige::scene
         auto parentRect = parentTransform->getRect();
 
         Rect anchorRect;
-        anchorRect.m_left = parentRect.m_left + m_anchor.m_left * parentRect.getWidth();
-        anchorRect.m_right = parentRect.m_left + m_anchor.m_right * parentRect.getWidth();
-        anchorRect.m_top = parentRect.m_top + m_anchor.m_top * parentRect.getHeight();
-        anchorRect.m_bottom = parentRect.m_top + m_anchor.m_bottom * parentRect.getHeight();
+        anchorRect.m_left = parentRect.m_left + parentRect.getWidth() * m_anchor.m_left;
+        anchorRect.m_right = parentRect.m_left + parentRect.getWidth() * m_anchor.m_right;
+        anchorRect.m_top = parentRect.m_top + parentRect.getHeight() * m_anchor.m_top;
+        anchorRect.m_bottom = parentRect.m_top + parentRect.getHeight() * m_anchor.m_bottom;
 
         return anchorRect.getCenter();
     }
@@ -52,14 +66,19 @@ namespace ige::scene
         {
             m_localMatrix.Identity();
 
+            auto pos2 = m_localPosition;
+            auto pos = Vec3(pos2.X(), pos2.Y(), m_posZ);
+            auto transMat = Mat4::Translate(pos);
+            m_localMatrix = transMat;
+
             if (hasScaleOrRotation())
             {
-                auto pivot = getPivotInCanvasSpace();
-                auto transformToPivotSpace = Mat4::Translate(Vec3(-pivot.X(), -pivot.Y(), 0.f));
+                auto pivot = getPivotInViewportSpace();
+                auto transformToPivotSpace = Mat4::Translate(Vec3(-pivot.X(), -pivot.Y(), m_posZ));
                 auto scaleMat = Mat4::Scale(m_localScale);
                 auto rotMat = Mat4::Rotation(m_localRotation);
-                auto transformFromPivotSpace = Mat4::Translate(Vec3(pivot.X(), pivot.Y(), 0.f));
-                m_localMatrix = transformFromPivotSpace * rotMat * scaleMat * transformToPivotSpace;
+                auto transformFromPivotSpace = Mat4::Translate(Vec3(pivot.X(), pivot.Y(), m_posZ));
+                m_localMatrix = transformFromPivotSpace * rotMat * scaleMat * transMat * transformToPivotSpace;
             }
             m_bLocalDirty = false;
         }
@@ -77,32 +96,14 @@ namespace ige::scene
             {
                 auto parentTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
                 m_canvasTransform = parentTransform->getCanvasSpaceTransform();
-                if (hasScaleOrRotation())
-                {
-                    auto transformToParent = getLocalTransform();
-                    m_worldMatrix = m_canvasTransform = m_canvasTransform * transformToParent;
-
-                    Vec3 columns[3] =
-                    {
-                        { m_worldMatrix[0][0], m_worldMatrix[0][1], m_worldMatrix[0][2]},
-                        { m_worldMatrix[1][0], m_worldMatrix[1][1], m_worldMatrix[1][2]},
-                        { m_worldMatrix[2][0], m_worldMatrix[2][1], m_worldMatrix[2][2]},
-                    };
-
-                    // Update world scale
-                    m_worldScale.X(columns[0].Length());
-                    m_worldScale.Y(columns[1].Length());
-                    m_worldScale.Z(columns[2].Length());
-
-                    if (m_worldScale.X()) columns[0] /= m_worldScale.X();
-                    if (m_worldScale.Y()) columns[1] /= m_worldScale.Y();
-                    if (m_worldScale.Z()) columns[2] /= m_worldScale.Z();
-
-                    // Update world rotation
-                    Mat3 rotationMatrix(columns[0], columns[1], columns[2]);
-                    m_worldRotation = Quat(rotationMatrix);
-                }
+                auto transformToParent = getLocalTransform();
+                m_canvasTransform = m_canvasTransform * transformToParent;
             }
+            else
+            {
+                m_canvasTransform = getLocalTransform();
+            }
+
             m_canvasTransformDirty = false;
         }
         return m_canvasTransform;
@@ -120,6 +121,34 @@ namespace ige::scene
                 auto canvasToViewportMatrix = canvas->getCanvasToViewportMatrix();
                 m_viewportTransform = canvasToViewportMatrix * getCanvasSpaceTransform();
             }
+
+            // Update world matrix
+            m_worldMatrix = m_viewportTransform;
+
+            m_worldPosition.X(m_worldMatrix[3][0]);
+            m_worldPosition.Y(m_worldMatrix[3][1]);
+            m_worldPosition.Z(m_worldMatrix[3][2]);
+
+            Vec3 columns[3] =
+            {
+                { m_worldMatrix[0][0], m_worldMatrix[0][1], m_worldMatrix[0][2]},
+                { m_worldMatrix[1][0], m_worldMatrix[1][1], m_worldMatrix[1][2]},
+                { m_worldMatrix[2][0], m_worldMatrix[2][1], m_worldMatrix[2][2]},
+            };
+
+            // Update world scale
+            m_worldScale.X(columns[0].Length());
+            m_worldScale.Y(columns[1].Length());
+            m_worldScale.Z(columns[2].Length());
+
+            if (m_worldScale.X()) columns[0] /= m_worldScale.X();
+            if (m_worldScale.Y()) columns[1] /= m_worldScale.Y();
+            if (m_worldScale.Z()) columns[2] /= m_worldScale.Z();
+
+            // Update world rotation
+            Mat3 rotationMatrix(columns[0], columns[1], columns[2]);
+            m_worldRotation = Quat(rotationMatrix);
+
             m_viewportTransformDirty = false;
         }
         return m_viewportTransform;
@@ -131,7 +160,7 @@ namespace ige::scene
         {
             m_localRotation = rot;
             m_worldRotation = m_localRotation;
-            setRecomputeFlag(E_Recompute::TransformOnly);
+            setDirty();
         }
     }
 
@@ -140,23 +169,8 @@ namespace ige::scene
         if (m_localScale != scale)
         {
             m_localScale = scale;
-            setRecomputeFlag(E_Recompute::TransformOnly);
+            setDirty();
         }
-    }
-
-    const Vec3& RectTransform::getPosition() const
-    {
-        return m_localPosition;
-    }
-
-    const Mat4& RectTransform::getLocalMatrix() const
-    {
-        return m_localMatrix;
-    }
-
-    const Mat4& RectTransform::getWorldMatrix() const
-    {
-        return m_viewportTransform;
     }
 
     //! OnUpdate
@@ -176,18 +190,12 @@ namespace ige::scene
             auto offsetVec3 = (pos - currPos);
             m_offset += Vec2(offsetVec3.X(), offsetVec3.Y());
             m_posZ = pos.Z();
-            setRecomputeFlag(E_Recompute::RectOnly);
+            setDirty();
         }
     }
 
-    void RectTransform::setRecomputeFlag(E_Recompute flag)
+    void RectTransform::setDirty()
     {
-        if (flag == E_Recompute::RectOnly && hasScaleOrRotation())
-        {
-            // If has scale or rotation, need recalculate transform
-            flag = E_Recompute::RectAndTransform;
-        }
-
         // Recursive update flag of all child object
         for (auto& child : getOwner()->getChildren())
         {
@@ -196,29 +204,15 @@ namespace ige::scene
                 auto childTransform = child->getComponent<RectTransform>();
                 if (childTransform)
                 {
-                    childTransform->setRecomputeFlag(flag);
+                    childTransform->setDirty();
                 }
             }
         }
-
-        // Now update flags
-        switch (flag)
-        {
-        case E_Recompute::RectOnly:
-            m_rectDirty = true;
-            break;
-        case E_Recompute::TransformOnly:
-            m_bLocalDirty = true;
-            m_viewportTransformDirty = true;
-            m_canvasTransformDirty = true;
-            break;
-        case E_Recompute::RectAndTransform:
-            m_rectDirty = true;
-            m_bLocalDirty = true;
-            m_viewportTransformDirty = true;
-            m_canvasTransformDirty = true;
-            break;
-        }
+               
+        m_rectDirty = true;
+        m_bLocalDirty = true;
+        m_viewportTransformDirty = true;
+        m_canvasTransformDirty = true;          
     }
 
     void RectTransform::setAnchor(const Anchor& anchor)
@@ -266,7 +260,7 @@ namespace ige::scene
 
         // Recompute
         if (lastAnchor != m_anchor || lastOffset != m_offset)
-            setRecomputeFlag(E_Recompute::RectOnly);
+            setDirty();
     }
 
     void RectTransform::setPivot(const Vec2& pivot)
@@ -294,7 +288,7 @@ namespace ige::scene
 
             // Set new pivot
             m_pivot = pivot;
-            setRecomputeFlag(E_Recompute::TransformOnly);
+            setDirty();;
 
             // Calculate pivot in transformed space
             auto rightVec4 = rightTop - leftTop;
@@ -317,13 +311,13 @@ namespace ige::scene
             m_offset.m_bottom += deltaY;
 
             // Recalculate rect
-            setRecomputeFlag(E_Recompute::RectOnly);
+            setDirty();;
         }
         else
         {
             // No scale or rotation, just update pivot
             m_pivot = pivot;
-            setRecomputeFlag(E_Recompute::TransformOnly);
+            setDirty();;
         }
     }
 
@@ -391,7 +385,7 @@ namespace ige::scene
         if (m_offset != newOffset)
         {
             m_offset = newOffset;
-            setRecomputeFlag(E_Recompute::RectOnly);
+            setDirty();
         }
     }
 
@@ -469,14 +463,8 @@ namespace ige::scene
             auto posVec2 = pivot - getAnchorCenterInCanvasSpace();
             m_localPosition = Vec3(posVec2.X(), posVec2.Y(), m_posZ);
 
-            auto pivotPosition = Vec4(pivot.X(), pivot.Y(), m_posZ, 1.f);
-            if (parent)
-            {
-                auto parentRectTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
-                auto transform = parentRectTransform->getViewportTransform();
-                pivotPosition = transform * pivotPosition;
-            }
-            m_worldPosition = Vec3(pivotPosition.X(), pivotPosition.Y(), pivotPosition.Z());
+            // Recompute world transform
+            setDirty();
         }
         return m_rect;
     }
@@ -493,12 +481,12 @@ namespace ige::scene
 
     bool RectTransform::hasScaleOrRotation() const
     {
-        auto parentHasScaleOrRotation = false;
         auto parent = getOwner()->getParent();
+        auto parentHasScaleOrRotation = false;
         if (parent)
         {
             auto parentTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
-            parentHasScaleOrRotation = parentTransform->hasScaleOrRotation();
+            parentHasScaleOrRotation = parentTransform->hasScale() || parentTransform->hasRotation();
         }
         return parentHasScaleOrRotation || hasScale() || hasRotation();
     }

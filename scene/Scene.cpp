@@ -117,11 +117,11 @@ namespace ige::scene
         return sceneObject;
     }
 
-    std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent)
+    std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent, const Vec3& pos, const Vec2& size)
     {
         auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get(), true);
         if (parent != nullptr) parent->addChild(sceneObject);
-        auto transform = sceneObject->addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
+        auto transform = sceneObject->addComponent<RectTransform>(pos, size);
         sceneObject->setTransform(transform);
 
         if (parent == nullptr)
@@ -137,7 +137,7 @@ namespace ige::scene
             auto canvas = sceneObject->addComponent<Canvas>();
             canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetDeviceW(), SystemInfo::Instance().GetDeviceH()));
 
-            auto camObj = createObject("GUI Camera", sceneObject);
+            auto camObj = createGUIObject("GUI Camera", sceneObject);
             camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 20.f));
             auto camComp = camObj->addComponent<CameraComponent>("default_2d_camera");
             camComp->lockOnTarget(false);

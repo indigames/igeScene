@@ -53,7 +53,7 @@ namespace ige::scene
         virtual std::shared_ptr<SceneObject> createObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
 
         //! Create GUI object
-        virtual std::shared_ptr<SceneObject> createGUIObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
+        virtual std::shared_ptr<SceneObject> createGUIObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr, const Vec3& pos = Vec3(), const Vec2& size = {64, 64});
 
         //! Remove scene object
         virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);

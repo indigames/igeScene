@@ -113,15 +113,6 @@ namespace ige::scene
     class RectTransform : public TransformComponent
     {
     public:
-        //! Recompute flags
-        enum class E_Recompute
-        {
-            RectOnly,               //! Only rect changed
-            TransformOnly,          //! Only transform changed
-            RectAndTransform,       //! Both rect and transform changed
-            ViewportTransformOnly,  //! Both rect and transform changed
-        };
-
         //! Constructor
         RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{ 64.f, 64.f });
 
@@ -157,7 +148,6 @@ namespace ige::scene
         void setSize(const Vec2& size);
 
         //! Position
-        const Vec3& getPosition() const override;
         void setPosition(const Vec3& pos) override;
 
         //! Rotation
@@ -166,18 +156,11 @@ namespace ige::scene
         //! Scale
         void setScale(const Vec3& scale) override;
 
-        //! Get local transform matrix
-        const Mat4& getLocalMatrix() const override;
-
-        //! Get world transform matrix
-        const Mat4& getWorldMatrix() const override;
-
         //! Get rect in canvas space (no scale, no rotate)
         const Rect& getRect();
 
-        //! Recompute flag
-        E_Recompute getRecomputeMode() const { return m_recomputeFlag; }
-        void setRecomputeFlag(E_Recompute flag);
+        //! Dirty flag
+        void setDirty();
 
         //! OnUpdate
         void onUpdate(float dt) override;
@@ -206,6 +189,8 @@ namespace ige::scene
         bool hasScaleOrRotation() const;
 
         Vec2 getPivotInCanvasSpace();
+        Vec2 getPivotInViewportSpace();
+
         Vec2 getAnchorCenterInCanvasSpace();
 
     protected:
@@ -223,18 +208,15 @@ namespace ige::scene
 
         //! Cached rect in canvas space (no scale, no rotate)
         Rect m_rect;
-        bool m_rectDirty;
+        bool m_rectDirty = true;
 
         //! Cached transform to viewport space
         Mat4 m_viewportTransform;
-        bool m_viewportTransformDirty;
+        bool m_viewportTransformDirty = true;
 
         //! Cached transform to canvas space
         Mat4 m_canvasTransform;
-        bool m_canvasTransformDirty;
-
-        //! Recompute flags
-        E_Recompute m_recomputeFlag;
+        bool m_canvasTransformDirty = true;
 
         //! Associated EditableFigure object
         EditableFigure* m_figure;
