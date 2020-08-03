@@ -1,6 +1,7 @@
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
+#include "components/gui/UIImage.h"
 #include "scene/SceneObject.h"
 #include "utils/RayOBBChecker.h"
 
@@ -19,7 +20,7 @@ namespace ige::scene {
 
     TransformComponent::~TransformComponent() 
     {
-        if(hasParent()) getParent()->addObserver(this);
+        if(hasParent()) getParent()->removeObserver(this);
         notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
         m_observers.clear();
     }    
@@ -62,22 +63,28 @@ namespace ige::scene {
             }
             else
             {
+                EditableFigure* figure = nullptr;
                 auto spriteComp = owner->getComponent<SpriteComponent>();
                 if (spriteComp)
                 {
-                    auto figure = spriteComp->getFigure();
-                    if (figure)
-                    {
-                        Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
-                        figure->CalcAABBox(0, aabbMin.P(), aabbMax.P());
-                        intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
-                    }
-                }
+                    figure = spriteComp->getFigure();
+                } 
                 else
                 {
-                    // bool intersected = RayOBBChecker::checkIntersect({ -1.0f, -1.0f, -1.0f }, { 1.0f,  1.0f,  1.0f }, m_worldMatrix, distance);
-                    // getOwner()->setSelected(intersected);
+                    auto uiImageComp = owner->getComponent<UIImage>();
+                    if (uiImageComp && getOwner()->getParent()) // exclude Canvas
+                    {
+                        figure = uiImageComp->getFigure();
+                    }
                 }
+
+                if (figure)
+                {
+                    Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
+                    figure->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                    intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
+                }
+                
             }
 
             // Update selected info

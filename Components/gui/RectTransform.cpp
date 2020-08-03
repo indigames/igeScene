@@ -180,6 +180,9 @@ namespace ige::scene
         getLocalTransform();
         getCanvasSpaceTransform();
         getViewportTransform();
+
+        // Allow object picking
+        TransformComponent::onUpdate(dt);
     }
 
     void RectTransform::setPosition(const Vec3& pos)
