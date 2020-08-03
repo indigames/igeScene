@@ -149,12 +149,15 @@ namespace ige::scene
 
         //! Position
         void setPosition(const Vec3& pos) override;
+        void setWorldPosition(const Vec3& pos) override;
 
         //! Rotation
         void setRotation(const Quat& rot) override;
+        void setWorldRotation(const Quat& rot) override;
 
         //! Scale
         void setScale(const Vec3& scale) override;
+        void setWorldScale(const Vec3& scale) override;
 
         //! Get rect in canvas space (no scale, no rotate)
         const Rect& getRect();
