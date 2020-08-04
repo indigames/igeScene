@@ -29,6 +29,11 @@ namespace ige::scene
 
     Scene::~Scene()
     {
+        SceneObject::getComponentAddedEvent().removeAllListeners();
+        SceneObject::getComponentRemovedEvent().removeAllListeners();
+        SceneObject::getSelectedEvent().removeAllListeners();
+        getOnActiveCameraChangedEvent().removeAllListeners();
+
         clear();
     }
 
@@ -43,9 +48,6 @@ namespace ige::scene
         for (auto& root : m_roots)
             root = nullptr;
         m_roots.clear();
-
-        SceneObject::getComponentAddedEvent().removeAllListeners();
-        SceneObject::getComponentRemovedEvent().removeAllListeners();
     }
 
     void Scene::update(float dt)

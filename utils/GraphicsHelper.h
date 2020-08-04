@@ -11,7 +11,7 @@ namespace ige::scene
     {
     public:
         EditableFigure* createSprite(const Vec2& size = {128, 128}, const std::string& texture = "", const Vec2& uv_top_left = {0.f, 0.f}, const Vec2& uv_bottom_right = {1.f, 1.f}, Vec3* normal = nullptr, uint32_t pivot = 4, ShaderDescriptor* shader = nullptr);
-        EditableFigure* createMesh(const std::vector<float>& points, const std::vector<uint32_t>& trianglesIndices, const std::string& texture = "", std::vector<float>* uvs = nullptr, ShaderDescriptor* shader = nullptr, Vec3* normal = nullptr);
+        EditableFigure* createMesh(const std::vector<float>& points, const std::vector<uint32_t>& trianglesIndices, const std::string& texture = "", const std::vector<float>& uvs = {}, ShaderDescriptor* shader = nullptr, Vec3* normal = nullptr);
         EditableFigure* createText(const std::string& words, const std::string& fontPath, const Vec2& fontSize, const Vec4& color = {1.f, 1.f, 1.f, 1.f}, uint32_t pivot = 4, float scale = 1.0f);
         EditableFigure* createGridMesh(const Vec2& size = {128, 128}, const std::string& texture = "");
     };

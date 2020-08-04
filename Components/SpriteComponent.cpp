@@ -11,43 +11,40 @@ namespace ige::scene
 {
     //! Constructor
     SpriteComponent::SpriteComponent(const std::shared_ptr<SceneObject>& owner, const Vec2& size, const std::string& path)
-        : Component(owner), m_figure(nullptr), m_size(size), m_path(path)
+        : Component(owner)
     {
-        if (!m_path.empty())
-        {
-            m_figure = GraphicsHelper::getInstance()->createSprite(m_size, m_path.c_str());
-            m_figure->WaitInitialize();
-        }
+        m_sprite = std::make_shared<Sprite>(path, size);
+        if (m_sprite->getFigure())
+            getOnFigureCreatedEvent().invoke(m_sprite->getFigure());
     }
 
     //! Destructor
-    SpriteComponent::~SpriteComponent() 
+    SpriteComponent::~SpriteComponent()
     {
-        if(m_figure)
-            m_figure->DecReference();
-        m_figure = nullptr;
+        getOnFigureDestroyedEvent().invoke(m_sprite->getFigure());
+        m_sprite = nullptr;
     }
 
     //! Update
     void SpriteComponent::onUpdate(float dt)
     {
-        if (m_figure == nullptr) return;
+        if (getFigure() == nullptr) return;
 
         // Update transform from transform component
         auto transCmp = getOwner()->getTransform();
-        m_figure->SetPosition(transCmp->getWorldPosition());
-        m_figure->SetRotation(transCmp->getWorldRotation());
-        m_figure->SetScale(transCmp->getWorldScale());
+        getFigure()->SetPosition(transCmp->getWorldPosition());
+        getFigure()->SetRotation(transCmp->getWorldRotation());
+        getFigure()->SetScale(transCmp->getWorldScale());
 
         // Update
-        m_figure->Pose();
+        getFigure()->Pose();
     }
 
     //! Update
     void SpriteComponent::onRender()
     {
-        if (m_figure == nullptr) return;
-        m_figure->Render();
+        if (getFigure() == nullptr) return;
+        getFigure()->Render();
     }
 
     //! Set path
@@ -55,65 +52,34 @@ namespace ige::scene
     {
         auto fsPath = fs::path(path);
         auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
-
-        if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
+        auto figure = m_sprite->getFigure();
+        m_sprite->setPath(relPath);
+        auto figureAfter = m_sprite->getFigure();
+        if (figure == nullptr && figureAfter)
         {
-            m_path = relPath;
-
-            if (m_figure != nullptr)
-            {
-                getOnFigureDestroyedEvent().invoke(m_figure);
-                m_figure->DecReference();
-                m_figure = nullptr;
-                ResourceManager::Instance().DeleteDaemon();
-            }
-
-            if (m_path != "")
-            {
-                m_figure = GraphicsHelper::getInstance()->createSprite(m_size, m_path.c_str());
-                m_figure->WaitInitialize();
-                getOnFigureCreatedEvent().invoke(m_figure);
-            }
+            getOnFigureCreatedEvent().invoke(figureAfter);
         }
     }
 
     //! Set size
     void SpriteComponent::setSize(const Vec2& size)
     {
-        if (m_size != size)
-        {
-            m_size = size;
-
-            if (m_figure != nullptr)
-            {
-                getOnFigureDestroyedEvent().invoke(m_figure);
-                m_figure->DecReference();
-                m_figure = nullptr;
-                ResourceManager::Instance().DeleteDaemon();
-            }
-            
-            if (m_path != "")
-            {
-                m_figure = GraphicsHelper::getInstance()->createSprite(m_size, m_path.c_str());
-                m_figure->WaitInitialize();
-                getOnFigureCreatedEvent().invoke(m_figure);
-            }
-        }
+        m_sprite->setSize(size);
     }
 
     //! Serialize
     void SpriteComponent::to_json(json& j) const
     {
         j = json {
-            {"path", m_path},
-            {"size", m_size}
+            {"path", getPath()},
+            {"size", getSize()}
         };
     }
 
     //! Deserialize
     void SpriteComponent::from_json(const json& j)
     {
-        j.at("size").get_to(m_size);
+        setSize(j.at("size"));
         setPath(j.at("path"));
     }
 }

@@ -22,7 +22,7 @@ namespace ige::scene
             const float nom0[3] = {0.f, 0.f, 1.f};
             Mat3 mat;
             vmath_quat_rotation(nom0, (const float*)normal, (float*)&mat);
-            for (auto p: points)            
+            for (auto p: points)
                 newpoints.push_back(mat * p);
             points = newpoints;
         }
@@ -31,7 +31,7 @@ namespace ige::scene
                                 uv_bottom_right.X(), uv_bottom_right.Y(),
                                 uv_top_left.X(), uv_top_left.Y(),
                                 uv_bottom_right.X(), uv_top_left.Y()};
-        
+
         std::vector<float> _points = {};
         for(auto p: points)
         {
@@ -39,10 +39,10 @@ namespace ige::scene
             _points.push_back(p.Y());
             _points.push_back(p.Z());
         }
-        return createMesh(_points, _tris, texture, &uvs, shader);
+        return createMesh(_points, _tris, texture, uvs, shader);
     }
-    
-    EditableFigure* GraphicsHelper::createMesh(const std::vector<float>& points, const std::vector<uint32_t>& trianglesIndices, const std::string& texture, std::vector<float>* uvs, ShaderDescriptor* shader, Vec3* normals)
+
+    EditableFigure* GraphicsHelper::createMesh(const std::vector<float>& points, const std::vector<uint32_t>& trianglesIndices, const std::string& texture, const std::vector<float>& uvs, ShaderDescriptor* shader, Vec3* normals)
     {
         if (shader == nullptr)
         {
@@ -62,7 +62,7 @@ namespace ige::scene
         efig->SetMeshVertexValues(meshIdx, (const void*)points.data(), (uint32_t)(points.size() / 3), ATTRIBUTE_ID_POSITION, 0);
 
         // if (uvs) efig->SetVertexElements("mesh", ATTRIBUTE_ID_UV0, uvs);
-        if (uvs) efig->SetMeshVertexValues(meshIdx, (const void*)uvs->data(), (uint32_t)(uvs->size() / 2), ATTRIBUTE_ID_UV0, 0);
+        if (uvs.size() > 0) efig->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);
 
         // if (normals) efig->SetVertexElements("mesh", ATTRIBUTE_ID_NORMAL, normals);
         if (normals) efig->SetMeshVertexValues(meshIdx, (const void*)normals, 1, ATTRIBUTE_ID_NORMAL, 0);
@@ -117,7 +117,7 @@ namespace ige::scene
         return nullptr;
     }
 
-    EditableFigure* GraphicsHelper::createGridMesh(const Vec2& size, const std::string& texture) 
+    EditableFigure* GraphicsHelper::createGridMesh(const Vec2& size, const std::string& texture)
     {
         auto w = size.X()/2;
         auto h = size.Y()/2;
@@ -125,7 +125,7 @@ namespace ige::scene
         const std::vector<uint32_t> _tris = {0, 2, 1, 1, 2, 3, 1, 2, 0, 3, 2, 1};
         std::vector<float> uvs = {0.0, size.Y(), size.X(), size.Y(), 0.0, 0.0, size.X(), 0.0};
 
-        auto efig = createMesh(points, _tris, texture, &uvs);
+        auto efig = createMesh(points, _tris, texture, uvs);
         int materialIdx = efig->GetMaterialIndex(GenerateNameHash("mate"));
 
         Sampler sampler;
