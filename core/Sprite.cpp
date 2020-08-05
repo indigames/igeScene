@@ -1,9 +1,6 @@
 #include "core/Sprite.h"
 #include "utils/GraphicsHelper.h"
 
-#include "utils/PyxieHeaders.h"
-using namespace pyxie;
-
 namespace ige::scene
 {
     Sprite::Sprite(const std::string& path, const Vec2& size)
@@ -36,8 +33,6 @@ namespace ige::scene
                 auto meshIdx = m_figure->GetMeshIndex(GenerateNameHash("mesh"));
                 if (meshIdx == -1) return;
                 m_figure->SetMeshVertexValues(meshIdx, (const void*)points.data(), (uint32_t)(points.size() / 3), ATTRIBUTE_ID_POSITION, 0);
-
-                adjustTextureUVs();
             }
         }
     }
@@ -81,45 +76,6 @@ namespace ige::scene
 
                 int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
                 m_figure->SetMaterialParam(materialIdx, "ColorSampler", &sampler);
-
-                adjustTextureUVs();
-            }
-        }
-    }
-
-    void Sprite::adjustTextureUVs()
-    {
-        if(!m_figure) return;
-
-        auto textureSources = m_figure->GetTextureSources();
-        if(textureSources.size() > 0)
-        {
-            auto textureSource = textureSources[0];
-            auto texture = (Texture*)ResourceManager::Instance().GetResource(textureSource.path, TEXTURETYPE);
-            if(texture)
-            {
-                m_texSize = Vec2(texture->GetTextureWidth(), texture->GetTextureHeight());
-                auto textureRatio = m_texSize.X() / m_texSize.Y();
-                auto imageRatio = m_size.X() / m_size.Y();
-
-                auto uvOffset = Vec2(1.f, 1.f);
-                if(textureRatio > imageRatio) // width is bigger
-                    uvOffset.X(textureRatio / imageRatio);
-                else // height is bigger
-                    uvOffset.Y(textureRatio / imageRatio);
-
-                uvOffset.X((1.f - uvOffset.X()) / 2.f);
-                uvOffset.Y((1.f - uvOffset.Y()) / 2.f);
-
-                const std::vector<float> uvs = {
-                    0.f + uvOffset.X(), 1.f - uvOffset.Y(),
-                    1.f - uvOffset.X(), 1.f - uvOffset.Y(),
-                    0.f + uvOffset.X(), 0.f + uvOffset.Y(),
-                    1.f - uvOffset.X(), 0.f + uvOffset.Y()
-                };
-
-                auto meshIdx = m_figure->GetMeshIndex(GenerateNameHash("mesh"));
-                m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);
             }
         }
     }

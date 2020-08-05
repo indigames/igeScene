@@ -22,8 +22,6 @@ namespace ige::scene
         EditableFigure* getFigure() { return m_figure; }
 
     protected:
-        void adjustTextureUVs();
-
         std::string m_path;
         Vec2 m_texSize;
         Vec2 m_size;
