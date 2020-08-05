@@ -46,6 +46,10 @@ namespace ige::scene {
 
         if(RayOBBChecker::isChecking())
         {
+            // ignore root node
+            if (getOwner()->getParent() == nullptr)
+                return;
+
             bool intersected = false;
             float distance;
 
@@ -68,23 +72,13 @@ namespace ige::scene {
                 if (spriteComp)
                 {
                     figure = spriteComp->getFigure();
-                } 
-                else
-                {
-                    auto uiImageComp = owner->getComponent<UIImage>();
-                    if (uiImageComp && getOwner()->getParent()) // exclude Canvas
-                    {
-                        figure = uiImageComp->getFigure();
-                    }
                 }
-
                 if (figure)
                 {
                     Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
                     figure->CalcAABBox(0, aabbMin.P(), aabbMax.P());
                     intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
                 }
-                
             }
 
             // Update selected info

@@ -47,16 +47,16 @@ namespace ige::scene
     {
         m_transform = nullptr;
 
+        removeAllComponents();
+        removeChildren();
+        setParent(nullptr);
+
         if (m_showcase)
         {
             m_showcase->Clear();
             m_showcase->DecReference();
             m_showcase = nullptr;
         }
-
-        removeAllComponents();
-        removeChildren();
-        setParent(nullptr);
 
         getDestroyedEvent().invoke(*this);
         ResourceManager::Instance().DeleteDaemon();
@@ -184,11 +184,11 @@ namespace ige::scene
                 if (figure) m_showcase->Add(figure);
 
                 figureComponent->getOnFigureCreatedEvent().addListener([this](auto figure) {
-                    if (figure) m_showcase->Add(figure);
+                    if (figure && m_showcase) m_showcase->Add(figure);
                 });
 
                 figureComponent->getOnFigureDestroyedEvent().addListener([this](auto figure) {
-                    if (figure) m_showcase->Remove(figure);
+                    if (figure && m_showcase) m_showcase->Remove(figure);
                 });
             }
             else if (component->getName() == "SpriteComponent")
@@ -198,11 +198,11 @@ namespace ige::scene
                 if (figure) m_showcase->Add(figure);
 
                 eFigComp->getOnFigureCreatedEvent().addListener([this](auto figure) {
-                    if (figure) m_showcase->Add(figure);
+                    if (figure && m_showcase) m_showcase->Add(figure);
                     });
 
                 eFigComp->getOnFigureDestroyedEvent().addListener([this](auto figure) {
-                    if (figure) m_showcase->Remove(figure);
+                    if (figure && m_showcase) m_showcase->Remove(figure);
                     });
             }
             else if (component->getName() == "UIImage")
@@ -212,12 +212,12 @@ namespace ige::scene
                 if (figure) m_showcase->Add(figure);
 
                 eFigComp->getOnFigureCreatedEvent().addListener([this](auto figure) {
-                    if (figure) m_showcase->Add(figure);
-                    });
+                    if (figure && m_showcase) m_showcase->Add(figure);
+                });
 
                 eFigComp->getOnFigureDestroyedEvent().addListener([this](auto figure) {
-                    if (figure) m_showcase->Remove(figure);
-                    });
+                    if (figure && m_showcase) m_showcase->Remove(figure);
+                });
             }
             else if (component->getName() == "EnvironmentComponent")
             {

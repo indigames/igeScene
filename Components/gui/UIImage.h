@@ -4,12 +4,12 @@
 using namespace pyxie;
 
 #include "event/Event.h"
-#include "components/Component.h"
+#include "components/SpriteComponent.h"
 
 namespace ige::scene
 {
     //! UIImage
-    class UIImage : public Component
+    class UIImage : public SpriteComponent
     {
     public:
         //! Constructor
@@ -22,10 +22,10 @@ namespace ige::scene
         virtual std::string getName() const override { return "UIImage"; }
 
         //! Update
-        void onUpdate(float dt);
+        virtual void onUpdate(float dt) override;
 
         //! Render
-        void onRender();
+        virtual void onRender() override;
 
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -33,31 +33,5 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j) override;
 
-        //! Get associated figure
-        EditableFigure* getFigure() { return m_figure; }
-
-        //! Path
-        void setPath(const std::string& path);
-        const std::string& getPath() { return m_path; }
-
-        //! Size
-        void setSize(const Vec2& size);
-        const Vec2& getSize() { return m_size; }
-
-        //! Events
-        Event<EditableFigure*>& getOnFigureCreatedEvent() { return m_onFigureCreatedEvent; }
-        Event<EditableFigure*>& getOnFigureDestroyedEvent() { return m_onFigureDestroyedEvent; }
-
-    protected:
-        //! Associated EditableFigure object
-        EditableFigure* m_figure;
-
-        //! Events
-        Event<EditableFigure*> m_onFigureCreatedEvent;
-        Event<EditableFigure*> m_onFigureDestroyedEvent;
-
-        //! Path
-        std::string m_path;
-        Vec2 m_size;
     };
 }

@@ -159,7 +159,6 @@ namespace ige::scene
         if (m_localRotation != rot)
         {
             m_localRotation = rot;
-            m_worldRotation = m_localRotation;
             setDirty();
         }
     }
@@ -492,5 +491,24 @@ namespace ige::scene
             parentHasScaleOrRotation = parentTransform->hasScale() || parentTransform->hasRotation();
         }
         return parentHasScaleOrRotation || hasScale() || hasRotation();
+    }
+
+    void RectTransform::setWorldPosition(const Vec3& pos)
+    {
+        auto worldPos = getWorldPosition();
+        auto delta = pos - worldPos;
+
+        auto localPos = getPosition() + delta;
+        setPosition(Vec3(localPos.X(), localPos.Y(), m_posZ));
+    }
+
+    void RectTransform::setWorldRotation(const Quat& rot)
+    {
+        setRotation(rot);
+    }    
+    
+    void RectTransform::setWorldScale(const Vec3& scale)
+    {
+        setScale(scale);
     }
 }
