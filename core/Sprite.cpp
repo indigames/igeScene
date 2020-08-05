@@ -44,6 +44,23 @@ namespace ige::scene
             m_path = path;
             if (m_path.length() > 0)
             {
+                // Free old texture
+                if(m_figure != nullptr)
+                {
+                    auto textureSources = m_figure->GetTextureSources();
+                    if(textureSources.size() > 0)
+                    {
+                        auto textureSource = textureSources[0];
+                        auto texture = (Texture*)ResourceManager::Instance().GetResource(textureSource.path, TEXTURETYPE);
+                        if(texture)
+                        {
+                            texture->DecReference();
+                            texture = nullptr;
+                        }
+                    }
+                }
+
+                // Create figure if needed
                 if (m_figure == nullptr)
                 {
                     auto w = m_size.X() / 2.f;

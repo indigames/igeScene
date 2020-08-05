@@ -10,19 +10,22 @@ namespace ige::scene
     {
         m_environment = ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), nullptr);
         m_environment->WaitBuild();
+
+        getOwner()->getRoot()->getResourceAddedEvent().invoke(m_environment);
     }
 
     //! Destructor
-    EnvironmentComponent::~EnvironmentComponent() 
+    EnvironmentComponent::~EnvironmentComponent()
     {
         if (m_environment)
         {
+            if(hasOwner()) getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_environment);
             m_environment->DecReference();
             m_environment = nullptr;
         }
         ResourceManager::Instance().DeleteDaemon();
     }
-    
+
     //! Update
     void EnvironmentComponent::onUpdate(float dt)
     {
