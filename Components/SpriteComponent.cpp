@@ -1,5 +1,6 @@
 #include "components/SpriteComponent.h"
 #include "components/TransformComponent.h"
+#include "components/gui/RectTransform.h"
 #include "scene/SceneObject.h"
 
 #include "utils/GraphicsHelper.h"
@@ -10,7 +11,7 @@ namespace fs = std::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    SpriteComponent::SpriteComponent(const std::shared_ptr<SceneObject>& owner, const Vec2& size, const std::string& path)
+    SpriteComponent::SpriteComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path, const Vec2& size)
         : Component(owner)
     {
         m_sprite = std::make_shared<Sprite>(path, size);
@@ -31,10 +32,10 @@ namespace ige::scene
         if (getFigure() == nullptr) return;
 
         // Update transform from transform component
-        auto transCmp = getOwner()->getTransform();
-        getFigure()->SetPosition(transCmp->getWorldPosition());
-        getFigure()->SetRotation(transCmp->getWorldRotation());
-        getFigure()->SetScale(transCmp->getWorldScale());
+        auto transform = getOwner()->getTransform();
+        getFigure()->SetPosition(transform->getWorldPosition());
+        getFigure()->SetRotation(transform->getWorldRotation());
+        getFigure()->SetScale(transform->getWorldScale());
 
         // Update
         getFigure()->Pose();
@@ -52,13 +53,11 @@ namespace ige::scene
     {
         auto fsPath = fs::path(path);
         auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
-        auto figure = m_sprite->getFigure();
+        auto oldFigure = m_sprite->getFigure();
         m_sprite->setPath(relPath);
-        auto figureAfter = m_sprite->getFigure();
-        if (figure == nullptr && figureAfter)
-        {
-            getOnFigureCreatedEvent().invoke(figureAfter);
-        }
+        auto newFigure = m_sprite->getFigure();
+        if (oldFigure == nullptr && newFigure)
+            getOnFigureCreatedEvent().invoke(newFigure);
     }
 
     //! Set size

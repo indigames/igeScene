@@ -14,7 +14,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SpriteComponent(const std::shared_ptr<SceneObject>& owner, const Vec2& size = {32.f, 32.f}, const std::string& texture = "");
+        SpriteComponent(const std::shared_ptr<SceneObject>& owner, const std::string& texture = "", const Vec2& size = {32.f, 32.f});
 
         //! Destructor
         virtual ~SpriteComponent();
@@ -23,10 +23,10 @@ namespace ige::scene
         virtual std::string getName() const override { return "SpriteComponent"; }
 
         //! Update
-        void onUpdate(float dt);
+        virtual void onUpdate(float dt) override;
 
         //! Render
-        void onRender();
+        virtual void onRender() override;
 
         //! Serialize
         virtual void to_json(json& j) const override;

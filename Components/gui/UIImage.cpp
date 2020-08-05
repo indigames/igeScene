@@ -11,109 +11,41 @@ namespace ige::scene
 {
     //! Constructor
     UIImage::UIImage(const std::shared_ptr<SceneObject>& owner, const std::string& path, const Vec2& size)
-        : Component(owner), m_figure(nullptr), m_size(size), m_path(path)
-    {
-        if (!m_path.empty())
-        {
-            m_figure = GraphicsHelper::getInstance()->createSprite(m_size, m_path.c_str());
-            m_figure->WaitBuild();
-            getOnFigureCreatedEvent().invoke(m_figure);
-        }
-    }
+        : SpriteComponent(owner, path, size)
+    {}
 
     //! Destructor
-    UIImage::~UIImage() 
-    {
-        if(m_figure)
-            m_figure->DecReference();
-        m_figure = nullptr;
-    }
+    UIImage::~UIImage()
+    {}
 
     //! Update
     void UIImage::onUpdate(float dt)
     {
-        if (m_figure == nullptr) return;
+        // Sync size from transform
+        auto rectTranform = std::dynamic_pointer_cast<RectTransform>(getOwner()->getTransform());
+        if(m_sprite && rectTranform)
+        {
+            m_sprite->setSize(rectTranform->getSize());
+        }
 
-        // Update transform from transform component
-        auto transCmp = std::dynamic_pointer_cast<RectTransform>(getOwner()->getTransform());
-        setSize(transCmp->getSize());
-        m_figure->SetPosition(transCmp->getWorldPosition());
-        m_figure->SetRotation(transCmp->getWorldRotation());
-        m_figure->SetScale(transCmp->getWorldScale());
-
-        // Update
-        m_figure->Pose();
+        SpriteComponent::onUpdate(dt);
     }
 
     //! Update
     void UIImage::onRender()
     {
-        if (m_figure == nullptr) return;
-        m_figure->Render();
-    }
-
-    //! Set path
-    void UIImage::setPath(const std::string& path)
-    {
-        auto fsPath = fs::path(path);
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
-
-        if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
-        {
-            m_path = relPath;
-
-            if (m_figure != nullptr)
-            {
-                getOnFigureDestroyedEvent().invoke(m_figure);
-                m_figure->DecReference();
-                m_figure = nullptr;
-            }
-
-            if (m_path != "")
-            {
-                m_figure = GraphicsHelper::getInstance()->createSprite(m_size, m_path.c_str());
-                m_figure->WaitBuild();
-                getOnFigureCreatedEvent().invoke(m_figure);
-            }
-        }
-    }
-
-    //! Set size
-    void UIImage::setSize(const Vec2& size)
-    {
-        if (m_size != size)
-        {
-            m_size = size;
-
-            if (m_figure != nullptr)
-            {
-                getOnFigureDestroyedEvent().invoke(m_figure);
-                m_figure->DecReference();
-                m_figure = nullptr;
-            }
-            
-            if (m_path != "")
-            {
-                m_figure = GraphicsHelper::getInstance()->createSprite(m_size, m_path.c_str());
-                m_figure->WaitBuild();
-                getOnFigureCreatedEvent().invoke(m_figure);
-            }
-        }
+        SpriteComponent::onRender();
     }
 
     //! Serialize
     void UIImage::to_json(json& j) const
     {
-        j = json {
-            {"path", m_path},
-            {"size", m_size}
-        };
+        SpriteComponent::to_json(j);
     }
 
     //! Deserialize
     void UIImage::from_json(const json& j)
     {
-        j.at("size").get_to(m_size);
-        setPath(j.at("path"));
+        SpriteComponent::from_json(j);
     }
 }
