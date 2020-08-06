@@ -9,14 +9,14 @@ namespace ige::scene
     {
         m_text = std::make_shared<Text>(text, fontPath, fontSize, color);
         if (m_text->getFigure())
-            getOwner()->getResourceAddedEvent().invoke(m_text->getFigure());
+            getOwner()->getRoot()->getResourceAddedEvent().invoke(m_text->getFigure());
     }
 
     //! Destructor
     UIText::~UIText()
     {
         if (m_text->getFigure())
-            if(hasOwner()) getOwner()->getResourceRemovedEvent().invoke(m_text->getFigure());
+            if(hasOwner()) getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_text->getFigure());
         m_text = nullptr;
     }
 
@@ -70,8 +70,8 @@ namespace ige::scene
         auto newFigure = m_text->getFigure();
         if(oldFigure != newFigure)
         {
-            if (oldFigure) getOwner()->getResourceRemovedEvent().invoke(oldFigure);
-            if (newFigure) getOwner()->getResourceAddedEvent().invoke(newFigure);
+            if (oldFigure) getOwner()->getRoot()->getResourceRemovedEvent().invoke(oldFigure);
+            if (newFigure) getOwner()->getRoot()->getResourceAddedEvent().invoke(newFigure);
         }
     }
 
@@ -83,8 +83,8 @@ namespace ige::scene
         auto newFigure = m_text->getFigure();
         if(oldFigure != newFigure)
         {
-            if (oldFigure) getOwner()->getResourceRemovedEvent().invoke(oldFigure);
-            if (newFigure) getOwner()->getResourceAddedEvent().invoke(newFigure);
+            if (oldFigure) getOwner()->getRoot()->getResourceRemovedEvent().invoke(oldFigure);
+            if (newFigure) getOwner()->getRoot()->getResourceAddedEvent().invoke(newFigure);
         }
     }
 
@@ -96,8 +96,8 @@ namespace ige::scene
         auto newFigure = m_text->getFigure();
         if(oldFigure != newFigure)
         {
-            if (oldFigure) getOwner()->getResourceRemovedEvent().invoke(oldFigure);
-            if (newFigure) getOwner()->getResourceAddedEvent().invoke(newFigure);
+            if (oldFigure) getOwner()->getRoot()->getResourceRemovedEvent().invoke(oldFigure);
+            if (newFigure) getOwner()->getRoot()->getResourceAddedEvent().invoke(newFigure);
         }
     }
 

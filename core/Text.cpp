@@ -66,13 +66,16 @@ namespace ige::scene
 
     void Text::updateFigure()
     {
-        if(m_figure)
+        if (m_text != "" && m_fontPath != "")
         {
-            m_figure->DecReference();
-            m_figure = nullptr;
-        }
+            if (m_figure)
+            {
+                m_figure->DecReference();
+                m_figure = nullptr;
+            }
 
-        m_figure = GraphicsHelper::getInstance()->createText(m_text, m_fontPath, m_fontSize, m_color);
-        m_figure->WaitBuild();
+            m_figure = GraphicsHelper::getInstance()->createText(m_text, m_fontPath, m_fontSize, m_color);
+            m_figure->WaitBuild();
+        }
     }
 }
