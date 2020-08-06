@@ -1,4 +1,6 @@
 #include "components/gui/UIText.h"
+#include "components/gui/RectTransform.h"
+
 #include "scene/SceneObject.h"
 
 namespace ige::scene
@@ -26,7 +28,24 @@ namespace ige::scene
         if (getFigure() == nullptr) return;
 
         // Update transform from transform component
-        auto transform = getOwner()->getTransform();
+        auto transform = std::dynamic_pointer_cast<RectTransform>(getOwner()->getTransform());
+
+        // Scale container to fit text size
+        auto containerSize = transform->getSize();
+        auto size = m_text->getSize();
+        auto sizeChanged = false;        
+        if (size.X() > containerSize.X()) 
+        {
+            containerSize.X(size.X() + 1.f);
+            sizeChanged = true;
+        }
+        if (size.Y() > containerSize.Y())
+        {
+            containerSize.Y(size.Y() + 1.f);
+            sizeChanged = true;
+        }
+        if (sizeChanged) transform->setSize(containerSize);
+
         getFigure()->SetPosition(transform->getWorldPosition());
         getFigure()->SetRotation(transform->getWorldRotation());
         getFigure()->SetScale(transform->getWorldScale());

@@ -1,6 +1,9 @@
 #include "core/Text.h"
 #include "utils/GraphicsHelper.h"
 
+#include <bitmapHelper.h>
+using namespace pyxie;
+
 namespace ige::scene
 {
     //! Constructor
@@ -64,6 +67,11 @@ namespace ige::scene
         }
     }
 
+    const Vec2& Text::getSize() const
+    {
+        return m_size;
+    }
+
     void Text::updateFigure()
     {
         if (m_text != "" && m_fontPath != "")
@@ -73,6 +81,10 @@ namespace ige::scene
                 m_figure->DecReference();
                 m_figure = nullptr;
             }
+
+            int w, h;
+            calcTextSize(m_text.c_str(), m_fontPath.c_str(), m_fontSize, w, h);
+            m_size = Vec2(w, h);
 
             m_figure = GraphicsHelper::getInstance()->createText(m_text, m_fontPath, m_fontSize, m_color);
             m_figure->WaitBuild();

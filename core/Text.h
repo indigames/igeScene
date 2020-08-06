@@ -27,6 +27,9 @@ namespace ige::scene
         const Vec4& getColor() const { return m_color; }
         void setColor( const Vec4& color);
 
+        //! Get size
+        const Vec2& getSize() const;
+
         //! Figure
         EditableFigure* getFigure() { return m_figure; }
 
@@ -44,6 +47,9 @@ namespace ige::scene
 
         //! Color
         Vec4 m_color;
+
+        //! Cached Size
+        Vec2 m_size;
 
         //! Internal figure
         EditableFigure* m_figure;
