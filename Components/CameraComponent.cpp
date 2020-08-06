@@ -8,7 +8,8 @@ namespace ige::scene
     CameraComponent::CameraComponent(const std::shared_ptr<SceneObject>& owner, const std::string& name)
         : Component(owner), m_name(name), m_shootTarget(nullptr)
     {
-        m_camera = ResourceCreator::Instance().NewCamera(name.c_str(), nullptr);
+        static int name_count = 0;
+        m_camera = ResourceCreator::Instance().NewCamera((name + std::to_string(name_count++)).c_str(), nullptr);
     }
 
     //! Destructor

@@ -23,7 +23,7 @@ namespace ige::scene
         virtual ~Component();
 
         //! Get owner object
-        virtual std::shared_ptr<SceneObject> getOwner() const { return m_owner.lock(); }
+        virtual SceneObject* getOwner() const { return m_owner; }
 
         //! Check if owner was set
         virtual bool hasOwner() const { return getOwner() != nullptr; }
@@ -68,7 +68,7 @@ namespace ige::scene
 
     protected:
         //! Reference to owner object
-        std::weak_ptr<SceneObject> m_owner;
+        SceneObject* m_owner = nullptr;
     };
 
     //! Serialize

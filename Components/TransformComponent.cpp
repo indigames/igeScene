@@ -15,19 +15,21 @@ namespace ige::scene {
         m_worldRotation = rot;
         m_worldScale = scale;
 
-        if(hasParent()) getParent()->addObserver(this);
+        if (getOwner()->getParent())
+            m_parent = getOwner()->getParent()->getTransform().get();
     }
 
     TransformComponent::~TransformComponent() 
     {
         if(hasParent()) getParent()->removeObserver(this);
+        m_parent = nullptr;
         notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
         m_observers.clear();
     }    
 
     TransformComponent* TransformComponent::getParent() const
     {
-        return (getOwner() && getOwner()->getParent()) ? getOwner()->getParent()->getTransform().get() : nullptr;
+        return m_parent;
     }
 
     void TransformComponent::onUpdate(float dt)

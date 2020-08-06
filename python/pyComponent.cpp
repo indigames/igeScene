@@ -33,7 +33,7 @@ namespace ige::scene
         if(self->component && self->component->hasOwner())
         {
             auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = self->component->getOwner();
+            obj->sceneObject = nullptr; //self->component->getOwner();
             return (PyObject*)obj;
         }
         Py_RETURN_NONE;

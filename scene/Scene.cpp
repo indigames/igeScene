@@ -95,7 +95,7 @@ namespace ige::scene
 
     std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent)
     {
-        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get());
+        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent ? parent.get() : nullptr);
         if(parent != nullptr) parent->addChild(sceneObject);
         auto transform = sceneObject->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
         sceneObject->setTransform(transform);
@@ -121,7 +121,7 @@ namespace ige::scene
 
     std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent, const Vec3& pos, const Vec2& size)
     {
-        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get(), true);
+        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent ? parent.get() : nullptr, true);
         if (parent != nullptr) parent->addChild(sceneObject);
         auto transform = sceneObject->addComponent<RectTransform>(pos, size);
         sceneObject->setTransform(transform);
@@ -159,11 +159,8 @@ namespace ige::scene
         auto found = std::find(m_roots.begin(), m_roots.end(), obj);
         if (found != m_roots.end())
         {
-            if (m_activeCamera && m_activeCamera->getShootTarget()
-                && m_activeCamera->getShootTarget()->getId() == (*found)->getId())
-            {
+            if (m_activeCamera && m_activeCamera->getOwner()->getRoot() == (*found).get())
                 setActiveCamera(nullptr);
-            }
             m_roots.erase(found);
             return true;
         }
@@ -221,9 +218,6 @@ namespace ige::scene
     //! Component removed event
     void Scene::onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component)
     {
-        auto cameraComp = std::dynamic_pointer_cast<CameraComponent>(component);
-        if (cameraComp && m_activeCamera == cameraComp.get()) setActiveCamera(nullptr);
-
         if (component->getName() == "CameraComponent")
         {
             auto found = std::find_if(m_cameras.begin(), m_cameras.end(), [&](const auto& cam) {
@@ -233,6 +227,9 @@ namespace ige::scene
 
             if (found != m_cameras.end())
             {
+                auto cameraComponent = *found;
+                if(cameraComponent.get() == getActiveCamera()) 
+                    setActiveCamera(nullptr);
                 m_cameras.erase(found);
             }
         }
@@ -240,9 +237,9 @@ namespace ige::scene
 
     void Scene::onSceneObjectSelected(SceneObject& sceneObject)
     {
-        for (auto& cam : m_cameras)
+        for (const auto& cam : m_cameras)
         {
-            if (cam && cam->getShootTarget() && cam->getShootTarget()->getId() == sceneObject.getRoot()->getId())
+            if (cam && cam->getShootTarget() == sceneObject.getRoot())
             {
                 setActiveCamera(cam.get());
                 break;
@@ -255,17 +252,9 @@ namespace ige::scene
     {
         if (m_activeCamera != camera)
         {
-            // Deactive old root node, not update nor render
-            if (m_activeCamera && m_activeCamera->getOwner())
-                m_activeCamera->getOwner()->getRoot()->setActive(false);
-
             // Invoke callback
             getOnActiveCameraChangedEvent().invoke(camera);
-
-            // Set current node active
             m_activeCamera = camera;
-            if (m_activeCamera && m_activeCamera->getOwner())
-                m_activeCamera->getOwner()->getRoot()->setActive(true);
         }
     }
 

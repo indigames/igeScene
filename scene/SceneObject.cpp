@@ -48,17 +48,17 @@ namespace ige::scene
     //! Destructor
     SceneObject::~SceneObject()
     {
-        m_transform = nullptr;
-
-        getResourceAddedEvent().removeAllListeners();
-        getResourceRemovedEvent().removeAllListeners();
-
-        removeAllComponents();
         removeChildren();
+        removeAllComponents();
+
+        m_transform = nullptr;
         setParent(nullptr);
 
         if (m_showcase)
         {
+            getResourceAddedEvent().removeAllListeners();
+            getResourceRemovedEvent().removeAllListeners();
+
             m_showcase->Clear();
             m_showcase->DecReference();
             m_showcase = nullptr;
@@ -150,7 +150,8 @@ namespace ige::scene
     //! Remove children
     void SceneObject::removeChildren()
     {
-       for(auto& child: m_children) {
+        for(auto& child: m_children)
+        {
             if(child != nullptr) child->setParent(nullptr);
             child = nullptr;
         }
@@ -198,8 +199,7 @@ namespace ige::scene
     //! Remove all component
     bool SceneObject::removeAllComponents()
     {
-        auto it = m_components.begin();
-        while (it != m_components.end())
+        for (auto it = m_components.begin(); it != m_components.end();)
         {
             auto result = std::dynamic_pointer_cast<Component>(*it);
             m_componentRemovedEvent.invoke(*this, result);

@@ -94,10 +94,6 @@ namespace ige::scene
         //! Resource removed event
         void onResourceRemoved(Resource* resource);
 
-        //! Remove component by type
-        template<typename T>
-        bool removeComponent();
-
         //! Find object by id
         std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const;
 
@@ -238,25 +234,5 @@ namespace ige::scene
         m_components.push_back(instance);
         m_componentAddedEvent.invoke(*this, instance);
         return instance;
-    }
-
-    //! Remove component by type
-    template<typename T>
-    inline bool SceneObject::removeComponent()
-    {
-        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
-        std::shared_ptr<T> result(nullptr);
-        for (auto it = m_components.begin(); it != m_components.end(); ++it)
-        {
-            result = std::dynamic_pointer_cast<T>(*it);
-            if (result)
-            {
-                m_componentRemovedEvent.invoke(*this, result);
-                m_components.erase(it);
-                return true;
-            }
-        }
-
-        return false;
     }
 }

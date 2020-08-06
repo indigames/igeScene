@@ -4,13 +4,12 @@
 namespace ige::scene
 {
     //! Constructor
-    Component::Component(const std::shared_ptr<SceneObject>& owner): m_owner(owner) {}
+    Component::Component(const std::shared_ptr<SceneObject>& owner): m_owner(owner.get()) {}
     
     //! Destructor
     Component::~Component() 
     {
-        auto owner = m_owner.lock();
-        if (owner && owner->isActive())
+        if (m_owner && m_owner->isActive())
         {
             onDisable();
             onDestroy();
