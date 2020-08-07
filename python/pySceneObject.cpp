@@ -73,6 +73,24 @@ namespace ige::scene
 		return -1;
     }
 
+    // Get selected
+    PyObject* SceneObject_getSelected(PyObject_SceneObject* self)
+    {
+        return PyBool_FromLong(self->sceneObject->isSelected());
+    }
+
+    // Set selected
+    int SceneObject_setSelected(PyObject_SceneObject* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+			auto selected = (uint32_t)PyLong_AsLong(value) != 0;
+            self->sceneObject->setSelected(selected);
+            return 0;
+		}
+		return -1;
+    }
+
     // Get parent
     PyObject* SceneObject_getParent(PyObject_SceneObject* self)
     {
@@ -106,7 +124,7 @@ namespace ige::scene
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj))
         {
-            if(obj) 
+            if(obj)
             {
                 if(PyUnicode_Check(obj))
                 {
@@ -128,7 +146,7 @@ namespace ige::scene
                         Py_RETURN_TRUE;
                     }
                 }
-                else if(obj->ob_type == &PyTypeObject_SceneObject) 
+                else if(obj->ob_type == &PyTypeObject_SceneObject)
                 {
                     auto sceneObj = (PyObject_SceneObject*)obj;
                     self->sceneObject->addChild(sceneObj->sceneObject);
@@ -145,7 +163,7 @@ namespace ige::scene
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj))
         {
-            if(obj) 
+            if(obj)
             {
                 if(PyUnicode_Check(obj))
                 {
@@ -167,7 +185,7 @@ namespace ige::scene
                         Py_RETURN_TRUE;
                     }
                 }
-                else if(obj->ob_type == &PyTypeObject_SceneObject) 
+                else if(obj->ob_type == &PyTypeObject_SceneObject)
                 {
                     auto sceneObj = (PyObject_SceneObject*)obj;
                     self->sceneObject->removeChild(sceneObj->sceneObject);
@@ -285,7 +303,7 @@ namespace ige::scene
                 auto componentObj = (PyObject_Component*)obj;
                 self->sceneObject->addComponent(componentObj->component);
                 return obj;
-            }            
+            }
         }
         Py_RETURN_NONE;
     }
@@ -325,7 +343,7 @@ namespace ige::scene
                 {
                     self->sceneObject->removeComponent(comp);
                     Py_RETURN_TRUE;
-                }                
+                }
             }
             else if(obj->ob_type == &PyTypeObject_Component
                     || obj->ob_type == &PyTypeObject_TransformComponent
@@ -454,6 +472,7 @@ namespace ige::scene
         { "id", (getter)SceneObject_getId, NULL, SceneObject_id_doc, NULL },
         { "name", (getter)SceneObject_getName, (setter)SceneObject_setName, SceneObject_name_doc, NULL },
         { "active", (getter)SceneObject_getActive, (setter)SceneObject_setActive, SceneObject_active_doc, NULL },
+        { "selected", (getter)SceneObject_getSelected, (setter)SceneObject_setSelected, SceneObject_selected_doc, NULL },
         { "parent", (getter)SceneObject_getParent, (setter)SceneObject_setParent, SceneObject_parent_doc, NULL },
         { NULL, NULL }
     };

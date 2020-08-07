@@ -157,6 +157,12 @@ PyDoc_STRVAR(SceneObject_active_doc,
     "Type: boolean.\n"
 );
 
+// selected
+PyDoc_STRVAR(SceneObject_selected_doc,
+    "The selected status of the scene object.\n"\
+    "Type: boolean.\n"
+);
+
 // parent
 PyDoc_STRVAR(SceneObject_parent_doc,
     "The parent object of the object.\n"\

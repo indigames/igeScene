@@ -1,6 +1,7 @@
 #include <Python.h>
 
 #include "components/ScriptComponent.h"
+#include "python/pySceneObject.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -9,16 +10,25 @@ namespace ige::scene
 {
     //! Constructor
     ScriptComponent::ScriptComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path)
-        : Component(owner), m_pModule(nullptr), m_path(path)
+        : Component(owner), m_pyModule(nullptr), m_pyOwner(nullptr), m_path(path)
     {
         if (!m_path.empty())
             m_bPathDirty = true;
+
+        auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+        obj->sceneObject = owner;
+        m_pyOwner = (PyObject*)obj;
     }
 
     //! Destructor
     ScriptComponent::~ScriptComponent()
     {
         unloadPyModule();
+        if (m_pyOwner)
+        {
+            SceneObject_dealloc((PyObject_SceneObject*)m_pyOwner);
+            m_pyOwner = nullptr;
+        }        
     }
 
     void ScriptComponent::loadPyModule()
@@ -29,7 +39,7 @@ namespace ige::scene
         {
             auto mod =  PyUnicode_FromString(m_path.c_str());
             if (mod != nullptr) {
-                m_pModule = PyImport_Import(mod);
+                m_pyModule = PyImport_Import(mod);
                 Py_DECREF(mod);
             }
         }
@@ -38,10 +48,10 @@ namespace ige::scene
     //! Unload PyModule
     void ScriptComponent::unloadPyModule()
     {
-        if(m_pModule != nullptr)
+        if(m_pyModule != nullptr)
         {
-            Py_DECREF(m_pModule);
-            m_pModule = nullptr;
+            Py_DECREF(m_pyModule);
+            m_pyModule = nullptr;
         }
 
         // Clear error states
@@ -51,12 +61,14 @@ namespace ige::scene
     //! Awake
     void ScriptComponent::onAwake()
     {
-        if (m_pModule)
+        if (m_pyModule)
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Awake");
-            if(func)
+            auto func = PyObject_GetAttrString(m_pyModule, "Awake");
+            if (func)
             {
-                auto ret = PyObject_CallObject(func, NULL);
+                auto arglist = Py_BuildValue("(O)", m_pyOwner);
+                auto ret = PyObject_CallObject(func, arglist);
+                Py_DECREF(arglist);
                 Py_XDECREF(ret);
                 Py_DECREF(func);
             }
@@ -66,12 +78,14 @@ namespace ige::scene
     //! Start
     void ScriptComponent::onStart()
     {
-        if (m_pModule)
+        if (m_pyModule)
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Start");
+            auto func = PyObject_GetAttrString(m_pyModule, "Start");
             if(func)
             {
-                auto ret = PyObject_CallObject(func, NULL);
+                auto arglist = Py_BuildValue("(O)", m_pyOwner);
+                auto ret = PyObject_CallObject(func, arglist);
+                Py_DECREF(arglist);
                 Py_XDECREF(ret);
                 Py_DECREF(func);
             }
@@ -81,12 +95,14 @@ namespace ige::scene
     //! Enable
     void ScriptComponent::onEnable()
     {
-        if (m_pModule)
+        if (m_pyModule)
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Enable");
+            auto func = PyObject_GetAttrString(m_pyModule, "Enable");
             if(func)
             {
-                auto ret = PyObject_CallObject(func, NULL);
+                auto arglist = Py_BuildValue("(O)", m_pyOwner);
+                auto ret = PyObject_CallObject(func, arglist);
+                Py_DECREF(arglist);
                 Py_XDECREF(ret);
                 Py_DECREF(func);
             }
@@ -96,12 +112,14 @@ namespace ige::scene
     //! Disable
     void ScriptComponent::onDisable()
     {
-        if (m_pModule)
+        if (m_pyModule)
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Disable");
+            auto func = PyObject_GetAttrString(m_pyModule, "Disable");
             if(func)
             {
-                auto ret = PyObject_CallObject(func, NULL);
+                auto arglist = Py_BuildValue("(O)", m_pyOwner);
+                auto ret = PyObject_CallObject(func, arglist);
+                Py_DECREF(arglist);
                 Py_XDECREF(ret);
                 Py_DECREF(func);
             }
@@ -117,12 +135,12 @@ namespace ige::scene
             m_bPathDirty = false;
         }
 
-        if (m_pModule)
+        if (m_pyModule)
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Update");
+            auto func = PyObject_GetAttrString(m_pyModule, "Update");
             if(func)
             {
-                auto arglist = Py_BuildValue("(f)", dt);
+                auto arglist = Py_BuildValue("(Of)", m_pyOwner, dt);
                 auto ret = PyObject_CallObject(func, arglist);
                 Py_DECREF(arglist);
                 Py_XDECREF(ret);
@@ -133,12 +151,12 @@ namespace ige::scene
 
     void ScriptComponent::onFixedUpdate(float dt)
     {
-        if (m_pModule)
+        if (m_pyModule)
         {
-            auto func = PyObject_GetAttrString(m_pModule, "FixedUpdate");
+            auto func = PyObject_GetAttrString(m_pyModule, "FixedUpdate");
             if(func)
             {
-                auto arglist = Py_BuildValue("(f)", dt);
+                auto arglist = Py_BuildValue("(Of)", m_pyOwner, dt);
                 auto ret = PyObject_CallObject(func, arglist);
                 Py_DECREF(arglist);
                 Py_XDECREF(ret);
@@ -149,12 +167,12 @@ namespace ige::scene
 
     void ScriptComponent::onLateUpdate(float dt)
     {
-        if (m_pModule)
+        if (m_pyModule)
         {
-            auto func = PyObject_GetAttrString(m_pModule, "LateUpdate");
+            auto func = PyObject_GetAttrString(m_pyModule, "LateUpdate");
             if(func)
             {
-                auto arglist = Py_BuildValue("(f)", dt);
+                auto arglist = Py_BuildValue("(Of)", m_pyOwner, dt);
                 auto ret = PyObject_CallObject(func, arglist);
                 Py_DECREF(arglist);
                 Py_XDECREF(ret);
@@ -166,12 +184,14 @@ namespace ige::scene
     //! Render
     void ScriptComponent::onRender()
     {
-        if (m_pModule)
+        if (m_pyModule)
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Render");
+            auto func = PyObject_GetAttrString(m_pyModule, "Render");
             if(func)
             {
-                auto ret = PyObject_CallObject(func, NULL);
+                auto arglist = Py_BuildValue("(O)", m_pyOwner);
+                auto ret = PyObject_CallObject(func, arglist);
+                Py_DECREF(arglist);
                 Py_XDECREF(ret);
                 Py_DECREF(func);
             }
@@ -181,12 +201,14 @@ namespace ige::scene
     //! Destroyed
     void ScriptComponent::onDestroy()
     {
-        if (m_pModule)
+        if (m_pyModule)
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Destroy");
+            auto func = PyObject_GetAttrString(m_pyModule, "Destroy");
             if(func)
             {
-                auto ret = PyObject_CallObject(func, NULL);
+                auto arglist = Py_BuildValue("(O)", m_pyOwner);
+                auto ret = PyObject_CallObject(func, arglist);
+                Py_DECREF(arglist);
                 Py_XDECREF(ret);
                 Py_DECREF(func);
             }
@@ -212,7 +234,7 @@ namespace ige::scene
     {
         auto scriptName = fs::path(path).stem().string();
 
-        if (!scriptName.empty() && strcmp(m_path.c_str(), scriptName.c_str()) != 0)
+        if (strcmp(m_path.c_str(), scriptName.c_str()) != 0)
         {
             m_path = scriptName;
             m_bPathDirty = true;

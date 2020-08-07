@@ -4,6 +4,9 @@
 #include "python/pySceneObject.h"
 
 #include "components/Component.h"
+#include "scene/Scene.h"
+#include "scene/SceneObject.h"
+#include "scene/SceneManager.h"
 
 namespace ige::scene
 {
@@ -32,8 +35,8 @@ namespace ige::scene
     {
         if(self->component && self->component->hasOwner())
         {
-            auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = nullptr; //self->component->getOwner();
+            auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);            
+            obj->sceneObject = SceneManager::getInstance()->getCurrentScene()->findObjectById(self->component->getOwner()->getId());
             return (PyObject*)obj;
         }
         Py_RETURN_NONE;

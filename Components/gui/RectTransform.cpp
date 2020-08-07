@@ -65,21 +65,13 @@ namespace ige::scene
         if (m_bLocalDirty)
         {
             m_localMatrix.Identity();
-
-            auto pos2 = m_localPosition;
-            auto pos = Vec3(pos2.X(), pos2.Y(), m_posZ);
-            auto transMat = Mat4::Translate(pos);
-            m_localMatrix = transMat;
-
-            if (hasScaleOrRotation())
-            {
-                auto pivot = getPivotInViewportSpace();
-                auto transformToPivotSpace = Mat4::Translate(Vec3(-pivot.X(), -pivot.Y(), m_posZ));
-                auto scaleMat = Mat4::Scale(m_localScale);
-                auto rotMat = Mat4::Rotation(m_localRotation);
-                auto transformFromPivotSpace = Mat4::Translate(Vec3(pivot.X(), pivot.Y(), m_posZ));
-                m_localMatrix = transformFromPivotSpace * rotMat * scaleMat * transMat * transformToPivotSpace;
-            }
+            auto pivot = getPivotInViewportSpace();
+            auto transformToPivotSpace = Mat4::Translate(Vec3(-pivot.X(), -pivot.Y(), m_posZ));
+            auto scaleMat = Mat4::Scale(m_localScale);
+            auto rotMat = Mat4::Rotation(m_localRotation);
+            auto transMat = Mat4::Translate(m_localPosition);
+            auto transformFromPivotSpace = Mat4::Translate(Vec3(pivot.X(), pivot.Y(), m_posZ));
+            m_localMatrix = transformFromPivotSpace * rotMat * scaleMat * transMat * transformToPivotSpace;
             m_bLocalDirty = false;
         }
         return m_localMatrix;
@@ -269,58 +261,8 @@ namespace ige::scene
     {
         if (m_pivot == pivot)
             return;
-
-        // If has scale or rotation, need calculate offset in transformed space
-        if (hasScaleOrRotation())
-        {
-            auto rect = getRect();
-            auto localTransform = getLocalTransform();
-
-            // Get the rect points
-            auto leftTop = Vec4(rect.m_left, rect.m_top, 0.0f, 1.0f);
-            auto rightTop = Vec4(rect.m_right, rect.m_top, 0.0f, 1.0f);
-            auto leftBottom = Vec4(rect.m_left, rect.m_bottom, 0.0f, 1.0f);
-            auto rightBottom = Vec4(rect.m_right, rect.m_bottom, 0.0f, 1.0f);
-
-            // Apply transformation
-            leftTop = localTransform * leftTop;
-            rightTop = localTransform * rightTop;
-            leftBottom = localTransform * leftBottom;
-            rightBottom = localTransform * rightBottom;
-
-            // Set new pivot
-            m_pivot = pivot;
-            setDirty();
-
-            // Calculate pivot in transformed space
-            auto rightVec4 = rightTop - leftTop;
-            auto downVec4 = leftBottom - leftTop;
-            auto leftTopVec = Vec2(leftTop.X(), leftTop.Y());
-            auto rightVec = Vec2(rightVec4.X(), rightVec4.Y());
-            auto downVec = Vec2(downVec4.X(), downVec4.Y());
-            auto transPivot = leftTopVec + (rightVec * pivot.X()) + (downVec * pivot.Y());
-
-            // Adjust the size based on transformed pivot
-            float newLeft = transPivot.X() - rect.getWidth() * pivot.X();
-            float newTop = transPivot.Y() - rect.getHeight() * pivot.Y();
-            float deltaX = newLeft - rect.m_left;
-            float deltaY = newTop - rect.m_top;
-
-            // Adjust the offset values
-            m_offset.m_left += deltaX;
-            m_offset.m_right += deltaX;
-            m_offset.m_top += deltaY;
-            m_offset.m_bottom += deltaY;
-
-            // Recalculate rect
-            setDirty();;
-        }
-        else
-        {
-            // No scale or rotation, just update pivot
-            m_pivot = pivot;
-            setDirty();;
-        }
+        m_pivot = pivot;
+        setDirty();
     }
 
     void RectTransform::setOffset(const Offset& offset)

@@ -2,6 +2,7 @@
 #include "python/pyScene_doc_en.h"
 
 #include "python/pySceneObject.h"
+#include "python/pyCameraComponent.h"
 
 #include "scene/SceneManager.h"
 
@@ -49,13 +50,41 @@ namespace ige::scene
         return 0;
     }
 
+    // Get active camera
+    PyObject* Scene_getActiveCamera(PyObject_Scene* self)
+    {
+        auto cameras = self->scene->getCameras();
+        std::shared_ptr<CameraComponent> camera = nullptr;
+        for (const auto& cam : cameras)
+        {
+            if(cam.get() == self->scene->getActiveCamera())
+            {
+                camera = cam;
+                break;
+            }
+        }
+        auto *obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
+        obj->component = camera;
+        return (PyObject*)obj;
+    }
+
+    // Set active camera
+    int Scene_setActiveCamera(PyObject_Scene* self, PyObject* value)
+    {
+        PyObject* camera;
+        if (PyArg_ParseTuple(value, "O", &camera)) {
+            self->scene->setActiveCamera(((PyObject_CameraComponent*)camera)->component.get());
+        }
+        return 0;
+    }
+
     // Create object
     PyObject* Scene_createObject(PyObject_Scene *self, PyObject* args)
     {
         char* name;
         PyObject* parentObj;
 
-        if (PyArg_ParseTuple(args, "sO", &name, &parentObj)) {            
+        if (PyArg_ParseTuple(args, "sO", &name, &parentObj)) {
             auto parent = parentObj ? ((PyObject_SceneObject*)parentObj)->sceneObject : nullptr;
             auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
             obj->sceneObject = self->scene->createObject(name, parent);
@@ -63,14 +92,14 @@ namespace ige::scene
         }
         Py_RETURN_NONE;
     }
-    
+
     // Remove object
     PyObject* Scene_removeObject(PyObject_Scene *self, PyObject* args)
     {
         PyObject* obj = nullptr;
 		if (PyArg_ParseTuple(args, "O", &obj))
         {
-            if(obj)            
+            if(obj)
             {
                 if(PyUnicode_Check(obj))
                 {
@@ -81,7 +110,7 @@ namespace ige::scene
                         if(self->scene->removeObject(sceneObject))
                         {
                             Py_RETURN_TRUE;
-                        }                        
+                        }
                     }
                 }
                 else if(PyNumber_Check(obj))
@@ -135,32 +164,53 @@ namespace ige::scene
                         return (PyObject*)obj;
                     }
                 }
-            }            
+            }
         }
         Py_RETURN_NONE;
     }
- 
-    // Get root 
-    // TODO
-    /*PyObject* Scene_getRoot(PyObject_Scene *self)
+
+    // Get roots
+    PyObject* Scene_getRoots(PyObject_Scene *self)
     {
-        auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        obj->sceneObject = self->scene->getRoot();
-        return (PyObject*)obj;
-    }*/
+        auto roots = self->scene->getRoots();
+        auto pyList = PyList_New(roots.size());
+        for(int i = 0; i < roots.size(); ++i)
+        {
+            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            obj->sceneObject = roots[i];
+            PyList_Append(pyList, (PyObject*)obj);
+        }
+        return (PyObject*)pyList;
+    }
+
+    // Get cameras
+    PyObject* Scene_getCameras(PyObject_Scene *self)
+    {
+        auto cameras = self->scene->getCameras();
+        auto pyList = PyList_New(cameras.size());
+        for(int i = 0; i < cameras.size(); ++i)
+        {
+            auto obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
+            obj->component = cameras[i];
+            PyList_Append(pyList, (PyObject*)obj);
+        }
+        return (PyObject*)pyList;
+    }
 
     // Methods definition
     PyMethodDef Scene_methods[] = {
-    { "createObject", (PyCFunction)Scene_createObject, METH_VARARGS, Scene_createObject_doc },
-    { "removeObject", (PyCFunction)Scene_removeObject, METH_VARARGS, Scene_removeObject_doc },
-    { "findObject", (PyCFunction)Scene_findObject, METH_VARARGS, Scene_findObject_doc },
-    // { "getRoot", (PyCFunction)Scene_getRoot, METH_NOARGS, Scene_getRoot_doc },
-    { NULL, NULL }
+        { "createObject", (PyCFunction)Scene_createObject, METH_VARARGS, Scene_createObject_doc },
+        { "removeObject", (PyCFunction)Scene_removeObject, METH_VARARGS, Scene_removeObject_doc },
+        { "findObject", (PyCFunction)Scene_findObject, METH_VARARGS, Scene_findObject_doc },
+        { NULL, NULL }
     };
 
     // Variable definition
     PyGetSetDef Scene_getsets[] = {
         { "name", (getter)Scene_getName, (setter)Scene_setName, Scene_name_doc, NULL },
+        { "roots", (getter)Scene_getRoots, nullptr, Scene_roots_doc, NULL },
+        { "cameras", (getter)Scene_getCameras, nullptr, Scene_cameras_doc, NULL },
+        { "activeCamera", (getter)Scene_getActiveCamera, (setter)Scene_setActiveCamera, Scene_activeCamera_doc, NULL },
         { NULL, NULL }
     };
 

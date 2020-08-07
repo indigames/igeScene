@@ -36,6 +36,12 @@ namespace ige::scene
     // Set active
     int SceneObject_setActive(PyObject_SceneObject* self, PyObject* value);
 
+    // Get selected
+    PyObject* SceneObject_getSelected(PyObject_SceneObject* self);
+
+    // Set selected
+    int SceneObject_setSelected(PyObject_SceneObject* self, PyObject* value);
+
     // Get parent
     PyObject* SceneObject_getParent(PyObject_SceneObject* self);
 

@@ -28,15 +28,24 @@ namespace ige::scene
     // Set name
     int Scene_setName(PyObject_Scene* self, PyObject* value);
 
+    // Get active camera
+    PyObject* Scene_getActiveCamera(PyObject_Scene *self);
+
+    // Set active camera
+    int Scene_setActiveCamera(PyObject_Scene *self, PyObject* value);
+
     // Create object
     PyObject* Scene_createObject(PyObject_Scene *self, PyObject* args);
-    
+
     // Remove object
     PyObject* Scene_removeObject(PyObject_Scene *self, PyObject* args);
 
     // Find object
     PyObject* Scene_findObject(PyObject_Scene *self, PyObject* args);
 
-    // Get root object
-    PyObject* Scene_getRoot(PyObject_Scene *self);
+    // Get ass root objects
+    PyObject* Scene_getRoots(PyObject_Scene *self);
+
+    // Get all cameras
+    PyObject* Scene_getCameras(PyObject_Scene *self);
 }

@@ -68,7 +68,10 @@ namespace ige::scene
         //! Events
         Event<const std::string&> m_onScriptChangedEvent;
 
-        //! PyObject module
-        _object* m_pModule;
+        //! PyObject: module
+        _object* m_pyModule;
+
+        //! PyObject: owner
+        _object* m_pyOwner;
     };
 }

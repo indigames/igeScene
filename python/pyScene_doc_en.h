@@ -54,22 +54,16 @@ PyDoc_STRVAR(Scene_findObject_doc,
 	"    None: if not found\n"
 );
 
-// getRoot
-PyDoc_STRVAR(Scene_getRoot_doc,
-	"Get the root object of the scene.\n"\
-	"\n"\
-	"Scene().findObject(param: string|number)\n"\
-	"\n"\
-	"Parameters\n"\
-	"----------\n"\
-	"    param : string\n"\
-	"        Name of the scene object to find\n"\
-	"    param : number (unsigned long long)\n"\
-	"        ID of the scene object to find\n"\
-	"Return:\n"\
-	"----------\n"\
-	"    SceneObject: if found\n"\
-	"    None: if not found\n"
+// roots
+PyDoc_STRVAR(Scene_roots_doc,
+	"Get the list of root objects from the scene.\n"\
+	"Type: List<SceneObject>\n"
+);
+
+// cameras
+PyDoc_STRVAR(Scene_cameras_doc,
+	"Get the list of cameras from the scene.\n"\
+	"Type: List<CameraComponent>\n"
 );
 
 // name
@@ -78,3 +72,8 @@ PyDoc_STRVAR(Scene_name_doc,
 	"Type: string\n"
 );
 
+// activeCamera
+PyDoc_STRVAR(Scene_activeCamera_doc,
+	"The current active camera.\n"\
+	"Type: CameraComponent\n"
+);
