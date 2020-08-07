@@ -290,7 +290,7 @@ namespace ige::scene
 
             // Set new pivot
             m_pivot = pivot;
-            setDirty();;
+            setDirty();
 
             // Calculate pivot in transformed space
             auto rightVec4 = rightTop - leftTop;
@@ -463,6 +463,11 @@ namespace ige::scene
 
             auto pivot = getPivotInCanvasSpace();
             auto posVec2 = pivot - getAnchorCenterInCanvasSpace();
+
+            // Adjust center point to fit the edges of parent
+            posVec2.X(posVec2.X() - (0.5f - m_anchor.getCenterX()) * rect.getWidth());
+            posVec2.Y(posVec2.Y() - (0.5f - m_anchor.getCenterY()) * rect.getHeight());
+
             m_localPosition = Vec3(posVec2.X(), posVec2.Y(), m_posZ);
 
             // Recompute world transform
