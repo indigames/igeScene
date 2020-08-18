@@ -49,10 +49,10 @@ namespace ige::scene
     SceneObject::~SceneObject()
     {
         removeChildren();
-        removeAllComponents();
+        setParent(nullptr);
 
         m_transform = nullptr;
-        setParent(nullptr);
+        removeAllComponents();
 
         if (m_showcase)
         {

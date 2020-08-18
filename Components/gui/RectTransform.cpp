@@ -6,13 +6,55 @@
 
 namespace ige::scene
 {
+    // get width of rect with left-top-right-bottom
+    inline float getRectWidth(const Vec4& vec)
+    {
+        return vec[2] - vec[0];
+    }
+
+    // get height of rect with left-top-right-bottom
+    inline float getRectHeight(const Vec4& vec)
+    {
+        return vec[3] - vec[1];
+    }
+
+    // get size of rect with left-top-right-bottom
+    inline Vec2 getRectSize(const Vec4& vec)
+    {
+        return Vec2(vec[2] - vec[0], vec[3] - vec[1]);
+    }
+
+    // get center of rect with left-top-right-bottom
+    inline Vec2 getRectCenter(const Vec4& vec)
+    {
+        return Vec2((vec[2] + vec[0]) * 0.5f, (vec[3] + vec[1]) * 0.5f);
+    }
+
+    //! Translation
+    inline void translateRect(Vec4& vec, const Vec2& offset)
+    {
+        vec[0] += offset.X();
+        vec[2] += offset.X();
+        vec[1] += offset.Y();
+        vec[3] += offset.Y();
+    }
+
+    //! Claim values in range of 0.0f - 1.0f
+    void clampRectZeroToOne(Vec4& vec)
+    {
+        vec[0] = std::clamp(vec[0], 0.0f, 1.0f);
+        vec[1] = std::clamp(vec[1], 0.0f, 1.0f);
+        vec[2] = std::clamp(vec[2], 0.0f, 1.0f);
+        vec[3] = std::clamp(vec[3], 0.0f, 1.0f);
+    }
+
     RectTransform::RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos, const Vec2& size)
         : TransformComponent(owner)
     {
         m_posZ = 0.f;
-        m_offset = Offset(0.f, 0.f, 0.f, 0.f);
-        setAnchor(Anchor(0.5f, 0.5f, 0.5f, 0.5f));
-        setPivot(Vec2(0.5f, 0.5f));
+        m_offset = Vec4(0.f, 0.f, 0.f, 0.f);
+        m_anchor = Vec4(0.5f, 0.5f, 0.5f, 0.5f);
+        m_pivot = Vec2(0.5f, 0.5f);
         setSize(size);
         setDirty();
     }
@@ -24,8 +66,8 @@ namespace ige::scene
     Vec2 RectTransform::getPivotInCanvasSpace()
     {
         auto rect = getRect();
-        float x = rect.m_left + rect.getWidth() * m_pivot.X();
-        float y = rect.m_top + rect.getHeight() * m_pivot.Y();
+        float x = rect[0] + getRectWidth(rect) * m_pivot.X();
+        float y = rect[1] + getRectHeight(rect) * m_pivot.Y();
         return Vec2(x, y);
     }
 
@@ -51,13 +93,13 @@ namespace ige::scene
         auto parentTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
         auto parentRect = parentTransform->getRect();
 
-        Rect anchorRect;
-        anchorRect.m_left = parentRect.m_left + parentRect.getWidth() * m_anchor.m_left;
-        anchorRect.m_right = parentRect.m_left + parentRect.getWidth() * m_anchor.m_right;
-        anchorRect.m_top = parentRect.m_top + parentRect.getHeight() * m_anchor.m_top;
-        anchorRect.m_bottom = parentRect.m_top + parentRect.getHeight() * m_anchor.m_bottom;
+        Vec4 anchorRect;
+        anchorRect[0] = parentRect[0] + getRectWidth(parentRect) * m_anchor[0];
+        anchorRect[2] = parentRect[0] + getRectWidth(parentRect) * m_anchor[2];
+        anchorRect[1] = parentRect[1] + getRectHeight(parentRect) * m_anchor[1];
+        anchorRect[3] = parentRect[1] + getRectHeight(parentRect) * m_anchor[3];
 
-        return anchorRect.getCenter();
+        return getRectCenter(anchorRect);
     }
 
     const Mat4& RectTransform::getLocalTransform()
@@ -182,7 +224,7 @@ namespace ige::scene
         if (currPos != pos)
         {
             auto offsetVec3 = (pos - currPos);
-            m_offset += Vec2(offsetVec3.X(), offsetVec3.Y());
+            translateRect(m_offset, Vec2(offsetVec3.X(), offsetVec3.Y()));
             m_posZ = pos.Z();
             setDirty();
         }
@@ -202,35 +244,36 @@ namespace ige::scene
                 }
             }
         }
-               
+
         m_rectDirty = true;
         m_bLocalDirty = true;
         m_viewportTransformDirty = true;
-        m_canvasTransformDirty = true;          
+        m_canvasTransformDirty = true;
     }
 
-    void RectTransform::setAnchor(const Anchor& anchor)
+    void RectTransform::setAnchor(const Vec4& anchor)
     {
         auto lastAnchor = m_anchor;
         auto lastOffset = m_offset;
         m_anchor = anchor;
+        clampRectZeroToOne(m_anchor);
 
         // Correct anchor left & right
-        if (m_anchor.m_right < m_anchor.m_left)
+        if (m_anchor[2] < m_anchor[0])
         {
-            if (m_anchor.m_right != lastAnchor.m_right)
-                m_anchor.m_right = m_anchor.m_left;
+            if (m_anchor[2] != lastAnchor[2])
+                m_anchor[2] = m_anchor[0];
             else
-                m_anchor.m_left = m_anchor.m_right;
+                m_anchor[0] = m_anchor[2];
         }
 
         // Correct anchor top & bottom
-        if (m_anchor.m_bottom < m_anchor.m_top)
+        if (m_anchor[3] < m_anchor[1])
         {
-            if (m_anchor.m_bottom != lastAnchor.m_bottom)
-                m_anchor.m_bottom = m_anchor.m_top;
+            if (m_anchor[3] != lastAnchor[3])
+                m_anchor[3] = m_anchor[1];
             else
-                m_anchor.m_top = m_anchor.m_bottom;
+                m_anchor[1] = m_anchor[3];
         }
 
         // Update offsets
@@ -239,18 +282,18 @@ namespace ige::scene
         {
             auto parentRectTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
             auto parentRect = parentRectTransform->getRect();
-            m_offset.m_left -= parentRect.getWidth() * (m_anchor.m_left - lastAnchor.m_left);
-            m_offset.m_right -= parentRect.getWidth() * (m_anchor.m_right - lastAnchor.m_right);
-            m_offset.m_top -= parentRect.getHeight() * (m_anchor.m_top - lastAnchor.m_top);
-            m_offset.m_bottom -= parentRect.getHeight() * (m_anchor.m_bottom - lastAnchor.m_bottom);
+            m_offset[0] -= getRectWidth(parentRect) * (m_anchor[0] - lastAnchor[0]);
+            m_offset[2] -= getRectWidth(parentRect) * (m_anchor[2] - lastAnchor[2]);
+            m_offset[1] -= getRectHeight(parentRect) * (m_anchor[1] - lastAnchor[1]);
+            m_offset[3] -= getRectHeight(parentRect) * (m_anchor[3] - lastAnchor[3]);
         }
 
         // Avoid negative width and height
-        if (m_anchor.m_left == m_anchor.m_right && m_offset.m_left > m_offset.m_right)
-            m_offset.m_left = m_offset.m_right = (m_offset.m_left + m_offset.m_right) * 0.5f;
+        if (m_anchor[0] == m_anchor[2] && m_offset[0] > m_offset[2])
+            m_offset[0] = m_offset[2] = (m_offset[0] + m_offset[2]) * 0.5f;
 
-        if (m_anchor.m_top == m_anchor.m_bottom && m_offset.m_top > m_offset.m_bottom)
-            m_offset.m_top = m_offset.m_bottom = (m_offset.m_top + m_offset.m_bottom) * 0.5f;
+        if (m_anchor[1] == m_anchor[3] && m_offset[1] > m_offset[3])
+            m_offset[1] = m_offset[3] = (m_offset[1] + m_offset[3]) * 0.5f;
 
         // Recompute
         if (lastAnchor != m_anchor || lastOffset != m_offset)
@@ -265,7 +308,7 @@ namespace ige::scene
         setDirty();
     }
 
-    void RectTransform::setOffset(const Offset& offset)
+    void RectTransform::setOffset(const Vec4& offset)
     {
         auto parent = getOwner()->getParent();
         if (!parent) return;
@@ -277,52 +320,52 @@ namespace ige::scene
         auto newOffset = offset;
 
         auto parentRect = parentRectTransform->getRect();
-        float left = parentRect.m_left + parentRect.getWidth() * m_anchor.m_left + offset.m_left;
-        float right = parentRect.m_left + parentRect.getWidth() * m_anchor.m_right + offset.m_right;
-        float top = parentRect.m_top + parentRect.getHeight() * m_anchor.m_top + offset.m_top;
-        float bottom = parentRect.m_top + parentRect.getHeight() * m_anchor.m_bottom + offset.m_bottom;
+        float left = parentRect[0] + getRectWidth(parentRect) * m_anchor[0] + offset[0];
+        float right = parentRect[0] + getRectWidth(parentRect) * m_anchor[2] + offset[2];
+        float top = parentRect[1] + getRectHeight(parentRect) * m_anchor[1] + offset[1];
+        float bottom = parentRect[1] + getRectHeight(parentRect) * m_anchor[3] + offset[3];
 
         if (left > right)
         {
             // left - right offsets are flipped
-            bool leftChanged = newOffset.m_left != lastOffset.m_left;
-            bool rightChanged = newOffset.m_right != lastOffset.m_right;
+            bool leftChanged = newOffset[0] != lastOffset[0];
+            bool rightChanged = newOffset[2] != lastOffset[2];
 
             if (leftChanged && rightChanged)
             {
                 float newValue = left * (1.0f - m_pivot.X()) + right * m_pivot.X();
-                newOffset.m_left = newValue - (parentRect.m_left + parentRect.getWidth() * m_anchor.m_left);
-                newOffset.m_right = newValue - (parentRect.m_left + parentRect.getWidth() * m_anchor.m_right);
+                newOffset[0] = newValue - (parentRect[0] + getRectWidth(parentRect) * m_anchor[0]);
+                newOffset[2] = newValue - (parentRect[0] + getRectWidth(parentRect) * m_anchor[2]);
             }
             else if (rightChanged)
             {
-                newOffset.m_right = left - (parentRect.m_left + parentRect.getWidth() * m_anchor.m_right);
+                newOffset[2] = left - (parentRect[0] + getRectWidth(parentRect) * m_anchor[2]);
             }
             else if (leftChanged)
             {
-                newOffset.m_left = right - (parentRect.m_left + parentRect.getWidth() * m_anchor.m_left);
+                newOffset[0] = right - (parentRect[0] + getRectWidth(parentRect) * m_anchor[0]);
             }
         }
 
         if (top > bottom)
         {
             // top - bottom offsets are flipped
-            bool topChanged = newOffset.m_top != lastOffset.m_top;
-            bool bottomChanged = newOffset.m_bottom != lastOffset.m_bottom;
+            bool topChanged = newOffset[1] != lastOffset[1];
+            bool bottomChanged = newOffset[3] != lastOffset[3];
 
             if (topChanged && bottomChanged)
             {
                 float newValue = top * (1.0f - m_pivot.Y()) + bottom * m_pivot.Y();
-                newOffset.m_top = newValue - (parentRect.m_top + parentRect.getHeight() * m_anchor.m_top);
-                newOffset.m_bottom = newValue - (parentRect.m_top + parentRect.getHeight() * m_anchor.m_bottom);
+                newOffset[1] = newValue - (parentRect[1] + getRectHeight(parentRect) * m_anchor[1]);
+                newOffset[3] = newValue - (parentRect[1] + getRectHeight(parentRect) * m_anchor[3]);
             }
             else if (bottomChanged)
             {
-                newOffset.m_bottom = top - (parentRect.m_top + parentRect.getHeight() * m_anchor.m_bottom);
+                newOffset[3] = top - (parentRect[1] + getRectHeight(parentRect) * m_anchor[3]);
             }
             else if (topChanged)
             {
-                newOffset.m_top = bottom - (parentRect.m_top + parentRect.getHeight() * m_anchor.m_top);
+                newOffset[1] = bottom - (parentRect[1] + getRectHeight(parentRect) * m_anchor[1]);
             }
         }
 
@@ -335,7 +378,7 @@ namespace ige::scene
 
     Vec2 RectTransform::getSize()
     {
-        return getRect().getSize();
+        return getRectSize(getRect());
     }
 
     void RectTransform::setSize(const Vec2& size)
@@ -343,21 +386,21 @@ namespace ige::scene
         auto offset = getOffset();
 
         // Adjust width
-        if (m_anchor.m_left == m_anchor.m_right)
+        if (m_anchor[0] == m_anchor[2])
         {
-            auto curWidth = m_offset.m_right - m_offset.m_left;
+            auto curWidth = m_offset[2] - m_offset[0];
             auto diff = size.X() - curWidth;
-            offset.m_left -= diff * m_pivot.X();
-            offset.m_right += diff * (1.0f - m_pivot.X());
+            offset[0] -= diff * m_pivot.X();
+            offset[2] += diff * (1.0f - m_pivot.X());
         }
 
         // Adjust height
-        if (m_anchor.m_top == m_anchor.m_bottom)
+        if (m_anchor[1] == m_anchor[3])
         {
-            auto curHeight = m_offset.m_bottom - m_offset.m_top;
+            auto curHeight = m_offset[3] - m_offset[1];
             auto diff = size.Y() - curHeight;
-            offset.m_top -= diff * m_pivot.Y();
-            offset.m_bottom += diff * (1.0f - m_pivot.Y());
+            offset[1] -= diff * m_pivot.Y();
+            offset[3] += diff * (1.0f - m_pivot.Y());
         }
 
         // Set new offset
@@ -365,22 +408,22 @@ namespace ige::scene
     }
 
 
-    const Rect& RectTransform::getRect()
+    const Vec4& RectTransform::getRect()
     {
         if (m_rectDirty)
         {
-            Rect rect;
-            rect.m_left = rect.m_top = 0.f;
+            Vec4 rect;
+            rect[0] = rect[1] = 0.f;
 
             auto parent = getOwner()->getParent();
             if (parent)
             {
                 auto parentRectTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
                 auto parentRect = parentRectTransform->getRect();
-                rect.m_left = parentRect.m_left + parentRect.getWidth() * m_anchor.m_left + m_offset.m_left;
-                rect.m_right = parentRect.m_left + parentRect.getWidth() * m_anchor.m_right + m_offset.m_right;
-                rect.m_top = parentRect.m_top + parentRect.getHeight() * m_anchor.m_top + m_offset.m_top;
-                rect.m_bottom = parentRect.m_top + parentRect.getHeight() * m_anchor.m_bottom + m_offset.m_bottom;
+                rect[0] = parentRect[0] + getRectWidth(parentRect) * m_anchor[0] + m_offset[0];
+                rect[2] = parentRect[0] + getRectWidth(parentRect) * m_anchor[2] + m_offset[2];
+                rect[1] = parentRect[1] + getRectHeight(parentRect) * m_anchor[1] + m_offset[1];
+                rect[3] = parentRect[1] + getRectHeight(parentRect) * m_anchor[3] + m_offset[3];
             }
             else
             {
@@ -388,27 +431,29 @@ namespace ige::scene
                 if (canvas)
                 {
                     auto size = canvas->getDesignCanvasSize();
-                    rect.m_right = size.X();
-                    rect.m_bottom = size.Y();
+                    rect[2] = size.X();
+                    rect[3] = size.Y();
                 }
             }
 
+            auto center = getRectCenter(rect);
             // Avoid flipped rect
-            if(rect.m_left > rect.m_right)
-                rect.m_left = rect.m_right = rect.getCenterX();
+            if(rect[0] > rect[2])
+                rect[0] = rect[2] = center[0];
 
-            if (rect.m_top > rect.m_bottom)
-                rect.m_top = rect.m_bottom = rect.getCenterY();
+            if (rect[1] > rect[3])
+                rect[1] = rect[3] = center[1];
 
             m_rect = rect;
             m_rectDirty = false;
 
-            auto pivot = getPivotInCanvasSpace();
-            auto posVec2 = pivot - getAnchorCenterInCanvasSpace();
+            auto centerPoint = getRectCenter(m_rect);
+            auto posVec2 = centerPoint - getAnchorCenterInCanvasSpace();
 
             // Adjust center point to fit the edges of parent
-            posVec2.X(posVec2.X() - (0.5f - m_anchor.getCenterX()) * rect.getWidth());
-            posVec2.Y(posVec2.Y() - (0.5f - m_anchor.getCenterY()) * rect.getHeight());
+            auto anchorCenter = getRectCenter(m_anchor);
+            posVec2.X(posVec2.X() - (0.5f - anchorCenter[0]) * getRectWidth(rect));
+            posVec2.Y(posVec2.Y() - (0.5f - anchorCenter[1]) * getRectHeight(rect));
 
             m_localPosition = Vec3(posVec2.X(), posVec2.Y(), m_posZ);
 
@@ -452,8 +497,8 @@ namespace ige::scene
     void RectTransform::setWorldRotation(const Quat& rot)
     {
         setRotation(rot);
-    }    
-    
+    }
+
     void RectTransform::setWorldScale(const Vec3& scale)
     {
         setScale(scale);
