@@ -44,6 +44,15 @@ namespace ige::scene
         //! Destroyed
         virtual void onDestroy();
 
+        //! Click
+        virtual void onClick();
+
+        //! Suspend
+        virtual void onSuspend();
+
+        //! Resume
+        virtual void onResume();
+
         //! Serialize
         virtual void to_json(json& j) const override;
 

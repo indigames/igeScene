@@ -169,6 +169,12 @@ PyDoc_STRVAR(SceneObject_parent_doc,
     "Type: SceneObject.\n"
 );
 
+// root
+PyDoc_STRVAR(SceneObject_root_doc,
+    "The root object of the scene contains this object.\n"\
+    "Type: SceneObject.\n"
+);
+
 // transform
 PyDoc_STRVAR(SceneObject_transform_doc,
 	"The transform component of the object.\n"\

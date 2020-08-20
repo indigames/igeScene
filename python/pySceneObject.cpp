@@ -119,6 +119,14 @@ namespace ige::scene
         return -1;
     }
 
+    // Get root
+    PyObject* SceneObject_getRoot(PyObject_SceneObject* self)
+    {
+        auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+        obj->sceneObject = self->sceneObject->getRoot();
+        return (PyObject*)obj;
+    }
+
     // Get transform
     PyObject* SceneObject_getTransform(PyObject_SceneObject* self)
     {
@@ -493,6 +501,7 @@ namespace ige::scene
         { "active", (getter)SceneObject_getActive, (setter)SceneObject_setActive, SceneObject_active_doc, NULL },
         { "selected", (getter)SceneObject_getSelected, (setter)SceneObject_setSelected, SceneObject_selected_doc, NULL },
         { "parent", (getter)SceneObject_getParent, (setter)SceneObject_setParent, SceneObject_parent_doc, NULL },
+        { "root", (getter)SceneObject_getRoot, NULL, SceneObject_root_doc, NULL },
         { "transform", (getter)SceneObject_getTransform, NULL, SceneObject_transform_doc, NULL },
         { "rectTransform", (getter)SceneObject_getRectTransform, NULL, SceneObject_rectTransform_doc, NULL },
         { NULL, NULL }

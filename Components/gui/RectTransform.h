@@ -65,6 +65,9 @@ namespace ige::scene
         //! Get rect in canvas space (no scale, no rotate)
         const Vec4& getRect();
 
+        //! Get rect in viewport space
+        const Vec4& getRectInViewportSpace() { return m_rectViewport; }
+
         //! Dirty flag
         void setDirty();
 
@@ -88,6 +91,9 @@ namespace ige::scene
 
         //! Handle notification from parent: just do nothing
         void onNotified(const ETransformMessage& message) override { }
+
+        //! Check point inside rect
+        bool isPointInside(const Vec2& point) const;
 
     protected:
         bool hasScale() const;
@@ -114,6 +120,7 @@ namespace ige::scene
 
         //! Cached rect in canvas space (no scale, no rotate)
         Vec4 m_rect;
+        Vec4 m_rectViewport;
         bool m_rectDirty = true;
 
         //! Cached transform to viewport space

@@ -137,7 +137,7 @@ namespace ige::scene
             envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
 
             auto canvas = sceneObject->addComponent<Canvas>();
-            canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetDeviceW(), SystemInfo::Instance().GetDeviceH()));
+            canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW()));
 
             auto camObj = createGUIObject("GUI Camera", sceneObject);
             camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 20.f));

@@ -445,6 +445,20 @@ namespace ige::scene
                 rect[1] = rect[3] = center[1];
 
             m_rect = rect;
+
+            auto canvasToViewport = getOwner()->getRoot()->getComponent<Canvas>()->getCanvasToViewportMatrix();
+            // Get the rect points
+            auto leftTop = Vec4(rect[0], rect[1], 0.0f, 1.0f);
+            auto rightTop = Vec4(rect[2], rect[1], 0.0f, 1.0f);
+            auto leftBottom = Vec4(rect[0], rect[3], 0.0f, 1.0f);
+            auto rightBottom = Vec4(rect[2], rect[3], 0.0f, 1.0f);
+
+            // Apply transformation
+            leftTop = canvasToViewport * leftTop;
+            rightBottom = canvasToViewport * rightBottom;
+
+            m_rectViewport = Vec4(leftTop[0], leftTop[1], rightBottom[0], rightBottom[1]);
+            
             m_rectDirty = false;
 
             auto centerPoint = getRectCenter(m_rect);
@@ -502,5 +516,10 @@ namespace ige::scene
     void RectTransform::setWorldScale(const Vec3& scale)
     {
         setScale(scale);
+    }
+
+    bool RectTransform::isPointInside(const Vec2& point) const
+    {
+        return (point.X() >= m_rectViewport[0] && point.X() <= m_rectViewport[2] && point.Y() >= m_rectViewport[1] && point.Y() <= m_rectViewport[3]);
     }
 }

@@ -11,6 +11,9 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
+#include "utils/PyxieHeaders.h"
+extern std::shared_ptr<Application> gApp;
+
 namespace ige::scene
 {
     //! Constructor
@@ -42,14 +45,14 @@ namespace ige::scene
                 auto module = PyImport_ReloadModule(m_pyModule);
                 Py_DECREF(m_pyModule);
                 m_pyModule = module;
-            }            
+            }
 
             // Return if the module was not loaded
             if (m_pyModule == nullptr)
             {
                 PyErr_Clear();
                 return;
-            }                
+            }
 
             // fetch the module's dictionary
             auto dict = PyModule_GetDict(m_pyModule);
@@ -110,52 +113,40 @@ namespace ige::scene
     //! Awake
     void ScriptComponent::onAwake()
     {
-        if (m_pyInstance)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onAwake"))
         {
-            if (PyObject_HasAttrString(m_pyInstance, "onAwake"))
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, "onAwake", nullptr);
-                Py_XDECREF(ret);
-            }
-        }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onAwake", nullptr);
+            Py_XDECREF(ret);
+        }        
     }
 
     //! Start
     void ScriptComponent::onStart()
     {
-        if (m_pyInstance)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onStart"))
         {
-            if (PyObject_HasAttrString(m_pyInstance, "onStart"))
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, "onStart", nullptr);
-                Py_XDECREF(ret);
-            }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onStart", nullptr);
+            Py_XDECREF(ret);
         }
     }
 
     //! Enable
     void ScriptComponent::onEnable()
     {
-        if (m_pyInstance)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onEnable"))
         {
-            if (PyObject_HasAttrString(m_pyInstance, "onEnable"))
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, "onEnable", nullptr);
-                Py_XDECREF(ret);
-            }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onEnable", nullptr);
+            Py_XDECREF(ret);
         }
     }
 
     //! Disable
     void ScriptComponent::onDisable()
     {
-        if (m_pyInstance)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onEnable"))
         {
-            if (PyObject_HasAttrString(m_pyInstance, "onEnable"))
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, "onDisable", nullptr);
-                Py_XDECREF(ret);
-            }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onDisable", nullptr);
+            Py_XDECREF(ret);
         }
     }
 
@@ -165,28 +156,31 @@ namespace ige::scene
         if (m_bPathDirty)
         {
             loadPyModule();
-
-            onStart();
-
             m_bPathDirty = false;
         }
-
-        if (m_pyInstance)
+        
+        // If left button release, check selected object
+        auto touch = gApp->getInputHandler()->getTouchDevice();
+        if (touch->isFingerReleased(0))
         {
-            // Clear error states
-            PyErr_Clear();
+            float touchX, touchY;
+            touch->getFingerPosition(0, touchX, touchY);
+            
+            auto transform = getOwner()->getRectTransform();
+            if (transform->isPointInside({touchX, touchY }))
+                onClick();
+        }
 
-            if(PyObject_HasAttrString(m_pyInstance, "onUpdate"))
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, "onUpdate", "(f)", dt);
-                Py_XDECREF(ret);
-            }
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onUpdate"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onUpdate", "(f)", dt);
+            Py_XDECREF(ret);
         }
     }
 
     void ScriptComponent::onFixedUpdate(float dt)
     {
-        if (PyObject_HasAttrString(m_pyInstance, "onFixedUpdate"))
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onFixedUpdate"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onFixedUpdate", "f", dt);
             Py_XDECREF(ret);
@@ -195,7 +189,7 @@ namespace ige::scene
 
     void ScriptComponent::onLateUpdate(float dt)
     {
-        if (PyObject_HasAttrString(m_pyInstance, "onLateUpdate"))
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onLateUpdate"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onLateUpdate", "f", dt);
             Py_XDECREF(ret);
@@ -205,7 +199,7 @@ namespace ige::scene
     //! Render
     void ScriptComponent::onRender()
     {
-        if (PyObject_HasAttrString(m_pyInstance, "onRender"))
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onRender"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onRender", nullptr);
             Py_XDECREF(ret);
@@ -215,9 +209,39 @@ namespace ige::scene
     //! Destroyed
     void ScriptComponent::onDestroy()
     {
-        if (PyObject_HasAttrString(m_pyInstance, "onDestroy"))
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onDestroy"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onDestroy", nullptr);
+            Py_XDECREF(ret);
+        }
+    }
+
+    //! Click
+    void ScriptComponent::onClick()
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onClick"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onClick", nullptr);
+            Py_XDECREF(ret);
+        }
+    }
+
+    //! Suspend
+    void ScriptComponent::onSuspend()
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onSuspend"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onSuspend", nullptr);
+            Py_XDECREF(ret);
+        }
+    }
+
+    //! Resume
+    void ScriptComponent::onResume()
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onResume"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onResume", nullptr);
             Py_XDECREF(ret);
         }
     }

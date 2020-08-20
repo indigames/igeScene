@@ -7,6 +7,7 @@
 #include "event/Event.h"
 #include "components/Component.h"
 #include "components/TransformComponent.h"
+#include "components/gui/RectTransform.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
@@ -156,6 +157,9 @@ namespace ige::scene
 
         //! Get transform component
         std::shared_ptr<TransformComponent>& getTransform() { return m_transform; }
+
+        //! Get RectRransform component (GUI only)
+        std::shared_ptr<RectTransform> getRectTransform() { return std::dynamic_pointer_cast<RectTransform>(m_transform); }
 
         //! Set transform component
         void setTransform(const std::shared_ptr<TransformComponent>& transform) { m_transform = transform; }
