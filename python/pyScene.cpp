@@ -5,6 +5,8 @@
 #include "python/pyCameraComponent.h"
 
 #include "scene/SceneManager.h"
+#include "scene/SceneObject.h"
+#include "scene/Scene.h"
 
 namespace ige::scene
 {
@@ -85,9 +87,9 @@ namespace ige::scene
         PyObject* parentObj;
 
         if (PyArg_ParseTuple(args, "sO", &name, &parentObj)) {
-            auto parent = parentObj ? ((PyObject_SceneObject*)parentObj)->sceneObject : nullptr;
             auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = self->scene->createObject(name, parent);
+            auto parent = parentObj ? SceneManager::getInstance()->getCurrentScene()->findObjectById(((PyObject_SceneObject*)parentObj)->sceneObject->getId()) : nullptr;
+            obj->sceneObject = self->scene->createObject(name, parent).get();
             return (PyObject*)obj;
         }
         Py_RETURN_NONE;
@@ -124,7 +126,7 @@ namespace ige::scene
                 else if (obj->ob_type == &PyTypeObject_SceneObject)
                 {
                     auto pySceneObject = (PyObject_SceneObject*)(obj);
-                    if(self->scene->removeObject(pySceneObject->sceneObject))
+                    if(self->scene->removeObjectById(pySceneObject->sceneObject->getId()))
                     {
                         Py_RETURN_TRUE;
                     }
@@ -149,7 +151,7 @@ namespace ige::scene
                     if (sceneObject)
                     {
                         auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                        obj->sceneObject = sceneObject;
+                        obj->sceneObject = sceneObject.get();
                         return (PyObject*)obj;
                     }
                 }
@@ -160,7 +162,7 @@ namespace ige::scene
                     if (sceneObject)
                     {
                         auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                        obj->sceneObject = sceneObject;
+                        obj->sceneObject = sceneObject.get();
                         return (PyObject*)obj;
                     }
                 }
@@ -177,7 +179,7 @@ namespace ige::scene
         for(int i = 0; i < roots.size(); ++i)
         {
             auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = roots[i];
+            obj->sceneObject = roots[i].get();
             PyList_Append(pyList, (PyObject*)obj);
         }
         return (PyObject*)pyList;

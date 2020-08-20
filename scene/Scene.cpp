@@ -176,9 +176,9 @@ namespace ige::scene
         return removeObject(findObjectById(id));
     }
 
-    std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id) const
+    std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id)
     {
-        for (const auto& root : m_roots)
+        for (auto root : m_roots)
         {
             if (root)
             {
@@ -191,9 +191,9 @@ namespace ige::scene
         return nullptr;
     }
 
-    std::shared_ptr<SceneObject> Scene::findObjectByName(std::string name) const
+    std::shared_ptr<SceneObject> Scene::findObjectByName(std::string name)
     {
-        for (const auto& root : m_roots)
+        for (auto root : m_roots)
         {
             if (root)
             {

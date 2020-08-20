@@ -6,6 +6,7 @@
 #include "python/pyScene.h"
 #include "python/pySceneManager.h"
 #include "python/pySceneObject.h"
+#include "python/pyScript.h"
 
 #include "python/pyComponent.h"
 #include "python/pyTransformComponent.h"
@@ -13,6 +14,10 @@
 #include "python/pyEnvironmentComponent.h"
 #include "python/pyFigureComponent.h"
 #include "python/pySpriteComponent.h"
+#include "python/pyRectTransform.h"
+#include "python/pyCanvas.h"
+#include "python/pyUIImage.h"
+#include "python/pyUIText.h"
 
 using namespace ige::scene;
 
@@ -21,13 +26,13 @@ static PyObject* igeScene_getVersion(PyObject* self)
     return PyUnicode_FromString("V0.0.1");
 }
 
-static PyMethodDef igeScene_methods[] = 
+static PyMethodDef igeScene_methods[] =
 {
     {"getVersion", (PyCFunction)igeScene_getVersion, METH_NOARGS, getVersion_doc },
     { nullptr, nullptr, 0, nullptr }
 };
 
-static PyModuleDef igeScene_module = 
+static PyModuleDef igeScene_module =
 {
     PyModuleDef_HEAD_INIT,
     "igeScene",
@@ -36,7 +41,7 @@ static PyModuleDef igeScene_module =
     igeScene_methods
 };
 
-PyMODINIT_FUNC PyInit_igeScene() 
+PyMODINIT_FUNC PyInit_igeScene()
 {
     PyObject *module = PyModule_Create(&igeScene_module);
     if (PyType_Ready(&PyTypeObject_Scene) < 0) return NULL;
@@ -76,6 +81,26 @@ PyMODINIT_FUNC PyInit_igeScene()
 
     Py_INCREF(&PyTypeObject_SpriteComponent);
     PyModule_AddObject(module, "SpriteComponent", (PyObject*)&PyTypeObject_SpriteComponent);
+
+    if (PyType_Ready(&PyTypeObject_RectTransform) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_RectTransform);
+    PyModule_AddObject(module, "RectTransform", (PyObject*)&PyTypeObject_RectTransform);
+
+    if (PyType_Ready(&PyTypeObject_Canvas) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_Canvas);
+    PyModule_AddObject(module, "Canvas", (PyObject*)&PyTypeObject_Canvas);
+
+    if (PyType_Ready(&PyTypeObject_UIImage) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_UIImage);
+    PyModule_AddObject(module, "UIImage", (PyObject*)&PyTypeObject_UIImage);
+
+    if (PyType_Ready(&PyTypeObject_UIText) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_UIText);
+    PyModule_AddObject(module, "UIText", (PyObject*)&PyTypeObject_UIText);
+
+    if (PyType_Ready(&PyTypeObject_Script) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_Script);
+    PyModule_AddObject(module, "Script", (PyObject*)&PyTypeObject_Script);
 
     return module;
 }

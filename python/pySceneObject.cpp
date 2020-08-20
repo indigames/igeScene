@@ -97,7 +97,7 @@ namespace ige::scene
         if(self->sceneObject->hasParent())
         {
             auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = SceneManager::getInstance()->getCurrentScene()->findObjectById(self->sceneObject->getParent()->getId());
+            obj->sceneObject = self->sceneObject->getParent();
             return (PyObject*)obj;
         }
         Py_RETURN_NONE;
@@ -111,7 +111,7 @@ namespace ige::scene
         {
             if(obj && obj->ob_type == &PyTypeObject_SceneObject) {
                 auto sceneObj = (PyObject_SceneObject*)obj;
-                self->sceneObject->setParent(sceneObj->sceneObject.get());
+                self->sceneObject->setParent(sceneObj->sceneObject);
                 return 0;
             }
         }
@@ -148,8 +148,8 @@ namespace ige::scene
                 }
                 else if(obj->ob_type == &PyTypeObject_SceneObject)
                 {
-                    auto sceneObj = (PyObject_SceneObject*)obj;
-                    self->sceneObject->addChild(sceneObj->sceneObject);
+                    auto sceneObj = SceneManager::getInstance()->getCurrentScene()->findObjectById(((PyObject_SceneObject*)obj)->sceneObject->getId());
+                    self->sceneObject->addChild(sceneObj);
                     Py_RETURN_TRUE;
                 }
             }
@@ -187,8 +187,8 @@ namespace ige::scene
                 }
                 else if(obj->ob_type == &PyTypeObject_SceneObject)
                 {
-                    auto sceneObj = (PyObject_SceneObject*)obj;
-                    self->sceneObject->removeChild(sceneObj->sceneObject);
+                    auto sceneObj = SceneManager::getInstance()->getCurrentScene()->findObjectById(((PyObject_SceneObject*)obj)->sceneObject->getId());
+                    self->sceneObject->removeChild(sceneObj);
                     Py_RETURN_TRUE;
                 }
             }
@@ -207,7 +207,7 @@ namespace ige::scene
             for(int i = 0; i < len; ++i)
             {
                 auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                obj->sceneObject = children[i];
+                obj->sceneObject = children[i].get();
                 PyTuple_SetItem(childrenTuple, i, (PyObject*)obj);
                 Py_XDECREF(obj);
             }

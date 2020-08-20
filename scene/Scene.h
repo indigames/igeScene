@@ -62,10 +62,10 @@ namespace ige::scene
         virtual bool removeObjectById(uint64_t id);
 
         //! Find object in hierarchy by it's id
-        virtual std::shared_ptr<SceneObject> findObjectById(uint64_t id) const;
+        virtual std::shared_ptr<SceneObject> findObjectById(uint64_t id);
 
         //! Find object in hierarchy by name
-        virtual std::shared_ptr<SceneObject> findObjectByName(std::string name) const;
+        virtual std::shared_ptr<SceneObject> findObjectByName(std::string name);
 
         //! Serialize
         virtual void to_json(json& j) const;
