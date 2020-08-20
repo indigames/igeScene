@@ -71,12 +71,6 @@ namespace ige::scene
         //! PyObject: module
         _object* m_pyModule;
 
-        //! PyObject: owner
-        _object* m_pyOwner;
-
-        //! PyObject: Python class
-        _object* m_pyClass;
-
         //! PyObject: instance of Python class
         _object* m_pyInstance;
     };

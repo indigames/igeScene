@@ -71,6 +71,12 @@ namespace ige::scene
         //! Remove a component
         virtual bool removeComponent(const std::shared_ptr<Component>& component);
 
+        //! Add a component by raw pointer
+        virtual void addComponent(Component* component);
+
+        //! Remove a component by raw pointer
+        virtual bool removeComponent(Component* component);
+
         //! Remove all components
         virtual bool removeAllComponents();
 

@@ -39,7 +39,7 @@ namespace ige::scene
             m_showcase = ResourceCreator::Instance().NewShowcase((m_name + "_" + std::to_string(m_id) + "_showcase").c_str());
             getResourceAddedEvent().addListener(std::bind(&SceneObject::onResourceAdded, this, std::placeholders::_1));
             getResourceRemovedEvent().addListener(std::bind(&SceneObject::onResourceRemoved, this, std::placeholders::_1));
-        }        
+        }
 
         // Invoke created event
         getCreatedEvent().invoke(*this);
@@ -168,6 +168,28 @@ namespace ige::scene
     bool SceneObject::removeComponent(const std::shared_ptr<Component>& component)
     {
         auto it = std::find(m_components.begin(), m_components.end(), component);
+        if(it != m_components.end())
+        {
+            auto result = std::dynamic_pointer_cast<Component>(*it);
+            m_componentRemovedEvent.invoke(*this, result);
+            m_components.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    //! Add a component by raw pointer
+    void SceneObject::addComponent(Component* component)
+    {
+        m_components.push_back(std::shared_ptr<Component>(component));
+    }
+
+    //! Remove a component by raw pointer
+    bool SceneObject::removeComponent(Component* component)
+    {
+        auto it = std::find_if(m_components.begin(), m_components.end(), [&](const auto& comp) {
+            return comp.get() == component;
+        });
         if(it != m_components.end())
         {
             auto result = std::dynamic_pointer_cast<Component>(*it);

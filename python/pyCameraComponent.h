@@ -12,7 +12,7 @@ namespace ige::scene
     struct PyObject_CameraComponent
     {
 		PyObject_Component super;
-		std::shared_ptr<CameraComponent> component;
+		CameraComponent* component;
 	};
 
     // Type declaration

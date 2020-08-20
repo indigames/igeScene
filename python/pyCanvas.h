@@ -12,7 +12,7 @@ namespace ige::scene
     struct PyObject_Canvas
     {
         PyObject_Component super;
-        std::shared_ptr<Canvas> component;
+        Canvas* component;
     };
 
     // Type declaration

@@ -168,3 +168,15 @@ PyDoc_STRVAR(SceneObject_parent_doc,
     "The parent object of the object.\n"\
     "Type: SceneObject.\n"
 );
+
+// transform
+PyDoc_STRVAR(SceneObject_transform_doc,
+	"The transform component of the object.\n"\
+	"Type: TransformComponent.\n"
+);
+
+// rectTransform
+PyDoc_STRVAR(SceneObject_rectTransform_doc,
+	"The transform component as RectTransform for UI elements.\n"\
+	"Type: RectTransform.\n"
+);

@@ -48,6 +48,12 @@ namespace ige::scene
     // Set parent
     int SceneObject_setParent(PyObject_SceneObject* self, PyObject* value);
 
+    // Get transform
+    PyObject* SceneObject_getTransform(PyObject_SceneObject* self);
+
+    // Get rect transform
+    PyObject* SceneObject_getRectTransform(PyObject_SceneObject* self);
+
     // Add child
     PyObject* SceneObject_addChild(PyObject_SceneObject* self, PyObject* value);
 

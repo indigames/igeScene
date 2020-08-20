@@ -13,7 +13,7 @@ namespace ige::scene
     struct PyObject_RectTransform
     {
         PyObject_TransformComponent super;
-        std::shared_ptr<RectTransform> component;
+        RectTransform* component;
     };
 
     // Type declaration

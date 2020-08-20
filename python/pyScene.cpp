@@ -16,7 +16,7 @@ namespace ige::scene
         PyObject_Scene* self = nullptr;
         if (PyArg_ParseTuple(args, "s", &name)) {
             self = (PyObject_Scene*)type->tp_alloc(type, 0);
-            self->scene = SceneManager::getInstance()->createScene(std::string(name));
+            self->scene = SceneManager::getInstance()->createScene(std::string(name)).get();
         }
         return (PyObject*)self;
     }
@@ -66,7 +66,8 @@ namespace ige::scene
             }
         }
         auto *obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
-        obj->component = camera;
+        obj->component = camera.get();
+        obj->super.component = obj->component;
         return (PyObject*)obj;
     }
 
@@ -75,7 +76,7 @@ namespace ige::scene
     {
         PyObject* camera;
         if (PyArg_ParseTuple(value, "O", &camera)) {
-            self->scene->setActiveCamera(((PyObject_CameraComponent*)camera)->component.get());
+            self->scene->setActiveCamera(((PyObject_CameraComponent*)camera)->component);
         }
         return 0;
     }
@@ -193,7 +194,8 @@ namespace ige::scene
         for(int i = 0; i < cameras.size(); ++i)
         {
             auto obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
-            obj->component = cameras[i];
+            obj->component = cameras[i].get();
+            obj->super.component = obj->component;
             PyList_Append(pyList, (PyObject*)obj);
         }
         return (PyObject*)pyList;

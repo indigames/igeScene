@@ -15,7 +15,7 @@ namespace ige::scene
 {
     //! Constructor
     ScriptComponent::ScriptComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path)
-        : Component(owner), m_pyModule(nullptr), m_pyOwner(nullptr), m_path(path), m_pyClass(nullptr), m_pyInstance(nullptr)
+        : Component(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
     {
         if (!m_path.empty())
             m_bPathDirty = true;
@@ -25,11 +25,6 @@ namespace ige::scene
     ScriptComponent::~ScriptComponent()
     {
         unloadPyModule();
-        if (m_pyOwner)
-        {
-            SceneObject_dealloc((PyObject_SceneObject*)m_pyOwner);
-            m_pyOwner = nullptr;
-        }
     }
 
     void ScriptComponent::loadPyModule()
@@ -40,46 +35,58 @@ namespace ige::scene
         {
             // Load the module from python source file
             m_pyModule = PyImport_ImportModule(m_path.c_str());
-            if(m_pyModule) // Reload from source
-                m_pyModule = PyImport_ReloadModule(m_pyModule);
+
+            // Reload from source
+            if (m_pyModule)
+            {
+                auto module = PyImport_ReloadModule(m_pyModule);
+                Py_DECREF(m_pyModule);
+                m_pyModule = module;
+            }            
 
             // Return if the module was not loaded
-            if(m_pyModule == nullptr) return;
+            if (m_pyModule == nullptr)
+            {
+                PyErr_Clear();
+                return;
+            }                
 
             // fetch the module's dictionary
             auto dict = PyModule_GetDict(m_pyModule);
-            if (dict == nullptr) return;
+            if (dict == nullptr)
+            {
+                PyErr_Clear();
+                return;
+            }
 
             // Builds the name of a callable class
-            PyObject *key = nullptr, *value = nullptr;
+            PyObject* key = nullptr,  *value = nullptr, *pyClass = nullptr;
             Py_ssize_t pos = 0;
             while (PyDict_Next(dict, &pos, &key, &value))
             {
                 if(PyObject_HasAttrString(value, "onStart") && PyObject_IsSubclass(value, (PyObject*)&PyTypeObject_Script))
                 {
-                    m_pyClass = value;
+                    pyClass = value;
                     break;
                 }
             }
-            Py_DECREF(dict);
 
-            if (m_pyClass == nullptr) {
+            if (pyClass == nullptr) {
+                PyErr_Clear();
                 return;
             }
 
             // Creates an instance of the class
             auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
             obj->sceneObject = SceneManager::getInstance()->getCurrentScene()->findObjectById(getOwner()->getId()).get();
-            m_pyOwner = (PyObject*)obj;
-            auto arglist = Py_BuildValue("(O)", m_pyOwner);
-            PyObject* pyConstruct = PyInstanceMethod_New(m_pyClass);
+            auto arglist = Py_BuildValue("(O)", obj);
+            PyObject* pyConstruct = PyInstanceMethod_New(pyClass);
             m_pyInstance = PyObject_CallObject(pyConstruct, arglist);
             Py_DECREF(arglist);
             Py_DECREF(pyConstruct);
-        }
 
-        // Clear error states
-        PyErr_Clear();
+            PyErr_Clear();
+        }
     }
 
     //! Unload PyModule
@@ -91,19 +98,12 @@ namespace ige::scene
             m_pyInstance = nullptr;
         }
 
-        if(m_pyClass != nullptr)
-        {
-            Py_DECREF(m_pyClass);
-            m_pyClass = nullptr;
-        }
-
         if(m_pyModule != nullptr)
         {
             Py_DECREF(m_pyModule);
             m_pyModule = nullptr;
         }
 
-        // Clear error states
         PyErr_Clear();
     }
 

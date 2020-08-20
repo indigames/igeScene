@@ -15,7 +15,6 @@ namespace ige::scene
     {
         if(self && self->component)
         {
-            self->super.component = nullptr;
             self->component = nullptr;
             Py_TYPE(self)->tp_free(self);
         }
@@ -49,7 +48,7 @@ namespace ige::scene
     // Get rotation
     PyObject* TransformComponent_getRotation(PyObject_TransformComponent* self)
     {
-        auto quatObj = PyObject_New(vec_obj, _QuatType);        
+        auto quatObj = PyObject_New(vec_obj, _QuatType);
         vmath_cpy(self->component->getRotation().P(), 4, quatObj->v);
         quatObj->d = 4;
         return (PyObject*)quatObj;
@@ -120,7 +119,7 @@ namespace ige::scene
     // Get world rotation
     PyObject* TransformComponent_getWorldRotation(PyObject_TransformComponent* self)
     {
-        auto quatObj = PyObject_New(vec_obj, _QuatType);        
+        auto quatObj = PyObject_New(vec_obj, _QuatType);
         vmath_cpy(self->component->getWorldRotation().P(), 4, quatObj->v);
         quatObj->d = 4;
         return (PyObject*)quatObj;

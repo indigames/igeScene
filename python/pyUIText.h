@@ -12,7 +12,7 @@ namespace ige::scene
     struct PyObject_UIText
     {
         PyObject_Component super;
-        std::shared_ptr<UIText> component;
+        UIText* component;
     };
 
     // Type declaration
