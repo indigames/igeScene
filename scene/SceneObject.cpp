@@ -48,6 +48,9 @@ namespace ige::scene
     //! Destructor
     SceneObject::~SceneObject()
     {
+        for (auto& comp : m_components)
+            comp->onDestroy();
+
         removeChildren();
         setParent(nullptr);
 
@@ -347,7 +350,20 @@ namespace ige::scene
     //! Enable or disable the actor
     void SceneObject::setActive(bool isActive)
     {
-        m_isActive = isActive;
+        if(m_isActive != isActive)
+        {
+            m_isActive = isActive;
+            if (m_isActive)
+            {
+                for (auto& comp : m_components)
+                    comp->onEnable();
+            }
+            else
+            {
+                for (auto& comp : m_components)
+                    comp->onDisable();
+            }
+        }
     }
 
     //! Check active
@@ -362,10 +378,13 @@ namespace ige::scene
         if(m_isSelected != select)
         {
             m_isSelected = select;
-            if(m_isSelected)
-            {
-                getSelectedEvent().invoke(*this);
-            }
+            if(m_isSelected) getSelectedEvent().invoke(*this);
+        }
+
+        if (m_isSelected)
+        {
+            for (auto& comp : m_components)
+                comp->onClick();
         }
     }
 

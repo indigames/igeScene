@@ -21,7 +21,8 @@ namespace ige::scene
         : Component(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
     {
         if (!m_path.empty())
-            m_bPathDirty = true;
+            loadPyModule();
+        m_bPathDirty = false;
     }
 
     //! Destructor
@@ -89,6 +90,12 @@ namespace ige::scene
             Py_DECREF(pyConstruct);
 
             PyErr_Clear();
+
+            // Initialized, call invoke onAwake()
+            onAwake();
+
+            // Enable call onStart() next frame
+            m_bOnStartCalled = false;
         }
     }
 
@@ -153,24 +160,21 @@ namespace ige::scene
     //! Update functions
     void ScriptComponent::onUpdate(float dt)
     {
+        // Check reload script
         if (m_bPathDirty)
         {
             loadPyModule();
             m_bPathDirty = false;
         }
         
-        // If left button release, check selected object
-        auto touch = gApp->getInputHandler()->getTouchDevice();
-        if (touch->isFingerReleased(0))
+        // Check call onStart()
+        if (!m_bOnStartCalled)
         {
-            float touchX, touchY;
-            touch->getFingerPosition(0, touchX, touchY);
-            
-            auto transform = getOwner()->getRectTransform();
-            if (transform->isPointInside({touchX, touchY }))
-                onClick();
+            onStart();
+            m_bOnStartCalled = true;
         }
 
+        // Check call onUpdate()
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onUpdate"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onUpdate", "(f)", dt);

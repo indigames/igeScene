@@ -15,12 +15,6 @@ namespace ige::scene
             onDestroy();
         }
     }
-    
-    //! Awake
-    void Component::onAwake() {}
-
-    //! Start
-    void Component::onStart() {}
 
     //! Enable
     void Component::onEnable() {}
@@ -40,6 +34,15 @@ namespace ige::scene
 
     //! Destroyed
     void Component::onDestroy() {}
+
+    //! Click
+    void Component::onClick() {}
+
+    //! Suspend
+    void Component::onSuspend() {}
+
+    //! Resume
+    void Component::onResume() {}
 
     //! Serialize
     void to_json(json& j, const Component& obj)

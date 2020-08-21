@@ -31,12 +31,6 @@ namespace ige::scene
         //! Returns the name of the component
 		virtual std::string getName() const = 0;
         
-        //! Awake
-        virtual void onAwake();
-
-        //! Start
-        virtual void onStart();
-
         //! Enable
         virtual void onEnable();
 
@@ -53,6 +47,15 @@ namespace ige::scene
 
         //! Destroyed
         virtual void onDestroy();
+
+        //! Click
+        virtual void onClick();
+
+        //! Suspend
+        virtual void onSuspend();
+
+        //! Resume
+        virtual void onResume();
 
         //! Serialize
         virtual void to_json(json& j) const = 0;

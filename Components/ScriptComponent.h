@@ -28,36 +28,36 @@ namespace ige::scene
         virtual void onStart();
 
         //! Enable
-        virtual void onEnable();
+        virtual void onEnable() override;
 
         //! Disable
-        virtual void onDisable();
+        virtual void onDisable() override;
 
         //! Update functions
-        virtual void onUpdate(float dt);
-        virtual void onFixedUpdate(float dt);
-        virtual void onLateUpdate(float dt);
+        virtual void onUpdate(float dt) override;
+        virtual void onFixedUpdate(float dt) override;
+        virtual void onLateUpdate(float dt) override;
 
         //! Render
-        virtual void onRender();
+        virtual void onRender() override;
 
         //! Destroyed
-        virtual void onDestroy();
+        virtual void onDestroy() override;
 
         //! Click
-        virtual void onClick();
+        virtual void onClick() override;
 
         //! Suspend
-        virtual void onSuspend();
+        virtual void onSuspend() override;
 
         //! Resume
-        virtual void onResume();
+        virtual void onResume() override;
 
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
-        virtual void from_json(const json& j);
+        virtual void from_json(const json& j) override;
 
         //! Path
         void setPath(const std::string& path);
@@ -73,6 +73,9 @@ namespace ige::scene
         //! Path to figure file
         std::string m_path;
         bool m_bPathDirty = false;
+
+        //! Flags for onStart() event
+        bool m_bOnStartCalled = false;
 
         //! Events
         Event<const std::string&> m_onScriptChangedEvent;
