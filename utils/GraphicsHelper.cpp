@@ -144,7 +144,7 @@ namespace ige::scene
     EditableFigure* GraphicsHelper::createText(const std::string& words, const std::string& fontPath, int fontSize, const Vec4& color, uint32_t pivot, float scale)
     {
         int w, h;
-        calcTextSize(words.c_str(), fontPath.c_str(), fontSize, w, h);
+        calcTextSize(words.c_str(), fontPath.c_str(), fontSize, w, h, 1.f);
 
         auto texture =  ResourceCreator::Instance().NewTexture(unique("text").c_str(), nullptr, w, h, GL_RED);
         texture_setText(texture, words, fontPath, fontSize);
@@ -203,7 +203,7 @@ namespace ige::scene
         if(texture == nullptr) return;
 
         int texW, texH;
-        uint8_t* bmp = createTextImage(word.c_str(), font.c_str(), size, texW, texH);
+        uint8_t* bmp = createTextImage(word.c_str(), font.c_str(), size, texW, texH, 1.f);
 
         int maxW = texture->GetTextureWidth();
         int maxH = texture->GetTextureHeight();

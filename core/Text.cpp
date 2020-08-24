@@ -76,17 +76,25 @@ namespace ige::scene
     {
         if (m_text != "" && m_fontPath != "")
         {
+            Vec3 pos, scale(1.f, 1.f, 1.f);
+            Quat rot;
             if (m_figure)
             {
+                pos = m_figure->GetPosition(); 
+                rot = m_figure->GetRotation();
+                scale = m_figure->GetScale();
                 m_figure->DecReference();
                 m_figure = nullptr;
             }
 
             int w, h;
-            calcTextSize(m_text.c_str(), m_fontPath.c_str(), m_fontSize, w, h);
+            calcTextSize(m_text.c_str(), m_fontPath.c_str(), m_fontSize, w, h, 1.f);
             m_size = Vec2(w, h);
 
             m_figure = GraphicsHelper::getInstance()->createText(m_text, m_fontPath, m_fontSize, m_color);
+            m_figure->SetPosition(pos);
+            m_figure->SetRotation(rot);
+            m_figure->SetScale(scale);
             m_figure->WaitBuild();
         }
     }

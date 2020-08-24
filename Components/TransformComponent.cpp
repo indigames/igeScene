@@ -1,7 +1,8 @@
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
-#include "components/gui/UIImage.h"
+#include "components/gui/UIImage.h" 
+#include "components/gui/UIText.h" 
 #include "scene/SceneObject.h"
 #include "utils/RayOBBChecker.h"
 
@@ -74,12 +75,26 @@ namespace ige::scene {
                 if (spriteComp)
                 {
                     figure = spriteComp->getFigure();
+                    if (figure)
+                    {
+                        Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
+                        figure->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                        intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
+                    }
                 }
-                if (figure)
+                else
                 {
-                    Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
-                    figure->CalcAABBox(0, aabbMin.P(), aabbMax.P());
-                    intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
+                    auto uiText = owner->getComponent<UIText>();
+                    if (uiText)
+                    {
+                        figure = uiText->getFigure();
+                        if (figure)
+                        {
+                            Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
+                            figure->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                            intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
+                        }
+                    }
                 }
             }
 
