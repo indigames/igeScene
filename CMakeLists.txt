@@ -74,6 +74,8 @@ set(INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/../pyxCore/pyxcore"
     "${CMAKE_CURRENT_SOURCE_DIR}/../igeCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/../igeVMath"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../igeBullet"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../igeBullet/bullet"
     "${CMAKE_CURRENT_SOURCE_DIR}/../igeLibs/json/include"
 )
 

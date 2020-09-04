@@ -8,6 +8,8 @@
                 "${workspaceFolder}/../igeCore",
                 "${workspaceFolder}/../pyxCore/pyxcore",
                 "${workspaceFolder}/../igeVMath",
+                "${workspaceFolder}/../igeBullet",
+                "${workspaceFolder}/../igeBullet/bullet",
                 "${IGE_LIBS}/json/include",
                 "${IGE_LIBS}/SDL/include",
                 "${IGE_LIBS}/Python/include",
