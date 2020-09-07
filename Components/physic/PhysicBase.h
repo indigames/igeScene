@@ -43,6 +43,12 @@ namespace ige::scene
         //! Remove collision flag
         void removeCollisionFlag(btCollisionObject::CollisionFlags flag);
 
+        //! Update Bullet transform
+        void updateBtTransform();
+
+        //! Update IGE transform
+        void updateIgeTransform();
+
         //! Body
         btRigidBody &getBody() const { return *m_body; };
 
@@ -136,6 +142,12 @@ namespace ige::scene
 
         //! Deactivate
         void deactivate();
+
+        //! Recreate Body
+        void recreateBody();
+
+        //! Set local scale
+        virtual void setLocalScale(const Vec3& scale) = 0;
 
     protected:
         //! On created event
@@ -235,5 +247,8 @@ namespace ige::scene
 
         //! Cache transform
         TransformComponent *m_transform;
+
+        //! Cache previous scale value
+        Vec3 m_previousScale = { 1.0f, 1.0f, 1.0f };
     };
 } // namespace ige::scene

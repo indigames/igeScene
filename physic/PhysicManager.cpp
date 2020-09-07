@@ -88,7 +88,87 @@ namespace ige::scene
     //! Update
     void PhysicManager::onUpdate(float dt)
     {
-        m_world->stepSimulation(dt * m_frameUpdateRatio, m_frameMaxSubStep, m_fixedTimeStep);
+        preUpdate();
+        if (m_world->stepSimulation(dt * m_frameUpdateRatio, m_frameMaxSubStep, m_fixedTimeStep))
+            postUpdate();
+    }
+
+    void PhysicManager::preUpdate()
+    {
+        // Reset collision events
+        for (auto &element : m_collisionEvents)
+            element.second = false;
+
+        // Update bullet transform
+        std::for_each(m_physicObjects.begin(), m_physicObjects.end(), std::mem_fn(&PhysicBase::updateBtTransform));
+    }
+
+    void PhysicManager::postUpdate()
+    {
+        // Check remove collision events
+        for (auto it = m_collisionEvents.begin(); it != m_collisionEvents.end();)
+        {
+            auto objects = it->first;
+            if (!it->second)
+            {
+                if (!objects.first->isTrigger() && !objects.second->isTrigger())
+                {
+                    objects.first->getCollisionStopEvent().invoke(*objects.second);
+                    objects.second->getCollisionStopEvent().invoke(*objects.first);
+                }
+                else
+                {
+                    if (objects.first->isTrigger())
+                        objects.first->getTriggerStopEvent().invoke(*objects.second);
+                    else
+                        objects.second->getTriggerStopEvent().invoke(*objects.first);
+                }
+                it = m_collisionEvents.erase(it);
+            }
+            else
+                ++it;
+        }
+
+        // Update object transform
+        std::for_each(m_physicObjects.begin(), m_physicObjects.end(), std::mem_fn(&PhysicBase::updateIgeTransform));
+    }
+
+    //! Create/Destroy event
+    void PhysicManager::onObjectCreated(PhysicBase &object)
+    {
+        m_physicObjects.push_back(std::ref(object));
+    }
+
+    void PhysicManager::onObjectDestroyed(PhysicBase &object)
+    {
+        // Find and remove object from the objects list
+        auto found = std::find_if(m_physicObjects.begin(), m_physicObjects.end(), [&object](std::reference_wrapper<PhysicBase> element) {
+            return std::addressof(object) == std::addressof(element.get());
+        });
+
+        if (found != m_physicObjects.end())
+            m_physicObjects.erase(found);
+
+        // Find and remove collision events
+        for (auto iter = m_collisionEvents.begin(); iter != m_collisionEvents.end();)
+        {
+            if (iter->first.first == std::addressof(object) || iter->first.second == std::addressof(object))
+            {
+                m_collisionEvents.erase(iter);
+            }
+            ++iter;
+        }
+    }
+
+    //! Activate/Deactivate event
+    void PhysicManager::onObjectActivated(PhysicBase &object)
+    {
+        m_world->addRigidBody(&(object.getBody()));
+    }
+
+    void PhysicManager::onObjectDeactivated(PhysicBase &object)
+    {
+        m_world->removeRigidBody(&(object.getBody()));
     }
 
     //! Ray test closest
@@ -103,7 +183,7 @@ namespace ige::scene
         if (closestRayCallback.hasHit())
         {
             // Get closest hit
-            result.hitObject = reinterpret_cast<SceneObject *>(closestRayCallback.m_collisionObject->getUserPointer());
+            result.hitObject = reinterpret_cast<PhysicBase *>(closestRayCallback.m_collisionObject->getUserPointer())->getOwner();
             result.hitPosition = closestRayCallback.m_hitPointWorld;
             result.hitNormal = closestRayCallback.m_hitNormalWorld;
         }
@@ -129,7 +209,7 @@ namespace ige::scene
         for (int i = 0; i < allHitsRayCallback.m_collisionObjects.size(); i++)
         {
             RaycastHit hit;
-            hit.hitObject = reinterpret_cast<SceneObject *>(allHitsRayCallback.m_collisionObjects[i]->getUserPointer());
+            hit.hitObject = reinterpret_cast<PhysicBase *>(allHitsRayCallback.m_collisionObjects[i]->getUserPointer())->getOwner();
             hit.hitPosition = allHitsRayCallback.m_hitPointWorld[i];
             hit.hitNormal = allHitsRayCallback.m_hitNormalWorld[i];
             result.push_back(hit);
@@ -152,7 +232,7 @@ namespace ige::scene
         if (closestRayCallback.hasHit())
         {
             // Get closest hit
-            resultHit.closestHit.hitObject = reinterpret_cast<SceneObject *>(closestRayCallback.m_collisionObject->getUserPointer());
+            resultHit.closestHit.hitObject = reinterpret_cast<PhysicBase *>(closestRayCallback.m_collisionObject->getUserPointer())->getOwner();
             resultHit.closestHit.hitPosition = closestRayCallback.m_hitPointWorld;
             resultHit.closestHit.hitNormal = closestRayCallback.m_hitNormalWorld;
 
@@ -167,7 +247,7 @@ namespace ige::scene
             for (int i = 0; i < allHitsRayCallback.m_collisionObjects.size(); i++)
             {
                 RaycastHit hit;
-                hit.hitObject = reinterpret_cast<SceneObject *>(allHitsRayCallback.m_collisionObjects[i]->getUserPointer());
+                hit.hitObject = reinterpret_cast<PhysicBase *>(allHitsRayCallback.m_collisionObjects[i]->getUserPointer())->getOwner();
                 hit.hitPosition = allHitsRayCallback.m_hitPointWorld[i];
                 hit.hitNormal = allHitsRayCallback.m_hitNormalWorld[i];
                 resultHit.allHits.push_back(hit);

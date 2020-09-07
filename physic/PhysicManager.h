@@ -43,6 +43,8 @@ namespace ige::scene
 
         //! Update
         void onUpdate(float dt);
+        void preUpdate();
+        void postUpdate();
 
         //! Ray test closest
         RaycastHit rayTestClosest(const btVector3 &rayFromWorld, const btVector3 &rayToWorld, int group = btBroadphaseProxy::DefaultFilter, int mask = btBroadphaseProxy::AllFilter);
@@ -83,6 +85,10 @@ namespace ige::scene
         const btVector3 &getGravity() { return m_gravity; }
         void setGravity(const btVector3 &gravity) { m_gravity = gravity; }
 
+    protected:
+        //! Clear world
+        void clear();
+
         //! Create/Destroy event
         void onObjectCreated(PhysicBase& object);
         void onObjectDestroyed(PhysicBase& object);
@@ -90,11 +96,6 @@ namespace ige::scene
         //! Activate/Deactivate event
         void onObjectActivated(PhysicBase& object);
         void onObjectDeactivated(PhysicBase& object);
-
-
-    protected:
-        //! Clear world
-        void clear();
 
     protected:
         //! Physic world
@@ -129,5 +130,8 @@ namespace ige::scene
 
         //! Collision event map
         static std::map< std::pair<PhysicBase*, PhysicBase*>, bool> m_collisionEvents;
+
+        //! Physic objects list
+        std::vector<std::reference_wrapper<PhysicBase>> m_physicObjects;
     };
 } // namespace ige::scene
