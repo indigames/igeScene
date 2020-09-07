@@ -53,6 +53,10 @@ namespace ige::scene
         //! Ray cast by origin, direction and distance
         RaycastResult raycast(const btVector3& origin, const btVector3& direction, float distance, int group = btBroadphaseProxy::DefaultFilter, int mask = btBroadphaseProxy::AllFilter);
 
+        //! Collision callback
+        void setCollisionCallback();
+        static bool collisionCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2);
+
         //! Get world
         btDynamicsWorld *getWorld() { return m_world ? m_world.get() : nullptr; }
 
@@ -122,5 +126,8 @@ namespace ige::scene
 
         //! Gravity
         btVector3 m_gravity = {0.f, -9.81f, 0.f};
+
+        //! Collision event map
+        static std::map< std::pair<PhysicBase*, PhysicBase*>, bool> m_collisionEvents;
     };
 } // namespace ige::scene

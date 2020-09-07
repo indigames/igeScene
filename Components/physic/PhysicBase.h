@@ -28,11 +28,11 @@ namespace ige::scene
 
         //! Apply force
         void applyForce(const btVector3 &force);
-        void applyForce(const btVector3 &force, const btVector3& pos);
+        void applyForce(const btVector3 &force, const btVector3 &pos);
 
         //! Apply impulse
         void applyImpulse(const btVector3 &impulse);
-        void applyImpulse(const btVector3 &impulse, const btVector3& pos);
+        void applyImpulse(const btVector3 &impulse, const btVector3 &pos);
 
         //! Clear forces
         void clearForces();
@@ -44,7 +44,7 @@ namespace ige::scene
         void removeCollisionFlag(btCollisionObject::CollisionFlags flag);
 
         //! Body
-        btRigidBody& getBody() const { return *m_body; };
+        btRigidBody &getBody() const { return *m_body; };
 
         //! Mass
         float getMass() const { return m_mass; };
@@ -52,11 +52,19 @@ namespace ige::scene
 
         //! Friction
         float getFriction() const { return m_body->getFriction(); }
-        void setFriction(float friction) { m_friction = friction; m_body->setFriction(friction); }
+        void setFriction(float friction)
+        {
+            m_friction = friction;
+            m_body->setFriction(friction);
+        }
 
         //! Restitution
         float getRestitution() const { return m_body->getRestitution(); }
-        void setRestitution(float restitution) { m_restitution = restitution; m_body->setRestitution(restitution); }
+        void setRestitution(float restitution)
+        {
+            m_restitution = restitution;
+            m_body->setRestitution(restitution);
+        }
 
         //! Linear velocity
         const btVector3 &getLinearVelocity() const { return m_linearVelocity; }
@@ -83,19 +91,29 @@ namespace ige::scene
         void setIsKinematic(bool isKinematic) { m_bIsKinematic = isKinematic; }
 
         //! Get AABB
-        void getAABB(btVector3& aabbMin, btVector3 aabbMax);
+        void getAABB(btVector3 &aabbMin, btVector3 aabbMax);
 
         //! Get onCreatedEvent
-        static Event<PhysicBase&>& getOnCreatedEvent() { return m_onCreatedEvent; }
+        static Event<PhysicBase &> &getOnCreatedEvent() { return m_onCreatedEvent; }
 
         //! Get onDestroyedEvent
-        static Event<PhysicBase&>& getOnDestroyedEvent() { return m_onDestroyedEvent; }
+        static Event<PhysicBase &> &getOnDestroyedEvent() { return m_onDestroyedEvent; }
 
         //! Get onDestroyedEvent
-        static Event<PhysicBase&>& getOnActivatedEvent() { return m_onActivatedEvent; }
+        static Event<PhysicBase &> &getOnActivatedEvent() { return m_onActivatedEvent; }
 
         //! Get onDestroyedEvent
-        static Event<PhysicBase&>& getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
+        static Event<PhysicBase &> &getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
+
+        //! Collision events
+        Event<PhysicBase &> &getCollisionStartEvent() { return m_collisionStartEvent; }
+        Event<PhysicBase &> &getCollisionStayEvent() { return m_collisionStayEvent; }
+        Event<PhysicBase &> &getCollisionStopEvent() { return m_collisionStopEvent; }
+
+        //! Trigger events
+        Event<PhysicBase &> &getTriggerStartEvent() { return m_triggerStartEvent; }
+        Event<PhysicBase &> &getTriggerStayEvent() { return m_triggerStayEvent; }
+        Event<PhysicBase &> &getTriggerStopEvent() { return m_triggerStopEvent; }
 
         //! Serialize
         virtual void to_json(json &j) const;
@@ -121,16 +139,26 @@ namespace ige::scene
 
     protected:
         //! On created event
-        static Event<PhysicBase&> m_onCreatedEvent;
+        static Event<PhysicBase &> m_onCreatedEvent;
 
         //! On destroyed event
-		static Event<PhysicBase&> m_onDestroyedEvent;
+        static Event<PhysicBase &> m_onDestroyedEvent;
 
         //! On activated event
-		static Event<PhysicBase&> m_onActivatedEvent;
+        static Event<PhysicBase &> m_onActivatedEvent;
 
         //! On deactivated event
-		static Event<PhysicBase&> m_onDeactivatedEvent;
+        static Event<PhysicBase &> m_onDeactivatedEvent;
+
+        //! Collision events
+        Event<PhysicBase &> m_collisionStartEvent;
+        Event<PhysicBase &> m_collisionStayEvent;
+        Event<PhysicBase &> m_collisionStopEvent;
+
+        //! Trigger events
+        Event<PhysicBase &> m_triggerStartEvent;
+        Event<PhysicBase &> m_triggerStayEvent;
+        Event<PhysicBase &> m_triggerStopEvent;
 
     protected:
         //! Collision shape

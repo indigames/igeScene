@@ -176,4 +176,81 @@ namespace ige::scene
         return resultHit;
     }
 
+    bool PhysicManager::collisionCallback(btManifoldPoint &cp, const btCollisionObjectWrapper *obj1, int id1, int index1, const btCollisionObjectWrapper *obj2, int id2, int index2)
+    {
+        auto object1 = reinterpret_cast<PhysicBase *>(obj1->getCollisionObject()->getUserPointer());
+        auto object2 = reinterpret_cast<PhysicBase *>(obj2->getCollisionObject()->getUserPointer());
+
+        if (object1 && object2)
+        {
+            /* If the objects are not all trigger, enter */
+            if (!object1->isTrigger() || !object2->isTrigger())
+            {
+                if (m_collisionEvents.find({object1, object2}) == m_collisionEvents.end())
+                {
+                    /*
+                    *  If object is trigger, invoke Trigger event,
+                    *  else : is the other object trigger?
+                    *    yes -> do nothing
+                    *    no -> invoke Collision event
+                    */
+
+                    // Object 1 (Start event)
+                    if (object1->isTrigger())
+                        object1->getTriggerStartEvent().invoke(*object2);
+                    else if (!object2->isTrigger())
+                        object1->getCollisionStartEvent().invoke(*object2);
+
+                    // Object 2 (Start event)
+                    if (object2->isTrigger())
+                        object2->getTriggerStartEvent().invoke(*object1);
+                    else if (!object1->isTrigger())
+                        object2->getCollisionStartEvent().invoke(*object1);
+
+                    // Object 1 (Stay event)
+                    if (object1->isTrigger())
+                        object1->getTriggerStayEvent().invoke(*object2);
+                    else if (!object2->isTrigger())
+                        object1->getCollisionStayEvent().invoke(*object2);
+
+                    // Object 2 (Stay event)
+                    if (object2->isTrigger())
+                        object2->getTriggerStayEvent().invoke(*object1);
+                    else if (!object1->isTrigger())
+                        object2->getCollisionStayEvent().invoke(*object1);
+
+                    m_collisionEvents[{object1, object2}] = true;
+                    return true;
+                }
+                else
+                {
+                    if (!m_collisionEvents[{object1, object2}])
+                    {
+                        // Object 1 (Stay event)
+                        if (object1->isTrigger())
+                            object1->getTriggerStayEvent().invoke(*object2);
+                        else if (!object2->isTrigger())
+                            object1->getCollisionStayEvent().invoke(*object2);
+
+                        // Object 2 (Stay event)
+                        if (object2->isTrigger())
+                            object2->getTriggerStayEvent().invoke(*object1);
+                        else if (!object1->isTrigger())
+                            object2->getCollisionStayEvent().invoke(*object1);
+
+                        m_collisionEvents[{object1, object2}] = true;
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    void PhysicManager::setCollisionCallback()
+    {
+        gContactAddedCallback = &PhysicManager::collisionCallback;
+    }
+
 } // namespace ige::scene
