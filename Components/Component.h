@@ -11,14 +11,14 @@ namespace ige::scene
     class SceneObject;
 
     /**
-	* Component is the base class of any component
-	*/
+    * Component is the base class of any component
+    */
     class Component
     {
     public:
         //! Constructor
         Component(const std::shared_ptr<SceneObject>& owner);
-        
+
         //! Destructor
         virtual ~Component();
 
@@ -29,8 +29,8 @@ namespace ige::scene
         virtual bool hasOwner() const { return getOwner() != nullptr; }
 
         //! Returns the name of the component
-		virtual std::string getName() const = 0;
-        
+        virtual std::string getName() const = 0;
+
         //! Enable
         virtual void onEnable();
 
@@ -60,13 +60,13 @@ namespace ige::scene
         //! Serialize
         virtual void to_json(json& j) const = 0;
 
-        //! Deserialize 
+        //! Deserialize
         virtual void from_json(const json& j) = 0;
-        
+
         //! Serialize
         friend void to_json(json& j, const Component& obj);
 
-        //! Deserialize 
+        //! Deserialize
         friend void from_json(const json& j, Component& obj);
 
     protected:
@@ -77,6 +77,6 @@ namespace ige::scene
     //! Serialize
     void to_json(json& j, const Component& obj);
 
-    //! Deserialize 
+    //! Deserialize
     void from_json(const json& j, Component& obj);
 }

@@ -10,6 +10,7 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
 #include "scene/SceneObject.h"
+#include "components/physic/PhysicBase.h"
 
 #include "utils/Singleton.h"
 #include "event/Event.h"

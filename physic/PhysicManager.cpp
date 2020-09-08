@@ -28,7 +28,7 @@ namespace ige::scene
             m_broadphase = std::make_unique<btDbvtBroadphase>();
             m_solver = std::make_unique<btDeformableMultiBodyConstraintSolver>();
             ((btDeformableMultiBodyConstraintSolver *)m_solver.get())->setDeformableSolver(new btDeformableBodySolver());
-            m_world = std::make_unique<btDeformableMultiBodyDynamicsWorld>(m_dispatcher.get(), m_broadphase.get(), m_solver.get());
+            m_world = std::make_unique<btDeformableMultiBodyDynamicsWorld>(m_dispatcher.get(), m_broadphase.get(), (btDeformableMultiBodyConstraintSolver *)m_solver.get(), m_collisionConfiguration.get());
             auto worldInfo = ((btDeformableMultiBodyDynamicsWorld *)m_world.get())->getWorldInfo();
             worldInfo.m_gravity = m_gravity;
             worldInfo.m_sparsesdf.setDefaultVoxelsz(0.25f);
@@ -37,7 +37,7 @@ namespace ige::scene
         else
         {
             m_collisionConfiguration = std::make_unique<btDefaultCollisionConfiguration>();
-            m_dispatcher = std::make_unique<btCollisionDispatcher>(m_collisionConfiguration);
+            m_dispatcher = std::make_unique<btCollisionDispatcher>(m_collisionConfiguration.get());
             m_broadphase = std::make_unique<btDbvtBroadphase>();
             m_ghostPairCallback = std::make_unique<btGhostPairCallback>();
             m_broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(m_ghostPairCallback.get());

@@ -11,6 +11,7 @@ namespace ige::scene
         : Component(owner)
     {
         getOnCreatedEvent().invoke(*this);
+        createBody();
         m_transform = owner->getTransform().get();
     }
 
