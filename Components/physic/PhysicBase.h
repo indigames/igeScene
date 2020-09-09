@@ -57,7 +57,7 @@ namespace ige::scene
 
         //! Mass
         float getMass() const { return m_mass; };
-        void setMass(float mass) { m_mass = mass; }
+        void setMass(float mass);
 
         //! Friction
         float getFriction() const { return m_body->getFriction(); }
@@ -77,27 +77,31 @@ namespace ige::scene
 
         //! Linear velocity
         const btVector3 &getLinearVelocity() const { return m_linearVelocity; }
-        void setLinearVelocity(const btVector3 &velocity) { m_linearVelocity = velocity; };
+        void setLinearVelocity(const btVector3& velocity);
 
         //! Angular velocity
         const btVector3 &getAngularVelocity() const { return m_angularVelocity; }
-        void setAngularVelocity(const btVector3 &velocity) { m_angularVelocity = velocity; }
+        void setAngularVelocity(const btVector3& velocity);
 
         //! Linear factor
         const btVector3 &getLinearFactor() const { return m_linearFactor; }
-        void setLinearFactor(const btVector3 &factor) { m_linearFactor = factor; }
+        void setLinearFactor(const btVector3& factor);
 
         //! Angular factor
         const btVector3 &getAngularFactor() const { return m_angularFactor; }
-        void getAngularFactor(const btVector3 &factor) { m_angularFactor = factor; }
+        void setAngularFactor(const btVector3& factor);
 
         //! Indicate object is a trigger object
         bool isTrigger() const { return m_bIsTrigger; }
-        void setIsTrigger(bool isTrigger) { m_bIsTrigger = isTrigger; }
+        void setIsTrigger(bool isTrigger);
 
         //! Indicate object is a kinematic object
         bool isKinematic() const { return m_bIsKinematic; }
-        void setIsKinematic(bool isKinematic) { m_bIsKinematic = isKinematic; }
+        void setIsKinematic(bool isKinematic);
+
+        //! Enable/Disable physic component
+        bool isEnabled() const { return m_bIsEnabled; }
+        void setEnable(bool enable);
 
         //! Get AABB
         void getAABB(btVector3 &aabbMin, btVector3 aabbMax);
@@ -217,36 +221,6 @@ namespace ige::scene
 
         //! Cache activated status
         bool m_bIsActivated = false;
-
-        //! Enable collision callback
-        bool m_bEnableCollisionCallback = false;
-
-        //! Enable contact respone
-        bool m_bEnableContactResponse = false;
-
-        //! Collision group bit
-        int m_collisionGroupBit = -1;
-
-        //! Collision group mask
-        int m_collisionGroupMask = -1;
-
-        //! Linear damping
-        float m_linearDamping;
-
-        //! Angular damping
-        float m_angularDamping;
-
-        //! Linear sleeping threshold
-        float m_linearSleepingThreshold;
-
-        //! Angular sleeping threshold
-        float m_angularSleepingThreshold;
-
-        //! Deactivation time
-        float m_deactivationTime;
-
-        //! Activation state
-        int m_activationState;
 
         //! Cache transform
         TransformComponent *m_transform;

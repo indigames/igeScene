@@ -35,6 +35,67 @@ namespace ige::scene
         return true;
     }
 
+    //! Set enable
+    void PhysicBase::setEnable(bool enable) 
+    { 
+        m_bIsEnabled = enable;
+        if (m_bIsEnabled)
+            activate();
+        else 
+            deactivate();
+    }
+
+    //! Set mass
+    void PhysicBase::setMass(float mass)
+    {
+        m_mass = mass;
+        btVector3 inertia = { 0.f, 0.f, 0.f };
+        if (m_mass != 0.0f)
+            m_shape->calculateLocalInertia(m_mass, inertia);
+        m_body->setMassProps(mass, inertia);
+        m_body->updateInertiaTensor();
+    }
+
+    //! Set linear velocity
+    void PhysicBase::setLinearVelocity(const btVector3& velocity)
+    { 
+        m_linearVelocity = velocity; 
+        m_body->setLinearFactor(m_linearVelocity);
+    }
+
+    //! Set angular velocity
+    void PhysicBase::setAngularVelocity(const btVector3& velocity)
+    {
+        m_angularVelocity = velocity; 
+        m_body->setAngularVelocity(m_angularVelocity);
+    }
+
+    //! Set linear factor
+    void PhysicBase::setLinearFactor(const btVector3& factor)
+    { 
+        m_linearFactor = factor;
+        m_body->setLinearFactor(m_linearFactor);
+    }
+
+    //! Set linear factor
+    void PhysicBase::setAngularFactor(const btVector3& factor)
+    { 
+        m_angularFactor = factor; 
+        m_body->setAngularFactor(m_angularFactor);
+    }
+
+    //! Set is trigger
+    void PhysicBase::setIsTrigger(bool isTrigger)
+    { 
+        m_bIsTrigger = isTrigger;
+    }
+
+    //! Set is kinematic
+    void PhysicBase::setIsKinematic(bool isKinematic)
+    { 
+        m_bIsKinematic = isKinematic; 
+    }
+
     //! Apply torque
     void PhysicBase::applyTorque(const btVector3 &torque)
     {
