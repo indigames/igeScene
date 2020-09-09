@@ -17,6 +17,9 @@
 
 namespace ige::scene
 {
+    //! Static member initialization
+    std::map< std::pair<PhysicBase*, PhysicBase*>, bool> PhysicManager::m_collisionEvents;
+
     //! Constructor
     PhysicManager::PhysicManager(int numIteration, bool deformable)
         : m_numIteration(numIteration), m_bDeformable(deformable)
@@ -47,6 +50,12 @@ namespace ige::scene
 
         m_world->setGravity(m_gravity);
         m_world->getSolverInfo().m_numIterations = numIteration;
+
+        // Register event listeners
+        PhysicBase::getOnCreatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase&)>(&PhysicManager::onObjectCreated), this, std::placeholders::_1));
+        PhysicBase::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase&)>(&PhysicManager::onObjectDestroyed), this, std::placeholders::_1));
+        PhysicBase::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase&)>(&PhysicManager::onObjectActivated), this, std::placeholders::_1));
+        PhysicBase::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase&)>(&PhysicManager::onObjectDeactivated), this, std::placeholders::_1));
     }
 
     //! Destructor

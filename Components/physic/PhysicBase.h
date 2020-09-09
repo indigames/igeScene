@@ -23,6 +23,9 @@ namespace ige::scene
         //! Destructor
         virtual ~PhysicBase();
 
+        //! Initialization
+        bool init();
+
         //! Apply torque
         void applyTorque(const btVector3 &torque);
 
@@ -186,22 +189,22 @@ namespace ige::scene
         float m_mass = 1.f;
 
         //! Restuitution
-        float m_restitution;
+        float m_restitution = 1.f;
 
         //! Friction
-        float m_friction;
+        float m_friction = 0.5f;
 
         //! Linear velocity
-        btVector3 m_linearVelocity;
+        btVector3 m_linearVelocity = { 0.f, 0.f, 0.f };
 
         //! Angular velocity
-        btVector3 m_angularVelocity;
+        btVector3 m_angularVelocity = { 0.f, 0.f, 0.f };
 
         //! Linear factor
-        btVector3 m_linearFactor;
+        btVector3 m_linearFactor = {1.f, 1.f, 0.f};
 
         //! Angular factor
-        btVector3 m_angularFactor;
+        btVector3 m_angularFactor = { 0.f, 0.f, 0.f };
 
         //! isKinematic
         bool m_bIsKinematic = false;
@@ -222,10 +225,10 @@ namespace ige::scene
         bool m_bEnableContactResponse = false;
 
         //! Collision group bit
-        int m_collisionGroupBit;
+        int m_collisionGroupBit = -1;
 
         //! Collision group mask
-        int m_collisionGroupMask;
+        int m_collisionGroupMask = -1;
 
         //! Linear damping
         float m_linearDamping;

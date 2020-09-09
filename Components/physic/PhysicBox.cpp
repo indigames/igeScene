@@ -11,6 +11,7 @@ namespace ige::scene
         : PhysicBase(owner)
     {
         createCollisionShape(size);
+        init();
     }
 
     //! Destructor

@@ -6,12 +6,16 @@
 
 namespace ige::scene
 {
+    //! Initialize static members
+    Event<PhysicBase&> PhysicBase::m_onCreatedEvent;
+    Event<PhysicBase&> PhysicBase::m_onDestroyedEvent;
+    Event<PhysicBase&> PhysicBase::m_onActivatedEvent;
+    Event<PhysicBase&> PhysicBase::m_onDeactivatedEvent;
+
     //! Constructor
     PhysicBase::PhysicBase(const std::shared_ptr<SceneObject> &owner)
         : Component(owner)
     {
-        getOnCreatedEvent().invoke(*this);
-        createBody();
         m_transform = owner->getTransform().get();
     }
 
@@ -21,6 +25,14 @@ namespace ige::scene
         destroyBody();
         getOnDestroyedEvent().invoke(*this);
         m_transform = nullptr;
+    }
+
+    //! Initialization
+    bool PhysicBase::init()
+    {
+        getOnCreatedEvent().invoke(*this);
+        createBody();
+        return true;
     }
 
     //! Apply torque
