@@ -8,6 +8,7 @@
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <BulletSoftBody/btDeformableMultiBodyDynamicsWorld.h>
 
 #include "scene/SceneObject.h"
 #include "components/physic/PhysicBase.h"
@@ -37,10 +38,13 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        PhysicManager(int numIteration = 4, bool deformable = false);
+        PhysicManager();
 
         //! Destructor
         virtual ~PhysicManager();
+
+        //! Initialize
+        bool initialize(int numIteration = 4, bool deformable = false);
 
         //! Update
         void onUpdate(float dt);
@@ -106,6 +110,7 @@ namespace ige::scene
         std::unique_ptr<btConstraintSolver> m_solver = nullptr;
         std::unique_ptr<btCollisionConfiguration> m_collisionConfiguration = nullptr;
         std::unique_ptr<btGhostPairCallback> m_ghostPairCallback = nullptr;
+        std::unique_ptr<btDeformableBodySolver> m_deformableBodySolver = nullptr;
         std::vector<std::unique_ptr<btRaycastVehicle>> m_vehicles;
 
         //! Last frame time

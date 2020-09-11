@@ -21,17 +21,24 @@ namespace ige::scene
     std::map< std::pair<PhysicBase*, PhysicBase*>, bool> PhysicManager::m_collisionEvents;
 
     //! Constructor
-    PhysicManager::PhysicManager(int numIteration, bool deformable)
-        : m_numIteration(numIteration), m_bDeformable(deformable)
+    PhysicManager::PhysicManager()
     {
+    }
+
+    bool PhysicManager::initialize(int numIteration, bool deformable)
+    {
+        m_numIteration = numIteration;
+        m_bDeformable = deformable;
+
         if (deformable)
         {
             m_collisionConfiguration = std::make_unique<btSoftBodyRigidBodyCollisionConfiguration>();
             m_dispatcher = std::make_unique<btCollisionDispatcher>(m_collisionConfiguration.get());
             m_broadphase = std::make_unique<btDbvtBroadphase>();
             m_solver = std::make_unique<btDeformableMultiBodyConstraintSolver>();
-            ((btDeformableMultiBodyConstraintSolver *)m_solver.get())->setDeformableSolver(new btDeformableBodySolver());
-            m_world = std::make_unique<btDeformableMultiBodyDynamicsWorld>(m_dispatcher.get(), m_broadphase.get(), (btDeformableMultiBodyConstraintSolver *)m_solver.get(), m_collisionConfiguration.get());
+            m_deformableBodySolver = std::make_unique<btDeformableBodySolver>();
+            ((btDeformableMultiBodyConstraintSolver *)m_solver.get())->setDeformableSolver(m_deformableBodySolver.get());
+            m_world = std::make_unique<btDeformableMultiBodyDynamicsWorld>(m_dispatcher.get(), m_broadphase.get(), (btDeformableMultiBodyConstraintSolver *)m_solver.get(), m_collisionConfiguration.get(), m_deformableBodySolver.get());
             auto worldInfo = ((btDeformableMultiBodyDynamicsWorld *)m_world.get())->getWorldInfo();
             worldInfo.m_gravity = m_gravity;
             worldInfo.m_sparsesdf.setDefaultVoxelsz(0.25f);
@@ -56,6 +63,7 @@ namespace ige::scene
         PhysicBase::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase&)>(&PhysicManager::onObjectDestroyed), this, std::placeholders::_1));
         PhysicBase::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase&)>(&PhysicManager::onObjectActivated), this, std::placeholders::_1));
         PhysicBase::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase&)>(&PhysicManager::onObjectDeactivated), this, std::placeholders::_1));
+        return true;
     }
 
     //! Destructor
@@ -67,6 +75,7 @@ namespace ige::scene
         m_dispatcher = nullptr;
         m_broadphase = nullptr;
         m_solver = nullptr;
+        m_deformableBodySolver = nullptr;
         m_ghostPairCallback = nullptr;
         m_world = nullptr;
     }
