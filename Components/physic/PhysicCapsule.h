@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        PhysicCapsule(const std::shared_ptr<SceneObject> &owner, float radius = 1.f, float height = 3.f);
+        PhysicCapsule(const std::shared_ptr<SceneObject> &owner, float radius = 1.f, float height = 1.f);
 
         //! Destructor
         virtual ~PhysicCapsule();

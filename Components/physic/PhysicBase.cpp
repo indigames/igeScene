@@ -37,8 +37,10 @@ namespace ige::scene
 
     //! Set enable
     void PhysicBase::setEnable(bool enable) 
-    { 
+    {
         m_bIsEnabled = enable;
+        m_body->clearForces();
+
         if (m_bIsEnabled)
             activate();
         else 
@@ -88,12 +90,23 @@ namespace ige::scene
     void PhysicBase::setIsTrigger(bool isTrigger)
     { 
         m_bIsTrigger = isTrigger;
+        if (m_bIsTrigger)
+            addCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+        else
+            removeCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
     }
 
     //! Set is kinematic
     void PhysicBase::setIsKinematic(bool isKinematic)
     { 
-        m_bIsKinematic = isKinematic; 
+        m_bIsKinematic = isKinematic;
+        if (m_bIsKinematic)
+        {
+            clearForces();
+            setLinearVelocity({0.f, 0.f, 0.f});
+            setAngularVelocity({0.f, 0.f, 0.f});
+        }
+        recreateBody();
     }
 
     //! Apply torque
