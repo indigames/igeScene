@@ -16,8 +16,11 @@ namespace ige::scene {
         m_worldRotation = rot;
         m_worldScale = scale;
 
-        if (getOwner()->getParent())
+        if (getOwner()->getParent()) {
             m_parent = getOwner()->getParent()->getTransform().get();
+            if (m_parent)
+                m_parent->addObserver(this);
+        }
     }
 
     TransformComponent::~TransformComponent() 
