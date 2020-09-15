@@ -22,7 +22,7 @@ namespace ige::scene
     }
 
     //! Get size
-    Vec3 &PhysicBox::getSize()
+    const Vec3 &PhysicBox::getSize() const
     {
         return m_size;
     }
@@ -67,13 +67,14 @@ namespace ige::scene
     void PhysicBox::to_json(json &j) const
     {
         PhysicBase::to_json(j);
-
+        j["size"] = getSize();
     }
 
     //! Deserialize
     void PhysicBox::from_json(const json &j)
     {
         PhysicBase::from_json(j);
+        setSize(j.at("size"));
     }
 
 } // namespace ige::scene

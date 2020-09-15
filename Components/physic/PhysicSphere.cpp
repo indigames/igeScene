@@ -22,7 +22,7 @@ namespace ige::scene
     }
 
     //! Get radius
-    float PhysicSphere::getRadius()
+    float PhysicSphere::getRadius() const
     {
         return m_radius;
     }
@@ -70,13 +70,14 @@ namespace ige::scene
     void PhysicSphere::to_json(json &j) const
     {
         PhysicBase::to_json(j);
-
+        j["radius"] = getRadius();
     }
 
     //! Deserialize
     void PhysicSphere::from_json(const json &j)
     {
         PhysicBase::from_json(j);
+        setRadius(j.at("radius"));
     }
 
 } // namespace ige::scene

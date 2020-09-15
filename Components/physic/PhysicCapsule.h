@@ -27,13 +27,13 @@ namespace ige::scene
         virtual void from_json(const json &j);
 
         //! Get radius
-        float getRadius();
+        float getRadius() const;
 
         //! Set radius
         void setRadius(float radius);
 
         //! Get height
-        float getHeight();
+        float getHeight() const;
 
         //! Set height
         void setHeight(float radius);

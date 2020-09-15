@@ -22,7 +22,7 @@ namespace ige::scene
     }
 
     //! Get radius
-    float PhysicCapsule::getRadius()
+    float PhysicCapsule::getRadius() const
     {
         return m_radius;
     }
@@ -35,7 +35,7 @@ namespace ige::scene
     }
 
     //! Get height
-    float PhysicCapsule::getHeight()
+    float PhysicCapsule::getHeight() const
     {
         return m_height;
     }
@@ -81,12 +81,15 @@ namespace ige::scene
     void PhysicCapsule::to_json(json &j) const
     {
         PhysicBase::to_json(j);
-
+       j["height"] = getHeight();
+       j["radius"] = getRadius();
     }
 
     //! Deserialize
     void PhysicCapsule::from_json(const json &j)
     {
         PhysicBase::from_json(j);
+        setHeight(j.at("height"));
+        setRadius(j.at("radius"));
     }
 } // namespace ige::scene

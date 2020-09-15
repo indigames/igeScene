@@ -11,6 +11,9 @@
 #include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/UIImage.h"
+#include "components/physic/PhysicBox.h"
+#include "components/physic/PhysicCapsule.h"
+#include "components/physic/PhysicSphere.h"
 
 namespace ige::scene
 {
@@ -454,6 +457,9 @@ namespace ige::scene
             else if (key == "FigureComponent") comp = addComponent<FigureComponent>(val.at("path"));
             else if (key == "SpriteComponent") comp = addComponent<SpriteComponent>(val.at("size"), val.at("path"));
             else if (key == "ScriptComponent") comp = addComponent<ScriptComponent>(val.at("path"));
+            else if (key == "PhysicBox") comp = addComponent<PhysicBox>();
+            else if (key == "PhysicSphere") comp = addComponent<PhysicSphere>();
+            else if (key == "PhysicCapsule") comp = addComponent<PhysicCapsule>();
             if (comp) comp->from_json(val);
         }
 

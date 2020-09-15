@@ -27,7 +27,7 @@ namespace ige::scene
         virtual void from_json(const json &j);
 
         //! Get size
-        Vec3& getSize();
+        const Vec3& getSize() const;
 
         //! Set size
         void setSize(const Vec3& size);
