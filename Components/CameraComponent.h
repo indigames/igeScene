@@ -21,12 +21,12 @@ namespace ige::scene
         virtual std::string getName() const override { return "CameraComponent"; }
 
         //! Position
-        void setPosition(const Vec3& pos) { m_camera->SetCameraPosition(pos);  }
-        Vec3 getPosition() const { return m_camera->GetCameraPosition(); }
+        void setPosition(const Vec3& pos);
+        Vec3 getPosition() const;
 
         //! Rotation
-        void setRotation(const Quat& rot) { m_camera->SetCameraRotation(rot);  }
-        Quat getRotation() const { return m_camera->GetCameraRotation(); }
+        void setRotation(const Quat& rot);
+        Quat getRotation() const;
 
         //! Aspect ratio
         float getAspectRatio() const { return m_camera->GetAspectRate(); }

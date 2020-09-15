@@ -36,14 +36,14 @@ namespace ige::scene
     }
 
     //! Set enable
-    void PhysicBase::setEnable(bool enable) 
+    void PhysicBase::setEnabled(bool enable)
     {
         m_bIsEnabled = enable;
         m_body->clearForces();
 
         if (m_bIsEnabled)
             activate();
-        else 
+        else
             deactivate();
     }
 
@@ -60,35 +60,35 @@ namespace ige::scene
 
     //! Set linear velocity
     void PhysicBase::setLinearVelocity(const btVector3& velocity)
-    { 
-        m_linearVelocity = velocity; 
+    {
+        m_linearVelocity = velocity;
         m_body->setLinearFactor(m_linearVelocity);
     }
 
     //! Set angular velocity
     void PhysicBase::setAngularVelocity(const btVector3& velocity)
     {
-        m_angularVelocity = velocity; 
+        m_angularVelocity = velocity;
         m_body->setAngularVelocity(m_angularVelocity);
     }
 
     //! Set linear factor
     void PhysicBase::setLinearFactor(const btVector3& factor)
-    { 
+    {
         m_linearFactor = factor;
         m_body->setLinearFactor(m_linearFactor);
     }
 
     //! Set linear factor
     void PhysicBase::setAngularFactor(const btVector3& factor)
-    { 
-        m_angularFactor = factor; 
+    {
+        m_angularFactor = factor;
         m_body->setAngularFactor(m_angularFactor);
     }
 
     //! Set is trigger
     void PhysicBase::setIsTrigger(bool isTrigger)
-    { 
+    {
         m_bIsTrigger = isTrigger;
         if (m_bIsTrigger)
             addCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
@@ -98,7 +98,7 @@ namespace ige::scene
 
     //! Set is kinematic
     void PhysicBase::setIsKinematic(bool isKinematic)
-    { 
+    {
         m_bIsKinematic = isKinematic;
         if (m_bIsKinematic)
         {

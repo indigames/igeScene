@@ -81,6 +81,32 @@ namespace ige::scene
         m_camera->Render();
     }
 
+    //! Position
+    void CameraComponent::setPosition(const Vec3& pos)
+    { 
+        auto transCmp = getOwner()->getTransform();
+        transCmp->setWorldPosition(pos);
+    }
+
+    Vec3 CameraComponent::getPosition() const 
+    { 
+        auto transCmp = getOwner()->getTransform();
+        return transCmp->getWorldPosition();
+    }
+
+    //! Rotation
+    void CameraComponent::setRotation(const Quat& rot)
+    { 
+        auto transCmp = getOwner()->getTransform();
+        transCmp->setWorldRotation(rot);
+    }
+
+    Quat CameraComponent::getRotation() const
+    { 
+        auto transCmp = getOwner()->getTransform();
+        return transCmp->getWorldRotation();
+    }
+
     //! Serialize
     void CameraComponent::to_json(json& j) const
     {

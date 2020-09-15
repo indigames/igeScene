@@ -101,7 +101,7 @@ namespace ige::scene
 
         //! Enable/Disable physic component
         bool isEnabled() const { return m_bIsEnabled; }
-        void setEnable(bool enable);
+        void setEnabled(bool enable);
 
         //! Get AABB
         void getAABB(btVector3 &aabbMin, btVector3 aabbMax);

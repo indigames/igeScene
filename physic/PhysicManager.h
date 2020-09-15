@@ -83,7 +83,7 @@ namespace ige::scene
         void setFrameMaxSubStep(int nSteps) { m_frameMaxSubStep = nSteps; }
 
         //! Fixed time steps
-        float gatFixedTimeStep() { return m_fixedTimeStep; }
+        float getFixedTimeStep() { return m_fixedTimeStep; }
         void setFixedTimeStep(float timeStep) { m_fixedTimeStep = timeStep; }
 
         //! Gravity
