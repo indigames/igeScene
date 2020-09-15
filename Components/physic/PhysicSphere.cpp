@@ -42,6 +42,7 @@ namespace ige::scene
             m_shape.reset();
         m_shape = std::make_unique<btSphereShape>(radius);
         m_radius = radius;
+        setLocalScale(m_previousScale);
     }
 
     //! Recreate collision shape

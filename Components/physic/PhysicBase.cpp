@@ -229,11 +229,8 @@ namespace ige::scene
         m_body->setWorldTransform(PhysicHelper::to_btTransform(*m_transform));
 
         Vec3 scale = m_transform->getWorldScale();
-        float scaleDelta = std::sqrt(
-            (scale[0] - m_previousScale[0]) * (scale[0] - m_previousScale[0]) +
-            (scale[1] - m_previousScale[1]) * (scale[1] - m_previousScale[1]) +
-            (scale[2] - m_previousScale[2]) * (scale[2] - m_previousScale[2]));
-
+        Vec3 dScale = { scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2] };
+        float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
         if (scaleDelta >= 0.01f)
         {
             m_previousScale = scale;

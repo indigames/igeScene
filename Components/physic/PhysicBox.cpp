@@ -42,14 +42,13 @@ namespace ige::scene
             m_shape.reset();
         m_shape = std::make_unique<btBoxShape>(PhysicHelper::to_btVector3(size));
         m_size = size;
+        setLocalScale(m_previousScale);
     }
 
     //! Recreate collision shape
     void PhysicBox::recreateCollisionShape(const Vec3 &size)
     {
         // Create collision shape
-        if (m_shape != nullptr)
-            m_shape.reset();
         createCollisionShape(size);
 
         // Create body
@@ -60,7 +59,9 @@ namespace ige::scene
     void PhysicBox::setLocalScale(const Vec3 &scale)
     {
         if (m_shape)
+        {
             m_shape->setLocalScaling(PhysicHelper::to_btVector3(scale));
+        }
     }
 
     //! Serialize
