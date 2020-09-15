@@ -20,6 +20,12 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "PhysicCapsule"; }
 
+        //! Serialize
+        virtual void to_json(json &j) const;
+
+        //! Deserialize
+        virtual void from_json(const json &j);
+
         //! Get radius
         float getRadius();
 

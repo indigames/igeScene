@@ -76,4 +76,17 @@ namespace ige::scene
         if (m_shape)
             m_shape->setLocalScaling(PhysicHelper::to_btVector3(scale));
     }
+
+    //! Serialize
+    void PhysicCapsule::to_json(json &j) const
+    {
+        PhysicBase::to_json(j);
+
+    }
+
+    //! Deserialize
+    void PhysicCapsule::from_json(const json &j)
+    {
+        PhysicBase::from_json(j);
+    }
 } // namespace ige::scene

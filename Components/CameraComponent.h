@@ -125,7 +125,10 @@ namespace ige::scene
         SceneObject* getShootTarget() { return m_shootTarget; }
 
         //! Set shooting target
-        void setShootTarget(SceneObject* target) { m_shootTarget = target; }
+        void setShootTarget(SceneObject* target);
+
+        //! Get target id
+        uint64_t getTargetId() { return m_targetId; }
 
     protected:
         //! Internal camera
@@ -136,5 +139,6 @@ namespace ige::scene
 
         //! Target to shoot
         SceneObject* m_shootTarget;
+        uint64_t m_targetId = 0xffffffff;
     };
 }

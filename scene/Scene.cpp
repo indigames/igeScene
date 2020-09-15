@@ -22,16 +22,16 @@ namespace ige::scene
     Scene::Scene(const std::string& name)
         : m_name(name)
     {
-        SceneObject::getComponentAddedEvent().addListener(std::bind(&Scene::onComponentAdded, this, std::placeholders::_1, std::placeholders::_2));
-        SceneObject::getComponentRemovedEvent().addListener(std::bind(&Scene::onComponentRemoved, this, std::placeholders::_1, std::placeholders::_2));
-        SceneObject::getSelectedEvent().addListener(std::bind(&Scene::onSceneObjectSelected, this, std::placeholders::_1));
+        m_componentAddedEventId = SceneObject::getComponentAddedEvent().addListener(std::bind(&Scene::onComponentAdded, this, std::placeholders::_1, std::placeholders::_2));
+        m_componentRemovedEventId = SceneObject::getComponentRemovedEvent().addListener(std::bind(&Scene::onComponentRemoved, this, std::placeholders::_1, std::placeholders::_2));
+        m_objectSelectedEventId = SceneObject::getSelectedEvent().addListener(std::bind(&Scene::onSceneObjectSelected, this, std::placeholders::_1));
     }
 
     Scene::~Scene()
     {
-        SceneObject::getComponentAddedEvent().removeAllListeners();
-        SceneObject::getComponentRemovedEvent().removeAllListeners();
-        SceneObject::getSelectedEvent().removeAllListeners();
+        SceneObject::getComponentAddedEvent().removeListener(m_componentAddedEventId);
+        SceneObject::getComponentRemovedEvent().removeListener(m_componentRemovedEventId);
+        SceneObject::getSelectedEvent().removeListener(m_objectSelectedEventId);
         getOnActiveCameraChangedEvent().removeAllListeners();
 
         clear();
@@ -48,6 +48,11 @@ namespace ige::scene
         for (auto& root : m_roots)
             root = nullptr;
         m_roots.clear();
+
+        m_activeCamera = nullptr;
+        for (auto& cam : m_cameras)
+            cam = nullptr;
+        m_cameras.clear();
     }
 
     void Scene::update(float dt)
@@ -288,7 +293,15 @@ namespace ige::scene
         {
             auto root = std::make_shared<SceneObject>(it.at("id"), it.at("name"));
             root->from_json(it);
+            m_roots.push_back(root);
         }
         j.at("objId").get_to(m_nextObjectID);
+
+        for (auto& cam : m_cameras)
+        {
+            auto target = findObjectById(cam->getTargetId());
+            if (target)
+                cam->setShootTarget(target.get());
+        }
     }
 }

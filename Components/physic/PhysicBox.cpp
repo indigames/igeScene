@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    PhysicBox::PhysicBox(const std::shared_ptr<SceneObject> &owner, const Vec3& size)
+    PhysicBox::PhysicBox(const std::shared_ptr<SceneObject> &owner, const Vec3 &size)
         : PhysicBase(owner)
     {
         createCollisionShape(size);
@@ -62,4 +62,18 @@ namespace ige::scene
         if (m_shape)
             m_shape->setLocalScaling(PhysicHelper::to_btVector3(scale));
     }
+
+    //! Serialize
+    void PhysicBox::to_json(json &j) const
+    {
+        PhysicBase::to_json(j);
+
+    }
+
+    //! Deserialize
+    void PhysicBox::from_json(const json &j)
+    {
+        PhysicBase::from_json(j);
+    }
+
 } // namespace ige::scene

@@ -65,4 +65,18 @@ namespace ige::scene
             m_shape->setLocalScaling({radiusScale, radiusScale, radiusScale});
         }
     }
+
+    //! Serialize
+    void PhysicSphere::to_json(json &j) const
+    {
+        PhysicBase::to_json(j);
+
+    }
+
+    //! Deserialize
+    void PhysicSphere::from_json(const json &j)
+    {
+        PhysicBase::from_json(j);
+    }
+
 } // namespace ige::scene

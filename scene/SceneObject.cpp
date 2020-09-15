@@ -54,8 +54,8 @@ namespace ige::scene
         removeChildren();
         setParent(nullptr);
 
-        m_transform = nullptr;
         removeAllComponents();
+        m_transform = nullptr;
 
         if (m_showcase)
         {
@@ -407,10 +407,12 @@ namespace ige::scene
         auto jComponents = json::array();
         for (const auto& comp : m_components)
         {
-            json jCmp = json{
-                {comp->getName(), *comp.get()}
-            };
-            jComponents.push_back(jCmp);
+            json jCmp;
+            comp->to_json(jCmp);
+
+            json jPairCmp = {comp->getName(), jCmp};
+
+            jComponents.push_back(jPairCmp);
         }
         j["comps"] = jComponents;
 
@@ -438,10 +440,15 @@ namespace ige::scene
         auto jComps = j.at("comps");
         for (auto it : jComps)
         {
-            auto key = it.begin().key();
-            auto val = it.begin().value();
+            auto key = it.at(0);
+            auto val = it.at(1);
             std::shared_ptr<Component> comp = nullptr;
-            if (key == "TransformComponent") comp = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+            if (key == "TransformComponent") 
+            { 
+                auto transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+                setTransform(transform);
+                comp = transform;
+            }
             else if (key == "CameraComponent") comp = addComponent<CameraComponent>(val.at("name"));
             else if (key == "EnvironmentComponent") comp = addComponent<EnvironmentComponent>(val.at("name"));
             else if (key == "FigureComponent") comp = addComponent<FigureComponent>(val.at("path"));

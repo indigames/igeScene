@@ -113,5 +113,10 @@ namespace ige::scene
 
         //! Active camera changed events
         Event<CameraComponent*> m_onActiveCameraChanged;
+
+        //! Cached event id for removing
+        uint64_t m_componentAddedEventId;
+        uint64_t m_componentRemovedEventId;
+        uint64_t m_objectSelectedEventId;
     };
 }

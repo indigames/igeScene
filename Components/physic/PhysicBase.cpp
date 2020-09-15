@@ -7,10 +7,10 @@
 namespace ige::scene
 {
     //! Initialize static members
-    Event<PhysicBase&> PhysicBase::m_onCreatedEvent;
-    Event<PhysicBase&> PhysicBase::m_onDestroyedEvent;
-    Event<PhysicBase&> PhysicBase::m_onActivatedEvent;
-    Event<PhysicBase&> PhysicBase::m_onDeactivatedEvent;
+    Event<PhysicBase &> PhysicBase::m_onCreatedEvent;
+    Event<PhysicBase &> PhysicBase::m_onDestroyedEvent;
+    Event<PhysicBase &> PhysicBase::m_onActivatedEvent;
+    Event<PhysicBase &> PhysicBase::m_onDeactivatedEvent;
 
     //! Constructor
     PhysicBase::PhysicBase(const std::shared_ptr<SceneObject> &owner)
@@ -51,7 +51,7 @@ namespace ige::scene
     void PhysicBase::setMass(float mass)
     {
         m_mass = mass;
-        btVector3 inertia = { 0.f, 0.f, 0.f };
+        btVector3 inertia = {0.f, 0.f, 0.f};
         if (m_mass != 0.0f)
             m_shape->calculateLocalInertia(m_mass, inertia);
         m_body->setMassProps(mass, inertia);
@@ -59,28 +59,28 @@ namespace ige::scene
     }
 
     //! Set linear velocity
-    void PhysicBase::setLinearVelocity(const btVector3& velocity)
+    void PhysicBase::setLinearVelocity(const btVector3 &velocity)
     {
         m_linearVelocity = velocity;
         m_body->setLinearFactor(m_linearVelocity);
     }
 
     //! Set angular velocity
-    void PhysicBase::setAngularVelocity(const btVector3& velocity)
+    void PhysicBase::setAngularVelocity(const btVector3 &velocity)
     {
         m_angularVelocity = velocity;
         m_body->setAngularVelocity(m_angularVelocity);
     }
 
     //! Set linear factor
-    void PhysicBase::setLinearFactor(const btVector3& factor)
+    void PhysicBase::setLinearFactor(const btVector3 &factor)
     {
         m_linearFactor = factor;
         m_body->setLinearFactor(m_linearFactor);
     }
 
     //! Set linear factor
-    void PhysicBase::setAngularFactor(const btVector3& factor)
+    void PhysicBase::setAngularFactor(const btVector3 &factor)
     {
         m_angularFactor = factor;
         m_body->setAngularFactor(m_angularFactor);
@@ -262,10 +262,33 @@ namespace ige::scene
     //! Serialize
     void PhysicBase::to_json(json &j) const
     {
+        j = json{
+            {"mass", m_mass},
+            {"restitution", m_restitution},
+            {"friction", m_friction},
+            {"linearVelocity", PhysicHelper::from_btVector3(m_linearVelocity)},
+            {"angularVelocity", PhysicHelper::from_btVector3(m_angularVelocity)},
+            {"linearFactor", PhysicHelper::from_btVector3(m_linearFactor)},
+            {"angularFactor", PhysicHelper::from_btVector3(m_angularFactor)},
+            {"isKinematic", m_bIsKinematic},
+            {"isTrigger", m_bIsTrigger},
+            {"isEnabled", m_bIsEnabled},
+            {"scale", m_previousScale},
+        };
     }
 
     //! Deserialize
     void PhysicBase::from_json(const json &j)
     {
+        setMass(j.at("mass"));
+        setRestitution(j.at("restitution"));
+        setFriction(j.at("friction"));
+        setLinearVelocity(PhysicHelper::to_btVector3(j.at("linearVelocity")));
+        setAngularVelocity(PhysicHelper::to_btVector3(j.at("angularVelocity")));
+        setLinearFactor(PhysicHelper::to_btVector3(j.at("linearFactor")));
+        setAngularFactor(PhysicHelper::to_btVector3(j.at("angularFactor")));
+        setIsKinematic(j.at("isKinematic"));
+        setIsTrigger(j.at("isTrigger"));
+        setEnabled(j.at("isEnabled"));
     }
 } // namespace ige::scene

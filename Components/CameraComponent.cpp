@@ -1,6 +1,8 @@
 #include "components/CameraComponent.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
+#include "scene/Scene.h"
+#include "scene/SceneManager.h"
 
 namespace ige::scene
 {
@@ -107,13 +109,16 @@ namespace ige::scene
         return transCmp->getWorldRotation();
     }
 
+    void CameraComponent::setShootTarget(SceneObject* target) {
+        m_shootTarget = target;
+        m_targetId = target ? target->getId() : 0xffffffff;
+    }
+
     //! Serialize
     void CameraComponent::to_json(json& j) const
     {
         j = json {
             {"name", m_name},
-            {"pos", getPosition()},
-            {"rot", getRotation()},
             {"aspect", getAspectRatio()},
             {"wBase", isWidthBase()},
             {"fov", getFieldOfView()},
@@ -131,14 +136,13 @@ namespace ige::scene
             {"scrOff", getScreenOffset()},
             {"scrRad", getScreenRadian()},
             {"up", getUpAxis()},
+            {"targetId", m_targetId},
         };
     }
 
     //! Deserialize
     void CameraComponent::from_json(const json& j)
     {
-        setPosition(j.at("pos"));
-        setRotation(j.at("rot"));
         setAspectRatio(j.at("aspect"));
         setWidthBase(j.at("wBase"));
         setFieldOfView(j.at("fov"));
@@ -156,5 +160,6 @@ namespace ige::scene
         setScreenOffset(j.at("scrOff"));
         setScreenRadian(j.at("scrRad"));
         setUpAxis(j.at("up"));
+        m_targetId = j.at("targetId");
     }
 }

@@ -1,8 +1,8 @@
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
-#include "components/gui/UIImage.h" 
-#include "components/gui/UIText.h" 
+#include "components/gui/UIImage.h"
+#include "components/gui/UIText.h"
 #include "scene/SceneObject.h"
 #include "utils/RayOBBChecker.h"
 
@@ -23,13 +23,13 @@ namespace ige::scene {
         }
     }
 
-    TransformComponent::~TransformComponent() 
+    TransformComponent::~TransformComponent()
     {
         if(hasParent()) getParent()->removeObserver(this);
         m_parent = nullptr;
         notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
         m_observers.clear();
-    }    
+    }
 
     TransformComponent* TransformComponent::getParent() const
     {
@@ -133,7 +133,7 @@ namespace ige::scene {
         {
             m_localPosition = pos;
             m_bLocalDirty = true;
-        }        
+        }
     }
 
     const Vec3& TransformComponent::getPosition() const
@@ -161,7 +161,7 @@ namespace ige::scene {
         {
             m_localRotation = rot;
             m_bLocalDirty = true;
-        }        
+        }
     }
 
     const Quat& TransformComponent::getRotation() const
@@ -269,7 +269,7 @@ namespace ige::scene {
         m_worldPosition.Y(m_worldMatrix[3][1]);
         m_worldPosition.Z(m_worldMatrix[3][2]);
 
-        Vec3 columns[3] = 
+        Vec3 columns[3] =
         {
             { m_worldMatrix[0][0], m_worldMatrix[0][1], m_worldMatrix[0][2]},
             { m_worldMatrix[1][0], m_worldMatrix[1][1], m_worldMatrix[1][2]},
@@ -368,7 +368,7 @@ namespace ige::scene {
 
     void TransformComponent::notifyObservers(const ETransformMessage &message)
     {
-        for( auto observer: m_observers) 
+        for( auto observer: m_observers)
         {
             observer->onNotified(message);
         }
@@ -408,7 +408,6 @@ namespace ige::scene {
     //! Deserialize
     void TransformComponent::from_json(const json& j)
     {
-
         setPosition(j.at("pos"));
         setRotation(j.at("rot"));
         setScale(j.at("scale"));
