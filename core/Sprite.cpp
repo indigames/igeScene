@@ -47,10 +47,10 @@ namespace ige::scene
                 // Free old texture
                 if(m_figure != nullptr)
                 {
-                    auto textureSources = m_figure->GetTextureSources();
+                    const auto& textureSources = m_figure->GetTextureSources();
                     if(textureSources.size() > 0)
                     {
-                        auto textureSource = textureSources[0];
+                        auto& textureSource = textureSources[0];
                         auto texture = (Texture*)ResourceManager::Instance().GetResource(textureSource.path, TEXTURETYPE);
                         if(texture)
                         {
@@ -76,11 +76,10 @@ namespace ige::scene
 
                 Sampler sampler;
                 sampler.samplerSlotNo = 0;
-                sampler.samplerState.wrap_s = SamplerState::WRAP;
-                sampler.samplerState.wrap_t = SamplerState::WRAP;
+                sampler.samplerState.wrap_s = SamplerState::CLAMP;
+                sampler.samplerState.wrap_t = SamplerState::CLAMP;
                 sampler.samplerState.minfilter = SamplerState::LINEAR;
                 sampler.samplerState.magfilter = SamplerState::LINEAR;
-                sampler.samplerState.mipfilter = SamplerState::LINEAR_MIPMAP_LINEAR;
                 sampler.tex = ResourceCreator::Instance().NewTexture(m_path.c_str());
                 sampler.tex->WaitInitialize();
                 sampler.tex->WaitBuild();
@@ -93,6 +92,10 @@ namespace ige::scene
 
                 int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
                 m_figure->SetMaterialParam(materialIdx, "ColorSampler", &sampler);
+
+                const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
+                uint32_t blendVal[4] = { 1,0,0,0 };
+                m_figure->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, blendVal);
             }
         }
     }
