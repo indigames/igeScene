@@ -75,7 +75,7 @@ namespace ige::scene
     void PhysicBox::from_json(const json &j)
     {
         PhysicBase::from_json(j);
-        setSize(j.at("size"));
+        setSize(j.value("size", Vec3(1.f, 1.f, 1.f)));
     }
 
 } // namespace ige::scene

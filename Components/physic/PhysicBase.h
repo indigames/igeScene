@@ -217,7 +217,7 @@ namespace ige::scene
         bool m_bIsTrigger = false;
 
         //! Enable physic
-        bool m_bIsEnabled = false;
+        bool m_bIsEnabled = true;
 
         //! Cache activated status
         bool m_bIsActivated = false;
