@@ -26,6 +26,7 @@ using RenderContext = pyxie::pyxieRenderContext;
 using Figure = pyxie::pyxieFigure;
 using EditableFigure = pyxie::pyxieEditableFigure;
 using RenderTarget = pyxie::pyxieRenderTarget;
+using Resource = pyxie::pyxieResource;
 using ResourceCreator = pyxie::pyxieResourceCreator;
 using ResourceManager = pyxie::pyxieResourceManager;
 using InputHandler = pyxie::InputHandler;

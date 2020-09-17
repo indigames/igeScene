@@ -8,23 +8,25 @@ namespace fs = std::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    FigureComponent::FigureComponent(std::shared_ptr<SceneObject> owner, const std::string& path)
+    FigureComponent::FigureComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path)
         : Component(owner), m_figure(nullptr), m_path(path)
     {
         if (!m_path.empty())
         {
             m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
             m_figure->WaitBuild();
+            getOwner()->getRoot()->getResourceAddedEvent().invoke(m_figure);
         }
     }
 
     //! Destructor
-    FigureComponent::~FigureComponent() 
+    FigureComponent::~FigureComponent()
     {
         if (m_figure)
         {
-             m_figure->DecReference();
-             m_figure = nullptr;
+            if (hasOwner()) getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_figure);
+            m_figure->DecReference();
+            m_figure = nullptr;
         }
         ResourceManager::Instance().DeleteDaemon();
     }
@@ -34,22 +36,19 @@ namespace ige::scene
     {
         if (m_figure == nullptr) return;
 
-        std::shared_ptr<TransformComponent> transCmp = nullptr;
-
-        if(getOwner() != nullptr)
-        {
-            // Update transform from transform component
-            transCmp = getOwner()->getComponent<TransformComponent>();
-            if(transCmp != nullptr)
-            {
-                m_figure->SetPosition(transCmp->getWorldPosition());
-                m_figure->SetRotation(transCmp->getWorldRotation());
-                m_figure->SetScale(transCmp->getWorldScale());
-            }
-        }
+        // Update transform from transform component
+        auto transCmp = getOwner()->getTransform();
+        m_figure->SetPosition(transCmp->getWorldPosition());
+        m_figure->SetRotation(transCmp->getWorldRotation());
+        m_figure->SetScale(transCmp->getWorldScale());
 
         // Update
         m_figure->Step(dt);
+
+        // Update transform back to transform component
+        transCmp->setWorldPosition(m_figure->GetPosition());
+        transCmp->setWorldRotation(m_figure->GetRotation());
+        transCmp->setWorldScale(m_figure->GetScale());
     }
 
     //! Update
@@ -72,7 +71,7 @@ namespace ige::scene
 
             if (m_figure != nullptr)
             {
-                getOnFigureDestroyedEvent().invoke(m_figure);
+                getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_figure);
                 m_figure->DecReference();
                 m_figure = nullptr;
                 ResourceManager::Instance().DeleteDaemon();
@@ -80,7 +79,7 @@ namespace ige::scene
 
             m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
             m_figure->WaitInitialize();
-            getOnFigureCreatedEvent().invoke(m_figure);
+            getOwner()->getRoot()->getResourceAddedEvent().invoke(m_figure);
         }
     }
 

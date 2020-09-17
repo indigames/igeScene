@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        CameraComponent(std::shared_ptr<SceneObject> owner, const std::string& name);
+        CameraComponent(const std::shared_ptr<SceneObject>& owner, const std::string& name);
 
         //! Destructor
         virtual ~CameraComponent();
@@ -21,12 +21,12 @@ namespace ige::scene
         virtual std::string getName() const override { return "CameraComponent"; }
 
         //! Position
-        void setPosition(const Vec3& pos) { m_camera->SetCameraPosition(pos);  }
-        Vec3 getPosition() const { return m_camera->GetCameraPosition(); }
+        void setPosition(const Vec3& pos);
+        Vec3 getPosition() const;
 
         //! Rotation
-        void setRotation(const Quat& rot) { m_camera->SetCameraRotation(rot);  }
-        Quat getRotation() const { return m_camera->GetCameraRotation(); }
+        void setRotation(const Quat& rot);
+        Quat getRotation() const;
 
         //! Aspect ratio
         float getAspectRatio() const { return m_camera->GetAspectRate(); }
@@ -121,11 +121,24 @@ namespace ige::scene
         //! Get camera
         Camera* getCamera() { return m_camera; }
 
+        //! Get shooting target
+        SceneObject* getShootTarget() { return m_shootTarget; }
+
+        //! Set shooting target
+        void setShootTarget(SceneObject* target);
+
+        //! Get target id
+        uint64_t getTargetId() { return m_targetId; }
+
     protected:
         //! Internal camera
         Camera* m_camera;
 
         //! Camera name
         std::string m_name;
+
+        //! Target to shoot
+        SceneObject* m_shootTarget;
+        uint64_t m_targetId = 0xffffffff;
     };
 }

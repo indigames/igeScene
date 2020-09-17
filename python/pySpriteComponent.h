@@ -12,7 +12,7 @@ namespace ige::scene
     struct PyObject_SpriteComponent
     {
         PyObject_Component super;
-        std::shared_ptr<SpriteComponent> component;
+        SpriteComponent* component;
     };
 
     // Type declaration

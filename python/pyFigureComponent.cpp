@@ -15,7 +15,6 @@ namespace ige::scene
     {
         if(self && self->component)
         {
-            self->super.component = nullptr;
             self->component = nullptr;
             Py_TYPE(self)->tp_free(self);
         }

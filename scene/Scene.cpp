@@ -10,6 +10,8 @@
 #include "components/SpriteComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/ScriptComponent.h"
+#include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
 
 #include "utils/GraphicsHelper.h"
 
@@ -20,77 +22,138 @@ namespace ige::scene
     Scene::Scene(const std::string& name)
         : m_name(name)
     {
-        m_showcase = ResourceCreator::Instance().NewShowcase((name + "_showcase").c_str());
-        m_showcase->Initialize();
-        m_showcase->WaitInitialize();
-
-        SceneObject::getComponentAddedEvent().addListener(std::bind(&Scene::onComponentAdded, this, std::placeholders::_1, std::placeholders::_2));
-        SceneObject::getComponentRemovedEvent().addListener(std::bind(&Scene::onComponentRemoved, this, std::placeholders::_1, std::placeholders::_2));
+        m_componentAddedEventId = SceneObject::getComponentAddedEvent().addListener(std::bind(&Scene::onComponentAdded, this, std::placeholders::_1, std::placeholders::_2));
+        m_componentRemovedEventId = SceneObject::getComponentRemovedEvent().addListener(std::bind(&Scene::onComponentRemoved, this, std::placeholders::_1, std::placeholders::_2));
+        m_objectSelectedEventId = SceneObject::getSelectedEvent().addListener(std::bind(&Scene::onSceneObjectSelected, this, std::placeholders::_1));
     }
 
     Scene::~Scene()
     {
+        SceneObject::getComponentAddedEvent().removeListener(m_componentAddedEventId);
+        SceneObject::getComponentRemovedEvent().removeListener(m_componentRemovedEventId);
+        SceneObject::getSelectedEvent().removeListener(m_objectSelectedEventId);
+        getOnActiveCameraChangedEvent().removeAllListeners();
+
         clear();
     }
-    
+
     bool Scene::initialize()
     {
-        m_root = createObject("root");
-        auto envComp = m_root->addComponent<EnvironmentComponent>("environment");
-        envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
-        envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+        createObject(getName());
         return true;
     }
 
     void Scene::clear()
     {
-        if (m_root)
-        {
-            m_root->removeAllComponents();
-            m_root->removeChildren();
-            m_root = nullptr;
-        }
+        for (auto& root : m_roots)
+            root = nullptr;
+        m_roots.clear();
 
-        SceneObject::getComponentAddedEvent().removeAllListeners();
-        SceneObject::getComponentRemovedEvent().removeAllListeners();
-
-        if (m_showcase)
-        {
-            m_showcase->Clear();
-            m_showcase->DecReference();
-            m_showcase = nullptr;
-        }        
-
-        ResourceManager::Instance().DeleteDaemon();
+        m_activeCamera = nullptr;
+        for (auto& cam : m_cameras)
+            cam = nullptr;
+        m_cameras.clear();
     }
 
     void Scene::update(float dt)
     {
-        m_root->onUpdate(dt);
-        m_showcase->Update(dt);
+        for (auto& root : m_roots)
+            if (root) root->onUpdate(dt);
+
+        if (m_activeCamera)
+        {
+            m_activeCamera->onUpdate(dt);
+            auto target = m_activeCamera->getShootTarget();
+            if (target && target->getShowcase())
+            {
+                target->getShowcase()->Update(dt);
+            }
+        }
     }
 
     void Scene::fixedUpdate(float dt)
     {
-        m_root->onFixedUpdate(dt);
+        for (auto& root : m_roots)
+            if (root) root->onFixedUpdate(dt);
     }
 
     void Scene::lateUpdate(float dt)
     {
-         m_root->onLateUpdate(dt);
+        for (auto& root : m_roots)
+            if (root) root->onLateUpdate(dt);
     }
 
     void Scene::render()
     {
-        m_root->onRender();
-        m_showcase->Render();
+        if (m_activeCamera)
+        {
+            m_activeCamera->onRender();
+            auto target = m_activeCamera->getShootTarget();
+            if (target && target->getShowcase())
+            {
+                target->getShowcase()->Render();
+            }
+        }
+        //for (auto& root : m_roots)
+        //    if (root) root->onRender();
     }
 
     std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent)
     {
-        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent.get());
+        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent ? parent.get() : nullptr);
         if(parent != nullptr) parent->addChild(sceneObject);
-        sceneObject->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+        auto transform = sceneObject->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+        sceneObject->setTransform(transform);
+
+        if (parent == nullptr)
+        {
+            // This is a root object, setup default environment and camera
+            auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
+            envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
+            envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+
+            auto camObj = createObject("Default Camera", sceneObject);
+            camObj->getTransform()->setPosition(Vec3(0.f, 5.f, 20.f));
+            auto camComp = camObj->addComponent<CameraComponent>("default_camera");
+            camComp->lockOnTarget(false);
+            camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+            camComp->setShootTarget(sceneObject.get());
+            setActiveCamera(camComp.get());
+            m_roots.push_back(sceneObject);
+        }
+        return sceneObject;
+    }
+
+    std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent, const Vec3& pos, const Vec2& size)
+    {
+        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent ? parent.get() : nullptr, true);
+        if (parent != nullptr) parent->addChild(sceneObject);
+        auto transform = sceneObject->addComponent<RectTransform>(pos, size);
+        sceneObject->setTransform(transform);
+
+        if (parent == nullptr)
+        {
+            // Canvas, pivot at top-left
+            transform->setPivot(Vec2(0.f, 0.f));
+
+            // This is a GUI root object, setup default environment, canvas and camera
+            auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
+            envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
+            envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+
+            auto canvas = sceneObject->addComponent<Canvas>();
+            canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW()));
+
+            auto camObj = createGUIObject("GUI Camera", sceneObject);
+            camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 20.f));
+            auto camComp = camObj->addComponent<CameraComponent>("default_2d_camera");
+            camComp->lockOnTarget(false);
+            camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+            camComp->setOrthoProjection(true);
+            camComp->setWidthBase(false);
+            camComp->setShootTarget(sceneObject.get());
+            m_roots.push_back(sceneObject);
+        }
         return sceneObject;
     }
 
@@ -98,13 +161,18 @@ namespace ige::scene
     {
         if(!obj) return false;
 
-        if(!m_root || m_root == obj) 
+        auto found = std::find(m_roots.begin(), m_roots.end(), obj);
+        if (found != m_roots.end())
         {
-            m_root = nullptr;
+            if (m_activeCamera && m_activeCamera->getOwner()->getRoot() == (*found).get())
+                setActiveCamera(nullptr);
+            m_roots.erase(found);
             return true;
         }
-        
-        return m_root->removeChild(obj);
+        for (auto& root : m_roots)
+            if (root && root->removeChild(obj))
+                return true;
+        return false;
     }
 
     //! Remove scene object by its id
@@ -112,84 +180,86 @@ namespace ige::scene
     {
         return removeObject(findObjectById(id));
     }
-    
-    std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id) const
+
+    std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id)
     {
-        if (m_root == nullptr) return nullptr;
-        return m_root->findObjectById(id);
+        for (auto root : m_roots)
+        {
+            if (root)
+            {
+                if (root->getId() == id)
+                    return root;
+                auto obj = root->findObjectById(id);
+                if (obj) return obj;
+            }
+        }
+        return nullptr;
     }
 
-    std::shared_ptr<SceneObject> Scene::findObjectByName(std::string name) const
+    std::shared_ptr<SceneObject> Scene::findObjectByName(std::string name)
     {
-        if (m_root == nullptr) return nullptr;
-        return m_root->findObjectByName(name);
+        for (auto root : m_roots)
+        {
+            if (root)
+            {
+                if (root->getName() == name)
+                    return root;
+                auto obj = root->findObjectByName(name);
+                if (obj) return obj;
+            }
+        }
+        return nullptr;
     }
 
     //! Component added event
-    void Scene::onComponentAdded(SceneObject& obj, std::shared_ptr<Component> component)
+    void Scene::onComponentAdded(SceneObject& obj, const std::shared_ptr<Component>& component)
     {
-        if (component->getName() == "FigureComponent")
+        if (component->getName() == "CameraComponent")
         {
-            auto figureComponent = std::dynamic_pointer_cast<FigureComponent>(component);
-            auto figure = figureComponent->getFigure();
-            if(figure) m_showcase->Add(figure);
-
-            figureComponent->getOnFigureCreatedEvent().addListener([this](auto figure) {
-                if (figure) m_showcase->Add(figure);
-            });
-
-            figureComponent->getOnFigureDestroyedEvent().addListener([this](auto figure) {
-                if (figure) m_showcase->Remove(figure);
-            });
-        }
-        else if (component->getName() == "SpriteComponent")
-        {
-            auto eFigComp = std::dynamic_pointer_cast<SpriteComponent>(component);
-            auto figure = eFigComp->getFigure();
-            if (figure) m_showcase->Add(figure);
-
-            eFigComp->getOnFigureCreatedEvent().addListener([this](auto figure) {
-                if (figure) m_showcase->Add(figure);
-            });
-
-            eFigComp->getOnFigureDestroyedEvent().addListener([this](auto figure) {
-                if (figure) m_showcase->Remove(figure);
-            });
-        }
-        else if (component->getName() == "EnvironmentComponent")
-        {
-            auto envComp = std::dynamic_pointer_cast<EnvironmentComponent>(component);
-            auto env = envComp->getEnvironment();
-            if (env) m_showcase->Add(env);
+            m_cameras.push_back(std::dynamic_pointer_cast<CameraComponent>(component));
         }
     }
 
     //! Component removed event
-    void Scene::onComponentRemoved(SceneObject& obj, std::shared_ptr<Component> component)
+    void Scene::onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component)
     {
-        if (component->getName() == "FigureComponent")
+        if (component->getName() == "CameraComponent")
         {
-            auto figComp = std::dynamic_pointer_cast<FigureComponent>(component);
-            auto figure = figComp->getFigure();
-            if (figure) m_showcase->Remove(figure);
+            auto found = std::find_if(m_cameras.begin(), m_cameras.end(), [&](const auto& cam) {
+                auto cameraComponent = std::dynamic_pointer_cast<CameraComponent>(component);
+                return strcmp(cam->getCamera()->ResourceName(), cameraComponent->getCamera()->ResourceName()) == 0;
+            });
 
-            figComp->getOnFigureDestroyedEvent().removeAllListeners();
-            figComp->getOnFigureDestroyedEvent().removeAllListeners();
+            if (found != m_cameras.end())
+            {
+                auto cameraComponent = *found;
+                if(cameraComponent.get() == getActiveCamera()) 
+                    setActiveCamera(nullptr);
+                m_cameras.erase(found);
+            }
         }
-        else if (component->getName() == "SpriteComponent")
-        {
-            auto eFigComp = std::dynamic_pointer_cast<SpriteComponent>(component);
-            auto figure = eFigComp->getFigure();
-            if (figure) m_showcase->Remove(figure);
+    }
 
-            eFigComp->getOnFigureDestroyedEvent().removeAllListeners();
-            eFigComp->getOnFigureDestroyedEvent().removeAllListeners();
-        }
-        else if (component->getName() == "EnvironmentComponent")
+    void Scene::onSceneObjectSelected(SceneObject& sceneObject)
+    {
+        for (const auto& cam : m_cameras)
         {
-            auto envComp = std::dynamic_pointer_cast<EnvironmentComponent>(component);
-            auto env = envComp->getEnvironment();
-            if (env) m_showcase->Remove(env);
+            if (cam && cam->getShootTarget() == sceneObject.getRoot())
+            {
+                setActiveCamera(cam.get());
+                break;
+            }
+        }
+    }
+
+    //! Set active camera
+    void Scene::setActiveCamera(CameraComponent* camera)
+    {
+        if (m_activeCamera != camera)
+        {
+            // Invoke callback
+            getOnActiveCameraChangedEvent().invoke(camera);
+            m_activeCamera = camera;
         }
     }
 
@@ -201,19 +271,37 @@ namespace ige::scene
             {"objId", m_nextObjectID}
         };
 
-        json jRoot;
-        m_root->to_json(jRoot);
-        j["root"] = jRoot;
+        auto jRoots = json::array();
+        for (const auto& root : m_roots)
+        {
+            if (root)
+            {
+                json jRoot;
+                root->to_json(jRoot);
+                jRoots.push_back(jRoot);
+            }
+        }
+        j["roots"] = jRoots;
     }
 
-    //! Deserialize 
+    //! Deserialize
     void Scene::from_json(const json& j)
     {
         j.at("name").get_to(m_name);
-        auto jRoot = j.at("root");
-
-        m_root = std::make_shared<SceneObject>(jRoot.at("id"), jRoot.at("name"));
-        m_root->from_json(jRoot);
+        auto jRoots = j.at("roots");
+        for (auto it : jRoots)
+        {
+            auto root = std::make_shared<SceneObject>(it.at("id"), it.at("name"));
+            root->from_json(it);
+            m_roots.push_back(root);
+        }
         j.at("objId").get_to(m_nextObjectID);
+
+        for (auto& cam : m_cameras)
+        {
+            auto target = findObjectById(cam->getTargetId());
+            if (target)
+                cam->setShootTarget(target.get());
+        }
     }
 }

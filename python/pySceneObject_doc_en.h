@@ -157,8 +157,32 @@ PyDoc_STRVAR(SceneObject_active_doc,
     "Type: boolean.\n"
 );
 
+// selected
+PyDoc_STRVAR(SceneObject_selected_doc,
+    "The selected status of the scene object.\n"\
+    "Type: boolean.\n"
+);
+
 // parent
 PyDoc_STRVAR(SceneObject_parent_doc,
     "The parent object of the object.\n"\
     "Type: SceneObject.\n"
+);
+
+// root
+PyDoc_STRVAR(SceneObject_root_doc,
+    "The root object of the scene contains this object.\n"\
+    "Type: SceneObject.\n"
+);
+
+// transform
+PyDoc_STRVAR(SceneObject_transform_doc,
+	"The transform component of the object.\n"\
+	"Type: TransformComponent.\n"
+);
+
+// rectTransform
+PyDoc_STRVAR(SceneObject_rectTransform_doc,
+	"The transform component as RectTransform for UI elements.\n"\
+	"Type: RectTransform.\n"
 );

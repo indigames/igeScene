@@ -13,7 +13,7 @@ namespace ige::scene
     struct PyObject_FigureComponent
     {
         PyObject_Component super;
-        std::shared_ptr<FigureComponent> component;
+        FigureComponent* component;
     };
 
     // Type declaration

@@ -1,43 +1,39 @@
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
+#include "components/SpriteComponent.h"
+#include "components/gui/UIImage.h"
+#include "components/gui/UIText.h"
 #include "scene/SceneObject.h"
 #include "utils/RayOBBChecker.h"
 
 namespace ige::scene {
-    TransformComponent::TransformComponent(std::shared_ptr<SceneObject> owner, const Vec3& pos, const Quat& rot, const Vec3& scale)
-        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale), m_parent(nullptr)
+    TransformComponent::TransformComponent(const std::shared_ptr<SceneObject>& owner, const Vec3& pos, const Quat& rot, const Vec3& scale)
+        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale)
     {
         m_bLocalDirty = true;
 
-        if(owner && owner->getParent())
-        {
-            setParent(owner->getParent()->getComponent<TransformComponent>().get());
+        m_worldPosition = pos;
+        m_worldRotation = rot;
+        m_worldScale = scale;
+
+        if (getOwner()->getParent()) {
+            m_parent = getOwner()->getParent()->getTransform().get();
+            if (m_parent)
+                m_parent->addObserver(this);
         }
     }
 
-    TransformComponent::~TransformComponent() 
+    TransformComponent::~TransformComponent()
     {
-        removeParent();
+        if(hasParent()) getParent()->removeObserver(this);
+        m_parent = nullptr;
         notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
         m_observers.clear();
     }
 
-    void TransformComponent::setParent(TransformComponent* parent)
+    TransformComponent* TransformComponent::getParent() const
     {
-        removeParent();
-        m_parent = parent;
-        if(hasParent()) getParent()->addObserver(this);
-        m_bWorldDirty = true;
-    }
-
-    void TransformComponent::removeParent()
-    {
-        if(hasParent())
-        {
-            if (hasParent()) getParent()->removeObserver(this);
-            m_parent = nullptr;
-            m_bWorldDirty = true;
-        }
+        return m_parent;
     }
 
     void TransformComponent::onUpdate(float dt)
@@ -56,29 +52,62 @@ namespace ige::scene {
 
         if(RayOBBChecker::isChecking())
         {
-            auto figureComp = getOwner()->getComponent<FigureComponent>();
+            // ignore root node
+            if (getOwner()->getParent() == nullptr)
+                return;
+
+            bool intersected = false;
+            float distance;
+
+            auto owner = getOwner();
+            auto figureComp = owner->getComponent<FigureComponent>();
             if (figureComp)
             {
                 auto figure = figureComp->getFigure();
                 if (figure)
                 {
-                    float distance;
                     Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
-                    figure->CalcAABBox(0, aabbMin.P(), aabbMax.P(), 0);
-                    bool intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
-                    getOwner()->setSelected(intersected);
-
-                    if (intersected)
-                    {
-                        // Scene object found, no more checking
-                        RayOBBChecker::setChecking(false);
-                    }
+                    figure->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
+                    intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
                 }
             }
             else
             {
-                // bool intersected = RayOBBChecker::checkIntersect({ -1.0f, -1.0f, -1.0f }, { 1.0f,  1.0f,  1.0f }, m_worldMatrix, distance);
-                // getOwner()->setSelected(intersected);
+                EditableFigure* figure = nullptr;
+                auto spriteComp = owner->getComponent<SpriteComponent>();
+                if (spriteComp)
+                {
+                    figure = spriteComp->getFigure();
+                    if (figure)
+                    {
+                        Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
+                        figure->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                        intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
+                    }
+                }
+                else
+                {
+                    auto uiText = owner->getComponent<UIText>();
+                    if (uiText)
+                    {
+                        figure = uiText->getFigure();
+                        if (figure)
+                        {
+                            Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
+                            figure->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                            intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
+                        }
+                    }
+                }
+            }
+
+            // Update selected info
+            owner->setSelected(intersected);
+
+            // Scene object found, no more checking
+            if (intersected)
+            {
+                RayOBBChecker::setChecking(false);
             }
         }
     }
@@ -102,9 +131,9 @@ namespace ige::scene {
     {
         if(m_localPosition != pos)
         {
-            m_localPosition = Vec3(pos);
+            m_localPosition = pos;
             m_bLocalDirty = true;
-        }        
+        }
     }
 
     const Vec3& TransformComponent::getPosition() const
@@ -116,7 +145,7 @@ namespace ige::scene {
     {
         if (m_worldPosition != pos)
         {
-            m_worldPosition = Vec3(pos);
+            m_worldPosition = pos;
             updateWorldToLocal();
         }
     }
@@ -130,9 +159,9 @@ namespace ige::scene {
     {
         if(m_localRotation != rot)
         {
-            m_localRotation = Quat(rot);
+            m_localRotation = rot;
             m_bLocalDirty = true;
-        }        
+        }
     }
 
     const Quat& TransformComponent::getRotation() const
@@ -144,7 +173,7 @@ namespace ige::scene {
     {
         if (m_worldRotation != rot)
         {
-            m_worldRotation = Quat(rot);
+            m_worldRotation = rot;
             updateWorldToLocal();
         }
     }
@@ -156,11 +185,11 @@ namespace ige::scene {
 
     void TransformComponent::setScale(const Vec3& scale)
     {
-        if(m_localScale != scale)
+        if (m_localScale != scale)
         {
-            m_localScale = Vec3(scale);
+            m_localScale = scale;
             m_bLocalDirty = true;
-        }     
+        }
     }
 
     const Vec3& TransformComponent::getScale() const
@@ -172,7 +201,7 @@ namespace ige::scene {
     {
         if (m_worldScale != scale)
         {
-            m_worldScale = Vec3(scale);
+            m_worldScale = scale;
             updateWorldToLocal();
         }
     }
@@ -233,14 +262,14 @@ namespace ige::scene {
     void TransformComponent::updateWorldMatrix()
     {
         // Update world matrix
-        m_worldMatrix = hasParent() ? getParent()->getWorldMatrix() * m_localMatrix : m_localMatrix;
+        m_worldMatrix = (hasParent() && getParent()->getName() == "TransformComponent") ? getParent()->getWorldMatrix() * m_localMatrix : m_localMatrix;
 
         // Update world position
         m_worldPosition.X(m_worldMatrix[3][0]);
         m_worldPosition.Y(m_worldMatrix[3][1]);
         m_worldPosition.Z(m_worldMatrix[3][2]);
 
-        Vec3 columns[3] = 
+        Vec3 columns[3] =
         {
             { m_worldMatrix[0][0], m_worldMatrix[0][1], m_worldMatrix[0][2]},
             { m_worldMatrix[1][0], m_worldMatrix[1][1], m_worldMatrix[1][2]},
@@ -339,7 +368,7 @@ namespace ige::scene {
 
     void TransformComponent::notifyObservers(const ETransformMessage &message)
     {
-        for( auto observer: m_observers) 
+        for( auto observer: m_observers)
         {
             observer->onNotified(message);
         }
@@ -358,8 +387,6 @@ namespace ige::scene {
             m_localRotation = m_worldRotation;
             m_localScale = m_worldScale;
             m_bLocalDirty = true;
-
-            m_parent = nullptr;
             m_bWorldDirty = true;
             break;
         }
@@ -381,12 +408,6 @@ namespace ige::scene {
     //! Deserialize
     void TransformComponent::from_json(const json& j)
     {
-        if (hasOwner())
-        {
-            if(getOwner()->hasParent())
-                setParent(getOwner()->getParent()->getComponent<TransformComponent>().get());
-        }
-
         setPosition(j.at("pos"));
         setRotation(j.at("rot"));
         setScale(j.at("scale"));

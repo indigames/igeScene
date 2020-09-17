@@ -38,6 +38,10 @@ namespace ige::scene
     {
         m_currScene = nullptr;
 
+        for (auto& scene : m_scenes)
+            scene = nullptr;
+        m_scenes.clear();
+
         // Destroy python runtime
         Py_Finalize();
     }
@@ -89,53 +93,40 @@ namespace ige::scene
         if (m_currScene) m_currScene->render();
     }
 
-    std::shared_ptr<Scene> SceneManager::createEmptyScene()
+    std::shared_ptr<Scene> SceneManager::createScene(const std::string& name)
     {
-        auto scene = std::make_shared<Scene>("EmptyScene");
+        auto scene = std::make_shared<Scene>(name);
         scene->initialize();
-
-        //auto tree = scene->createObject("tree", scene->getRoot());
-        //tree->getComponent<TransformComponent>()->setPosition(Vec3(-5.f, 0.f, -10.f));
-        //tree->addComponent<FigureComponent>("Trees_Object");
-
-        //auto tree2 = scene->createObject("tree2", tree);
-        //tree2->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
-        //tree2->addComponent<FigureComponent>("Trees_Object");
-
-        //auto tree3 = scene->createObject("tree3", tree2);
-        //tree3->getComponent<TransformComponent>()->setPosition(Vec3(8.f, 0.f, -10.f));
-        //tree3->addComponent<FigureComponent>("Trees_Object");
-
-    /// Just to test performance
-         //for (int i = 0; i < 10000; i++)
-         //{
-         //    auto newTree = scene->createObject(std::string("tree") + std::to_string(i), tree2);
-         //    newTree->getComponent<TransformComponent>()->setPosition(Vec3(-2.f, 0.f, -10.f));
-         //    newTree->addComponent<FigureComponent>("Trees_Object");
-         //}
-    ///
-        setCurrentScene(scene);
+        m_scenes.push_back(scene);
         return scene;
     }
 
     void SceneManager::setCurrentScene(const std::shared_ptr<Scene>& scene)
     {
-        if (m_currScene != scene && m_currScene)
+        if (m_currScene == scene) return;
+
+        auto it = std::find(m_scenes.begin(), m_scenes.end(), scene);
+        if (it != m_scenes.end())
         {
-            m_currScene->clear();
-            m_currScene = nullptr;
+            m_currScene = scene;
         }
-        m_currScene = scene;
+    }
+
+    void SceneManager::setCurrentScene(const std::string& name)
+    {
+        auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](const auto& itr)
+        {
+            return itr->getName() == name;
+        });
+
+        if (found != m_scenes.end())
+        {
+            m_currScene = *found;
+        }
     }
 
     std::shared_ptr<Scene> SceneManager::loadScene(const std::string& path)
     {
-        if (m_currScene)
-        {
-            m_currScene->clear();
-            m_currScene = nullptr;
-        }
-
         json jScene;
         std::ifstream file(path);
         file >> jScene;
@@ -143,7 +134,7 @@ namespace ige::scene
 
         auto scene = std::make_shared<Scene>(jScene.at("name"));
         scene->from_json(jScene);
-
+        m_scenes.push_back(scene);
         setCurrentScene(scene);
         return scene;
     }
@@ -169,4 +160,31 @@ namespace ige::scene
         return false;
     }
 
+    void SceneManager::unloadScene(const std::shared_ptr<Scene>& scene)
+    {
+        if (m_currScene == scene)
+            m_currScene = nullptr;
+
+        auto it = std::find(m_scenes.begin(), m_scenes.end(), scene);
+        if (it != m_scenes.end())
+        {
+            m_scenes.erase(it);
+        }
+    }
+
+    void SceneManager::unloadScene(const std::string& name)
+    {
+        if (m_currScene->getName() == name)
+            m_currScene = nullptr;
+
+        auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](const auto& itr)
+        {
+            return itr->getName() == name;
+        });
+
+        if (found != m_scenes.end())
+        {
+            m_scenes.erase(found);
+        }
+    }
 }

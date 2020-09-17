@@ -12,7 +12,7 @@ namespace ige::scene
     struct PyObject_TransformComponent
     {
         PyObject_Component super;
-        std::shared_ptr<TransformComponent> component;
+        TransformComponent* component;
     };
 
     // Type declaration

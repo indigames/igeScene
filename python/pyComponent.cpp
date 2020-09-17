@@ -4,6 +4,9 @@
 #include "python/pySceneObject.h"
 
 #include "components/Component.h"
+#include "scene/Scene.h"
+#include "scene/SceneObject.h"
+#include "scene/SceneManager.h"
 
 namespace ige::scene
 {

@@ -5,24 +5,27 @@
 namespace ige::scene
 {
     //! Constructor
-    EnvironmentComponent::EnvironmentComponent(std::shared_ptr<SceneObject> owner, const std::string& name)
+    EnvironmentComponent::EnvironmentComponent(const std::shared_ptr<SceneObject>& owner, const std::string& name)
         : Component(owner), m_name(name)
     {
         m_environment = ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), nullptr);
         m_environment->WaitBuild();
+
+        getOwner()->getRoot()->getResourceAddedEvent().invoke(m_environment);
     }
 
     //! Destructor
-    EnvironmentComponent::~EnvironmentComponent() 
+    EnvironmentComponent::~EnvironmentComponent()
     {
         if (m_environment)
         {
+            if(hasOwner()) getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_environment);
             m_environment->DecReference();
             m_environment = nullptr;
         }
         ResourceManager::Instance().DeleteDaemon();
     }
-    
+
     //! Update
     void EnvironmentComponent::onUpdate(float dt)
     {

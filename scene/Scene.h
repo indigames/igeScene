@@ -6,13 +6,15 @@
 
 #include <utils/PyxieHeaders.h>
 #include "components/Component.h"
+#include "components/CameraComponent.h"
+#include "event/Event.h"
 
 namespace ige::scene
 {
     class SceneObject;
 
     /**
-     * Class Scene: Manage scene objects hierarchy 
+     * Class Scene: Manage scene objects hierarchy
      */
     class Scene
     {
@@ -50,47 +52,71 @@ namespace ige::scene
         //! Create scene object
         virtual std::shared_ptr<SceneObject> createObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
 
+        //! Create GUI object
+        virtual std::shared_ptr<SceneObject> createGUIObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr, const Vec3& pos = Vec3(), const Vec2& size = {64, 64});
+
         //! Remove scene object
         virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);
-        
+
         //! Remove scene object by its name
         virtual bool removeObjectById(uint64_t id);
 
         //! Find object in hierarchy by it's id
-        virtual std::shared_ptr<SceneObject> findObjectById(uint64_t id) const;
+        virtual std::shared_ptr<SceneObject> findObjectById(uint64_t id);
 
         //! Find object in hierarchy by name
-        virtual std::shared_ptr<SceneObject> findObjectByName(std::string name) const;
+        virtual std::shared_ptr<SceneObject> findObjectByName(std::string name);
 
         //! Serialize
         virtual void to_json(json& j) const;
 
-        //! Deserialize 
+        //! Deserialize
         virtual void from_json(const json& j);
 
         //! Component added event
-        void onComponentAdded(SceneObject& obj, std::shared_ptr<Component> component);
+        void onComponentAdded(SceneObject& obj, const std::shared_ptr<Component>& component);
 
         //! Component added event
-        void onComponentRemoved(SceneObject& obj, std::shared_ptr<Component> component);
+        void onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component);
 
-        //! Get root of scene nodes tree
-        std::shared_ptr<SceneObject>& getRoot() { return m_root; };
+        //! Object selected
+        void onSceneObjectSelected(SceneObject& sceneObject);
 
-        //! Get the showcase object
-        Showcase* getShowcase() { return m_showcase; }
+        //! Get roots of scene nodes tree
+        std::vector<std::shared_ptr<SceneObject>>& getRoots() { return m_roots; };
+
+        //! Get all camera
+        std::vector<std::shared_ptr<CameraComponent>>& getCameras() { return m_cameras; };
+
+        //! Set active camera
+        void setActiveCamera(CameraComponent* camera);
+
+        //! Get active camera
+        CameraComponent* getActiveCamera() { return m_activeCamera; }
+
+        //! Active camera changed event
+        Event<CameraComponent*>& getOnActiveCameraChangedEvent() { return m_onActiveCameraChanged; }
 
     protected:
         //! Scene root node
-        std::shared_ptr<SceneObject> m_root;
+        std::vector<std::shared_ptr<SceneObject>> m_roots;
 
-        //! Scene showcase
-        Showcase* m_showcase;
+        //! Cache all camera components
+        std::vector<std::shared_ptr<CameraComponent>> m_cameras;
+        CameraComponent* m_activeCamera = nullptr;
 
         //! Object ID counter
         uint64_t m_nextObjectID = 0;
 
         //! Scene name
         std::string m_name;
+
+        //! Active camera changed events
+        Event<CameraComponent*> m_onActiveCameraChanged;
+
+        //! Cached event id for removing
+        uint64_t m_componentAddedEventId;
+        uint64_t m_componentRemovedEventId;
+        uint64_t m_objectSelectedEventId;
     };
 }

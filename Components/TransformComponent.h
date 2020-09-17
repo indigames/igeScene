@@ -21,7 +21,7 @@ namespace ige::scene {
     {
     public:
         //! Constructor
-        TransformComponent(std::shared_ptr<SceneObject> owner, const Vec3& pos = Vec3(), const Quat& rot = Quat(), const Vec3& scale = Vec3(1.f, 1.f, 1.f));
+        TransformComponent(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Quat& rot = Quat(), const Vec3& scale = Vec3(1.f, 1.f, 1.f));
 
         //! Destructor
         virtual ~TransformComponent();
@@ -30,16 +30,10 @@ namespace ige::scene {
         virtual std::string getName() const override { return "TransformComponent"; }
 
         //! Get parent transform component
-        TransformComponent* getParent() const { return m_parent; }
+        TransformComponent* getParent() const;
 
         //! Check if has parent transform component
         bool hasParent() const { return  getParent() != nullptr; }
-
-        //! Assign parent transform component
-        void setParent(TransformComponent* parent);
-
-        //! Remove parent transform component
-        void removeParent();
 
         //! Translate
         virtual void translate(const Vec3& trans);
@@ -154,11 +148,11 @@ namespace ige::scene {
         Vec3 m_worldScale;
         Mat4 m_worldMatrix;
 
-        //! Parent tranformation
-        TransformComponent* m_parent;
-
         //! Transform observers
         std::set<TransformComponent*> m_observers;
+
+        //! Cached parent transform
+        TransformComponent* m_parent = nullptr;
 
         //! Dirty flag
         bool m_bLocalDirty = false;
