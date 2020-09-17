@@ -16,7 +16,7 @@ namespace ige::scene
     // Type declaration
     extern PyTypeObject PyTypeObject_SceneManager;
 
-    // Dealloc    
+    // Dealloc
     void  SceneManager_dealloc(PyObject_SceneManager *self);
 
     // String represent
@@ -25,11 +25,17 @@ namespace ige::scene
     // Get instance
     PyObject* SceneManager_getInstance();
 
+    // Create scene
+    PyObject* SceneManager_createScene(PyObject_SceneManager* self, PyObject* value);
+
     // Load scene
     PyObject* SceneManager_loadScene(PyObject_SceneManager* self, PyObject* value);
 
     // Unload scene
     PyObject* SceneManager_unloadScene(PyObject_SceneManager* self, PyObject* value);
+
+    // Save scene
+    PyObject* SceneManager_saveScene(PyObject_SceneManager* self, PyObject* value);
 
     // Get current scene
     PyObject* SceneManager_getCurrentScene(PyObject_SceneManager* self);

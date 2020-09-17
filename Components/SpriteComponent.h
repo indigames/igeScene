@@ -45,16 +45,8 @@ namespace ige::scene
         void setSize(const Vec2& size);
         const Vec2& getSize() const { return m_sprite->getSize(); }
 
-        //! Events
-        Event<EditableFigure*>& getOnFigureCreatedEvent() { return m_onFigureCreatedEvent; }
-        Event<EditableFigure*>& getOnFigureDestroyedEvent() { return m_onFigureDestroyedEvent; }
-
     protected:
         //! Sprite
         std::shared_ptr<Sprite> m_sprite;
-
-        //! Events
-        Event<EditableFigure*> m_onFigureCreatedEvent;
-        Event<EditableFigure*> m_onFigureDestroyedEvent;
     };
 }

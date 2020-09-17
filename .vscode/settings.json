@@ -73,6 +73,7 @@
         "numeric": "cpp",
         "valarray": "cpp",
         "filesystem": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "condition_variable": "cpp"
     }
 }

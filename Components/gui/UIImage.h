@@ -32,6 +32,5 @@ namespace ige::scene
 
         //! Deserialize
         virtual void from_json(const json& j) override;
-
     };
 }

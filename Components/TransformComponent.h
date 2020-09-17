@@ -151,6 +151,9 @@ namespace ige::scene {
         //! Transform observers
         std::set<TransformComponent*> m_observers;
 
+        //! Cached parent transform
+        TransformComponent* m_parent = nullptr;
+
         //! Dirty flag
         bool m_bLocalDirty = false;
         bool m_bWorldDirty = false;

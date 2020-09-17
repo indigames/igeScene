@@ -9,7 +9,7 @@ namespace ige::scene
     struct PyObject_SceneObject
     {
         PyObject_HEAD
-        std::shared_ptr<SceneObject> sceneObject;
+        SceneObject* sceneObject;
     };
 
     // Type declaration
@@ -36,11 +36,26 @@ namespace ige::scene
     // Set active
     int SceneObject_setActive(PyObject_SceneObject* self, PyObject* value);
 
+    // Get selected
+    PyObject* SceneObject_getSelected(PyObject_SceneObject* self);
+
+    // Set selected
+    int SceneObject_setSelected(PyObject_SceneObject* self, PyObject* value);
+
     // Get parent
     PyObject* SceneObject_getParent(PyObject_SceneObject* self);
 
     // Set parent
     int SceneObject_setParent(PyObject_SceneObject* self, PyObject* value);
+
+    // Get root
+    PyObject* SceneObject_getRoot(PyObject_SceneObject* self);
+
+    // Get transform
+    PyObject* SceneObject_getTransform(PyObject_SceneObject* self);
+
+    // Get rect transform
+    PyObject* SceneObject_getRectTransform(PyObject_SceneObject* self);
 
     // Add child
     PyObject* SceneObject_addChild(PyObject_SceneObject* self, PyObject* value);

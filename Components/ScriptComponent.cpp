@@ -1,18 +1,28 @@
 #include <Python.h>
 
 #include "components/ScriptComponent.h"
+#include "python/pySceneObject.h"
+#include "python/pyScript.h"
+
+#include "scene/SceneManager.h"
+#include "scene/Scene.h"
+#include "scene/SceneObject.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
+
+#include "utils/PyxieHeaders.h"
+extern std::shared_ptr<Application> gApp;
 
 namespace ige::scene
 {
     //! Constructor
     ScriptComponent::ScriptComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path)
-        : Component(owner), m_pModule(nullptr), m_path(path)
+        : Component(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
     {
         if (!m_path.empty())
-            m_bPathDirty = true;
+            loadPyModule();
+        m_bPathDirty = false;
     }
 
     //! Destructor
@@ -27,169 +37,216 @@ namespace ige::scene
 
         if(!m_path.empty())
         {
-            auto mod =  PyUnicode_FromString(m_path.c_str());
-            if (mod != nullptr) {
-                m_pModule = PyImport_Import(mod);
-                Py_DECREF(mod);
+            // Load the module from python source file
+            m_pyModule = PyImport_ImportModule(m_path.c_str());
+
+            // Reload from source
+            if (m_pyModule)
+            {
+                auto module = PyImport_ReloadModule(m_pyModule);
+                Py_DECREF(m_pyModule);
+                m_pyModule = module;
             }
+
+            // Return if the module was not loaded
+            if (m_pyModule == nullptr)
+            {
+                PyErr_Clear();
+                return;
+            }
+
+            // fetch the module's dictionary
+            auto dict = PyModule_GetDict(m_pyModule);
+            if (dict == nullptr)
+            {
+                PyErr_Clear();
+                return;
+            }
+
+            // Builds the name of a callable class
+            PyObject* key = nullptr,  *value = nullptr, *pyClass = nullptr;
+            Py_ssize_t pos = 0;
+            while (PyDict_Next(dict, &pos, &key, &value))
+            {
+                if(PyObject_HasAttrString(value, "onStart") && PyObject_IsSubclass(value, (PyObject*)&PyTypeObject_Script))
+                {
+                    pyClass = value;
+                    break;
+                }
+            }
+
+            if (pyClass == nullptr) {
+                PyErr_Clear();
+                return;
+            }
+
+            // Creates an instance of the class
+            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            obj->sceneObject = SceneManager::getInstance()->getCurrentScene()->findObjectById(getOwner()->getId()).get();
+            auto arglist = Py_BuildValue("(O)", obj);
+            PyObject* pyConstruct = PyInstanceMethod_New(pyClass);
+            m_pyInstance = PyObject_CallObject(pyConstruct, arglist);
+            Py_DECREF(arglist);
+            Py_DECREF(pyConstruct);
+
+            PyErr_Clear();
+
+            // Initialized, call invoke onAwake()
+            onAwake();
+
+            // Enable call onStart() next frame
+            m_bOnStartCalled = false;
         }
     }
 
     //! Unload PyModule
     void ScriptComponent::unloadPyModule()
     {
-        if(m_pModule != nullptr)
+        if(m_pyInstance != nullptr)
         {
-            Py_DECREF(m_pModule);
-            m_pModule = nullptr;
+            Py_DECREF(m_pyInstance);
+            m_pyInstance = nullptr;
         }
 
-        // Clear error states
+        if(m_pyModule != nullptr)
+        {
+            Py_DECREF(m_pyModule);
+            m_pyModule = nullptr;
+        }
+
         PyErr_Clear();
     }
 
     //! Awake
     void ScriptComponent::onAwake()
     {
-        if (m_pModule)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onAwake"))
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Awake");
-            if(func)
-            {
-                auto ret = PyObject_CallObject(func, NULL);
-                Py_XDECREF(ret);
-                Py_DECREF(func);
-            }
-        }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onAwake", nullptr);
+            Py_XDECREF(ret);
+        }        
     }
 
     //! Start
     void ScriptComponent::onStart()
     {
-        if (m_pModule)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onStart"))
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Start");
-            if(func)
-            {
-                auto ret = PyObject_CallObject(func, NULL);
-                Py_XDECREF(ret);
-                Py_DECREF(func);
-            }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onStart", nullptr);
+            Py_XDECREF(ret);
         }
     }
 
     //! Enable
     void ScriptComponent::onEnable()
     {
-        if (m_pModule)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onEnable"))
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Enable");
-            if(func)
-            {
-                auto ret = PyObject_CallObject(func, NULL);
-                Py_XDECREF(ret);
-                Py_DECREF(func);
-            }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onEnable", nullptr);
+            Py_XDECREF(ret);
         }
     }
 
     //! Disable
     void ScriptComponent::onDisable()
     {
-        if (m_pModule)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onEnable"))
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Disable");
-            if(func)
-            {
-                auto ret = PyObject_CallObject(func, NULL);
-                Py_XDECREF(ret);
-                Py_DECREF(func);
-            }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onDisable", nullptr);
+            Py_XDECREF(ret);
         }
     }
 
     //! Update functions
     void ScriptComponent::onUpdate(float dt)
     {
+        // Check reload script
         if (m_bPathDirty)
         {
             loadPyModule();
             m_bPathDirty = false;
         }
-
-        if (m_pModule)
+        
+        // Check call onStart()
+        if (!m_bOnStartCalled)
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Update");
-            if(func)
-            {
-                auto arglist = Py_BuildValue("(f)", dt);
-                auto ret = PyObject_CallObject(func, arglist);
-                Py_DECREF(arglist);
-                Py_XDECREF(ret);
-                Py_DECREF(func);
-            }
+            onStart();
+            m_bOnStartCalled = true;
+        }
+
+        // Check call onUpdate()
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onUpdate"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onUpdate", "(f)", dt);
+            Py_XDECREF(ret);
         }
     }
 
     void ScriptComponent::onFixedUpdate(float dt)
     {
-        if (m_pModule)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onFixedUpdate"))
         {
-            auto func = PyObject_GetAttrString(m_pModule, "FixedUpdate");
-            if(func)
-            {
-                auto arglist = Py_BuildValue("(f)", dt);
-                auto ret = PyObject_CallObject(func, arglist);
-                Py_DECREF(arglist);
-                Py_XDECREF(ret);
-                Py_DECREF(func);
-            }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onFixedUpdate", "f", dt);
+            Py_XDECREF(ret);
         }
     }
 
     void ScriptComponent::onLateUpdate(float dt)
     {
-        if (m_pModule)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onLateUpdate"))
         {
-            auto func = PyObject_GetAttrString(m_pModule, "LateUpdate");
-            if(func)
-            {
-                auto arglist = Py_BuildValue("(f)", dt);
-                auto ret = PyObject_CallObject(func, arglist);
-                Py_DECREF(arglist);
-                Py_XDECREF(ret);
-                Py_DECREF(func);
-            }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onLateUpdate", "f", dt);
+            Py_XDECREF(ret);
         }
     }
 
     //! Render
     void ScriptComponent::onRender()
     {
-        if (m_pModule)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onRender"))
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Render");
-            if(func)
-            {
-                auto ret = PyObject_CallObject(func, NULL);
-                Py_XDECREF(ret);
-                Py_DECREF(func);
-            }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onRender", nullptr);
+            Py_XDECREF(ret);
         }
     }
 
     //! Destroyed
     void ScriptComponent::onDestroy()
     {
-        if (m_pModule)
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onDestroy"))
         {
-            auto func = PyObject_GetAttrString(m_pModule, "Destroy");
-            if(func)
-            {
-                auto ret = PyObject_CallObject(func, NULL);
-                Py_XDECREF(ret);
-                Py_DECREF(func);
-            }
+            auto ret = PyObject_CallMethod(m_pyInstance, "onDestroy", nullptr);
+            Py_XDECREF(ret);
+        }
+    }
+
+    //! Click
+    void ScriptComponent::onClick()
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onClick"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onClick", nullptr);
+            Py_XDECREF(ret);
+        }
+    }
+
+    //! Suspend
+    void ScriptComponent::onSuspend()
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onSuspend"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onSuspend", nullptr);
+            Py_XDECREF(ret);
+        }
+    }
+
+    //! Resume
+    void ScriptComponent::onResume()
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onResume"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onResume", nullptr);
+            Py_XDECREF(ret);
         }
     }
 
@@ -212,7 +269,7 @@ namespace ige::scene
     {
         auto scriptName = fs::path(path).stem().string();
 
-        if (!scriptName.empty() && strcmp(m_path.c_str(), scriptName.c_str()) != 0)
+        if (strcmp(m_path.c_str(), scriptName.c_str()) != 0)
         {
             m_path = scriptName;
             m_bPathDirty = true;

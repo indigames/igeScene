@@ -16,13 +16,14 @@ namespace ige::scene
     {
         m_sprite = std::make_shared<Sprite>(path, size);
         if (m_sprite->getFigure())
-            getOnFigureCreatedEvent().invoke(m_sprite->getFigure());
+            getOwner()->getRoot()->getResourceAddedEvent().invoke(m_sprite->getFigure());
     }
 
     //! Destructor
     SpriteComponent::~SpriteComponent()
     {
-        getOnFigureDestroyedEvent().invoke(m_sprite->getFigure());
+        if (m_sprite->getFigure())
+            if (hasOwner()) getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_sprite->getFigure());
         m_sprite = nullptr;
     }
 
@@ -57,7 +58,7 @@ namespace ige::scene
         m_sprite->setPath(relPath);
         auto newFigure = m_sprite->getFigure();
         if (oldFigure == nullptr && newFigure)
-            getOnFigureCreatedEvent().invoke(newFigure);
+            getOwner()->getRoot()->getResourceAddedEvent().invoke(newFigure);
     }
 
     //! Set size

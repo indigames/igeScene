@@ -12,7 +12,7 @@ namespace ige::scene
     struct PyObject_EnvironmentComponent
     {
         PyObject_Component super;
-        std::shared_ptr<EnvironmentComponent> component;
+        EnvironmentComponent* component;
     };
 
     // Type declaration

@@ -14,7 +14,7 @@ namespace ige::scene
     class SceneObject;
 
     /**
-     * Class Scene: Manage scene objects hierarchy 
+     * Class Scene: Manage scene objects hierarchy
      */
     class Scene
     {
@@ -57,20 +57,20 @@ namespace ige::scene
 
         //! Remove scene object
         virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);
-        
+
         //! Remove scene object by its name
         virtual bool removeObjectById(uint64_t id);
 
         //! Find object in hierarchy by it's id
-        virtual std::shared_ptr<SceneObject> findObjectById(uint64_t id) const;
+        virtual std::shared_ptr<SceneObject> findObjectById(uint64_t id);
 
         //! Find object in hierarchy by name
-        virtual std::shared_ptr<SceneObject> findObjectByName(std::string name) const;
+        virtual std::shared_ptr<SceneObject> findObjectByName(std::string name);
 
         //! Serialize
         virtual void to_json(json& j) const;
 
-        //! Deserialize 
+        //! Deserialize
         virtual void from_json(const json& j);
 
         //! Component added event
@@ -82,8 +82,11 @@ namespace ige::scene
         //! Object selected
         void onSceneObjectSelected(SceneObject& sceneObject);
 
-        //! Get root of scene nodes tree
+        //! Get roots of scene nodes tree
         std::vector<std::shared_ptr<SceneObject>>& getRoots() { return m_roots; };
+
+        //! Get all camera
+        std::vector<std::shared_ptr<CameraComponent>>& getCameras() { return m_cameras; };
 
         //! Set active camera
         void setActiveCamera(CameraComponent* camera);
@@ -110,5 +113,10 @@ namespace ige::scene
 
         //! Active camera changed events
         Event<CameraComponent*> m_onActiveCameraChanged;
+
+        //! Cached event id for removing
+        uint64_t m_componentAddedEventId;
+        uint64_t m_componentRemovedEventId;
+        uint64_t m_objectSelectedEventId;
     };
 }

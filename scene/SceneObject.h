@@ -7,6 +7,7 @@
 #include "event/Event.h"
 #include "components/Component.h"
 #include "components/TransformComponent.h"
+#include "components/gui/RectTransform.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
@@ -32,7 +33,7 @@ namespace ige::scene
         inline const std::string& getName() const { return m_name; }
 
         //! Set Name
-        inline void setName(const std::string& name) 
+        inline void setName(const std::string& name)
         {
             if (m_name != name)
             {
@@ -71,6 +72,12 @@ namespace ige::scene
         //! Remove a component
         virtual bool removeComponent(const std::shared_ptr<Component>& component);
 
+        //! Add a component by raw pointer
+        virtual void addComponent(Component* component);
+
+        //! Remove a component by raw pointer
+        virtual bool removeComponent(Component* component);
+
         //! Remove all components
         virtual bool removeAllComponents();
 
@@ -88,15 +95,11 @@ namespace ige::scene
         template<typename T, typename ... Args>
         std::shared_ptr<T> addComponent(Args&&... args);
 
-        //! Component added event
-        void onComponentAdded(SceneObject& obj, const std::shared_ptr<Component>& component);
+        //! Resource added event
+        void onResourceAdded(Resource* resource);
 
-        //! Component added event
-        void onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component);
-
-        //! Remove component by type
-        template<typename T>
-        bool removeComponent();
+        //! Resource removed event
+        void onResourceRemoved(Resource* resource);
 
         //! Find object by id
         std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const;
@@ -108,26 +111,26 @@ namespace ige::scene
         virtual void onUpdate(float dt);
         virtual void onFixedUpdate(float dt);
         virtual void onLateUpdate(float dt);
-        
+
         //! Render function
         virtual void onRender();
 
-        //! Enable or disable the actor		
+        //! Enable or disable the actor
         void setActive(bool isActive);
 
         //! Check active
         bool isActive() const;
-        
+
         // Set selected
         void setSelected(bool select);
 
         //! Check selected
         bool isSelected() const;
-        
+
         //! Internal event
-        static Event<SceneObject&, const std::shared_ptr<Component>&>& getComponentAddedEvent() { return m_componentAddedEvent; }
-        static Event<SceneObject&, const std::shared_ptr<Component>&>& getComponentRemovedEvent() { return m_componentRemovedEvent; }
-        
+        Event<Resource*>& getResourceAddedEvent() { return m_resourceAddedEvent; }
+        Event<Resource*>& getResourceRemovedEvent() { return m_resourceRemovedEvent; }
+
         //! Public events: Created, Destroyed, Attached, Detached
         static Event<SceneObject&>& getCreatedEvent() { return s_createdEvent; }
         static Event<SceneObject&>& getDestroyedEvent() { return s_destroyedEvent; }
@@ -136,10 +139,14 @@ namespace ige::scene
         static Event<SceneObject&>& getNameChangedEvent() { return s_nameChangedEvent; }
         static Event<SceneObject&>& getSelectedEvent() { return s_selectedEvent; }
 
+        // Component related events
+        static Event<SceneObject&, const std::shared_ptr<Component>&>& getComponentAddedEvent() { return m_componentAddedEvent; }
+        static Event<SceneObject&, const std::shared_ptr<Component>&>& getComponentRemovedEvent() { return m_componentRemovedEvent; }
+
         //! Serialize
         void to_json(json& j);
 
-        //! Deserialize 
+        //! Deserialize
         void from_json(const json& j);
 
         //! Get showcase
@@ -150,6 +157,9 @@ namespace ige::scene
 
         //! Get transform component
         std::shared_ptr<TransformComponent>& getTransform() { return m_transform; }
+
+        //! Get RectRransform component (GUI only)
+        std::shared_ptr<RectTransform> getRectTransform() { return std::dynamic_pointer_cast<RectTransform>(m_transform); }
 
         //! Set transform component
         void setTransform(const std::shared_ptr<TransformComponent>& transform) { m_transform = transform; }
@@ -183,8 +193,8 @@ namespace ige::scene
         std::vector<std::shared_ptr<Component>> m_components;
 
         //! Internal events
-        static Event<SceneObject&, const std::shared_ptr<Component>&> m_componentAddedEvent;
-        static Event<SceneObject&, const std::shared_ptr<Component>&> m_componentRemovedEvent;
+        Event<Resource*> m_resourceAddedEvent;
+        Event<Resource*> m_resourceRemovedEvent;
 
         //! Public events
         static Event<SceneObject&> s_destroyedEvent;
@@ -193,6 +203,10 @@ namespace ige::scene
         static Event<SceneObject&> s_detachedEvent;
         static Event<SceneObject&> s_nameChangedEvent;
         static Event<SceneObject&> s_selectedEvent;
+
+        //! Component related event
+        static Event<SceneObject&, const std::shared_ptr<Component>&> m_componentAddedEvent;
+        static Event<SceneObject&, const std::shared_ptr<Component>&> m_componentRemovedEvent;
 
         //! Cache transform component
         std::shared_ptr<TransformComponent> m_transform = nullptr;
@@ -229,28 +243,6 @@ namespace ige::scene
         auto instance = std::make_shared<T>(shared_from_this(), args...);
         m_components.push_back(instance);
         m_componentAddedEvent.invoke(*this, instance);
-        onComponentAdded(*this, instance);
         return instance;
-    }
-
-    //! Remove component by type
-    template<typename T>
-    inline bool SceneObject::removeComponent()
-    {
-        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
-        std::shared_ptr<T> result(nullptr);
-        for (auto it = m_components.begin(); it != m_components.end(); ++it)
-        {
-            result = std::dynamic_pointer_cast<T>(*it);
-            if (result)
-            {
-                m_componentRemovedEvent.invoke(*this, result);
-                onComponentRemoved(*this, result);
-                m_components.erase(it);
-                return true;
-            }
-        }
-
-        return false;
     }
 }

@@ -2,11 +2,6 @@
 #include "components/gui/RectTransform.h"
 #include "scene/SceneObject.h"
 
-#include "utils/GraphicsHelper.h"
-
-#include <filesystem>
-namespace fs = std::filesystem;
-
 namespace ige::scene
 {
     //! Constructor

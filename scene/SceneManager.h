@@ -13,7 +13,7 @@ namespace ige::scene
     class Scene;
 
     /**
-     * Class SceneManager: Manage scene object hierarchy 
+     * Class SceneManager: Manage scene object hierarchy
      */
     class SceneManager: public Singleton<SceneManager>
     {
@@ -52,7 +52,10 @@ namespace ige::scene
         bool saveScene(const std::string& scenePath);
 
         //! Get current scene
-        std::shared_ptr<Scene>& getCurrentScene() { return m_currScene; }
+        const std::shared_ptr<Scene>& getCurrentScene() const { return m_currScene; }
+
+        //! Get scenes
+        const std::vector<std::shared_ptr<Scene>>& getScenes() const { return m_scenes; }
 
         //! Set current scene
         void setCurrentScene(const std::shared_ptr<Scene>& scene);

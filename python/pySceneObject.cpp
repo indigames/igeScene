@@ -9,6 +9,7 @@
 #include "python/pyFigureComponent.h"
 #include "python/pyEnvironmentComponent.h"
 #include "python/pySpriteComponent.h"
+#include "python/pyRectTransform.h"
 
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
@@ -17,9 +18,9 @@
 namespace ige::scene
 {
     // Deallocation
-    void  SceneObject_dealloc(PyObject_SceneObject *self)
+    void  SceneObject_dealloc(PyObject_SceneObject* self)
     {
-        if(self)
+        if (self)
         {
             self->sceneObject = nullptr;
             Py_TYPE(self)->tp_free(self);
@@ -27,7 +28,7 @@ namespace ige::scene
     }
 
     // String representation
-    PyObject* SceneObject_str(PyObject_SceneObject *self)
+    PyObject* SceneObject_str(PyObject_SceneObject* self)
     {
         return PyUnicode_FromString("C++ SceneObject object");
     }
@@ -66,20 +67,38 @@ namespace ige::scene
     {
         if (PyLong_Check(value))
         {
-			auto isActive = (uint32_t)PyLong_AsLong(value) != 0;
+            auto isActive = (uint32_t)PyLong_AsLong(value) != 0;
             self->sceneObject->setActive(isActive);
             return 0;
-		}
-		return -1;
+        }
+        return -1;
+    }
+
+    // Get selected
+    PyObject* SceneObject_getSelected(PyObject_SceneObject* self)
+    {
+        return PyBool_FromLong(self->sceneObject->isSelected());
+    }
+
+    // Set selected
+    int SceneObject_setSelected(PyObject_SceneObject* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto selected = (uint32_t)PyLong_AsLong(value) != 0;
+            self->sceneObject->setSelected(selected);
+            return 0;
+        }
+        return -1;
     }
 
     // Get parent
     PyObject* SceneObject_getParent(PyObject_SceneObject* self)
     {
-        if(self->sceneObject->hasParent())
+        if (self->sceneObject->hasParent())
         {
-            auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = SceneManager::getInstance()->getCurrentScene()->findObjectById(self->sceneObject->getParent()->getId());
+            auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            obj->sceneObject = self->sceneObject->getParent();
             return (PyObject*)obj;
         }
         Py_RETURN_NONE;
@@ -91,13 +110,39 @@ namespace ige::scene
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj))
         {
-            if(obj && obj->ob_type == &PyTypeObject_SceneObject) {
+            if (obj && obj->ob_type == &PyTypeObject_SceneObject) {
                 auto sceneObj = (PyObject_SceneObject*)obj;
-                self->sceneObject->setParent(sceneObj->sceneObject.get());
+                self->sceneObject->setParent(sceneObj->sceneObject);
                 return 0;
             }
         }
         return -1;
+    }
+
+    // Get root
+    PyObject* SceneObject_getRoot(PyObject_SceneObject* self)
+    {
+        auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+        obj->sceneObject = self->sceneObject->getRoot();
+        return (PyObject*)obj;
+    }
+
+    // Get transform
+    PyObject* SceneObject_getTransform(PyObject_SceneObject* self)
+    {
+        auto* obj = PyObject_New(PyObject_TransformComponent, &PyTypeObject_TransformComponent);
+        obj->component = self->sceneObject->getTransform().get();
+        obj->super.component = obj->component;
+        return (PyObject*)obj;
+    }
+
+    // Get rect transform
+    PyObject* SceneObject_getRectTransform(PyObject_SceneObject* self)
+    {
+        auto* obj = PyObject_New(PyObject_RectTransform, &PyTypeObject_RectTransform);
+        obj->component = (RectTransform*)(self->sceneObject->getTransform().get());
+        obj->super.component = obj->component;
+        return (PyObject*)obj;
     }
 
     // Add child
@@ -106,7 +151,7 @@ namespace ige::scene
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj))
         {
-            if(obj) 
+            if(obj)
             {
                 if(PyUnicode_Check(obj))
                 {
@@ -128,10 +173,10 @@ namespace ige::scene
                         Py_RETURN_TRUE;
                     }
                 }
-                else if(obj->ob_type == &PyTypeObject_SceneObject) 
+                else if(obj->ob_type == &PyTypeObject_SceneObject)
                 {
-                    auto sceneObj = (PyObject_SceneObject*)obj;
-                    self->sceneObject->addChild(sceneObj->sceneObject);
+                    auto sceneObj = SceneManager::getInstance()->getCurrentScene()->findObjectById(((PyObject_SceneObject*)obj)->sceneObject->getId());
+                    self->sceneObject->addChild(sceneObj);
                     Py_RETURN_TRUE;
                 }
             }
@@ -145,7 +190,7 @@ namespace ige::scene
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj))
         {
-            if(obj) 
+            if(obj)
             {
                 if(PyUnicode_Check(obj))
                 {
@@ -167,10 +212,10 @@ namespace ige::scene
                         Py_RETURN_TRUE;
                     }
                 }
-                else if(obj->ob_type == &PyTypeObject_SceneObject) 
+                else if(obj->ob_type == &PyTypeObject_SceneObject)
                 {
-                    auto sceneObj = (PyObject_SceneObject*)obj;
-                    self->sceneObject->removeChild(sceneObj->sceneObject);
+                    auto sceneObj = SceneManager::getInstance()->getCurrentScene()->findObjectById(((PyObject_SceneObject*)obj)->sceneObject->getId());
+                    self->sceneObject->removeChild(sceneObj);
                     Py_RETURN_TRUE;
                 }
             }
@@ -189,7 +234,7 @@ namespace ige::scene
             for(int i = 0; i < len; ++i)
             {
                 auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                obj->sceneObject = children[i];
+                obj->sceneObject = children[i].get();
                 PyTuple_SetItem(childrenTuple, i, (PyObject*)obj);
                 Py_XDECREF(obj);
             }
@@ -224,7 +269,7 @@ namespace ige::scene
                     if(comp)
                     {
                         auto *compObj = PyObject_New(PyObject_TransformComponent, &PyTypeObject_TransformComponent);
-                        compObj->component = comp;
+                        compObj->component = comp.get();
                         compObj->super.component = compObj->component;
                         return (PyObject*)compObj;
                     }
@@ -235,7 +280,7 @@ namespace ige::scene
                     if(comp)
                     {
                         auto *compObj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
-                        compObj->component = comp;
+                        compObj->component = comp.get();
                         compObj->super.component = compObj->component;
                         return (PyObject*)compObj;
                     }
@@ -246,7 +291,7 @@ namespace ige::scene
                     if(comp)
                     {
                         auto *compObj = PyObject_New(PyObject_EnvironmentComponent, &PyTypeObject_EnvironmentComponent);
-                        compObj->component = comp;
+                        compObj->component = comp.get();
                         compObj->super.component = compObj->component;
                         return (PyObject*)compObj;
                     }
@@ -257,7 +302,7 @@ namespace ige::scene
                     if(comp)
                     {
                         auto *compObj = PyObject_New(PyObject_FigureComponent, &PyTypeObject_FigureComponent);
-                        compObj->component = comp;
+                        compObj->component = comp.get();
                         compObj->super.component = compObj->component;
                         return (PyObject*)compObj;
                     }
@@ -268,7 +313,7 @@ namespace ige::scene
                     if(comp)
                     {
                         auto *compObj = PyObject_New(PyObject_SpriteComponent, &PyTypeObject_SpriteComponent);
-                        compObj->component = comp;
+                        compObj->component = comp.get();
                         compObj->super.component = compObj->component;
                         return (PyObject*)compObj;
                     }
@@ -285,7 +330,7 @@ namespace ige::scene
                 auto componentObj = (PyObject_Component*)obj;
                 self->sceneObject->addComponent(componentObj->component);
                 return obj;
-            }            
+            }
         }
         Py_RETURN_NONE;
     }
@@ -325,7 +370,7 @@ namespace ige::scene
                 {
                     self->sceneObject->removeComponent(comp);
                     Py_RETURN_TRUE;
-                }                
+                }
             }
             else if(obj->ob_type == &PyTypeObject_Component
                     || obj->ob_type == &PyTypeObject_TransformComponent
@@ -355,7 +400,7 @@ namespace ige::scene
                 if(comp)
                 {
                     auto *compObj = PyObject_New(PyObject_TransformComponent, &PyTypeObject_TransformComponent);
-                    compObj->component = comp;
+                    compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject*)compObj;
                 }
@@ -366,7 +411,7 @@ namespace ige::scene
                 if(comp)
                 {
                     auto *compObj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
-                    compObj->component = comp;
+                    compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject*)compObj;
                 }
@@ -377,7 +422,7 @@ namespace ige::scene
                 if(comp)
                 {
                     auto *compObj = PyObject_New(PyObject_EnvironmentComponent, &PyTypeObject_EnvironmentComponent);
-                    compObj->component = comp;
+                    compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject*)compObj;
                 }
@@ -388,7 +433,7 @@ namespace ige::scene
                 if(comp)
                 {
                     auto *compObj = PyObject_New(PyObject_FigureComponent, &PyTypeObject_FigureComponent);
-                    compObj->component = comp;
+                    compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject*)compObj;
                 }
@@ -399,7 +444,7 @@ namespace ige::scene
                 if(comp)
                 {
                     auto *compObj = PyObject_New(PyObject_SpriteComponent, &PyTypeObject_SpriteComponent);
-                    compObj->component = comp;
+                    compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject*)compObj;
                 }
@@ -419,7 +464,7 @@ namespace ige::scene
             for(int i = 0; i < len; ++i)
             {
                 auto obj = PyObject_New(PyObject_Component, &PyTypeObject_Component);
-                obj->component = components[i];
+                obj->component = components[i].get();
                 PyTuple_SetItem(compTuple, i, (PyObject*)obj);
                 Py_XDECREF(obj);
             }
@@ -454,7 +499,11 @@ namespace ige::scene
         { "id", (getter)SceneObject_getId, NULL, SceneObject_id_doc, NULL },
         { "name", (getter)SceneObject_getName, (setter)SceneObject_setName, SceneObject_name_doc, NULL },
         { "active", (getter)SceneObject_getActive, (setter)SceneObject_setActive, SceneObject_active_doc, NULL },
+        { "selected", (getter)SceneObject_getSelected, (setter)SceneObject_setSelected, SceneObject_selected_doc, NULL },
         { "parent", (getter)SceneObject_getParent, (setter)SceneObject_setParent, SceneObject_parent_doc, NULL },
+        { "root", (getter)SceneObject_getRoot, NULL, SceneObject_root_doc, NULL },
+        { "transform", (getter)SceneObject_getTransform, NULL, SceneObject_transform_doc, NULL },
+        { "rectTransform", (getter)SceneObject_getRectTransform, NULL, SceneObject_rectTransform_doc, NULL },
         { NULL, NULL }
     };
 

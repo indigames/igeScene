@@ -10,7 +10,7 @@ using namespace pyxie;
 
 #include "event/Event.h"
 
-namespace ige::scene 
+namespace ige::scene
 {
     //! Canvas: the playground of UI elements
     class Canvas: public Component
@@ -24,10 +24,10 @@ namespace ige::scene
         virtual std::string getName() const override { return "Canvas"; }
 
         //! Serialize
-        void to_json(json& j) const override { }
+        void to_json(json& j) const override;
 
-        //! Deserialize 
-        void from_json(const json& j) override { }
+        //! Deserialize
+        void from_json(const json& j) override;
 
         //! Canvas to viewport matrix
         void setCanvasToViewportMatrix(const Mat4& matrix);
@@ -47,7 +47,7 @@ namespace ige::scene
 
         // Set target canvas size, based on device resolution
         void setTargetCanvasSize(const Vec2& canvasSize);
-        
+
     public:
         //! Default canvas size
         static Vec2 s_defaultCanvasSize;

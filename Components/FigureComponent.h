@@ -30,7 +30,7 @@ namespace ige::scene
         //! Serialize
         virtual void to_json(json& j) const override;
 
-        //! Deserialize 
+        //! Deserialize
         virtual void from_json(const json& j) override;
 
         //! Get associated figure
@@ -40,17 +40,9 @@ namespace ige::scene
         void setPath(const std::string& path);
         const std::string& getPath() { return m_path; }
 
-        //! Events
-        Event<Figure*>& getOnFigureCreatedEvent() { return m_onFigureCreatedEvent; }
-        Event<Figure*>& getOnFigureDestroyedEvent() { return m_onFigureDestroyedEvent; }
-
     protected:
         //! Associated figure object
         Figure* m_figure;
-
-        //! Events
-        Event<Figure*> m_onFigureCreatedEvent;
-        Event<Figure*> m_onFigureDestroyedEvent;
 
         //! Path to figure file
         std::string m_path;

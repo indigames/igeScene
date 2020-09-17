@@ -11,13 +11,17 @@
 #include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/UIImage.h"
+#include "components/physic/PhysicBox.h"
+#include "components/physic/PhysicCapsule.h"
+#include "components/physic/PhysicSphere.h"
 
 namespace ige::scene
 {
+    //! Static member initialization
     Event<SceneObject&, const std::shared_ptr<Component>&> SceneObject::m_componentAddedEvent;
     Event<SceneObject&, const std::shared_ptr<Component>&> SceneObject::m_componentRemovedEvent;
 
-    //! Static member initialization
+    //! Events
     Event<SceneObject&> SceneObject::s_destroyedEvent;
     Event<SceneObject&> SceneObject::s_createdEvent;
     Event<SceneObject&> SceneObject::s_attachedEvent;
@@ -35,7 +39,9 @@ namespace ige::scene
         // Only create showcase for root objects
         if (parent == nullptr)
         {
-            m_showcase = ResourceCreator::Instance().NewShowcase((m_name + "_" + std::to_string(m_id) + "_showcase").c_str());            
+            m_showcase = ResourceCreator::Instance().NewShowcase((m_name + "_" + std::to_string(m_id) + "_showcase").c_str());
+            getResourceAddedEvent().addListener(std::bind(&SceneObject::onResourceAdded, this, std::placeholders::_1));
+            getResourceRemovedEvent().addListener(std::bind(&SceneObject::onResourceRemoved, this, std::placeholders::_1));
         }
 
         // Invoke created event
@@ -45,14 +51,20 @@ namespace ige::scene
     //! Destructor
     SceneObject::~SceneObject()
     {
-        m_transform = nullptr;
+        for (auto& comp : m_components)
+            comp->onDestroy();
 
-        removeAllComponents();
         removeChildren();
         setParent(nullptr);
 
+        removeAllComponents();
+        m_transform = nullptr;
+
         if (m_showcase)
         {
+            getResourceAddedEvent().removeAllListeners();
+            getResourceRemovedEvent().removeAllListeners();
+
             m_showcase->Clear();
             m_showcase->DecReference();
             m_showcase = nullptr;
@@ -74,7 +86,7 @@ namespace ige::scene
         {
             m_parent = nullptr;
             getDetachedEvent().invoke(*this);
-        }        
+        }
     }
 
     // Get parent
@@ -117,7 +129,7 @@ namespace ige::scene
                 return true;
             }
         }
-        
+
         // Recursive remove child
         for (auto& currObject : m_children)
         {
@@ -144,7 +156,8 @@ namespace ige::scene
     //! Remove children
     void SceneObject::removeChildren()
     {
-       for(auto& child: m_children) {
+        for(auto& child: m_children)
+        {
             if(child != nullptr) child->setParent(nullptr);
             child = nullptr;
         }
@@ -156,7 +169,7 @@ namespace ige::scene
     {
         m_components.push_back(component);
     }
-  
+
     //! Remove a component
     bool SceneObject::removeComponent(const std::shared_ptr<Component>& component)
     {
@@ -165,134 +178,64 @@ namespace ige::scene
         {
             auto result = std::dynamic_pointer_cast<Component>(*it);
             m_componentRemovedEvent.invoke(*this, result);
-            onComponentRemoved(*this, result);
             m_components.erase(it);
             return true;
         }
         return false;
     }
 
-    //! Component added event
-    void SceneObject::onComponentAdded(SceneObject& obj, const std::shared_ptr<Component>& component)
-    {        
-        if(m_showcase != nullptr)
-        {
-            if (component->getName() == "FigureComponent")
-            {
-                auto figureComponent = std::dynamic_pointer_cast<FigureComponent>(component);
-                auto figure = figureComponent->getFigure();
-                if (figure) m_showcase->Add(figure);
-
-                figureComponent->getOnFigureCreatedEvent().addListener([this](auto figure) {
-                    if (figure && m_showcase) m_showcase->Add(figure);
-                });
-
-                figureComponent->getOnFigureDestroyedEvent().addListener([this](auto figure) {
-                    if (figure && m_showcase) m_showcase->Remove(figure);
-                });
-            }
-            else if (component->getName() == "SpriteComponent")
-            {
-                auto eFigComp = std::dynamic_pointer_cast<SpriteComponent>(component);
-                auto figure = eFigComp->getFigure();
-                if (figure) m_showcase->Add(figure);
-
-                eFigComp->getOnFigureCreatedEvent().addListener([this](auto figure) {
-                    if (figure && m_showcase) m_showcase->Add(figure);
-                    });
-
-                eFigComp->getOnFigureDestroyedEvent().addListener([this](auto figure) {
-                    if (figure && m_showcase) m_showcase->Remove(figure);
-                    });
-            }
-            else if (component->getName() == "UIImage")
-            {
-                auto eFigComp = std::dynamic_pointer_cast<UIImage>(component);
-                auto figure = eFigComp->getFigure();
-                if (figure) m_showcase->Add(figure);
-
-                eFigComp->getOnFigureCreatedEvent().addListener([this](auto figure) {
-                    if (figure && m_showcase) m_showcase->Add(figure);
-                });
-
-                eFigComp->getOnFigureDestroyedEvent().addListener([this](auto figure) {
-                    if (figure && m_showcase) m_showcase->Remove(figure);
-                });
-            }
-            else if (component->getName() == "EnvironmentComponent")
-            {
-                auto envComp = std::dynamic_pointer_cast<EnvironmentComponent>(component);
-                auto env = envComp->getEnvironment();
-                if (env) m_showcase->Add(env);
-            }
-        }
-
-        if (hasParent())
-        {
-            getParent()->onComponentAdded(obj, component);
-        }
+    //! Add a component by raw pointer
+    void SceneObject::addComponent(Component* component)
+    {
+        m_components.push_back(std::shared_ptr<Component>(component));
     }
 
-    //! Component removed event
-    void SceneObject::onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component)
+    //! Remove a component by raw pointer
+    bool SceneObject::removeComponent(Component* component)
+    {
+        auto it = std::find_if(m_components.begin(), m_components.end(), [&](const auto& comp) {
+            return comp.get() == component;
+        });
+        if(it != m_components.end())
+        {
+            auto result = std::dynamic_pointer_cast<Component>(*it);
+            m_componentRemovedEvent.invoke(*this, result);
+            m_components.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    //! Resource added event
+    void SceneObject::onResourceAdded(Resource* resource)
     {
         if(m_showcase != nullptr)
         {
-            if (component->getName() == "FigureComponent")
-            {
-                auto figComp = std::dynamic_pointer_cast<FigureComponent>(component);
-                auto figure = figComp->getFigure();
-                if (figure) m_showcase->Remove(figure);
-
-                figComp->getOnFigureCreatedEvent().removeAllListeners();
-                figComp->getOnFigureDestroyedEvent().removeAllListeners();
-            }
-            else if (component->getName() == "SpriteComponent")
-            {
-                auto eFigComp = std::dynamic_pointer_cast<SpriteComponent>(component);
-                auto figure = eFigComp->getFigure();
-                if (figure) m_showcase->Remove(figure);
-
-                eFigComp->getOnFigureCreatedEvent().removeAllListeners();
-                eFigComp->getOnFigureDestroyedEvent().removeAllListeners();
-            }
-             else if (component->getName() == "UIImage")
-            {
-                auto eFigComp = std::dynamic_pointer_cast<UIImage>(component);
-                auto figure = eFigComp->getFigure();
-                if (figure) m_showcase->Remove(figure);
-
-                eFigComp->getOnFigureCreatedEvent().removeAllListeners();
-                eFigComp->getOnFigureDestroyedEvent().removeAllListeners();
-            }
-            else if (component->getName() == "EnvironmentComponent")
-            {
-                auto envComp = std::dynamic_pointer_cast<EnvironmentComponent>(component);
-                auto env = envComp->getEnvironment();
-                if (env) m_showcase->Remove(env);
-            }
+            if(resource) m_showcase->Add(resource);
         }
+    }
 
-        if (hasParent())
+    //! Resource removed event
+    void SceneObject::onResourceRemoved(Resource* resource)
+    {
+        if(m_showcase != nullptr)
         {
-            getParent()->onComponentRemoved(obj, component);
+            if(resource) m_showcase->Remove(resource);
         }
     }
 
     //! Remove all component
     bool SceneObject::removeAllComponents()
     {
-        auto it = m_components.begin();
-        while (it != m_components.end())
+        for (auto it = m_components.begin(); it != m_components.end();)
         {
             auto result = std::dynamic_pointer_cast<Component>(*it);
             m_componentRemovedEvent.invoke(*this, result);
-            onComponentRemoved(*this, result);
             it = m_components.erase(it);
         }
         return true;
     }
-    
+
     //! Get components list
     std::vector<std::shared_ptr<Component>>& SceneObject::getComponents()
     {
@@ -304,7 +247,7 @@ namespace ige::scene
     {
         return m_components.size();
     }
-        
+
     //! Find object by id
     std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const
     {
@@ -346,7 +289,7 @@ namespace ige::scene
                 if(comp->getName() != "CameraComponent")
                     comp->onUpdate(dt);
             }
-            
+
             for (auto& obj : m_children)
             {
                 if(obj != nullptr) obj->onUpdate(dt);
@@ -387,7 +330,7 @@ namespace ige::scene
             }
         }
     }
-    
+
     //! Render
     void SceneObject::onRender()
     {
@@ -410,10 +353,23 @@ namespace ige::scene
     //! Enable or disable the actor
     void SceneObject::setActive(bool isActive)
     {
-        m_isActive = isActive;
+        if(m_isActive != isActive)
+        {
+            m_isActive = isActive;
+            if (m_isActive)
+            {
+                for (auto& comp : m_components)
+                    comp->onEnable();
+            }
+            else
+            {
+                for (auto& comp : m_components)
+                    comp->onDisable();
+            }
+        }
     }
 
-    //! Check active    
+    //! Check active
     bool SceneObject::isActive() const
     {
         return m_isActive;
@@ -425,10 +381,13 @@ namespace ige::scene
         if(m_isSelected != select)
         {
             m_isSelected = select;
-            if(m_isSelected)
-            {
-                getSelectedEvent().invoke(*this);
-            }
+            if(m_isSelected) getSelectedEvent().invoke(*this);
+        }
+
+        if (m_isSelected)
+        {
+            for (auto& comp : m_components)
+                comp->onClick();
         }
     }
 
@@ -451,10 +410,12 @@ namespace ige::scene
         auto jComponents = json::array();
         for (const auto& comp : m_components)
         {
-            json jCmp = json{
-                {comp->getName(), *comp.get()}
-            };
-            jComponents.push_back(jCmp);
+            json jCmp;
+            comp->to_json(jCmp);
+
+            json jPairCmp = {comp->getName(), jCmp};
+
+            jComponents.push_back(jPairCmp);
         }
         j["comps"] = jComponents;
 
@@ -466,12 +427,12 @@ namespace ige::scene
                 json jChild;
                 child->to_json(jChild);
                 jChildren.push_back(jChild);
-            }            
+            }
         }
         j["children"] = jChildren;
     }
 
-    //! Deserialize 
+    //! Deserialize
     void SceneObject::from_json(const json& j)
     {
         j.at("id").get_to(m_id);
@@ -482,15 +443,23 @@ namespace ige::scene
         auto jComps = j.at("comps");
         for (auto it : jComps)
         {
-            auto key = it.begin().key();
-            auto val = it.begin().value();
+            auto key = it.at(0);
+            auto val = it.at(1);
             std::shared_ptr<Component> comp = nullptr;
-            if (key == "TransformComponent") comp = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+            if (key == "TransformComponent") 
+            { 
+                auto transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+                setTransform(transform);
+                comp = transform;
+            }
             else if (key == "CameraComponent") comp = addComponent<CameraComponent>(val.at("name"));
             else if (key == "EnvironmentComponent") comp = addComponent<EnvironmentComponent>(val.at("name"));
             else if (key == "FigureComponent") comp = addComponent<FigureComponent>(val.at("path"));
             else if (key == "SpriteComponent") comp = addComponent<SpriteComponent>(val.at("size"), val.at("path"));
             else if (key == "ScriptComponent") comp = addComponent<ScriptComponent>(val.at("path"));
+            else if (key == "PhysicBox") comp = addComponent<PhysicBox>();
+            else if (key == "PhysicSphere") comp = addComponent<PhysicSphere>();
+            else if (key == "PhysicCapsule") comp = addComponent<PhysicCapsule>();
             if (comp) comp->from_json(val);
         }
 

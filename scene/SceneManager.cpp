@@ -135,6 +135,7 @@ namespace ige::scene
         auto scene = std::make_shared<Scene>(jScene.at("name"));
         scene->from_json(jScene);
         m_scenes.push_back(scene);
+        setCurrentScene(scene);
         return scene;
     }
 

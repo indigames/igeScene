@@ -15,16 +15,18 @@ namespace ige::scene
         {
             m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
             m_figure->WaitBuild();
+            getOwner()->getRoot()->getResourceAddedEvent().invoke(m_figure);
         }
     }
 
     //! Destructor
-    FigureComponent::~FigureComponent() 
+    FigureComponent::~FigureComponent()
     {
         if (m_figure)
         {
-             m_figure->DecReference();
-             m_figure = nullptr;
+            if (hasOwner()) getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_figure);
+            m_figure->DecReference();
+            m_figure = nullptr;
         }
         ResourceManager::Instance().DeleteDaemon();
     }
@@ -69,7 +71,7 @@ namespace ige::scene
 
             if (m_figure != nullptr)
             {
-                getOnFigureDestroyedEvent().invoke(m_figure);
+                getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_figure);
                 m_figure->DecReference();
                 m_figure = nullptr;
                 ResourceManager::Instance().DeleteDaemon();
@@ -77,7 +79,7 @@ namespace ige::scene
 
             m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
             m_figure->WaitInitialize();
-            getOnFigureCreatedEvent().invoke(m_figure);
+            getOwner()->getRoot()->getResourceAddedEvent().invoke(m_figure);
         }
     }
 
