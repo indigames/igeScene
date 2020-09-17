@@ -62,18 +62,26 @@ namespace ige::scene
     void CameraComponent::onUpdate(float dt)
     {
         if (m_camera == nullptr) return;
+
         auto transCmp = getOwner()->getTransform();
+        if (transCmp)
+        {
+            m_camera->SetPosition(transCmp->getWorldPosition());
+            m_camera->SetRotation(transCmp->getWorldRotation());
+            m_camera->SetScale(transCmp->getWorldScale());
 
-        m_camera->SetPosition(transCmp->getWorldPosition());
-        m_camera->SetRotation(transCmp->getWorldRotation());
-        m_camera->SetScale(transCmp->getWorldScale());
+            // Update
+            m_camera->Step(dt);
 
-        // Update
-        m_camera->Step(dt);
-
-        setPosition(m_camera->GetPosition());
-        setRotation(m_camera->GetRotation());
-        setScale(m_camera->GetScale());
+            setPosition(m_camera->GetPosition());
+            setRotation(m_camera->GetRotation());
+            setScale(m_camera->GetScale());
+        }
+        else
+        {
+            // Update
+            m_camera->Step(dt);
+        }
     }
 
     //! Render
