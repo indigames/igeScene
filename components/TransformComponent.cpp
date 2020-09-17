@@ -4,6 +4,8 @@
 #include "components/gui/UIImage.h"
 #include "components/gui/UIText.h"
 #include "scene/SceneObject.h"
+#include "scene/Scene.h"
+#include "scene/SceneManager.h"
 #include "utils/RayOBBChecker.h"
 
 namespace ige::scene {
@@ -60,6 +62,12 @@ namespace ige::scene {
             float distance;
 
             auto owner = getOwner();
+
+            // Ignore other scene than current one
+            auto camera = SceneManager::getInstance()->getCurrentScene()->getActiveCamera();
+            if (!camera || !owner || owner->getRoot() != camera->getShootTarget())
+                return;
+
             auto figureComp = owner->getComponent<FigureComponent>();
             if (figureComp)
             {
