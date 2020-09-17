@@ -35,12 +35,16 @@ namespace ige::scene
     //! Serialize
     void UIImage::to_json(json& j) const
     {
-        SpriteComponent::to_json(j);
+        j = json{
+            {"path", getPath()},
+            {"size", getSize()}
+        };
     }
 
     //! Deserialize
     void UIImage::from_json(const json& j)
     {
-        SpriteComponent::from_json(j);
+        setSize(j.at("size"));
+        setPath(j.at("path"));
     }
 }

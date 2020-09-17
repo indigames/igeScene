@@ -10,7 +10,10 @@
 #include "components/SpriteComponent.h"
 #include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
+#include "components/gui/UIText.h"
+#include "components/gui/UITextField.h"
 #include "components/physic/PhysicBox.h"
 #include "components/physic/PhysicCapsule.h"
 #include "components/physic/PhysicSphere.h"
@@ -381,7 +384,10 @@ namespace ige::scene
         if(m_isSelected != select)
         {
             m_isSelected = select;
-            if(m_isSelected) getSelectedEvent().invoke(*this);
+            if (m_isSelected)
+            {
+                getSelectedEvent().invoke(*this);
+            }
         }
 
         if (m_isSelected)
@@ -404,7 +410,7 @@ namespace ige::scene
             {"id", m_id},
             {"name", m_name},
             {"active", m_isActive},
-            {"select", m_isSelected},
+            {"gui", m_bIsGui},
         };
 
         auto jComponents = json::array();
@@ -412,9 +418,7 @@ namespace ige::scene
         {
             json jCmp;
             comp->to_json(jCmp);
-
-            json jPairCmp = {comp->getName(), jCmp};
-
+            json jPairCmp = { comp->getName(), jCmp };
             jComponents.push_back(jPairCmp);
         }
         j["comps"] = jComponents;
@@ -436,9 +440,9 @@ namespace ige::scene
     void SceneObject::from_json(const json& j)
     {
         j.at("id").get_to(m_id);
-        j.at("name").get_to(m_name);
-        j.at("active").get_to(m_isActive);
-        j.at("select").get_to(m_isSelected);
+        setName(j.value("name", ""));
+        setActive(j.value("active", false));
+        m_bIsGui = j.value("gui", false);
 
         auto jComps = j.at("comps");
         for (auto it : jComps)
@@ -452,14 +456,24 @@ namespace ige::scene
                 setTransform(transform);
                 comp = transform;
             }
+            else if (key == "RectTransform")
+            {
+                auto transform = addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
+                setTransform(transform);
+                comp = transform;
+            }
             else if (key == "CameraComponent") comp = addComponent<CameraComponent>(val.at("name"));
             else if (key == "EnvironmentComponent") comp = addComponent<EnvironmentComponent>(val.at("name"));
             else if (key == "FigureComponent") comp = addComponent<FigureComponent>(val.at("path"));
             else if (key == "SpriteComponent") comp = addComponent<SpriteComponent>(val.at("size"), val.at("path"));
-            else if (key == "ScriptComponent") comp = addComponent<ScriptComponent>(val.at("path"));
+            else if (key == "ScriptComponent") comp = addComponent<ScriptComponent>();
             else if (key == "PhysicBox") comp = addComponent<PhysicBox>();
             else if (key == "PhysicSphere") comp = addComponent<PhysicSphere>();
             else if (key == "PhysicCapsule") comp = addComponent<PhysicCapsule>();
+            else if (key == "Canvas") comp = addComponent<Canvas>();
+            else if (key == "UIImage") comp = addComponent<UIImage>();
+            else if (key == "UIText") comp = addComponent<UIText>();
+            else if (key == "UITextField") comp = addComponent<UITextField>();
             if (comp) comp->from_json(val);
         }
 

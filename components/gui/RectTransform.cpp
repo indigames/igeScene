@@ -522,4 +522,28 @@ namespace ige::scene
     {
         return (point.X() >= m_rectViewport[0] && point.X() <= m_rectViewport[2] && point.Y() >= m_rectViewport[1] && point.Y() <= m_rectViewport[3]);
     }
+
+    //! Serialize
+    void RectTransform::to_json(json& j) const
+    {
+        auto size = Vec2(m_rect[2] - m_rect[0], m_rect[3] - m_rect[1]);
+        j = json{
+            {"anchor", m_anchor},
+            {"offset", m_offset},
+            {"pivot", m_pivot},
+            {"posz", m_posZ},
+            {"size", size},
+        };
+    }
+
+    //! Deserialize
+    void RectTransform::from_json(const json& j)
+    {
+        m_posZ = 0.f;
+        setOffset(j.value("offset", Vec4(0.f, 0.f, 0.f, 0.f)));
+        setAnchor(j.value("anchor", Vec4(0.5f, 0.5f, 0.5f, 0.5f)));
+        setPivot(j.value("pivot", Vec2(0.5f, 0.5f)));
+        setSize(j.value("size", Vec2(128.f, 128.f)));
+        setDirty();
+    }
 }

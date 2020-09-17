@@ -74,12 +74,6 @@ namespace ige::scene
         //! OnUpdate
         void onUpdate(float dt) override;
 
-        //! Serialize
-        void to_json(json& j) const override { }
-
-        //! Deserialize
-        void from_json(const json& j) override { }
-
         //! Add observer: just do nothing
         void addObserver(TransformComponent* observer) override { }
 
@@ -94,6 +88,12 @@ namespace ige::scene
 
         //! Check point inside rect
         bool isPointInside(const Vec2& point) const;
+
+        //! Serialize
+        void to_json(json& j) const override;
+
+        //! Deserialize
+        void from_json(const json& j) override;
 
     protected:
         bool hasScale() const;
@@ -137,6 +137,5 @@ namespace ige::scene
         //! Events
         Event<EditableFigure*> m_onFigureCreatedEvent;
         Event<EditableFigure*> m_onFigureDestroyedEvent;
-
     };
 }

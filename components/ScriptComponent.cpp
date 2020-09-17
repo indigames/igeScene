@@ -82,7 +82,7 @@ namespace ige::scene
 
             // Creates an instance of the class
             auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = SceneManager::getInstance()->getCurrentScene()->findObjectById(getOwner()->getId()).get();
+            obj->sceneObject = getOwner();
             auto arglist = Py_BuildValue("(O)", obj);
             PyObject* pyConstruct = PyInstanceMethod_New(pyClass);
             m_pyInstance = PyObject_CallObject(pyConstruct, arglist);
@@ -113,8 +113,6 @@ namespace ige::scene
             Py_DECREF(m_pyModule);
             m_pyModule = nullptr;
         }
-
-        PyErr_Clear();
     }
 
     //! Awake
