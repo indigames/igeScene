@@ -137,6 +137,8 @@ namespace ige::scene
             {"scrRad", getScreenRadian()},
             {"up", getUpAxis()},
             {"targetId", m_targetId},
+            {"pos", getPosition()},
+            {"rot", getRotation()},
         };
     }
 
@@ -160,6 +162,8 @@ namespace ige::scene
         setScreenOffset(j.at("scrOff"));
         setScreenRadian(j.at("scrRad"));
         setUpAxis(j.at("up"));
+        setPosition(j.value("pos", Vec3()));
+        setRotation(j.value("rot", Quat()));
         m_targetId = j.at("targetId");
     }
 }
