@@ -71,9 +71,9 @@ namespace ige::scene
         // Update
         m_camera->Step(dt);
 
-        transCmp->setWorldPosition(m_camera->GetPosition());
-        transCmp->setWorldRotation(m_camera->GetRotation());
-        transCmp->setWorldScale(m_camera->GetScale());
+        setPosition(m_camera->GetPosition());
+        setRotation(m_camera->GetRotation());
+        setScale(m_camera->GetScale());
     }
 
     //! Render
@@ -101,6 +101,19 @@ namespace ige::scene
     { 
         auto transCmp = getOwner()->getTransform();
         transCmp->setWorldRotation(rot);
+    }
+
+    //! Scale
+    void CameraComponent::setScale(const Vec3& scale)
+    {
+        auto transCmp = getOwner()->getTransform();
+        transCmp->setWorldScale(scale);
+    }
+
+    Vec3 CameraComponent::getScale() const
+    {
+        auto transCmp = getOwner()->getTransform();
+        return transCmp->getWorldScale();
     }
 
     Quat CameraComponent::getRotation() const
@@ -139,6 +152,7 @@ namespace ige::scene
             {"targetId", m_targetId},
             {"pos", getPosition()},
             {"rot", getRotation()},
+            {"scale", getScale()},
         };
     }
 
@@ -162,8 +176,14 @@ namespace ige::scene
         setScreenOffset(j.at("scrOff"));
         setScreenRadian(j.at("scrRad"));
         setUpAxis(j.at("up"));
-        setPosition(j.value("pos", Vec3()));
-        setRotation(j.value("rot", Quat()));
         m_targetId = j.at("targetId");
+
+        auto transCmp = getOwner()->getRectTransform();
+        if (transCmp)
+        {
+            setPosition(j.value("pos", Vec3()));
+            setRotation(j.value("rot", Quat()));
+            setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
+        }
     }
 }

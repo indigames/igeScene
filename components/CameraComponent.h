@@ -28,6 +28,10 @@ namespace ige::scene
         void setRotation(const Quat& rot);
         Quat getRotation() const;
 
+        //! Rotation
+        void setScale(const Vec3& scale);
+        Vec3 getScale() const;
+
         //! Aspect ratio
         float getAspectRatio() const { return m_camera->GetAspectRate(); }
         void setAspectRatio(float val) { m_camera->SetAspectRate(val); }
