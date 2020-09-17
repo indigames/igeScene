@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.4.1)
 
-file(TO_CMAKE_PATH $ENV{IGE_LIBS} IGE_LIBS)
-
 if (NOT DEFINED APP_STYLE)
     set(APP_STYLE STATIC)
 endif()
@@ -45,21 +43,18 @@ elseif(APPLE)
     endif()
 endif()
 
-if(${APP_STYLE} MATCHES "SHARED")
-    find_package(PythonInterp 3.7 REQUIRED)
-    find_package(PythonLibs 3.7 REQUIRED)
-else()
-    set (PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/Include")
-    if (MSVC)
-        list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/PC")
-    elseif (OSX)
-        list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/Mac")
-    elseif (ANDROID)
-        list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/Android")
-    elseif (IOS)
-        list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/IOS")
-    endif ()
-endif()
+set(LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+set (PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/Include)
+if (MSVC)
+    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/PC)
+elseif (OSX)
+    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/Mac)
+elseif (ANDROID)
+    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/Android)
+elseif (IOS)
+    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/IOS)
+endif ()
 
 file(GLOB_RECURSE SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
@@ -69,14 +64,22 @@ file(GLOB_RECURSE SRC
 )
 
 set(INCLUDES
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${PYTHON_INCLUDE_DIRS}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../pyxCore/pyxcore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../igeCore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../igeVMath"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../igeBullet"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../igeBullet/bullet"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../igeLibs/json/include"
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${PYTHON_INCLUDE_DIRS}
+    ${LIBS_DIR}/pyxCore/include/pyxcore
+    ${LIBS_DIR}/pyxCore/include/ThirdParty/GLEW
+    ${LIBS_DIR}/pyxCore/include/ThirdParty/edge/include
+    ${LIBS_DIR}/pyxCore/include/ThirdParty/spdlog/include
+    ${LIBS_DIR}/tracy/include
+    ${LIBS_DIR}/json/include
+    ${LIBS_DIR}/igeVmath/include
+    ${LIBS_DIR}/igeCore/include
+    ${LIBS_DIR}/igeScene
+    ${LIBS_DIR}/imgui
+    ${LIBS_DIR}/SDL/include
+    ${LIBS_DIR}/stb/include
+    ${LIBS_DIR}/igeBullet/include
+    ${LIBS_DIR}/igeBullet/include/bullet
 )
 
 if(APPLE)
