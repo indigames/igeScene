@@ -94,8 +94,6 @@ namespace ige::scene
                 target->getShowcase()->Render();
             }
         }
-        //for (auto& root : m_roots)
-        //    if (root) root->onRender();
     }
 
     std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent)
@@ -113,7 +111,7 @@ namespace ige::scene
             envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
 
             auto camObj = createObject("Default Camera", sceneObject);
-            camObj->getTransform()->setPosition(Vec3(0.f, 5.f, 20.f));
+            camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
             auto camComp = camObj->addComponent<CameraComponent>("default_camera");
             camComp->lockOnTarget(false);
             camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
@@ -145,7 +143,7 @@ namespace ige::scene
             canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW()));
 
             auto camObj = createGUIObject("GUI Camera", sceneObject);
-            camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 20.f));
+            camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
             auto camComp = camObj->addComponent<CameraComponent>("default_2d_camera");
             camComp->lockOnTarget(false);
             camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());

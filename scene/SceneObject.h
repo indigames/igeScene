@@ -150,7 +150,7 @@ namespace ige::scene
         void from_json(const json& j);
 
         //! Get showcase
-        Showcase* getShowcase() { return m_showcase; }
+        Showcase* getShowcase();
 
         //! Check whether it's a GUI object
         bool isGUIObject() const { return m_bIsGui; }

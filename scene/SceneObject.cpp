@@ -98,6 +98,13 @@ namespace ige::scene
         return m_parent;
     }
 
+    Showcase* SceneObject::getShowcase()
+    { 
+        if (m_root == this)
+            return m_showcase;
+        return m_root->getShowcase();
+    }
+
     //! Adds a child.
     void SceneObject::addChild(const std::shared_ptr<SceneObject>& child)
     {
