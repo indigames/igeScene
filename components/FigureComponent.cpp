@@ -9,14 +9,9 @@ namespace ige::scene
 {
     //! Constructor
     FigureComponent::FigureComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path)
-        : Component(owner), m_figure(nullptr), m_path(path)
+        : Component(owner), m_figure(nullptr)
     {
-        if (!m_path.empty())
-        {
-            m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
-            m_figure->WaitBuild();
-            getOwner()->getRoot()->getResourceAddedEvent().invoke(m_figure);
-        }
+        setPath(path);
     }
 
     //! Destructor
@@ -37,18 +32,18 @@ namespace ige::scene
         if (m_figure == nullptr) return;
 
         // Update transform from transform component
-        auto transCmp = getOwner()->getTransform();
-        m_figure->SetPosition(transCmp->getWorldPosition());
-        m_figure->SetRotation(transCmp->getWorldRotation());
-        m_figure->SetScale(transCmp->getWorldScale());
+        auto transform = getOwner()->getTransform();
+        m_figure->SetPosition(transform->getWorldPosition());
+        m_figure->SetRotation(transform->getWorldRotation());
+        m_figure->SetScale(transform->getWorldScale());
 
         // Update
         m_figure->Step(dt);
 
         // Update transform back to transform component
-        transCmp->setWorldPosition(m_figure->GetPosition());
-        transCmp->setWorldRotation(m_figure->GetRotation());
-        transCmp->setWorldScale(m_figure->GetScale());
+        transform->setWorldPosition(m_figure->GetPosition());
+        transform->setWorldRotation(m_figure->GetRotation());
+        transform->setWorldScale(m_figure->GetScale());
     }
 
     //! Update

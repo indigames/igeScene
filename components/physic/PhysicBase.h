@@ -103,6 +103,10 @@ namespace ige::scene
         bool isEnabled() const { return m_bIsEnabled; }
         void setEnabled(bool enable);
 
+        //! Position offset
+        const Vec3& getPositionOffset() const { return m_positionOffset; }
+        void setPositionOffset(const Vec3& offset) { m_positionOffset = offset;  }
+
         //! Get AABB
         void getAABB(btVector3 &aabbMin, btVector3 aabbMax);
 
@@ -225,7 +229,10 @@ namespace ige::scene
         //! Cache transform
         TransformComponent *m_transform;
 
+        //! Position offsets
+        Vec3 m_positionOffset = { 0.f, 0.f, 0.f };
+
         //! Cache previous scale value
-        Vec3 m_previousScale = { 1.0f, 1.0f, 1.0f };
+        Vec3 m_previousScale = { 1.f, 1.f, 1.f };
     };
 } // namespace ige::scene

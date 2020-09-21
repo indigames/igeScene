@@ -68,46 +68,7 @@ namespace ige::scene {
             if (!camera || !owner || owner->getRoot() != camera->getShootTarget())
                 return;
 
-            auto figureComp = owner->getComponent<FigureComponent>();
-            if (figureComp)
-            {
-                auto figure = figureComp->getFigure();
-                if (figure)
-                {
-                    Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
-                    figure->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
-                    intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
-                }
-            }
-            else
-            {
-                EditableFigure* figure = nullptr;
-                auto spriteComp = owner->getComponent<SpriteComponent>();
-                if (spriteComp)
-                {
-                    figure = spriteComp->getFigure();
-                    if (figure)
-                    {
-                        Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
-                        figure->CalcAABBox(0, aabbMin.P(), aabbMax.P());
-                        intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
-                    }
-                }
-                else
-                {
-                    auto uiText = owner->getComponent<UIText>();
-                    if (uiText)
-                    {
-                        figure = uiText->getFigure();
-                        if (figure)
-                        {
-                            Vec3 aabbMin(-1.f, -1.f, -1.f), aabbMax(1.f, 1.f, 1.f);
-                            figure->CalcAABBox(0, aabbMin.P(), aabbMax.P());
-                            intersected = RayOBBChecker::checkIntersect(aabbMin, aabbMax, m_worldMatrix, distance);
-                        }
-                    }
-                }
-            }
+            intersected = RayOBBChecker::checkIntersect(m_aabbMin, m_aabbMax, m_worldMatrix, distance);
 
             // Update selected info
             owner->setSelected(intersected);
@@ -310,6 +271,9 @@ namespace ige::scene {
 
         // Notify all children
         notifyObservers(ETransformMessage::TRANSFORM_CHANGED);
+
+        // Update aabb
+        updateAabb();
     }
 
     void TransformComponent::updateWorldToLocal()
@@ -360,8 +324,44 @@ namespace ige::scene {
 
         // Notify all children
         notifyObservers(ETransformMessage::TRANSFORM_CHANGED);
+
+        // Update aabb
+        updateAabb();
     }
 
+    void TransformComponent::updateAabb()
+    {
+        if (!SceneManager::getInstance()->isEditor())
+            return;
+
+        auto figureComp = getOwner()->getComponent<FigureComponent>();
+        if (figureComp && figureComp->getFigure())
+        {
+            figureComp->onUpdate(0.33f);
+            figureComp->getFigure()->CalcAABBox(0, m_aabbMin.P(), m_aabbMax.P(), LocalSpace);
+            m_aabbCenter = Vec3((m_aabbMin[0] + m_aabbMax[0]), (m_aabbMin[1] + m_aabbMax[1]), (m_aabbMin[2] + m_aabbMax[2])) * 0.5f;
+        } 
+        else
+        {
+            auto spriteComp = getOwner()->getComponent<SpriteComponent>();
+            if (spriteComp && spriteComp->getFigure())
+            {
+                spriteComp->onUpdate(0.33f);
+                spriteComp->getFigure()->CalcAABBox(0, m_aabbMin.P(), m_aabbMax.P());
+                m_aabbCenter = Vec3((m_aabbMin[0] + m_aabbMax[0]), (m_aabbMin[1] + m_aabbMax[1]), (m_aabbMin[2] + m_aabbMax[2])) * 0.5f;
+            }
+            else
+            {
+                auto uiText = getOwner()->getComponent<UIText>();
+                if (uiText && uiText->getFigure())
+                {
+                    uiText->onUpdate(0.33f);
+                    uiText->getFigure()->CalcAABBox(0, m_aabbMin.P(), m_aabbMax.P());
+                    m_aabbCenter = Vec3((m_aabbMin[0] + m_aabbMax[0]), (m_aabbMin[1] + m_aabbMax[1]), (m_aabbMin[2] + m_aabbMax[2])) * 0.5f;
+                }
+            }
+        }
+    }
 
     void TransformComponent::addObserver(TransformComponent* observer)
     {

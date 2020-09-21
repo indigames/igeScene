@@ -226,7 +226,7 @@ namespace ige::scene
     //! Update Bullet transform
     void PhysicBase::updateBtTransform()
     {
-        m_body->setWorldTransform(PhysicHelper::to_btTransform(*m_transform));
+        m_body->setWorldTransform(PhysicHelper::to_btTransform(m_transform->getWorldRotation(), m_transform->getWorldPosition() + m_positionOffset));
 
         Vec3 scale = m_transform->getWorldScale();
         Vec3 dScale = { scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2] };
@@ -245,7 +245,7 @@ namespace ige::scene
         if (!m_bIsKinematic)
         {
             const btTransform &result = m_body->getWorldTransform();
-            m_transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
+            m_transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()) - m_positionOffset);
             m_transform->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
         }
     }
@@ -267,6 +267,8 @@ namespace ige::scene
             {"angularVelocity", PhysicHelper::from_btVector3(m_angularVelocity)},
             {"linearFactor", PhysicHelper::from_btVector3(m_linearFactor)},
             {"angularFactor", PhysicHelper::from_btVector3(m_angularFactor)},
+            {"offset", m_positionOffset},
+            {"isKinematic", m_bIsKinematic},
             {"isKinematic", m_bIsKinematic},
             {"isTrigger", m_bIsTrigger},
             {"isEnabled", m_bIsEnabled},
@@ -277,15 +279,16 @@ namespace ige::scene
     //! Deserialize
     void PhysicBase::from_json(const json &j)
     {
-        setMass(j.at("mass"));
-        setRestitution(j.at("restitution"));
-        setFriction(j.at("friction"));
-        setLinearVelocity(PhysicHelper::to_btVector3(j.at("linearVelocity")));
-        setAngularVelocity(PhysicHelper::to_btVector3(j.at("angularVelocity")));
-        setLinearFactor(PhysicHelper::to_btVector3(j.at("linearFactor")));
-        setAngularFactor(PhysicHelper::to_btVector3(j.at("angularFactor")));
-        setIsKinematic(j.at("isKinematic"));
-        setIsTrigger(j.at("isTrigger"));
-        setEnabled(j.at("isEnabled"));
+        setMass(j.value("mass", 1.f));
+        setRestitution(j.value("restitution", 1.f));
+        setFriction(j.value("friction", 0.5f));
+        setLinearVelocity(PhysicHelper::to_btVector3(j.value("linearVelocity", Vec3())));
+        setAngularVelocity(PhysicHelper::to_btVector3(j.value("angularVelocity", Vec3())));
+        setLinearFactor(PhysicHelper::to_btVector3(j.value("linearFactor", Vec3(1.f, 1.f, 0.f))));
+        setAngularFactor(PhysicHelper::to_btVector3(j.value("angularFactor", Vec3())));
+        setPositionOffset(j.value("offset", Vec3()));
+        setIsKinematic(j.value("isKinematic", false));
+        setIsTrigger(j.value("isTrigger", false));
+        setEnabled(j.value("isEnabled", true));
     }
 } // namespace ige::scene
