@@ -20,9 +20,7 @@ namespace ige::scene
     ScriptComponent::ScriptComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path)
         : Component(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
     {
-        if (!m_path.empty())
-            loadPyModule();
-        m_bPathDirty = false;
+        m_bPathDirty = true;
     }
 
     //! Destructor
@@ -158,6 +156,9 @@ namespace ige::scene
     //! Update functions
     void ScriptComponent::onUpdate(float dt)
     {
+        if (SceneManager::getInstance()->isEditor())
+            return;
+
         // Check reload script
         if (m_bPathDirty)
         {
