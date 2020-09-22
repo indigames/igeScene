@@ -207,17 +207,17 @@ namespace ige::scene {
 
     Vec3 TransformComponent::getWorldRight() const
     {
-        return m_worldPosition.xAxis();
+        return m_worldRotation * Vec3(1.f, 0.f, 0.f);
     }
 
     Vec3 TransformComponent::getWorldUp() const
     {
-        return m_worldPosition.yAxis();
+        return m_worldRotation * Vec3(0.f, 1.f, 0.f);
     }
 
     Vec3 TransformComponent::getWorldForward() const
     {
-        return m_worldPosition.zAxis();
+        return m_worldRotation * Vec3(0.f, 0.f, 1.f);
     }
 
     void TransformComponent::updateLocalMatrix()
