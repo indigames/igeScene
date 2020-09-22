@@ -544,9 +544,9 @@ namespace ige::scene
     void RectTransform::from_json(const json& j)
     {
         m_posZ = 0.f;
-        setOffset(j.value("offset", Vec4(0.f, 0.f, 0.f, 0.f)));
-        setAnchor(j.value("anchor", Vec4(0.5f, 0.5f, 0.5f, 0.5f)));
-        setPivot(j.value("pivot", Vec2(0.5f, 0.5f)));
+        m_offset = j.value("offset", Vec4(0.f, 0.f, 0.f, 0.f));
+        m_anchor = j.value("anchor", Vec4(0.5f, 0.5f, 0.5f, 0.5f));
+        m_pivot = j.value("pivot", Vec2(0.5f, 0.5f));
         setSize(j.value("size", Vec2(128.f, 128.f)));
         setDirty();
     }
