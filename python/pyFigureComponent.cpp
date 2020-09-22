@@ -43,8 +43,20 @@ namespace ige::scene
         return -1;
     }
 
+    // Get figure
+    PyObject* FigureComponent_getFigure(PyObject_FigureComponent* self)
+    {
+        auto figureObj = (figure_obj*)(&FigureType)->tp_alloc(&FigureType, 0);
+        // auto figureObj = PyObject_New(figure_obj, &FigureType);
+        figureObj->figure = self->component->getFigure();        
+        return (PyObject*)figureObj;
+        
+    }
+
+
     PyGetSetDef FigureComponent_getsets[] = {
         { "path", (getter)FigureComponent_getPath, (setter)FigureComponent_setPath, FigureComponent_path_doc, NULL },
+        { "figure", (getter)FigureComponent_getFigure, NULL, FigureComponent_figure_doc, NULL },
         { NULL, NULL }
     };
 

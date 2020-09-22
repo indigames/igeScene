@@ -100,15 +100,11 @@ namespace ige::scene
     //! Unload PyModule
     void ScriptComponent::unloadPyModule()
     {
-        if(m_pyInstance != nullptr)
-        {
-            Py_DECREF(m_pyInstance);
-            m_pyInstance = nullptr;
-        }
+        m_pyInstance = nullptr;
 
         if(m_pyModule != nullptr)
         {
-            Py_DECREF(m_pyModule);
+            Py_XDECREF(m_pyModule);
             m_pyModule = nullptr;
         }
     }
