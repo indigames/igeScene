@@ -289,7 +289,7 @@ namespace ige::scene
         auto jRoots = j.at("roots");
         for (auto it : jRoots)
         {
-            auto root = std::make_shared<SceneObject>(it.at("id"), it.at("name"));
+            auto root = std::make_shared<SceneObject>(it.at("id"), it.at("name"), nullptr, it.value("gui", false));
             root->from_json(it);
             m_roots.push_back(root);
         }

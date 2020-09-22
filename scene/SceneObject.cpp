@@ -487,7 +487,7 @@ namespace ige::scene
         auto jChildren = j.at("children");
         for (auto it : jChildren)
         {
-            auto child = std::make_shared<SceneObject>(it.at("id"), it.at("name"), this);
+            auto child = std::make_shared<SceneObject>(it.at("id"), it.at("name"), this, it.value("gui", false));
             child->from_json(it);
             addChild(child);
         }
