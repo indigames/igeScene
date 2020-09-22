@@ -79,7 +79,7 @@ namespace ige::scene
         auto canvas = getOwner()->getRoot()->getComponent<Canvas>();
         if (canvas)
         {
-            auto canvasToViewportMatrix = canvas->getCanvasToViewportMatrix();
+            const auto& canvasToViewportMatrix = canvas->getCanvasToViewportMatrix();
             pivotVec4 = canvasToViewportMatrix * pivotVec4;
         }
         return Vec2(pivotVec4.X(), pivotVec4.Y());
@@ -88,7 +88,7 @@ namespace ige::scene
     Vec2 RectTransform::getAnchorCenterInCanvasSpace()
     {
         auto parent = getOwner()->getParent();
-        if (!parent) return Vec2(0.0f, 0.0f);
+        if (!parent) return Vec2(0.f, 0.f);
 
         auto parentTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
         auto parentRect = parentTransform->getRect();
@@ -130,7 +130,7 @@ namespace ige::scene
             {
                 auto parentTransform = std::dynamic_pointer_cast<RectTransform>(parent->getTransform());
                 m_canvasTransform = parentTransform->getCanvasSpaceTransform();
-                auto transformToParent = getLocalTransform();
+                const auto& transformToParent = getLocalTransform();
                 m_canvasTransform = m_canvasTransform * transformToParent;
             }
             else
@@ -152,7 +152,7 @@ namespace ige::scene
             auto canvas = getOwner()->getRoot()->getComponent<Canvas>();
             if (canvas)
             {
-                auto canvasToViewportMatrix = canvas->getCanvasToViewportMatrix();
+                const auto& canvasToViewportMatrix = canvas->getCanvasToViewportMatrix();
                 m_viewportTransform = canvasToViewportMatrix * getCanvasSpaceTransform();
             }
 
@@ -182,6 +182,9 @@ namespace ige::scene
             // Update world rotation
             Mat3 rotationMatrix(columns[0], columns[1], columns[2]);
             m_worldRotation = Quat(rotationMatrix);
+
+            // Update aabb
+            updateAabb();
 
             m_viewportTransformDirty = false;
         }
@@ -469,10 +472,11 @@ namespace ige::scene
             posVec2.X(posVec2.X() - (0.5f - anchorCenter[0]) * getRectWidth(rect));
             posVec2.Y(posVec2.Y() - (0.5f - anchorCenter[1]) * getRectHeight(rect));
 
+            // Update local position
             m_localPosition = Vec3(posVec2.X(), posVec2.Y(), m_posZ);
 
             // Recompute world transform
-            setDirty();
+            m_viewportTransformDirty = true;
         }
         return m_rect;
     }
