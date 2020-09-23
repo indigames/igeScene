@@ -65,10 +65,16 @@ namespace ige::scene
                 break;
             }
         }
-        auto *obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
-        obj->component = camera.get();
-        obj->super.component = obj->component;
-        return (PyObject*)obj;
+
+        if (camera)
+        {
+            auto* obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
+            obj->component = camera.get();
+            obj->super.component = obj->component;
+            return (PyObject*)obj;
+        }
+
+        Py_RETURN_NONE;
     }
 
     // Set active camera

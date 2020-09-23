@@ -48,8 +48,11 @@ namespace ige::scene
         //! Unload scene by name
         void unloadScene(const std::string& sceneName);
 
+        //! Reload scene
+        void reloadScene();
+
         //! Save scene
-        bool saveScene(const std::string& scenePath);
+        bool saveScene(const std::string& scenePath = std::string());
 
         //! Get current scene
         const std::shared_ptr<Scene>& getCurrentScene() const { return m_currScene; }

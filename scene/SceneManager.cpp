@@ -128,12 +128,21 @@ namespace ige::scene
     std::shared_ptr<Scene> SceneManager::loadScene(const std::string& path)
     {
         json jScene;
-        std::ifstream file(path);
+
+        auto fsPath = fs::path(path);
+        auto ext = fsPath.extension();
+        if (ext.string() != ".json")
+        {
+            fsPath = fsPath.replace_extension(".json");
+        }
+
+        std::ifstream file(fsPath);
         file >> jScene;
         auto s = jScene.dump();
 
         auto scene = std::make_shared<Scene>(jScene.at("name"));
         scene->from_json(jScene);
+        scene->setPath(path);
         m_scenes.push_back(scene);
         setCurrentScene(scene);
         return scene;
@@ -146,7 +155,7 @@ namespace ige::scene
             json jScene;
             m_currScene->to_json(jScene);
 
-            auto fsPath = fs::path(path);
+            auto fsPath = path.empty() ? m_currScene->getPath() : fs::path(path);
             auto ext = fsPath.extension();
             if (ext.string() != ".json")
             {
@@ -174,7 +183,7 @@ namespace ige::scene
 
     void SceneManager::unloadScene(const std::string& name)
     {
-        if (m_currScene->getName() == name)
+        if (m_currScene && m_currScene->getName() == name)
             m_currScene = nullptr;
 
         auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](const auto& itr)
@@ -186,5 +195,15 @@ namespace ige::scene
         {
             m_scenes.erase(found);
         }
+    }
+
+    //! Reload scene
+    void SceneManager::reloadScene()
+    {
+        auto path = m_currScene->getPath();
+        auto name = m_currScene->getName();
+        m_currScene = nullptr;
+        unloadScene(name);
+        loadScene(path);
     }
 }

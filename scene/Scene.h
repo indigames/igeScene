@@ -97,6 +97,12 @@ namespace ige::scene
         //! Active camera changed event
         Event<CameraComponent*>& getOnActiveCameraChangedEvent() { return m_onActiveCameraChanged; }
 
+        //! Return the cached path
+        const std::string& getPath() const { return m_path; }
+
+        //! Cache the path
+        void setPath(const std::string& path) { m_path = path; }
+
     protected:
         //! Scene root node
         std::vector<std::shared_ptr<SceneObject>> m_roots;
@@ -110,6 +116,9 @@ namespace ige::scene
 
         //! Scene name
         std::string m_name;
+
+        //! Cached path
+        std::string m_path;
 
         //! Active camera changed events
         Event<CameraComponent*> m_onActiveCameraChanged;
