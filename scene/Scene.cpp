@@ -45,14 +45,14 @@ namespace ige::scene
 
     void Scene::clear()
     {
-        for (auto& root : m_roots)
-            root = nullptr;
-        m_roots.clear();
-
         m_activeCamera = nullptr;
         for (auto& cam : m_cameras)
             cam = nullptr;
         m_cameras.clear();
+
+        for (auto& root : m_roots)
+            root = nullptr;
+        m_roots.clear();
     }
 
     void Scene::update(float dt)
