@@ -32,6 +32,9 @@ namespace ige::scene {
         //! Get parent transform component
         TransformComponent* getParent() const;
 
+        //! Set parent transform
+        void setParent(TransformComponent* comp);
+
         //! Check if has parent transform component
         bool hasParent() const { return  getParent() != nullptr; }
 

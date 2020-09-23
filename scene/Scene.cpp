@@ -99,9 +99,9 @@ namespace ige::scene
     std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent)
     {
         auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent ? parent.get() : nullptr);
-        if(parent != nullptr) parent->addChild(sceneObject);
         auto transform = sceneObject->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
         sceneObject->setTransform(transform);
+        if (parent != nullptr) parent->addChild(sceneObject);
 
         if (parent == nullptr)
         {
@@ -125,9 +125,9 @@ namespace ige::scene
     std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent, const Vec3& pos, const Vec2& size)
     {
         auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent ? parent.get() : nullptr, true);
-        if (parent != nullptr) parent->addChild(sceneObject);
         auto transform = sceneObject->addComponent<RectTransform>(pos, size);
         sceneObject->setTransform(transform);
+        if (parent != nullptr) parent->addChild(sceneObject);
 
         if (parent == nullptr)
         {

@@ -38,6 +38,15 @@ namespace ige::scene {
         return m_parent;
     }
 
+    //! Set parent transform
+    void TransformComponent::setParent(TransformComponent* comp)
+    {
+        if (hasParent()) getParent()->removeObserver(this);
+        m_parent = comp;
+        if (m_parent)
+            m_parent->addObserver(this);
+    }
+
     void TransformComponent::onUpdate(float dt)
     {
         if (m_bLocalDirty)

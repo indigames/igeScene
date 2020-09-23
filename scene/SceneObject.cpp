@@ -83,6 +83,7 @@ namespace ige::scene
         if (parent)
         {
             m_parent = parent;
+            getTransform()->setParent(parent->getTransform().get());
             getAttachedEvent().invoke(*this);
         }
         else
