@@ -60,15 +60,30 @@ namespace ige::scene
         for (auto& root : m_roots)
             if (root) root->onUpdate(dt);
 
-        if (m_activeCamera)
+        //if (m_activeCamera)
+        //{
+        //    m_activeCamera->onUpdate(dt);
+        //    auto target = m_activeCamera->getShootTarget();
+        //    if (target && target->getShowcase())
+        //    {
+        //        target->getShowcase()->Update(dt);
+        //    }
+        //}
+
+        for (auto& camera : m_cameras) 
         {
-            m_activeCamera->onUpdate(dt);
-            auto target = m_activeCamera->getShootTarget();
-            if (target && target->getShowcase())
+            if (camera && camera->getOwner()->isActive())
             {
-                target->getShowcase()->Update(dt);
+                auto target = camera->getShootTarget();
+                if (target && target->isActive() && target->getShowcase())
+                {
+                    camera->onUpdate(dt);
+                    target->getShowcase()->Update(dt);
+                }
             }
         }
+        
+
     }
 
     void Scene::fixedUpdate(float dt)
@@ -85,13 +100,26 @@ namespace ige::scene
 
     void Scene::render()
     {
-        if (m_activeCamera)
+        //if (m_activeCamera)
+        //{
+        //    m_activeCamera->onRender();
+        //    auto target = m_activeCamera->getShootTarget();
+        //    if (target && target->getShowcase())
+        //    {
+        //        target->getShowcase()->Render();
+        //    }
+        //}
+
+        for (auto& camera : m_cameras)
         {
-            m_activeCamera->onRender();
-            auto target = m_activeCamera->getShootTarget();
-            if (target && target->getShowcase())
+            if (camera && camera->getOwner()->isActive())
             {
-                target->getShowcase()->Render();
+                auto target = camera->getShootTarget();
+                if (target && target->isActive() && target->getShowcase())
+                {
+                    camera->onRender();
+                    target->getShowcase()->Render();
+                }
             }
         }
     }
@@ -255,9 +283,17 @@ namespace ige::scene
     {
         if (m_activeCamera != camera)
         {
-            // Invoke callback
-            getOnActiveCameraChangedEvent().invoke(camera);
-            m_activeCamera = camera;
+            if (camera && camera->getOwner()->isActive())
+            {
+                // Invoke callback
+                getOnActiveCameraChangedEvent().invoke(camera);
+                m_activeCamera = camera;
+            }
+            else
+            {
+                getOnActiveCameraChangedEvent().invoke(nullptr);
+                m_activeCamera = nullptr;
+            }
         }
     }
 
