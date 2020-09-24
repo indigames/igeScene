@@ -135,7 +135,7 @@ namespace ige::scene
         {
             // This is a root object, setup default environment and camera
             auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
-            envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
+            envComp->setAmbientSkyColor(Vec3(0.5f, 0.5f, 0.5f));
             envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
 
             auto camObj = createObject("Default Camera", sceneObject);
@@ -164,7 +164,7 @@ namespace ige::scene
 
             // This is a GUI root object, setup default environment, canvas and camera
             auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
-            envComp->setAmbientGroundColor(Vec3(0.5f, 0.5f, 0.5f));
+            envComp->setAmbientSkyColor(Vec3(0.5f, 0.5f, 0.5f));
             envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
 
             auto canvas = sceneObject->addComponent<Canvas>();
