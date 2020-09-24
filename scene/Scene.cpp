@@ -39,7 +39,6 @@ namespace ige::scene
 
     bool Scene::initialize()
     {
-        createObject(getName());
         return true;
     }
 
