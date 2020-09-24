@@ -68,17 +68,7 @@ namespace ige::scene
         {
             m_camera->SetPosition(transCmp->getWorldPosition());
             m_camera->SetRotation(transCmp->getWorldRotation());
-            m_camera->SetScale(transCmp->getWorldScale());
 
-            // Update
-            m_camera->Step(dt);
-
-            setPosition(m_camera->GetPosition());
-            setRotation(m_camera->GetRotation());
-            setScale(m_camera->GetScale());
-        }
-        else
-        {
             // Update
             m_camera->Step(dt);
         }
@@ -145,9 +135,6 @@ namespace ige::scene
             {"fov", getFieldOfView()},
             {"near", getNearPlane()},
             {"far", getFarPlane()},
-            {"tilt", getTilt()},
-            {"pan", getPan()},
-            {"roll", getRoll()},
             {"lock", getLockOn()},
             {"target", getTarget()},
             {"ortho", isOrthoProjection()},
@@ -172,9 +159,6 @@ namespace ige::scene
         setFieldOfView(j.at("fov"));
         setNearPlane(j.at("near"));
         setFarPlane(j.at("far"));
-        setTilt(j.at("tilt"));
-        setPan(j.at("pan"));
-        setRoll(j.at("roll"));
         lockOnTarget(j.at("lock"));
         setTarget(j.at("target"));
         setOrthoProjection(j.at("ortho"));
