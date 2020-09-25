@@ -74,6 +74,7 @@
         "valarray": "cpp",
         "filesystem": "cpp",
         "iomanip": "cpp",
-        "condition_variable": "cpp"
+        "condition_variable": "cpp",
+        "compare": "cpp"
     }
 }

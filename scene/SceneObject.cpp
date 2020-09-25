@@ -99,7 +99,7 @@ namespace ige::scene
     }
 
     Showcase* SceneObject::getShowcase()
-    { 
+    {
         if (m_root == this)
             return m_showcase;
         return m_root->getShowcase();
@@ -195,6 +195,23 @@ namespace ige::scene
         return false;
     }
 
+    //! Remove a component by name
+    bool SceneObject::removeComponent(const std::string& name)
+    {
+        auto found = std::find_if(m_components.begin(), m_components.end(), [&name](auto element) {
+            return name.compare(element->getName()) == 0;
+        });
+
+        if(found != m_components.end())
+        {
+            auto result = std::dynamic_pointer_cast<Component>(*found);
+            m_componentRemovedEvent.invoke(*this, result);
+            m_components.erase(found);
+            return true;
+        }
+        return false;
+    }
+
     //! Add a component by raw pointer
     void SceneObject::addComponent(Component* component)
     {
@@ -258,6 +275,17 @@ namespace ige::scene
     size_t SceneObject::getComponentsCount()
     {
         return m_components.size();
+    }
+
+    //! Get component by name
+    std::shared_ptr<Component> SceneObject::getComponent(std::string name) const
+    {
+        for(int i = 0; i < m_components.size(); ++i)
+        {
+            if (m_components[i]->getName().compare(name) == 0)
+                return m_components[i];
+        }
+        return nullptr;
     }
 
     //! Find object by id
@@ -459,8 +487,8 @@ namespace ige::scene
             auto key = it.at(0);
             auto val = it.at(1);
             std::shared_ptr<Component> comp = nullptr;
-            if (key == "TransformComponent") 
-            { 
+            if (key == "TransformComponent")
+            {
                 auto transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
                 setTransform(transform);
                 comp = transform;

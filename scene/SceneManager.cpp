@@ -127,6 +127,8 @@ namespace ige::scene
 
     std::shared_ptr<Scene> SceneManager::loadScene(const std::string& path)
     {
+        ResourceManager::Instance().DeleteDaemon();
+
         json jScene;
 
         auto fsPath = fs::path(path);
@@ -198,6 +200,8 @@ namespace ige::scene
         {
             m_scenes.erase(found);
         }
+
+        ResourceManager::Instance().DeleteDaemon();
     }
 
     //! Reload scene

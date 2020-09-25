@@ -72,6 +72,9 @@ namespace ige::scene
         //! Remove a component
         virtual bool removeComponent(const std::shared_ptr<Component>& component);
 
+        //! Remove a component by name
+        virtual bool removeComponent(const std::string& name);
+
         //! Add a component by raw pointer
         virtual void addComponent(Component* component);
 
@@ -83,6 +86,9 @@ namespace ige::scene
 
         //! Get components list
         virtual std::vector<std::shared_ptr<Component>>& getComponents();
+
+        //! Get component by name
+        std::shared_ptr<Component> getComponent(std::string name) const;
 
         //! Get components count
         virtual size_t getComponentsCount();
@@ -102,10 +108,10 @@ namespace ige::scene
         void onResourceRemoved(Resource* resource);
 
         //! Find object by id
-        std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const;
+        std::shared_ptr<SceneObject> findObjectById(uint64_t id) const;
 
         //! Find object by name
-        std::shared_ptr<SceneObject> SceneObject::findObjectByName(std::string name) const;
+        std::shared_ptr<SceneObject> findObjectByName(std::string name) const;
 
         //! Update functions
         virtual void onUpdate(float dt);
