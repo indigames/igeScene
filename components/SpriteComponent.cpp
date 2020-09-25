@@ -22,8 +22,9 @@ namespace ige::scene
     //! Destructor
     SpriteComponent::~SpriteComponent()
     {
-        if (m_sprite->getFigure())
-            if (hasOwner()) getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_sprite->getFigure());
+        if (m_sprite && m_sprite->getFigure())
+            if (hasOwner() && getOwner()->getRoot())
+                getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_sprite->getFigure());
         m_sprite = nullptr;
     }
 

@@ -19,11 +19,11 @@ namespace ige::scene
     {
         if (m_environment)
         {
-            if(hasOwner()) getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_environment);
+            if(hasOwner() && getOwner()->getRoot())
+                getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_environment);
             m_environment->DecReference();
             m_environment = nullptr;
         }
-        ResourceManager::Instance().DeleteDaemon();
     }
 
     //! Update

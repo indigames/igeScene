@@ -182,7 +182,7 @@ namespace ige::scene
     PyObject* Scene_getRoots(PyObject_Scene *self)
     {
         auto roots = self->scene->getRoots();
-        auto pyList = PyList_New(roots.size());
+        PyObject* pyList = PyList_New(0);
         for(int i = 0; i < roots.size(); ++i)
         {
             auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
@@ -196,7 +196,7 @@ namespace ige::scene
     PyObject* Scene_getCameras(PyObject_Scene *self)
     {
         auto cameras = self->scene->getCameras();
-        auto pyList = PyList_New(cameras.size());
+        PyObject* pyList = PyList_New(0);
         for(int i = 0; i < cameras.size(); ++i)
         {
             auto obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);

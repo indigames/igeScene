@@ -181,10 +181,10 @@ namespace ige::scene
         bool m_isSelected;
 
         //! Pointer to parent, use weak_ptr avoid dangling issue
-        SceneObject* m_parent;
+        SceneObject* m_parent = nullptr;
 
         //! Showcase which contains self and children render components
-        Showcase* m_showcase;
+        Showcase* m_showcase = nullptr;
 
         //! Children vector
         std::vector<std::shared_ptr<SceneObject>> m_children;

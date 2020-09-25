@@ -136,7 +136,7 @@ namespace ige::scene
 
     protected:
         //! Internal camera
-        Camera* m_camera;
+        Camera* m_camera = nullptr;
 
         //! Camera name
         std::string m_name;

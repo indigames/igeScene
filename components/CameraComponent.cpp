@@ -20,7 +20,6 @@ namespace ige::scene
         m_shootTarget = nullptr;
         if (m_camera) m_camera->DecReference();
         m_camera = nullptr;
-        ResourceManager::Instance().DeleteDaemon();
     }
     
     //! Pan (Y-axis)
@@ -130,7 +129,6 @@ namespace ige::scene
     {
         j = json {
             {"name", m_name},
-            {"aspect", getAspectRatio()},
             {"wBase", isWidthBase()},
             {"fov", getFieldOfView()},
             {"near", getNearPlane()},
@@ -154,7 +152,6 @@ namespace ige::scene
     //! Deserialize
     void CameraComponent::from_json(const json& j)
     {
-        setAspectRatio(j.at("aspect"));
         setWidthBase(j.at("wBase"));
         setFieldOfView(j.at("fov"));
         setNearPlane(j.at("near"));

@@ -74,7 +74,6 @@ namespace ige::scene
         }
 
         getDestroyedEvent().invoke(*this);
-        ResourceManager::Instance().DeleteDaemon();
     }
 
     //! Set parent
@@ -167,9 +166,10 @@ namespace ige::scene
     //! Remove children
     void SceneObject::removeChildren()
     {
-        for(auto& child: m_children)
+        for (auto& child : m_children)
         {
-            if(child != nullptr) child->setParent(nullptr);
+            if (child)
+                child->setParent(nullptr);
             child = nullptr;
         }
         m_children.clear();
@@ -238,12 +238,13 @@ namespace ige::scene
     //! Remove all component
     bool SceneObject::removeAllComponents()
     {
-        for (auto it = m_components.begin(); it != m_components.end();)
+        for (auto& comp : m_components)
         {
-            auto result = std::dynamic_pointer_cast<Component>(*it);
+            auto result = std::dynamic_pointer_cast<Component>(comp);
             m_componentRemovedEvent.invoke(*this, result);
-            it = m_components.erase(it);
+            comp = nullptr;
         }
+        m_components.clear();
         return true;
     }
 
