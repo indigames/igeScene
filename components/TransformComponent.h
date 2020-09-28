@@ -25,7 +25,7 @@ namespace ige::scene {
 
         //! Destructor
         virtual ~TransformComponent();
-        
+
         //! Get component name
         virtual std::string getName() const override { return "TransformComponent"; }
 
@@ -97,7 +97,7 @@ namespace ige::scene {
 
         //! Get local forward vector
         virtual Vec3 getLocalForward() const;
-        
+
         //! Get world right vector
         virtual Vec3 getWorldRight() const;
 
@@ -112,7 +112,7 @@ namespace ige::scene {
 
         //! Aabb min
         const Vec3& getAabbMin() const { return m_aabbMin; }
-        inline void setAabbMin(const Vec3& aabb) 
+        inline void setAabbMin(const Vec3& aabb)
         {
             m_aabbMin = aabb;
             m_aabbCenter = Vec3((m_aabbMin[0] + m_aabbMax[0]), (m_aabbMin[1] + m_aabbMax[1]), (m_aabbMin[2] + m_aabbMax[2])) * 0.5f;
@@ -120,19 +120,19 @@ namespace ige::scene {
 
         //! Aabb max
         const Vec3& getAabbMax() const { return m_aabbMax; }
-        inline void setAabbMax(const Vec3& aabb) 
-        { 
+        inline void setAabbMax(const Vec3& aabb)
+        {
             m_aabbMax = aabb;
             m_aabbCenter = Vec3((m_aabbMin[0] + m_aabbMax[0]), (m_aabbMin[1] + m_aabbMax[1]), (m_aabbMin[2] + m_aabbMax[2])) * 0.5f;
         }
-        
+
         const Vec3& getCenter() const { return m_aabbCenter; }
 
         //! Serialize
         virtual void to_json(json& j) const override;
 
-        //! Deserialize 
-        virtual void from_json(const json& j);
+        //! Deserialize
+        virtual void from_json(const json& j) override;
 
     protected:
         //! Update local transform matrix
@@ -152,7 +152,7 @@ namespace ige::scene {
 
         //! Notify to all observers
         virtual void notifyObservers(const ETransformMessage &message);
-        
+
         //! Handle notification from parent
         virtual void onNotified(const ETransformMessage &message);
 

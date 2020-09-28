@@ -133,10 +133,10 @@ namespace ige::scene
         Event<PhysicBase &> &getTriggerStopEvent() { return m_triggerStopEvent; }
 
         //! Serialize
-        virtual void to_json(json &j) const;
+        virtual void to_json(json &j) const override;
 
         //! Deserialize
-        virtual void from_json(const json &j);
+        virtual void from_json(const json &j) override;
 
     protected:
         //! Create physic body

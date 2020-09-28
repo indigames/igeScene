@@ -45,14 +45,19 @@ endif()
 
 set(LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
-set (PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/Include)
+set (PYTHON_INCLUDE_DIRS ${LIBS_DIR}/cpython/Include)
+list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/Include)
 if (MSVC)
+    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/cpython/PC)
     list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/PC)
 elseif (OSX)
+    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/cpython/Mac)
     list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/Mac)
 elseif (ANDROID)
+    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/cpython/Android)
     list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/Android)
 elseif (IOS)
+    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/cpython/IOS)
     list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/IOS)
 endif ()
 
@@ -66,19 +71,33 @@ file(GLOB_RECURSE SRC
 set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${PYTHON_INCLUDE_DIRS}
+    ${LIBS_DIR}/pyxCore/pyxcore
     ${LIBS_DIR}/pyxCore/include/pyxcore
+    ${LIBS_DIR}/pyxCore/ThirdParty/GLEW
     ${LIBS_DIR}/pyxCore/include/ThirdParty/GLEW
+    ${LIBS_DIR}/pyxCore/ThirdParty/edge/include
     ${LIBS_DIR}/pyxCore/include/ThirdParty/edge/include
+    ${LIBS_DIR}/pyxCore/ThirdParty/spdlog/include
     ${LIBS_DIR}/pyxCore/include/ThirdParty/spdlog/include
+    ${LIBS_DIR}/tracy
     ${LIBS_DIR}/tracy/include
+    ${LIBS_DIR}/json
     ${LIBS_DIR}/json/include
+    ${LIBS_DIR}/igeVmath
     ${LIBS_DIR}/igeVmath/include
+    ${LIBS_DIR}/igeCore
     ${LIBS_DIR}/igeCore/include
     ${LIBS_DIR}/igeScene
+    ${LIBS_DIR}/igeScene/include
     ${LIBS_DIR}/imgui
+    ${LIBS_DIR}/imgui/include
+    ${LIBS_DIR}/SDL
     ${LIBS_DIR}/SDL/include
+    ${LIBS_DIR}/stb
     ${LIBS_DIR}/stb/include
+    ${LIBS_DIR}/igeBullet
     ${LIBS_DIR}/igeBullet/include
+    ${LIBS_DIR}/igeBullet/bullet
     ${LIBS_DIR}/igeBullet/include/bullet
 )
 

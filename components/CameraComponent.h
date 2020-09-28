@@ -59,11 +59,11 @@ namespace ige::scene
         //! Pan (Y-axis)
         float getPan() const { return m_camera->GetPan(); }
         void setPan(float pan);
-        
+
         //! Roll (Z-axis)
         float getRoll() const { return m_camera->GetRoll(); }
         void setRoll(float roll);
-        
+
         //! Targets
         void setTarget(const Vec3& tar);
         Vec3 getTarget() const { return m_camera->GetTarget(); }
@@ -111,15 +111,15 @@ namespace ige::scene
         int getUpAxis() const { return m_camera->GetUpAxis(); }
 
         //! Update
-        virtual void onUpdate(float dt);
+        virtual void onUpdate(float dt) override;
 
         //! Update
-        virtual void onRender();
+        virtual void onRender() override;
 
         //! Serialize
         virtual void to_json(json& j) const override;
 
-        //! Deserialize 
+        //! Deserialize
         virtual void from_json(const json& j) override;
 
         //! Get camera

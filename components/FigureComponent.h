@@ -22,10 +22,10 @@ namespace ige::scene
         virtual std::string getName() const override { return "FigureComponent"; }
 
         //! Update
-        void onUpdate(float dt);
+        void onUpdate(float dt) override;
 
         //! Render
-        void onRender();
+        void onRender() override;
 
         //! Serialize
         virtual void to_json(json& j) const override;

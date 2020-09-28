@@ -29,7 +29,7 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    SceneManager::SceneManager() 
+    SceneManager::SceneManager()
     {
         m_currScene = nullptr;
     }
@@ -45,7 +45,7 @@ namespace ige::scene
         // Destroy python runtime
         Py_Finalize();
     }
-    
+
     void SceneManager::update(float dt)
     {
         if (!m_bInitialized)
@@ -160,7 +160,7 @@ namespace ige::scene
             json jScene;
             m_currScene->to_json(jScene);
 
-            auto fsPath = path.empty() ? m_currScene->getPath() : fs::path(path);
+            auto fsPath = path.empty() ? fs::path(m_currScene->getPath()) : fs::path(path);
             auto ext = fsPath.extension();
             if (ext.string() != ".json")
             {
