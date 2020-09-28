@@ -8,8 +8,8 @@
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
 
-#include <filesystem>
-namespace fs = std::filesystem;
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
 
 #include "utils/PyxieHeaders.h"
 extern std::shared_ptr<Application> gApp;

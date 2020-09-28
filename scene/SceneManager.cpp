@@ -13,8 +13,8 @@
 
 #include <Python.h>
 
-#include <filesystem>
-namespace fs = std::filesystem;
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
