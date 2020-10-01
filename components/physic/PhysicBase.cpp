@@ -319,6 +319,8 @@ namespace ige::scene
             {"isTrigger", m_bIsTrigger},
             {"isEnabled", m_bIsEnabled},
             {"scale", m_previousScale},
+            {"group", m_collisionFilterGroup},
+            {"mask", m_collisionFilterMask},
         };
     }
 
@@ -336,5 +338,7 @@ namespace ige::scene
         setIsKinematic(j.value("isKinematic", false));
         setIsTrigger(j.value("isTrigger", false));
         setEnabled(j.value("isEnabled", true));
+        setCollisionFilterGroup(j.value("group", isKinematic() ? 2 : 1));
+        setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
     }
 } // namespace ige::scene

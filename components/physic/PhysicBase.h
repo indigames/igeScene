@@ -232,10 +232,10 @@ namespace ige::scene
         bool m_bIsEnabled = true;
 
         //! Collision filter group
-        int m_collisionFilterGroup;
+        int m_collisionFilterGroup = 1;
 
         //! Collisuin filter mask
-        int m_collisionFilterMask;
+        int m_collisionFilterMask = -1;
 
         //! Cache activated status
         bool m_bIsActivated = false;
