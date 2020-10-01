@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "components/FigureComponent.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
@@ -63,6 +65,7 @@ namespace ige::scene
         if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
         {
             m_path = relPath;
+            std::replace(m_path.begin(), m_path.end(), '\\', '/');
 
             if (m_figure != nullptr)
             {

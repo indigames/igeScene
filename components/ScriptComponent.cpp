@@ -1,4 +1,5 @@
 #include <Python.h>
+#include <algorithm>
 
 #include "components/ScriptComponent.h"
 #include "python/pySceneObject.h"
@@ -267,6 +268,8 @@ namespace ige::scene
         if (strcmp(m_path.c_str(), scriptName.c_str()) != 0)
         {
             m_path = scriptName;
+            std::replace(m_path.begin(), m_path.end(), '\\', '/');
+
             m_bPathDirty = true;
         }
     }

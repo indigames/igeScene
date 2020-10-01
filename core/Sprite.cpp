@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "core/Sprite.h"
 #include "utils/GraphicsHelper.h"
 
@@ -42,6 +44,8 @@ namespace ige::scene
         if(m_path != path)
         {
             m_path = path;
+            std::replace(m_path.begin(), m_path.end(), '\\', '/');
+
             if (m_path.length() > 0)
             {
                 // Free old texture
