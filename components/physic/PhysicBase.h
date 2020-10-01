@@ -110,6 +110,14 @@ namespace ige::scene
         //! Get AABB
         void getAABB(btVector3 &aabbMin, btVector3 aabbMax);
 
+        //! Collision filter group
+        int getCollisionFilterGroup() { return m_collisionFilterGroup; }
+        void setCollisionFilterGroup(int group);
+
+        //! Collision filter mask
+        int getCollisionFilterMask() { return m_collisionFilterMask; }
+        void setCollisionFilterMask(int mask);
+
         //! Get onCreatedEvent
         static Event<PhysicBase &> &getOnCreatedEvent() { return m_onCreatedEvent; }
 
@@ -222,6 +230,12 @@ namespace ige::scene
 
         //! Enable physic
         bool m_bIsEnabled = true;
+
+        //! Collision filter group
+        int m_collisionFilterGroup;
+
+        //! Collisuin filter mask
+        int m_collisionFilterMask;
 
         //! Cache activated status
         bool m_bIsActivated = false;

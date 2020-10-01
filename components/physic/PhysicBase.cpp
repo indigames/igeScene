@@ -156,15 +156,36 @@ namespace ige::scene
         m_body->setAngularFactor(m_angularFactor);
         m_body->setUserPointer(this);
 
+        // Apply collision filter group and mask
+        if (m_bIsKinematic)
+        {
+            addCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
+            m_collisionFilterGroup = 2;
+            m_collisionFilterMask = 3;
+        }
+        else
+        {
+            m_collisionFilterGroup = 1;
+            m_collisionFilterMask = -1;
+        }
+        
+        if (m_body->getBroadphaseHandle())
+        {
+            m_body->getBroadphaseHandle()->m_collisionFilterGroup = m_collisionFilterGroup;
+            m_body->getBroadphaseHandle()->m_collisionFilterMask = m_collisionFilterMask;
+        }
+
+        // Apply inertia
         applyInertia();
 
         // Add custom material callback for collision events
         addCollisionFlag(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 
+        // Add trigger flag
         if (m_bIsTrigger)
             addCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
-        if (m_bIsEnabled)
+       if (m_bIsEnabled)
             activate();
     }
 
@@ -195,6 +216,28 @@ namespace ige::scene
     void PhysicBase::removeCollisionFlag(btCollisionObject::CollisionFlags flag)
     {
         m_body->setCollisionFlags(m_body->getCollisionFlags() & ~flag);
+    }
+
+    //! Collision filter group
+    void PhysicBase::setCollisionFilterGroup(int group)
+    {
+        if (m_collisionFilterGroup != group)
+        {
+            m_collisionFilterGroup = group;
+            if (m_body && m_body->getBroadphaseHandle())
+                m_body->getBroadphaseHandle()->m_collisionFilterGroup = m_collisionFilterGroup;
+        }
+    }
+
+    //! Collision filter mask
+    void PhysicBase::setCollisionFilterMask(int mask)
+    {
+        if (m_collisionFilterMask != mask)
+        {
+            m_collisionFilterMask = mask;
+            if (m_body && m_body->getBroadphaseHandle())
+                m_body->getBroadphaseHandle()->m_collisionFilterMask = m_collisionFilterMask;
+        }
     }
 
     //! Activate
