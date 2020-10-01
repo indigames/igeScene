@@ -158,6 +158,9 @@ namespace ige::scene
 
         applyInertia();
 
+        // Add custom material callback for collision events
+        addCollisionFlag(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+
         if (m_bIsTrigger)
             addCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 

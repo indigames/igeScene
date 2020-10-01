@@ -53,6 +53,16 @@ namespace ige::scene
         //! Resume
         virtual void onResume() override;
 
+        //! Trigger events
+        virtual void onTriggerStart(SceneObject& other);
+        virtual void onTriggerStay(SceneObject& other);
+        virtual void onTriggerStop(SceneObject& other);
+
+        //! Collision events
+        virtual void onCollisionStart(SceneObject& other);
+        virtual void onCollisionStay(SceneObject& other);
+        virtual void onCollisionStop(SceneObject& other);
+
         //! Serialize
         virtual void to_json(json& j) const override;
 
@@ -69,6 +79,9 @@ namespace ige::scene
     protected:
         void loadPyModule();
         void unloadPyModule();
+
+        void registerPhysicEvents();
+        void unregisterPhysicEvents();
 
         //! Path to figure file
         std::string m_path;

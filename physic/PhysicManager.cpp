@@ -63,6 +63,10 @@ namespace ige::scene
         PhysicBase::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase&)>(&PhysicManager::onObjectDestroyed), this, std::placeholders::_1));
         PhysicBase::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase&)>(&PhysicManager::onObjectActivated), this, std::placeholders::_1));
         PhysicBase::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase&)>(&PhysicManager::onObjectDeactivated), this, std::placeholders::_1));
+
+        // Set collision callback
+        setCollisionCallback();
+
         return true;
     }
 

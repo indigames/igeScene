@@ -2,6 +2,8 @@
 #include <algorithm>
 
 #include "components/ScriptComponent.h"
+#include "components/physic/PhysicBase.h"
+
 #include "python/pySceneObject.h"
 #include "python/pyScript.h"
 
@@ -90,6 +92,9 @@ namespace ige::scene
 
             PyErr_Clear();
 
+            // Register physic events
+            registerPhysicEvents();
+
             // Initialized, call invoke onAwake()
             onAwake();
 
@@ -107,6 +112,68 @@ namespace ige::scene
         {
             Py_XDECREF(m_pyModule);
             m_pyModule = nullptr;
+        }
+
+        unregisterPhysicEvents();
+    }
+
+    //! Register physic events
+    void ScriptComponent::registerPhysicEvents()
+    {
+        if (getOwner() == nullptr)
+            return;
+
+        auto physicComp = getOwner()->getComponent<PhysicBase>();
+        if (physicComp != nullptr)
+        {
+            physicComp->getTriggerStartEvent().addListener([this](auto& other) {
+                auto otherObject = other.getOwner();
+                onTriggerStart(*otherObject);
+            });
+
+            physicComp->getTriggerStayEvent().addListener([this](auto& other) {
+                auto otherObject = other.getOwner();
+                onTriggerStay(*otherObject);
+            });
+
+            physicComp->getTriggerStopEvent().addListener([this](auto& other) {
+                auto otherObject = other.getOwner();
+                onTriggerStop(*otherObject);
+            });
+
+            physicComp->getCollisionStartEvent().addListener([this](auto& other) {
+                auto otherObject = other.getOwner();
+                onCollisionStart(*otherObject);
+            });
+
+            physicComp->getCollisionStayEvent().addListener([this](auto& other) {
+                auto otherObject = other.getOwner();
+                onCollisionStay(*otherObject);
+            });
+
+            physicComp->getCollisionStayEvent().addListener([this](auto& other) {
+                auto otherObject = other.getOwner();
+                onCollisionStop(*otherObject);
+            });
+        }
+    }
+
+    //! Unregister physic events
+    void ScriptComponent::unregisterPhysicEvents()
+    {
+        if (getOwner() == nullptr)
+            return;
+
+        auto physicComp = getOwner()->getComponent<PhysicBase>();
+        if (physicComp != nullptr)
+        {
+            physicComp->getTriggerStartEvent().removeAllListeners();
+            physicComp->getTriggerStayEvent().removeAllListeners();
+            physicComp->getTriggerStopEvent().removeAllListeners();
+
+            physicComp->getCollisionStartEvent().removeAllListeners();
+            physicComp->getCollisionStayEvent().removeAllListeners();
+            physicComp->getCollisionStayEvent().removeAllListeners();
         }
     }
 
@@ -245,6 +312,81 @@ namespace ige::scene
             Py_XDECREF(ret);
         }
     }
+
+    //! Trigger events
+    void ScriptComponent::onTriggerStart(SceneObject& other)
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onTriggerStart"))
+        {
+            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            obj->sceneObject = &other;
+
+            auto ret = PyObject_CallMethod(m_pyInstance, "onTriggerStart", "(O)", obj);
+            Py_XDECREF(ret);
+        }
+    }
+
+    void ScriptComponent::onTriggerStay(SceneObject& other)
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onTriggerStay"))
+        {
+            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            obj->sceneObject = &other;
+
+            auto ret = PyObject_CallMethod(m_pyInstance, "onTriggerStay", "(O)", obj);
+            Py_XDECREF(ret);
+        }
+    }
+
+    void ScriptComponent::onTriggerStop(SceneObject& other)
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onTriggerStop"))
+        {
+            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            obj->sceneObject = &other;
+
+            auto ret = PyObject_CallMethod(m_pyInstance, "onTriggerStop", "(O)", obj);
+            Py_XDECREF(ret);
+        }
+    }
+
+    //! Collision events
+    void ScriptComponent::onCollisionStart(SceneObject& other)
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onCollisionStart"))
+        {
+            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            obj->sceneObject = &other;
+
+            auto ret = PyObject_CallMethod(m_pyInstance, "onCollisionStart", "(O)", obj);
+            Py_XDECREF(ret);
+        }
+    }
+
+    void ScriptComponent::onCollisionStay(SceneObject& other)
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onCollisionStay"))
+        {
+            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            obj->sceneObject = &other;
+
+            auto ret = PyObject_CallMethod(m_pyInstance, "onCollisionStay", "(O)", obj);
+            Py_XDECREF(ret);
+        }
+    }
+
+    void ScriptComponent::onCollisionStop(SceneObject& other)
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onCollisionStop"))
+        {
+            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            obj->sceneObject = &other;
+
+            auto ret = PyObject_CallMethod(m_pyInstance, "onCollisionStop", "(O)", obj);
+            Py_XDECREF(ret);
+        }
+    }
+
 
     //! Serialize
     void ScriptComponent::to_json(json& j) const
