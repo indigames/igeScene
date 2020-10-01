@@ -78,4 +78,13 @@ namespace ige::scene
 
     //! Get AABB
     PyObject *PhysicBase_getAABB(PyObject_PhysicBase *self);
+
+    //! Collision group
+    PyObject* PhysicBase_getCollisionFilterGroup(PyObject_PhysicBase* self);
+    int PhysicBase_setCollisionFilterGroup(PyObject_PhysicBase* self, PyObject* value);
+
+    //! Collision mask
+    PyObject* PhysicBase_getCollisionFilterMask(PyObject_PhysicBase* self);
+    int PhysicBase_setCollisionFilterMask(PyObject_PhysicBase* self, PyObject* value);
+
 } // namespace ige::scene

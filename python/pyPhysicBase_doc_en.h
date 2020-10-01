@@ -90,3 +90,13 @@ PyDoc_STRVAR(PhysicBase_isEnabled_doc,
 PyDoc_STRVAR(PhysicBase_aabb_doc,
              "Aabb bounding box.\n"
              "Type: tuple of Vec4\n");
+
+// collisionGroup
+PyDoc_STRVAR(PhysicBase_collisionGroup_doc,
+    "Collision filter group.\n"
+    "Type: int\n");
+
+// collisionMask
+PyDoc_STRVAR(PhysicBase_collisionMask_doc,
+    "Collision filter mask.\n"
+    "Type: int\n");
