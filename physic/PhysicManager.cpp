@@ -178,7 +178,8 @@ namespace ige::scene
             {
                 m_collisionEvents.erase(iter);
             }
-            ++iter;
+            if(iter != m_collisionEvents.end())
+                ++iter;
         }
     }
 
