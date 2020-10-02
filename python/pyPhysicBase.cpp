@@ -308,6 +308,23 @@ namespace ige::scene
         return -1;
     }
 
+    //! Continous Collision Detection mode
+    PyObject* PhysicBase_isCCD(PyObject_PhysicBase* self)
+    {
+        return PyBool_FromLong(self->component->isCCD());
+    }
+
+    int PhysicBase_setCCD(PyObject_PhysicBase* self, PyObject* value)
+    {
+        int val;
+        if (PyArg_ParseTuple(value, "i", &val))
+        {
+            self->component->setCCD(val);
+            return 0;
+        }
+        return -1;
+    }
+
     // Methods definition
     PyMethodDef PhysicBase_methods[] = {
         {"applyTorque", (PyCFunction)PhysicBase_applyTorque, METH_VARARGS, PhysicBase_applyTorque_doc},
@@ -332,6 +349,7 @@ namespace ige::scene
         {"aabb", (getter)PhysicBase_getAABB, NULL, PhysicBase_isEnabled_doc, NULL},
         {"collisionGroup", (getter)PhysicBase_getCollisionFilterGroup, (setter)PhysicBase_setCollisionFilterGroup, PhysicBase_collisionGroup_doc, NULL},
         {"collisionMask", (getter)PhysicBase_getCollisionFilterMask, (setter)PhysicBase_setCollisionFilterMask, PhysicBase_collisionMask_doc, NULL},
+        {"continousDetection", (getter)PhysicBase_isCCD, (setter)PhysicBase_setCCD, PhysicBase_continousDetection_doc, NULL},
         {NULL, NULL},
     };
 

@@ -47,6 +47,27 @@ namespace ige::scene
             deactivate();
     }
 
+    //! Set enable
+    void PhysicBase::setCCD(bool isCCD)
+    {
+        if (m_bIsCCD != isCCD)
+        {
+            m_bIsCCD = isCCD;
+            if (m_bIsCCD)
+            {
+                // Continous detection
+                m_body->setCcdMotionThreshold(static_cast<btScalar>(0.001f));
+                m_body->setCcdSweptSphereRadius(0.5f);
+            }
+            else
+            {
+                // Discrete detection
+                m_body->setCcdMotionThreshold(std::numeric_limits<float>::max());
+                m_body->setCcdSweptSphereRadius(0.0f);
+            }
+        }
+    }
+
     //! Set mass
     void PhysicBase::setMass(float mass)
     {
@@ -173,6 +194,20 @@ namespace ige::scene
         {
             m_body->getBroadphaseHandle()->m_collisionFilterGroup = m_collisionFilterGroup;
             m_body->getBroadphaseHandle()->m_collisionFilterMask = m_collisionFilterMask;
+        }
+
+        // Continous detection mode
+        if (m_bIsCCD)
+        {
+            // Continous detection
+            m_body->setCcdMotionThreshold(static_cast<btScalar>(0.001f));
+            m_body->setCcdSweptSphereRadius(0.5f);
+        }
+        else
+        {
+            // Discrete detection
+            m_body->setCcdMotionThreshold(std::numeric_limits<float>::max());
+            m_body->setCcdSweptSphereRadius(0.0f);
         }
 
         // Apply inertia
@@ -321,6 +356,7 @@ namespace ige::scene
             {"scale", m_previousScale},
             {"group", m_collisionFilterGroup},
             {"mask", m_collisionFilterMask},
+            {"ccd", m_bIsCCD},
         };
     }
 
@@ -340,5 +376,6 @@ namespace ige::scene
         setEnabled(j.value("isEnabled", true));
         setCollisionFilterGroup(j.value("group", isKinematic() ? 2 : 1));
         setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
+        setCCD(j.value("ccd", true));
     }
 } // namespace ige::scene

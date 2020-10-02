@@ -87,4 +87,8 @@ namespace ige::scene
     PyObject* PhysicBase_getCollisionFilterMask(PyObject_PhysicBase* self);
     int PhysicBase_setCollisionFilterMask(PyObject_PhysicBase* self, PyObject* value);
 
+    //! Continous Collision Detection mode
+    PyObject* PhysicBase_isCCD(PyObject_PhysicBase* self);
+    int PhysicBase_setCCD(PyObject_PhysicBase* self, PyObject* value);
+
 } // namespace ige::scene

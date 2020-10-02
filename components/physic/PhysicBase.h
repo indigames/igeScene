@@ -93,15 +93,19 @@ namespace ige::scene
 
         //! Indicate object is a trigger object
         bool isTrigger() const { return m_bIsTrigger; }
-        void setIsTrigger(bool isTrigger);
+        void setIsTrigger(bool isTrigger = true);
 
         //! Indicate object is a kinematic object
         bool isKinematic() const { return m_bIsKinematic; }
-        void setIsKinematic(bool isKinematic);
+        void setIsKinematic(bool isKinematic = true);
 
         //! Enable/Disable physic component
         bool isEnabled() const { return m_bIsEnabled; }
-        void setEnabled(bool enable);
+        void setEnabled(bool enable = true);
+
+        //! Enable/Disable continous collision detection
+        bool isCCD() const { return m_bIsCCD; }
+        void setCCD(bool isCCD = true);
 
         //! Position offset
         const Vec3& getPositionOffset() const { return m_positionOffset; }
@@ -230,6 +234,9 @@ namespace ige::scene
 
         //! Enable physic
         bool m_bIsEnabled = true;
+
+        //! Continuous collision detection
+        bool m_bIsCCD = true;
 
         //! Collision filter group
         int m_collisionFilterGroup = 1;
