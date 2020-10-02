@@ -41,5 +41,5 @@ namespace ige::scene
     PyObject* SceneManager_getCurrentScene(PyObject_SceneManager* self);
 
     // Set current scene
-    PyObject* SceneManager_setCurrentScene(PyObject_SceneManager* self, PyObject* value);
+    int SceneManager_setCurrentScene(PyObject_SceneManager* self, PyObject* value);
 }

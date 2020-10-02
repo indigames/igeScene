@@ -75,6 +75,12 @@ namespace ige::scene
     {
         clear();
 
+        // Unregister event listeners
+        PhysicBase::getOnCreatedEvent().removeAllListeners();
+        PhysicBase::getOnDestroyedEvent().removeAllListeners();
+        PhysicBase::getOnActivatedEvent().removeAllListeners();
+        PhysicBase::getOnDeactivatedEvent().removeAllListeners();
+
         m_collisionConfiguration = nullptr;
         m_dispatcher = nullptr;
         m_broadphase = nullptr;
@@ -206,9 +212,9 @@ namespace ige::scene
         if (closestRayCallback.hasHit())
         {
             // Get closest hit
-            result.hitObject = reinterpret_cast<PhysicBase *>(closestRayCallback.m_collisionObject->getUserPointer())->getOwner();
-            result.hitPosition = closestRayCallback.m_hitPointWorld;
-            result.hitNormal = closestRayCallback.m_hitNormalWorld;
+            result.m_object = reinterpret_cast<PhysicBase *>(closestRayCallback.m_collisionObject->getUserPointer())->getOwner();
+            result.m_position = closestRayCallback.m_hitPointWorld;
+            result.m_normal = closestRayCallback.m_hitNormalWorld;
         }
         return result;
     }
@@ -218,7 +224,7 @@ namespace ige::scene
     {
         std::vector<RaycastHit> result;
         auto closeRayHit = rayTestClosest(rayFromWorld, rayToWorld, group, mask);
-        if (closeRayHit.hitObject == nullptr)
+        if (closeRayHit.m_object == nullptr)
             return result;
 
         // Get all hits
@@ -232,51 +238,12 @@ namespace ige::scene
         for (int i = 0; i < allHitsRayCallback.m_collisionObjects.size(); i++)
         {
             RaycastHit hit;
-            hit.hitObject = reinterpret_cast<PhysicBase *>(allHitsRayCallback.m_collisionObjects[i]->getUserPointer())->getOwner();
-            hit.hitPosition = allHitsRayCallback.m_hitPointWorld[i];
-            hit.hitNormal = allHitsRayCallback.m_hitNormalWorld[i];
+            hit.m_object = reinterpret_cast<PhysicBase *>(allHitsRayCallback.m_collisionObjects[i]->getUserPointer())->getOwner();
+            hit.m_position = allHitsRayCallback.m_hitPointWorld[i];
+            hit.m_normal = allHitsRayCallback.m_hitNormalWorld[i];
             result.push_back(hit);
         }
         return result;
-    }
-
-    //! Ray cast by origin, direction and distance
-    RaycastResult PhysicManager::raycast(const btVector3 &origin, const btVector3 &direction, float distance, int group, int mask)
-    {
-        btVector3 target = origin + direction * distance;
-        RaycastResult resultHit;
-
-        btCollisionWorld::ClosestRayResultCallback closestRayCallback(origin, target);
-        closestRayCallback.m_collisionFilterMask = mask;
-        closestRayCallback.m_collisionFilterGroup = group;
-
-        m_world->rayTest(origin, target, closestRayCallback);
-
-        if (closestRayCallback.hasHit())
-        {
-            // Get closest hit
-            resultHit.closestHit.hitObject = reinterpret_cast<PhysicBase *>(closestRayCallback.m_collisionObject->getUserPointer())->getOwner();
-            resultHit.closestHit.hitPosition = closestRayCallback.m_hitPointWorld;
-            resultHit.closestHit.hitNormal = closestRayCallback.m_hitNormalWorld;
-
-            // Get all hits
-            btCollisionWorld::AllHitsRayResultCallback allHitsRayCallback(origin, target);
-            allHitsRayCallback.m_collisionFilterMask = mask;
-            allHitsRayCallback.m_collisionFilterGroup = group;
-
-            m_world->rayTest(origin, target, allHitsRayCallback);
-
-            // Get all Hit
-            for (int i = 0; i < allHitsRayCallback.m_collisionObjects.size(); i++)
-            {
-                RaycastHit hit;
-                hit.hitObject = reinterpret_cast<PhysicBase *>(allHitsRayCallback.m_collisionObjects[i]->getUserPointer())->getOwner();
-                hit.hitPosition = allHitsRayCallback.m_hitPointWorld[i];
-                hit.hitNormal = allHitsRayCallback.m_hitNormalWorld[i];
-                resultHit.allHits.push_back(hit);
-            }
-        }
-        return resultHit;
     }
 
     bool PhysicManager::collisionCallback(btManifoldPoint &cp, const btCollisionObjectWrapper *obj1, int id1, int index1, const btCollisionObjectWrapper *obj2, int id2, int index2)

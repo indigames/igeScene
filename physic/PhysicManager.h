@@ -20,15 +20,9 @@ namespace ige::scene
 {
     struct RaycastHit
     {
-        SceneObject* hitObject = nullptr;
-        btVector3 hitPosition;
-        btVector3 hitNormal;
-    };
-
-    struct RaycastResult
-    {
-        RaycastHit closestHit;
-        std::vector<RaycastHit> allHits;
+        SceneObject* m_object = nullptr;
+        btVector3 m_position;
+        btVector3 m_normal;
     };
 
     /**
@@ -46,6 +40,9 @@ namespace ige::scene
         //! Initialize
         bool initialize(int numIteration = 4, bool deformable = false);
 
+        //! Clear world
+        void clear();
+
         //! Update
         void onUpdate(float dt);
         void preUpdate();
@@ -56,13 +53,6 @@ namespace ige::scene
 
         //! Ray test all
         std::vector<RaycastHit> rayTestAll(const btVector3 &rayFromWorld, const btVector3 &rayToWorld, int group = btBroadphaseProxy::DefaultFilter, int mask = btBroadphaseProxy::AllFilter);
-
-        //! Ray cast by origin, direction and distance
-        RaycastResult raycast(const btVector3& origin, const btVector3& direction, float distance, int group = btBroadphaseProxy::DefaultFilter, int mask = btBroadphaseProxy::AllFilter);
-
-        //! Collision callback
-        void setCollisionCallback();
-        static bool collisionCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2);
 
         //! Get world
         btDynamicsWorld *getWorld() { return m_world ? m_world.get() : nullptr; }
@@ -91,8 +81,9 @@ namespace ige::scene
         void setGravity(const btVector3 &gravity) { m_gravity = gravity; }
 
     protected:
-        //! Clear world
-        void clear();
+        //! Collision callback
+        void setCollisionCallback();
+        static bool collisionCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2);
 
         //! Create/Destroy event
         void onObjectCreated(PhysicBase& object);
@@ -119,7 +110,7 @@ namespace ige::scene
         //! Deformable (enable SoftBody simulation)
         bool m_bDeformable = false;
 
-        //! Deformable (enable SoftBody simulation)
+        //! Numer of iteration per frame
         int m_numIteration = 4;
 
         //! Frame update ratio (speedup/slower effects)
