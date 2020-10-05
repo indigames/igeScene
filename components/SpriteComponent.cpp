@@ -55,6 +55,8 @@ namespace ige::scene
     {
         auto fsPath = fs::path(path);
         auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+
         auto oldFigure = m_sprite->getFigure();
         m_sprite->setPath(relPath);
         auto newFigure = m_sprite->getFigure();

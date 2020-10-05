@@ -61,11 +61,11 @@ namespace ige::scene
     {
         auto fsPath = fs::path(path);
         auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
 
         if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
         {
             m_path = relPath;
-            std::replace(m_path.begin(), m_path.end(), '\\', '/');
 
             if (m_figure != nullptr)
             {

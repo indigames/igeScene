@@ -184,7 +184,7 @@ namespace ige::scene
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onAwake", nullptr);
             Py_XDECREF(ret);
-        }        
+        }
     }
 
     //! Start
@@ -229,7 +229,7 @@ namespace ige::scene
             loadPyModule();
             m_bPathDirty = false;
         }
-        
+
         // Check call onStart()
         if (!m_bOnStartCalled)
         {
@@ -406,12 +406,11 @@ namespace ige::scene
     void ScriptComponent::setPath(const std::string& path)
     {
         auto scriptName = fs::path(path).stem().string();
+        std::replace(scriptName.begin(), scriptName.end(), '\\', '/');
 
         if (strcmp(m_path.c_str(), scriptName.c_str()) != 0)
         {
             m_path = scriptName;
-            std::replace(m_path.begin(), m_path.end(), '\\', '/');
-
             m_bPathDirty = true;
         }
     }

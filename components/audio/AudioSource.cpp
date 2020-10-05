@@ -7,6 +7,9 @@
 #include <soloud_wav.h>
 #include <soloud_wavstream.h>
 
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
+
 namespace ige::scene
 {
     //! Static members initialization
@@ -54,8 +57,13 @@ namespace ige::scene
     //! Set path
     void AudioSource::setPath(const std::string &path)
     {
-        if (path != m_path)
+        auto fsPath = fs::path(path);
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+
+        if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
         {
+            m_path = relPath;
             m_audioSource = nullptr;
 
             auto engine = AudioManager::getInstance()->getEngine();
