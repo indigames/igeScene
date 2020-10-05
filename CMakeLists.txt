@@ -89,6 +89,10 @@ set(INCLUDES
     ${LIBS_DIR}/igeCore/include
     ${LIBS_DIR}/igeScene
     ${LIBS_DIR}/igeScene/include
+    ${LIBS_DIR}/igeSound
+    ${LIBS_DIR}/igeSound/include
+    ${LIBS_DIR}/igeSound/ThirdParty/soloud/include
+    ${LIBS_DIR}/igeSound/include/ThirdParty/soloud/include
     ${LIBS_DIR}/imgui
     ${LIBS_DIR}/imgui/include
     ${LIBS_DIR}/SDL

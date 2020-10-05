@@ -75,6 +75,8 @@
         "filesystem": "cpp",
         "iomanip": "cpp",
         "condition_variable": "cpp",
-        "compare": "cpp"
+        "compare": "cpp",
+        "stack": "cpp",
+        "optional": "cpp"
     }
 }

@@ -10,6 +10,8 @@
                 "${workspaceFolder}/../igeVMath/include",
                 "${workspaceFolder}/../igeBullet/include",
                 "${workspaceFolder}/../igeBullet/include/bullet",
+                "${workspaceFolder}/../igeSound/include",
+                "${workspaceFolder}/../igeSound/include/ThirdParty/soloud/include",
                 "${workspaceFolder}/../json/include",
                 "${workspaceFolder}/../SDL/include",
                 "${workspaceFolder}/../Python/include",
