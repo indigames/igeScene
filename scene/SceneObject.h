@@ -17,11 +17,11 @@ namespace ige::scene
     /**
     * SceneObject represents an object in scene hierarchy
     */
-    class SceneObject: public std::enable_shared_from_this<SceneObject>
+    class SceneObject : public std::enable_shared_from_this<SceneObject>
     {
     public:
         //! Constructor
-        SceneObject(uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false);
+        SceneObject(uint64_t id, std::string name = "", SceneObject *parent = nullptr, bool isGui = false);
 
         //! Destructor
         virtual ~SceneObject();
@@ -30,10 +30,10 @@ namespace ige::scene
         inline uint64_t getId() const { return m_id; }
 
         //! Get Name
-        inline const std::string& getName() const { return m_name; }
+        inline const std::string &getName() const { return m_name; }
 
         //! Set Name
-        inline void setName(const std::string& name)
+        inline void setName(const std::string &name)
         {
             if (m_name != name)
             {
@@ -43,22 +43,22 @@ namespace ige::scene
         }
 
         //! Set parent
-        virtual void setParent(SceneObject* parent);
+        virtual void setParent(SceneObject *parent);
 
         // Has parent
         virtual bool hasParent() const { return getParent() != nullptr; };
 
         // Get parent
-        virtual SceneObject* getParent() const;
+        virtual SceneObject *getParent() const;
 
         //! Adds a child.
-        virtual void addChild(const std::shared_ptr<SceneObject>& child);
+        virtual void addChild(const std::shared_ptr<SceneObject> &child);
 
         //! Remove a childs.
-        virtual bool removeChild(const std::shared_ptr<SceneObject>& child);
+        virtual bool removeChild(const std::shared_ptr<SceneObject> &child);
 
         //! Get children list
-        virtual std::vector<std::shared_ptr<SceneObject>>& getChildren();
+        virtual std::vector<std::shared_ptr<SceneObject>> &getChildren();
 
         //! Get children count
         virtual size_t getChildrenCount() const;
@@ -67,25 +67,25 @@ namespace ige::scene
         virtual void removeChildren();
 
         //! Add a component
-        virtual void addComponent(const std::shared_ptr<Component>& component);
+        virtual void addComponent(const std::shared_ptr<Component> &component);
 
         //! Remove a component
-        virtual bool removeComponent(const std::shared_ptr<Component>& component);
+        virtual bool removeComponent(const std::shared_ptr<Component> &component);
 
         //! Remove a component by name
-        virtual bool removeComponent(const std::string& name);
+        virtual bool removeComponent(const std::string &name);
 
         //! Add a component by raw pointer
-        virtual void addComponent(Component* component);
+        virtual void addComponent(Component *component);
 
         //! Remove a component by raw pointer
-        virtual bool removeComponent(Component* component);
+        virtual bool removeComponent(Component *component);
 
         //! Remove all components
         virtual bool removeAllComponents();
 
         //! Get components list
-        virtual std::vector<std::shared_ptr<Component>>& getComponents();
+        virtual std::vector<std::shared_ptr<Component>> &getComponents();
 
         //! Get component by name
         std::shared_ptr<Component> getComponent(std::string name) const;
@@ -94,18 +94,18 @@ namespace ige::scene
         virtual size_t getComponentsCount();
 
         //! Get component by type
-        template<typename T>
+        template <typename T>
         inline std::shared_ptr<T> getComponent();
 
         //! Add component by type
-        template<typename T, typename ... Args>
-        std::shared_ptr<T> addComponent(Args&&... args);
+        template <typename T, typename... Args>
+        std::shared_ptr<T> addComponent(Args &&... args);
 
         //! Resource added event
-        void onResourceAdded(Resource* resource);
+        void onResourceAdded(Resource *resource);
 
         //! Resource removed event
-        void onResourceRemoved(Resource* resource);
+        void onResourceRemoved(Resource *resource);
 
         //! Find object by id
         std::shared_ptr<SceneObject> findObjectById(uint64_t id) const;
@@ -134,44 +134,44 @@ namespace ige::scene
         bool isSelected() const;
 
         //! Internal event
-        Event<Resource*>& getResourceAddedEvent() { return m_resourceAddedEvent; }
-        Event<Resource*>& getResourceRemovedEvent() { return m_resourceRemovedEvent; }
+        Event<Resource *> &getResourceAddedEvent() { return m_resourceAddedEvent; }
+        Event<Resource *> &getResourceRemovedEvent() { return m_resourceRemovedEvent; }
 
         //! Public events: Created, Destroyed, Attached, Detached
-        static Event<SceneObject&>& getCreatedEvent() { return s_createdEvent; }
-        static Event<SceneObject&>& getDestroyedEvent() { return s_destroyedEvent; }
-        static Event<SceneObject&>& getAttachedEvent() { return s_attachedEvent; }
-        static Event<SceneObject&>& getDetachedEvent() { return s_detachedEvent; }
-        static Event<SceneObject&>& getNameChangedEvent() { return s_nameChangedEvent; }
-        static Event<SceneObject&>& getSelectedEvent() { return s_selectedEvent; }
+        static Event<SceneObject &> &getCreatedEvent() { return s_createdEvent; }
+        static Event<SceneObject &> &getDestroyedEvent() { return s_destroyedEvent; }
+        static Event<SceneObject &> &getAttachedEvent() { return s_attachedEvent; }
+        static Event<SceneObject &> &getDetachedEvent() { return s_detachedEvent; }
+        static Event<SceneObject &> &getNameChangedEvent() { return s_nameChangedEvent; }
+        static Event<SceneObject &> &getSelectedEvent() { return s_selectedEvent; }
 
         // Component related events
-        static Event<SceneObject&, const std::shared_ptr<Component>&>& getComponentAddedEvent() { return m_componentAddedEvent; }
-        static Event<SceneObject&, const std::shared_ptr<Component>&>& getComponentRemovedEvent() { return m_componentRemovedEvent; }
+        static Event<SceneObject &, const std::shared_ptr<Component> &> &getComponentAddedEvent() { return m_componentAddedEvent; }
+        static Event<SceneObject &, const std::shared_ptr<Component> &> &getComponentRemovedEvent() { return m_componentRemovedEvent; }
 
         //! Serialize
-        void to_json(json& j);
+        void to_json(json &j);
 
         //! Deserialize
-        void from_json(const json& j);
+        void from_json(const json &j);
 
         //! Get showcase
-        Showcase* getShowcase();
+        Showcase *getShowcase();
 
         //! Check whether it's a GUI object
         bool isGUIObject() const { return m_bIsGui; }
 
         //! Get transform component
-        std::shared_ptr<TransformComponent>& getTransform() { return m_transform; }
+        std::shared_ptr<TransformComponent> &getTransform() { return m_transform; }
 
         //! Get RectRransform component (GUI only)
         std::shared_ptr<RectTransform> getRectTransform() { return std::dynamic_pointer_cast<RectTransform>(m_transform); }
 
         //! Set transform component
-        void setTransform(const std::shared_ptr<TransformComponent>& transform) { m_transform = transform; }
+        void setTransform(const std::shared_ptr<TransformComponent> &transform) { m_transform = transform; }
 
         //! Get root object
-        SceneObject* getRoot() { return m_root; }
+        SceneObject *getRoot() { return m_root; }
 
     protected:
         //! Node ID
@@ -187,10 +187,10 @@ namespace ige::scene
         bool m_isSelected;
 
         //! Pointer to parent, use weak_ptr avoid dangling issue
-        SceneObject* m_parent = nullptr;
+        SceneObject *m_parent = nullptr;
 
         //! Showcase which contains self and children render components
-        Showcase* m_showcase = nullptr;
+        Showcase *m_showcase = nullptr;
 
         //! Children vector
         std::vector<std::shared_ptr<SceneObject>> m_children;
@@ -199,33 +199,33 @@ namespace ige::scene
         std::vector<std::shared_ptr<Component>> m_components;
 
         //! Internal events
-        Event<Resource*> m_resourceAddedEvent;
-        Event<Resource*> m_resourceRemovedEvent;
+        Event<Resource *> m_resourceAddedEvent;
+        Event<Resource *> m_resourceRemovedEvent;
 
         //! Public events
-        static Event<SceneObject&> s_destroyedEvent;
-        static Event<SceneObject&> s_createdEvent;
-        static Event<SceneObject&> s_attachedEvent;
-        static Event<SceneObject&> s_detachedEvent;
-        static Event<SceneObject&> s_nameChangedEvent;
-        static Event<SceneObject&> s_selectedEvent;
+        static Event<SceneObject &> s_destroyedEvent;
+        static Event<SceneObject &> s_createdEvent;
+        static Event<SceneObject &> s_attachedEvent;
+        static Event<SceneObject &> s_detachedEvent;
+        static Event<SceneObject &> s_nameChangedEvent;
+        static Event<SceneObject &> s_selectedEvent;
 
         //! Component related event
-        static Event<SceneObject&, const std::shared_ptr<Component>&> m_componentAddedEvent;
-        static Event<SceneObject&, const std::shared_ptr<Component>&> m_componentRemovedEvent;
+        static Event<SceneObject &, const std::shared_ptr<Component> &> m_componentAddedEvent;
+        static Event<SceneObject &, const std::shared_ptr<Component> &> m_componentRemovedEvent;
 
         //! Cache transform component
         std::shared_ptr<TransformComponent> m_transform = nullptr;
 
         //! Cache root object
-        SceneObject* m_root = nullptr;
+        SceneObject *m_root = nullptr;
 
         //! Cache isGui
         bool m_bIsGui = false;
     };
 
     //! Get component by type
-    template<typename T>
+    template <typename T>
     inline std::shared_ptr<T> SceneObject::getComponent()
     {
         static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
@@ -240,15 +240,16 @@ namespace ige::scene
     }
 
     //! Add component by type
-    template<typename T, typename ...Args>
-    inline std::shared_ptr<T> SceneObject::addComponent(Args&& ...args)
+    template <typename T, typename... Args>
+    inline std::shared_ptr<T> SceneObject::addComponent(Args &&... args)
     {
         static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
         auto found = getComponent<T>();
-        if (found) return found;
+        if (found)
+            return found;
         auto instance = std::make_shared<T>(shared_from_this(), args...);
         m_components.push_back(instance);
         m_componentAddedEvent.invoke(*this, instance);
         return instance;
     }
-}
+} // namespace ige::scene

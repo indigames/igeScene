@@ -46,13 +46,12 @@ namespace ige::scene
                 play();
             }
 
-            if(!m_bIsEnabled)
+            if (!m_bIsEnabled)
             {
                 stop();
             }
         }
     }
-
 
     //! Set path
     void AudioSource::setPath(const std::string &path)
@@ -181,7 +180,7 @@ namespace ige::scene
 
     void AudioSource::setVelocity(const Vec3 &velocity)
     {
-        if(m_velocity != velocity)
+        if (m_velocity != velocity)
         {
             m_velocity = velocity;
             if (m_handle != 0)
@@ -200,11 +199,11 @@ namespace ige::scene
 
     void AudioSource::setMinDistance(float distance)
     {
-        if(m_minDistance != distance)
+        if (m_minDistance != distance)
         {
             m_minDistance = distance;
 
-            if(m_audioSource != nullptr)
+            if (m_audioSource != nullptr)
             {
                 m_audioSource->set3dMinMaxDistance(m_minDistance, m_maxDistance);
             }
@@ -225,11 +224,11 @@ namespace ige::scene
 
     void AudioSource::setMaxDistance(float distance)
     {
-        if(m_maxDistance != distance)
+        if (m_maxDistance != distance)
         {
             m_maxDistance = distance;
 
-            if(m_audioSource != nullptr)
+            if (m_audioSource != nullptr)
             {
                 m_audioSource->set3dMinMaxDistance(m_minDistance, m_maxDistance);
             }
@@ -250,11 +249,11 @@ namespace ige::scene
 
     void AudioSource::setAttenuationModel(int model)
     {
-        if(m_attenuationModel != model)
+        if (m_attenuationModel != model)
         {
             m_attenuationModel = model;
 
-            if(m_audioSource != nullptr)
+            if (m_audioSource != nullptr)
             {
                 m_audioSource->set3dAttenuation(m_attenuationModel, m_attenuationRollOffFactor);
             }
@@ -275,11 +274,11 @@ namespace ige::scene
 
     void AudioSource::setAttenuationRollOffFactor(float factor)
     {
-        if(m_attenuationRollOffFactor != factor)
+        if (m_attenuationRollOffFactor != factor)
         {
             m_attenuationRollOffFactor = factor;
 
-            if(m_audioSource != nullptr)
+            if (m_audioSource != nullptr)
             {
                 m_audioSource->set3dAttenuation(m_attenuationModel, m_attenuationRollOffFactor);
             }
@@ -300,11 +299,11 @@ namespace ige::scene
 
     void AudioSource::setDopplerFactor(float factor)
     {
-        if(m_dopplerFactor != factor)
+        if (m_dopplerFactor != factor)
         {
             m_dopplerFactor = factor;
 
-            if(m_audioSource != nullptr)
+            if (m_audioSource != nullptr)
             {
                 m_audioSource->set3dDopplerFactor(m_dopplerFactor);
             }
@@ -388,6 +387,19 @@ namespace ige::scene
     {
         j = json{
             {"isEnabled", m_bIsEnabled},
+            {"stream", m_bIsStream},
+            {"path", m_path},
+            {"play", m_bPlayOnEnabled},
+            {"loop", m_bIsLooped},
+            {"single", m_bIsSingleInstance},
+            {"volume", m_volume},
+            {"pan", m_pan},
+            {"velocity", m_velocity},
+            {"minDist", m_minDistance},
+            {"maxDist", m_maxDistance},
+            {"attModel", m_attenuationModel},
+            {"attFactor", m_attenuationRollOffFactor},
+            {"dopFactor", m_dopplerFactor},
         };
     }
 
@@ -395,6 +407,19 @@ namespace ige::scene
     void AudioSource::from_json(const json &j)
     {
         setEnabled(j.value("isEnabled", false));
+        setStream(j.value("stream", false));
+        setPath(j.value("path", std::string()));
+        setPlayOnEnabled(j.value("play", false));
+        setLoop(j.value("loop", false));
+        setSingleInstance(j.value("single", false));
+        setVolume(j.value("volume", 1.f));
+        setPan(j.value("pan", 0.f));
+        setVelocity(j.value("velocity", Vec3()));
+        setMinDistance(j.value("minDist", 0.f));
+        setMaxDistance(j.value("maxDist", 10000.f));
+        setAttenuationModel(j.value("attModel", SoLoud::AudioSource::LINEAR_DISTANCE));
+        setAttenuationRollOffFactor(j.value("attFactor", 0.5f));
+        setDopplerFactor(j.value("dopFactor", 1.f));
     }
 
 } // namespace ige::scene
