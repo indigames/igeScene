@@ -109,6 +109,8 @@ namespace ige::scene
         if (m_bIsLooped != loop)
         {
             m_bIsLooped = loop;
+            if (m_audioSource)
+                m_audioSource->setLooping(m_bIsLooped);
             if (m_handle != 0)
             {
                 auto engine = AudioManager::getInstance()->getEngine();
