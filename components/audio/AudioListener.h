@@ -27,6 +27,10 @@ namespace ige::scene
         bool isEnabled() const { return m_bIsEnabled; }
         void setEnabled(bool enable = true);
 
+        //! Created/Destroyed events
+        static Event<AudioListener&>& getCreatedEvent() { return m_onCreatedEvent; }
+        static Event<AudioListener&>& getDestroyedEvent() { return m_onDestroyedEvent; }
+
     protected:
         //! On created event
         static Event<AudioListener &> m_onCreatedEvent;

@@ -11,10 +11,35 @@ namespace ige::scene
     {
         m_engine = std::make_shared<SoLoud::Soloud>();
         m_engine->init();
+
+        // Listen to AudioListener events
+        AudioListener::getCreatedEvent().addListener(std::bind(static_cast<void(AudioManager::*)(AudioListener&)>(&AudioManager::onCreated), this, std::placeholders::_1));
+        AudioListener::getDestroyedEvent().addListener(std::bind(static_cast<void(AudioManager::*)(AudioListener&)>(&AudioManager::onDestroyed), this, std::placeholders::_1));
+
+        // Listen to AudioSource events
+        AudioSource::getCreatedEvent().addListener(std::bind(static_cast<void(AudioManager::*)(AudioSource&)>(&AudioManager::onCreated), this, std::placeholders::_1));
+        AudioSource::getDestroyedEvent().addListener(std::bind(static_cast<void(AudioManager::*)(AudioSource&)>(&AudioManager::onDestroyed), this, std::placeholders::_1));
     }
 
     AudioManager::~AudioManager()
     {
+        // Clear audio sources
+        for (auto& audioSrc : m_audioSources)
+            audioSrc.get().stop();
+        m_audioSources.clear();
+
+        // Unregister AudioListener events
+        AudioListener::getCreatedEvent().removeAllListeners();
+        AudioListener::getDestroyedEvent().removeAllListeners();
+
+        // Clear audio listeners
+        m_audioListeners.clear();
+
+        // Unregister AudioSource events
+        AudioSource::getCreatedEvent().removeAllListeners();
+        AudioSource::getDestroyedEvent().removeAllListeners();
+
+        // Stop audio engine
         m_engine->stopAll();
         m_engine->deinit();
         m_engine = nullptr;

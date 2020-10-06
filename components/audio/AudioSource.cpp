@@ -111,7 +111,7 @@ namespace ige::scene
             m_bIsLooped = loop;
             if (m_audioSource)
                 m_audioSource->setLooping(m_bIsLooped);
-            if (m_handle != 0)
+            if (!isStopped())
             {
                 auto engine = AudioManager::getInstance()->getEngine();
                 engine->setLooping(m_handle, m_bIsLooped);
@@ -131,7 +131,7 @@ namespace ige::scene
         if (m_volume != volume)
         {
             m_volume = volume;
-            if (m_handle != 0)
+            if (!isStopped())
             {
                 auto engine = AudioManager::getInstance()->getEngine();
                 engine->fadeVolume(m_handle, m_volume, fadingTime);
@@ -166,7 +166,7 @@ namespace ige::scene
         if (m_pan != pan)
         {
             m_pan = pan;
-            if (m_handle != 0)
+            if (!isStopped())
             {
                 auto engine = AudioManager::getInstance()->getEngine();
                 engine->setPan(m_handle, m_pan);
@@ -185,7 +185,7 @@ namespace ige::scene
         if (m_velocity != velocity)
         {
             m_velocity = velocity;
-            if (m_handle != 0)
+            if (!isStopped())
             {
                 auto engine = AudioManager::getInstance()->getEngine();
                 engine->set3dSourceVelocity(m_handle, m_velocity[0], m_velocity[1], m_velocity[2]);
@@ -210,7 +210,7 @@ namespace ige::scene
                 m_audioSource->set3dMinMaxDistance(m_minDistance, m_maxDistance);
             }
 
-            if (m_handle != 0)
+            if (!isStopped())
             {
                 auto engine = AudioManager::getInstance()->getEngine();
                 engine->set3dSourceMinMaxDistance(m_handle, m_minDistance, m_maxDistance);
@@ -229,13 +229,11 @@ namespace ige::scene
         if (m_maxDistance != distance)
         {
             m_maxDistance = distance;
-
             if (m_audioSource != nullptr)
             {
                 m_audioSource->set3dMinMaxDistance(m_minDistance, m_maxDistance);
             }
-
-            if (m_handle != 0)
+            if (!isStopped())
             {
                 auto engine = AudioManager::getInstance()->getEngine();
                 engine->set3dSourceMinMaxDistance(m_handle, m_minDistance, m_maxDistance);
@@ -254,13 +252,11 @@ namespace ige::scene
         if (m_attenuationModel != model)
         {
             m_attenuationModel = model;
-
             if (m_audioSource != nullptr)
             {
                 m_audioSource->set3dAttenuation(m_attenuationModel, m_attenuationRollOffFactor);
             }
-
-            if (m_handle != 0)
+            if (!isStopped())
             {
                 auto engine = AudioManager::getInstance()->getEngine();
                 engine->set3dSourceAttenuation(m_handle, m_attenuationModel, m_attenuationRollOffFactor);
@@ -279,13 +275,11 @@ namespace ige::scene
         if (m_attenuationRollOffFactor != factor)
         {
             m_attenuationRollOffFactor = factor;
-
             if (m_audioSource != nullptr)
             {
                 m_audioSource->set3dAttenuation(m_attenuationModel, m_attenuationRollOffFactor);
             }
-
-            if (m_handle != 0)
+            if (!isStopped())
             {
                 auto engine = AudioManager::getInstance()->getEngine();
                 engine->set3dSourceAttenuation(m_handle, m_attenuationModel, m_attenuationRollOffFactor);
@@ -304,13 +298,11 @@ namespace ige::scene
         if (m_dopplerFactor != factor)
         {
             m_dopplerFactor = factor;
-
             if (m_audioSource != nullptr)
             {
                 m_audioSource->set3dDopplerFactor(m_dopplerFactor);
             }
-
-            if (m_handle != 0)
+            if (!isStopped())
             {
                 auto engine = AudioManager::getInstance()->getEngine();
                 engine->set3dSourceDopplerFactor(m_handle, m_dopplerFactor);
@@ -324,16 +316,13 @@ namespace ige::scene
         auto engine = AudioManager::getInstance()->getEngine();
         auto position = getOwner()->getTransform()->getWorldPosition();
         m_handle = engine->play3d(*m_audioSource.get(), position[0], position[0], position[2], m_velocity[0], m_velocity[1], m_velocity[2], m_volume);
-        if (m_handle != 0)
-        {
-            engine->setPan(m_handle, m_pan);
-        }
+        engine->setPan(m_handle, m_pan);
     }
 
     //! Seek
     void AudioSource::seek(double seconds)
     {
-        if (m_handle != 0)
+        if (!isStopped())
         {
             auto engine = AudioManager::getInstance()->getEngine();
             engine->seek(m_handle, seconds);
@@ -343,7 +332,7 @@ namespace ige::scene
     //! Pause
     void AudioSource::pause()
     {
-        if (m_handle != 0)
+        if (!isStopped())
         {
             auto engine = AudioManager::getInstance()->getEngine();
             engine->setPause(m_handle, true);
@@ -353,7 +342,7 @@ namespace ige::scene
     //! Resume
     void AudioSource::resume()
     {
-        if (m_handle != 0)
+        if (!isStopped())
         {
             auto engine = AudioManager::getInstance()->getEngine();
             engine->setPause(m_handle, false);
@@ -363,11 +352,11 @@ namespace ige::scene
     //! Stop
     void AudioSource::stop()
     {
-        if (m_handle != 0)
+        if (!isStopped())
         {
             auto engine = AudioManager::getInstance()->getEngine();
             engine->stop(m_handle);
-            m_handle = (unsigned int)(-1);
+            m_handle = 0;
         }
     }
 
@@ -375,13 +364,13 @@ namespace ige::scene
     bool AudioSource::isPaused()
     {
         auto engine = AudioManager::getInstance()->getEngine();
-        return (m_handle != 0) && engine->getPause(m_handle);
+        return (!isStopped()) && engine->getPause(m_handle);
     }
 
     //! Check if sound stopped
     bool AudioSource::isStopped()
     {
-        return m_handle == (unsigned int)(-1);
+        return (m_handle == 0);
     }
 
     //! Serialize

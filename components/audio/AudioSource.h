@@ -106,6 +106,10 @@ namespace ige::scene
         //! Check if sound stopped
         bool isStopped();
 
+        //! Created/Destroyed events
+        static Event<AudioSource&>& getCreatedEvent() { return m_onCreatedEvent; }
+        static Event<AudioSource&>& getDestroyedEvent() { return m_onDestroyedEvent; }
+
     protected:
         //! On created event
         static Event<AudioSource &> m_onCreatedEvent;
