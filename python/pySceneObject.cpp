@@ -17,6 +17,8 @@
 #include "python/pyPhysicBox.h"
 #include "python/pyPhysicSphere.h"
 #include "python/pyPhysicCapsule.h"
+#include "python/pyAudioListener.h"
+#include "python/pyAudioSource.h"
 
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
@@ -412,6 +414,28 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
+            else if (type == "AudioListener")
+            {
+                auto comp = self->sceneObject->addComponent<AudioListener>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_AudioListener, &PyTypeObject_AudioListener);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "AudioSource")
+            {
+                auto comp = self->sceneObject->addComponent<AudioSource>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_AudioSource, &PyTypeObject_AudioSource);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
         }
         Py_RETURN_NONE;
     }
@@ -583,6 +607,28 @@ namespace ige::scene
                 if (comp)
                 {
                     auto *compObj = PyObject_New(PyObject_PhysicCapsule, &PyTypeObject_PhysicCapsule);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "AudioListener")
+            {
+                auto comp = self->sceneObject->getComponent<AudioListener>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_AudioListener, &PyTypeObject_AudioListener);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "AudioSource")
+            {
+                auto comp = self->sceneObject->getComponent<AudioSource>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_AudioSource, &PyTypeObject_AudioSource);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;

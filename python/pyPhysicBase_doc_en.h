@@ -93,15 +93,15 @@ PyDoc_STRVAR(PhysicBase_aabb_doc,
 
 // collisionGroup
 PyDoc_STRVAR(PhysicBase_collisionGroup_doc,
-    "Collision filter group.\n"
-    "Type: int\n");
+             "Collision filter group.\n"
+             "Type: int\n");
 
 // collisionMask
 PyDoc_STRVAR(PhysicBase_collisionMask_doc,
-    "Collision filter mask.\n"
-    "Type: int\n");
+             "Collision filter mask.\n"
+             "Type: int\n");
 
-// continousDetection
-PyDoc_STRVAR(PhysicBase_continousDetection_doc,
-    "Continous Colision Detection.\n"
-    "Type: bool\n");
+// continuousDetection
+PyDoc_STRVAR(PhysicBase_continuousDetection_doc,
+             "Continuous Colision Detection.\n"
+             "Type: bool\n");

@@ -275,12 +275,12 @@ namespace ige::scene
     }
 
     //! Collision group
-    PyObject* PhysicBase_getCollisionFilterGroup(PyObject_PhysicBase* self)
+    PyObject *PhysicBase_getCollisionFilterGroup(PyObject_PhysicBase *self)
     {
         return PyLong_FromLong(self->component->getCollisionFilterGroup());
     }
 
-    int PhysicBase_setCollisionFilterGroup(PyObject_PhysicBase* self, PyObject* value)
+    int PhysicBase_setCollisionFilterGroup(PyObject_PhysicBase *self, PyObject *value)
     {
         int val;
         if (PyArg_ParseTuple(value, "i", &val))
@@ -292,12 +292,12 @@ namespace ige::scene
     }
 
     //! Collision mask
-    PyObject* PhysicBase_getCollisionFilterMask(PyObject_PhysicBase* self)
+    PyObject *PhysicBase_getCollisionFilterMask(PyObject_PhysicBase *self)
     {
         return PyLong_FromLong(self->component->getCollisionFilterMask());
     }
 
-    int PhysicBase_setCollisionFilterMask(PyObject_PhysicBase* self, PyObject* value)
+    int PhysicBase_setCollisionFilterMask(PyObject_PhysicBase *self, PyObject *value)
     {
         int val;
         if (PyArg_ParseTuple(value, "i", &val))
@@ -309,12 +309,12 @@ namespace ige::scene
     }
 
     //! Continous Collision Detection mode
-    PyObject* PhysicBase_isCCD(PyObject_PhysicBase* self)
+    PyObject *PhysicBase_isCCD(PyObject_PhysicBase *self)
     {
         return PyBool_FromLong(self->component->isCCD());
     }
 
-    int PhysicBase_setCCD(PyObject_PhysicBase* self, PyObject* value)
+    int PhysicBase_setCCD(PyObject_PhysicBase *self, PyObject *value)
     {
         int val;
         if (PyArg_ParseTuple(value, "i", &val))
@@ -349,7 +349,7 @@ namespace ige::scene
         {"aabb", (getter)PhysicBase_getAABB, NULL, PhysicBase_isEnabled_doc, NULL},
         {"collisionGroup", (getter)PhysicBase_getCollisionFilterGroup, (setter)PhysicBase_setCollisionFilterGroup, PhysicBase_collisionGroup_doc, NULL},
         {"collisionMask", (getter)PhysicBase_getCollisionFilterMask, (setter)PhysicBase_setCollisionFilterMask, PhysicBase_collisionMask_doc, NULL},
-        {"continousDetection", (getter)PhysicBase_isCCD, (setter)PhysicBase_setCCD, PhysicBase_continousDetection_doc, NULL},
+        {"continuousDetection", (getter)PhysicBase_isCCD, (setter)PhysicBase_setCCD, PhysicBase_continuousDetection_doc, NULL},
         {NULL, NULL},
     };
 

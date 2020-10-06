@@ -9,8 +9,8 @@ namespace ige::scene
 {
     struct PyObject_PhysicManager
     {
-        PyObject_HEAD
-            PhysicManager *physicManager;
+        PyObject_HEAD;
+        PhysicManager *physicManager;
     };
 
     // Type declaration
