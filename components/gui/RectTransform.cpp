@@ -186,6 +186,9 @@ namespace ige::scene
             // Update aabb
             updateAabb();
 
+            // Fire transform changed event
+            getOwner()->getTransformChangedEvent().invoke(*getOwner());
+
             m_viewportTransformDirty = false;
         }
         return m_viewportTransform;

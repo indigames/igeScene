@@ -281,6 +281,9 @@ namespace ige::scene {
         // Notify all children
         notifyObservers(ETransformMessage::TRANSFORM_CHANGED);
 
+        // Fire transform changed event
+        getOwner()->getTransformChangedEvent().invoke(*getOwner());
+
         // Update aabb
         updateAabb();
     }
@@ -333,6 +336,9 @@ namespace ige::scene {
 
         // Notify all children
         notifyObservers(ETransformMessage::TRANSFORM_CHANGED);
+
+        // Fire transform changed event
+        getOwner()->getTransformChangedEvent().invoke(*getOwner());
 
         // Update aabb
         updateAabb();

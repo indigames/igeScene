@@ -31,7 +31,6 @@ namespace ige::scene
     Event<SceneObject &> SceneObject::s_createdEvent;
     Event<SceneObject &> SceneObject::s_attachedEvent;
     Event<SceneObject &> SceneObject::s_detachedEvent;
-    Event<SceneObject &> SceneObject::s_nameChangedEvent;
     Event<SceneObject &> SceneObject::s_selectedEvent;
 
     //! Constructor

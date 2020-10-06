@@ -38,7 +38,7 @@ namespace ige::scene
             if (m_name != name)
             {
                 m_name = name;
-                s_nameChangedEvent.invoke(*this);
+                getNameChangedEvent().invoke(*this);
             }
         }
 
@@ -136,13 +136,14 @@ namespace ige::scene
         //! Internal event
         Event<Resource *> &getResourceAddedEvent() { return m_resourceAddedEvent; }
         Event<Resource *> &getResourceRemovedEvent() { return m_resourceRemovedEvent; }
+        Event<SceneObject &> &getNameChangedEvent() { return m_nameChangedEvent; }
+        Event<SceneObject &> &getTransformChangedEvent() { return m_transformChangedEvent; }
 
         //! Public events: Created, Destroyed, Attached, Detached
         static Event<SceneObject &> &getCreatedEvent() { return s_createdEvent; }
         static Event<SceneObject &> &getDestroyedEvent() { return s_destroyedEvent; }
         static Event<SceneObject &> &getAttachedEvent() { return s_attachedEvent; }
         static Event<SceneObject &> &getDetachedEvent() { return s_detachedEvent; }
-        static Event<SceneObject &> &getNameChangedEvent() { return s_nameChangedEvent; }
         static Event<SceneObject &> &getSelectedEvent() { return s_selectedEvent; }
 
         // Component related events
@@ -201,13 +202,14 @@ namespace ige::scene
         //! Internal events
         Event<Resource *> m_resourceAddedEvent;
         Event<Resource *> m_resourceRemovedEvent;
+        Event<SceneObject &> m_nameChangedEvent;
+        Event<SceneObject &> m_transformChangedEvent;
 
         //! Public events
         static Event<SceneObject &> s_destroyedEvent;
         static Event<SceneObject &> s_createdEvent;
         static Event<SceneObject &> s_attachedEvent;
         static Event<SceneObject &> s_detachedEvent;
-        static Event<SceneObject &> s_nameChangedEvent;
         static Event<SceneObject &> s_selectedEvent;
 
         //! Component related event
