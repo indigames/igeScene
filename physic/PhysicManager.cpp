@@ -1,5 +1,7 @@
 #include "physic/PhysicManager.h"
 
+#include <algorithm>
+
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
@@ -178,14 +180,18 @@ namespace ige::scene
             m_physicObjects.erase(found);
 
         // Find and remove collision events
-        for (auto iter = m_collisionEvents.begin(); iter != m_collisionEvents.end();)
+        auto evfound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [&object](auto pair) {
+            return std::addressof(object) == pair.first.first || std::addressof(object) == pair.first.second;
+        });
+
+        // Find and remove all collision events
+        while (evfound != m_collisionEvents.end())
         {
-            if (iter->first.first == std::addressof(object) || iter->first.second == std::addressof(object))
-            {
-                m_collisionEvents.erase(iter);
-            }
-            if(iter != m_collisionEvents.end())
-                ++iter;
+            m_collisionEvents.erase(evfound);
+
+            evfound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [&object](auto pair) {
+                return std::addressof(object) == pair.first.first || std::addressof(object) == pair.first.second;
+            });
         }
     }
 
