@@ -143,7 +143,6 @@ namespace ige::scene
             return nullptr;
 
         file >> jScene;
-        auto s = jScene.dump();
 
         auto scene = std::make_shared<Scene>(jScene.at("name"));
         scene->from_json(jScene);
