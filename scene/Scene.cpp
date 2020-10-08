@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <cstdlib> 
+#include <ctime>
 
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
@@ -145,6 +147,27 @@ namespace ige::scene
             camComp->setShootTarget(sceneObject.get());
             setActiveCamera(camComp.get());
             m_roots.push_back(sceneObject);
+
+        /*
+            //! [IGE]: To test perfornamce with huge amount of objects
+            std::srand(std::time(nullptr));
+
+            for (int i = 0; i < 10000; ++i)
+            {
+                auto newObj = createObject("Object_" + std::to_string(i), sceneObject);
+                if((std::rand() / (float)RAND_MAX) < 0.5f)
+                    if ((std::rand() / (float)RAND_MAX) < 0.5f)
+                        newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, -std::rand() % 50));
+                    else
+                        newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, std::rand() % 50));
+                else
+                    if ((std::rand() / (float)RAND_MAX) < 0.5f)
+                        newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, -std::rand() % 50));
+                    else
+                        newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, std::rand() % 50));
+                newObj->addComponent<FigureComponent>("figure/Tree/Tree.pyxf");
+            }
+        */
         }
         return sceneObject;
     }
