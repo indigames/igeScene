@@ -186,31 +186,31 @@ namespace ige::scene
         onUpdate(0.f);
     }
 
-    void RectTransform::setPosition(const Vec3& pos)
+    void RectTransform::worldTranslate(const Vec3& trans)
     {
-        auto deltaPos = pos - m_localPosition;
-
-        if (deltaPos[0] || deltaPos[1])
+        // Reformat the delta pos to parent direction
+        auto deltaPos4 = Vec4(trans[0], trans[1], trans[2], 1.f);
+        auto parent = getOwner()->getParent();
+        if (parent)
         {
-            // Reformat the delta pos to parent direction
-            auto deltaPos4 = Vec4(deltaPos[0], deltaPos[1], m_localPosition.Z(), 1.f);
-            auto parent = getOwner()->getParent();
-            if (parent)
+            auto parentTransform = parent->getRectTransform();
+            if (parentTransform)
             {
-                auto parentTransform = parent->getRectTransform();
-                if (parentTransform)
-                {
-                    auto mat = parentTransform->getWorldMatrix().Inverse();
-                    mat[3][0] = mat[3][1] = mat[3][2] = 0.f; // Eliminate translation
-                    deltaPos4 = mat * deltaPos4;
-                }
+                auto mat = parentTransform->getWorldMatrix().Inverse();
+                mat[3][0] = mat[3][1] = mat[3][2] = 0.f; // Eliminate translation
+                deltaPos4 = mat * deltaPos4;
             }
+        }
+        translate(Vec3(deltaPos4[0], deltaPos4[1], deltaPos4[2]));
+    }
 
-            float deltaX = deltaPos4[0];
-            float deltaY = deltaPos4[1];
-
+    void RectTransform::setPosition(const Vec3& pos)
+    {        
+        if (m_localPosition != pos)
+        {
+            auto deltaPos = pos - m_localPosition;
             auto newOffset = m_offset;
-            translateRect(newOffset, Vec2(deltaX, deltaY));
+            translateRect(newOffset, Vec2(deltaPos[0], deltaPos[1]));
             m_localPosition[3] = pos.Z();
             setOffset(newOffset);
 

@@ -51,7 +51,7 @@ namespace ige::scene
         void setSize(const Vec2& size);
 
         //! Translate
-        void worldTranslate(const Vec3& trans) override { translate(trans); }
+        void worldTranslate(const Vec3& trans) override;
 
         //! Rotate
         void worldRotate(const Quat& rot) override { rotate(rot);  }
