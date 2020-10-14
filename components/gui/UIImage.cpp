@@ -17,7 +17,7 @@ namespace ige::scene
     void UIImage::onUpdate(float dt)
     {
         // Sync size from transform
-        auto rectTranform = std::dynamic_pointer_cast<RectTransform>(getOwner()->getTransform());
+        auto rectTranform = getOwner()->getRectTransform();
         if(m_sprite && rectTranform)
         {
             m_sprite->setSize(rectTranform->getSize());

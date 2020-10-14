@@ -14,6 +14,7 @@
 #include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
+#include "components/gui/UIImage.h"
 
 #include "utils/GraphicsHelper.h"
 
@@ -174,34 +175,58 @@ namespace ige::scene
 
     std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent, const Vec3& pos, const Vec2& size)
     {
-        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent ? parent.get() : nullptr, true);
-        auto transform = sceneObject->addComponent<RectTransform>(pos, size);
-        sceneObject->setTransform(transform);
-        if (parent != nullptr) parent->addChild(sceneObject);
-
-        if (parent == nullptr)
+        std::shared_ptr<SceneObject> sceneObject = nullptr;
+        if (!parent || parent->getCanvas() == nullptr)
         {
-            // Canvas, pivot at top-left
-            transform->setPivot(Vec2(0.f, 0.f));
+            auto canvasObject = std::make_shared<SceneObject>(m_nextObjectID++, "Canvas", parent ? parent.get() : nullptr, true);
+            auto transform = canvasObject->addComponent<RectTransform>(pos, size);
+            canvasObject->setTransform(transform);
+            
+            auto uiImage = canvasObject->addComponent<UIImage>();
+            uiImage->setPath("sprite/rect");
 
-            // This is a GUI root object, setup default environment, canvas and camera
-            auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
-            envComp->setAmbientSkyColor(Vec3(0.5f, 0.5f, 0.5f));
-            envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
-
-            auto canvas = sceneObject->addComponent<Canvas>();
+            auto canvas = canvasObject->addComponent<Canvas>();
+            canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
             canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW()));
+            canvasObject->setCanvas(canvas);
 
-            auto camObj = createGUIObject("GUI Camera", sceneObject);
-            camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
-            auto camComp = camObj->addComponent<CameraComponent>("default_2d_camera");
-            camComp->lockOnTarget(false);
-            camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
-            camComp->setOrthoProjection(true);
-            camComp->setWidthBase(false);
-            camComp->setShootTarget(sceneObject.get());
-            m_roots.push_back(sceneObject);
+            if (parent != nullptr)
+                parent->addChild(canvasObject);
+
+            sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, canvasObject.get(), true);
+            transform = sceneObject->addComponent<RectTransform>(pos, size);
+            sceneObject->setTransform(transform);
+            canvasObject->addChild(sceneObject);
+
+            if (!parent)
+            {
+                // This is a GUI root object, setup default environment, canvas and camera
+                auto envComp = canvasObject->addComponent<EnvironmentComponent>("environment");
+                envComp->setAmbientSkyColor(Vec3(0.5f, 0.5f, 0.5f));
+                envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+
+                auto camObj = createGUIObject("GUI Camera", canvasObject);
+                camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
+                auto camComp = camObj->addComponent<CameraComponent>("default_2d_camera");
+                camComp->lockOnTarget(false);
+                camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+                camComp->setOrthoProjection(true);
+                camComp->setWidthBase(false);
+                camComp->setShootTarget(canvasObject.get());
+                camObj->onUpdate(0.f);
+
+                m_roots.push_back(canvasObject);
+            }
         }
+        else
+        {
+            sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent ? parent.get() : nullptr, true);
+            auto transform = sceneObject->addComponent<RectTransform>(pos, size);
+            sceneObject->setTransform(transform);
+            if (parent != nullptr)
+                parent->addChild(sceneObject);
+        }
+
         return sceneObject;
     }
 

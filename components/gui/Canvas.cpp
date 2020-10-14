@@ -24,7 +24,7 @@ namespace ige::scene
             m_viewportToCanvasMatrix = m_canvasToViewportMatrix.Inverse();
 
             // Recompute viewport transform
-            getOwner()->getComponent<RectTransform>()->setDirty();
+            getOwner()->getRectTransform()->setTransformDirty();
         }
     }
 
@@ -44,8 +44,8 @@ namespace ige::scene
         m_canvasSize = canvasSize;
 
         // Recompute transform
-        auto transform = std::dynamic_pointer_cast<RectTransform>(getOwner()->getTransform());
-        transform->setDirty();
+        auto transform = getOwner()->getRectTransform();
+        transform->setTransformDirty();
     }
 
     void Canvas::setTargetCanvasSize(const Vec2& canvasSize)
@@ -69,7 +69,7 @@ namespace ige::scene
         if (oldTargetCanvasSize != m_targetCanvasSize || oldDeviceScale != m_deviceScale)
         {
             // Recompute transform
-            getOwner()->getComponent<RectTransform>()->setDirty();
+            getOwner()->getRectTransform()->setTransformDirty();
         }
     }
 

@@ -8,6 +8,7 @@
 #include "components/Component.h"
 #include "components/TransformComponent.h"
 #include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
@@ -171,6 +172,12 @@ namespace ige::scene
         //! Set transform component
         void setTransform(const std::shared_ptr<TransformComponent> &transform) { m_transform = transform; }
 
+        //! Get canvas
+        std::shared_ptr<Canvas>& getCanvas() { return m_canvas; }
+
+        //! Set canvas
+        void setCanvas(const std::shared_ptr<Canvas>& canvas) { m_canvas = canvas; }
+
         //! Get root object
         SceneObject *getRoot() { return m_root; }
 
@@ -218,6 +225,9 @@ namespace ige::scene
 
         //! Cache transform component
         std::shared_ptr<TransformComponent> m_transform = nullptr;
+
+        //! Cache Canvas component (GUI)
+        std::shared_ptr<Canvas> m_canvas = nullptr;
 
         //! Cache root object
         SceneObject *m_root = nullptr;

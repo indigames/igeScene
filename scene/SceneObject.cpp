@@ -47,6 +47,11 @@ namespace ige::scene
             getResourceAddedEvent().addListener(std::bind(&SceneObject::onResourceAdded, this, std::placeholders::_1));
             getResourceRemovedEvent().addListener(std::bind(&SceneObject::onResourceRemoved, this, std::placeholders::_1));
         }
+        else
+        {
+            setCanvas(parent->getCanvas());
+        }
+
 
         // Invoke created event
         getCreatedEvent().invoke(*this);
@@ -89,6 +94,7 @@ namespace ige::scene
         else
         {
             getDetachedEvent().invoke(*this);
+            getTransform()->setParent(nullptr);
             m_parent = nullptr;
         }
     }

@@ -50,44 +50,41 @@ namespace ige::scene
         Vec2 getSize();
         void setSize(const Vec2& size);
 
+        //! Translate
+        void worldTranslate(const Vec3& trans) override { translate(trans); }
+
+        //! Rotate
+        void worldRotate(const Quat& rot) override { rotate(rot);  }
+
+        //! Scale
+        void worldScale(const Vec3& scl) override { scale(scl); }
+
         //! Position
         void setPosition(const Vec3& pos) override;
-        void setWorldPosition(const Vec3& pos) override;
+        void setWorldPosition(const Vec3& pos) override {}
 
         //! Rotation
         void setRotation(const Quat& rot) override;
-        void setWorldRotation(const Quat& rot) override;
+        void setWorldRotation(const Quat& rot) override {}
 
         //! Scale
         void setScale(const Vec3& scale) override;
-        void setWorldScale(const Vec3& scale) override;
+        void setWorldScale(const Vec3& scale) override {}
 
         //! Get rect in canvas space (no scale, no rotate)
         const Vec4& getRect();
 
-        //! Get rect in viewport space
-        const Vec4& getRectInViewportSpace() { return m_rectViewport; }
-
         //! Dirty flag
-        void setDirty();
+        void setRectDirty();
+
+        //! Set transform dirty
+        void setTransformDirty();
 
         //! OnUpdate
         void onUpdate(float dt) override;
 
-        //! Add observer: just do nothing
-        void addObserver(TransformComponent* observer) override { }
-
-        //! Remove observer: just do nothing
-        void removeObserver(TransformComponent* observer) override { }
-
-        //! Notify to all observers: just do nothing
-        void notifyObservers(const ETransformMessage& message) override { }
-
         //! Handle notification from parent: just do nothing
-        void onNotified(const ETransformMessage& message) override { }
-
-        //! Check point inside rect
-        bool isPointInside(const Vec2& point) const;
+        void onNotified(const ETransformMessage& message) override;
 
         //! Serialize
         void to_json(json& j) const override;
@@ -96,13 +93,7 @@ namespace ige::scene
         void from_json(const json& j) override;
 
     protected:
-        bool hasScale() const;
-        bool hasRotation() const;
-        bool hasScaleOrRotation() const;
-
         Vec2 getPivotInCanvasSpace();
-        Vec2 getPivotInViewportSpace();
-
         Vec2 getAnchorCenterInCanvasSpace();
 
     protected:
@@ -115,12 +106,8 @@ namespace ige::scene
         //! Pivot: center of the content
         Vec2 m_pivot;
 
-        //! Position Z
-        float m_posZ;
-
         //! Cached rect in canvas space (no scale, no rotate)
         Vec4 m_rect;
-        Vec4 m_rectViewport;
         bool m_rectDirty = true;
 
         //! Cached transform to viewport space
@@ -130,12 +117,5 @@ namespace ige::scene
         //! Cached transform to canvas space
         Mat4 m_canvasTransform;
         bool m_canvasTransformDirty = true;
-
-        //! Associated EditableFigure object
-        EditableFigure* m_figure;
-
-        //! Events
-        Event<EditableFigure*> m_onFigureCreatedEvent;
-        Event<EditableFigure*> m_onFigureDestroyedEvent;
     };
 }

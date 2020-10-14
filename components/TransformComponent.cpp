@@ -51,13 +51,13 @@ namespace ige::scene {
     {
         if (m_bLocalDirty)
         {
-            updateLocalMatrix();
+            updateLocalToWorld(); 
             m_bLocalDirty = false;
         }
 
         if (m_bWorldDirty)
         {
-            updateWorldMatrix();
+            updateWorldToLocal();
             m_bWorldDirty = false;
         }
 
@@ -95,14 +95,29 @@ namespace ige::scene {
         setPosition(m_localPosition + trans);
     }
 
+    void TransformComponent::worldTranslate(const Vec3& trans)
+    {
+        setWorldPosition(m_worldPosition + trans);
+    }
+
     void TransformComponent::rotate(const Quat& rot)
     {
         setRotation(m_localRotation * rot);
     }
 
+    void TransformComponent::worldRotate(const Quat& rot)
+    {
+        setWorldRotation(m_worldRotation * rot);
+    }
+
     void TransformComponent::scale(const Vec3& scale)
     {
         setScale(Vec3(m_localScale.X() * scale.X(), m_localScale.Y() * scale.Y(), m_localScale.Z() * scale.Z()));
+    }
+
+    void TransformComponent::worldScale(const Vec3& scale)
+    {
+        setWorldScale(Vec3(m_worldScale.X() * scale.X(), m_worldScale.Y() * scale.Y(), m_worldScale.Z() * scale.Z()));
     }
 
     void TransformComponent::setPosition(const Vec3& pos)
@@ -124,7 +139,7 @@ namespace ige::scene {
         if (m_worldPosition != pos)
         {
             m_worldPosition = pos;
-            updateWorldToLocal();
+            m_bWorldDirty = true;
         }
     }
 
@@ -152,7 +167,7 @@ namespace ige::scene {
         if (m_worldRotation != rot)
         {
             m_worldRotation = rot;
-            updateWorldToLocal();
+            m_bWorldDirty = true;
         }
     }
 
@@ -180,7 +195,7 @@ namespace ige::scene {
         if (m_worldScale != scale)
         {
             m_worldScale = scale;
-            updateWorldToLocal();
+            m_bWorldDirty = true;
         }
     }
 
@@ -229,18 +244,15 @@ namespace ige::scene {
         return m_worldRotation * Vec3(0.f, 0.f, 1.f);
     }
 
-    void TransformComponent::updateLocalMatrix()
+    void TransformComponent::updateLocalToWorld()
     {
+        // Update local matrix
         m_localMatrix.Identity();
         vmath_mat4_from_rottrans(m_localRotation.P(), m_localPosition.P(), m_localMatrix.P());
         vmath_mat_appendScale(m_localMatrix.P(), m_localScale.P(), 4, 4, m_localMatrix.P());
-        m_bWorldDirty = true;
-    }
 
-    void TransformComponent::updateWorldMatrix()
-    {
         // Update world matrix
-        m_worldMatrix = (hasParent() && getParent()->getName() == "TransformComponent") ? getParent()->getWorldMatrix() * m_localMatrix : m_localMatrix;
+        m_worldMatrix = (hasParent()) ? getParent()->getWorldMatrix() * m_localMatrix : m_localMatrix;
 
         // Update world position
         m_worldPosition.X(m_worldMatrix[3][0]);
@@ -402,7 +414,7 @@ namespace ige::scene {
         switch (message)
         {
         case ETransformMessage::TRANSFORM_CHANGED:
-            m_bWorldDirty = true;
+            m_bLocalDirty = true;
             break;
 
         case ETransformMessage::TRANSFORM_DESTROYED:
@@ -410,7 +422,6 @@ namespace ige::scene {
             m_localRotation = m_worldRotation;
             m_localScale = m_worldScale;
             m_bLocalDirty = true;
-            m_bWorldDirty = true;
             break;
         }
 

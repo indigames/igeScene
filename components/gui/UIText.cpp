@@ -28,7 +28,7 @@ namespace ige::scene
         if (getFigure() == nullptr) return;
 
         // Update transform from transform component
-        auto transform = std::dynamic_pointer_cast<RectTransform>(getOwner()->getTransform());
+        auto transform = getOwner()->getRectTransform();
 
         // Scale container to fit text size
         auto containerSize = transform->getSize();

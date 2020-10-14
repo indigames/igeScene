@@ -40,12 +40,15 @@ namespace ige::scene {
 
         //! Translate
         virtual void translate(const Vec3& trans);
+        virtual void worldTranslate(const Vec3& trans);
 
         //! Rotate
         virtual void rotate(const Quat& rot);
+        virtual void worldRotate(const Quat& rot);
 
         //! Scale
         virtual void scale(const Vec3& scale);
+        virtual void worldScale(const Vec3& scale);
 
         //! Set local position
         virtual void setPosition(const Vec3& pos);
@@ -135,11 +138,8 @@ namespace ige::scene {
         virtual void from_json(const json& j) override;
 
     protected:
-        //! Update local transform matrix
-        virtual void updateLocalMatrix();
-
         //! Update world transform matrix
-        virtual void updateWorldMatrix();
+        virtual void updateLocalToWorld();
 
         //! Update world transform, then adjust local transfrom based on world transform
         virtual void updateWorldToLocal();
