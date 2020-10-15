@@ -147,6 +147,8 @@ namespace ige::scene
             camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
             camComp->setShootTarget(sceneObject.get());
             setActiveCamera(camComp.get());
+            camObj->addComponent<FigureComponent>("figure/camera.pyxf");
+
             m_roots.push_back(sceneObject);
 
         /*
