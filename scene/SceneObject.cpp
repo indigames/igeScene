@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "scene/SceneObject.h"
+#include "scene/Scene.h"
 
 #include "components/Component.h"
 #include "components/TransformComponent.h"
@@ -34,52 +35,49 @@ namespace ige::scene
     Event<SceneObject &> SceneObject::s_selectedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(uint64_t id, std::string name, SceneObject *parent, bool isGui)
-        : m_id(id), m_name(name), m_parent(parent), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_showcase(nullptr)
+    SceneObject::SceneObject(Scene* scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2& size)
+        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr)
     {
-        // Cache root item
-        m_root = (parent == nullptr) ? this : parent->getRoot();
-
-        // Only create showcase for root objects
-        if (parent == nullptr)
-        {
-            m_showcase = ResourceCreator::Instance().NewShowcase((m_name + "_" + std::to_string(m_id) + "_showcase").c_str());
-            getResourceAddedEvent().addListener(std::bind(&SceneObject::onResourceAdded, this, std::placeholders::_1));
-            getResourceRemovedEvent().addListener(std::bind(&SceneObject::onResourceRemoved, this, std::placeholders::_1));
-        }
-        else
-        {
-            setCanvas(parent->getCanvas());
-        }
-
-
         // Invoke created event
         getCreatedEvent().invoke(*this);
+
+        // Create and add transform component
+        if (isGui)
+            m_transform = addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f), size);
+        else
+            m_transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+
+        // Update parent
+        setParent(parent);
     }
 
     //! Destructor
     SceneObject::~SceneObject()
     {
-        for (auto &comp : m_components)
-            comp->onDestroy();
+        if (m_parent)
+            m_parent->removeChild(this);
+        m_parent = nullptr;
+        m_pid = (uint64_t)-1;
 
-        removeChildren();
-        setParent(nullptr);
-
+        setCanvas(nullptr);
+        
         removeAllComponents();
+        removeChildren();
+
+        getTransform()->setParent(nullptr);
         m_transform = nullptr;
 
-        if (m_showcase)
-        {
-            getResourceAddedEvent().removeAllListeners();
-            getResourceRemovedEvent().removeAllListeners();
-
-            m_showcase->Clear();
-            m_showcase->DecReference();
-            m_showcase = nullptr;
-        }
-
         getDestroyedEvent().invoke(*this);
+    }
+
+    //! Set Name
+    void SceneObject::setName(const std::string& name)
+    {
+        if (m_name != name)
+        {
+            m_name = name;
+            getNameChangedEvent().invoke(*this);
+        }
     }
 
     //! Set parent
@@ -88,14 +86,21 @@ namespace ige::scene
         if (parent)
         {
             m_parent = parent;
-            getTransform()->setParent(parent->getTransform().get());
+            m_pid = m_parent->getId();
+            m_parent->addChild(this);
+            getTransform()->setParent(m_parent->getTransform().get());
+            setCanvas(m_parent->getCanvas());
             getAttachedEvent().invoke(*this);
         }
         else
         {
             getDetachedEvent().invoke(*this);
+            if (m_parent)
+                m_parent->removeChild(this);
             getTransform()->setParent(nullptr);
+            setCanvas(nullptr);
             m_parent = nullptr;
+            m_pid = (uint64_t)-1;
         }
     }
 
@@ -105,80 +110,34 @@ namespace ige::scene
         return m_parent;
     }
 
-    Showcase *SceneObject::getShowcase()
-    {
-        if (m_root == this)
-            return m_showcase;
-        return m_root->getShowcase();
-    }
-
-    //! Adds a child.
-    void SceneObject::addChild(const std::shared_ptr<SceneObject> &child)
-    {
-        child->setParent(this);
-
-        // Insert to the first available slot.
-        for (auto &currObject : m_children)
-        {
-            if (!currObject)
-            {
-                currObject = child;
-                return;
-            }
-        }
-
-        // Add at back of vector.
-        m_children.push_back(child);
-    }
-
-    //! Remove a childs.
-    bool SceneObject::removeChild(const std::shared_ptr<SceneObject> &child)
-    {
-        if (!child)
-            return false;
-
-        // Remove from vector by nullptr assignment
-        for (auto &currObject : m_children)
-        {
-            if (currObject != nullptr && currObject == child)
-            {
-                currObject = nullptr;
-                return true;
-            }
-        }
-
-        // Recursive remove child
-        for (auto &currObject : m_children)
-        {
-            if (currObject && currObject->removeChild(child))
-                return true;
-        }
-
-        // Not found, return false
-        return false;
-    }
 
     //! Get all children
-    std::vector<std::shared_ptr<SceneObject>> &SceneObject::getChildren()
+    const std::vector<SceneObject*> &SceneObject::getChildren() const
     {
         return m_children;
     }
 
-    //! Count children
-    size_t SceneObject::getChildrenCount() const
+    //! Add child
+    void SceneObject::addChild(SceneObject* child)
     {
-        return m_children.size();
+        auto found = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem == child; });
+        if (found == m_children.end())
+            m_children.push_back(child);
+    }
+
+    //! Removes child
+    void SceneObject::removeChild(SceneObject* child)
+    {
+        if (child == nullptr)
+            return;
+        auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getId() == child->getId()); });
+        if(itr != m_children.end())
+            m_children.erase(itr);
     }
 
     //! Remove children
     void SceneObject::removeChildren()
     {
-        for (auto &child : m_children)
-        {
-            if (child)
-                child->setParent(nullptr);
-            child = nullptr;
-        }
         m_children.clear();
     }
 
@@ -241,26 +200,6 @@ namespace ige::scene
         return false;
     }
 
-    //! Resource added event
-    void SceneObject::onResourceAdded(Resource *resource)
-    {
-        if (m_showcase != nullptr)
-        {
-            if (resource)
-                m_showcase->Add(resource);
-        }
-    }
-
-    //! Resource removed event
-    void SceneObject::onResourceRemoved(Resource *resource)
-    {
-        if (m_showcase != nullptr)
-        {
-            if (resource)
-                m_showcase->Remove(resource);
-        }
-    }
-
     //! Remove all component
     bool SceneObject::removeAllComponents()
     {
@@ -297,38 +236,6 @@ namespace ige::scene
         return nullptr;
     }
 
-    //! Find object by id
-    std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const
-    {
-        for (int i = 0; i < m_children.size(); ++i)
-        {
-            if (m_children[i] == nullptr)
-                continue;
-            if (m_children[i]->getId() == id)
-                return m_children[i];
-            auto ret = m_children[i]->findObjectById(id);
-            if (ret)
-                return ret;
-        }
-        return nullptr;
-    }
-
-    //! Find object by name
-    std::shared_ptr<SceneObject> SceneObject::findObjectByName(std::string name) const
-    {
-        for (int i = 0; i < m_children.size(); ++i)
-        {
-            if (m_children[i] == nullptr)
-                continue;
-            if (m_children[i]->getName() == name)
-                return m_children[i];
-            auto ret = m_children[i]->findObjectByName(name);
-            if (ret)
-                return ret;
-        }
-        return nullptr;
-    }
-
     //! Update function
     void SceneObject::onUpdate(float dt)
     {
@@ -339,12 +246,6 @@ namespace ige::scene
                 // Camera updated before other objects
                 if (comp->getName() != "CameraComponent")
                     comp->onUpdate(dt);
-            }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onUpdate(dt);
             }
         }
     }
@@ -358,12 +259,6 @@ namespace ige::scene
             {
                 comp->onFixedUpdate(dt);
             }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onFixedUpdate(dt);
-            }
         }
     }
 
@@ -375,12 +270,6 @@ namespace ige::scene
             for (auto &comp : m_components)
             {
                 comp->onLateUpdate(dt);
-            }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onLateUpdate(dt);
             }
         }
     }
@@ -395,12 +284,6 @@ namespace ige::scene
                 // Camera rendered before other objects
                 if (comp->getName() != "CameraComponent")
                     comp->onRender();
-            }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onRender();
             }
         }
     }
@@ -460,6 +343,7 @@ namespace ige::scene
     {
         j = json{
             {"id", m_id},
+            {"pid", m_pid},
             {"name", m_name},
             {"active", m_isActive},
             {"gui", m_bIsGui},
@@ -474,18 +358,6 @@ namespace ige::scene
             jComponents.push_back(jPairCmp);
         }
         j["comps"] = jComponents;
-
-        auto jChildren = json::array();
-        for (const auto &child : m_children)
-        {
-            if (child)
-            {
-                json jChild;
-                child->to_json(jChild);
-                jChildren.push_back(jChild);
-            }
-        }
-        j["children"] = jChildren;
     }
 
     //! Deserialize
@@ -495,6 +367,7 @@ namespace ige::scene
         setName(j.value("name", ""));
         setActive(j.value("active", false));
         m_bIsGui = j.value("gui", false);
+        m_pid = j.value("pid", (uint64_t)-1);
 
         auto jComps = j.at("comps");
         for (auto it : jComps)
@@ -504,15 +377,17 @@ namespace ige::scene
             std::shared_ptr<Component> comp = nullptr;
             if (key == "TransformComponent")
             {
-                auto transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
-                setTransform(transform);
-                comp = transform;
+                if(getTransform())
+                    comp = getTransform();
+                else
+                    comp = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
             }
             else if (key == "RectTransform")
             {
-                auto transform = addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
-                setTransform(transform);
-                comp = transform;
+                if (getRectTransform())
+                    comp = getRectTransform();
+                else
+                    comp = addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
             }
             else if (key == "CameraComponent")
                 comp = addComponent<CameraComponent>(val.at("name"));
@@ -544,14 +419,6 @@ namespace ige::scene
                 comp = addComponent<AudioListener>();
             if (comp)
                 comp->from_json(val);
-        }
-
-        auto jChildren = j.at("children");
-        for (auto it : jChildren)
-        {
-            auto child = std::make_shared<SceneObject>(it.at("id"), it.at("name"), this, it.value("gui", false));
-            child->from_json(it);
-            addChild(child);
         }
     }
 } // namespace ige::scene

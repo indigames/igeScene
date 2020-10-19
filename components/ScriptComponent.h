@@ -13,7 +13,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        ScriptComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path = "");
+        ScriptComponent(SceneObject &owner, const std::string &path = "");
 
         //! Destructor
         virtual ~ScriptComponent();
@@ -54,27 +54,27 @@ namespace ige::scene
         virtual void onResume() override;
 
         //! Trigger events
-        virtual void onTriggerStart(SceneObject& other);
-        virtual void onTriggerStay(SceneObject& other);
-        virtual void onTriggerStop(SceneObject& other);
+        virtual void onTriggerStart(SceneObject &other);
+        virtual void onTriggerStay(SceneObject &other);
+        virtual void onTriggerStop(SceneObject &other);
 
         //! Collision events
-        virtual void onCollisionStart(SceneObject& other);
-        virtual void onCollisionStay(SceneObject& other);
-        virtual void onCollisionStop(SceneObject& other);
+        virtual void onCollisionStart(SceneObject &other);
+        virtual void onCollisionStay(SceneObject &other);
+        virtual void onCollisionStop(SceneObject &other);
 
         //! Serialize
-        virtual void to_json(json& j) const override;
+        virtual void to_json(json &j) const override;
 
         //! Deserialize
-        virtual void from_json(const json& j) override;
+        virtual void from_json(const json &j) override;
 
         //! Path
-        void setPath(const std::string& path);
-        const std::string& getPath() { return m_path; }
+        void setPath(const std::string &path);
+        const std::string &getPath() { return m_path; }
 
         //! Script changed event
-        Event<const std::string&>& getOnScriptChangedEvent() { return m_onScriptChangedEvent; }
+        Event<const std::string &> &getOnScriptChangedEvent() { return m_onScriptChangedEvent; }
 
     protected:
         void loadPyModule();
@@ -91,12 +91,12 @@ namespace ige::scene
         bool m_bOnStartCalled = false;
 
         //! Events
-        Event<const std::string&> m_onScriptChangedEvent;
+        Event<const std::string &> m_onScriptChangedEvent;
 
         //! PyObject: module
-        _object* m_pyModule;
+        _object *m_pyModule;
 
         //! PyObject: instance of Python class
-        _object* m_pyInstance;
+        _object *m_pyInstance;
     };
-}
+} // namespace ige::scene

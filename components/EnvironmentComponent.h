@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        EnvironmentComponent(const std::shared_ptr<SceneObject>& owner, const std::string& name);
+        EnvironmentComponent(SceneObject &owner, const std::string &name);
 
         //! Destructor
         virtual ~EnvironmentComponent();
@@ -22,15 +22,15 @@ namespace ige::scene
 
         //! Ambient Sky Color
         Vec3 getAmbientSkyColor() const { return m_environment->GetAmbientSkyColor(); }
-        void setAmbientSkyColor(const Vec3& col) const { m_environment->SetAmbientSkyColor(col); }
+        void setAmbientSkyColor(const Vec3 &col) const { m_environment->SetAmbientSkyColor(col); }
 
         //! Ambient Ground Color
         Vec3 getAmbientGroundColor() const { return m_environment->GetAmbientGroundColor(); }
-        void setAmbientGroundColor(const Vec3& col) { m_environment->SetAmbientGroundColor(col); }
+        void setAmbientGroundColor(const Vec3 &col) { m_environment->SetAmbientGroundColor(col); }
 
         //! Ambient direction
         Vec3 getAmbientDirection() const { return m_environment->GetAmbientDirection(); }
-        void setAmbientDirection(const Vec3& dir) { m_environment->SetAmbientDirection(dir); }
+        void setAmbientDirection(const Vec3 &dir) { m_environment->SetAmbientDirection(dir); }
 
         //! Directional light intensity
         float getDirectionalLightIntensity(uint32_t index) const { return m_environment->GetDirectionalLampIntensity(index); }
@@ -38,11 +38,11 @@ namespace ige::scene
 
         //! Directional light color
         Vec3 getDirectionalLightColor(uint32_t index) const { return m_environment->GetDirectionalLampColor(index); }
-        void setDirectionalLightColor(uint32_t index, const Vec3& col) { m_environment->SetDirectionalLampColor(index, col); }
+        void setDirectionalLightColor(uint32_t index, const Vec3 &col) { m_environment->SetDirectionalLampColor(index, col); }
 
         //! Directional light direction
         Vec3 getDirectionalLightDirection(uint32_t index) const { return m_environment->GetDirectionalLampDirection(index); }
-        void setDirectionalLightDirection(uint32_t index, const Vec3& dir) { m_environment->SetDirectionalLampDirection(index, dir); }
+        void setDirectionalLightDirection(uint32_t index, const Vec3 &dir) { m_environment->SetDirectionalLampDirection(index, dir); }
 
         //! Point light range
         float getPointLightRange(uint32_t index) const { return m_environment->GetPointLampRange(index); }
@@ -54,11 +54,11 @@ namespace ige::scene
 
         //! Point light color
         Vec3 getPointLightColor(uint32_t index) const { return m_environment->GetPointLampColor(index); }
-        void setPointLightColor(uint32_t index, const Vec3& col) { m_environment->SetPointLampColor(index, col); }
+        void setPointLightColor(uint32_t index, const Vec3 &col) { m_environment->SetPointLampColor(index, col); }
 
         //! Point light position
         Vec3 getPointLightPosition(uint32_t index) const { return m_environment->GetPointLampPosition(index); }
-        void setPointLightPosition(uint32_t index, const Vec3& pos) { m_environment->SetPointLampPosition(index, pos); }
+        void setPointLightPosition(uint32_t index, const Vec3 &pos) { m_environment->SetPointLampPosition(index, pos); }
 
         //! Fog near distance
         float getDistanceFogNear() const { return m_environment->GetDistanceFogNear(); }
@@ -74,11 +74,11 @@ namespace ige::scene
 
         //! Fog color distance
         Vec3 getDistanceFogColor() const { return m_environment->GetDistanceFogColor(); }
-        void setDistanceFogColor(const Vec3& col) { m_environment->SetDistanceFogColor(col); }
+        void setDistanceFogColor(const Vec3 &col) { m_environment->SetDistanceFogColor(col); }
 
         //! Shadow color
         Vec3 getShadowColor() const { return m_environment->GetShadowColor(); }
-        void setShadowColor(const Vec3& col) { m_environment->SetShadowColor(col); }
+        void setShadowColor(const Vec3 &col) { m_environment->SetShadowColor(col); }
 
         //! Shadow density
         float getShadowDensity() const { return m_environment->GetShadowDensity(); }
@@ -95,19 +95,19 @@ namespace ige::scene
         virtual void onRender() override;
 
         //! Serialize
-        virtual void to_json(json& j) const override;
+        virtual void to_json(json &j) const override;
 
         //! Deserialize
-        virtual void from_json(const json& j) override;
+        virtual void from_json(const json &j) override;
 
         //! Get internal environment
-        Environment* getEnvironment() { return m_environment; }
+        Environment *getEnvironment() { return m_environment; }
 
     protected:
         //! Environment instance
-        Environment* m_environment;
+        Environment *m_environment;
 
         //! Environment name
         std::string m_name;
     };
-}
+} // namespace ige::scene

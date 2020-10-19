@@ -11,7 +11,7 @@ namespace ige::scene
     class AudioListener : public Component
     {
     public:
-        AudioListener(const std::shared_ptr<SceneObject> &owner);
+        AudioListener(SceneObject &owner);
         virtual ~AudioListener();
 
         //! Get name

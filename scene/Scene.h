@@ -73,20 +73,8 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j);
 
-        //! Component added event
-        void onComponentAdded(SceneObject& obj, const std::shared_ptr<Component>& component);
-
-        //! Component added event
-        void onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component);
-
-        //! Object selected
-        void onSceneObjectSelected(SceneObject& sceneObject);
-
         //! Get roots of scene nodes tree
-        std::vector<std::shared_ptr<SceneObject>>& getRoots() { return m_roots; };
-
-        //! Get all camera
-        std::vector<std::shared_ptr<CameraComponent>>& getCameras() { return m_cameras; };
+        std::vector<std::shared_ptr<SceneObject>>& getObjects() { return m_objects; };
 
         //! Set active camera
         void setActiveCamera(CameraComponent* camera);
@@ -94,21 +82,35 @@ namespace ige::scene
         //! Get active camera
         CameraComponent* getActiveCamera() { return m_activeCamera; }
 
-        //! Active camera changed event
-        Event<CameraComponent*>& getOnActiveCameraChangedEvent() { return m_onActiveCameraChanged; }
-
         //! Return the cached path
         const std::string& getPath() const { return m_path; }
 
         //! Cache the path
         void setPath(const std::string& path) { m_path = path; }
 
+        //! Get showcase
+        Showcase* getShowcase() { return m_showcase; }
+
+        //! Internal event
+        Event<Resource*>& getResourceAddedEvent() { return m_resourceAddedEvent; }
+        Event<Resource*>& getResourceRemovedEvent() { return m_resourceRemovedEvent; }
+
+        //! Resource added/removed event
+        void onResourceAdded(Resource* resource);
+        void onResourceRemoved(Resource* resource);
+
     protected:
         //! Scene root node
-        std::vector<std::shared_ptr<SceneObject>> m_roots;
+        std::vector<std::shared_ptr<SceneObject>> m_objects;
 
-        //! Cache all camera components
-        std::vector<std::shared_ptr<CameraComponent>> m_cameras;
+        //! Showcase which contains all rendering resources
+        Showcase* m_showcase = nullptr;
+
+        //! Internal events
+        Event<Resource*> m_resourceAddedEvent;
+        Event<Resource*> m_resourceRemovedEvent;
+
+        //! Cache active camera
         CameraComponent* m_activeCamera = nullptr;
 
         //! Object ID counter
@@ -119,13 +121,5 @@ namespace ige::scene
 
         //! Cached path
         std::string m_path;
-
-        //! Active camera changed events
-        Event<CameraComponent*> m_onActiveCameraChanged;
-
-        //! Cached event id for removing
-        uint64_t m_componentAddedEventId;
-        uint64_t m_componentRemovedEventId;
-        uint64_t m_objectSelectedEventId;
     };
 }

@@ -55,24 +55,14 @@ namespace ige::scene
     // Get active camera
     PyObject* Scene_getActiveCamera(PyObject_Scene* self)
     {
-        auto cameras = self->scene->getCameras();
-        std::shared_ptr<CameraComponent> camera = nullptr;
-        for (const auto& cam : cameras)
-        {
-            if(cam.get() == self->scene->getActiveCamera())
-            {
-                camera = cam;
-                break;
-            }
-        }
-
-        if (camera)
-        {
-            auto* obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
-            obj->component = camera.get();
-            obj->super.component = obj->component;
-            return (PyObject*)obj;
-        }
+        //auto camera = self->scene->getActiveCamera();
+        //if (camera)
+        //{
+        //    auto* obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
+        //    obj->component = camera.get();
+        //    obj->super.component = obj->component;
+        //    return (PyObject*)obj;
+        //}
 
         Py_RETURN_NONE;
     }
@@ -80,10 +70,10 @@ namespace ige::scene
     // Set active camera
     int Scene_setActiveCamera(PyObject_Scene* self, PyObject* value)
     {
-        PyObject* camera;
-        if (PyArg_ParseTuple(value, "O", &camera)) {
-            self->scene->setActiveCamera(((PyObject_CameraComponent*)camera)->component);
-        }
+        //PyObject* camera;
+        //if (PyArg_ParseTuple(value, "O", &camera)) {
+        //    self->scene->setActiveCamera(((PyObject_CameraComponent*)camera)->component);
+        //}
         return 0;
     }
 
@@ -179,29 +169,14 @@ namespace ige::scene
     }
 
     // Get roots
-    PyObject* Scene_getRoots(PyObject_Scene *self)
+    PyObject* Scene_getObjects(PyObject_Scene *self)
     {
-        auto roots = self->scene->getRoots();
+        auto roots = self->scene->getObjects();
         PyObject* pyList = PyList_New(0);
         for(int i = 0; i < roots.size(); ++i)
         {
             auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
             obj->sceneObject = roots[i].get();
-            PyList_Append(pyList, (PyObject*)obj);
-        }
-        return (PyObject*)pyList;
-    }
-
-    // Get cameras
-    PyObject* Scene_getCameras(PyObject_Scene *self)
-    {
-        auto cameras = self->scene->getCameras();
-        PyObject* pyList = PyList_New(0);
-        for(int i = 0; i < cameras.size(); ++i)
-        {
-            auto obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
-            obj->component = cameras[i].get();
-            obj->super.component = obj->component;
             PyList_Append(pyList, (PyObject*)obj);
         }
         return (PyObject*)pyList;
@@ -218,8 +193,7 @@ namespace ige::scene
     // Variable definition
     PyGetSetDef Scene_getsets[] = {
         { "name", (getter)Scene_getName, (setter)Scene_setName, Scene_name_doc, NULL },
-        { "roots", (getter)Scene_getRoots, nullptr, Scene_roots_doc, NULL },
-        { "cameras", (getter)Scene_getCameras, nullptr, Scene_cameras_doc, NULL },
+        { "objects", (getter)Scene_getObjects, nullptr, Scene_objects_doc, NULL },
         { "activeCamera", (getter)Scene_getActiveCamera, (setter)Scene_setActiveCamera, Scene_activeCamera_doc, NULL },
         { NULL, NULL }
     };

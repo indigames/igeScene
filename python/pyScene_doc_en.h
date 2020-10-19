@@ -54,8 +54,8 @@ PyDoc_STRVAR(Scene_findObject_doc,
 	"    None: if not found\n"
 );
 
-// roots
-PyDoc_STRVAR(Scene_roots_doc,
+// objects
+PyDoc_STRVAR(Scene_objects_doc,
 	"Get the list of root objects from the scene.\n"\
 	"Type: List<SceneObject>\n"
 );

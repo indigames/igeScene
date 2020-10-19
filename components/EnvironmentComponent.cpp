@@ -1,17 +1,18 @@
 #include "components/EnvironmentComponent.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
+#include "scene/Scene.h"
 
 namespace ige::scene
 {
     //! Constructor
-    EnvironmentComponent::EnvironmentComponent(const std::shared_ptr<SceneObject>& owner, const std::string& name)
+    EnvironmentComponent::EnvironmentComponent(SceneObject &owner, const std::string &name)
         : Component(owner), m_name(name)
     {
         m_environment = ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), nullptr);
         m_environment->WaitBuild();
 
-        getOwner()->getRoot()->getResourceAddedEvent().invoke(m_environment);
+        getOwner()->getScene()->getResourceAddedEvent().invoke(m_environment);
     }
 
     //! Destructor
@@ -19,8 +20,8 @@ namespace ige::scene
     {
         if (m_environment)
         {
-            if(hasOwner() && getOwner()->getRoot())
-                getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_environment);
+            if (getOwner()->getScene())
+                getOwner()->getScene()->getResourceRemovedEvent().invoke(m_environment);
             m_environment->DecReference();
             m_environment = nullptr;
         }
@@ -29,22 +30,24 @@ namespace ige::scene
     //! Update
     void EnvironmentComponent::onUpdate(float dt)
     {
-        if (m_environment == nullptr) return;
+        if (m_environment == nullptr)
+            return;
     }
 
     //! Render
     void EnvironmentComponent::onRender()
     {
-        if (m_environment == nullptr) return;
+        if (m_environment == nullptr)
+            return;
 
         // Render
         m_environment->Render();
     }
 
     //! Serialize
-    void EnvironmentComponent::to_json(json& j) const
+    void EnvironmentComponent::to_json(json &j) const
     {
-        j = json {
+        j = json{
             {"name", m_name},
             {"ambSkyCol", getAmbientSkyColor()},
             {"ambGndCol", getAmbientGroundColor()},
@@ -97,7 +100,7 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void EnvironmentComponent::from_json(const json& j)
+    void EnvironmentComponent::from_json(const json &j)
     {
         setAmbientSkyColor(j.at("ambSkyCol"));
         setAmbientGroundColor(j.at("ambGndCol"));
@@ -148,4 +151,4 @@ namespace ige::scene
         setShadowDensity(j.at("shadowDensity"));
         setShadowWideness(j.at("shadowWideness"));
     }
-}
+} // namespace ige::scene

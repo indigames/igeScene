@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    PhysicBox::PhysicBox(const std::shared_ptr<SceneObject> &owner, const Vec3 &size)
+    PhysicBox::PhysicBox(SceneObject &owner, const Vec3 &size)
         : PhysicBase(owner)
     {
         createCollisionShape(size);

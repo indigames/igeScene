@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    PhysicCapsule::PhysicCapsule(const std::shared_ptr<SceneObject> &owner, float radius, float height)
+    PhysicCapsule::PhysicCapsule(SceneObject &owner, float radius, float height)
         : PhysicBase(owner)
     {
         createCollisionShape(radius, height);

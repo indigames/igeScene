@@ -8,7 +8,7 @@ namespace ige::scene
     Event<AudioListener &> AudioListener::m_onDestroyedEvent;
 
     //! Constructor
-    AudioListener::AudioListener(const std::shared_ptr<SceneObject> &owner)
+    AudioListener::AudioListener(SceneObject &owner)
         : Component(owner)
     {
         m_onCreatedEvent.invoke(*this);

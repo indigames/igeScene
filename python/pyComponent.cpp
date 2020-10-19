@@ -33,13 +33,9 @@ namespace ige::scene
     // Get owner
     PyObject* Component_getOwner(PyObject_Component* self)
     {
-        if(self->component && self->component->hasOwner())
-        {
-            auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = self->component->getOwner();
-            return (PyObject*)obj;
-        }
-        Py_RETURN_NONE;
+        auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+        obj->sceneObject = self->component->getOwner();
+        return (PyObject*)obj;
     }
 
     // Variable definition

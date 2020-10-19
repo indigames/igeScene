@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        PhysicBox(const std::shared_ptr<SceneObject> &owner, const Vec3& size = {1.f, 1.f, 1.f});
+        PhysicBox(SceneObject &owner, const Vec3& size = {1.f, 1.f, 1.f});
 
         //! Destructor
         virtual ~PhysicBox();

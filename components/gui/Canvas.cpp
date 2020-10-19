@@ -8,15 +8,16 @@
 namespace ige::scene
 {
     //! Constructor
-    Canvas::Canvas(const std::shared_ptr<SceneObject>& owner):
-        Component(owner)
-    {}
+    Canvas::Canvas(SceneObject &owner)
+        : Component(owner)
+    {
+    }
 
     //! Destructor
     Canvas::~Canvas() {}
 
     //! Canvas to viewport matrix
-    void Canvas::setCanvasToViewportMatrix(const Mat4& matrix)
+    void Canvas::setCanvasToViewportMatrix(const Mat4 &matrix)
     {
         if (m_canvasToViewportMatrix != matrix)
         {
@@ -28,18 +29,18 @@ namespace ige::scene
         }
     }
 
-    const Mat4& Canvas::getCanvasToViewportMatrix() const
+    const Mat4 &Canvas::getCanvasToViewportMatrix() const
     {
         return m_canvasToViewportMatrix;
     }
 
     //! Viewport to canvas matrix
-    const Mat4& Canvas::getViewportToCanvasMatrix() const
+    const Mat4 &Canvas::getViewportToCanvasMatrix() const
     {
         return m_viewportToCanvasMatrix;
     }
 
-    void Canvas::setDesignCanvasSize(const Vec2& canvasSize)
+    void Canvas::setDesignCanvasSize(const Vec2 &canvasSize)
     {
         m_canvasSize = canvasSize;
 
@@ -48,7 +49,7 @@ namespace ige::scene
         transform->setTransformDirty();
     }
 
-    void Canvas::setTargetCanvasSize(const Vec2& canvasSize)
+    void Canvas::setTargetCanvasSize(const Vec2 &canvasSize)
     {
         auto oldTargetCanvasSize = m_targetCanvasSize;
         auto oldDeviceScale = m_deviceScale;
@@ -74,7 +75,7 @@ namespace ige::scene
     }
 
     //! Serialize
-    void Canvas::to_json(json& j) const
+    void Canvas::to_json(json &j) const
     {
         j = json{
             {"size", m_canvasSize},
@@ -85,11 +86,11 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void Canvas::from_json(const json& j)
+    void Canvas::from_json(const json &j)
     {
         setDesignCanvasSize(j.value("size", Vec2(560.f, 940.f)));
         setTargetCanvasSize(j.value("targetSize", Vec2(560.f, 940.f)));
         m_deviceScale = (j.value("targetSize", Vec2(560.f, 940.f)));
         setCanvasToViewportMatrix(j.value("viewport", Mat4::IdentityMat()));
     }
-}
+} // namespace ige::scene

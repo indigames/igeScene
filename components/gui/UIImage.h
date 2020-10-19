@@ -13,7 +13,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        UIImage(const std::shared_ptr<SceneObject>& owner, const std::string& texture = "", const Vec2& size = {128.f, 128.f});
+        UIImage(SceneObject &owner, const std::string &texture = "", const Vec2 &size = {128.f, 128.f});
 
         //! Destructor
         virtual ~UIImage();
@@ -28,9 +28,9 @@ namespace ige::scene
         virtual void onRender() override;
 
         //! Serialize
-        virtual void to_json(json& j) const override;
+        virtual void to_json(json &j) const override;
 
         //! Deserialize
-        virtual void from_json(const json& j) override;
+        virtual void from_json(const json &j) override;
     };
 }

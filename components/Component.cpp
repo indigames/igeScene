@@ -4,12 +4,12 @@
 namespace ige::scene
 {
     //! Constructor
-    Component::Component(const std::shared_ptr<SceneObject>& owner): m_owner(owner.get()) {}
-    
+    Component::Component(SceneObject &owner) : m_owner(owner) {}
+
     //! Destructor
-    Component::~Component() 
+    Component::~Component()
     {
-        if (m_owner && m_owner->isActive())
+        if (getOwner()->isActive())
         {
             onDisable();
             onDestroy();
@@ -45,14 +45,14 @@ namespace ige::scene
     void Component::onResume() {}
 
     //! Serialize
-    void to_json(json& j, const Component& obj)
+    void to_json(json &j, const Component &obj)
     {
         obj.to_json(j);
     }
 
-    //! Deserialize 
-    void from_json(const json& j, Component& obj)
+    //! Deserialize
+    void from_json(const json &j, Component &obj)
     {
         obj.from_json(j);
     }
-}
+} // namespace ige::scene

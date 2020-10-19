@@ -13,7 +13,7 @@ namespace ige::scene
     class AudioSource : public Component
     {
     public:
-        AudioSource(const std::shared_ptr<SceneObject> &owner, const std::string &path = {}, bool stream = false);
+        AudioSource(SceneObject &owner, const std::string &path = {}, bool stream = false);
         virtual ~AudioSource();
 
         //! Get name

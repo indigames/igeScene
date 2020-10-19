@@ -48,7 +48,7 @@ namespace ige::scene
         vec[3] = std::clamp(vec[3], 0.0f, 1.0f);
     }
 
-    RectTransform::RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos, const Vec2& size)
+    RectTransform::RectTransform(SceneObject& owner, const Vec3& pos, const Vec2& size)
         : TransformComponent(owner, pos)
     {
         m_offset = Vec4(0.f, 0.f, 0.f, 0.f);
@@ -97,7 +97,7 @@ namespace ige::scene
         {
             m_worldMatrix.Identity();
             auto pivot = getPivotInCanvasSpace();
-            auto transformToPivotSpace = Mat4::Translate(Vec3(-pivot.X(), -pivot.Y(), m_localPosition.Z())); 
+            auto transformToPivotSpace = Mat4::Translate(Vec3(-pivot.X(), -pivot.Y(), m_localPosition.Z()));
             auto transformFromPivotSpace = Mat4::Translate(Vec3(pivot.X(), pivot.Y(), m_localPosition.Z()));
             m_worldMatrix = transformFromPivotSpace * Mat4::Rotation(m_localRotation) * Mat4::Scale(m_localScale) * transformToPivotSpace * Mat4::Translate(m_localPosition);
             m_bLocalDirty = false;
@@ -205,7 +205,7 @@ namespace ige::scene
     }
 
     void RectTransform::setPosition(const Vec3& pos)
-    {        
+    {
         if (m_localPosition != pos)
         {
             auto deltaPos = pos - m_localPosition;
@@ -354,7 +354,7 @@ namespace ige::scene
         auto transformToPivotSpace = Mat4::Translate(Vec3(-curPivot.X(), -curPivot.Y(), m_localPosition.Z()));
         auto transformFromPivotSpace = Mat4::Translate(Vec3(curPivot.X(), curPivot.Y(), m_localPosition.Z()));
         auto localTransform = transformFromPivotSpace * Mat4::Rotation(m_localRotation) * Mat4::Scale(m_localScale) * transformToPivotSpace;
-  
+
         // Get the rect points
         auto leftTop = Vec4(rect[0], rect[1], m_localPosition.Z(), 1.f);
         auto rightTop = Vec4(rect[2], rect[1], m_localPosition.Z(), 1.f);
@@ -544,7 +544,7 @@ namespace ige::scene
             auto anchorCenter = getRectCenter(m_anchor);
             posVec2.X(posVec2.X() - (0.5f - anchorCenter[0]) * getRectWidth(rect));
             posVec2.Y(posVec2.Y() - (0.5f - anchorCenter[1]) * getRectHeight(rect));
-            
+
             // Update local position
             m_localPosition = Vec3(posVec2.X(), posVec2.Y(), m_localPosition.Z());
 

@@ -104,7 +104,7 @@ namespace ige::scene
     // Get parent
     PyObject *SceneObject_getParent(PyObject_SceneObject *self)
     {
-        if (self->sceneObject->hasParent())
+        if (self->sceneObject->getParent())
         {
             auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
             obj->sceneObject = self->sceneObject->getParent();
@@ -129,14 +129,6 @@ namespace ige::scene
         return -1;
     }
 
-    // Get root
-    PyObject *SceneObject_getRoot(PyObject_SceneObject *self)
-    {
-        auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        obj->sceneObject = self->sceneObject->getRoot();
-        return (PyObject *)obj;
-    }
-
     // Get transform
     PyObject *SceneObject_getTransform(PyObject_SceneObject *self)
     {
@@ -155,88 +147,10 @@ namespace ige::scene
         return (PyObject *)obj;
     }
 
-    // Add child
-    PyObject *SceneObject_addChild(PyObject_SceneObject *self, PyObject *value)
-    {
-        PyObject *obj;
-        if (PyArg_ParseTuple(value, "O", &obj))
-        {
-            if (obj)
-            {
-                if (PyUnicode_Check(obj))
-                {
-                    const char *name = PyUnicode_AsUTF8(obj);
-                    auto sceneObj = SceneManager::getInstance()->getCurrentScene()->findObjectByName(std::string(name));
-                    if (sceneObj)
-                    {
-                        self->sceneObject->addChild(sceneObj);
-                        Py_RETURN_TRUE;
-                    }
-                }
-                else if (PyNumber_Check(obj))
-                {
-                    uint64_t id = PyLong_AsUnsignedLongLong(obj);
-                    auto sceneObj = SceneManager::getInstance()->getCurrentScene()->findObjectById(id);
-                    if (sceneObj)
-                    {
-                        self->sceneObject->addChild(sceneObj);
-                        Py_RETURN_TRUE;
-                    }
-                }
-                else if (obj->ob_type == &PyTypeObject_SceneObject)
-                {
-                    auto sceneObj = SceneManager::getInstance()->getCurrentScene()->findObjectById(((PyObject_SceneObject *)obj)->sceneObject->getId());
-                    self->sceneObject->addChild(sceneObj);
-                    Py_RETURN_TRUE;
-                }
-            }
-        }
-        Py_RETURN_FALSE;
-    }
-
-    // Remove child
-    PyObject *SceneObject_removeChild(PyObject_SceneObject *self, PyObject *value)
-    {
-        PyObject *obj;
-        if (PyArg_ParseTuple(value, "O", &obj))
-        {
-            if (obj)
-            {
-                if (PyUnicode_Check(obj))
-                {
-                    const char *name = PyUnicode_AsUTF8(obj);
-                    auto sceneObj = SceneManager::getInstance()->getCurrentScene()->findObjectByName(std::string(name));
-                    if (sceneObj)
-                    {
-                        self->sceneObject->removeChild(sceneObj);
-                        Py_RETURN_TRUE;
-                    }
-                }
-                else if (PyNumber_Check(obj))
-                {
-                    uint64_t id = PyLong_AsUnsignedLongLong(obj);
-                    auto sceneObj = SceneManager::getInstance()->getCurrentScene()->findObjectById(id);
-                    if (sceneObj)
-                    {
-                        self->sceneObject->removeChild(sceneObj);
-                        Py_RETURN_TRUE;
-                    }
-                }
-                else if (obj->ob_type == &PyTypeObject_SceneObject)
-                {
-                    auto sceneObj = SceneManager::getInstance()->getCurrentScene()->findObjectById(((PyObject_SceneObject *)obj)->sceneObject->getId());
-                    self->sceneObject->removeChild(sceneObj);
-                    Py_RETURN_TRUE;
-                }
-            }
-        }
-        Py_RETURN_FALSE;
-    }
-
     // Get children
     PyObject *SceneObject_getChildren(PyObject_SceneObject *self)
     {
-        auto len = self->sceneObject->getChildrenCount();
+        auto len = self->sceneObject->getChildren().size();
         if (len > 0)
         {
             auto children = self->sceneObject->getChildren();
@@ -244,7 +158,7 @@ namespace ige::scene
             for (int i = 0; i < len; ++i)
             {
                 auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                obj->sceneObject = children[i].get();
+                obj->sceneObject = children[i];
                 PyTuple_SetItem(childrenTuple, i, (PyObject *)obj);
                 Py_XDECREF(obj);
             }
@@ -669,8 +583,6 @@ namespace ige::scene
 
     // Methods
     PyMethodDef SceneObject_methods[] = {
-        {"addChild", (PyCFunction)SceneObject_addChild, METH_VARARGS, SceneObject_addChild_doc},
-        {"removeChild", (PyCFunction)SceneObject_removeChild, METH_VARARGS, SceneObject_removeChild_doc},
         {"getChildren", (PyCFunction)SceneObject_getChildren, METH_VARARGS, SceneObject_getChildren_doc},
         {"removeChildren", (PyCFunction)SceneObject_removeChildren, METH_VARARGS, SceneObject_removeChildren_doc},
         {"addComponent", (PyCFunction)SceneObject_addComponent, METH_VARARGS, SceneObject_addComponent_doc},
@@ -687,7 +599,6 @@ namespace ige::scene
         {"active", (getter)SceneObject_getActive, (setter)SceneObject_setActive, SceneObject_active_doc, NULL},
         {"selected", (getter)SceneObject_getSelected, (setter)SceneObject_setSelected, SceneObject_selected_doc, NULL},
         {"parent", (getter)SceneObject_getParent, (setter)SceneObject_setParent, SceneObject_parent_doc, NULL},
-        {"root", (getter)SceneObject_getRoot, NULL, SceneObject_root_doc, NULL},
         {"transform", (getter)SceneObject_getTransform, NULL, SceneObject_transform_doc, NULL},
         {"rectTransform", (getter)SceneObject_getRectTransform, NULL, SceneObject_rectTransform_doc, NULL},
         {NULL, NULL}};

@@ -14,7 +14,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        UIText(const std::shared_ptr<SceneObject>& owner, const std::string& text = "", const std::string& fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4& color = {1.f, 1.f, 1.f, 1.f});
+        UIText(SceneObject &owner, const std::string &text = "", const std::string &fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4 &color = {1.f, 1.f, 1.f, 1.f});
 
         //! Destructor
         virtual ~UIText();
@@ -29,32 +29,32 @@ namespace ige::scene
         virtual void onRender() override;
 
         //! Serialize
-        virtual void to_json(json& j) const override;
+        virtual void to_json(json &j) const override;
 
         //! Deserialize
-        virtual void from_json(const json& j) override;
+        virtual void from_json(const json &j) override;
 
         //! Text
         const std::string getText() const { return m_text->getText(); }
-        void setText(const std::string& text);
+        void setText(const std::string &text);
 
         //! Font Path
-        const std::string& getFontPath() const { return m_text->getFontPath(); }
-        void setFontPath(const std::string& path);
+        const std::string &getFontPath() const { return m_text->getFontPath(); }
+        void setFontPath(const std::string &path);
 
         //! Font Size
         int getFontSize() const { return m_text->getFontSize(); }
         void setFontSize(int size);
 
         //! Color
-        const Vec4& getColor() const { return m_text->getColor(); }
-        void setColor( const Vec4& color);
+        const Vec4 &getColor() const { return m_text->getColor(); }
+        void setColor(const Vec4 &color);
 
         //! Figure
-        EditableFigure* getFigure() { return m_text->getFigure(); }
+        EditableFigure *getFigure() { return m_text->getFigure(); }
 
     protected:
         //! Text
         std::shared_ptr<Text> m_text;
     };
-}
+} // namespace ige::scene

@@ -17,16 +17,13 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        Component(const std::shared_ptr<SceneObject>& owner);
+        Component(SceneObject &owner);
 
         //! Destructor
         virtual ~Component();
 
         //! Get owner object
-        virtual SceneObject* getOwner() const { return m_owner; }
-
-        //! Check if owner was set
-        virtual bool hasOwner() const { return getOwner() != nullptr; }
+        virtual SceneObject *getOwner() const { return &m_owner; }
 
         //! Returns the name of the component
         virtual std::string getName() const = 0;
@@ -58,25 +55,25 @@ namespace ige::scene
         virtual void onResume();
 
         //! Serialize
-        virtual void to_json(json& j) const = 0;
+        virtual void to_json(json &j) const = 0;
 
         //! Deserialize
-        virtual void from_json(const json& j) = 0;
+        virtual void from_json(const json &j) = 0;
 
         //! Serialize
-        friend void to_json(json& j, const Component& obj);
+        friend void to_json(json &j, const Component &obj);
 
         //! Deserialize
-        friend void from_json(const json& j, Component& obj);
+        friend void from_json(const json &j, Component &obj);
 
     protected:
         //! Reference to owner object
-        SceneObject* m_owner = nullptr;
+        SceneObject &m_owner;
     };
 
     //! Serialize
-    void to_json(json& j, const Component& obj);
+    void to_json(json &j, const Component &obj);
 
     //! Deserialize
-    void from_json(const json& j, Component& obj);
-}
+    void from_json(const json &j, Component &obj);
+} // namespace ige::scene
