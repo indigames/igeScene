@@ -151,28 +151,25 @@ namespace ige::scene
 
     std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent, const Vec3& pos, const Vec2& size)
     {
-        std::shared_ptr<SceneObject> sceneObject = nullptr;
-        if (!parent || parent->getCanvas() == nullptr)
+        std::shared_ptr<SceneObject> sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parent ? parent.get() : nullptr, true, size);
+        m_objects.push_back(sceneObject);;
+
+        // Not canvas, create defaut canvas
+        if (!parent || !parent->getCanvas())
         {
-            auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", parent ? parent.get() : nullptr, true, size);
-            m_objects.push_back(canvasObject);
-
-            auto uiImage = canvasObject->addComponent<UIImage>();
-            uiImage->setPath("sprite/rect");
-
-            auto canvas = canvasObject->addComponent<Canvas>();
+            auto canvas = sceneObject->addComponent<Canvas>();
             canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
             canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW()));
-            canvasObject->setCanvas(canvas);
+            sceneObject->setCanvas(canvas);
 
+            // Root object, set environment and default camera
             if (!parent)
             {
-                // This is a GUI root object, setup default environment, canvas and camera
-                auto envComp = canvasObject->addComponent<EnvironmentComponent>("environment");
+                auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
                 envComp->setAmbientSkyColor(Vec3(0.5f, 0.5f, 0.5f));
                 envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
 
-                auto camObj = createGUIObject("GUI Camera", canvasObject);
+                auto camObj = createGUIObject("GUI Camera", sceneObject);
                 camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
                 auto camComp = camObj->addComponent<CameraComponent>("default_2d_camera");
                 camComp->lockOnTarget(false);
@@ -182,12 +179,6 @@ namespace ige::scene
                 camObj->onUpdate(0.f);
             }
         }
-        else
-        {
-            sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parent ? parent.get() : nullptr, true, size);
-            m_objects.push_back(sceneObject);
-        }
-
         return sceneObject;
     }
 

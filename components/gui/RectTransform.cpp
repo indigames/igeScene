@@ -211,8 +211,13 @@ namespace ige::scene
             auto deltaPos = pos - m_localPosition;
             auto newOffset = m_offset;
             translateRect(newOffset, Vec2(deltaPos[0], deltaPos[1]));
-            m_localPosition[3] = pos.Z();
             setOffset(newOffset);
+
+            if (m_localPosition[3] != pos.Z())
+            {
+                m_localPosition.Z(pos.Z());
+                setTransformDirty();
+            }
 
             onUpdate(0.f);
         }
