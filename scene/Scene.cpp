@@ -342,8 +342,26 @@ namespace ige::scene
         return true;
     }
 
-    bool Scene::loadPrefab(uint64_t parentId, const std::string& file)
+    bool Scene::loadPrefab(uint64_t parentId, const std::string& path)
     {
+        if (path.empty())
+            return false;
+
+        auto fsPath = fs::path(path);
+        if (fsPath.extension().string() != ".prefab")
+            return false;
+
+        std::ifstream file(fsPath);
+        if (!file.is_open())
+            return nullptr;
+
+        json jObj;
+        file >> jObj;
+
+        auto parent = findObjectById(parentId);
+        auto obj = createObject(jObj.at("name"), parent, jObj.value("gui", false));
+        obj->from_json(jObj);
+
         return true;
     }
 }

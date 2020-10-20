@@ -129,9 +129,9 @@ namespace ige::scene
 
         auto fsPath = fs::path(path);
         auto ext = fsPath.extension();
-        if (ext.string() != ".json")
+        if (ext.string() != ".scene")
         {
-            fsPath = fsPath.replace_extension(".json");
+            fsPath = fsPath.replace_extension(".scene");
         }
 
         std::ifstream file(fsPath);
@@ -157,9 +157,9 @@ namespace ige::scene
 
             auto fsPath = path.empty() ? fs::path(m_currScene->getPath()) : fs::path(path);
             auto ext = fsPath.extension();
-            if (ext.string() != ".json")
+            if (ext.string() != ".scene")
             {
-                fsPath = fsPath.replace_extension(".json");
+                fsPath = fsPath.replace_extension(".scene");
             }
 
             std::ofstream file(fsPath.string());
