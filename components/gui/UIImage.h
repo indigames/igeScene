@@ -27,6 +27,7 @@ namespace ige::scene
         //! Render
         virtual void onRender() override;
 
+    protected:
         //! Serialize
         virtual void to_json(json &j) const override;
 

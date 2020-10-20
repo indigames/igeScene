@@ -27,13 +27,13 @@ namespace ige::scene
         //! Click
         virtual void onClick() override;
 
+    protected:
         //! Serialize
-        virtual void to_json(json &j) const override;
+        virtual void to_json(json& j) const override;
 
         //! Deserialize
-        virtual void from_json(const json &j) override;
+        virtual void from_json(const json& j) override;
 
-    protected:
         bool m_bIsInputing = false;
     };
 } // namespace ige::scene

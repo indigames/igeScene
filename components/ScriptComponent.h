@@ -63,12 +63,6 @@ namespace ige::scene
         virtual void onCollisionStay(SceneObject &other);
         virtual void onCollisionStop(SceneObject &other);
 
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
-
         //! Path
         void setPath(const std::string &path);
         const std::string &getPath() { return m_path; }
@@ -77,6 +71,12 @@ namespace ige::scene
         Event<const std::string &> &getOnScriptChangedEvent() { return m_onScriptChangedEvent; }
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         void loadPyModule();
         void unloadPyModule();
 

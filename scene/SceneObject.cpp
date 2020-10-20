@@ -2,6 +2,7 @@
 
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
+#include "scene/SceneManager.h"
 
 #include "components/Component.h"
 #include "components/TransformComponent.h"
@@ -376,10 +377,10 @@ namespace ige::scene
         auto jComponents = json::array();
         for (const auto &comp : m_components)
         {
-            json jCmp;
-            comp->to_json(jCmp);
-            json jPairCmp = {comp->getName(), jCmp};
-            jComponents.push_back(jPairCmp);
+            if (!comp->isSkipSerialize())
+            {
+                jComponents.push_back({ comp->getName(), json(*comp.get()) });
+            }
         }
         j["comps"] = jComponents;
 
@@ -452,7 +453,17 @@ namespace ige::scene
             else if (key == "AudioListener")
                 comp = addComponent<AudioListener>();
             if (comp)
-                comp->from_json(val);
+                val.get_to(*comp);
+        }
+
+        // Add editor camera figure debug
+        if (SceneManager::getInstance()->isEditor())
+        {
+            if (auto camera = getComponent<CameraComponent>())
+            {
+                if (!getComponent<FigureComponent>())
+                    addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
+            }
         }
 
         auto jChildren = j.at("childs");

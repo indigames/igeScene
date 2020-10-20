@@ -144,13 +144,13 @@ namespace ige::scene
         Event<PhysicBase &> &getTriggerStayEvent() { return m_triggerStayEvent; }
         Event<PhysicBase &> &getTriggerStopEvent() { return m_triggerStopEvent; }
 
+    protected:
         //! Serialize
-        virtual void to_json(json &j) const override;
+        virtual void to_json(json& j) const override;
 
         //! Deserialize
-        virtual void from_json(const json &j) override;
+        virtual void from_json(const json& j) override;
 
-    protected:
         //! Create physic body
         void createBody();
 

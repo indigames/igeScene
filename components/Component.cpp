@@ -47,7 +47,8 @@ namespace ige::scene
     //! Serialize
     void to_json(json &j, const Component &obj)
     {
-        obj.to_json(j);
+        if (!obj.isSkipSerialize())
+            obj.to_json(j);
     }
 
     //! Deserialize

@@ -116,16 +116,16 @@ namespace ige::scene
         //! Update
         virtual void onRender() override;
 
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
-
         //! Get camera
         Camera *getCamera() { return m_camera; }
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! Internal camera
         Camera *m_camera = nullptr;
 

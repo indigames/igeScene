@@ -19,12 +19,6 @@ namespace ige::scene
         //! Get name
         virtual std::string getName() const override { return "AudioSource"; }
 
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
-
         //! Enable/disable
         bool isEnabled() const { return m_bIsEnabled; }
         void setEnabled(bool enable = true);
@@ -111,6 +105,12 @@ namespace ige::scene
         static Event<AudioSource&>& getDestroyedEvent() { return m_onDestroyedEvent; }
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! On created event
         static Event<AudioSource &> m_onCreatedEvent;
 

@@ -86,13 +86,13 @@ namespace ige::scene
         //! Handle notification from parent: just do nothing
         void onNotified(const ETransformMessage &message) override;
 
+    protected:
         //! Serialize
-        void to_json(json &j) const override;
+        virtual void to_json(json& j) const override;
 
         //! Deserialize
-        void from_json(const json &j) override;
+        virtual void from_json(const json& j) override;
 
-    protected:
         Vec2 getPivotInCanvasSpace();
         Vec2 getAnchorCenterInCanvasSpace();
 

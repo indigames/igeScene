@@ -27,12 +27,6 @@ namespace ige::scene
         //! Render
         void onRender() override;
 
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
-
         //! Get associated figure
         Figure *getFigure() { return m_figure; }
 
@@ -41,6 +35,12 @@ namespace ige::scene
         const std::string &getPath() { return m_path; }
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! Associated figure object
         Figure *m_figure;
 

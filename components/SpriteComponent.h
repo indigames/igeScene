@@ -28,12 +28,6 @@ namespace ige::scene
         //! Render
         virtual void onRender() override;
 
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
-
         //! Get associated figure
         EditableFigure *getFigure() { return m_sprite->getFigure(); }
 
@@ -46,6 +40,12 @@ namespace ige::scene
         const Vec2 &getSize() const { return m_sprite->getSize(); }
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! Sprite
         std::shared_ptr<Sprite> m_sprite;
     };

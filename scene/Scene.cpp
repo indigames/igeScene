@@ -27,7 +27,12 @@ namespace ige::scene
     Scene::Scene(const std::string& name)
         : m_name(name)
     {
+        m_environment = ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), nullptr);
+        m_environment->WaitBuild();
+
         m_showcase = ResourceCreator::Instance().NewShowcase((m_name + "_showcase").c_str());
+        m_showcase->Add(m_environment);
+
         getResourceAddedEvent().addListener(std::bind(&Scene::onResourceAdded, this, std::placeholders::_1));
         getResourceRemovedEvent().addListener(std::bind(&Scene::onResourceRemoved, this, std::placeholders::_1));
     }
@@ -41,9 +46,13 @@ namespace ige::scene
 
         if (m_showcase)
         {
+            m_showcase->Remove(m_environment);
             m_showcase->Clear();
             m_showcase->DecReference();
             m_showcase = nullptr;
+
+            m_environment->DecReference();
+            m_environment = nullptr;
         }
 
         ResourceManager::Instance().DeleteDaemon();
@@ -149,7 +158,12 @@ namespace ige::scene
                 auto camComp = camObj->addComponent<CameraComponent>("default_camera");
                 camComp->lockOnTarget(false);
                 camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
-                camObj->addComponent<FigureComponent>("figure/camera.pyxf");
+
+                // Add editor camera figure debug
+                if (SceneManager::getInstance()->isEditor())
+                {
+                    camObj->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
+                }
 
                 // Fill up test data
                 // populateTestData(sceneObject, 1000);

@@ -20,12 +20,6 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "PhysicSphere"; }
 
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
-
         //! Get radius
         float getRadius() const;
 
@@ -33,6 +27,12 @@ namespace ige::scene
         void setRadius(float radius);
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! Create collision shape
         void createCollisionShape(float radius);
 

@@ -91,6 +91,9 @@ namespace ige::scene
         //! Get showcase
         Showcase* getShowcase() { return m_showcase; }
 
+        //! Get environment
+        Environment* getEnvironment() { return m_environment; }
+
         //! Internal event
         Event<Resource*>& getResourceAddedEvent() { return m_resourceAddedEvent; }
         Event<Resource*>& getResourceRemovedEvent() { return m_resourceRemovedEvent; }
@@ -115,6 +118,9 @@ namespace ige::scene
 
         //! Showcase which contains all rendering resources
         Showcase* m_showcase = nullptr;
+
+        //! Environment settings of the scene
+        Environment* m_environment = nullptr;
 
         //! Internal events
         Event<Resource*> m_resourceAddedEvent;

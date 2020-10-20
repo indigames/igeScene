@@ -129,13 +129,13 @@ namespace ige::scene
 
         const Vec3 &getCenter() const { return m_aabbCenter; }
 
+    protected:
         //! Serialize
-        virtual void to_json(json &j) const override;
+        virtual void to_json(json& j) const override;
 
         //! Deserialize
-        virtual void from_json(const json &j) override;
+        virtual void from_json(const json& j) override;
 
-    protected:
         //! Update world transform matrix
         virtual void updateLocalToWorld();
 

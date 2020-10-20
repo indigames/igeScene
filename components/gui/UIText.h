@@ -28,12 +28,6 @@ namespace ige::scene
         //! Render
         virtual void onRender() override;
 
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
-
         //! Text
         const std::string getText() const { return m_text->getText(); }
         void setText(const std::string &text);
@@ -54,6 +48,12 @@ namespace ige::scene
         EditableFigure *getFigure() { return m_text->getFigure(); }
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! Text
         std::shared_ptr<Text> m_text;
     };

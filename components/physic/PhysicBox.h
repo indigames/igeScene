@@ -20,12 +20,6 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "PhysicBox"; }
 
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
-
         //! Get size
         const Vec3& getSize() const;
 
@@ -33,6 +27,12 @@ namespace ige::scene
         void setSize(const Vec3& size);
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! Create collision shape
         void createCollisionShape(const Vec3& size);
 

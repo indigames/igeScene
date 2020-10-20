@@ -9,39 +9,15 @@ namespace ige::scene
     EnvironmentComponent::EnvironmentComponent(SceneObject &owner, const std::string &name)
         : Component(owner), m_name(name)
     {
-        m_environment = ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), nullptr);
-        m_environment->WaitBuild();
-
-        getOwner()->getScene()->getResourceAddedEvent().invoke(m_environment);
+        m_environment = getOwner()->getScene()->getEnvironment();
+        m_environment->IncReference();
     }
 
     //! Destructor
     EnvironmentComponent::~EnvironmentComponent()
     {
-        if (m_environment)
-        {
-            if (getOwner()->getScene())
-                getOwner()->getScene()->getResourceRemovedEvent().invoke(m_environment);
-            m_environment->DecReference();
-            m_environment = nullptr;
-        }
-    }
-
-    //! Update
-    void EnvironmentComponent::onUpdate(float dt)
-    {
-        if (m_environment == nullptr)
-            return;
-    }
-
-    //! Render
-    void EnvironmentComponent::onRender()
-    {
-        if (m_environment == nullptr)
-            return;
-
-        // Render
-        m_environment->Render();
+        m_environment->DecReference();
+        m_environment = nullptr;
     }
 
     //! Serialize

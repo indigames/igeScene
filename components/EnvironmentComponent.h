@@ -88,22 +88,16 @@ namespace ige::scene
         float getShadowWideness() const { return m_environment->GetShadowWideness(); }
         void setShadowWideness(float wideness) { m_environment->SetShadowWideness(wideness); }
 
-        //! Update
-        virtual void onUpdate(float dt) override;
-
-        //! Render
-        virtual void onRender() override;
-
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
-
         //! Get internal environment
         Environment *getEnvironment() { return m_environment; }
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! Environment instance
         Environment *m_environment;
 
