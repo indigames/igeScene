@@ -24,7 +24,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SceneObject(Scene* scene, uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false, const Vec2& size = {});
+        SceneObject(Scene* scene, uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false, const Vec2& size = {64.f, 64.f});
 
         //! Destructor
         virtual ~SceneObject();
@@ -43,7 +43,6 @@ namespace ige::scene
 
         // Get parent
         virtual SceneObject *getParent() const;
-        uint64_t getParentId() const { return m_pid; }
 
         //! Get children list
         virtual const std::vector<SceneObject*> &getChildren() const;
@@ -157,9 +156,6 @@ namespace ige::scene
     protected:
         //! Node ID
         uint64_t m_id;
-
-        //! Parent ID
-        uint64_t m_pid = (uint64_t)-1;
 
         //! Node Name
         std::string m_name;

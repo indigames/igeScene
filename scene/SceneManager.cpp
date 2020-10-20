@@ -25,8 +25,6 @@ using namespace pyxie;
 #  define DELIMITER ":"
 #endif
 
-#define SERIALIZE_VERSION "0.0.1"
-
 namespace ige::scene
 {
     SceneManager::SceneManager()

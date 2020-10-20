@@ -10,7 +10,7 @@
 namespace ige::scene
 {
     TransformComponent::TransformComponent(SceneObject &owner, const Vec3 &pos, const Quat &rot, const Vec3 &scale)
-        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale)
+        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale), m_parent(nullptr)
     {
         m_bLocalDirty = true;
 

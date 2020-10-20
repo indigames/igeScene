@@ -50,10 +50,7 @@ namespace ige::scene
         virtual void render();
 
         //! Create scene object
-        virtual std::shared_ptr<SceneObject> createObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
-
-        //! Create GUI object
-        virtual std::shared_ptr<SceneObject> createGUIObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr, const Vec3& pos = Vec3(), const Vec2& size = {64, 64});
+        virtual std::shared_ptr<SceneObject> createObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 });
 
         //! Remove scene object
         virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);
@@ -73,7 +70,10 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j);
 
-        //! Get roots of scene nodes tree
+        //! Get root of scene
+        std::vector<std::shared_ptr<SceneObject>>& getRoots() { return m_roots; };
+
+        //! Get objects list
         std::vector<std::shared_ptr<SceneObject>>& getObjects() { return m_objects; };
 
         //! Set active camera
@@ -99,8 +99,18 @@ namespace ige::scene
         void onResourceAdded(Resource* resource);
         void onResourceRemoved(Resource* resource);
 
+        //! Prefab save/load
+        bool savePrefab(uint64_t objectId, const std::string& file);
+        bool loadPrefab(uint64_t parentId, const std::string& file);
+
     protected:
-        //! Scene root node
+        void populateTestData(const std::shared_ptr<SceneObject>& parent = nullptr, int num = 1000);
+
+    protected:
+        //! Scene roots node
+        std::vector < std::shared_ptr<SceneObject>> m_roots;
+
+        //! Cache all objects
         std::vector<std::shared_ptr<SceneObject>> m_objects;
 
         //! Showcase which contains all rendering resources

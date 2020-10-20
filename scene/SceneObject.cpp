@@ -36,10 +36,13 @@ namespace ige::scene
 
     //! Constructor
     SceneObject::SceneObject(Scene* scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2& size)
-        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr)
+        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr)
     {
         // Invoke created event
         getCreatedEvent().invoke(*this);
+
+        // Update parent
+        setParent(parent);
 
         // Create and add transform component
         if (isGui)
@@ -47,8 +50,9 @@ namespace ige::scene
         else
             m_transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
 
-        // Update parent
-        setParent(parent);
+        // Update parent transform
+        if(getParent())
+            m_transform->setParent(getParent()->getTransform().get());
     }
 
     //! Destructor
@@ -57,8 +61,6 @@ namespace ige::scene
         if (m_parent)
             m_parent->removeChild(this);
         m_parent = nullptr;
-        m_pid = (uint64_t)-1;
-
         setCanvas(nullptr);
         
         removeAllComponents();
@@ -86,9 +88,9 @@ namespace ige::scene
         if (parent)
         {
             m_parent = parent;
-            m_pid = m_parent->getId();
             m_parent->addChild(this);
-            getTransform()->setParent(m_parent->getTransform().get());
+            if(getTransform())
+                getTransform()->setParent(m_parent->getTransform().get());
             setCanvas(m_parent->getCanvas());
             getAttachedEvent().invoke(*this);
         }
@@ -97,10 +99,10 @@ namespace ige::scene
             getDetachedEvent().invoke(*this);
             if (m_parent)
                 m_parent->removeChild(this);
-            getTransform()->setParent(nullptr);
+            if(getTransform())
+                getTransform()->setParent(nullptr);
             setCanvas(nullptr);
             m_parent = nullptr;
-            m_pid = (uint64_t)-1;
         }
     }
 
@@ -247,6 +249,12 @@ namespace ige::scene
                 if (comp->getName() != "CameraComponent")
                     comp->onUpdate(dt);
             }
+
+            for (auto &obj : m_children)
+            {
+                if (obj != nullptr)
+                    obj->onUpdate(dt);
+            }
         }
     }
 
@@ -259,6 +267,12 @@ namespace ige::scene
             {
                 comp->onFixedUpdate(dt);
             }
+
+            for (auto &obj : m_children)
+            {
+                if (obj != nullptr)
+                    obj->onFixedUpdate(dt);
+            }
         }
     }
 
@@ -270,6 +284,12 @@ namespace ige::scene
             for (auto &comp : m_components)
             {
                 comp->onLateUpdate(dt);
+            }
+
+            for (auto &obj : m_children)
+            {
+                if (obj != nullptr)
+                    obj->onLateUpdate(dt);
             }
         }
     }
@@ -284,6 +304,12 @@ namespace ige::scene
                 // Camera rendered before other objects
                 if (comp->getName() != "CameraComponent")
                     comp->onRender();
+            }
+
+            for (auto &obj : m_children)
+            {
+                if (obj != nullptr)
+                    obj->onRender();
             }
         }
     }
@@ -342,8 +368,6 @@ namespace ige::scene
     void SceneObject::to_json(json &j)
     {
         j = json{
-            {"id", m_id},
-            {"pid", m_pid},
             {"name", m_name},
             {"active", m_isActive},
             {"gui", m_bIsGui},
@@ -358,16 +382,26 @@ namespace ige::scene
             jComponents.push_back(jPairCmp);
         }
         j["comps"] = jComponents;
+
+        auto jChildren = json::array();
+        for (const auto &child : m_children)
+        {
+            if (child)
+            {
+                json jChild;
+                child->to_json(jChild);
+                jChildren.push_back(jChild);
+            }
+        }
+        j["childs"] = jChildren;
     }
 
     //! Deserialize
     void SceneObject::from_json(const json &j)
-    {
-        j.at("id").get_to(m_id);
+    {   
         setName(j.value("name", ""));
         setActive(j.value("active", false));
         m_bIsGui = j.value("gui", false);
-        m_pid = j.value("pid", (uint64_t)-1);
 
         auto jComps = j.at("comps");
         for (auto it : jComps)
@@ -419,6 +453,14 @@ namespace ige::scene
                 comp = addComponent<AudioListener>();
             if (comp)
                 comp->from_json(val);
+        }
+
+        auto jChildren = j.at("childs");
+        auto thisObj = getScene()->findObjectById(getId());
+        for (auto it : jChildren)
+        {
+            auto child = getScene()->createObject(it.at("name"), thisObj, it.value("gui", false));
+            child->from_json(it);
         }
     }
 } // namespace ige::scene

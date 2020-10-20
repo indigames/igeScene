@@ -19,7 +19,8 @@
 
 #include "utils/GraphicsHelper.h"
 
-#define SERIALIZE_VERSION "0.0.1"
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
 
 namespace ige::scene
 {
@@ -34,6 +35,18 @@ namespace ige::scene
     Scene::~Scene()
     {
         clear();
+
+        getResourceAddedEvent().removeAllListeners();
+        getResourceRemovedEvent().removeAllListeners();
+
+        if (m_showcase)
+        {
+            m_showcase->Clear();
+            m_showcase->DecReference();
+            m_showcase = nullptr;
+        }
+
+        ResourceManager::Instance().DeleteDaemon();
     }
 
     bool Scene::initialize()
@@ -43,6 +56,7 @@ namespace ige::scene
 
     void Scene::clear()
     {
+        m_nextObjectID = 0;
         m_activeCamera = nullptr;
 
         for (auto& obj : m_objects)
@@ -57,18 +71,7 @@ namespace ige::scene
             obj = nullptr;
         }
         m_objects.clear();
-
-        getResourceAddedEvent().removeAllListeners();
-        getResourceRemovedEvent().removeAllListeners();
-
-        if (m_showcase)
-        {
-            m_showcase->Clear();
-            m_showcase->DecReference();
-            m_showcase = nullptr;
-        }
-
-        ResourceManager::Instance().DeleteDaemon();
+        m_roots.clear();
     }
 
     void Scene::update(float dt)
@@ -105,87 +108,100 @@ namespace ige::scene
         m_showcase->Render();
     }
 
-    std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent)
+    std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent, bool isGUI, const Vec2& size)
     {
-        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parent ? parent.get() : nullptr);
+        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parent ? parent.get() : nullptr, isGUI, size);
         m_objects.push_back(sceneObject);
 
-        if (parent == nullptr)
-        {
-            // This is a root object, setup default environment and camera
-            auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
-            envComp->setAmbientSkyColor(Vec3(0.5f, 0.5f, 0.5f));
-            envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
-
-            auto camObj = createObject("Default Camera", sceneObject);
-            camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
-            auto camComp = camObj->addComponent<CameraComponent>("default_camera");
-            camComp->lockOnTarget(false);
-            camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
-            setActiveCamera(camComp.get());
-            camObj->addComponent<FigureComponent>("figure/camera.pyxf");
-
-        /*
-            //! [IGE]: To test perfornamce with huge amount of objects
-            std::srand(std::time(nullptr));
-
-            for (int i = 0; i < 10000; ++i)
-            {
-                auto newObj = createObject("Object_" + std::to_string(i), sceneObject);
-                if((std::rand() / (float)RAND_MAX) < 0.5f)
-                    if ((std::rand() / (float)RAND_MAX) < 0.5f)
-                        newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, -std::rand() % 50));
-                    else
-                        newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, std::rand() % 50));
-                else
-                    if ((std::rand() / (float)RAND_MAX) < 0.5f)
-                        newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, -std::rand() % 50));
-                    else
-                        newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, std::rand() % 50));
-                newObj->addComponent<FigureComponent>("figure/Tree/Tree.pyxf");
-            }
-        */
-        }
-        return sceneObject;
-    }
-
-    std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent, const Vec3& pos, const Vec2& size)
-    {
-        std::shared_ptr<SceneObject> sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parent ? parent.get() : nullptr, true, size);
-        m_objects.push_back(sceneObject);;
-
         // Not canvas, create defaut canvas
-        if (!parent || !parent->getCanvas())
+        if (isGUI && (!parent || !parent->getCanvas()))
         {
             auto canvas = sceneObject->addComponent<Canvas>();
             canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
             canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW()));
             sceneObject->setCanvas(canvas);
+        }
 
-            // Root object, set environment and default camera
-            if (!parent)
+        // Setup default environment and camera for root
+        if (!parent)
+        {
+            // Cache the root object
+            m_roots.push_back(sceneObject);
+
+            auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
+            envComp->setAmbientSkyColor(Vec3(0.5f, 0.5f, 0.5f));
+            envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+
+            if (isGUI)
             {
-                auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
-                envComp->setAmbientSkyColor(Vec3(0.5f, 0.5f, 0.5f));
-                envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
-
-                auto camObj = createGUIObject("GUI Camera", sceneObject);
+                auto camObj = createObject("GUI Camera", sceneObject, true);
                 camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
                 auto camComp = camObj->addComponent<CameraComponent>("default_2d_camera");
                 camComp->lockOnTarget(false);
                 camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
                 camComp->setOrthoProjection(true);
                 camComp->setWidthBase(false);
-                camObj->onUpdate(0.f);
+            }
+            else
+            {
+                auto camObj = createObject("Default Camera", sceneObject);
+                camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
+                auto camComp = camObj->addComponent<CameraComponent>("default_camera");
+                camComp->lockOnTarget(false);
+                camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+                camObj->addComponent<FigureComponent>("figure/camera.pyxf");
+
+                // Fill up test data
+                // populateTestData(sceneObject, 1000);
             }
         }
         return sceneObject;
+    }
+
+    void Scene::populateTestData(const std::shared_ptr<SceneObject>& parent, int numObjects)
+    {
+        //! [IGE]: To test perfornamce with huge amount of objects
+        std::srand(std::time(nullptr));
+
+        for (int i = 0; i < numObjects; ++i)
+        {
+            auto newObj = createObject("Object_" + std::to_string(i), parent);
+            if((std::rand() / (float)RAND_MAX) < 0.5f)
+                if ((std::rand() / (float)RAND_MAX) < 0.5f)
+                    newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, -std::rand() % 50));
+                else
+                    newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, std::rand() % 50));
+            else
+                if ((std::rand() / (float)RAND_MAX) < 0.5f)
+                    newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, -std::rand() % 50));
+                else
+                    newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, std::rand() % 50));
+            newObj->addComponent<FigureComponent>("figure/Tree/Tree.pyxf");
+        }
     }
 
     bool Scene::removeObject(const std::shared_ptr<SceneObject>& obj)
     {
         if (!obj) return false;
 
+        // Remove active camera
+        if (auto camera = obj->getComponent<CameraComponent>())
+        {
+            if (getActiveCamera() == camera.get())
+                setActiveCamera(nullptr);
+        }
+
+        // Remove from roots list
+        if (obj->getParent() == nullptr)
+        {
+            auto itr = std::find(m_roots.begin(), m_roots.end(), obj);
+            if (itr != m_roots.end())
+            {
+                m_roots.erase(itr);
+            }
+        }
+
+        // Remove all children
         auto children = obj->getChildren();
         for (int i = 0; i < children.size(); ++i)
         {
@@ -195,9 +211,10 @@ namespace ige::scene
                 return el && elem && (el->getId() == elem->getId());
             });
             if (itr != m_objects.end())
-                m_objects.erase(itr);
+                removeObject(*itr);
         }
 
+        // Remove from objects list
         auto itr = std::find(m_objects.begin(), m_objects.end(), obj);
         if (itr != m_objects.end())
         {
@@ -269,11 +286,10 @@ namespace ige::scene
     {
         j = json {
             {"name", m_name},
-            {"objId", m_nextObjectID}
+            {"objId", m_nextObjectID},
         };
-
         auto jRoots = json::array();
-        for (const auto& obj : m_objects)
+        for (const auto& obj : m_roots)
         {
             if (obj)
             {
@@ -282,34 +298,52 @@ namespace ige::scene
                 jRoots.push_back(jRoot);
             }
         }
-        j["objects"] = jRoots;
+        j["roots"] = jRoots;
     }
 
     //! Deserialize
     void Scene::from_json(const json& j)
     {
+        clear();
+
         j.at("name").get_to(m_name);
-        auto jRoots = j.at("objects");
+
+        auto jRoots = j.at("roots");
         for (auto it : jRoots)
         {
-            auto root = std::make_shared<SceneObject>(this, it.at("id"), it.at("name"), nullptr, it.value("gui", false));
-            root->from_json(it);
+            auto root = std::make_shared<SceneObject>(this, m_nextObjectID++, it.at("name"), nullptr, it.value("gui", false));
             m_objects.push_back(root);
-        }
+            m_roots.push_back(root);
 
-        for (auto& obj : m_objects)
-        {
-            if (obj)
-            {
-                auto pid = obj->getParentId();
-                if (pid != (uint64_t)-1)
-                {
-                    auto parentObj = findObjectById(pid);
-                    obj->setParent(parentObj.get());
-                }
-            }
+            root->from_json(it);
         }
-
         j.at("objId").get_to(m_nextObjectID);
+    }
+
+    //! Prefab save/load
+    bool Scene::savePrefab(uint64_t objectId, const std::string& path)
+    {
+        auto object = findObjectById(objectId);
+        if (object != nullptr)
+        {
+            json jObj;
+            object->to_json(jObj);
+
+            auto fsPath = path.empty() ? fs::path(object->getName()) : fs::path(path + "/" + object->getName());
+            auto ext = fsPath.extension();
+            if (ext.string() != ".prefab")
+            {
+                fsPath = fsPath.replace_extension(".prefab");
+            }
+            std::ofstream file(fsPath.string());
+            file << jObj;
+            return true;
+        }
+        return true;
+    }
+
+    bool Scene::loadPrefab(uint64_t parentId, const std::string& file)
+    {
+        return true;
     }
 }
