@@ -209,7 +209,7 @@ namespace ige::scene
             }
             else if (type == "EnvironmentComponent")
             {
-                auto comp = self->sceneObject->addComponent<EnvironmentComponent>(std::string("environment##") + std::to_string(self->sceneObject->getId()));
+                auto comp = self->sceneObject->addComponent<EnvironmentComponent>();
                 if (comp)
                 {
                     auto *compObj = PyObject_New(PyObject_EnvironmentComponent, &PyTypeObject_EnvironmentComponent);

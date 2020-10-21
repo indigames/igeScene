@@ -9,6 +9,10 @@
 #include "components/CameraComponent.h"
 #include "event/Event.h"
 
+#define MAX_DIRECTIONAL_LIGHT_NUMBER    3
+#define MAX_POINT_LIGHT_NUMBER          7
+
+
 namespace ige::scene
 {
     class SceneObject;
@@ -106,6 +110,16 @@ namespace ige::scene
         bool savePrefab(uint64_t objectId, const std::string& file);
         bool loadPrefab(uint64_t parentId, const std::string& file);
 
+        //! Acquire directional light
+        bool isDirectionalLightAvailable();
+        int acquireDirectionalLight();
+        void releaseDirectionalLight(int index);
+
+        //! Acquire point light
+        bool isPointLightAvailable();
+        int acquirePointLight();
+        void releasePointLight(int index);
+
     protected:
         void populateTestData(const std::shared_ptr<SceneObject>& parent = nullptr, int num = 1000);
 
@@ -137,5 +151,11 @@ namespace ige::scene
 
         //! Cached path
         std::string m_path;
+
+        //! Directional light index
+        bool m_directionalLights[MAX_DIRECTIONAL_LIGHT_NUMBER] = { false };
+
+        //! Point light index
+        bool m_pointLights[MAX_POINT_LIGHT_NUMBER] = { false };
     };
 }

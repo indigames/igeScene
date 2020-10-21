@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <cstdlib> 
+#include <cstdlib>
 #include <ctime>
 
 #include "scene/Scene.h"
@@ -12,6 +12,7 @@
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
 #include "components/EnvironmentComponent.h"
+#include "components/AmbientLight.h"
 #include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
@@ -137,9 +138,11 @@ namespace ige::scene
             // Cache the root object
             m_roots.push_back(sceneObject);
 
-            auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
-            envComp->setAmbientSkyColor(Vec3(0.5f, 0.5f, 0.5f));
-            envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
+            // Set ambient color
+            sceneObject->addComponent<AmbientLight>();
+
+            // Set general environment
+            sceneObject->addComponent<EnvironmentComponent>();
 
             if (isGUI)
             {
@@ -174,7 +177,7 @@ namespace ige::scene
 
     void Scene::populateTestData(const std::shared_ptr<SceneObject>& parent, int numObjects)
     {
-        //! [IGE]: To test perfornamce with huge amount of objects
+        //! [IGE]: To test performance with huge amount of objects
         std::srand(std::time(nullptr));
 
         for (int i = 0; i < numObjects; ++i)
@@ -328,7 +331,6 @@ namespace ige::scene
             auto root = std::make_shared<SceneObject>(this, m_nextObjectID++, it.at("name"), nullptr, it.value("gui", false));
             m_objects.push_back(root);
             m_roots.push_back(root);
-
             root->from_json(it);
         }
         j.at("objId").get_to(m_nextObjectID);
@@ -377,5 +379,78 @@ namespace ige::scene
         obj->from_json(jObj);
 
         return true;
+    }
+
+    //! Acquire directional light
+    bool Scene::isDirectionalLightAvailable()
+    {
+        for (auto enable : m_directionalLights)
+        {
+            if (!enable)
+                return true;
+        }
+        return false;
+    }
+
+    int Scene::acquireDirectionalLight()
+    {
+        for (int i = 0; i < MAX_DIRECTIONAL_LIGHT_NUMBER; ++i)
+        {
+            if (!m_directionalLights[i])
+            {
+                m_directionalLights[i] = true;
+                return i;
+            }
+        }
+
+        // safe value
+        return 0;
+    }
+
+    void Scene::releaseDirectionalLight(int idx)
+    {
+        m_directionalLights[idx] = false;
+
+        // Reset to default value
+        m_environment->SetDirectionalLampColor(idx, { 0.5f, 0.5f, 0.5f });
+        m_environment->SetDirectionalLampDirection(idx, { 5.f, 10.f, 5.f });
+        m_environment->SetDirectionalLampIntensity(idx, 1.f);
+    }
+
+    //! Acquire point light
+    bool Scene::isPointLightAvailable()
+    {
+        for (auto enable : m_pointLights)
+        {
+            if (!enable)
+                return true;
+        }
+        return false;
+    }
+
+    int Scene::acquirePointLight()
+    {
+        for (int i = 0; i < MAX_POINT_LIGHT_NUMBER; ++i)
+        {
+            if (!m_pointLights[i])
+            {
+                m_pointLights[i] = true;
+                return i;
+            }
+        }
+
+        // safe value
+        return 0;
+    }
+
+    void Scene::releasePointLight(int idx)
+    {
+        m_pointLights[idx] = false;
+
+        // Reset to default value
+        m_environment->SetPointLampColor(idx, { 1.0f, 1.0f, 1.0f });
+        m_environment->SetPointLampPosition(idx, { 0.0f, 100.0f, 0.0f });
+        m_environment->SetPointLampIntensity(idx, 0.3f);
+        m_environment->SetPointLampRange(idx, 100.0f);
     }
 }

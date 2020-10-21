@@ -21,6 +21,9 @@
 #include "components/physic/PhysicSphere.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
+#include "components/AmbientLight.h"
+#include "components/DirectionalLight.h"
+#include "components/PointLight.h"
 
 namespace ige::scene
 {
@@ -63,7 +66,7 @@ namespace ige::scene
             m_parent->removeChild(this);
         m_parent = nullptr;
         setCanvas(nullptr);
-        
+
         removeAllComponents();
         removeChildren();
 
@@ -399,7 +402,7 @@ namespace ige::scene
 
     //! Deserialize
     void SceneObject::from_json(const json &j)
-    {   
+    {
         setName(j.value("name", ""));
         setActive(j.value("active", false));
         m_bIsGui = j.value("gui", false);
@@ -427,7 +430,7 @@ namespace ige::scene
             else if (key == "CameraComponent")
                 comp = addComponent<CameraComponent>(val.at("name"));
             else if (key == "EnvironmentComponent")
-                comp = addComponent<EnvironmentComponent>(val.at("name"));
+                comp = addComponent<EnvironmentComponent>();
             else if (key == "FigureComponent")
                 comp = addComponent<FigureComponent>(val.at("path"));
             else if (key == "SpriteComponent")
@@ -452,6 +455,12 @@ namespace ige::scene
                 comp = addComponent<AudioSource>();
             else if (key == "AudioListener")
                 comp = addComponent<AudioListener>();
+            else if (key == "AmbientLight")
+                comp = addComponent<AmbientLight>();
+            else if (key == "DirectionalLight")
+                comp = addComponent<DirectionalLight>();
+            else if (key == "PointLight")
+                comp = addComponent<PointLight>();
             if (comp)
                 val.get_to(*comp);
         }
