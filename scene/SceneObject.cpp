@@ -39,8 +39,8 @@ namespace ige::scene
     Event<SceneObject &> SceneObject::s_selectedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(Scene* scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2& size)
-        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr)
+    SceneObject::SceneObject(Scene* scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2& size, bool isCanvas)
+        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_bIsCanvas(isCanvas), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr)
     {
         // Invoke created event
         getCreatedEvent().invoke(*this);
@@ -375,6 +375,7 @@ namespace ige::scene
             {"name", m_name},
             {"active", m_isActive},
             {"gui", m_bIsGui},
+            {"cvs", m_bIsCanvas},
         };
 
         auto jComponents = json::array();
@@ -406,6 +407,7 @@ namespace ige::scene
         setName(j.value("name", ""));
         setActive(j.value("active", false));
         m_bIsGui = j.value("gui", false);
+        m_bIsCanvas = j.value("cvs", false);
 
         auto jComps = j.at("comps");
         for (auto it : jComps)
@@ -443,8 +445,10 @@ namespace ige::scene
                 comp = addComponent<PhysicSphere>();
             else if (key == "PhysicCapsule")
                 comp = addComponent<PhysicCapsule>();
-            else if (key == "Canvas")
+            else if (key == "Canvas") {
                 comp = addComponent<Canvas>();
+                setCanvas(getComponent<Canvas>());
+            }
             else if (key == "UIImage")
                 comp = addComponent<UIImage>();
             else if (key == "UIText")
@@ -473,13 +477,19 @@ namespace ige::scene
                 if (!getComponent<FigureComponent>())
                     addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
             }
+
+            if (auto canvas = getComponent<Canvas>())
+            {
+                if (!getComponent<UIImage>())
+                    addComponent<UIImage>("sprite/rect")->setSkipSerialize(true);
+            }
         }
 
         auto jChildren = j.at("childs");
         auto thisObj = getScene()->findObjectById(getId());
         for (auto it : jChildren)
         {
-            auto child = getScene()->createObject(it.at("name"), thisObj, it.value("gui", false));
+            auto child = getScene()->createObject(it.at("name"), thisObj, it.value("gui", false), {}, it.value("cvs", false));
             child->from_json(it);
         }
     }

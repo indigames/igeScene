@@ -36,6 +36,31 @@ namespace ige::scene
 
         getResourceAddedEvent().addListener(std::bind(&Scene::onResourceAdded, this, std::placeholders::_1));
         getResourceRemovedEvent().addListener(std::bind(&Scene::onResourceRemoved, this, std::placeholders::_1));
+
+        // Create root object
+        m_root = createObject(m_name);
+
+        // Set ambient color
+        m_root->addComponent<AmbientLight>();
+
+        // Set general environment
+        m_root->addComponent<EnvironmentComponent>();
+
+        // Create default camera
+        auto camObj = createObject("Default Camera");
+        camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
+        auto camComp = camObj->addComponent<CameraComponent>("default_camera");
+        camComp->lockOnTarget(false);
+        camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+
+        // Add editor camera figure debug
+        if (SceneManager::getInstance()->isEditor())
+        {
+            camObj->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
+        }
+
+        // Fill up test data
+        // populateTestData(sceneObject, 1000);
     }
 
     Scene::~Scene()
@@ -75,13 +100,14 @@ namespace ige::scene
             obj->setParent(nullptr);
         }
 
+        m_root = nullptr;
+
         // Destroy all objects
         for (auto& obj : m_objects)
         {
             obj = nullptr;
         }
         m_objects.clear();
-        m_roots.clear();
     }
 
     void Scene::update(float dt)
@@ -118,60 +144,28 @@ namespace ige::scene
         m_showcase->Render();
     }
 
-    std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent, bool isGUI, const Vec2& size)
+    std::shared_ptr<SceneObject> Scene::createObject(std::string name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, bool isCanvas)
     {
-        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parent ? parent.get() : nullptr, isGUI, size);
-        m_objects.push_back(sceneObject);
+        auto parentObject = parent ? parent : m_root;
 
         // Not canvas, create defaut canvas
-        if (isGUI && (!parent || !parent->getCanvas()))
+        if (isGUI && !parentObject->getCanvas() && !isCanvas)
         {
-            auto canvas = sceneObject->addComponent<Canvas>();
+            auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", parentObject.get(), true, size, true);
+            auto canvas = canvasObject->addComponent<Canvas>();
             canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
             canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW()));
-            sceneObject->setCanvas(canvas);
+            canvasObject->setCanvas(canvas);
+
+            if (SceneManager::getInstance()->isEditor())
+                canvasObject->addComponent<UIImage>("sprite/rect")->setSkipSerialize(true);
+
+            parentObject = canvasObject;
+            m_objects.push_back(canvasObject);
         }
 
-        // Setup default environment and camera for root
-        if (!parent)
-        {
-            // Cache the root object
-            m_roots.push_back(sceneObject);
-
-            // Set ambient color
-            sceneObject->addComponent<AmbientLight>();
-
-            // Set general environment
-            sceneObject->addComponent<EnvironmentComponent>();
-
-            if (isGUI)
-            {
-                auto camObj = createObject("GUI Camera", sceneObject, true);
-                camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
-                auto camComp = camObj->addComponent<CameraComponent>("default_2d_camera");
-                camComp->lockOnTarget(false);
-                camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
-                camComp->setOrthoProjection(true);
-                camComp->setWidthBase(false);
-            }
-            else
-            {
-                auto camObj = createObject("Default Camera", sceneObject);
-                camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
-                auto camComp = camObj->addComponent<CameraComponent>("default_camera");
-                camComp->lockOnTarget(false);
-                camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
-
-                // Add editor camera figure debug
-                if (SceneManager::getInstance()->isEditor())
-                {
-                    camObj->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
-                }
-
-                // Fill up test data
-                // populateTestData(sceneObject, 1000);
-            }
-        }
+        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parentObject.get(), isGUI, size, isCanvas);
+        m_objects.push_back(sceneObject);
         return sceneObject;
     }
 
@@ -208,16 +202,12 @@ namespace ige::scene
                 setActiveCamera(nullptr);
         }
 
-        // Remove from roots list
-        if (obj->getParent() == nullptr)
+        // Remove root object
+        if (obj == m_root)
         {
-            auto itr = std::find(m_roots.begin(), m_roots.end(), obj);
-            if (itr != m_roots.end())
-            {
-                m_roots.erase(itr);
-            }
+            m_root = nullptr;
         }
-
+        
         // Remove all children
         auto children = obj->getChildren();
         for (int i = 0; i < children.size(); ++i)
@@ -305,34 +295,21 @@ namespace ige::scene
             {"name", m_name},
             {"objId", m_nextObjectID},
         };
-        auto jRoots = json::array();
-        for (const auto& obj : m_roots)
-        {
-            if (obj)
-            {
-                json jRoot;
-                obj->to_json(jRoot);
-                jRoots.push_back(jRoot);
-            }
-        }
-        j["roots"] = jRoots;
+        json jRoot;
+        m_root->to_json(jRoot);
+        j["root"] = jRoot;
     }
 
     //! Deserialize
     void Scene::from_json(const json& j)
     {
         clear();
-
         j.at("name").get_to(m_name);
 
-        auto jRoots = j.at("roots");
-        for (auto it : jRoots)
-        {
-            auto root = std::make_shared<SceneObject>(this, m_nextObjectID++, it.at("name"), nullptr, it.value("gui", false));
-            m_objects.push_back(root);
-            m_roots.push_back(root);
-            root->from_json(it);
-        }
+        auto jRoot = j.at("root");
+        m_root = createObject(m_name);
+        m_root->from_json(jRoot);
+       
         j.at("objId").get_to(m_nextObjectID);
     }
 

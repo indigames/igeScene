@@ -24,7 +24,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SceneObject(Scene* scene, uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false, const Vec2& size = {64.f, 64.f});
+        SceneObject(Scene* scene, uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false, const Vec2& size = {64.f, 64.f}, bool isCanvas = false);
 
         //! Destructor
         virtual ~SceneObject();
@@ -135,6 +135,9 @@ namespace ige::scene
         //! Check whether it's a GUI object
         bool isGUIObject() const { return m_bIsGui; }
 
+        //! Check whether it's a Canvas object
+        bool isCanvasObject() const { return m_bIsCanvas; }
+
         //! Get transform component
         std::shared_ptr<TransformComponent> &getTransform() { return m_transform; }
 
@@ -201,6 +204,9 @@ namespace ige::scene
 
         //! Cache isGui
         bool m_bIsGui = false;
+
+        //! Cache isCanvas
+        bool m_bIsCanvas = false;
     };
 
     //! Get component by type

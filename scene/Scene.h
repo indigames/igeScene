@@ -54,7 +54,7 @@ namespace ige::scene
         virtual void render();
 
         //! Create scene object
-        virtual std::shared_ptr<SceneObject> createObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 });
+        virtual std::shared_ptr<SceneObject> createObject(std::string name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 }, bool isCanvas = false);
 
         //! Remove scene object
         virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);
@@ -75,7 +75,7 @@ namespace ige::scene
         virtual void from_json(const json& j);
 
         //! Get root of scene
-        std::vector<std::shared_ptr<SceneObject>>& getRoots() { return m_roots; };
+        std::shared_ptr<SceneObject>& getRoot() { return m_root; };
 
         //! Get objects list
         std::vector<std::shared_ptr<SceneObject>>& getObjects() { return m_objects; };
@@ -124,8 +124,8 @@ namespace ige::scene
         void populateTestData(const std::shared_ptr<SceneObject>& parent = nullptr, int num = 1000);
 
     protected:
-        //! Scene roots node
-        std::vector < std::shared_ptr<SceneObject>> m_roots;
+        //! Scene root node
+        std::shared_ptr<SceneObject> m_root;
 
         //! Cache all objects
         std::vector<std::shared_ptr<SceneObject>> m_objects;

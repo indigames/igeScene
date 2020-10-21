@@ -144,7 +144,6 @@ namespace ige::scene
         scene->from_json(jScene);
         scene->setPath(path);
         m_scenes.push_back(scene);
-        setCurrentScene(scene);
         return scene;
     }
 
