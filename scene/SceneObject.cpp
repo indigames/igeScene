@@ -89,6 +89,17 @@ namespace ige::scene
     //! Set parent
     void SceneObject::setParent(SceneObject *parent)
     {
+        if (m_parent)
+        {
+            m_parent->removeChild(this);
+
+            if (getTransform())
+                getTransform()->setParent(nullptr);
+            getDetachedEvent().invoke(*this);
+            setCanvas(nullptr);
+            m_parent = nullptr;
+        }
+
         if (parent)
         {
             m_parent = parent;
@@ -97,16 +108,6 @@ namespace ige::scene
                 getTransform()->setParent(m_parent->getTransform().get());
             setCanvas(m_parent->getCanvas());
             getAttachedEvent().invoke(*this);
-        }
-        else
-        {
-            getDetachedEvent().invoke(*this);
-            if (m_parent)
-                m_parent->removeChild(this);
-            if(getTransform())
-                getTransform()->setParent(nullptr);
-            setCanvas(nullptr);
-            m_parent = nullptr;
         }
     }
 
