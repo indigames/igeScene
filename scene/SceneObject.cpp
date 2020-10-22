@@ -19,6 +19,7 @@
 #include "components/physic/PhysicBox.h"
 #include "components/physic/PhysicCapsule.h"
 #include "components/physic/PhysicSphere.h"
+#include "components/physic/PhysicMesh.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
 #include "components/AmbientLight.h"
@@ -422,6 +423,8 @@ namespace ige::scene
                 comp = addComponent<PhysicSphere>();
             else if (key == "PhysicCapsule")
                 comp = addComponent<PhysicCapsule>();
+            else if (key == "PhysicMesh")
+                comp = addComponent<PhysicMesh>();
             else if (key == "Canvas") {
                 comp = addComponent<Canvas>();
                 setCanvas(getComponent<Canvas>());

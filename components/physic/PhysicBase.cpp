@@ -235,10 +235,17 @@ namespace ige::scene
     //! Calculate and apply inertia
     void PhysicBase::applyInertia()
     {
-        btVector3 inertia = {0.f, 0.f, 0.f};
-        if (m_mass != 0.0f)
-            m_shape->calculateLocalInertia(m_mass, inertia);
-        m_body->setMassProps(m_bIsKinematic ? 0.0f : std::max(0.0000001f, m_mass), m_bIsKinematic ? btVector3(0.0f, 0.0f, 0.0f) : inertia);
+        if (m_bIsKinematic)
+        {
+            m_body->setMassProps(0.0f, btVector3(0.0f, 0.0f, 0.0f));
+        }
+        else
+        {
+            btVector3 inertia = { 0.f, 0.f, 0.f };
+            if (m_mass != 0.0f)
+                m_shape->calculateLocalInertia(m_mass, inertia);
+            m_body->setMassProps(std::max(0.0000001f, m_mass), inertia);
+        }
     }
 
     //! Add collision flag
