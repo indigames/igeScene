@@ -70,7 +70,6 @@ namespace ige::scene
     void PointLight::to_json(json &j) const
     {
         j = json{
-            {"idx", m_index},
             {"its", getIntensity()},
             {"col", getColor()},
             {"rng", getRange()},
@@ -80,13 +79,9 @@ namespace ige::scene
     //! Deserialize
     void PointLight::from_json(const json &j)
     {
-        m_index = j.value("idx", -1);
-        if (m_index != -1)
-        {
-            setIntensity(j.value("its", 1.f));
-            setColor(j.value("col", Vec3()));
-            setRange(j.value("rng", 1.f));
-        }
+        setIntensity(j.value("its", 1.f));
+        setColor(j.value("col", Vec3()));
+        setRange(j.value("rng", 1.f));
     }
 
 } // namespace ige::scene

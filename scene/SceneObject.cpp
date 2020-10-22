@@ -254,12 +254,6 @@ namespace ige::scene
                 if (comp->getName() != "CameraComponent")
                     comp->onUpdate(dt);
             }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onUpdate(dt);
-            }
         }
     }
 
@@ -272,12 +266,6 @@ namespace ige::scene
             {
                 comp->onFixedUpdate(dt);
             }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onFixedUpdate(dt);
-            }
         }
     }
 
@@ -289,12 +277,6 @@ namespace ige::scene
             for (auto &comp : m_components)
             {
                 comp->onLateUpdate(dt);
-            }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onLateUpdate(dt);
             }
         }
     }
@@ -309,12 +291,6 @@ namespace ige::scene
                 // Camera rendered before other objects
                 if (comp->getName() != "CameraComponent")
                     comp->onRender();
-            }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onRender();
             }
         }
     }

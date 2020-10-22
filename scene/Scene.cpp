@@ -373,7 +373,7 @@ namespace ige::scene
     {
         for (int i = 0; i < MAX_DIRECTIONAL_LIGHT_NUMBER; ++i)
         {
-            if (!m_directionalLights[i])
+            if (m_directionalLights[i] == false)
             {
                 m_directionalLights[i] = true;
                 return i;
@@ -409,7 +409,7 @@ namespace ige::scene
     {
         for (int i = 0; i < MAX_POINT_LIGHT_NUMBER; ++i)
         {
-            if (!m_pointLights[i])
+            if (m_pointLights[i] == false)
             {
                 m_pointLights[i] = true;
                 return i;
