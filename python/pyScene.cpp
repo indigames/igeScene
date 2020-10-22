@@ -8,6 +8,8 @@
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 
+#include <pythonResource.h>
+
 namespace ige::scene
 {
     PyObject* Scene_new(PyTypeObject* type, PyObject* args, PyObject* kw)
@@ -55,25 +57,24 @@ namespace ige::scene
     // Get active camera
     PyObject* Scene_getActiveCamera(PyObject_Scene* self)
     {
-        //auto camera = self->scene->getActiveCamera();
-        //if (camera)
-        //{
-        //    auto* obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
-        //    obj->component = camera.get();
-        //    obj->super.component = obj->component;
-        //    return (PyObject*)obj;
-        //}
-
+        auto camera = self->scene->getActiveCamera();
+        if (camera)
+        {
+           auto* obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
+           obj->component = camera;
+           obj->super.component = obj->component;
+           return (PyObject*)obj;
+        }
         Py_RETURN_NONE;
     }
 
     // Set active camera
     int Scene_setActiveCamera(PyObject_Scene* self, PyObject* value)
     {
-        //PyObject* camera;
-        //if (PyArg_ParseTuple(value, "O", &camera)) {
-        //    self->scene->setActiveCamera(((PyObject_CameraComponent*)camera)->component);
-        //}
+        PyObject* camera;
+        if (PyArg_ParseTuple(value, "O", &camera)) {
+           self->scene->setActiveCamera(((PyObject_CameraComponent*)camera)->component);
+        }
         return 0;
     }
 
@@ -182,6 +183,36 @@ namespace ige::scene
         return (PyObject*)pyList;
     }
 
+    // Get root object
+    PyObject* Scene_getRoot(PyObject_Scene *self)
+    {
+        auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+        obj->sceneObject = self->scene->getRoot().get();
+        return (PyObject*)obj;
+    }
+
+    // Get path
+    PyObject* Scene_getPath(PyObject_Scene *self)
+    {
+        return PyUnicode_FromString(self->scene->getPath().c_str());
+    }
+
+    // Get showcase
+    PyObject* Scene_getShowcase(PyObject_Scene *self)
+    {
+        auto *obj = PyObject_New(showcase_obj, &ShowcaseType);
+        obj->showcase = self->scene->getShowcase();
+        return (PyObject *)obj;
+    }
+
+    // Get environment
+    PyObject* Scene_getEnvironment(PyObject_Scene *self)
+    {
+        auto *obj = PyObject_New(environment_obj, &EnvironmentType);
+        obj->envSet = self->scene->getEnvironment();
+        return (PyObject *)obj;
+    }
+
     // Compare function
     static PyObject* Scene_richcompare(PyObject* self, PyObject* other, int op)
     {
@@ -221,13 +252,17 @@ namespace ige::scene
         { "createObject", (PyCFunction)Scene_createObject, METH_VARARGS, Scene_createObject_doc },
         { "removeObject", (PyCFunction)Scene_removeObject, METH_VARARGS, Scene_removeObject_doc },
         { "findObject", (PyCFunction)Scene_findObject, METH_VARARGS, Scene_findObject_doc },
+        { "getObjects", (PyCFunction)Scene_getObjects, METH_NOARGS, Scene_getObjects_doc },
+        { "getRoot", (PyCFunction)Scene_getRoot, METH_NOARGS, Scene_getRoot_doc },
+        { "getPath", (PyCFunction)Scene_getPath, METH_NOARGS, Scene_getPath_doc },
+        { "getShowcase", (PyCFunction)Scene_getShowcase, METH_NOARGS, Scene_getShowcase_doc },
+        { "getEnvironment", (PyCFunction)Scene_getEnvironment, METH_NOARGS, Scene_getEnvironment_doc },
         { NULL, NULL }
     };
 
     // Variable definition
     PyGetSetDef Scene_getsets[] = {
         { "name", (getter)Scene_getName, (setter)Scene_setName, Scene_name_doc, NULL },
-        { "objects", (getter)Scene_getObjects, nullptr, Scene_objects_doc, NULL },
         { "activeCamera", (getter)Scene_getActiveCamera, (setter)Scene_setActiveCamera, Scene_activeCamera_doc, NULL },
         { NULL, NULL }
     };

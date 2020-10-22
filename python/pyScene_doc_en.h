@@ -4,76 +4,109 @@
 
 // createObject
 PyDoc_STRVAR(Scene_createObject_doc,
-	"Create new scene object.\n"\
-	"\n"\
-	"Scene().createObject(name: string, parent: SceneObject = None)\n"\
-	"\n"\
-	"Parameters\n"\
-	"----------\n"\
-	"    name : string\n"\
-	"        Name of the new scene object\n"\
-	"    parent : SceneObject\n"\
-	"        Parent object\n"
-);
+			 "Create new scene object.\n"
+			 "\n"
+			 "Scene().createObject(name: string, parent: SceneObject = None)\n"
+			 "\n"
+			 "Parameters\n"
+			 "----------\n"
+			 "    name : string\n"
+			 "        Name of the new scene object\n"
+			 "    parent : SceneObject\n"
+			 "        Parent object\n");
 
 // removeObject
 PyDoc_STRVAR(Scene_removeObject_doc,
-	"Remove object out of scene.\n"\
-	"\n"\
-	"Scene().removeObject(param: string|number|SceneObject)\n"\
-	"\n"\
-	"Parameters\n"\
-	"----------\n"\
-	"    param : string\n"\
-	"        Name of the scene object to remove\n"\
-	"    param : number (unsigned long long)\n"\
-	"        ID of the scene object to remove\n"\
-	"    param : SceneObject\n"\
-	"        Scene object instance to remove\n"\
-	"Return:\n"\
-	"----------\n"\
-	"    True: if removed success\n"\
-	"    False: if removed fail\n"
-);
+			 "Remove object out of scene.\n"
+			 "\n"
+			 "Scene().removeObject(param: string|number|SceneObject)\n"
+			 "\n"
+			 "Parameters\n"
+			 "----------\n"
+			 "    param : string\n"
+			 "        Name of the scene object to remove\n"
+			 "    param : number (unsigned long long)\n"
+			 "        ID of the scene object to remove\n"
+			 "    param : SceneObject\n"
+			 "        Scene object instance to remove\n"
+			 "Return:\n"
+			 "----------\n"
+			 "    True: if removed success\n"
+			 "    False: if removed fail\n");
 
 // findObject
 PyDoc_STRVAR(Scene_findObject_doc,
-	"Find a object in the scene.\n"\
-	"\n"\
-	"Scene().findObject(param: string|number)\n"\
-	"\n"\
-	"Parameters\n"\
-	"----------\n"\
-	"    param : string\n"\
-	"        Name of the scene object to find\n"\
-	"    param : number (unsigned long long)\n"\
-	"        ID of the scene object to find\n"\
-	"Return:\n"\
-	"----------\n"\
-	"    SceneObject: if found\n"\
-	"    None: if not found\n"
-);
+			 "Find a object in the scene.\n"
+			 "\n"
+			 "Scene().findObject(param: string|number)\n"
+			 "\n"
+			 "Parameters\n"
+			 "----------\n"
+			 "    param : string\n"
+			 "        Name of the scene object to find\n"
+			 "    param : number (unsigned long long)\n"
+			 "        ID of the scene object to find\n"
+			 "Return:\n"
+			 "----------\n"
+			 "    SceneObject: if found\n"
+			 "    None: if not found\n");
 
-// objects
-PyDoc_STRVAR(Scene_objects_doc,
-	"Get the list of root objects from the scene.\n"\
-	"Type: List<SceneObject>\n"
-);
+// getObjects
+PyDoc_STRVAR(Scene_getObjects_doc,
+			 "Get the list of all objects in the scene.\n"
+			 "\n"
+			 "Scene().getObjects()\n"
+			 "\n"
+			 "Return:\n"
+			 "----------\n"
+			 "    Type: List<SceneObject>\n");
 
-// cameras
-PyDoc_STRVAR(Scene_cameras_doc,
-	"Get the list of cameras from the scene.\n"\
-	"Type: List<CameraComponent>\n"
-);
+// getRoot
+PyDoc_STRVAR(Scene_getRoot_doc,
+			 "Get the root object in the scene.\n"
+			 "\n"
+			 "Scene().getRoot()\n"
+			 "\n"
+			 "Return:\n"
+			 "----------\n"
+			 "    Type: SceneObject\n");
+
+// getPath
+PyDoc_STRVAR(Scene_getPath_doc,
+			 "Get the relative path to the scene file.\n"
+			 "\n"
+			 "Scene().getPath()\n"
+			 "\n"
+			 "Return:\n"
+			 "----------\n"
+			 "    Type: string\n");
+
+// getShowcase
+PyDoc_STRVAR(Scene_getShowcase_doc,
+			 "Get the associated showcase instance.\n"
+			 "\n"
+			 "Scene().getShowcase()\n"
+			 "\n"
+			 "Return:\n"
+			 "----------\n"
+			 "    Type: igeCore.showcase\n");
+
+// getEnvironment
+PyDoc_STRVAR(Scene_getEnvironment_doc,
+			 "Get the associated environment instance.\n"
+			 "\n"
+			 "Scene().getEnvironment()\n"
+			 "\n"
+			 "Return:\n"
+			 "----------\n"
+			 "    Type: igeCore.environment\n");
 
 // name
 PyDoc_STRVAR(Scene_name_doc,
-	"Name of scene.\n"\
-	"Type: string\n"
-);
+			 "Name of scene.\n"
+			 "Type: string\n");
 
 // activeCamera
 PyDoc_STRVAR(Scene_activeCamera_doc,
-	"The current active camera.\n"\
-	"Type: CameraComponent\n"
-);
+			 "The current active camera.\n"
+			 "Type: CameraComponent\n");
