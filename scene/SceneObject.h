@@ -36,7 +36,7 @@ namespace ige::scene
         inline const std::string &getName() const { return m_name; }
 
         //! Set Name
-        inline void setName(const std::string& name);
+        void setName(const std::string& name);
 
         //! Set parent
         virtual void setParent(SceneObject *parent);
