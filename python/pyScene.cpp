@@ -182,6 +182,40 @@ namespace ige::scene
         return (PyObject*)pyList;
     }
 
+    // Compare function
+    static PyObject* Scene_richcompare(PyObject* self, PyObject* other, int op)
+    {
+        if (op == Py_LT || op == Py_LE || op == Py_GT || op == Py_GE)
+        {
+            return Py_NotImplemented;
+        }
+
+        if (self != Py_None && other != Py_None)
+        {
+            if (other->ob_type == &PyTypeObject_Scene)
+            {
+                auto selfCmp = (PyObject_Scene*)(self);
+                auto otherCmp = (PyObject_Scene*)(other);
+                bool eq = (selfCmp->scene == otherCmp->scene);
+                if (op == Py_NE)
+                    eq = !eq;
+                return eq ? Py_True : Py_False;
+            }
+            else
+            {
+                return (op == Py_EQ) ? Py_False : Py_True;
+            }
+        }
+        else if (self == Py_None && other == Py_None)
+        {
+            return (op == Py_EQ) ? Py_True : Py_False;
+        }
+        else
+        {
+            return (op == Py_EQ) ? Py_False : Py_True;
+        }
+    }
+
     // Methods definition
     PyMethodDef Scene_methods[] = {
         { "createObject", (PyCFunction)Scene_createObject, METH_VARARGS, Scene_createObject_doc },
@@ -223,7 +257,7 @@ namespace ige::scene
         0,                                  /* tp_doc */
         0,                                  /* tp_traverse */
         0,                                  /* tp_clear */
-        0,                                  /* tp_richcompare */
+        Scene_richcompare,                  /* tp_richcompare */
         0,                                  /* tp_weaklistoffset */
         0,                                  /* tp_iter */
         0,                                  /* tp_iternext */
