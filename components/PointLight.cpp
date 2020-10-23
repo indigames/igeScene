@@ -10,8 +10,11 @@ namespace ige::scene
     {
         m_index = getOwner()->getScene()->acquirePointLight();
 
-        // Create actual light
+        // Set default color
         setColor({ 1.f, 1.f, 1.f });
+
+        // Set default intensity
+        setIntensity(1.f);
     }
 
     //! Destructor

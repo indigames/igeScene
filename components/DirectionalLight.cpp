@@ -10,8 +10,11 @@ namespace ige::scene
     {
         m_index = getOwner()->getScene()->acquireDirectionalLight();
 
-        // Create actual light
+        // Set default color
         setColor({ 1.f, 1.f, 1.f });
+
+        // Set default intensity
+        setIntensity(0.75f);
     }
 
     //! Destructor
@@ -52,7 +55,7 @@ namespace ige::scene
     void DirectionalLight::onUpdate(float dt)
     {
         auto transform = getOwner()->getTransform();
-        getOwner()->getScene()->getEnvironment()->SetDirectionalLampDirection(m_index, transform->getWorldForward());
+        getOwner()->getScene()->getEnvironment()->SetDirectionalLampDirection(m_index, transform->getWorldForward().Negative());
     }
 
     //! Serialize

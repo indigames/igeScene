@@ -12,12 +12,13 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    SpriteComponent::SpriteComponent(SceneObject &owner, const std::string &path, const Vec2 &size)
+    SpriteComponent::SpriteComponent(SceneObject &owner, const std::string &path, const Vec2 &size, bool isBillboard)
         : Component(owner)
     {
         m_sprite = std::make_shared<Sprite>(path, size);
         if (m_sprite->getFigure())
-            getOwner()->getScene()->getResourceAddedEvent().invoke(m_sprite->getFigure());
+            getOwner()->getScene()->getResourceAddedEvent().invoke(m_sprite->getFigure());        
+        setBillboard(isBillboard);
     }
 
     //! Destructor
@@ -63,8 +64,17 @@ namespace ige::scene
         auto oldFigure = m_sprite->getFigure();
         m_sprite->setPath(relPath);
         auto newFigure = m_sprite->getFigure();
+
         if (oldFigure == nullptr && newFigure)
             getOwner()->getScene()->getResourceAddedEvent().invoke(newFigure);
+
+        if (newFigure)
+        {
+            auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+            shaderDesc->SetValue(newFigure->GetShaderName(0));
+            shaderDesc->SetBillboard(m_bIsBillboard);
+            newFigure->SetShaderName(0, shaderDesc->GetValue());
+        }
     }
 
     //! Set size

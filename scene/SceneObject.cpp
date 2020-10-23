@@ -414,7 +414,7 @@ namespace ige::scene
             else if (key == "FigureComponent")
                 comp = addComponent<FigureComponent>(val.at("path"));
             else if (key == "SpriteComponent")
-                comp = addComponent<SpriteComponent>(val.at("size"), val.at("path"));
+                comp = addComponent<SpriteComponent>(val.at("path"), val.at("size"));
             else if (key == "ScriptComponent")
                 comp = addComponent<ScriptComponent>();
             else if (key == "PhysicBox")
@@ -462,6 +462,18 @@ namespace ige::scene
             {
                 if (!getComponent<UIImage>())
                     addComponent<UIImage>("sprite/rect")->setSkipSerialize(true);
+            }
+
+            if (auto directionalLight = getComponent<DirectionalLight>())
+            {
+                if (!getComponent<FigureComponent>() && !getComponent<SpriteComponent>())
+                    addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+            }
+
+            if (auto pointLight = getComponent<PointLight>())
+            {
+                if (!getComponent<FigureComponent>() && !getComponent<SpriteComponent>())
+                    addComponent<SpriteComponent>("sprite/light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
             }
         }
 

@@ -13,6 +13,7 @@
 #include "components/SpriteComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/AmbientLight.h"
+#include "components/DirectionalLight.h"
 #include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
@@ -31,6 +32,14 @@ namespace ige::scene
         m_environment = ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), nullptr);
         m_environment->WaitBuild();
 
+        // Set directional lights deactivated
+        for (int i = 0; i < MAX_DIRECTIONAL_LIGHT_NUMBER; ++i)
+            m_environment->SetDirectionalLampIntensity(i, 0.f);
+
+        // Set point lights deactivated
+        for (int i = 0; i < MAX_POINT_LIGHT_NUMBER; ++i)
+            m_environment->SetPointLampIntensity(i, 0.f);
+
         m_showcase = ResourceCreator::Instance().NewShowcase((m_name + "_showcase").c_str());
         m_showcase->Add(m_environment);
 
@@ -41,7 +50,7 @@ namespace ige::scene
         m_root = createObject(m_name);
 
         // Set ambient color
-        m_root->addComponent<AmbientLight>();
+        m_root->addComponent<AmbientLight>()->setSkyColor({ 0.75f, 0.75f, 0.75f });
 
         // Set general environment
         m_root->addComponent<EnvironmentComponent>();
@@ -53,10 +62,20 @@ namespace ige::scene
         camComp->lockOnTarget(false);
         camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
 
-        // Add editor camera figure debug
+        // Create default directional light
+        auto directionalLight = createObject("Directional Light");
+        directionalLight->addComponent<DirectionalLight>();
+        float rad[3] = { DEGREES_TO_RADIANS(90.f), 0.f, .0f };
+        Quat quat;
+        vmath_eulerToQuat(rad, quat.P());
+        directionalLight->getTransform()->setPosition({0.f, 5.f, 0.f});
+        directionalLight->getTransform()->setRotation(quat);
+
+        // Add editor debug
         if (SceneManager::getInstance()->isEditor())
         {
             camObj->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
+            directionalLight->addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
         }
 
         // Fill up test data
@@ -391,7 +410,7 @@ namespace ige::scene
         // Reset to default value
         m_environment->SetDirectionalLampColor(idx, { 0.5f, 0.5f, 0.5f });
         m_environment->SetDirectionalLampDirection(idx, { 5.f, 10.f, 5.f });
-        m_environment->SetDirectionalLampIntensity(idx, 1.f);
+        m_environment->SetDirectionalLampIntensity(idx, 0.f);
     }
 
     //! Acquire point light
@@ -427,7 +446,7 @@ namespace ige::scene
         // Reset to default value
         m_environment->SetPointLampColor(idx, { 1.0f, 1.0f, 1.0f });
         m_environment->SetPointLampPosition(idx, { 0.0f, 100.0f, 0.0f });
-        m_environment->SetPointLampIntensity(idx, 0.3f);
+        m_environment->SetPointLampIntensity(idx, 0.0f);
         m_environment->SetPointLampRange(idx, 100.0f);
     }
 }
