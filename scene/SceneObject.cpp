@@ -63,9 +63,7 @@ namespace ige::scene
     //! Destructor
     SceneObject::~SceneObject()
     {
-        if (m_parent)
-            m_parent->removeChild(this);
-        m_parent = nullptr;
+        setParent(nullptr);
         setCanvas(nullptr);
 
         removeAllComponents();
