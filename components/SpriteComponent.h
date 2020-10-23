@@ -39,6 +39,10 @@ namespace ige::scene
         void setSize(const Vec2 &size);
         const Vec2 &getSize() const { return m_sprite->getSize(); }
 
+        //! Billboard
+        void setBillboard(bool isBillboard = true);
+        const bool isBillboard() const { return m_bIsBillboard; }
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -48,5 +52,8 @@ namespace ige::scene
 
         //! Sprite
         std::shared_ptr<Sprite> m_sprite;
+
+        //! Billboard setting
+        bool m_bIsBillboard = false;
     };
 } // namespace ige::scene

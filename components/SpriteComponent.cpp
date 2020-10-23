@@ -73,6 +73,23 @@ namespace ige::scene
         m_sprite->setSize(size);
     }
 
+    //! Set billboard
+    void SpriteComponent::setBillboard(bool isBillboard)
+    {
+        if (m_bIsBillboard != isBillboard)
+        {
+            m_bIsBillboard = isBillboard;
+            auto figure = m_sprite->getFigure();
+            if (figure)
+            {
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(figure->GetShaderName(0));
+                shaderDesc->SetBillboard(m_bIsBillboard);
+                figure->SetShaderName(0, shaderDesc->GetValue());
+            }
+        }
+    }
+
     //! Serialize
     void SpriteComponent::to_json(json &j) const
     {
