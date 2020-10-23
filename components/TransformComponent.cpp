@@ -132,6 +132,18 @@ namespace ige::scene
         }
     }
 
+    void TransformComponent::setRotation(const Vec3 &rot)
+    {
+        Quat rotQuat;
+        vmath_eulerToQuat(rot.P(), rotQuat.P());
+
+        if (m_localRotation != rotQuat)
+        {
+            m_localRotation = rotQuat;
+            m_bLocalDirty = true;
+        }
+    }
+
     const Quat &TransformComponent::getRotation() const
     {
         return m_localRotation;
@@ -416,8 +428,8 @@ namespace ige::scene
     //! Deserialize
     void TransformComponent::from_json(const json &j)
     {
-        setPosition(j.at("pos"));
-        setRotation(j.at("rot"));
-        setScale(j.at("scale"));
+        setPosition(j.value("pos", Vec3()));
+        setRotation(j.value("rot", Quat()));
+        setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
     }
 } // namespace ige::scene

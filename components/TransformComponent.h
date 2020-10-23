@@ -63,6 +63,9 @@ namespace ige::scene
         //! Set local rotation
         virtual void setRotation(const Quat &rot);
 
+        //! Set local rotation by xyz
+        virtual void setRotation(const Vec3 &rot);
+
         //! Get local rotation
         virtual const Quat &getRotation() const;
 

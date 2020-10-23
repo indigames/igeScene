@@ -65,11 +65,8 @@ namespace ige::scene
         // Create default directional light
         auto directionalLight = createObject("Directional Light");
         directionalLight->addComponent<DirectionalLight>();
-        float rad[3] = { DEGREES_TO_RADIANS(90.f), 0.f, .0f };
-        Quat quat;
-        vmath_eulerToQuat(rad, quat.P());
         directionalLight->getTransform()->setPosition({0.f, 5.f, 0.f});
-        directionalLight->getTransform()->setRotation(quat);
+        directionalLight->getTransform()->setRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
 
         // Add editor debug
         if (SceneManager::getInstance()->isEditor())
