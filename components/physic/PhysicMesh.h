@@ -28,6 +28,9 @@ namespace ige::scene
         float isConvex() const;
         void setConvex(bool convex = true);
 
+        //! Override
+        virtual void setIsKinematic(bool isKinematic = true) override;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

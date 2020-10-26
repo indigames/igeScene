@@ -75,6 +75,20 @@ namespace ige::scene
         }
     }
 
+    void PhysicMesh::setIsKinematic(bool isKinematic)
+    {
+        if (m_bIsKinematic != isKinematic)
+        {
+            // Not support concave with non kinematic ridgid body
+            if (!isKinematic && !m_bIsConvex)
+            {
+                setConvex(true);
+            }
+            PhysicBase::setIsKinematic(isKinematic);
+        }
+    }
+
+
     //! Create collision shape
     void PhysicMesh::createCollisionShape(const std::string &path)
     {
