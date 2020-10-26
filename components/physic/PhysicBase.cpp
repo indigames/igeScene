@@ -357,7 +357,6 @@ namespace ige::scene
             {"angularFactor", PhysicHelper::from_btVector3(m_angularFactor)},
             {"offset", m_positionOffset},
             {"isKinematic", m_bIsKinematic},
-            {"isKinematic", m_bIsKinematic},
             {"isTrigger", m_bIsTrigger},
             {"isEnabled", m_bIsEnabled},
             {"scale", m_previousScale},
@@ -381,6 +380,7 @@ namespace ige::scene
         setIsKinematic(j.value("isKinematic", false));
         setIsTrigger(j.value("isTrigger", false));
         setEnabled(j.value("isEnabled", true));
+        setLocalScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
         setCollisionFilterGroup(j.value("group", isKinematic() ? 2 : 1));
         setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
         setCCD(j.value("ccd", false));
