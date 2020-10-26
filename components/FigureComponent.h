@@ -13,7 +13,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        FigureComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path = "");
+        FigureComponent(SceneObject &owner, const std::string &path = "");
 
         //! Destructor
         virtual ~FigureComponent();
@@ -27,24 +27,24 @@ namespace ige::scene
         //! Render
         void onRender() override;
 
+        //! Get associated figure
+        Figure *getFigure() { return m_figure; }
+
+        //! Path
+        void setPath(const std::string &path);
+        const std::string &getPath() { return m_path; }
+
+    protected:
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
         virtual void from_json(const json& j) override;
 
-        //! Get associated figure
-        Figure* getFigure() { return m_figure; }
-
-        //! Path
-        void setPath(const std::string& path);
-        const std::string& getPath() { return m_path; }
-
-    protected:
         //! Associated figure object
-        Figure* m_figure;
+        Figure *m_figure;
 
         //! Path to figure file
         std::string m_path;
     };
-}
+} // namespace ige::scene

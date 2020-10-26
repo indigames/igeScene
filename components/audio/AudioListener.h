@@ -11,17 +11,11 @@ namespace ige::scene
     class AudioListener : public Component
     {
     public:
-        AudioListener(const std::shared_ptr<SceneObject> &owner);
+        AudioListener(SceneObject &owner);
         virtual ~AudioListener();
 
         //! Get name
         virtual std::string getName() const override { return "AudioListener"; }
-
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
 
         //! Enable/disable
         bool isEnabled() const { return m_bIsEnabled; }
@@ -32,6 +26,12 @@ namespace ige::scene
         static Event<AudioListener&>& getDestroyedEvent() { return m_onDestroyedEvent; }
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! On created event
         static Event<AudioListener &> m_onCreatedEvent;
 

@@ -3,6 +3,7 @@
 #include "components/FigureComponent.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
+#include "scene/Scene.h"
 
 #include "utils/filesystem.h"
 namespace fs = ghc::filesystem;
@@ -10,7 +11,7 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    FigureComponent::FigureComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path)
+    FigureComponent::FigureComponent(SceneObject &owner, const std::string &path)
         : Component(owner), m_figure(nullptr)
     {
         setPath(path);
@@ -21,8 +22,8 @@ namespace ige::scene
     {
         if (m_figure)
         {
-            if (hasOwner() && getOwner()->getRoot())
-                getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_figure);
+            if (getOwner()->getScene())
+                getOwner()->getScene()->getResourceRemovedEvent().invoke(m_figure);
             m_figure->DecReference();
             m_figure = nullptr;
         }
@@ -31,7 +32,8 @@ namespace ige::scene
     //! Update
     void FigureComponent::onUpdate(float dt)
     {
-        if (m_figure == nullptr) return;
+        if (m_figure == nullptr)
+            return;
 
         // Update transform from transform component
         auto transform = getOwner()->getTransform();
@@ -51,13 +53,13 @@ namespace ige::scene
     //! Update
     void FigureComponent::onRender()
     {
-        if (m_figure == nullptr) return;
+        if (m_figure == nullptr)
+            return;
 
         m_figure->Render();
     }
 
-
-    void FigureComponent::setPath(const std::string& path)
+    void FigureComponent::setPath(const std::string &path)
     {
         auto fsPath = fs::path(path);
         auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
@@ -69,28 +71,37 @@ namespace ige::scene
 
             if (m_figure != nullptr)
             {
-                getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_figure);
+                getOwner()->getScene()->getResourceRemovedEvent().invoke(m_figure);
                 m_figure->DecReference();
                 m_figure = nullptr;
             }
 
             m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
             m_figure->WaitInitialize();
-            getOwner()->getRoot()->getResourceAddedEvent().invoke(m_figure);
+            
+            // Setup point lights shader
+            for (int i = 0; i < m_figure->NumMaterials(); ++i)
+            {
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(m_figure->GetShaderName(i));
+                shaderDesc->SetNumPointLamp(MAX_POINT_LIGHT_NUMBER);
+                m_figure->SetShaderName(i, shaderDesc->GetValue());
+            }
+
+            getOwner()->getScene()->getResourceAddedEvent().invoke(m_figure);
         }
     }
 
     //! Serialize
-    void FigureComponent::to_json(json& j) const
+    void FigureComponent::to_json(json &j) const
     {
-        j = json {
-            {"path", m_path}
-        };
+        j = json{
+            {"path", m_path}};
     }
 
     //! Deserialize
-    void FigureComponent::from_json(const json& j)
+    void FigureComponent::from_json(const json &j)
     {
         setPath(j.at("path"));
     }
-}
+} // namespace ige::scene

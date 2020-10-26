@@ -6,7 +6,6 @@ namespace ige::scene
 {
     Vec3 RayOBBChecker::g_origin = Vec3();
     Vec3 RayOBBChecker::g_direction= Vec3();
-    bool RayOBBChecker::g_isChecking = false;
 
     void RayOBBChecker::screenPosToWorldRay(int mouseX, int mouseY, int screenWidth, int screenHeight,
             const Mat4& viewInversedMatrix, const Mat4& projectionMatrix)

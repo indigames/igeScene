@@ -6,11 +6,11 @@
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 #include "scene/SceneManager.h"
-#include "utils/RayOBBChecker.h"
 
-namespace ige::scene {
-    TransformComponent::TransformComponent(const std::shared_ptr<SceneObject>& owner, const Vec3& pos, const Quat& rot, const Vec3& scale)
-        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale)
+namespace ige::scene
+{
+    TransformComponent::TransformComponent(SceneObject &owner, const Vec3 &pos, const Quat &rot, const Vec3 &scale)
+        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale), m_parent(nullptr)
     {
         m_bLocalDirty = true;
 
@@ -18,7 +18,8 @@ namespace ige::scene {
         m_worldRotation = rot;
         m_worldScale = scale;
 
-        if (getOwner()->getParent()) {
+        if (getOwner()->getParent())
+        {
             m_parent = getOwner()->getParent()->getTransform().get();
             if (m_parent)
                 m_parent->addObserver(this);
@@ -27,21 +28,23 @@ namespace ige::scene {
 
     TransformComponent::~TransformComponent()
     {
-        if(hasParent()) getParent()->removeObserver(this);
+        if (m_parent)
+            m_parent->removeObserver(this);
         m_parent = nullptr;
         notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
         m_observers.clear();
     }
 
-    TransformComponent* TransformComponent::getParent() const
+    TransformComponent *TransformComponent::getParent() const
     {
         return m_parent;
     }
 
     //! Set parent transform
-    void TransformComponent::setParent(TransformComponent* comp)
+    void TransformComponent::setParent(TransformComponent *comp)
     {
-        if (hasParent()) getParent()->removeObserver(this);
+        if (m_parent)
+            m_parent->removeObserver(this);
         m_parent = comp;
         if (m_parent)
             m_parent->addObserver(this);
@@ -51,117 +54,116 @@ namespace ige::scene {
     {
         if (m_bLocalDirty)
         {
-            updateLocalMatrix();
+            updateLocalToWorld();
             m_bLocalDirty = false;
         }
 
         if (m_bWorldDirty)
         {
-            updateWorldMatrix();
+            updateWorldToLocal();
             m_bWorldDirty = false;
-        }
-
-        if(RayOBBChecker::isChecking())
-        {
-            // ignore root node
-            if (getOwner()->getParent() == nullptr)
-                return;
-
-            bool intersected = false;
-            float distance;
-
-            auto owner = getOwner();
-
-            // Ignore other scene than current one
-            auto camera = SceneManager::getInstance()->getCurrentScene()->getActiveCamera();
-            if (!camera || !owner || owner->getRoot() != camera->getShootTarget())
-                return;
-
-            intersected = RayOBBChecker::checkIntersect(m_aabbMin, m_aabbMax, m_worldMatrix, distance);
-
-            // Update selected info
-            owner->setSelected(intersected);
-
-            // Scene object found, no more checking
-            if (intersected)
-            {
-                RayOBBChecker::setChecking(false);
-            }
         }
     }
 
-    void TransformComponent::translate(const Vec3& trans)
+    void TransformComponent::translate(const Vec3 &trans)
     {
         setPosition(m_localPosition + trans);
     }
 
-    void TransformComponent::rotate(const Quat& rot)
+    void TransformComponent::worldTranslate(const Vec3 &trans)
+    {
+        setWorldPosition(m_worldPosition + trans);
+    }
+
+    void TransformComponent::rotate(const Quat &rot)
     {
         setRotation(m_localRotation * rot);
     }
 
-    void TransformComponent::scale(const Vec3& scale)
+    void TransformComponent::worldRotate(const Quat &rot)
+    {
+        setWorldRotation(m_worldRotation * rot);
+    }
+
+    void TransformComponent::scale(const Vec3 &scale)
     {
         setScale(Vec3(m_localScale.X() * scale.X(), m_localScale.Y() * scale.Y(), m_localScale.Z() * scale.Z()));
     }
 
-    void TransformComponent::setPosition(const Vec3& pos)
+    void TransformComponent::worldScale(const Vec3 &scale)
     {
-        if(m_localPosition != pos)
+        setWorldScale(Vec3(m_worldScale.X() * scale.X(), m_worldScale.Y() * scale.Y(), m_worldScale.Z() * scale.Z()));
+    }
+
+    void TransformComponent::setPosition(const Vec3 &pos)
+    {
+        if (m_localPosition != pos)
         {
             m_localPosition = pos;
             m_bLocalDirty = true;
         }
     }
 
-    const Vec3& TransformComponent::getPosition() const
+    const Vec3 &TransformComponent::getPosition() const
     {
         return m_localPosition;
     }
 
-    void TransformComponent::setWorldPosition(const Vec3& pos)
+    void TransformComponent::setWorldPosition(const Vec3 &pos)
     {
         if (m_worldPosition != pos)
         {
             m_worldPosition = pos;
-            updateWorldToLocal();
+            m_bWorldDirty = true;
         }
     }
 
-    const Vec3& TransformComponent::getWorldPosition() const
+    const Vec3 &TransformComponent::getWorldPosition() const
     {
         return m_worldPosition;
     }
 
-    void TransformComponent::setRotation(const Quat& rot)
+    void TransformComponent::setRotation(const Quat &rot)
     {
-        if(m_localRotation != rot)
+        if (m_localRotation != rot)
         {
             m_localRotation = rot;
             m_bLocalDirty = true;
         }
     }
 
-    const Quat& TransformComponent::getRotation() const
+    void TransformComponent::setRotation(const Vec3 &rot)
+    {
+        Quat rotQuat;
+        vmath_eulerToQuat(rot.P(), rotQuat.P());
+
+        if (m_localRotation != rotQuat)
+        {
+            m_localRotation = rotQuat;
+            m_bLocalDirty = true;
+        }
+    }
+
+    const Quat &TransformComponent::getRotation() const
     {
         return m_localRotation;
     }
 
-    void TransformComponent::setWorldRotation(const Quat& rot)
+    void TransformComponent::setWorldRotation(const Quat &rot)
     {
         if (m_worldRotation != rot)
         {
             m_worldRotation = rot;
-            updateWorldToLocal();
+            m_bWorldDirty = true;
         }
     }
 
-    const Quat& TransformComponent::getWorldRotation() const
+    const Quat &TransformComponent::getWorldRotation() const
     {
         return m_worldRotation;
     }
 
-    void TransformComponent::setScale(const Vec3& scale)
+    void TransformComponent::setScale(const Vec3 &scale)
     {
         if (m_localScale != scale)
         {
@@ -170,31 +172,31 @@ namespace ige::scene {
         }
     }
 
-    const Vec3& TransformComponent::getScale() const
+    const Vec3 &TransformComponent::getScale() const
     {
         return m_localScale;
     }
 
-    void TransformComponent::setWorldScale(const Vec3& scale)
+    void TransformComponent::setWorldScale(const Vec3 &scale)
     {
         if (m_worldScale != scale)
         {
             m_worldScale = scale;
-            updateWorldToLocal();
+            m_bWorldDirty = true;
         }
     }
 
-    const Vec3& TransformComponent::getWorldScale() const
+    const Vec3 &TransformComponent::getWorldScale() const
     {
         return m_worldScale;
     }
 
-    const Mat4& TransformComponent::getLocalMatrix() const
+    const Mat4 &TransformComponent::getLocalMatrix() const
     {
         return m_localMatrix;
     }
 
-    const Mat4& TransformComponent::getWorldMatrix() const
+    const Mat4 &TransformComponent::getWorldMatrix() const
     {
         return m_worldMatrix;
     }
@@ -229,18 +231,15 @@ namespace ige::scene {
         return m_worldRotation * Vec3(0.f, 0.f, 1.f);
     }
 
-    void TransformComponent::updateLocalMatrix()
+    void TransformComponent::updateLocalToWorld()
     {
+        // Update local matrix
         m_localMatrix.Identity();
         vmath_mat4_from_rottrans(m_localRotation.P(), m_localPosition.P(), m_localMatrix.P());
         vmath_mat_appendScale(m_localMatrix.P(), m_localScale.P(), 4, 4, m_localMatrix.P());
-        m_bWorldDirty = true;
-    }
 
-    void TransformComponent::updateWorldMatrix()
-    {
         // Update world matrix
-        m_worldMatrix = (hasParent() && getParent()->getName() == "TransformComponent") ? getParent()->getWorldMatrix() * m_localMatrix : m_localMatrix;
+        m_worldMatrix = (m_parent) ? m_parent->getWorldMatrix() * m_localMatrix : m_localMatrix;
 
         // Update world position
         m_worldPosition.X(m_worldMatrix[3][0]);
@@ -248,11 +247,11 @@ namespace ige::scene {
         m_worldPosition.Z(m_worldMatrix[3][2]);
 
         Vec3 columns[3] =
-        {
-            { m_worldMatrix[0][0], m_worldMatrix[0][1], m_worldMatrix[0][2]},
-            { m_worldMatrix[1][0], m_worldMatrix[1][1], m_worldMatrix[1][2]},
-            { m_worldMatrix[2][0], m_worldMatrix[2][1], m_worldMatrix[2][2]},
-        };
+            {
+                {m_worldMatrix[0][0], m_worldMatrix[0][1], m_worldMatrix[0][2]},
+                {m_worldMatrix[1][0], m_worldMatrix[1][1], m_worldMatrix[1][2]},
+                {m_worldMatrix[2][0], m_worldMatrix[2][1], m_worldMatrix[2][2]},
+            };
 
         // Update world scale
         m_worldScale.X(columns[0].Length());
@@ -296,7 +295,7 @@ namespace ige::scene {
         vmath_mat_appendScale(m_worldMatrix.P(), m_worldScale.P(), 4, 4, m_worldMatrix.P());
 
         // Update local matrix
-        m_localMatrix = hasParent() ? getParent()->getWorldMatrix().Inverse() * m_worldMatrix : m_worldMatrix;
+        m_localMatrix = m_parent ? m_parent->getWorldMatrix().Inverse() * m_worldMatrix : m_worldMatrix;
 
         // Update local position
         m_localPosition.X(m_localMatrix[3][0]);
@@ -304,11 +303,11 @@ namespace ige::scene {
         m_localPosition.Z(m_localMatrix[3][2]);
 
         Vec3 columns[3] =
-        {
-            { m_localMatrix[0][0], m_localMatrix[0][1], m_localMatrix[0][2]},
-            { m_localMatrix[1][0], m_localMatrix[1][1], m_localMatrix[1][2]},
-            { m_localMatrix[2][0], m_localMatrix[2][1], m_localMatrix[2][2]},
-        };
+            {
+                {m_localMatrix[0][0], m_localMatrix[0][1], m_localMatrix[0][2]},
+                {m_localMatrix[1][0], m_localMatrix[1][1], m_localMatrix[1][2]},
+                {m_localMatrix[2][0], m_localMatrix[2][1], m_localMatrix[2][2]},
+            };
 
         // Update local scale
         m_localScale.X(columns[0].Length());
@@ -355,7 +354,7 @@ namespace ige::scene {
             figureComp->onUpdate(0.33f);
             figureComp->getFigure()->CalcAABBox(0, m_aabbMin.P(), m_aabbMax.P(), LocalSpace);
             m_aabbCenter = Vec3((m_aabbMin[0] + m_aabbMax[0]), (m_aabbMin[1] + m_aabbMax[1]), (m_aabbMin[2] + m_aabbMax[2])) * 0.5f;
-        } 
+        }
         else
         {
             auto spriteComp = getOwner()->getComponent<SpriteComponent>();
@@ -378,20 +377,22 @@ namespace ige::scene {
         }
     }
 
-    void TransformComponent::addObserver(TransformComponent* observer)
+    void TransformComponent::addObserver(TransformComponent *observer)
     {
         // Avoid add `this`, should never happened
-        if(observer && observer != this) m_observers.emplace(observer);
+        if (observer && observer != this)
+            m_observers.emplace(observer);
     }
 
-    void TransformComponent::removeObserver(TransformComponent* observer)
+    void TransformComponent::removeObserver(TransformComponent *observer)
     {
-        if(observer) m_observers.erase(observer);
+        if (observer)
+            m_observers.erase(observer);
     }
 
     void TransformComponent::notifyObservers(const ETransformMessage &message)
     {
-        for( auto observer: m_observers)
+        for (auto observer : m_observers)
         {
             observer->onNotified(message);
         }
@@ -402,7 +403,7 @@ namespace ige::scene {
         switch (message)
         {
         case ETransformMessage::TRANSFORM_CHANGED:
-            m_bWorldDirty = true;
+            m_bLocalDirty = true;
             break;
 
         case ETransformMessage::TRANSFORM_DESTROYED:
@@ -410,18 +411,14 @@ namespace ige::scene {
             m_localRotation = m_worldRotation;
             m_localScale = m_worldScale;
             m_bLocalDirty = true;
-            m_bWorldDirty = true;
             break;
         }
-
-        // Update new transform
-        onUpdate(0.f);
     }
 
     //! Serialize
-    void TransformComponent::to_json(json& j) const
+    void TransformComponent::to_json(json &j) const
     {
-        j = json {
+        j = json{
             {"pos", m_localPosition},
             {"rot", m_localRotation},
             {"scale", m_localScale},
@@ -429,10 +426,10 @@ namespace ige::scene {
     }
 
     //! Deserialize
-    void TransformComponent::from_json(const json& j)
+    void TransformComponent::from_json(const json &j)
     {
-        setPosition(j.at("pos"));
-        setRotation(j.at("rot"));
-        setScale(j.at("scale"));
+        setPosition(j.value("pos", Vec3()));
+        setRotation(j.value("rot", Quat()));
+        setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
     }
-}
+} // namespace ige::scene

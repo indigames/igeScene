@@ -8,6 +8,8 @@
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 
+#include <pythonResource.h>
+
 namespace ige::scene
 {
     PyObject* Scene_new(PyTypeObject* type, PyObject* args, PyObject* kw)
@@ -45,9 +47,10 @@ namespace ige::scene
     // Set name
     int Scene_setName(PyObject_Scene* self, PyObject* value)
     {
-        char* name;
+        char* name = NULL;
         if (PyArg_ParseTuple(value, "s", &name)) {
-            self->scene->setName(std::string(name));
+            if(name != NULL)
+                self->scene->setName(std::string(name));
         }
         return 0;
     }
@@ -55,25 +58,14 @@ namespace ige::scene
     // Get active camera
     PyObject* Scene_getActiveCamera(PyObject_Scene* self)
     {
-        auto cameras = self->scene->getCameras();
-        std::shared_ptr<CameraComponent> camera = nullptr;
-        for (const auto& cam : cameras)
-        {
-            if(cam.get() == self->scene->getActiveCamera())
-            {
-                camera = cam;
-                break;
-            }
-        }
-
+        auto camera = self->scene->getActiveCamera();
         if (camera)
         {
-            auto* obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
-            obj->component = camera.get();
-            obj->super.component = obj->component;
-            return (PyObject*)obj;
+           auto* obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
+           obj->component = camera;
+           obj->super.component = obj->component;
+           return (PyObject*)obj;
         }
-
         Py_RETURN_NONE;
     }
 
@@ -82,7 +74,7 @@ namespace ige::scene
     {
         PyObject* camera;
         if (PyArg_ParseTuple(value, "O", &camera)) {
-            self->scene->setActiveCamera(((PyObject_CameraComponent*)camera)->component);
+           self->scene->setActiveCamera(((PyObject_CameraComponent*)camera)->component);
         }
         return 0;
     }
@@ -179,9 +171,9 @@ namespace ige::scene
     }
 
     // Get roots
-    PyObject* Scene_getRoots(PyObject_Scene *self)
+    PyObject* Scene_getObjects(PyObject_Scene *self)
     {
-        auto roots = self->scene->getRoots();
+        auto roots = self->scene->getObjects();
         PyObject* pyList = PyList_New(0);
         for(int i = 0; i < roots.size(); ++i)
         {
@@ -192,19 +184,68 @@ namespace ige::scene
         return (PyObject*)pyList;
     }
 
-    // Get cameras
-    PyObject* Scene_getCameras(PyObject_Scene *self)
+    // Get root object
+    PyObject* Scene_getRoot(PyObject_Scene *self)
     {
-        auto cameras = self->scene->getCameras();
-        PyObject* pyList = PyList_New(0);
-        for(int i = 0; i < cameras.size(); ++i)
+        auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+        obj->sceneObject = self->scene->getRoot().get();
+        return (PyObject*)obj;
+    }
+
+    // Get path
+    PyObject* Scene_getPath(PyObject_Scene *self)
+    {
+        return PyUnicode_FromString(self->scene->getPath().c_str());
+    }
+
+    // Get showcase
+    PyObject* Scene_getShowcase(PyObject_Scene *self)
+    {
+        auto *obj = PyObject_New(showcase_obj, &ShowcaseType);
+        obj->showcase = self->scene->getShowcase();
+        return (PyObject *)obj;
+    }
+
+    // Get environment
+    PyObject* Scene_getEnvironment(PyObject_Scene *self)
+    {
+        auto *obj = PyObject_New(environment_obj, &EnvironmentType);
+        obj->envSet = self->scene->getEnvironment();
+        return (PyObject *)obj;
+    }
+
+    // Compare function
+    static PyObject* Scene_richcompare(PyObject* self, PyObject* other, int op)
+    {
+        if (op == Py_LT || op == Py_LE || op == Py_GT || op == Py_GE)
         {
-            auto obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
-            obj->component = cameras[i].get();
-            obj->super.component = obj->component;
-            PyList_Append(pyList, (PyObject*)obj);
+            return Py_NotImplemented;
         }
-        return (PyObject*)pyList;
+
+        if (self != Py_None && other != Py_None)
+        {
+            if (other->ob_type == &PyTypeObject_Scene)
+            {
+                auto selfCmp = (PyObject_Scene*)(self);
+                auto otherCmp = (PyObject_Scene*)(other);
+                bool eq = (selfCmp->scene == otherCmp->scene);
+                if (op == Py_NE)
+                    eq = !eq;
+                return eq ? Py_True : Py_False;
+            }
+            else
+            {
+                return (op == Py_EQ) ? Py_False : Py_True;
+            }
+        }
+        else if (self == Py_None && other == Py_None)
+        {
+            return (op == Py_EQ) ? Py_True : Py_False;
+        }
+        else
+        {
+            return (op == Py_EQ) ? Py_False : Py_True;
+        }
     }
 
     // Methods definition
@@ -212,14 +253,17 @@ namespace ige::scene
         { "createObject", (PyCFunction)Scene_createObject, METH_VARARGS, Scene_createObject_doc },
         { "removeObject", (PyCFunction)Scene_removeObject, METH_VARARGS, Scene_removeObject_doc },
         { "findObject", (PyCFunction)Scene_findObject, METH_VARARGS, Scene_findObject_doc },
+        { "getObjects", (PyCFunction)Scene_getObjects, METH_NOARGS, Scene_getObjects_doc },
+        { "getRoot", (PyCFunction)Scene_getRoot, METH_NOARGS, Scene_getRoot_doc },
+        { "getPath", (PyCFunction)Scene_getPath, METH_NOARGS, Scene_getPath_doc },
+        { "getShowcase", (PyCFunction)Scene_getShowcase, METH_NOARGS, Scene_getShowcase_doc },
+        { "getEnvironment", (PyCFunction)Scene_getEnvironment, METH_NOARGS, Scene_getEnvironment_doc },
         { NULL, NULL }
     };
 
     // Variable definition
     PyGetSetDef Scene_getsets[] = {
         { "name", (getter)Scene_getName, (setter)Scene_setName, Scene_name_doc, NULL },
-        { "roots", (getter)Scene_getRoots, nullptr, Scene_roots_doc, NULL },
-        { "cameras", (getter)Scene_getCameras, nullptr, Scene_cameras_doc, NULL },
         { "activeCamera", (getter)Scene_getActiveCamera, (setter)Scene_setActiveCamera, Scene_activeCamera_doc, NULL },
         { NULL, NULL }
     };
@@ -249,7 +293,7 @@ namespace ige::scene
         0,                                  /* tp_doc */
         0,                                  /* tp_traverse */
         0,                                  /* tp_clear */
-        0,                                  /* tp_richcompare */
+        Scene_richcompare,                  /* tp_richcompare */
         0,                                  /* tp_weaklistoffset */
         0,                                  /* tp_iter */
         0,                                  /* tp_iternext */

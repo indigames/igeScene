@@ -14,7 +14,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SpriteComponent(const std::shared_ptr<SceneObject>& owner, const std::string& texture = "", const Vec2& size = {32.f, 32.f});
+        SpriteComponent(SceneObject &owner, const std::string &texture = "", const Vec2 &size = {32.f, 32.f}, bool isBillboard = false);
 
         //! Destructor
         virtual ~SpriteComponent();
@@ -28,25 +28,32 @@ namespace ige::scene
         //! Render
         virtual void onRender() override;
 
+        //! Get associated figure
+        EditableFigure *getFigure() { return m_sprite->getFigure(); }
+
+        //! Path
+        void setPath(const std::string &path);
+        const std::string &getPath() const { return m_sprite->getPath(); }
+
+        //! Size
+        void setSize(const Vec2 &size);
+        const Vec2 &getSize() const { return m_sprite->getSize(); }
+
+        //! Billboard
+        void setBillboard(bool isBillboard = true);
+        const bool isBillboard() const { return m_bIsBillboard; }
+
+    protected:
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
         virtual void from_json(const json& j) override;
 
-        //! Get associated figure
-        EditableFigure* getFigure() { return m_sprite->getFigure(); }
-
-        //! Path
-        void setPath(const std::string& path);
-        const std::string& getPath() const { return m_sprite->getPath(); }
-
-        //! Size
-        void setSize(const Vec2& size);
-        const Vec2& getSize() const { return m_sprite->getSize(); }
-
-    protected:
         //! Sprite
         std::shared_ptr<Sprite> m_sprite;
+
+        //! Billboard setting
+        bool m_bIsBillboard = false;
     };
-}
+} // namespace ige::scene

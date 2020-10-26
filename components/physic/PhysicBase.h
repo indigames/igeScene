@@ -18,7 +18,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        PhysicBase(const std::shared_ptr<SceneObject> &owner);
+        PhysicBase(SceneObject &owner);
 
         //! Destructor
         virtual ~PhysicBase();
@@ -77,19 +77,19 @@ namespace ige::scene
 
         //! Linear velocity
         const btVector3 &getLinearVelocity() const { return m_linearVelocity; }
-        void setLinearVelocity(const btVector3& velocity);
+        void setLinearVelocity(const btVector3 &velocity);
 
         //! Angular velocity
         const btVector3 &getAngularVelocity() const { return m_angularVelocity; }
-        void setAngularVelocity(const btVector3& velocity);
+        void setAngularVelocity(const btVector3 &velocity);
 
         //! Linear factor
         const btVector3 &getLinearFactor() const { return m_linearFactor; }
-        void setLinearFactor(const btVector3& factor);
+        void setLinearFactor(const btVector3 &factor);
 
         //! Angular factor
         const btVector3 &getAngularFactor() const { return m_angularFactor; }
-        void setAngularFactor(const btVector3& factor);
+        void setAngularFactor(const btVector3 &factor);
 
         //! Indicate object is a trigger object
         bool isTrigger() const { return m_bIsTrigger; }
@@ -108,8 +108,8 @@ namespace ige::scene
         void setCCD(bool isCCD = true);
 
         //! Position offset
-        const Vec3& getPositionOffset() const { return m_positionOffset; }
-        void setPositionOffset(const Vec3& offset) { m_positionOffset = offset;  }
+        const Vec3 &getPositionOffset() const { return m_positionOffset; }
+        void setPositionOffset(const Vec3 &offset) { m_positionOffset = offset; }
 
         //! Get AABB
         void getAABB(btVector3 &aabbMin, btVector3 aabbMax);
@@ -144,13 +144,13 @@ namespace ige::scene
         Event<PhysicBase &> &getTriggerStayEvent() { return m_triggerStayEvent; }
         Event<PhysicBase &> &getTriggerStopEvent() { return m_triggerStopEvent; }
 
+    protected:
         //! Serialize
-        virtual void to_json(json &j) const override;
+        virtual void to_json(json& j) const override;
 
         //! Deserialize
-        virtual void from_json(const json &j) override;
+        virtual void from_json(const json& j) override;
 
-    protected:
         //! Create physic body
         void createBody();
 
@@ -170,7 +170,7 @@ namespace ige::scene
         void recreateBody();
 
         //! Set local scale
-        virtual void setLocalScale(const Vec3& scale) = 0;
+        virtual void setLocalScale(const Vec3 &scale) = 0;
 
     protected:
         //! On created event
@@ -215,16 +215,16 @@ namespace ige::scene
         float m_friction = 0.5f;
 
         //! Linear velocity
-        btVector3 m_linearVelocity = { 0.f, 0.f, 0.f };
+        btVector3 m_linearVelocity = {0.f, 0.f, 0.f};
 
         //! Angular velocity
-        btVector3 m_angularVelocity = { 0.f, 0.f, 0.f };
+        btVector3 m_angularVelocity = {0.f, 0.f, 0.f};
 
         //! Linear factor
         btVector3 m_linearFactor = {1.f, 1.f, 0.f};
 
         //! Angular factor
-        btVector3 m_angularFactor = { 0.f, 0.f, 0.f };
+        btVector3 m_angularFactor = {0.f, 0.f, 0.f};
 
         //! isKinematic
         bool m_bIsKinematic = false;
@@ -236,7 +236,7 @@ namespace ige::scene
         bool m_bIsEnabled = true;
 
         //! Continuous collision detection
-        bool m_bIsCCD = true;
+        bool m_bIsCCD = false;
 
         //! Collision filter group
         int m_collisionFilterGroup = 1;
@@ -251,9 +251,9 @@ namespace ige::scene
         TransformComponent *m_transform;
 
         //! Position offsets
-        Vec3 m_positionOffset = { 0.f, 0.f, 0.f };
+        Vec3 m_positionOffset = {0.f, 0.f, 0.f};
 
         //! Cache previous scale value
-        Vec3 m_previousScale = { 1.f, 1.f, 1.f };
+        Vec3 m_previousScale = {1.f, 1.f, 1.f};
     };
 } // namespace ige::scene

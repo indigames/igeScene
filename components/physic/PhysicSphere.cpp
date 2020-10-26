@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    PhysicSphere::PhysicSphere(const std::shared_ptr<SceneObject> &owner, float radius)
+    PhysicSphere::PhysicSphere(SceneObject &owner, float radius)
         : PhysicBase(owner)
     {
         createCollisionShape(radius);

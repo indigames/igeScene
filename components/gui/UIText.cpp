@@ -2,39 +2,41 @@
 #include "components/gui/RectTransform.h"
 
 #include "scene/SceneObject.h"
+#include "scene/Scene.h"
 
 namespace ige::scene
 {
     //! Constructor
-    UIText::UIText(const std::shared_ptr<SceneObject>& owner, const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color)
+    UIText::UIText(SceneObject &owner, const std::string &text, const std::string &fontPath, int fontSize, const Vec4 &color)
         : Component(owner)
     {
         m_text = std::make_shared<Text>(text, fontPath, fontSize, color);
         if (m_text->getFigure())
-            getOwner()->getRoot()->getResourceAddedEvent().invoke(m_text->getFigure());
+            getOwner()->getScene()->getResourceAddedEvent().invoke(m_text->getFigure());
     }
 
     //! Destructor
     UIText::~UIText()
     {
         if (m_text->getFigure())
-            if(hasOwner()) getOwner()->getRoot()->getResourceRemovedEvent().invoke(m_text->getFigure());
+            getOwner()->getScene()->getResourceRemovedEvent().invoke(m_text->getFigure());
         m_text = nullptr;
     }
 
     //! Update
     void UIText::onUpdate(float dt)
     {
-        if (getFigure() == nullptr) return;
+        if (getFigure() == nullptr)
+            return;
 
         // Update transform from transform component
-        auto transform = std::dynamic_pointer_cast<RectTransform>(getOwner()->getTransform());
+        auto transform = getOwner()->getRectTransform();
 
         // Scale container to fit text size
         auto containerSize = transform->getSize();
         auto size = m_text->getSize();
-        auto sizeChanged = false;        
-        if (size.X() > containerSize.X()) 
+        auto sizeChanged = false;
+        if (size.X() > containerSize.X())
         {
             containerSize.X(size.X() + 1.f);
             sizeChanged = true;
@@ -44,7 +46,8 @@ namespace ige::scene
             containerSize.Y(size.Y() + 1.f);
             sizeChanged = true;
         }
-        if (sizeChanged) transform->setSize(containerSize);
+        if (sizeChanged)
+            transform->setSize(containerSize);
 
         getFigure()->SetPosition(transform->getWorldPosition());
         getFigure()->SetRotation(transform->getWorldRotation());
@@ -57,23 +60,23 @@ namespace ige::scene
     //! Render
     void UIText::onRender()
     {
-        if (getFigure() == nullptr) return;
+        if (getFigure() == nullptr)
+            return;
         getFigure()->Render();
     }
 
     //! Serialize
-    void UIText::to_json(json& j) const
+    void UIText::to_json(json &j) const
     {
-        j = json {
+        j = json{
             {"text", getText()},
             {"font", getFontPath()},
             {"size", getFontSize()},
-            {"color", getColor()}
-        };
+            {"color", getColor()}};
     }
 
     //! Deserialize
-    void UIText::from_json(const json& j)
+    void UIText::from_json(const json &j)
     {
         setText(j.at("text"));
         setFontPath(j.at("font"));
@@ -82,28 +85,32 @@ namespace ige::scene
     }
 
     //! Text
-    void UIText::setText(const std::string& text)
+    void UIText::setText(const std::string &text)
     {
         auto oldFigure = m_text->getFigure();
         m_text->setText(text);
         auto newFigure = m_text->getFigure();
-        if(oldFigure != newFigure)
+        if (oldFigure != newFigure)
         {
-            if (oldFigure) getOwner()->getRoot()->getResourceRemovedEvent().invoke(oldFigure);
-            if (newFigure) getOwner()->getRoot()->getResourceAddedEvent().invoke(newFigure);
+            if (oldFigure)
+                getOwner()->getScene()->getResourceRemovedEvent().invoke(oldFigure);
+            if (newFigure)
+                getOwner()->getScene()->getResourceAddedEvent().invoke(newFigure);
         }
     }
 
     //! Font Path
-    void UIText::setFontPath(const std::string& path)
+    void UIText::setFontPath(const std::string &path)
     {
         auto oldFigure = m_text->getFigure();
         m_text->setFontPath(path);
         auto newFigure = m_text->getFigure();
-        if(oldFigure != newFigure)
+        if (oldFigure != newFigure)
         {
-            if (oldFigure) getOwner()->getRoot()->getResourceRemovedEvent().invoke(oldFigure);
-            if (newFigure) getOwner()->getRoot()->getResourceAddedEvent().invoke(newFigure);
+            if (oldFigure)
+                getOwner()->getScene()->getResourceRemovedEvent().invoke(oldFigure);
+            if (newFigure)
+                getOwner()->getScene()->getResourceAddedEvent().invoke(newFigure);
         }
     }
 
@@ -113,16 +120,18 @@ namespace ige::scene
         auto oldFigure = m_text->getFigure();
         m_text->setFontSize(size);
         auto newFigure = m_text->getFigure();
-        if(oldFigure != newFigure)
+        if (oldFigure != newFigure)
         {
-            if (oldFigure) getOwner()->getRoot()->getResourceRemovedEvent().invoke(oldFigure);
-            if (newFigure) getOwner()->getRoot()->getResourceAddedEvent().invoke(newFigure);
+            if (oldFigure)
+                getOwner()->getScene()->getResourceRemovedEvent().invoke(oldFigure);
+            if (newFigure)
+                getOwner()->getScene()->getResourceAddedEvent().invoke(newFigure);
         }
     }
 
     //! Color
-    void UIText::setColor( const Vec4& color)
+    void UIText::setColor(const Vec4 &color)
     {
         m_text->setColor(color);
     }
-}
+} // namespace ige::scene

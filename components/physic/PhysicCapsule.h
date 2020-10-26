@@ -12,19 +12,13 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        PhysicCapsule(const std::shared_ptr<SceneObject> &owner, float radius = 1.f, float height = 1.f);
+        PhysicCapsule(SceneObject &owner, float radius = 1.f, float height = 1.f);
 
         //! Destructor
         virtual ~PhysicCapsule();
 
         //! Get name
         std::string getName() const override { return "PhysicCapsule"; }
-
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
 
         //! Get radius
         float getRadius() const;
@@ -39,6 +33,12 @@ namespace ige::scene
         void setHeight(float radius);
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! Create collision shape
         void createCollisionShape(float radius, float height);
 

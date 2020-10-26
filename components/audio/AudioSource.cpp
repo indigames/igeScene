@@ -17,7 +17,7 @@ namespace ige::scene
     Event<AudioSource &> AudioSource::m_onDestroyedEvent;
 
     //! Constructor
-    AudioSource::AudioSource(const std::shared_ptr<SceneObject> &owner, const std::string &path, bool stream)
+    AudioSource::AudioSource(SceneObject &owner, const std::string &path, bool stream)
         : Component(owner), m_bIsStream(stream)
     {
         if (!path.empty())

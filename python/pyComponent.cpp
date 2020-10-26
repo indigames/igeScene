@@ -33,13 +33,43 @@ namespace ige::scene
     // Get owner
     PyObject* Component_getOwner(PyObject_Component* self)
     {
-        if(self->component && self->component->hasOwner())
+        auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+        obj->sceneObject = self->component->getOwner();
+        return (PyObject*)obj;
+    }
+
+    // Compare function
+    static PyObject* Component_richcompare(PyObject* self, PyObject* other, int op)
+    {
+        if (op == Py_LT || op == Py_LE || op == Py_GT || op == Py_GE)
         {
-            auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = self->component->getOwner();
-            return (PyObject*)obj;
+            return Py_NotImplemented;
         }
-        Py_RETURN_NONE;
+
+        if (self != Py_None && other != Py_None)
+        {
+            if (other->ob_type == &PyTypeObject_Component)
+            {
+                auto selfCmp = (PyObject_Component*)(self);
+                auto otherCmp = (PyObject_Component*)(other);
+                bool eq = (selfCmp->component == otherCmp->component);
+                if (op == Py_NE)
+                    eq = !eq;
+                return eq ? Py_True : Py_False;
+            }
+            else
+            {
+                return (op == Py_EQ) ? Py_False : Py_True;
+            }
+        }
+        else if (self == Py_None && other == Py_None)
+        {
+            return (op == Py_EQ) ? Py_True : Py_False;
+        }
+        else
+        {
+            return (op == Py_EQ) ? Py_False: Py_True;
+        }
     }
 
     // Variable definition
@@ -70,15 +100,15 @@ namespace ige::scene
         0,                                          /* tp_getattro */
         0,                                          /* tp_setattro */
         0,                                          /* tp_as_buffer */
-        Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /* tp_flags */  //! [IGE]: allows inheritance
+        Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /* tp_flags */
         0,                                          /* tp_doc */
         0,                                          /* tp_traverse */
         0,                                          /* tp_clear */
-        0,                                          /* tp_richcompare */
+        Component_richcompare,                      /* tp_richcompare */
         0,                                          /* tp_weaklistoffset */
         0,                                          /* tp_iter */
         0,                                          /* tp_iternext */
-        0,                                          /* tp_methods */  //! [IGE]: no methods
+        0,                                          /* tp_methods */
         0,                                          /* tp_members */
         Component_getsets,                          /* tp_getset */
         0,                                          /* tp_base */
@@ -88,7 +118,7 @@ namespace ige::scene
         0,                                          /* tp_dictoffset */
         0,                                          /* tp_init */
         0,                                          /* tp_alloc */
-        0,                                          /* tp_new */  //! [IGE]: abstract class
+        0,                                          /* tp_new */
         0,                                          /* tp_free */
     };
 }

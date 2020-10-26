@@ -17,7 +17,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{ 128.f, 128.f });
+        RectTransform(SceneObject &owner, const Vec3 &pos = Vec3(), const Vec2 &size = Vec2{64.f, 64.f});
 
         //! Destructor
         virtual ~RectTransform();
@@ -26,83 +26,74 @@ namespace ige::scene
         virtual std::string getName() const override { return "RectTransform"; }
 
         //! Get local transform
-        const Mat4& getLocalTransform();
+        const Mat4 &getLocalTransform();
 
         //! Get canvas space transform
-        const Mat4& getCanvasSpaceTransform();
+        const Mat4 &getCanvasSpaceTransform();
 
         //! Get viewport transform
-        const Mat4& getViewportTransform();
+        const Mat4 &getViewportTransform();
 
         //! Anchor
-        const Vec4& getAnchor() const { return m_anchor; }
-        void setAnchor(const Vec4& anchor);
+        const Vec4 &getAnchor() const { return m_anchor; }
+        void setAnchor(const Vec4 &anchor);
 
         //! Pivot
-        const Vec2& getPivot() const { return m_pivot; }
-        void setPivot(const Vec2& pivot);
+        const Vec2 &getPivot() const { return m_pivot; }
+        void setPivot(const Vec2 &pivot);
 
         //! Offset
-        const Vec4& getOffset() const { return m_offset; }
-        void setOffset(const Vec4& offset);
+        const Vec4 &getOffset() const { return m_offset; }
+        void setOffset(const Vec4 &offset);
 
         //! Size
         Vec2 getSize();
-        void setSize(const Vec2& size);
+        void setSize(const Vec2 &size);
 
-        //! Position
-        void setPosition(const Vec3& pos) override;
-        void setWorldPosition(const Vec3& pos) override;
+        //! Translate
+        void worldTranslate(const Vec3 &trans) override;
 
-        //! Rotation
-        void setRotation(const Quat& rot) override;
-        void setWorldRotation(const Quat& rot) override;
+        //! Rotate
+        void worldRotate(const Quat &rot) override { rotate(rot); }
 
         //! Scale
-        void setScale(const Vec3& scale) override;
-        void setWorldScale(const Vec3& scale) override;
+        void worldScale(const Vec3 &scl) override { scale(scl); }
+
+        //! Position
+        void setPosition(const Vec3 &pos) override;
+        void setWorldPosition(const Vec3 &pos) override {}
+
+        //! Rotation
+        void setRotation(const Quat &rot) override;
+        void setWorldRotation(const Quat &rot) override {}
+
+        //! Scale
+        void setScale(const Vec3 &scale) override;
+        void setWorldScale(const Vec3 &scale) override {}
 
         //! Get rect in canvas space (no scale, no rotate)
-        const Vec4& getRect();
-
-        //! Get rect in viewport space
-        const Vec4& getRectInViewportSpace() { return m_rectViewport; }
+        const Vec4 &getRect();
 
         //! Dirty flag
-        void setDirty();
+        void setRectDirty();
+
+        //! Set transform dirty
+        void setTransformDirty();
 
         //! OnUpdate
         void onUpdate(float dt) override;
 
-        //! Add observer: just do nothing
-        void addObserver(TransformComponent* observer) override { }
-
-        //! Remove observer: just do nothing
-        void removeObserver(TransformComponent* observer) override { }
-
-        //! Notify to all observers: just do nothing
-        void notifyObservers(const ETransformMessage& message) override { }
-
         //! Handle notification from parent: just do nothing
-        void onNotified(const ETransformMessage& message) override { }
-
-        //! Check point inside rect
-        bool isPointInside(const Vec2& point) const;
-
-        //! Serialize
-        void to_json(json& j) const override;
-
-        //! Deserialize
-        void from_json(const json& j) override;
+        void onNotified(const ETransformMessage &message) override;
 
     protected:
-        bool hasScale() const;
-        bool hasRotation() const;
-        bool hasScaleOrRotation() const;
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
 
         Vec2 getPivotInCanvasSpace();
-        Vec2 getPivotInViewportSpace();
-
         Vec2 getAnchorCenterInCanvasSpace();
 
     protected:
@@ -115,12 +106,8 @@ namespace ige::scene
         //! Pivot: center of the content
         Vec2 m_pivot;
 
-        //! Position Z
-        float m_posZ;
-
         //! Cached rect in canvas space (no scale, no rotate)
         Vec4 m_rect;
-        Vec4 m_rectViewport;
         bool m_rectDirty = true;
 
         //! Cached transform to viewport space
@@ -130,12 +117,5 @@ namespace ige::scene
         //! Cached transform to canvas space
         Mat4 m_canvasTransform;
         bool m_canvasTransformDirty = true;
-
-        //! Associated EditableFigure object
-        EditableFigure* m_figure;
-
-        //! Events
-        Event<EditableFigure*> m_onFigureCreatedEvent;
-        Event<EditableFigure*> m_onFigureDestroyedEvent;
     };
-}
+} // namespace ige::scene

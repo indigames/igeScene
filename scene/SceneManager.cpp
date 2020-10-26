@@ -25,8 +25,6 @@ using namespace pyxie;
 #  define DELIMITER ":"
 #endif
 
-#define SERIALIZE_VERSION "0.0.1"
-
 namespace ige::scene
 {
     SceneManager::SceneManager()
@@ -127,15 +125,13 @@ namespace ige::scene
 
     std::shared_ptr<Scene> SceneManager::loadScene(const std::string& path)
     {
-        ResourceManager::Instance().DeleteDaemon();
-
         json jScene;
 
         auto fsPath = fs::path(path);
         auto ext = fsPath.extension();
-        if (ext.string() != ".json")
+        if (ext.string() != ".scene")
         {
-            fsPath = fsPath.replace_extension(".json");
+            fsPath = fsPath.replace_extension(".scene");
         }
 
         std::ifstream file(fsPath);
@@ -148,7 +144,6 @@ namespace ige::scene
         scene->from_json(jScene);
         scene->setPath(path);
         m_scenes.push_back(scene);
-        setCurrentScene(scene);
         return scene;
     }
 
@@ -161,9 +156,9 @@ namespace ige::scene
 
             auto fsPath = path.empty() ? fs::path(m_currScene->getPath()) : fs::path(path);
             auto ext = fsPath.extension();
-            if (ext.string() != ".json")
+            if (ext.string() != ".scene")
             {
-                fsPath = fsPath.replace_extension(".json");
+                fsPath = fsPath.replace_extension(".scene");
             }
 
             std::ofstream file(fsPath.string());
@@ -199,8 +194,6 @@ namespace ige::scene
         {
             m_scenes.erase(found);
         }
-
-        ResourceManager::Instance().DeleteDaemon();
     }
 
     //! Reload scene

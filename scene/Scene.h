@@ -9,6 +9,10 @@
 #include "components/CameraComponent.h"
 #include "event/Event.h"
 
+#define MAX_DIRECTIONAL_LIGHT_NUMBER    3
+#define MAX_POINT_LIGHT_NUMBER          7
+
+
 namespace ige::scene
 {
     class SceneObject;
@@ -50,10 +54,7 @@ namespace ige::scene
         virtual void render();
 
         //! Create scene object
-        virtual std::shared_ptr<SceneObject> createObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr);
-
-        //! Create GUI object
-        virtual std::shared_ptr<SceneObject> createGUIObject(std::string name = "", std::shared_ptr<SceneObject> parent = nullptr, const Vec3& pos = Vec3(), const Vec2& size = {64, 64});
+        virtual std::shared_ptr<SceneObject> createObject(std::string name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 }, bool isCanvas = false);
 
         //! Remove scene object
         virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);
@@ -73,20 +74,11 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j);
 
-        //! Component added event
-        void onComponentAdded(SceneObject& obj, const std::shared_ptr<Component>& component);
+        //! Get root of scene
+        std::shared_ptr<SceneObject>& getRoot() { return m_root; };
 
-        //! Component added event
-        void onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component);
-
-        //! Object selected
-        void onSceneObjectSelected(SceneObject& sceneObject);
-
-        //! Get roots of scene nodes tree
-        std::vector<std::shared_ptr<SceneObject>>& getRoots() { return m_roots; };
-
-        //! Get all camera
-        std::vector<std::shared_ptr<CameraComponent>>& getCameras() { return m_cameras; };
+        //! Get objects list
+        std::vector<std::shared_ptr<SceneObject>>& getObjects() { return m_objects; };
 
         //! Set active camera
         void setActiveCamera(CameraComponent* camera);
@@ -94,21 +86,61 @@ namespace ige::scene
         //! Get active camera
         CameraComponent* getActiveCamera() { return m_activeCamera; }
 
-        //! Active camera changed event
-        Event<CameraComponent*>& getOnActiveCameraChangedEvent() { return m_onActiveCameraChanged; }
-
         //! Return the cached path
         const std::string& getPath() const { return m_path; }
 
         //! Cache the path
         void setPath(const std::string& path) { m_path = path; }
 
+        //! Get showcase
+        Showcase* getShowcase() { return m_showcase; }
+
+        //! Get environment
+        Environment* getEnvironment() { return m_environment; }
+
+        //! Internal event
+        Event<Resource*>& getResourceAddedEvent() { return m_resourceAddedEvent; }
+        Event<Resource*>& getResourceRemovedEvent() { return m_resourceRemovedEvent; }
+
+        //! Resource added/removed event
+        void onResourceAdded(Resource* resource);
+        void onResourceRemoved(Resource* resource);
+
+        //! Prefab save/load
+        bool savePrefab(uint64_t objectId, const std::string& file);
+        bool loadPrefab(uint64_t parentId, const std::string& file);
+
+        //! Acquire directional light
+        bool isDirectionalLightAvailable();
+        int acquireDirectionalLight();
+        void releaseDirectionalLight(int index);
+
+        //! Acquire point light
+        bool isPointLightAvailable();
+        int acquirePointLight();
+        void releasePointLight(int index);
+
+    protected:
+        void populateTestData(const std::shared_ptr<SceneObject>& parent = nullptr, int num = 1000);
+
     protected:
         //! Scene root node
-        std::vector<std::shared_ptr<SceneObject>> m_roots;
+        std::shared_ptr<SceneObject> m_root;
 
-        //! Cache all camera components
-        std::vector<std::shared_ptr<CameraComponent>> m_cameras;
+        //! Cache all objects
+        std::vector<std::shared_ptr<SceneObject>> m_objects;
+
+        //! Showcase which contains all rendering resources
+        Showcase* m_showcase = nullptr;
+
+        //! Environment settings of the scene
+        Environment* m_environment = nullptr;
+
+        //! Internal events
+        Event<Resource*> m_resourceAddedEvent;
+        Event<Resource*> m_resourceRemovedEvent;
+
+        //! Cache active camera
         CameraComponent* m_activeCamera = nullptr;
 
         //! Object ID counter
@@ -120,12 +152,10 @@ namespace ige::scene
         //! Cached path
         std::string m_path;
 
-        //! Active camera changed events
-        Event<CameraComponent*> m_onActiveCameraChanged;
+        //! Directional light index
+        bool m_directionalLights[MAX_DIRECTIONAL_LIGHT_NUMBER] = { false };
 
-        //! Cached event id for removing
-        uint64_t m_componentAddedEventId;
-        uint64_t m_componentRemovedEventId;
-        uint64_t m_objectSelectedEventId;
+        //! Point light index
+        bool m_pointLights[MAX_POINT_LIGHT_NUMBER] = { false };
     };
 }

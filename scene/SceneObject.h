@@ -8,20 +8,23 @@
 #include "components/Component.h"
 #include "components/TransformComponent.h"
 #include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
 namespace ige::scene
 {
+    class Scene;
+
     /**
     * SceneObject represents an object in scene hierarchy
     */
-    class SceneObject : public std::enable_shared_from_this<SceneObject>
+    class SceneObject
     {
     public:
         //! Constructor
-        SceneObject(uint64_t id, std::string name = "", SceneObject *parent = nullptr, bool isGui = false);
+        SceneObject(Scene* scene, uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false, const Vec2& size = {64.f, 64.f}, bool isCanvas = false);
 
         //! Destructor
         virtual ~SceneObject();
@@ -33,35 +36,22 @@ namespace ige::scene
         inline const std::string &getName() const { return m_name; }
 
         //! Set Name
-        inline void setName(const std::string &name)
-        {
-            if (m_name != name)
-            {
-                m_name = name;
-                getNameChangedEvent().invoke(*this);
-            }
-        }
+        void setName(const std::string& name);
 
         //! Set parent
         virtual void setParent(SceneObject *parent);
 
-        // Has parent
-        virtual bool hasParent() const { return getParent() != nullptr; };
-
         // Get parent
         virtual SceneObject *getParent() const;
 
-        //! Adds a child.
-        virtual void addChild(const std::shared_ptr<SceneObject> &child);
-
-        //! Remove a childs.
-        virtual bool removeChild(const std::shared_ptr<SceneObject> &child);
-
         //! Get children list
-        virtual std::vector<std::shared_ptr<SceneObject>> &getChildren();
+        virtual const std::vector<SceneObject*> &getChildren() const;
 
-        //! Get children count
-        virtual size_t getChildrenCount() const;
+        //! Add child
+        virtual void addChild(SceneObject* child);
+
+        //! Removes child
+        virtual void removeChild(SceneObject* child);
 
         //! Removes all children
         virtual void removeChildren();
@@ -101,18 +91,6 @@ namespace ige::scene
         template <typename T, typename... Args>
         std::shared_ptr<T> addComponent(Args &&... args);
 
-        //! Resource added event
-        void onResourceAdded(Resource *resource);
-
-        //! Resource removed event
-        void onResourceRemoved(Resource *resource);
-
-        //! Find object by id
-        std::shared_ptr<SceneObject> findObjectById(uint64_t id) const;
-
-        //! Find object by name
-        std::shared_ptr<SceneObject> findObjectByName(std::string name) const;
-
         //! Update functions
         virtual void onUpdate(float dt);
         virtual void onFixedUpdate(float dt);
@@ -134,8 +112,6 @@ namespace ige::scene
         bool isSelected() const;
 
         //! Internal event
-        Event<Resource *> &getResourceAddedEvent() { return m_resourceAddedEvent; }
-        Event<Resource *> &getResourceRemovedEvent() { return m_resourceRemovedEvent; }
         Event<SceneObject &> &getNameChangedEvent() { return m_nameChangedEvent; }
         Event<SceneObject &> &getTransformChangedEvent() { return m_transformChangedEvent; }
 
@@ -156,11 +132,11 @@ namespace ige::scene
         //! Deserialize
         void from_json(const json &j);
 
-        //! Get showcase
-        Showcase *getShowcase();
-
         //! Check whether it's a GUI object
         bool isGUIObject() const { return m_bIsGui; }
+
+        //! Check whether it's a Canvas object
+        bool isCanvasObject() const { return m_bIsCanvas; }
 
         //! Get transform component
         std::shared_ptr<TransformComponent> &getTransform() { return m_transform; }
@@ -171,8 +147,14 @@ namespace ige::scene
         //! Set transform component
         void setTransform(const std::shared_ptr<TransformComponent> &transform) { m_transform = transform; }
 
-        //! Get root object
-        SceneObject *getRoot() { return m_root; }
+        //! Get canvas
+        std::shared_ptr<Canvas>& getCanvas() { return m_canvas; }
+
+        //! Set canvas
+        void setCanvas(const std::shared_ptr<Canvas>& canvas) { m_canvas = canvas; }
+
+        //! Get scene
+        Scene* getScene() { return m_scene; }
 
     protected:
         //! Node ID
@@ -187,21 +169,19 @@ namespace ige::scene
         //! Selected/Unselected
         bool m_isSelected;
 
+        //! Cache pointer to current scene
+        Scene* m_scene = nullptr;
+
         //! Pointer to parent, use weak_ptr avoid dangling issue
         SceneObject *m_parent = nullptr;
 
-        //! Showcase which contains self and children render components
-        Showcase *m_showcase = nullptr;
-
-        //! Children vector
-        std::vector<std::shared_ptr<SceneObject>> m_children;
+        //! Cached children vector
+        std::vector<SceneObject*> m_children;
 
         //! Components vector
         std::vector<std::shared_ptr<Component>> m_components;
 
         //! Internal events
-        Event<Resource *> m_resourceAddedEvent;
-        Event<Resource *> m_resourceRemovedEvent;
         Event<SceneObject &> m_nameChangedEvent;
         Event<SceneObject &> m_transformChangedEvent;
 
@@ -219,11 +199,14 @@ namespace ige::scene
         //! Cache transform component
         std::shared_ptr<TransformComponent> m_transform = nullptr;
 
-        //! Cache root object
-        SceneObject *m_root = nullptr;
+        //! Cache Canvas component (GUI)
+        std::shared_ptr<Canvas> m_canvas = nullptr;
 
         //! Cache isGui
         bool m_bIsGui = false;
+
+        //! Cache isCanvas
+        bool m_bIsCanvas = false;
     };
 
     //! Get component by type
@@ -249,7 +232,7 @@ namespace ige::scene
         auto found = getComponent<T>();
         if (found)
             return found;
-        auto instance = std::make_shared<T>(shared_from_this(), args...);
+        auto instance = std::make_shared<T>(*this, args...);
         m_components.push_back(instance);
         m_componentAddedEvent.invoke(*this, instance);
         return instance;

@@ -20,7 +20,7 @@ extern std::shared_ptr<Application> gApp;
 namespace ige::scene
 {
     //! Constructor
-    ScriptComponent::ScriptComponent(const std::shared_ptr<SceneObject>& owner, const std::string& path)
+    ScriptComponent::ScriptComponent(SceneObject &owner, const std::string &path)
         : Component(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
     {
         m_bPathDirty = true;
@@ -36,7 +36,7 @@ namespace ige::scene
     {
         unloadPyModule();
 
-        if(!m_path.empty())
+        if (!m_path.empty())
         {
             // Load the module from python source file
             m_pyModule = PyImport_ImportModule(m_path.c_str());
@@ -65,18 +65,19 @@ namespace ige::scene
             }
 
             // Builds the name of a callable class
-            PyObject* key = nullptr,  *value = nullptr, *pyClass = nullptr;
+            PyObject *key = nullptr, *value = nullptr, *pyClass = nullptr;
             Py_ssize_t pos = 0;
             while (PyDict_Next(dict, &pos, &key, &value))
             {
-                if(PyObject_HasAttrString(value, "onStart") && PyObject_IsSubclass(value, (PyObject*)&PyTypeObject_Script))
+                if (PyObject_HasAttrString(value, "onStart") && PyObject_IsSubclass(value, (PyObject *)&PyTypeObject_Script))
                 {
                     pyClass = value;
                     break;
                 }
             }
 
-            if (pyClass == nullptr) {
+            if (pyClass == nullptr)
+            {
                 PyErr_Clear();
                 return;
             }
@@ -85,7 +86,7 @@ namespace ige::scene
             auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
             obj->sceneObject = getOwner();
             auto arglist = Py_BuildValue("(O)", obj);
-            PyObject* pyConstruct = PyInstanceMethod_New(pyClass);
+            PyObject *pyConstruct = PyInstanceMethod_New(pyClass);
             m_pyInstance = PyObject_CallObject(pyConstruct, arglist);
             Py_DECREF(arglist);
             Py_DECREF(pyConstruct);
@@ -108,7 +109,7 @@ namespace ige::scene
     {
         m_pyInstance = nullptr;
 
-        if(m_pyModule != nullptr)
+        if (m_pyModule != nullptr)
         {
             Py_XDECREF(m_pyModule);
             m_pyModule = nullptr;
@@ -126,32 +127,32 @@ namespace ige::scene
         auto physicComp = getOwner()->getComponent<PhysicBase>();
         if (physicComp != nullptr)
         {
-            physicComp->getTriggerStartEvent().addListener([this](auto& other) {
+            physicComp->getTriggerStartEvent().addListener([this](auto &other) {
                 auto otherObject = other.getOwner();
                 onTriggerStart(*otherObject);
             });
 
-            physicComp->getTriggerStayEvent().addListener([this](auto& other) {
+            physicComp->getTriggerStayEvent().addListener([this](auto &other) {
                 auto otherObject = other.getOwner();
                 onTriggerStay(*otherObject);
             });
 
-            physicComp->getTriggerStopEvent().addListener([this](auto& other) {
+            physicComp->getTriggerStopEvent().addListener([this](auto &other) {
                 auto otherObject = other.getOwner();
                 onTriggerStop(*otherObject);
             });
 
-            physicComp->getCollisionStartEvent().addListener([this](auto& other) {
+            physicComp->getCollisionStartEvent().addListener([this](auto &other) {
                 auto otherObject = other.getOwner();
                 onCollisionStart(*otherObject);
             });
 
-            physicComp->getCollisionStayEvent().addListener([this](auto& other) {
+            physicComp->getCollisionStayEvent().addListener([this](auto &other) {
                 auto otherObject = other.getOwner();
                 onCollisionStay(*otherObject);
             });
 
-            physicComp->getCollisionStayEvent().addListener([this](auto& other) {
+            physicComp->getCollisionStayEvent().addListener([this](auto &other) {
                 auto otherObject = other.getOwner();
                 onCollisionStop(*otherObject);
             });
@@ -314,7 +315,7 @@ namespace ige::scene
     }
 
     //! Trigger events
-    void ScriptComponent::onTriggerStart(SceneObject& other)
+    void ScriptComponent::onTriggerStart(SceneObject &other)
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onTriggerStart"))
         {
@@ -326,7 +327,7 @@ namespace ige::scene
         }
     }
 
-    void ScriptComponent::onTriggerStay(SceneObject& other)
+    void ScriptComponent::onTriggerStay(SceneObject &other)
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onTriggerStay"))
         {
@@ -338,7 +339,7 @@ namespace ige::scene
         }
     }
 
-    void ScriptComponent::onTriggerStop(SceneObject& other)
+    void ScriptComponent::onTriggerStop(SceneObject &other)
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onTriggerStop"))
         {
@@ -351,7 +352,7 @@ namespace ige::scene
     }
 
     //! Collision events
-    void ScriptComponent::onCollisionStart(SceneObject& other)
+    void ScriptComponent::onCollisionStart(SceneObject &other)
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onCollisionStart"))
         {
@@ -363,7 +364,7 @@ namespace ige::scene
         }
     }
 
-    void ScriptComponent::onCollisionStay(SceneObject& other)
+    void ScriptComponent::onCollisionStay(SceneObject &other)
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onCollisionStay"))
         {
@@ -375,7 +376,7 @@ namespace ige::scene
         }
     }
 
-    void ScriptComponent::onCollisionStop(SceneObject& other)
+    void ScriptComponent::onCollisionStop(SceneObject &other)
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onCollisionStop"))
         {
@@ -387,23 +388,21 @@ namespace ige::scene
         }
     }
 
-
     //! Serialize
-    void ScriptComponent::to_json(json& j) const
+    void ScriptComponent::to_json(json &j) const
     {
-        j = json {
-            {"path", m_path}
-        };
+        j = json{
+            {"path", m_path}};
     }
 
     //! Deserialize
-    void ScriptComponent::from_json(const json& j)
+    void ScriptComponent::from_json(const json &j)
     {
         setPath(j.at("path"));
     }
 
     //! Path
-    void ScriptComponent::setPath(const std::string& path)
+    void ScriptComponent::setPath(const std::string &path)
     {
         auto scriptName = fs::path(path).stem().string();
         std::replace(scriptName.begin(), scriptName.end(), '\\', '/');
@@ -414,4 +413,4 @@ namespace ige::scene
             m_bPathDirty = true;
         }
     }
-}
+} // namespace ige::scene

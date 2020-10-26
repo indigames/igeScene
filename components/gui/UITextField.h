@@ -6,7 +6,6 @@ using namespace pyxie;
 #include "event/Event.h"
 #include "components/gui/UIText.h"
 
-
 namespace ige::scene
 {
     //! UITextField
@@ -14,7 +13,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        UITextField(const std::shared_ptr<SceneObject>& owner, const std::string& text = "");
+        UITextField(SceneObject &owner, const std::string &text = "");
 
         //! Destructor
         virtual ~UITextField();
@@ -28,13 +27,13 @@ namespace ige::scene
         //! Click
         virtual void onClick() override;
 
+    protected:
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
         virtual void from_json(const json& j) override;
 
-    protected:
         bool m_bIsInputing = false;
     };
-}
+} // namespace ige::scene

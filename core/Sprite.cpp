@@ -41,7 +41,7 @@ namespace ige::scene
 
     void Sprite::setPath(const std::string& path)
     {
-        if(m_path != path)
+        if(strcmp(m_path.c_str(), path.c_str()) != 0)
         {
             m_path = path;
             std::replace(m_path.begin(), m_path.end(), '\\', '/');

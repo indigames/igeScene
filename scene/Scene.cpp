@@ -1,9 +1,10 @@
 #include <algorithm>
-#include <cstdlib> 
+#include <cstdlib>
 #include <ctime>
 
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
+#include "scene/SceneManager.h"
 
 #include "components/Component.h"
 #include "components/CameraComponent.h"
@@ -11,32 +12,92 @@
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
 #include "components/EnvironmentComponent.h"
+#include "components/AmbientLight.h"
+#include "components/DirectionalLight.h"
 #include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
+#include "components/gui/UIImage.h"
 
 #include "utils/GraphicsHelper.h"
 
-#define SERIALIZE_VERSION "0.0.1"
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
 
 namespace ige::scene
 {
     Scene::Scene(const std::string& name)
         : m_name(name)
     {
-        m_componentAddedEventId = SceneObject::getComponentAddedEvent().addListener(std::bind(&Scene::onComponentAdded, this, std::placeholders::_1, std::placeholders::_2));
-        m_componentRemovedEventId = SceneObject::getComponentRemovedEvent().addListener(std::bind(&Scene::onComponentRemoved, this, std::placeholders::_1, std::placeholders::_2));
-        m_objectSelectedEventId = SceneObject::getSelectedEvent().addListener(std::bind(&Scene::onSceneObjectSelected, this, std::placeholders::_1));
+        m_environment = ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), nullptr);
+        m_environment->WaitBuild();
+
+        // Set directional lights deactivated
+        for (int i = 0; i < MAX_DIRECTIONAL_LIGHT_NUMBER; ++i)
+            m_environment->SetDirectionalLampIntensity(i, 0.f);
+
+        // Set point lights deactivated
+        for (int i = 0; i < MAX_POINT_LIGHT_NUMBER; ++i)
+            m_environment->SetPointLampIntensity(i, 0.f);
+
+        m_showcase = ResourceCreator::Instance().NewShowcase((m_name + "_showcase").c_str());
+        m_showcase->Add(m_environment);
+
+        getResourceAddedEvent().addListener(std::bind(&Scene::onResourceAdded, this, std::placeholders::_1));
+        getResourceRemovedEvent().addListener(std::bind(&Scene::onResourceRemoved, this, std::placeholders::_1));
+
+        // Create root object
+        m_root = createObject(m_name);
+
+        // Set ambient color
+        m_root->addComponent<AmbientLight>()->setSkyColor({ 0.75f, 0.75f, 0.75f });
+
+        // Set general environment
+        m_root->addComponent<EnvironmentComponent>();
+
+        // Create default camera
+        auto camObj = createObject("Default Camera");
+        camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
+        auto camComp = camObj->addComponent<CameraComponent>("default_camera");
+        camComp->lockOnTarget(false);
+        camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+
+        // Create default directional light
+        auto directionalLight = createObject("Directional Light");
+        directionalLight->addComponent<DirectionalLight>();
+        directionalLight->getTransform()->setPosition({0.f, 5.f, 0.f});
+        directionalLight->getTransform()->setRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
+
+        // Add editor debug
+        if (SceneManager::getInstance()->isEditor())
+        {
+            camObj->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
+            directionalLight->addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+        }
+
+        // Fill up test data
+        // populateTestData(sceneObject, 1000);
     }
 
     Scene::~Scene()
     {
-        SceneObject::getComponentAddedEvent().removeListener(m_componentAddedEventId);
-        SceneObject::getComponentRemovedEvent().removeListener(m_componentRemovedEventId);
-        SceneObject::getSelectedEvent().removeListener(m_objectSelectedEventId);
-        getOnActiveCameraChangedEvent().removeAllListeners();
-
         clear();
+
+        getResourceAddedEvent().removeAllListeners();
+        getResourceRemovedEvent().removeAllListeners();
+
+        if (m_showcase)
+        {
+            m_showcase->Remove(m_environment);
+            m_showcase->Clear();
+            m_showcase->DecReference();
+            m_showcase = nullptr;
+
+            m_environment->DecReference();
+            m_environment = nullptr;
+        }
+
+        ResourceManager::Instance().DeleteDaemon();
     }
 
     bool Scene::initialize()
@@ -46,181 +107,142 @@ namespace ige::scene
 
     void Scene::clear()
     {
+        m_nextObjectID = 0;
         m_activeCamera = nullptr;
-        for (auto& cam : m_cameras)
-            cam = nullptr;
-        m_cameras.clear();
 
-        for (auto& root : m_roots)
-            root = nullptr;
-        m_roots.clear();
+        for (auto& obj : m_objects)
+        {
+            obj->removeChildren();
+            obj->setParent(nullptr);
+        }
+
+        m_root = nullptr;
+
+        // Destroy all objects
+        for (auto& obj : m_objects)
+        {
+            obj = nullptr;
+        }
+        m_objects.clear();
     }
 
     void Scene::update(float dt)
     {
-        for (auto& root : m_roots)
-            if (root) root->onUpdate(dt);
+        for (auto& obj : m_objects)
+            if (obj) obj->onUpdate(dt);
 
-        //if (m_activeCamera)
-        //{
-        //    m_activeCamera->onUpdate(dt);
-        //    auto target = m_activeCamera->getShootTarget();
-        //    if (target && target->getShowcase())
-        //    {
-        //        target->getShowcase()->Update(dt);
-        //    }
-        //}
+        if (!SceneManager::getInstance()->isEditor() && m_activeCamera)
+            m_activeCamera->onUpdate(dt);
 
-        for (auto& camera : m_cameras) 
-        {
-            if (camera && camera->getOwner()->isActive())
-            {
-                auto target = camera->getShootTarget();
-                if (target && target->isActive() && target->getShowcase())
-                {
-                    camera->onUpdate(dt);
-                    target->getShowcase()->Update(dt);
-                }
-            }
-        }
-        
-
+        m_showcase->Update(dt);
     }
 
     void Scene::fixedUpdate(float dt)
     {
-        for (auto& root : m_roots)
-            if (root) root->onFixedUpdate(dt);
+        for (auto& obj : m_objects)
+            if (obj) obj->onFixedUpdate(dt);
     }
 
     void Scene::lateUpdate(float dt)
     {
-        for (auto& root : m_roots)
-            if (root) root->onLateUpdate(dt);
+        for (auto& obj : m_objects)
+            if (obj) obj->onLateUpdate(dt);
     }
 
     void Scene::render()
     {
-        //if (m_activeCamera)
-        //{
-        //    m_activeCamera->onRender();
-        //    auto target = m_activeCamera->getShootTarget();
-        //    if (target && target->getShowcase())
-        //    {
-        //        target->getShowcase()->Render();
-        //    }
-        //}
+        for (auto& obj : m_objects)
+            if (obj) obj->onRender();
 
-        for (auto& camera : m_cameras)
-        {
-            if (camera && camera->getOwner()->isActive())
-            {
-                auto target = camera->getShootTarget();
-                if (target && target->isActive() && target->getShowcase())
-                {
-                    camera->onRender();
-                    target->getShowcase()->Render();
-                }
-            }
-        }
+        if (!SceneManager::getInstance()->isEditor() && m_activeCamera)
+            m_activeCamera->onRender();
+
+        m_showcase->Render();
     }
 
-    std::shared_ptr<SceneObject> Scene::createObject(std::string name, std::shared_ptr<SceneObject> parent)
+    std::shared_ptr<SceneObject> Scene::createObject(std::string name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, bool isCanvas)
     {
-        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent ? parent.get() : nullptr);
-        auto transform = sceneObject->addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
-        sceneObject->setTransform(transform);
-        if (parent != nullptr) parent->addChild(sceneObject);
+        auto parentObject = parent ? parent : m_root;
 
-        if (parent == nullptr)
+        // Not canvas, create defaut canvas
+        if (isGUI && !parentObject->getCanvas() && !isCanvas)
         {
-            // This is a root object, setup default environment and camera
-            auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
-            envComp->setAmbientSkyColor(Vec3(0.5f, 0.5f, 0.5f));
-            envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
-
-            auto camObj = createObject("Default Camera", sceneObject);
-            camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
-            auto camComp = camObj->addComponent<CameraComponent>("default_camera");
-            camComp->lockOnTarget(false);
-            camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
-            camComp->setShootTarget(sceneObject.get());
-            setActiveCamera(camComp.get());
-            m_roots.push_back(sceneObject);
-
-        /*
-            //! [IGE]: To test perfornamce with huge amount of objects
-            std::srand(std::time(nullptr));
-
-            for (int i = 0; i < 10000; ++i)
-            {
-                auto newObj = createObject("Object_" + std::to_string(i), sceneObject);
-                if((std::rand() / (float)RAND_MAX) < 0.5f)
-                    if ((std::rand() / (float)RAND_MAX) < 0.5f)
-                        newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, -std::rand() % 50));
-                    else
-                        newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, std::rand() % 50));
-                else
-                    if ((std::rand() / (float)RAND_MAX) < 0.5f)
-                        newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, -std::rand() % 50));
-                    else
-                        newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, std::rand() % 50));
-                newObj->addComponent<FigureComponent>("figure/Tree/Tree.pyxf");
-            }
-        */
-        }
-        return sceneObject;
-    }
-
-    std::shared_ptr<SceneObject> Scene::createGUIObject(std::string name, std::shared_ptr<SceneObject> parent, const Vec3& pos, const Vec2& size)
-    {
-        auto sceneObject = std::make_shared<SceneObject>(m_nextObjectID++, name, parent ? parent.get() : nullptr, true);
-        auto transform = sceneObject->addComponent<RectTransform>(pos, size);
-        sceneObject->setTransform(transform);
-        if (parent != nullptr) parent->addChild(sceneObject);
-
-        if (parent == nullptr)
-        {
-            // Canvas, pivot at top-left
-            transform->setPivot(Vec2(0.f, 0.f));
-
-            // This is a GUI root object, setup default environment, canvas and camera
-            auto envComp = sceneObject->addComponent<EnvironmentComponent>("environment");
-            envComp->setAmbientSkyColor(Vec3(0.5f, 0.5f, 0.5f));
-            envComp->setDirectionalLightColor(0, Vec3(0.5f, 0.5f, 0.5f));
-
-            auto canvas = sceneObject->addComponent<Canvas>();
+            auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", parentObject.get(), true, size, true);
+            auto canvas = canvasObject->addComponent<Canvas>();
+            canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
             canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW()));
+            canvasObject->setCanvas(canvas);
 
-            auto camObj = createGUIObject("GUI Camera", sceneObject);
-            camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
-            auto camComp = camObj->addComponent<CameraComponent>("default_2d_camera");
-            camComp->lockOnTarget(false);
-            camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
-            camComp->setOrthoProjection(true);
-            camComp->setWidthBase(false);
-            camComp->setShootTarget(sceneObject.get());
-            m_roots.push_back(sceneObject);
+            if (SceneManager::getInstance()->isEditor())
+                canvasObject->addComponent<UIImage>("sprite/rect")->setSkipSerialize(true);
+
+            parentObject = canvasObject;
+            m_objects.push_back(canvasObject);
         }
+
+        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parentObject.get(), isGUI, size, isCanvas);
+        m_objects.push_back(sceneObject);
         return sceneObject;
+    }
+
+    void Scene::populateTestData(const std::shared_ptr<SceneObject>& parent, int numObjects)
+    {
+        //! [IGE]: To test performance with huge amount of objects
+        std::srand(std::time(nullptr));
+
+        for (int i = 0; i < numObjects; ++i)
+        {
+            auto newObj = createObject("Object_" + std::to_string(i), parent);
+            if((std::rand() / (float)RAND_MAX) < 0.5f)
+                if ((std::rand() / (float)RAND_MAX) < 0.5f)
+                    newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, -std::rand() % 50));
+                else
+                    newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, std::rand() % 50));
+            else
+                if ((std::rand() / (float)RAND_MAX) < 0.5f)
+                    newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, -std::rand() % 50));
+                else
+                    newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, std::rand() % 50));
+            newObj->addComponent<FigureComponent>("figure/Tree/Tree.pyxf");
+        }
     }
 
     bool Scene::removeObject(const std::shared_ptr<SceneObject>& obj)
     {
-        if(!obj) return false;
+        if (!obj) return false;
 
-        auto found = std::find(m_roots.begin(), m_roots.end(), obj);
-        if (found != m_roots.end())
+        // Remove active camera
+        if (auto camera = obj->getComponent<CameraComponent>())
         {
-            if (m_activeCamera && m_activeCamera->getOwner()->getRoot() == (*found).get())
+            if (getActiveCamera() == camera.get())
                 setActiveCamera(nullptr);
-            m_roots.erase(found);
-            return true;
         }
-        for (auto& root : m_roots)
-            if (root && root->removeChild(obj))
-                return true;
-        return false;
+
+        // Remove root object
+        if (obj == m_root)
+        {
+            m_root = nullptr;
+        }
+        
+        // Remove all children
+        auto children = obj->getChildren();
+        for (int i = 0; i < children.size(); ++i)
+        {
+            auto elem = children[i];
+            auto itr = std::find_if(m_objects.begin(), m_objects.end(), [&](auto el)
+            {
+                return el && elem && (el->getId() == elem->getId());
+            });
+            if (itr != m_objects.end())
+                removeObject(*itr);
+        }
+
+        // Remove from objects list
+        auto itr = std::find(m_objects.begin(), m_objects.end(), obj);
+        if (itr != m_objects.end())
+        {
+            m_objects.erase(itr);
+        }
     }
 
     //! Remove scene object by its id
@@ -231,74 +253,26 @@ namespace ige::scene
 
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id)
     {
-        for (auto root : m_roots)
+        auto found = std::find_if(m_objects.begin(), m_objects.end(), [&](auto elem)
         {
-            if (root)
-            {
-                if (root->getId() == id)
-                    return root;
-                auto obj = root->findObjectById(id);
-                if (obj) return obj;
-            }
-        }
+            return (elem->getId() == id);
+        });
+        if (found != m_objects.end())
+            return std::dynamic_pointer_cast<SceneObject>(*found);
         return nullptr;
     }
 
     std::shared_ptr<SceneObject> Scene::findObjectByName(std::string name)
     {
-        for (auto root : m_roots)
+        auto found = std::find_if(m_objects.begin(), m_objects.end(), [&](auto elem)
         {
-            if (root)
-            {
-                if (root->getName() == name)
-                    return root;
-                auto obj = root->findObjectByName(name);
-                if (obj) return obj;
-            }
-        }
+            return elem->getName() == name;
+        });
+        if (found != m_objects.end())
+            return std::dynamic_pointer_cast<SceneObject>(*found);
         return nullptr;
     }
 
-    //! Component added event
-    void Scene::onComponentAdded(SceneObject& obj, const std::shared_ptr<Component>& component)
-    {
-        if (component->getName() == "CameraComponent")
-        {
-            m_cameras.push_back(std::dynamic_pointer_cast<CameraComponent>(component));
-        }
-    }
-
-    //! Component removed event
-    void Scene::onComponentRemoved(SceneObject& obj, const std::shared_ptr<Component>& component)
-    {
-        if (component->getName() == "CameraComponent")
-        {
-            auto found = std::find_if(m_cameras.begin(), m_cameras.end(), [&](const auto& cam) {
-                auto cameraComponent = std::dynamic_pointer_cast<CameraComponent>(component);
-                return strcmp(cam->getCamera()->ResourceName(), cameraComponent->getCamera()->ResourceName()) == 0;
-            });
-
-            if (found != m_cameras.end())
-            {
-                auto cameraComponent = *found;
-                if(cameraComponent.get() == getActiveCamera()) 
-                    setActiveCamera(nullptr);
-                m_cameras.erase(found);
-            }
-        }
-    }
-
-    void Scene::onSceneObjectSelected(SceneObject& sceneObject)
-    {
-        for (const auto& cam : m_cameras)
-        {
-            if (cam && cam->getShootTarget() == sceneObject.getRoot())
-            {
-                setActiveCamera(cam.get());
-                break;
-            }
-        }
-    }
 
     //! Set active camera
     void Scene::setActiveCamera(CameraComponent* camera)
@@ -307,16 +281,27 @@ namespace ige::scene
         {
             if (camera && camera->getOwner()->isActive())
             {
-                // Invoke callback
-                getOnActiveCameraChangedEvent().invoke(camera);
                 m_activeCamera = camera;
             }
             else
             {
-                getOnActiveCameraChangedEvent().invoke(nullptr);
                 m_activeCamera = nullptr;
             }
         }
+    }
+
+    //! Resource added event
+    void Scene::onResourceAdded(Resource* resource)
+    {
+        if (resource)
+            m_showcase->Add(resource);
+    }
+
+    //! Resource removed event
+    void Scene::onResourceRemoved(Resource* resource)
+    {
+        if (resource)
+            m_showcase->Remove(resource);
     }
 
     //! Serialize
@@ -324,40 +309,141 @@ namespace ige::scene
     {
         j = json {
             {"name", m_name},
-            {"objId", m_nextObjectID}
+            {"objId", m_nextObjectID},
         };
-
-        auto jRoots = json::array();
-        for (const auto& root : m_roots)
-        {
-            if (root)
-            {
-                json jRoot;
-                root->to_json(jRoot);
-                jRoots.push_back(jRoot);
-            }
-        }
-        j["roots"] = jRoots;
+        json jRoot;
+        m_root->to_json(jRoot);
+        j["root"] = jRoot;
     }
 
     //! Deserialize
     void Scene::from_json(const json& j)
     {
+        clear();
         j.at("name").get_to(m_name);
-        auto jRoots = j.at("roots");
-        for (auto it : jRoots)
-        {
-            auto root = std::make_shared<SceneObject>(it.at("id"), it.at("name"), nullptr, it.value("gui", false));
-            root->from_json(it);
-            m_roots.push_back(root);
-        }
-        j.at("objId").get_to(m_nextObjectID);
 
-        for (auto& cam : m_cameras)
+        auto jRoot = j.at("root");
+        m_root = createObject(m_name);
+        m_root->from_json(jRoot);
+       
+        j.at("objId").get_to(m_nextObjectID);
+    }
+
+    //! Prefab save/load
+    bool Scene::savePrefab(uint64_t objectId, const std::string& path)
+    {
+        auto object = findObjectById(objectId);
+        if (object != nullptr)
         {
-            auto target = findObjectById(cam->getTargetId());
-            if (target)
-                cam->setShootTarget(target.get());
+            json jObj;
+            object->to_json(jObj);
+
+            auto fsPath = path.empty() ? fs::path(object->getName()) : fs::path(path + "/" + object->getName());
+            auto ext = fsPath.extension();
+            if (ext.string() != ".prefab")
+            {
+                fsPath = fsPath.replace_extension(".prefab");
+            }
+            std::ofstream file(fsPath.string());
+            file << jObj;
+            return true;
         }
+        return true;
+    }
+
+    bool Scene::loadPrefab(uint64_t parentId, const std::string& path)
+    {
+        if (path.empty())
+            return false;
+
+        auto fsPath = fs::path(path);
+        if (fsPath.extension().string() != ".prefab")
+            return false;
+
+        std::ifstream file(fsPath);
+        if (!file.is_open())
+            return nullptr;
+
+        json jObj;
+        file >> jObj;
+
+        auto parent = findObjectById(parentId);
+        auto obj = createObject(jObj.at("name"), parent, jObj.value("gui", false));
+        obj->from_json(jObj);
+
+        return true;
+    }
+
+    //! Acquire directional light
+    bool Scene::isDirectionalLightAvailable()
+    {
+        for (auto enable : m_directionalLights)
+        {
+            if (!enable)
+                return true;
+        }
+        return false;
+    }
+
+    int Scene::acquireDirectionalLight()
+    {
+        for (int i = 0; i < MAX_DIRECTIONAL_LIGHT_NUMBER; ++i)
+        {
+            if (m_directionalLights[i] == false)
+            {
+                m_directionalLights[i] = true;
+                return i;
+            }
+        }
+
+        // safe value
+        return 0;
+    }
+
+    void Scene::releaseDirectionalLight(int idx)
+    {
+        m_directionalLights[idx] = false;
+
+        // Reset to default value
+        m_environment->SetDirectionalLampColor(idx, { 0.5f, 0.5f, 0.5f });
+        m_environment->SetDirectionalLampDirection(idx, { 5.f, 10.f, 5.f });
+        m_environment->SetDirectionalLampIntensity(idx, 0.f);
+    }
+
+    //! Acquire point light
+    bool Scene::isPointLightAvailable()
+    {
+        for (auto enable : m_pointLights)
+        {
+            if (!enable)
+                return true;
+        }
+        return false;
+    }
+
+    int Scene::acquirePointLight()
+    {
+        for (int i = 0; i < MAX_POINT_LIGHT_NUMBER; ++i)
+        {
+            if (m_pointLights[i] == false)
+            {
+                m_pointLights[i] = true;
+                return i;
+            }
+        }
+
+        // safe value
+        return 0;
+    }
+
+    void Scene::releasePointLight(int idx)
+    {
+        m_pointLights[idx] = false;
+
+        // Reset to default value
+        m_environment->SetPointLampColor(idx, { 1.0f, 1.0f, 1.0f });
+        m_environment->SetPointLampPosition(idx, { 0.0f, 100.0f, 0.0f });
+        m_environment->SetPointLampIntensity(idx, 0.0f);
+        m_environment->SetPointLampRange(idx, 100.0f);
     }
 }

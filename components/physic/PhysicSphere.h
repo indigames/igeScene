@@ -12,19 +12,13 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        PhysicSphere(const std::shared_ptr<SceneObject> &owner, float radius = 1.f);
+        PhysicSphere(SceneObject &owner, float radius = 1.f);
 
         //! Destructor
         virtual ~PhysicSphere();
 
         //! Get name
         std::string getName() const override { return "PhysicSphere"; }
-
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
 
         //! Get radius
         float getRadius() const;
@@ -33,6 +27,12 @@ namespace ige::scene
         void setRadius(float radius);
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! Create collision shape
         void createCollisionShape(float radius);
 
@@ -40,9 +40,9 @@ namespace ige::scene
         void recreateCollisionShape(float radius);
 
         //! Set local scale of the box
-        virtual void setLocalScale(const Vec3& scale) override;
+        virtual void setLocalScale(const Vec3 &scale) override;
 
     protected:
         float m_radius;
     };
-}
+} // namespace ige::scene

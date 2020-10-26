@@ -13,10 +13,10 @@ namespace ige::scene
     Event<PhysicBase &> PhysicBase::m_onDeactivatedEvent;
 
     //! Constructor
-    PhysicBase::PhysicBase(const std::shared_ptr<SceneObject> &owner)
+    PhysicBase::PhysicBase(SceneObject &owner)
         : Component(owner)
     {
-        m_transform = owner->getTransform().get();
+        m_transform = getOwner()->getTransform().get();
     }
 
     //! Destructor
@@ -189,7 +189,7 @@ namespace ige::scene
             m_collisionFilterGroup = 1;
             m_collisionFilterMask = -1;
         }
-        
+
         if (m_body->getBroadphaseHandle())
         {
             m_body->getBroadphaseHandle()->m_collisionFilterGroup = m_collisionFilterGroup;
@@ -220,7 +220,7 @@ namespace ige::scene
         if (m_bIsTrigger)
             addCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
-       if (m_bIsEnabled)
+        if (m_bIsEnabled)
             activate();
     }
 
@@ -235,10 +235,17 @@ namespace ige::scene
     //! Calculate and apply inertia
     void PhysicBase::applyInertia()
     {
-        btVector3 inertia = {0.f, 0.f, 0.f};
-        if (m_mass != 0.0f)
-            m_shape->calculateLocalInertia(m_mass, inertia);
-        m_body->setMassProps(m_bIsKinematic ? 0.0f : std::max(0.0000001f, m_mass), m_bIsKinematic ? btVector3(0.0f, 0.0f, 0.0f) : inertia);
+        if (m_bIsKinematic)
+        {
+            m_body->setMassProps(0.0f, btVector3(0.0f, 0.0f, 0.0f));
+        }
+        else
+        {
+            btVector3 inertia = { 0.f, 0.f, 0.f };
+            if (m_mass != 0.0f)
+                m_shape->calculateLocalInertia(m_mass, inertia);
+            m_body->setMassProps(std::max(0.0000001f, m_mass), inertia);
+        }
     }
 
     //! Add collision flag
@@ -310,7 +317,7 @@ namespace ige::scene
         m_body->setWorldTransform(PhysicHelper::to_btTransform(m_transform->getWorldRotation(), m_transform->getWorldPosition() + m_positionOffset));
 
         Vec3 scale = m_transform->getWorldScale();
-        Vec3 dScale = { scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2] };
+        Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
         float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
         if (scaleDelta >= 0.01f)
         {
@@ -350,7 +357,6 @@ namespace ige::scene
             {"angularFactor", PhysicHelper::from_btVector3(m_angularFactor)},
             {"offset", m_positionOffset},
             {"isKinematic", m_bIsKinematic},
-            {"isKinematic", m_bIsKinematic},
             {"isTrigger", m_bIsTrigger},
             {"isEnabled", m_bIsEnabled},
             {"scale", m_previousScale},
@@ -374,8 +380,9 @@ namespace ige::scene
         setIsKinematic(j.value("isKinematic", false));
         setIsTrigger(j.value("isTrigger", false));
         setEnabled(j.value("isEnabled", true));
+        setLocalScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
         setCollisionFilterGroup(j.value("group", isKinematic() ? 2 : 1));
         setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
-        setCCD(j.value("ccd", true));
+        setCCD(j.value("ccd", false));
     }
 } // namespace ige::scene

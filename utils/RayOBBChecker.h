@@ -22,12 +22,8 @@ namespace ige::scene
             const Mat4& modelMatrix,            // World transformation matrix
             float& intersection_distance        // Output: intersection distance
         );
-        
-        static void setChecking(bool checking) { g_isChecking = checking; }
-        static bool isChecking() { return g_isChecking; }
 
         static Vec3 g_origin;
         static Vec3 g_direction;
-        static bool g_isChecking;
     };
 }

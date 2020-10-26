@@ -13,17 +13,11 @@ namespace ige::scene
     class AudioSource : public Component
     {
     public:
-        AudioSource(const std::shared_ptr<SceneObject> &owner, const std::string &path = {}, bool stream = false);
+        AudioSource(SceneObject &owner, const std::string &path = {}, bool stream = false);
         virtual ~AudioSource();
 
         //! Get name
         virtual std::string getName() const override { return "AudioSource"; }
-
-        //! Serialize
-        virtual void to_json(json &j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json &j) override;
 
         //! Enable/disable
         bool isEnabled() const { return m_bIsEnabled; }
@@ -111,6 +105,12 @@ namespace ige::scene
         static Event<AudioSource&>& getDestroyedEvent() { return m_onDestroyedEvent; }
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! On created event
         static Event<AudioSource &> m_onCreatedEvent;
 

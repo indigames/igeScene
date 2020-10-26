@@ -34,11 +34,14 @@ namespace ige::scene
     // Set path
     int SpriteComponent_setPath(PyObject_SpriteComponent *self, PyObject *value)
     {
-        char *val;
+        char *val = NULL;
         if (PyArg_ParseTuple(value, "s", &val))
         {
-            self->component->setPath(std::string(val));
-            return 0;
+            if (val != NULL)
+            {
+                self->component->setPath(std::string(val));
+                return 0;
+            }
         }
         return -1;
     }
@@ -64,9 +67,26 @@ namespace ige::scene
         return 0;
     }
 
+    PyObject* SpriteComponent_isBillboard(PyObject_SpriteComponent* self)
+    {
+        return PyBool_FromLong(self->component->isBillboard());
+    }
+
+    int SpriteComponent_setBillboard(PyObject_SpriteComponent* self, PyObject* value)
+    {
+        int val;
+        if (PyArg_ParseTuple(value, "i", &val))
+        {
+            self->component->setBillboard(val);
+            return 0;
+        }
+        return -1;
+    }
+
     PyGetSetDef SpriteComponent_getsets[] = {
         {"path", (getter)SpriteComponent_getPath, (setter)SpriteComponent_setPath, SpriteComponent_path_doc, NULL},
         {"size", (getter)SpriteComponent_getSize, (setter)SpriteComponent_setSize, SpriteComponent_size_doc, NULL},
+        {"isBillboard", (getter)SpriteComponent_isBillboard, (setter)SpriteComponent_setBillboard, SpriteComponent_isBillboard_doc, NULL},
         {NULL, NULL}};
 
     PyTypeObject PyTypeObject_SpriteComponent = {

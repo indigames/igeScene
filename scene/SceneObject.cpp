@@ -1,6 +1,8 @@
 #include <algorithm>
 
 #include "scene/SceneObject.h"
+#include "scene/Scene.h"
+#include "scene/SceneManager.h"
 
 #include "components/Component.h"
 #include "components/TransformComponent.h"
@@ -17,8 +19,12 @@
 #include "components/physic/PhysicBox.h"
 #include "components/physic/PhysicCapsule.h"
 #include "components/physic/PhysicSphere.h"
+#include "components/physic/PhysicMesh.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
+#include "components/AmbientLight.h"
+#include "components/DirectionalLight.h"
+#include "components/PointLight.h"
 
 namespace ige::scene
 {
@@ -34,62 +40,73 @@ namespace ige::scene
     Event<SceneObject &> SceneObject::s_selectedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(uint64_t id, std::string name, SceneObject *parent, bool isGui)
-        : m_id(id), m_name(name), m_parent(parent), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_showcase(nullptr)
+    SceneObject::SceneObject(Scene* scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2& size, bool isCanvas)
+        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_bIsCanvas(isCanvas), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr)
     {
-        // Cache root item
-        m_root = (parent == nullptr) ? this : parent->getRoot();
-
-        // Only create showcase for root objects
-        if (parent == nullptr)
-        {
-            m_showcase = ResourceCreator::Instance().NewShowcase((m_name + "_" + std::to_string(m_id) + "_showcase").c_str());
-            getResourceAddedEvent().addListener(std::bind(&SceneObject::onResourceAdded, this, std::placeholders::_1));
-            getResourceRemovedEvent().addListener(std::bind(&SceneObject::onResourceRemoved, this, std::placeholders::_1));
-        }
-
         // Invoke created event
         getCreatedEvent().invoke(*this);
+
+        // Update parent
+        setParent(parent);
+
+        // Create and add transform component
+        if (isGui)
+            m_transform = addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f), size);
+        else
+            m_transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+
+        // Update parent transform
+        if(getParent())
+            m_transform->setParent(getParent()->getTransform().get());
     }
 
     //! Destructor
     SceneObject::~SceneObject()
     {
-        for (auto &comp : m_components)
-            comp->onDestroy();
-
-        removeChildren();
         setParent(nullptr);
+        setCanvas(nullptr);
 
         removeAllComponents();
+        removeChildren();
+
+        getTransform()->setParent(nullptr);
         m_transform = nullptr;
 
-        if (m_showcase)
-        {
-            getResourceAddedEvent().removeAllListeners();
-            getResourceRemovedEvent().removeAllListeners();
-
-            m_showcase->Clear();
-            m_showcase->DecReference();
-            m_showcase = nullptr;
-        }
-
         getDestroyedEvent().invoke(*this);
+    }
+
+    //! Set Name
+    void SceneObject::setName(const std::string& name)
+    {
+        if (m_name != name)
+        {
+            m_name = name;
+            getNameChangedEvent().invoke(*this);
+        }
     }
 
     //! Set parent
     void SceneObject::setParent(SceneObject *parent)
     {
+        if (m_parent)
+        {
+            m_parent->removeChild(this);
+
+            if (getTransform())
+                getTransform()->setParent(nullptr);
+            getDetachedEvent().invoke(*this);
+            setCanvas(nullptr);
+            m_parent = nullptr;
+        }
+
         if (parent)
         {
             m_parent = parent;
-            getTransform()->setParent(parent->getTransform().get());
+            m_parent->addChild(this);
+            if(getTransform())
+                getTransform()->setParent(m_parent->getTransform().get());
+            setCanvas(m_parent->getCanvas());
             getAttachedEvent().invoke(*this);
-        }
-        else
-        {
-            getDetachedEvent().invoke(*this);
-            m_parent = nullptr;
         }
     }
 
@@ -99,80 +116,34 @@ namespace ige::scene
         return m_parent;
     }
 
-    Showcase *SceneObject::getShowcase()
-    {
-        if (m_root == this)
-            return m_showcase;
-        return m_root->getShowcase();
-    }
-
-    //! Adds a child.
-    void SceneObject::addChild(const std::shared_ptr<SceneObject> &child)
-    {
-        child->setParent(this);
-
-        // Insert to the first available slot.
-        for (auto &currObject : m_children)
-        {
-            if (!currObject)
-            {
-                currObject = child;
-                return;
-            }
-        }
-
-        // Add at back of vector.
-        m_children.push_back(child);
-    }
-
-    //! Remove a childs.
-    bool SceneObject::removeChild(const std::shared_ptr<SceneObject> &child)
-    {
-        if (!child)
-            return false;
-
-        // Remove from vector by nullptr assignment
-        for (auto &currObject : m_children)
-        {
-            if (currObject != nullptr && currObject == child)
-            {
-                currObject = nullptr;
-                return true;
-            }
-        }
-
-        // Recursive remove child
-        for (auto &currObject : m_children)
-        {
-            if (currObject && currObject->removeChild(child))
-                return true;
-        }
-
-        // Not found, return false
-        return false;
-    }
 
     //! Get all children
-    std::vector<std::shared_ptr<SceneObject>> &SceneObject::getChildren()
+    const std::vector<SceneObject*> &SceneObject::getChildren() const
     {
         return m_children;
     }
 
-    //! Count children
-    size_t SceneObject::getChildrenCount() const
+    //! Add child
+    void SceneObject::addChild(SceneObject* child)
     {
-        return m_children.size();
+        auto found = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem == child; });
+        if (found == m_children.end())
+            m_children.push_back(child);
+    }
+
+    //! Removes child
+    void SceneObject::removeChild(SceneObject* child)
+    {
+        if (child == nullptr)
+            return;
+        auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getId() == child->getId()); });
+        if(itr != m_children.end())
+            m_children.erase(itr);
     }
 
     //! Remove children
     void SceneObject::removeChildren()
     {
-        for (auto &child : m_children)
-        {
-            if (child)
-                child->setParent(nullptr);
-            child = nullptr;
-        }
         m_children.clear();
     }
 
@@ -235,26 +206,6 @@ namespace ige::scene
         return false;
     }
 
-    //! Resource added event
-    void SceneObject::onResourceAdded(Resource *resource)
-    {
-        if (m_showcase != nullptr)
-        {
-            if (resource)
-                m_showcase->Add(resource);
-        }
-    }
-
-    //! Resource removed event
-    void SceneObject::onResourceRemoved(Resource *resource)
-    {
-        if (m_showcase != nullptr)
-        {
-            if (resource)
-                m_showcase->Remove(resource);
-        }
-    }
-
     //! Remove all component
     bool SceneObject::removeAllComponents()
     {
@@ -291,38 +242,6 @@ namespace ige::scene
         return nullptr;
     }
 
-    //! Find object by id
-    std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const
-    {
-        for (int i = 0; i < m_children.size(); ++i)
-        {
-            if (m_children[i] == nullptr)
-                continue;
-            if (m_children[i]->getId() == id)
-                return m_children[i];
-            auto ret = m_children[i]->findObjectById(id);
-            if (ret)
-                return ret;
-        }
-        return nullptr;
-    }
-
-    //! Find object by name
-    std::shared_ptr<SceneObject> SceneObject::findObjectByName(std::string name) const
-    {
-        for (int i = 0; i < m_children.size(); ++i)
-        {
-            if (m_children[i] == nullptr)
-                continue;
-            if (m_children[i]->getName() == name)
-                return m_children[i];
-            auto ret = m_children[i]->findObjectByName(name);
-            if (ret)
-                return ret;
-        }
-        return nullptr;
-    }
-
     //! Update function
     void SceneObject::onUpdate(float dt)
     {
@@ -333,12 +252,6 @@ namespace ige::scene
                 // Camera updated before other objects
                 if (comp->getName() != "CameraComponent")
                     comp->onUpdate(dt);
-            }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onUpdate(dt);
             }
         }
     }
@@ -352,12 +265,6 @@ namespace ige::scene
             {
                 comp->onFixedUpdate(dt);
             }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onFixedUpdate(dt);
-            }
         }
     }
 
@@ -369,12 +276,6 @@ namespace ige::scene
             for (auto &comp : m_components)
             {
                 comp->onLateUpdate(dt);
-            }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onLateUpdate(dt);
             }
         }
     }
@@ -389,12 +290,6 @@ namespace ige::scene
                 // Camera rendered before other objects
                 if (comp->getName() != "CameraComponent")
                     comp->onRender();
-            }
-
-            for (auto &obj : m_children)
-            {
-                if (obj != nullptr)
-                    obj->onRender();
             }
         }
     }
@@ -453,19 +348,19 @@ namespace ige::scene
     void SceneObject::to_json(json &j)
     {
         j = json{
-            {"id", m_id},
             {"name", m_name},
             {"active", m_isActive},
             {"gui", m_bIsGui},
+            {"cvs", m_bIsCanvas},
         };
 
         auto jComponents = json::array();
         for (const auto &comp : m_components)
         {
-            json jCmp;
-            comp->to_json(jCmp);
-            json jPairCmp = {comp->getName(), jCmp};
-            jComponents.push_back(jPairCmp);
+            if (!comp->isSkipSerialize())
+            {
+                jComponents.push_back({ comp->getName(), json(*comp.get()) });
+            }
         }
         j["comps"] = jComponents;
 
@@ -479,16 +374,16 @@ namespace ige::scene
                 jChildren.push_back(jChild);
             }
         }
-        j["children"] = jChildren;
+        j["childs"] = jChildren;
     }
 
     //! Deserialize
     void SceneObject::from_json(const json &j)
     {
-        j.at("id").get_to(m_id);
         setName(j.value("name", ""));
         setActive(j.value("active", false));
         m_bIsGui = j.value("gui", false);
+        m_bIsCanvas = j.value("cvs", false);
 
         auto jComps = j.at("comps");
         for (auto it : jComps)
@@ -498,24 +393,26 @@ namespace ige::scene
             std::shared_ptr<Component> comp = nullptr;
             if (key == "TransformComponent")
             {
-                auto transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
-                setTransform(transform);
-                comp = transform;
+                if(getTransform())
+                    comp = getTransform();
+                else
+                    comp = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
             }
             else if (key == "RectTransform")
             {
-                auto transform = addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
-                setTransform(transform);
-                comp = transform;
+                if (getRectTransform())
+                    comp = getRectTransform();
+                else
+                    comp = addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
             }
             else if (key == "CameraComponent")
                 comp = addComponent<CameraComponent>(val.at("name"));
             else if (key == "EnvironmentComponent")
-                comp = addComponent<EnvironmentComponent>(val.at("name"));
+                comp = addComponent<EnvironmentComponent>();
             else if (key == "FigureComponent")
                 comp = addComponent<FigureComponent>(val.at("path"));
             else if (key == "SpriteComponent")
-                comp = addComponent<SpriteComponent>(val.at("size"), val.at("path"));
+                comp = addComponent<SpriteComponent>(val.at("path"), val.at("size"));
             else if (key == "ScriptComponent")
                 comp = addComponent<ScriptComponent>();
             else if (key == "PhysicBox")
@@ -524,8 +421,12 @@ namespace ige::scene
                 comp = addComponent<PhysicSphere>();
             else if (key == "PhysicCapsule")
                 comp = addComponent<PhysicCapsule>();
-            else if (key == "Canvas")
+            else if (key == "PhysicMesh")
+                comp = addComponent<PhysicMesh>();
+            else if (key == "Canvas") {
                 comp = addComponent<Canvas>();
+                setCanvas(getComponent<Canvas>());
+            }
             else if (key == "UIImage")
                 comp = addComponent<UIImage>();
             else if (key == "UIText")
@@ -536,16 +437,50 @@ namespace ige::scene
                 comp = addComponent<AudioSource>();
             else if (key == "AudioListener")
                 comp = addComponent<AudioListener>();
+            else if (key == "AmbientLight")
+                comp = addComponent<AmbientLight>();
+            else if (key == "DirectionalLight")
+                comp = addComponent<DirectionalLight>();
+            else if (key == "PointLight")
+                comp = addComponent<PointLight>();
             if (comp)
-                comp->from_json(val);
+                val.get_to(*comp);
         }
 
-        auto jChildren = j.at("children");
+        // Add editor camera figure debug
+        if (SceneManager::getInstance()->isEditor())
+        {
+            if (auto camera = getComponent<CameraComponent>())
+            {
+                if (!getComponent<FigureComponent>())
+                    addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
+            }
+
+            if (auto canvas = getComponent<Canvas>())
+            {
+                if (!getComponent<UIImage>())
+                    addComponent<UIImage>("sprite/rect")->setSkipSerialize(true);
+            }
+
+            if (auto directionalLight = getComponent<DirectionalLight>())
+            {
+                if (!getComponent<FigureComponent>() && !getComponent<SpriteComponent>())
+                    addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+            }
+
+            if (auto pointLight = getComponent<PointLight>())
+            {
+                if (!getComponent<FigureComponent>() && !getComponent<SpriteComponent>())
+                    addComponent<SpriteComponent>("sprite/light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+            }
+        }
+
+        auto jChildren = j.at("childs");
+        auto thisObj = getScene()->findObjectById(getId());
         for (auto it : jChildren)
         {
-            auto child = std::make_shared<SceneObject>(it.at("id"), it.at("name"), this, it.value("gui", false));
+            auto child = getScene()->createObject(it.at("name"), thisObj, it.value("gui", false), {}, it.value("cvs", false));
             child->from_json(it);
-            addChild(child);
         }
     }
 } // namespace ige::scene
