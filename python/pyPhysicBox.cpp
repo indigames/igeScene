@@ -17,8 +17,8 @@ namespace ige::scene
         if (self && self->component)
         {
             self->component = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        PyObject_Del(self);
     }
 
     PyObject *PhysicBox_str(PyObject_PhysicBox *self)

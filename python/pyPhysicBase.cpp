@@ -17,8 +17,8 @@ namespace ige::scene
         if (self && self->component)
         {
             self->component = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        PyObject_Del(self);
     }
 
     PyObject *PhysicBase_str(PyObject_PhysicBase *self)
@@ -27,7 +27,7 @@ namespace ige::scene
     }
 
     //! Apply torque
-    void PhysicBase_applyTorque(PyObject_PhysicBase *self, PyObject *value)
+    PyObject* PhysicBase_applyTorque(PyObject_PhysicBase *self, PyObject *value)
     {
         int d;
         float buff[4];
@@ -36,10 +36,11 @@ namespace ige::scene
         {
             self->component->applyTorque(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         }
+        Py_RETURN_NONE;
     }
 
     //! Apply force
-    void PhysicBase_applyForce(PyObject_PhysicBase *self, PyObject *value)
+    PyObject* PhysicBase_applyForce(PyObject_PhysicBase *self, PyObject *value)
     {
         int d;
         float buff[4];
@@ -48,10 +49,11 @@ namespace ige::scene
         {
             self->component->applyForce(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         }
+        Py_RETURN_NONE;
     }
 
     //! Apply impulse
-    void PhysicBase_applyImpulse(PyObject_PhysicBase *self, PyObject *value)
+    PyObject* PhysicBase_applyImpulse(PyObject_PhysicBase *self, PyObject *value)
     {
         int d;
         float buff[4];
@@ -60,12 +62,14 @@ namespace ige::scene
         {
             self->component->applyImpulse(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         }
+        Py_RETURN_NONE;
     }
 
     //! Clear forces
-    void PhysicBase_clearForces(PyObject_PhysicBase *self)
+    PyObject* PhysicBase_clearForces(PyObject_PhysicBase *self)
     {
         self->component->clearForces();
+        Py_RETURN_NONE;
     }
 
     //! Mass

@@ -16,8 +16,8 @@ namespace ige::scene
         if (self)
         {
             self->physicManager = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        PyObject_Del(self);
     }
 
     // String representation

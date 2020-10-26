@@ -16,8 +16,8 @@ namespace ige::scene
         if (self && self->component)
         {
             self->component = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        PyObject_Del(self);
     }
 
     PyObject *DirectionalLight_str(PyObject_DirectionalLight *self)

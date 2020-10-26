@@ -144,6 +144,8 @@ namespace ige::scene
     //! Remove children
     void SceneObject::removeChildren()
     {
+        for (auto& child : m_children)
+            child = nullptr;
         m_children.clear();
     }
 

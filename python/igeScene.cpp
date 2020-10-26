@@ -1,4 +1,5 @@
 #include <Python.h>
+#include <pythonResource.h>
 
 #include "python/igeScene.h"
 #include "python/igeScene_doc_en.h"
@@ -43,6 +44,11 @@ static PyModuleDef igeScene_module =
 
 PyMODINIT_FUNC PyInit_igeScene()
 {
+    if (!ImportVMath()) {
+        PyErr_SetString(PyExc_TypeError, "pyvmath isn't installed. please  pip install pyvmath before.");
+        return NULL;
+    }
+
     PyObject *module = PyModule_Create(&igeScene_module);
     if (PyType_Ready(&PyTypeObject_Scene) < 0) return NULL;
     if (PyType_Ready(&PyTypeObject_SceneManager) < 0) return NULL;

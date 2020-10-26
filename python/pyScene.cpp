@@ -28,8 +28,8 @@ namespace ige::scene
         if(self && self->scene)
         {
             self->scene = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        Py_TYPE(self)->tp_free(self);
     }
 
     PyObject* Scene_str(PyObject_Scene *self)

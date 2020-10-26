@@ -13,8 +13,8 @@ namespace ige::scene
         if(self)
         {
             self->sceneManager = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        PyObject_Del(self);
     }
 
     // String representation

@@ -221,10 +221,10 @@ namespace ige::scene
         btVector3 m_angularVelocity = {0.f, 0.f, 0.f};
 
         //! Linear factor
-        btVector3 m_linearFactor = {1.f, 1.f, 0.f};
+        btVector3 m_linearFactor = {1.f, 1.f, 1.f};
 
         //! Angular factor
-        btVector3 m_angularFactor = {0.f, 0.f, 0.f};
+        btVector3 m_angularFactor = { 1.f, 1.f, 1.f };
 
         //! isKinematic
         bool m_bIsKinematic = false;

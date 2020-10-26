@@ -374,8 +374,8 @@ namespace ige::scene
         setFriction(j.value("friction", 0.5f));
         setLinearVelocity(PhysicHelper::to_btVector3(j.value("linearVelocity", Vec3())));
         setAngularVelocity(PhysicHelper::to_btVector3(j.value("angularVelocity", Vec3())));
-        setLinearFactor(PhysicHelper::to_btVector3(j.value("linearFactor", Vec3(1.f, 1.f, 0.f))));
-        setAngularFactor(PhysicHelper::to_btVector3(j.value("angularFactor", Vec3())));
+        setLinearFactor(PhysicHelper::to_btVector3(j.value("linearFactor", Vec3(1.f, 1.f, 1.f))));
+        setAngularFactor(PhysicHelper::to_btVector3(j.value("angularFactor", Vec3(1.f, 1.f, 1.f))));
         setPositionOffset(j.value("offset", Vec3()));
         setIsKinematic(j.value("isKinematic", false));
         setIsTrigger(j.value("isTrigger", false));

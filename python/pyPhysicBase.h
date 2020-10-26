@@ -25,16 +25,16 @@ namespace ige::scene
     PyObject *PhysicBase_str(PyObject_PhysicBase *self);
 
     //! Apply torque
-    void PhysicBase_applyTorque(PyObject_PhysicBase *self, PyObject *value);
+    PyObject* PhysicBase_applyTorque(PyObject_PhysicBase *self, PyObject *value);
 
     //! Apply force
-    void PhysicBase_applyForce(PyObject_PhysicBase *self, PyObject *value);
+    PyObject* PhysicBase_applyForce(PyObject_PhysicBase *self, PyObject *value);
 
     //! Apply impulse
-    void PhysicBase_applyImpulse(PyObject_PhysicBase *self, PyObject *value);
+    PyObject* PhysicBase_applyImpulse(PyObject_PhysicBase *self, PyObject *value);
 
     //! Clear forces
-    void PhysicBase_clearForces(PyObject_PhysicBase *self);
+    PyObject* PhysicBase_clearForces(PyObject_PhysicBase *self);
 
     //! Mass
     PyObject *PhysicBase_getMass(PyObject_PhysicBase *self);

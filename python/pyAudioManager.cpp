@@ -15,8 +15,8 @@ namespace ige::scene
         if (self && self->audioManager)
         {
             self->audioManager = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        PyObject_Del(self);
     }
 
     PyObject *AudioManager_str(PyObject_AudioManager *self)

@@ -14,11 +14,12 @@ namespace ige::scene
 {
     void PhysicSphere_dealloc(PyObject_PhysicSphere *self)
     {
-        if (self && self->component)
+        if (self->component)
         {
+            self->super.component = nullptr;
             self->component = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        PyObject_Del(self);
     }
 
     PyObject *PhysicSphere_str(PyObject_PhysicSphere *self)
