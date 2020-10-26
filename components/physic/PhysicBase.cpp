@@ -383,6 +383,6 @@ namespace ige::scene
         setEnabled(j.value("isEnabled", true));
         setCollisionFilterGroup(j.value("group", isKinematic() ? 2 : 1));
         setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
-        setCCD(j.value("ccd", true));
+        setCCD(j.value("ccd", false));
     }
 } // namespace ige::scene

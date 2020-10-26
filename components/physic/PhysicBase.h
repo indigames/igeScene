@@ -236,7 +236,7 @@ namespace ige::scene
         bool m_bIsEnabled = true;
 
         //! Continuous collision detection
-        bool m_bIsCCD = true;
+        bool m_bIsCCD = false;
 
         //! Collision filter group
         int m_collisionFilterGroup = 1;

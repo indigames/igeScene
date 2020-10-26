@@ -56,5 +56,8 @@ namespace ige::scene
 
         //! Cache m_indexVertexArrays
         btTriangleIndexVertexArray* m_indexVertexArrays = nullptr;
+
+        //! Cache m_indices
+        int* m_indices = nullptr;
     };
 } // namespace ige::scene

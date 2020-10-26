@@ -30,6 +30,10 @@ namespace ige::scene
         if (m_indexVertexArrays != nullptr)
             delete[] m_indexVertexArrays;
         m_indexVertexArrays = nullptr;
+
+        if (m_indices)
+            delete[] m_indices;
+        m_indices = nullptr;
     }
 
     //! Path
@@ -119,12 +123,11 @@ namespace ige::scene
                     }
                 }
                 auto numPoints = positions.size();
-
                 if (m_btPositions != nullptr)
                     delete[] m_btPositions;
 
                 m_btPositions = new btVector3[numPoints];
-                for (int i = 0; i < positions.size(); ++i)
+                for (size_t i = 0; i < numPoints; ++i) 
                 {
                     m_btPositions[i] = PhysicHelper::to_btVector3(positions[i]);
                 }
@@ -132,34 +135,35 @@ namespace ige::scene
 
                 if (m_bIsConvex)
                 {
-                    m_shape = std::make_unique<btConvexHullShape>();
-                    for (int i = 0; i < numPoints; ++i)
-                    {
-                        ((btConvexHullShape *)m_shape.get())->addPoint(m_btPositions[i]);
-                    }
+                    auto convexHull = std::make_unique<btConvexHullShape>((btScalar*)m_btPositions, numPoints);
+                    convexHull->optimizeConvexHull();
+                    m_shape = std::move(convexHull);
+                    convexHull = nullptr;
                 }
                 else
                 {
-                    std::vector<Vec3> triangles;
                     int index = 0;
                     auto mesh = figure->GetMesh(index);
 
                     if (m_indexVertexArrays != nullptr)
                         delete m_indexVertexArrays;
 
-                    int* indices = new int[mesh->numIndices];
-                    for (int i = 0; i < mesh->numIndices; ++i)
+                    if (m_indices)
+                        delete[] m_indices;
+
+                    m_indices = new int[mesh->numIndices];
+                    for (uint32_t i = 0; i < mesh->numIndices; ++i)
                     {
-                        indices[i] = (int)mesh->indices[i];
+                        m_indices[i] = (int)mesh->indices[i];
                     }
 
-                    m_indexVertexArrays = new btTriangleIndexVertexArray(mesh->numIndices / 3, indices, 3 * 4, numPoints,
+                    m_indexVertexArrays = new btTriangleIndexVertexArray(mesh->numIndices / 3, m_indices, 3 * 4, numPoints,
                                                                          (btScalar *)m_btPositions, sizeof(btVector3));
                     bool useQuantizedAabbCompression = true;
-                    m_shape = std::make_unique<btBvhTriangleMeshShape>(m_indexVertexArrays, useQuantizedAabbCompression);
-
-                    if (indices)
-                        delete[] indices;
+                    auto triangleMeshShape = std::make_unique<btBvhTriangleMeshShape>(m_indexVertexArrays, useQuantizedAabbCompression);
+                    triangleMeshShape->buildOptimizedBvh();
+                    m_shape = std::move(triangleMeshShape);
+                    triangleMeshShape = nullptr;
                 }
             }
             figure->DecReference();
@@ -176,13 +180,19 @@ namespace ige::scene
     //! Recreate collision shape
     void PhysicMesh::recreateCollisionShape(const std::string &path)
     {
-        // Create collision shape
-        if (m_shape != nullptr)
-            m_shape.reset();
-        createCollisionShape(path);
+        if (!path.empty())
+        {
+            // Create collision shape
+            if (m_shape != nullptr)
+                m_shape.reset();
 
-        // Create body
-        recreateBody();
+            // Create collision shape
+            createCollisionShape(path);
+
+            // Create body
+            recreateBody();
+        }
+        
     }
 
     //! Set local scale of the box
