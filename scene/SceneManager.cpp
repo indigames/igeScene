@@ -151,16 +151,23 @@ namespace ige::scene
     {
         if (m_currScene)
         {
-            json jScene;
-            m_currScene->to_json(jScene);
-
             auto fsPath = path.empty() ? fs::path(m_currScene->getPath()) : fs::path(path);
             auto ext = fsPath.extension();
+
             if (ext.string() != ".scene")
             {
                 fsPath = fsPath.replace_extension(".scene");
             }
 
+            if (m_currScene->getName() == "Untitled")
+            {
+                m_currScene->setName(fsPath.filename().stem());
+            }
+
+            m_currScene->setPath(fsPath.string());
+
+            json jScene;
+            m_currScene->to_json(jScene);
             std::ofstream file(fsPath.string());
             file << jScene;
             return true;

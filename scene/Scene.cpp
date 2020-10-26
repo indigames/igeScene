@@ -126,6 +126,18 @@ namespace ige::scene
         m_objects.clear();
     }
 
+    void Scene::setName(const std::string& name)
+    {
+        if (m_name.compare(name) != 0)
+        {
+            m_name = name;
+            if (m_root)
+            {
+                m_root->setName(name);
+            }
+        }
+    }
+
     void Scene::update(float dt)
     {
         for (auto& obj : m_objects)

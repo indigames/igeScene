@@ -39,7 +39,7 @@ namespace ige::scene
         const std::string& getName() const { return m_name; }
 
         //! Get name
-        void setName(const std::string& name) { m_name = name; }
+        void setName(const std::string& name);
 
         //! Update
         virtual void update(float dt);
@@ -150,7 +150,7 @@ namespace ige::scene
         std::string m_name;
 
         //! Cached path
-        std::string m_path;
+        std::string m_path = {};
 
         //! Directional light index
         bool m_directionalLights[MAX_DIRECTIONAL_LIGHT_NUMBER] = { false };
