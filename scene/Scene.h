@@ -120,6 +120,10 @@ namespace ige::scene
         int acquirePointLight();
         void releasePointLight(int index);
 
+        //! Shadow texture size
+        const Vec2& getShadowTextureSize() const;
+        void setShadowTextureSize(const Vec2& size);
+
     protected:
         void populateTestData(const std::shared_ptr<SceneObject>& parent = nullptr, int num = 1000);
 
@@ -142,6 +146,12 @@ namespace ige::scene
 
         //! Cache active camera
         CameraComponent* m_activeCamera = nullptr;
+
+        //! Shadow render target
+        Texture* m_shadowTexture = nullptr;
+        RenderTarget* m_shadowFBO = nullptr;
+        EditableFigure* m_shadowEdgeMask = nullptr;
+        Vec2 m_shadowTextureSize = {2048, 2048};
 
         //! Object ID counter
         uint64_t m_nextObjectID = 0;

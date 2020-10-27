@@ -142,7 +142,12 @@ namespace ige::scene
 
         auto scene = std::make_shared<Scene>(jScene.at("name"));
         scene->from_json(jScene);
-        scene->setPath(path);
+
+        if (path.find("_tmp") == std::string::npos)
+        {
+            scene->setPath(path);
+        }
+
         m_scenes.push_back(scene);
         return scene;
     }

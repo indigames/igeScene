@@ -26,6 +26,28 @@ namespace fs = ghc::filesystem;
 
 namespace ige::scene
 {
+    static const float ip = 0.995f;
+    static const float op = 1.0f;
+
+    static const float verts[] = {
+        -op, -op, 0,  1.0f,0,0,1.0f,
+         op, -op, 0,  1.0f,0,0,1.0f,
+         op,  op, 0,  1.0f,0,0,1.0f,
+        -op,  op, 0,  1.0f,0,0,1.0f,
+        -ip, -ip, 0,  1.0f,0,0,1.0f,
+         ip, -ip, 0,  1.0f,0,0,1.0f,
+         ip,  ip, 0,  1.0f,0,0,1.0f,
+        -ip,  ip, 0,  1.0f,0,0,1.0f,
+    };
+
+    static const uint32_t tris[] = {
+        0,1,5, 0,5,4,
+        0,4,7, 0,7,3,
+        1,2,5, 5,2,6,
+        7,6,2, 7,2,3
+    };
+
+
     Scene::Scene(const std::string& name)
         : m_name(name)
     {
@@ -41,6 +63,32 @@ namespace ige::scene
             m_environment->SetPointLampIntensity(i, 0.f);
 
         m_showcase = ResourceCreator::Instance().NewShowcase((m_name + "_showcase").c_str());
+        m_shadowTexture = ResourceCreator::Instance().NewTexture("Shadow_texture", nullptr, 2048, 2048, GL_RED);
+        m_shadowTexture->WaitBuild();
+        m_showcase->SetShadowBuffer(m_shadowTexture);
+
+        m_shadowEdgeMask = ResourceCreator::Instance().NewEditableFigure("shadowEdgeMask");
+        
+        ShaderDescriptor desc;
+        desc.DicardViewProj(true);
+        desc.SetVertexColor(true);
+        desc.SetVertexAlpha(true);
+        m_shadowEdgeMask->AddMaterial("mate", desc);
+
+        float diffuse[4] = { 1,1,1,1 };
+        m_shadowEdgeMask->SetMaterialParam(0, "DiffuseColor", diffuse, ParamTypeFloat4);
+
+        float dt = 0;
+        m_shadowEdgeMask->SetMaterialState(0, Key_depth_test_enable, &dt);
+        m_shadowEdgeMask->AddMesh("mesh", "mate");
+        m_shadowEdgeMask->SetMeshVertices(0, verts, 8);
+        m_shadowEdgeMask->SetMeshIndices(0, 0, tris, 8, 4);
+
+        Joint pose;
+        m_shadowEdgeMask->AddJoint(-1, pose, false, "j01");
+        m_shadowEdgeMask->SetMeshAlpha(0, 0.97f);
+
+        m_shadowFBO = ResourceCreator::Instance().NewRenderTarget(m_shadowTexture, true, false);
         m_showcase->Add(m_environment);
 
         getResourceAddedEvent().addListener(std::bind(&Scene::onResourceAdded, this, std::placeholders::_1));
@@ -86,13 +134,35 @@ namespace ige::scene
         getResourceAddedEvent().removeAllListeners();
         getResourceRemovedEvent().removeAllListeners();
 
+        if (m_shadowTexture)
+        {
+            m_shadowTexture->DecReference();
+            m_shadowTexture = nullptr;
+        }
+
+        if (m_shadowFBO)
+        {
+            m_shadowFBO->DecReference();
+            m_shadowFBO = nullptr;
+        }
+
+        if (m_shadowEdgeMask)
+        {
+            m_shadowEdgeMask->DecReference();
+            m_shadowEdgeMask = nullptr;
+        }
+
         if (m_showcase)
         {
-            m_showcase->Remove(m_environment);
+            if(m_environment)
+                m_showcase->Remove(m_environment);
             m_showcase->Clear();
             m_showcase->DecReference();
             m_showcase = nullptr;
+        }
 
+        if (m_environment)
+        {
             m_environment->DecReference();
             m_environment = nullptr;
         }
@@ -147,6 +217,24 @@ namespace ige::scene
             m_activeCamera->onUpdate(dt);
 
         m_showcase->Update(dt);
+
+        // Render shadow before actually render objects
+        auto renderContext = RenderContext::InstancePtr();
+        if (renderContext)
+        {
+            renderContext->BeginScene(m_shadowFBO, Vec4(1.f, 1.f, 1.f, 1.f), true, true);
+
+            if (!SceneManager::getInstance()->isEditor() && m_activeCamera)
+                m_activeCamera->onRender();
+
+            m_showcase->Render(RenderPassFilter::ShadowPass);
+
+            renderContext->BeginPass(TransparentPass);
+            m_shadowEdgeMask->Pose();
+            m_shadowEdgeMask->Render();
+
+            renderContext->EndScene();
+        }
     }
 
     void Scene::fixedUpdate(float dt)
@@ -457,5 +545,20 @@ namespace ige::scene
         m_environment->SetPointLampPosition(idx, { 0.0f, 100.0f, 0.0f });
         m_environment->SetPointLampIntensity(idx, 0.0f);
         m_environment->SetPointLampRange(idx, 100.0f);
+    }
+
+    //! Shadow texture size
+    const Vec2& Scene::getShadowTextureSize() const
+    {
+        return m_shadowTextureSize;
+    }
+
+    void Scene::setShadowTextureSize(const Vec2& size)
+    {
+        if (m_shadowTextureSize != size)
+        {
+            m_shadowTextureSize = size;
+            m_shadowFBO->Resize(size[0], size[1]);
+        }
     }
 }

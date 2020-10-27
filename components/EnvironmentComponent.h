@@ -48,6 +48,14 @@ namespace ige::scene
         float getShadowWideness() const;
         void setShadowWideness(float wideness);
 
+        //! Shadow bias
+        float getShadowBias() const;
+        void setShadowBias(float wideness);
+
+        //! Shadow texture size
+        const Vec2& getShadowTextureSize() const;
+        void setShadowTextureSize(const Vec2& size);
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

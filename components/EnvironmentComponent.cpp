@@ -93,6 +93,27 @@ namespace ige::scene
         getOwner()->getScene()->getEnvironment()->SetShadowWideness(wideness);
     }
 
+    //! Shadow bias
+    float EnvironmentComponent::getShadowBias() const
+    {
+        return RenderContext::Instance().GetShadowBias();
+    }
+
+    void EnvironmentComponent::setShadowBias(float bias)
+    {
+        RenderContext::Instance().SetShadowBias(bias);
+    }
+
+    const Vec2& EnvironmentComponent::getShadowTextureSize() const
+    {
+        return getOwner()->getScene()->getShadowTextureSize();
+    }
+
+    void EnvironmentComponent::setShadowTextureSize(const Vec2& size)
+    {
+        getOwner()->getScene()->setShadowTextureSize(size);
+    }
+
     //! Serialize
     void EnvironmentComponent::to_json(json &j) const
     {
@@ -102,20 +123,24 @@ namespace ige::scene
             {"fogAlpha", getDistanceFogAlpha()},
             {"fogCol", getDistanceFogColor()},
             {"shadowCol", getShadowColor()},
+            {"shadowSize", getShadowTextureSize()},
             {"shadowDensity", getShadowDensity()},
             {"shadowWideness", getShadowWideness()},
+            {"shadowBias", getShadowBias()},
         };
     }
 
     //! Deserialize
     void EnvironmentComponent::from_json(const json &j)
     {
-        setDistanceFogNear(j.at("fogNear"));
-        setDistanceFogFar(j.at("fogFar"));
-        setDistanceFogAlpha(j.at("fogAlpha"));
-        setDistanceFogColor(j.at("fogCol"));
-        setShadowColor(j.at("shadowCol"));
-        setShadowDensity(j.at("shadowDensity"));
-        setShadowWideness(j.at("shadowWideness"));
+        setDistanceFogNear(j.value("fogNear", 0.1f));
+        setDistanceFogFar(j.value("fogFar", 50.f));
+        setDistanceFogAlpha(j.value("fogAlpha", 1.f));
+        setDistanceFogColor(j.value("fogCol", Vec3(1.f, 1.f, 1.f)));
+        setShadowColor(j.value("shadowCol", Vec3(1.f, 1.f, 1.f)));
+        setShadowTextureSize(j.value("shadowSize", Vec2(2048, 2048)));
+        setShadowDensity(j.value("shadowDensity", 0.5f));
+        setShadowWideness(j.value("shadowWideness", 1000.f));
+        setShadowBias(j.value("shadowBias", 0.005f));
     }
 } // namespace ige::scene
