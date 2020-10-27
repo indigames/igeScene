@@ -92,16 +92,40 @@ namespace ige::scene
         }
     }
 
+    //! Enable fog
+    void FigureComponent::setFogEnabled(bool enable)
+    {
+        if (m_bIsFogEnabled != enable)
+        {
+            m_bIsFogEnabled = enable;
+
+            if (m_figure)
+            {
+                // Setup point lights shader
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetFog(m_bIsFogEnabled);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
+            }
+        }
+    }
+
     //! Serialize
     void FigureComponent::to_json(json &j) const
     {
         j = json{
-            {"path", m_path}};
+            {"path", m_path},
+            {"fog", m_bIsFogEnabled},
+        };
     }
 
     //! Deserialize
     void FigureComponent::from_json(const json &j)
     {
-        setPath(j.at("path"));
+        setPath(j.value("path", std::string()));
+        setFogEnabled(j.value("fog", false));
     }
 } // namespace ige::scene

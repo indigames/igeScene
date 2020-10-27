@@ -34,6 +34,10 @@ namespace ige::scene
         void setPath(const std::string &path);
         const std::string &getPath() { return m_path; }
 
+        //! Enable fog
+        const bool isFogEnabled() { return m_bIsFogEnabled; }
+        void setFogEnabled(bool enable = true);
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -46,5 +50,8 @@ namespace ige::scene
 
         //! Path to figure file
         std::string m_path;
+
+        //! Cache fog state
+        bool m_bIsFogEnabled = false;
     };
 } // namespace ige::scene
