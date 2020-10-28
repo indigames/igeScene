@@ -103,7 +103,7 @@ namespace ige::scene
         virtual bool isEnabled() const { return m_bIsEnabled; }
         virtual void setEnabled(bool enable = true);
 
-        //! Enable/Disable continous collision detection
+        //! Enable/Disable continuos collision detection
         virtual bool isCCD() const { return m_bIsCCD; }
         virtual void setCCD(bool isCCD = true);
 
@@ -241,7 +241,7 @@ namespace ige::scene
         //! Collision filter group
         int m_collisionFilterGroup = 1;
 
-        //! Collisuin filter mask
+        //! Collision filter mask
         int m_collisionFilterMask = -1;
 
         //! Cache activated status

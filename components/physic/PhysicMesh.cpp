@@ -214,8 +214,7 @@ namespace ige::scene
     {
         if (m_shape)
         {
-            float radiusScale = std::max(std::max(scale[0], scale[1]), scale[2]);
-            m_shape->setLocalScaling({radiusScale, radiusScale, radiusScale});
+            m_shape->setLocalScaling(PhysicHelper::to_btVector3(scale));
         }
     }
 
