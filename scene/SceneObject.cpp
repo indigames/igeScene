@@ -20,6 +20,7 @@
 #include "components/physic/PhysicCapsule.h"
 #include "components/physic/PhysicSphere.h"
 #include "components/physic/PhysicMesh.h"
+#include "components/physic/PhysicSoftBody.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
 #include "components/AmbientLight.h"
@@ -28,10 +29,6 @@
 
 namespace ige::scene
 {
-    //! Static member initialization
-    Event<SceneObject &, const std::shared_ptr<Component> &> SceneObject::m_componentAddedEvent;
-    Event<SceneObject &, const std::shared_ptr<Component> &> SceneObject::m_componentRemovedEvent;
-
     //! Events
     Event<SceneObject &> SceneObject::s_destroyedEvent;
     Event<SceneObject &> SceneObject::s_createdEvent;
@@ -161,8 +158,6 @@ namespace ige::scene
         auto it = std::find(m_components.begin(), m_components.end(), component);
         if (it != m_components.end())
         {
-            auto result = std::dynamic_pointer_cast<Component>(*it);
-            m_componentRemovedEvent.invoke(*this, result);
             m_components.erase(it);
             return true;
         }
@@ -178,8 +173,6 @@ namespace ige::scene
 
         if (found != m_components.end())
         {
-            auto result = std::dynamic_pointer_cast<Component>(*found);
-            m_componentRemovedEvent.invoke(*this, result);
             m_components.erase(found);
             return true;
         }
@@ -200,8 +193,6 @@ namespace ige::scene
         });
         if (it != m_components.end())
         {
-            auto result = std::dynamic_pointer_cast<Component>(*it);
-            m_componentRemovedEvent.invoke(*this, result);
             m_components.erase(it);
             return true;
         }
@@ -213,8 +204,6 @@ namespace ige::scene
     {
         for (auto &comp : m_components)
         {
-            auto result = std::dynamic_pointer_cast<Component>(comp);
-            m_componentRemovedEvent.invoke(*this, result);
             comp = nullptr;
         }
         m_components.clear();
@@ -425,6 +414,8 @@ namespace ige::scene
                 comp = addComponent<PhysicCapsule>();
             else if (key == "PhysicMesh")
                 comp = addComponent<PhysicMesh>();
+            else if (key == "PhysicSoftBody")
+                comp = addComponent<PhysicSoftBody>(val.value("path", std::string()));
             else if (key == "Canvas") {
                 comp = addComponent<Canvas>();
                 setCanvas(getComponent<Canvas>());

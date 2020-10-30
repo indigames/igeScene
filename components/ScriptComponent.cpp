@@ -127,33 +127,33 @@ namespace ige::scene
         auto physicComp = getOwner()->getComponent<PhysicBase>();
         if (physicComp != nullptr)
         {
-            physicComp->getTriggerStartEvent().addListener([this](auto &other) {
-                auto otherObject = other.getOwner();
+            physicComp->getTriggerStartEvent().addListener([this](auto other) {
+                auto otherObject = other->getOwner();
                 onTriggerStart(*otherObject);
             });
 
-            physicComp->getTriggerStayEvent().addListener([this](auto &other) {
-                auto otherObject = other.getOwner();
+            physicComp->getTriggerStayEvent().addListener([this](auto other) {
+                auto otherObject = other->getOwner();
                 onTriggerStay(*otherObject);
             });
 
-            physicComp->getTriggerStopEvent().addListener([this](auto &other) {
-                auto otherObject = other.getOwner();
+            physicComp->getTriggerStopEvent().addListener([this](auto other) {
+                auto otherObject = other->getOwner();
                 onTriggerStop(*otherObject);
             });
 
-            physicComp->getCollisionStartEvent().addListener([this](auto &other) {
-                auto otherObject = other.getOwner();
+            physicComp->getCollisionStartEvent().addListener([this](auto other) {
+                auto otherObject = other->getOwner();
                 onCollisionStart(*otherObject);
             });
 
-            physicComp->getCollisionStayEvent().addListener([this](auto &other) {
-                auto otherObject = other.getOwner();
+            physicComp->getCollisionStayEvent().addListener([this](auto other) {
+                auto otherObject = other->getOwner();
                 onCollisionStay(*otherObject);
             });
 
-            physicComp->getCollisionStayEvent().addListener([this](auto &other) {
-                auto otherObject = other.getOwner();
+            physicComp->getCollisionStayEvent().addListener([this](auto other) {
+                auto otherObject = other->getOwner();
                 onCollisionStop(*otherObject);
             });
         }

@@ -39,9 +39,6 @@ namespace ige::scene
         //! Recreate collision shape once size changed
         void recreateCollisionShape(const Vec3 &size);
 
-        //! Set local scale of the box
-        virtual void setLocalScale(const Vec3 &scale) override;
-
     protected:
         Vec3 m_size;
     };

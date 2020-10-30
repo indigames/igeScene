@@ -122,10 +122,6 @@ namespace ige::scene
         static Event<SceneObject &> &getDetachedEvent() { return s_detachedEvent; }
         static Event<SceneObject &> &getSelectedEvent() { return s_selectedEvent; }
 
-        // Component related events
-        static Event<SceneObject &, const std::shared_ptr<Component> &> &getComponentAddedEvent() { return m_componentAddedEvent; }
-        static Event<SceneObject &, const std::shared_ptr<Component> &> &getComponentRemovedEvent() { return m_componentRemovedEvent; }
-
         //! Serialize
         void to_json(json &j);
 
@@ -192,10 +188,6 @@ namespace ige::scene
         static Event<SceneObject &> s_detachedEvent;
         static Event<SceneObject &> s_selectedEvent;
 
-        //! Component related event
-        static Event<SceneObject &, const std::shared_ptr<Component> &> m_componentAddedEvent;
-        static Event<SceneObject &, const std::shared_ptr<Component> &> m_componentRemovedEvent;
-
         //! Cache transform component
         std::shared_ptr<TransformComponent> m_transform = nullptr;
 
@@ -234,7 +226,6 @@ namespace ige::scene
             return found;
         auto instance = std::make_shared<T>(*this, args...);
         m_components.push_back(instance);
-        m_componentAddedEvent.invoke(*this, instance);
         return instance;
     }
 } // namespace ige::scene

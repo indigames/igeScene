@@ -7,64 +7,66 @@
 namespace ige::scene
 {
     //! Initialize static members
-    Event<PhysicBase &> PhysicBase::m_onCreatedEvent;
-    Event<PhysicBase &> PhysicBase::m_onDestroyedEvent;
-    Event<PhysicBase &> PhysicBase::m_onActivatedEvent;
-    Event<PhysicBase &> PhysicBase::m_onDeactivatedEvent;
+    Event<PhysicBase*> PhysicBase::m_onCreatedEvent;
+    Event<PhysicBase*> PhysicBase::m_onDestroyedEvent;
+    Event<PhysicBase*> PhysicBase::m_onActivatedEvent;
+    Event<PhysicBase*> PhysicBase::m_onDeactivatedEvent;
 
     //! Constructor
     PhysicBase::PhysicBase(SceneObject &owner)
         : Component(owner)
-    {
-        m_transform = getOwner()->getTransform().get();
-    }
+    {}
 
     //! Destructor
     PhysicBase::~PhysicBase()
     {
-        destroyBody();
-        getOnDestroyedEvent().invoke(*this);
-        m_transform = nullptr;
+        destroy();
     }
 
     //! Initialization
     bool PhysicBase::init()
     {
-        getOnCreatedEvent().invoke(*this);
+        getOnCreatedEvent().invoke(this);
         createBody();
+        return true;
+    }
+
+    //! Initialization
+    bool PhysicBase::destroy()
+    {
+        destroyBody();
+        getOnDestroyedEvent().invoke(this);
         return true;
     }
 
     //! Set enable
     void PhysicBase::setEnabled(bool enable)
     {
-        m_bIsEnabled = enable;
-        m_body->clearForces();
-
-        if (m_bIsEnabled)
-            activate();
-        else
-            deactivate();
+        if (m_bIsEnabled != enable)
+        {
+            m_bIsEnabled = enable;
+            if (m_bIsEnabled)
+                activate();
+            else
+                deactivate();
+        }
     }
 
     //! Set enable
     void PhysicBase::setCCD(bool isCCD)
     {
-        if (m_bIsCCD != isCCD)
+        m_bIsCCD = isCCD;
+        if (m_bIsCCD)
         {
-            m_bIsCCD = isCCD;
-            if (m_bIsCCD)
-            {
-                // Continous detection
-                m_body->setCcdMotionThreshold(static_cast<btScalar>(0.001f));
-                m_body->setCcdSweptSphereRadius(0.5f);
-            }
-            else
-            {
-                // Discrete detection
-                m_body->setCcdMotionThreshold(std::numeric_limits<float>::max());
-                m_body->setCcdSweptSphereRadius(0.0f);
-            }
+            // Continuos detection
+            m_body->setCcdMotionThreshold(static_cast<btScalar>(0.001f));
+            m_body->setCcdSweptSphereRadius(0.5f);
+        }
+        else
+        {
+            // Discrete detection
+            m_body->setCcdMotionThreshold(std::numeric_limits<float>::max());
+            m_body->setCcdSweptSphereRadius(0.0f);
         }
     }
 
@@ -75,36 +77,8 @@ namespace ige::scene
         btVector3 inertia = {0.f, 0.f, 0.f};
         if (m_mass != 0.0f)
             m_shape->calculateLocalInertia(m_mass, inertia);
-        m_body->setMassProps(mass, inertia);
-        m_body->updateInertiaTensor();
-    }
-
-    //! Set linear velocity
-    void PhysicBase::setLinearVelocity(const btVector3 &velocity)
-    {
-        m_linearVelocity = velocity;
-        m_body->setLinearFactor(m_linearVelocity);
-    }
-
-    //! Set angular velocity
-    void PhysicBase::setAngularVelocity(const btVector3 &velocity)
-    {
-        m_angularVelocity = velocity;
-        m_body->setAngularVelocity(m_angularVelocity);
-    }
-
-    //! Set linear factor
-    void PhysicBase::setLinearFactor(const btVector3 &factor)
-    {
-        m_linearFactor = factor;
-        m_body->setLinearFactor(m_linearFactor);
-    }
-
-    //! Set linear factor
-    void PhysicBase::setAngularFactor(const btVector3 &factor)
-    {
-        m_angularFactor = factor;
-        m_body->setAngularFactor(m_angularFactor);
+        getBody()->setMassProps(mass, inertia);
+        getBody()->updateInertiaTensor();
     }
 
     //! Set is trigger
@@ -130,52 +104,30 @@ namespace ige::scene
         recreateBody();
     }
 
-    //! Apply torque
-    void PhysicBase::applyTorque(const btVector3 &torque)
-    {
-        m_body->applyTorque(torque);
-    }
-
-    //! Apply force
-    void PhysicBase::applyForce(const btVector3 &force)
-    {
-        m_body->applyCentralForce(force);
-    }
-
-    void PhysicBase::applyForce(const btVector3 &force, const btVector3 &pos)
-    {
-        m_body->applyForce(force, pos);
-    }
-
-    //! Apply impulse
-    void PhysicBase::applyImpulse(const btVector3 &impulse)
-    {
-        m_body->applyCentralImpulse(impulse);
-    }
-
-    void PhysicBase::applyImpulse(const btVector3 &impulse, const btVector3 &pos)
-    {
-        m_body->applyImpulse(impulse, pos);
-    }
-
-    //! Clear forces
-    void PhysicBase::clearForces()
-    {
-        m_body->clearForces();
+    //! Set local scale
+    void PhysicBase::setLocalScale(const Vec3& scale)
+    { 
+        m_previousScale = scale;
+        if(m_shape)
+            m_shape->setLocalScaling(PhysicHelper::to_btVector3(m_previousScale));
     }
 
     //! Create physic body
     void PhysicBase::createBody()
     {
-        m_motion = std::make_unique<btDefaultMotionState>(PhysicHelper::to_btTransform(*m_transform));
+        m_motion = std::make_unique<btDefaultMotionState>(PhysicHelper::to_btTransform(*(getOwner()->getTransform())));
         m_body = std::make_unique<btRigidBody>(btRigidBody::btRigidBodyConstructionInfo{0.0f, m_motion.get(), m_shape.get(), btVector3(0.0f, 0.0f, 0.0f)});
-        m_body->setRestitution(m_restitution);
-        m_body->setFriction(m_friction);
-        m_body->setLinearVelocity(m_linearVelocity);
-        m_body->setAngularVelocity(m_angularVelocity);
-        m_body->setLinearFactor(m_linearFactor);
-        m_body->setAngularFactor(m_angularFactor);
         m_body->setUserPointer(this);
+
+        // Apply pre-configurated values
+        setMass(m_mass);
+        setFriction(m_friction);
+        setRestitution(m_restitution);
+        setLinearVelocity(m_linearVelocity);
+        setAngularVelocity(m_angularVelocity);
+        setLinearFactor(m_linearFactor);
+        setAngularFactor(m_angularFactor);
+        setCollisionMargin(m_collisionMargin);
 
         // Apply collision filter group and mask
         if (m_bIsKinematic)
@@ -196,19 +148,8 @@ namespace ige::scene
             m_body->getBroadphaseHandle()->m_collisionFilterMask = m_collisionFilterMask;
         }
 
-        // Continous detection mode
-        if (m_bIsCCD)
-        {
-            // Continous detection
-            m_body->setCcdMotionThreshold(static_cast<btScalar>(0.001f));
-            m_body->setCcdSweptSphereRadius(0.5f);
-        }
-        else
-        {
-            // Discrete detection
-            m_body->setCcdMotionThreshold(std::numeric_limits<float>::max());
-            m_body->setCcdSweptSphereRadius(0.0f);
-        }
+        // Continuos detection mode
+        setCCD(m_bIsCCD);
 
         // Apply inertia
         applyInertia();
@@ -228,36 +169,27 @@ namespace ige::scene
     void PhysicBase::destroyBody()
     {
         deactivate();
-        m_body.reset();
-        m_motion.reset();
+        if(m_body) m_body.reset();
+        if(m_motion) m_motion.reset();
     }
 
     //! Calculate and apply inertia
     void PhysicBase::applyInertia()
     {
-        if (m_bIsKinematic)
+        if (getBody())
         {
-            m_body->setMassProps(0.0f, btVector3(0.0f, 0.0f, 0.0f));
+            if (m_bIsKinematic)
+            {
+                getBody()->setMassProps(0.0f, btVector3(0.0f, 0.0f, 0.0f));
+            }
+            else
+            {
+                btVector3 inertia = { 0.f, 0.f, 0.f };
+                if (m_mass != 0.0f)
+                    m_shape->calculateLocalInertia(m_mass, inertia);
+                getBody()->setMassProps(std::max(0.0000001f, m_mass), inertia);
+            }
         }
-        else
-        {
-            btVector3 inertia = { 0.f, 0.f, 0.f };
-            if (m_mass != 0.0f)
-                m_shape->calculateLocalInertia(m_mass, inertia);
-            m_body->setMassProps(std::max(0.0000001f, m_mass), inertia);
-        }
-    }
-
-    //! Add collision flag
-    void PhysicBase::addCollisionFlag(btCollisionObject::CollisionFlags flag)
-    {
-        m_body->setCollisionFlags(m_body->getCollisionFlags() | flag);
-    }
-
-    //! Remove collision flag
-    void PhysicBase::removeCollisionFlag(btCollisionObject::CollisionFlags flag)
-    {
-        m_body->setCollisionFlags(m_body->getCollisionFlags() & ~flag);
     }
 
     //! Collision filter group
@@ -266,7 +198,7 @@ namespace ige::scene
         if (m_collisionFilterGroup != group)
         {
             m_collisionFilterGroup = group;
-            if (m_body && m_body->getBroadphaseHandle())
+            if (m_body->getBroadphaseHandle())
                 m_body->getBroadphaseHandle()->m_collisionFilterGroup = m_collisionFilterGroup;
         }
     }
@@ -277,7 +209,7 @@ namespace ige::scene
         if (m_collisionFilterMask != mask)
         {
             m_collisionFilterMask = mask;
-            if (m_body && m_body->getBroadphaseHandle())
+            if (m_body->getBroadphaseHandle())
                 m_body->getBroadphaseHandle()->m_collisionFilterMask = m_collisionFilterMask;
         }
     }
@@ -287,8 +219,8 @@ namespace ige::scene
     {
         if (!m_bIsActivated)
         {
+            getOnActivatedEvent().invoke(this);
             m_body->activate(true);
-            getOnActivatedEvent().invoke(*this);
             m_bIsActivated = true;
         }
     }
@@ -298,7 +230,7 @@ namespace ige::scene
     {
         if (m_bIsActivated)
         {
-            getOnDeactivatedEvent().invoke(*this);
+            getOnDeactivatedEvent().invoke(this);
             m_body->activate(false);
             m_bIsActivated = false;
         }
@@ -314,14 +246,13 @@ namespace ige::scene
     //! Update Bullet transform
     void PhysicBase::updateBtTransform()
     {
-        m_body->setWorldTransform(PhysicHelper::to_btTransform(m_transform->getWorldRotation(), m_transform->getWorldPosition() + m_positionOffset));
+        m_body->setWorldTransform(PhysicHelper::to_btTransform(getOwner()->getTransform()->getWorldRotation(), getOwner()->getTransform()->getWorldPosition()));
 
-        Vec3 scale = m_transform->getWorldScale();
+        Vec3 scale = getOwner()->getTransform()->getWorldScale();
         Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
         float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
         if (scaleDelta >= 0.01f)
         {
-            m_previousScale = scale;
             setLocalScale({std::abs(scale[0]), std::abs(scale[1]), std::abs(scale[2])});
             recreateBody();
         }
@@ -333,36 +264,36 @@ namespace ige::scene
         if (!m_bIsKinematic)
         {
             const btTransform &result = m_body->getWorldTransform();
-            m_transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()) - m_positionOffset);
-            m_transform->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
+            getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
+            getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
         }
     }
 
     //! Get AABB
     void PhysicBase::getAABB(btVector3 &aabbMin, btVector3 aabbMax)
     {
-        m_body->getAabb(aabbMin, aabbMax);
+        getBody()->getAabb(aabbMin, aabbMax);
     }
 
     //! Serialize
     void PhysicBase::to_json(json &j) const
     {
         j = json{
-            {"mass", m_mass},
-            {"restitution", m_restitution},
-            {"friction", m_friction},
-            {"linearVelocity", PhysicHelper::from_btVector3(m_linearVelocity)},
-            {"angularVelocity", PhysicHelper::from_btVector3(m_angularVelocity)},
-            {"linearFactor", PhysicHelper::from_btVector3(m_linearFactor)},
-            {"angularFactor", PhysicHelper::from_btVector3(m_angularFactor)},
-            {"offset", m_positionOffset},
-            {"isKinematic", m_bIsKinematic},
-            {"isTrigger", m_bIsTrigger},
-            {"isEnabled", m_bIsEnabled},
-            {"scale", m_previousScale},
-            {"group", m_collisionFilterGroup},
-            {"mask", m_collisionFilterMask},
-            {"ccd", m_bIsCCD},
+            {"mass", getMass()},
+            {"restitution", getRestitution()},
+            {"friction", getFriction()},
+            {"linearVelocity", PhysicHelper::from_btVector3(getLinearVelocity())},
+            {"angularVelocity", PhysicHelper::from_btVector3(getAngularVelocity())},
+            {"linearFactor", PhysicHelper::from_btVector3(getLinearFactor())},
+            {"angularFactor", PhysicHelper::from_btVector3(getAngularFactor())},
+            {"isKinematic", isKinematic()},
+            {"isTrigger", isTrigger()},
+            {"isEnabled", isEnabled()},
+            {"scale", getLocalScale()},
+            {"group", getCollisionFilterGroup()},
+            {"mask", getCollisionFilterMask()},
+            {"ccd", isCCD()},
+            {"margin", getCollisionMargin()},
         };
     }
 
@@ -376,7 +307,6 @@ namespace ige::scene
         setAngularVelocity(PhysicHelper::to_btVector3(j.value("angularVelocity", Vec3())));
         setLinearFactor(PhysicHelper::to_btVector3(j.value("linearFactor", Vec3(1.f, 1.f, 1.f))));
         setAngularFactor(PhysicHelper::to_btVector3(j.value("angularFactor", Vec3(1.f, 1.f, 1.f))));
-        setPositionOffset(j.value("offset", Vec3()));
         setIsKinematic(j.value("isKinematic", false));
         setIsTrigger(j.value("isTrigger", false));
         setEnabled(j.value("isEnabled", true));
@@ -384,5 +314,6 @@ namespace ige::scene
         setCollisionFilterGroup(j.value("group", isKinematic() ? 2 : 1));
         setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
         setCCD(j.value("ccd", false));
+        setCollisionMargin(j.value("margin", 0.025f));
     }
 } // namespace ige::scene

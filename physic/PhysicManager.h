@@ -8,10 +8,11 @@
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
-#include <BulletSoftBody/btDeformableMultiBodyDynamicsWorld.h>
+#include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
 
 #include "scene/SceneObject.h"
 #include "components/physic/PhysicBase.h"
+#include "components/physic/PhysicSoftBody.h"
 
 #include "utils/Singleton.h"
 #include "event/Event.h"
@@ -38,7 +39,7 @@ namespace ige::scene
         virtual ~PhysicManager();
 
         //! Initialize
-        bool initialize(int numIteration = 4, bool deformable = false);
+        bool initialize(int numIteration = 4, bool deformable = true);
 
         //! Clear world
         void clear();
@@ -55,7 +56,10 @@ namespace ige::scene
         std::vector<RaycastHit> rayTestAll(const btVector3 &rayFromWorld, const btVector3 &rayToWorld, int group = btBroadphaseProxy::DefaultFilter, int mask = btBroadphaseProxy::AllFilter);
 
         //! Get world
-        btDynamicsWorld *getWorld() { return m_world ? m_world.get() : nullptr; }
+        btDiscreteDynamicsWorld*getWorld() { return m_world ? m_world.get() : nullptr; }
+
+        //! Get world
+        btSoftRigidDynamicsWorld* getDeformableWorld() { return m_world ? (btSoftRigidDynamicsWorld*)m_world.get() : nullptr; }
 
         //! Check deformable
         bool isDeformable() { return m_bDeformable; }
@@ -80,28 +84,31 @@ namespace ige::scene
         const btVector3 &getGravity() { return m_gravity; }
         void setGravity(const btVector3 &gravity) { m_gravity = gravity; }
 
+        //! Deformable
+        bool isDeformable() const { return m_bDeformable; }
+        void setDeformable(bool deformable = true);
+
     protected:
         //! Collision callback
         void setCollisionCallback();
         static bool collisionCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2);
 
         //! Create/Destroy event
-        void onObjectCreated(PhysicBase& object);
-        void onObjectDestroyed(PhysicBase& object);
+        void onObjectCreated(PhysicBase* object);
+        void onObjectDestroyed(PhysicBase* object);
 
         //! Activate/Deactivate event
-        void onObjectActivated(PhysicBase& object);
-        void onObjectDeactivated(PhysicBase& object);
+        void onObjectActivated(PhysicBase* object);
+        void onObjectDeactivated(PhysicBase* object);
 
     protected:
         //! Physic world
-        std::unique_ptr<btDynamicsWorld> m_world = nullptr;
+        std::unique_ptr<btDiscreteDynamicsWorld> m_world = nullptr;
         std::unique_ptr<btBroadphaseInterface> m_broadphase = nullptr;
         std::unique_ptr<btDispatcher> m_dispatcher = nullptr;
         std::unique_ptr<btConstraintSolver> m_solver = nullptr;
         std::unique_ptr<btCollisionConfiguration> m_collisionConfiguration = nullptr;
         std::unique_ptr<btGhostPairCallback> m_ghostPairCallback = nullptr;
-        std::unique_ptr<btDeformableBodySolver> m_deformableBodySolver = nullptr;
         std::vector<std::unique_ptr<btRaycastVehicle>> m_vehicles;
 
         //! Last frame time
@@ -129,6 +136,6 @@ namespace ige::scene
         static std::map< std::pair<PhysicBase*, PhysicBase*>, bool> m_collisionEvents;
 
         //! Physic objects list
-        std::vector<std::reference_wrapper<PhysicBase>> m_physicObjects;
+        std::vector<PhysicBase*> m_physicObjects;
     };
 } // namespace ige::scene

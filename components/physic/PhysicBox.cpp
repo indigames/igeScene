@@ -55,15 +55,6 @@ namespace ige::scene
         recreateBody();
     }
 
-    //! Set local scale of the box
-    void PhysicBox::setLocalScale(const Vec3 &scale)
-    {
-        if (m_shape)
-        {
-            m_shape->setLocalScaling(PhysicHelper::to_btVector3(scale));
-        }
-    }
-
     //! Serialize
     void PhysicBox::to_json(json &j) const
     {

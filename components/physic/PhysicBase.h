@@ -2,6 +2,7 @@
 
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
+#include <bullet/BulletSoftBody/btSoftBody.h>
 
 #include "event/Event.h"
 
@@ -9,7 +10,6 @@
 using namespace pyxie;
 
 #include "components/Component.h"
-#include "components/TransformComponent.h"
 
 namespace ige::scene
 {
@@ -26,70 +26,64 @@ namespace ige::scene
         //! Initialization
         virtual bool init();
 
-        //! Apply torque
-        virtual void applyTorque(const btVector3 &torque);
+        //! Deinitialization
+        virtual bool destroy();
 
-        //! Apply force
-        virtual void applyForce(const btVector3 &force);
-        virtual void applyForce(const btVector3 &force, const btVector3 &pos);
+        //! Get RigidBody
+        virtual btRigidBody* getBody() const {
+            if (isSoftBody())
+                return nullptr;
+            return (btRigidBody*)m_body.get();
+        }
 
-        //! Apply impulse
-        virtual void applyImpulse(const btVector3 &impulse);
-        virtual void applyImpulse(const btVector3 &impulse, const btVector3 &pos);
-
-        //! Clear forces
-        virtual void clearForces();
-
-        //! Add collision flag
-        virtual void addCollisionFlag(btCollisionObject::CollisionFlags flag);
-
-        //! Remove collision flag
-        virtual void removeCollisionFlag(btCollisionObject::CollisionFlags flag);
-
-        //! Update Bullet transform
-        virtual void updateBtTransform();
-
-        //! Update IGE transform
-        virtual void updateIgeTransform();
-
-        //! Body
-        virtual btRigidBody &getBody() const { return *m_body; };
+        //! Get SoftBody
+        virtual btSoftBody* getSoftBody() const { 
+            if(!isSoftBody())
+                return nullptr;
+            return (btSoftBody*)m_body.get();
+        }
 
         //! Mass
         virtual float getMass() const { return m_mass; };
         virtual void setMass(float mass);
 
         //! Friction
-        virtual float getFriction() const { return m_body->getFriction(); }
-        virtual void setFriction(float friction)
-        {
-            m_friction = friction;
-            m_body->setFriction(friction);
-        }
+        virtual float getFriction() const { return m_friction; }
+        virtual void setFriction(float friction) { m_friction = friction;  m_body->setFriction(m_friction); }
 
         //! Restitution
-        virtual float getRestitution() const { return m_body->getRestitution(); }
-        virtual void setRestitution(float restitution)
-        {
-            m_restitution = restitution;
-            m_body->setRestitution(restitution);
-        }
+        virtual float getRestitution() const { return m_restitution; }
+        virtual void setRestitution(float restitution) { m_restitution = restitution;  m_body->setRestitution(m_restitution); }
 
         //! Linear velocity
         virtual const btVector3 &getLinearVelocity() const { return m_linearVelocity; }
-        virtual void setLinearVelocity(const btVector3 &velocity);
+        virtual void setLinearVelocity(const btVector3 &velocity) {
+            m_linearVelocity = velocity;
+            getBody()->setLinearVelocity(m_linearVelocity);
+        }
 
         //! Angular velocity
         virtual const btVector3 &getAngularVelocity() const { return m_angularVelocity; }
-        virtual void setAngularVelocity(const btVector3 &velocity);
+        virtual void setAngularVelocity(const btVector3 &velocity) {
+            m_angularVelocity = velocity;
+            getBody()->setAngularVelocity(m_angularVelocity);
+        }
 
         //! Linear factor
         virtual const btVector3 &getLinearFactor() const { return m_linearFactor; }
-        virtual void setLinearFactor(const btVector3 &factor);
+        virtual void setLinearFactor(const btVector3& factor) { 
+            m_linearFactor = factor;
+            if(getBody())
+                getBody()->setLinearFactor(m_linearFactor);
+        }
 
         //! Angular factor
         virtual const btVector3 &getAngularFactor() const { return m_angularFactor; }
-        virtual void setAngularFactor(const btVector3 &factor);
+        virtual void setAngularFactor(const btVector3& factor) { 
+            m_angularFactor = factor;
+            if(getBody())
+                getBody()->setAngularFactor(m_angularFactor);
+        }
 
         //! Indicate object is a trigger object
         virtual bool isTrigger() const { return m_bIsTrigger; }
@@ -107,42 +101,77 @@ namespace ige::scene
         virtual bool isCCD() const { return m_bIsCCD; }
         virtual void setCCD(bool isCCD = true);
 
-        //! Position offset
-        virtual const Vec3 &getPositionOffset() const { return m_positionOffset; }
-        virtual void setPositionOffset(const Vec3 &offset) { m_positionOffset = offset; }
-
         //! Get AABB
         virtual void getAABB(btVector3 &aabbMin, btVector3 aabbMax);
 
+        //! Add collision flag
+        virtual void addCollisionFlag(btCollisionObject::CollisionFlags flag) {
+            m_body->setCollisionFlags(m_body->getCollisionFlags() | flag);
+        }
+
+        //! Remove collision flag
+        virtual void removeCollisionFlag(btCollisionObject::CollisionFlags flag) {
+            m_body->setCollisionFlags(m_body->getCollisionFlags() & ~flag);
+        }
+
         //! Collision filter group
-        virtual int getCollisionFilterGroup() { return m_collisionFilterGroup; }
+        virtual int getCollisionFilterGroup() const { return m_collisionFilterGroup; }
         virtual void setCollisionFilterGroup(int group);
 
         //! Collision filter mask
-        virtual int getCollisionFilterMask() { return m_collisionFilterMask; }
+        virtual int getCollisionFilterMask() const { return m_collisionFilterMask; }
         virtual void setCollisionFilterMask(int mask);
 
+        //! Collision Margin
+        float getCollisionMargin() const { return m_collisionMargin; }
+        void setCollisionMargin(float margin) { m_collisionMargin = margin;  m_body->getCollisionShape()->setMargin(m_collisionMargin); }
+
+    public:
+        //! Apply torque
+        virtual void applyTorque(const btVector3& torque) {
+            if (getBody()) {
+                getBody()->applyTorque(torque);
+            }
+        }
+
+        //! Apply force
+        virtual void applyForce(const btVector3& force) { getBody()->applyCentralForce(force); }
+        virtual void applyForce(const btVector3& force, const btVector3& pos) { getBody()->applyForce(force, pos); }
+
+        //! Apply impulse
+        virtual void applyImpulse(const btVector3& impulse) { getBody()->applyCentralImpulse(impulse); }
+        virtual void applyImpulse(const btVector3& impulse, const btVector3& pos) { getBody()->applyImpulse(impulse, pos); }
+
+        //! Clear forces
+        virtual void clearForces() { if (getBody()) getBody()->clearForces(); }
+
+        //! Update Bullet transform
+        virtual void updateBtTransform();
+
+        //! Update IGE transform
+        virtual void updateIgeTransform();
+
         //! Get onCreatedEvent
-        static Event<PhysicBase &> &getOnCreatedEvent() { return m_onCreatedEvent; }
+        static Event<PhysicBase*> &getOnCreatedEvent() { return m_onCreatedEvent; }
 
         //! Get onDestroyedEvent
-        static Event<PhysicBase &> &getOnDestroyedEvent() { return m_onDestroyedEvent; }
+        static Event<PhysicBase*> &getOnDestroyedEvent() { return m_onDestroyedEvent; }
 
         //! Get onDestroyedEvent
-        static Event<PhysicBase &> &getOnActivatedEvent() { return m_onActivatedEvent; }
+        static Event<PhysicBase*> &getOnActivatedEvent() { return m_onActivatedEvent; }
 
         //! Get onDestroyedEvent
-        static Event<PhysicBase &> &getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
+        static Event<PhysicBase*> &getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
 
         //! Collision events
-        Event<PhysicBase &> &getCollisionStartEvent() { return m_collisionStartEvent; }
-        Event<PhysicBase &> &getCollisionStayEvent() { return m_collisionStayEvent; }
-        Event<PhysicBase &> &getCollisionStopEvent() { return m_collisionStopEvent; }
+        Event<PhysicBase*> &getCollisionStartEvent() { return m_collisionStartEvent; }
+        Event<PhysicBase*> &getCollisionStayEvent() { return m_collisionStayEvent; }
+        Event<PhysicBase*> &getCollisionStopEvent() { return m_collisionStopEvent; }
 
         //! Trigger events
-        Event<PhysicBase &> &getTriggerStartEvent() { return m_triggerStartEvent; }
-        Event<PhysicBase &> &getTriggerStayEvent() { return m_triggerStayEvent; }
-        Event<PhysicBase &> &getTriggerStopEvent() { return m_triggerStopEvent; }
+        Event<PhysicBase*> &getTriggerStartEvent() { return m_triggerStartEvent; }
+        Event<PhysicBase*> &getTriggerStayEvent() { return m_triggerStayEvent; }
+        Event<PhysicBase*> &getTriggerStopEvent() { return m_triggerStopEvent; }
 
     protected:
         //! Serialize
@@ -169,38 +198,43 @@ namespace ige::scene
         //! Recreate Body
         virtual void recreateBody();
 
-        //! Set local scale
-        virtual void setLocalScale(const Vec3 &scale) = 0;
+        //! Local scale
+        virtual const Vec3& getLocalScale() const { return m_previousScale; }
+        virtual void setLocalScale(const Vec3& scale);
+
+        //! Is SoftBody
+        bool isSoftBody() const { return m_bIsSoftBody; }
+        void setSoftBody(bool isSoftBody) { m_bIsSoftBody = isSoftBody; }
 
     protected:
         //! On created event
-        static Event<PhysicBase &> m_onCreatedEvent;
+        static Event<PhysicBase*> m_onCreatedEvent;
 
         //! On destroyed event
-        static Event<PhysicBase &> m_onDestroyedEvent;
+        static Event<PhysicBase*> m_onDestroyedEvent;
 
         //! On activated event
-        static Event<PhysicBase &> m_onActivatedEvent;
+        static Event<PhysicBase*> m_onActivatedEvent;
 
         //! On deactivated event
-        static Event<PhysicBase &> m_onDeactivatedEvent;
+        static Event<PhysicBase*> m_onDeactivatedEvent;
 
         //! Collision events
-        Event<PhysicBase &> m_collisionStartEvent;
-        Event<PhysicBase &> m_collisionStayEvent;
-        Event<PhysicBase &> m_collisionStopEvent;
+        Event<PhysicBase*> m_collisionStartEvent;
+        Event<PhysicBase*> m_collisionStayEvent;
+        Event<PhysicBase*> m_collisionStopEvent;
 
         //! Trigger events
-        Event<PhysicBase &> m_triggerStartEvent;
-        Event<PhysicBase &> m_triggerStayEvent;
-        Event<PhysicBase &> m_triggerStopEvent;
+        Event<PhysicBase*> m_triggerStartEvent;
+        Event<PhysicBase*> m_triggerStayEvent;
+        Event<PhysicBase*> m_triggerStopEvent;
 
     protected:
         //! Collision shape
         std::unique_ptr<btCollisionShape> m_shape;
 
         //! Rigid Body
-        std::unique_ptr<btRigidBody> m_body;
+        std::unique_ptr<btCollisionObject> m_body;
 
         //! Motion State
         std::unique_ptr<btMotionState> m_motion;
@@ -247,13 +281,13 @@ namespace ige::scene
         //! Cache activated status
         bool m_bIsActivated = false;
 
-        //! Cache transform
-        TransformComponent *m_transform;
-
-        //! Position offsets
-        Vec3 m_positionOffset = {0.f, 0.f, 0.f};
+        //! Collision margin
+        float m_collisionMargin = 0.025f;
 
         //! Cache previous scale value
         Vec3 m_previousScale = {1.f, 1.f, 1.f};
+
+        //! Cache isSoftBody state
+        bool m_bIsSoftBody = false;
     };
 } // namespace ige::scene

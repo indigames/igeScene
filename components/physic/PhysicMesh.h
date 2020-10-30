@@ -44,23 +44,11 @@ namespace ige::scene
         //! Recreate collision shape once radius changed
         void recreateCollisionShape(const std::string& path);
 
-        //! Set local scale of the box
-        virtual void setLocalScale(const Vec3 &scale) override;
-
     protected:
         //! Path to the model file
         std::string m_path;
 
         //! Convex or Concave
         bool m_bIsConvex = true;
-
-        //! Cache m_btPositions
-        btVector3* m_btPositions = nullptr;
-
-        //! Cache m_indexVertexArrays
-        btTriangleIndexVertexArray* m_indexVertexArrays = nullptr;
-
-        //! Cache m_indices
-        int* m_indices = nullptr;
     };
 } // namespace ige::scene
