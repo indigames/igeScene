@@ -156,7 +156,7 @@ namespace ige::scene
         virtual void setLocalScale(const Vec3& scale) override;
 
         //! Optimize mesh
-        void optimizeMesh(const std::vector<Vec3>&, int* indices, int numIndeces, float*& optPoss, int& numOptPoss, int*& orgMap);
+        void optimizeMesh(const std::vector<Vec3>&, int* indices, int numIndeces, float*& optPoss);
 
     protected:
         //! Path to the figure which contains mesh
@@ -188,8 +188,5 @@ namespace ige::scene
         
         //! Cache indices map
         int* m_indicesMap = nullptr;
-
-        //! Cache number of indices
-        int m_numIndices = 0;
 };
 } // namespace ige::scene

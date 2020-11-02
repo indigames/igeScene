@@ -18,6 +18,8 @@ namespace ige::scene
     PhysicSoftBody::PhysicSoftBody(SceneObject &owner, const std::string& path)
         : PhysicBase(owner), m_path(path)
     {
+        m_mass = -1.f;
+        m_density = -1.f;
         init();
     }
 
@@ -49,11 +51,6 @@ namespace ige::scene
         // Create collision shape
         if (m_body)
             m_body.reset();
-
-        if (m_indicesMap != nullptr)
-            delete[] m_indicesMap;
-        m_indicesMap = nullptr;
-        m_numIndices = 0;
 
         auto world = PhysicManager::getInstance()->getDeformableWorld();
 
@@ -108,14 +105,13 @@ namespace ige::scene
                             PYXIE_FREE_ALIGNED(palettebuffer);
                     }
                 }
-                
 
                 auto indices = new int[mesh->numIndices];
                 for (uint32_t i = 0; i < mesh->numIndices; ++i)
                     indices[i] = (int)mesh->indices[i];
 
                 float* optPoss;
-                optimizeMesh(positions, indices, mesh->numIndices, optPoss, m_numIndices, m_indicesMap);
+                optimizeMesh(positions, indices, mesh->numIndices, optPoss);
                 m_body = std::unique_ptr<btSoftBody>(btSoftBodyHelpers::CreateFromTriMesh(world->getWorldInfo(), optPoss, indices, mesh->numIndices / 3));
 
                 positions.clear();
@@ -138,7 +134,8 @@ namespace ige::scene
         setSoftBody(true);
 
         // Apply pre-configurated values to PhysicBase
-        setMass(m_mass);
+        if(m_mass > 0) // mass based on total mass
+            setMass(m_mass);
         setFriction(m_friction);
         setRestitution(m_restitution);
         setLinearVelocity(m_linearVelocity);
@@ -160,41 +157,16 @@ namespace ige::scene
         setSelfCollision(m_bUseSelfCollision);
         setSoftSoftCollision(m_softSoftCollision);
         setWindVelocity(m_windVelocity);
-        setDensity(m_density);
 
-        // Set collision config
-        getSoftBody()->m_cfg.kKHR = 1;
-        getSoftBody()->m_cfg.kCHR = 1;
-        getSoftBody()->m_cfg.kDF = 1;
-        getSoftBody()->m_cfg.collisions = btSoftBody::fCollision::CL_SS;
-        getSoftBody()->m_cfg.collisions |= btSoftBody::fCollision::CL_RS;
-        getSoftBody()->generateClusters(64);
+        if(m_density > 0) // mass based on density
+            setDensity(m_density);
 
-        getSoftBody()->m_materials[0]->m_kLST = 0.5f; // Linear stiffness coefficient [0,1]
-        getSoftBody()->m_cfg.kMT = 0.5f;  // Pose matching coefficient [0,1]
-        getSoftBody()->m_cfg.kVC = 0.5f;  // Volume conservation coefficient [0,+inf]
-        getSoftBody()->m_cfg.kPR = 1.f;  // Pressure coefficient [-inf,+inf]
         getSoftBody()->generateBendingConstraints(2);
-        getSoftBody()->setPose(true, true);
+        btSoftBodyHelpers::ReoptimizeLinkOrder(getSoftBody());
 
         // Apply collision filter group and mask
-        if (m_bIsKinematic)
-        {
-            addCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
-            m_collisionFilterGroup = 2;
-            m_collisionFilterMask = 3;
-        }
-        else
-        {
-            m_collisionFilterGroup = 1;
-            m_collisionFilterMask = -1;
-        }
-
-        if (m_body->getBroadphaseHandle())
-        {
-            m_body->getBroadphaseHandle()->m_collisionFilterGroup = m_collisionFilterGroup;
-            m_body->getBroadphaseHandle()->m_collisionFilterMask = m_collisionFilterMask;
-        }
+        setCollisionFilterGroup(m_collisionFilterGroup);
+        setCollisionFilterMask(m_collisionFilterMask);
 
         // Continuos detection mode
         setCCD(m_bIsCCD);
@@ -216,18 +188,13 @@ namespace ige::scene
         auto dScale = PhysicHelper::to_btVector3(scale) / PhysicHelper::to_btVector3(m_previousScale);
         getSoftBody()->scale({ std::abs(dScale[0]), std::abs(dScale[1]), std::abs(dScale[2]) });
         m_previousScale = scale;
-
-        if (m_body->getCollisionShape())
-            m_body->getCollisionShape()->setLocalScaling(PhysicHelper::to_btVector3(m_previousScale));
     }
 
     //! Update Bullet transform
     void PhysicSoftBody::updateBtTransform()
-    {   
-        const auto& currTrans = m_body->getWorldTransform();
+    {
         auto newTrans = PhysicHelper::to_btTransform(getOwner()->getTransform()->getWorldRotation(), getOwner()->getTransform()->getWorldPosition());
-        getSoftBody()->transform(newTrans * currTrans.inverse());
-        m_body->setWorldTransform(newTrans);
+        getSoftBody()->transformTo(newTrans);
 
         Vec3 scale = getOwner()->getTransform()->getWorldScale();
         Vec3 dScale = { scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2] };
@@ -241,9 +208,12 @@ namespace ige::scene
     //! Update IGE transform
     void PhysicSoftBody::updateIgeTransform()
     {
-       // const btTransform& result = m_body->getWorldTransform();
-       // getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
-       // getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
+        // Update position
+        getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(getSoftBody()->m_pose.m_com));
+
+        // Update rotation
+        auto xform = btTransform(getSoftBody()->m_pose.m_rot * getSoftBody()->m_pose.m_scl);
+        getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(xform.getRotation()));
 
         auto figureComp = getOwner()->getComponent<FigureComponent>();
         if (!figureComp || !figureComp->getFigure())
@@ -272,36 +242,26 @@ namespace ige::scene
             case GL_UNSIGNED_BYTE: elemSize = 1; break;
             }
 
-            void* buffer = PYXIE_MALLOC(m_numIndices * 3 * elemSize);
-            MemoryCleaner cleaner(buffer);
-
-            auto totalCount = 0;
             const auto& nodes = getSoftBody()->m_nodes;
-            for (int i = 0; i < m_numIndices; ++i) {
+            for (int i = 0; i < mesh->numVerticies; ++i) {
                 int idx = m_indicesMap[i];
+                auto* buffer = (uint8_t*)PYXIE_MALLOC(3 * elemSize);
+                MemoryCleaner cleaner(buffer);
+
                 for (int j = 0; j < 3; ++j) {
                     switch (mesh->vertexAttributes[attIdx].type) {
-                    case GL_FLOAT: ((float*)buffer)[totalCount++] = nodes[idx].m_x[j]; break;
-                    case GL_SHORT: ((int16_t*)buffer)[totalCount++] = F32toS16(nodes[idx].m_x[j]); break;
-                    case GL_HALF_FLOAT: ((uint16_t*)buffer)[totalCount++] = F32toF16(nodes[idx].m_x[j]); break;
-                    case GL_UNSIGNED_BYTE: ((uint8_t*)buffer)[totalCount++] = F32toU8(nodes[idx].m_x[j]); break;
+                    case GL_FLOAT: ((float*)buffer)[j] = nodes[idx].m_x[j]; break;
+                    case GL_SHORT: ((int16_t*)buffer)[j] = F32toS16(nodes[idx].m_x[j]); break;
+                    case GL_HALF_FLOAT: ((uint16_t*)buffer)[j] = F32toF16(nodes[idx].m_x[j]); break;
+                    case GL_UNSIGNED_BYTE: ((uint8_t*)buffer)[j] = F32toU8(nodes[idx].m_x[j]); break;
                     }
                 }
-            }
-
-            int size = totalCount / mesh->vertexAttributes[attIdx].size;
-            if (offset + size > mesh->numVerticies)
-                size = mesh->numVerticies - offset;
-
-            uint8_t* p = (uint8_t*)buffer;
-            for (int i = 0; i < size; i++) {
                 uint8_t* location = ((uint8_t*)mesh->vertices) + (i + offset) * mesh->vertexFormatSize + mesh->vertexAttributes[attIdx].offset;
-                memcpy(location, p, elemSize * mesh->vertexAttributes[attIdx].size);
-                p += elemSize * mesh->vertexAttributes[attIdx].size;
+                memcpy(location, buffer, elemSize * mesh->vertexAttributes[attIdx].size);
             }
             figure->ResetMeshBuffer(index, true, false, true);
         }
-
+  
         attIdx = -1;
         for (uint16_t i = 0; i < mesh->numVertexAttributes; ++i) {
             if (mesh->vertexAttributes[i].id == AttributeID::ATTRIBUTE_ID_NORMAL) {
@@ -309,7 +269,6 @@ namespace ige::scene
                 break;
             }
         }
-
         if (attIdx != -1)
         {
             int elemSize = 0;
@@ -320,72 +279,59 @@ namespace ige::scene
             case GL_UNSIGNED_BYTE: elemSize = 1; break;
             }
 
-            void* buffer = PYXIE_MALLOC(m_numIndices * 3 * elemSize);
-            MemoryCleaner cleaner(buffer);
-
-            auto totalCount = 0;
             const auto& nodes = getSoftBody()->m_nodes;
-            for (int i = 0; i < m_numIndices; ++i) {
+            for (int i = 0; i < mesh->numVerticies; ++i) {
                 int idx = m_indicesMap[i];
+                auto* buffer = (uint8_t*)PYXIE_MALLOC(3 * elemSize);
+                MemoryCleaner cleaner(buffer);
+
                 for (int j = 0; j < 3; ++j) {
                     switch (mesh->vertexAttributes[attIdx].type) {
-                    case GL_FLOAT: ((float*)buffer)[totalCount++] = nodes[idx].m_n[j]; break;
-                    case GL_SHORT: ((int16_t*)buffer)[totalCount++] = F32toS16(nodes[idx].m_n[j]); break;
-                    case GL_HALF_FLOAT: ((uint16_t*)buffer)[totalCount++] = F32toF16(nodes[idx].m_n[j]); break;
-                    case GL_UNSIGNED_BYTE: ((uint8_t*)buffer)[totalCount++] = F32toU8(nodes[idx].m_n[j]); break;
+                    case GL_FLOAT: ((float*)buffer)[j] = nodes[idx].m_n[j]; break;
+                    case GL_SHORT: ((int16_t*)buffer)[j] = F32toS16(nodes[idx].m_n[j]); break;
+                    case GL_HALF_FLOAT: ((uint16_t*)buffer)[j] = F32toF16(nodes[idx].m_n[j]); break;
+                    case GL_UNSIGNED_BYTE: ((uint8_t*)buffer)[j] = F32toU8(nodes[idx].m_n[j]); break;
                     }
                 }
-            }
-
-            int size = totalCount / mesh->vertexAttributes[attIdx].size;
-            if (offset + size > mesh->numVerticies)
-                size = mesh->numVerticies - offset;
-
-            uint8_t* p = (uint8_t*)buffer;
-            for (int i = 0; i < size; i++) {
-                uint8_t* location = ((uint8_t*)mesh->vertices) + (i + offset)*mesh->vertexFormatSize + mesh->vertexAttributes[attIdx].offset;
-                memcpy(location, p, elemSize * mesh->vertexAttributes[attIdx].size);
-                p += elemSize * mesh->vertexAttributes[attIdx].size;
+                uint8_t* location = ((uint8_t*)mesh->vertices) + (i + offset) * mesh->vertexFormatSize + mesh->vertexAttributes[attIdx].offset;
+                memcpy(location, buffer, elemSize * mesh->vertexAttributes[attIdx].size);
             }
             figure->ResetMeshBuffer(index, true, false, true);
         }
     }
 
     //! Optimize mesh
-    void PhysicSoftBody::optimizeMesh(const std::vector<Vec3>& orgPoss, int* indices, int numIndeces, float*& optPoss, int& numOptPoss, int*& orgMap) 
+    void PhysicSoftBody::optimizeMesh(const std::vector<Vec3>& orgPoss, int* indices, int numIndeces, float*& optPoss) 
     {
-        if (orgMap != nullptr)
-            delete[] orgMap;
+        if (m_indicesMap != nullptr)
+            delete[] m_indicesMap;
+        m_indicesMap = new int[orgPoss.size()];
 
-        orgMap = new int[orgPoss.size()];
         std::map<Vec3, int> vecList;
         int numOptVertex = 0;
         for (int i = 0; i < numIndeces; i++) {
             int idx = indices[i];
             const Vec3& v = orgPoss[idx];
-            if (vecList.count(v)) {
-                indices[i] = vecList[v];
-            }
-            else {
+            if (vecList.count(v) == 0) {
                 vecList[v] = numOptVertex;
-                indices[i] = numOptVertex;
                 numOptVertex++;
             }
-            orgMap[idx] = indices[i];
+            m_indicesMap[idx] = indices[i] = vecList[v];
         }
         std::map<uint32_t, Vec3> vecListRV;
-        for (auto& it : vecList)
+        for (const auto& it : vecList)
             vecListRV[it.second] = it.first;
 
-        numOptPoss = vecListRV.size();
-        optPoss = new float[numOptPoss * 3];
+        optPoss = new float[vecListRV.size() * 3];
         int numf = 0;
-        for (auto& it : vecListRV) {
+        for (const auto& it : vecListRV) {
             for (int i = 0; i < 3; i++) {
                 optPoss[numf] = it.second[i];
                 numf++;
             }
         }
+        vecList.clear();
+        vecListRV.clear();
     }
 
     //! Serialize

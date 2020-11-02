@@ -44,10 +44,6 @@ namespace ige::scene
             auto& worldInfo = getDeformableWorld()->getWorldInfo();
             worldInfo.m_dispatcher = m_dispatcher.get();
             worldInfo.m_broadphase = m_broadphase.get();
-            worldInfo.air_density = (btScalar)1.0;
-            worldInfo.water_density = 0;
-            worldInfo.water_offset = 0;
-            worldInfo.water_normal = btVector3(0, 0, 0);
             worldInfo.m_gravity = m_gravity;
             worldInfo.m_sparsesdf.Initialize();
         }
