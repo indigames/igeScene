@@ -135,6 +135,9 @@ namespace ige::scene
         preUpdate();
         if (m_world->stepSimulation(dt * m_frameUpdateRatio, m_frameMaxSubStep, m_fixedTimeStep))
             postUpdate();
+
+        if(getDeformableWorld())
+            getDeformableWorld()->getWorldInfo().m_sparsesdf.GarbageCollect();
     }
 
     void PhysicManager::preUpdate()

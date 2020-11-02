@@ -18,7 +18,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        PhysicSoftBody(SceneObject& owner, const std::string& path = {});
+        PhysicSoftBody(SceneObject& owner);
 
         //! Destructor
         virtual ~PhysicSoftBody();
@@ -26,13 +26,17 @@ namespace ige::scene
         // Inherited via Component
         virtual std::string getName() const override { return "PhysicSoftBody"; }
 
-        //! Path
-        const std::string& getPath() const { return m_path; }
-        void setPath(const std::string& path);
-
         //! Mass
-        virtual void setMass(float mass) override { m_mass = mass; getSoftBody()->setTotalMass(m_mass); }
-                
+        virtual void setMass(float mass) override { 
+            m_mass = mass;
+            if(m_mass > 0.f)
+                getSoftBody()->setTotalMass(m_mass);
+        }
+
+        //! Indicate object is a kinematic object
+        virtual bool isKinematic() const override { return false; }
+        virtual void setIsKinematic(bool isKinematic = true) override {};
+
         //! Linear velocity
         virtual void setLinearVelocity(const btVector3 &velocity) override {
             m_linearVelocity = velocity;
@@ -99,13 +103,6 @@ namespace ige::scene
             getSoftBody()->setWindVelocity(m_windVelocity);
         }
 
-        //! Density
-        virtual float getDensity() const { return m_density; }
-        virtual void setDensity(float density) { 
-            m_density = density;
-            getSoftBody()->setTotalDensity(m_density);
-        }
-
     public:
         //! Update Bullet transform
         virtual void updateBtTransform() override;
@@ -159,12 +156,6 @@ namespace ige::scene
         void optimizeMesh(const std::vector<Vec3>&, int* indices, int numIndeces, float*& optPoss);
 
     protected:
-        //! Path to the figure which contains mesh
-        std::string m_path = {};
-
-        //! Density
-        float m_density = 1.f;
-
         //! Damping Coefficient
         float m_dampingCoefficient = 0.4f;
 

@@ -39,7 +39,7 @@ namespace ige::scene
         virtual ~PhysicManager();
 
         //! Initialize
-        bool initialize(int numIteration = 4, bool deformable = true);
+        bool initialize(int numIteration = 10, bool deformable = true);
 
         //! Clear world
         void clear();
@@ -118,16 +118,16 @@ namespace ige::scene
         bool m_bDeformable = false;
 
         //! Numer of iteration per frame
-        int m_numIteration = 4;
+        int m_numIteration = 10;
 
         //! Frame update ratio (speedup/slower effects)
         float m_frameUpdateRatio = 1.f;
 
         //! Frame max simulation sub step
-        int m_frameMaxSubStep = 1;
+        int m_frameMaxSubStep = 4;
 
         //! Fixed time steps
-        float m_fixedTimeStep = 1 / 60.f;
+        float m_fixedTimeStep = 1 / 240.f;
 
         //! Gravity
         btVector3 m_gravity = {0.f, -9.81f, 0.f};

@@ -3,6 +3,7 @@
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
 #include "scene/SceneObject.h"
+#include "scene/SceneManager.h"
 #include "physic/PhysicManager.h"
 
 #include "utils/PhysicHelper.h"
@@ -15,11 +16,9 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    PhysicSoftBody::PhysicSoftBody(SceneObject &owner, const std::string& path)
-        : PhysicBase(owner), m_path(path)
+    PhysicSoftBody::PhysicSoftBody(SceneObject &owner)
+        : PhysicBase(owner)
     {
-        m_mass = -1.f;
-        m_density = -1.f;
         init();
     }
 
@@ -29,20 +28,6 @@ namespace ige::scene
         if (m_indicesMap != nullptr)
             delete[] m_indicesMap;
         m_indicesMap = nullptr;
-    }
-
-    //! Set path
-    void PhysicSoftBody::setPath(const std::string& path)
-    {
-        auto fsPath = fs::path(path);
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
-        std::replace(relPath.begin(), relPath.end(), '\\', '/');
-
-        if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
-        {
-            m_path = relPath;
-            recreateBody();
-        }
     }
 
     //! Create physic body
@@ -55,18 +40,10 @@ namespace ige::scene
         auto world = PhysicManager::getInstance()->getDeformableWorld();
 
         Figure* figure = nullptr;
-        bool figureCreated = false;
-
         std::vector<Vec3> positions;
         auto figureComp = getOwner()->getComponent<FigureComponent>();
         if(figureComp && figureComp->getFigure())
             figure = figureComp->getFigure();
-        else
-        {
-            figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
-            figureCreated = true;
-        }
-
         if (figure != nullptr)
         {
             figure->WaitInitialize();
@@ -118,12 +95,6 @@ namespace ige::scene
                 delete[] indices;
                 delete[] optPoss;
             }
-
-            if (figureCreated)
-            {
-                figure->DecReference();
-                figure = nullptr;
-            }
         }
 
         if (m_body == nullptr)
@@ -152,17 +123,24 @@ namespace ige::scene
         // Apply pre-configurated values
         setDampingCoefficient(m_dampingCoefficient);
         setRepulsionStiffness(m_repulsionStiffness);
-        setSleepingThreshold(m_sleepingThreshold);
-        setRestLengthScale(m_restLengthScale);
+
+        if(m_sleepingThreshold > 0)
+            setSleepingThreshold(m_sleepingThreshold);
+
+        if(m_restLengthScale > 0)
+            setRestLengthScale(m_restLengthScale);
+
         setSelfCollision(m_bUseSelfCollision);
         setSoftSoftCollision(m_softSoftCollision);
         setWindVelocity(m_windVelocity);
 
-        if(m_density > 0) // mass based on density
-            setDensity(m_density);
-
         getSoftBody()->generateBendingConstraints(2);
         btSoftBodyHelpers::ReoptimizeLinkOrder(getSoftBody());
+
+        getSoftBody()->m_materials[0]->m_kLST = 0.5f; // Linear stiffness coefficient [0,1]
+        getSoftBody()->m_cfg.kMT = 0.5f;  // Pose matching coefficient [0,1]
+        getSoftBody()->m_cfg.kVC = 0.5f;  // Volume conservation coefficient [0,+inf]
+        getSoftBody()->m_cfg.kPR = 1.f;  // Pressure coefficient [-inf,+inf]
 
         // Apply collision filter group and mask
         setCollisionFilterGroup(m_collisionFilterGroup);
@@ -174,10 +152,7 @@ namespace ige::scene
         // Add custom material callback for collision events
         addCollisionFlag(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 
-        // Add trigger flag
-        if (m_bIsTrigger)
-            addCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-
+        // Activate
         if (m_bIsEnabled)
             activate();
     }
@@ -193,6 +168,9 @@ namespace ige::scene
     //! Update Bullet transform
     void PhysicSoftBody::updateBtTransform()
     {
+        if (!SceneManager::getInstance()->isEditor())
+            return;
+
         auto newTrans = PhysicHelper::to_btTransform(getOwner()->getTransform()->getWorldRotation(), getOwner()->getTransform()->getWorldPosition());
         getSoftBody()->transformTo(newTrans);
 
@@ -208,13 +186,6 @@ namespace ige::scene
     //! Update IGE transform
     void PhysicSoftBody::updateIgeTransform()
     {
-        // Update position
-        getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(getSoftBody()->m_pose.m_com));
-
-        // Update rotation
-        auto xform = btTransform(getSoftBody()->m_pose.m_rot * getSoftBody()->m_pose.m_scl);
-        getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(xform.getRotation()));
-
         auto figureComp = getOwner()->getComponent<FigureComponent>();
         if (!figureComp || !figureComp->getFigure())
             return;
@@ -338,7 +309,6 @@ namespace ige::scene
     void PhysicSoftBody::to_json(json &j) const
     {
         PhysicBase::to_json(j);
-        j["path"] = getPath();
         j["dampCoeff"] = getDampingCoefficient();
         j["repStiff"] = getRepulsionStiffness();
         j["sleepThr"] = getSleepingThreshold();
@@ -346,22 +316,18 @@ namespace ige::scene
         j["isSelfCol"] = isSelfCollision();
         j["isSoftCol"] = isSoftSoftCollision();
         j["windVel"] = PhysicHelper::from_btVector3(getWindVelocity());
-        j["density"] = getDensity();
     }
 
     //! Deserialize
     void PhysicSoftBody::from_json(const json &j)
     {
         PhysicBase::from_json(j);
-        setPath(j.value("path",std::string()));
         setDampingCoefficient(j.value("dampCoeff", 0.4f));
         setRepulsionStiffness(j.value("repStiff", 0.5f));
         setSleepingThreshold(j.value("sleepThr", 0.f));
         setRestLengthScale(j.value("restLS", 0.f));
         setSelfCollision(j.value("isSelfCol", false));
         setSoftSoftCollision(j.value("isSoftCol", false));
-        setSoftSoftCollision(j.value("isSoftCol", false));
         setWindVelocity(PhysicHelper::to_btVector3(j.value("windVel", Vec3())));
-        setDensity(j.value("density", 1.f));
     }
 } // namespace ige::scene

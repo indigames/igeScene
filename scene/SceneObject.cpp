@@ -415,7 +415,7 @@ namespace ige::scene
             else if (key == "PhysicMesh")
                 comp = addComponent<PhysicMesh>();
             else if (key == "PhysicSoftBody")
-                comp = addComponent<PhysicSoftBody>(val.value("path", std::string()));
+                comp = addComponent<PhysicSoftBody>();
             else if (key == "Canvas") {
                 comp = addComponent<Canvas>();
                 setCanvas(getComponent<Canvas>());
