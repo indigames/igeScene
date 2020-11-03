@@ -51,12 +51,57 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setDampingCoefficient(float coeff)
+    void PhysicSoftBody::setDampingCoeff(float coeff)
     {
-        if (m_bIsDirty || m_dampingCoefficient != coeff)
+        if (m_bIsDirty || m_dampingCoeff != coeff)
         {
-            m_dampingCoefficient = coeff;
-            getSoftBody()->setDampingCoefficient(m_dampingCoefficient);
+            m_dampingCoeff = coeff;
+            getSoftBody()->setDampingCoefficient(m_dampingCoeff);
+        }
+    }
+
+    void PhysicSoftBody::setPressureCoeff(float coeff)
+    {
+        if (m_bIsDirty || m_pressureCoeff != coeff)
+        {
+            m_pressureCoeff = coeff;
+            getSoftBody()->m_cfg.kPR = m_pressureCoeff;
+        }
+    }
+
+    void PhysicSoftBody::setVolumeConvCoeff(float coeff)
+    {
+        if (m_bIsDirty || m_volumeConvCoeff != coeff)
+        {
+            m_volumeConvCoeff = coeff;
+            getSoftBody()->m_cfg.kVC = m_volumeConvCoeff;
+        }
+    }
+
+    void PhysicSoftBody::setDynamicFrictionCoeff(float coeff)
+    {
+        if (m_bIsDirty || m_dynamicFrictionCoeff != coeff)
+        {
+            m_dynamicFrictionCoeff = coeff;
+            getSoftBody()->m_cfg.kDF = m_dynamicFrictionCoeff;
+        }
+    }
+
+    void PhysicSoftBody::setPoseMatchCoeff(float coeff)
+    {
+        if (m_bIsDirty || m_poseMatchCoeff != coeff)
+        {
+            m_poseMatchCoeff = coeff;
+            getSoftBody()->m_cfg.kMT = m_poseMatchCoeff;
+        }
+    }
+
+    void PhysicSoftBody::setVelocityFactor(float coeff)
+    {
+        if (m_bIsDirty || m_velocityFactor != coeff)
+        {
+            m_velocityFactor = coeff;
+            getSoftBody()->m_cfg.kVCF = m_velocityFactor;
         }
     }
 
@@ -84,6 +129,74 @@ namespace ige::scene
         {
             m_restLengthScale = scale;
             getSoftBody()->setRestLengthScale(m_restLengthScale);
+        }
+    }
+
+    void PhysicSoftBody::setGravityFactor(float factor)
+    {
+        if (m_bIsDirty || m_gravityFactor != factor)
+        {
+            m_gravityFactor = factor;
+            getSoftBody()->setGravityFactor(m_gravityFactor);
+        }
+    }
+
+    void PhysicSoftBody::setRigidContactHardness(float factor)
+    {
+        if (m_bIsDirty || m_rigidContactHardness != factor)
+        {
+            m_rigidContactHardness = factor;
+            getSoftBody()->m_cfg.kCHR = m_rigidContactHardness;
+        }
+    }
+
+    void PhysicSoftBody::setKineticContactHardness(float factor)
+    {
+        if (m_bIsDirty || m_kineticContactHardness != factor)
+        {
+            m_kineticContactHardness = factor;
+            getSoftBody()->m_cfg.kKHR = m_kineticContactHardness;
+        }
+    }
+
+    void PhysicSoftBody::setSoftContactHardness(float factor)
+    {
+        if (m_bIsDirty || m_softContactHardness != factor)
+        {
+            m_softContactHardness = factor;
+            getSoftBody()->m_cfg.kSHR = m_softContactHardness;
+        }
+    }
+
+    void PhysicSoftBody::setAnchorHardness(float factor)
+    {
+        if (m_bIsDirty || m_anchorHardness != factor)
+        {
+            m_anchorHardness = factor;
+            getSoftBody()->m_cfg.kAHR = m_anchorHardness;
+        }
+    }
+
+    void PhysicSoftBody::setPosIterationNumber(int number)
+    {
+        if (m_bIsDirty || m_positionIterNumber != number)
+        {
+            m_positionIterNumber = number;
+            getSoftBody()->m_cfg.piterations = m_positionIterNumber;
+        }
+    }
+
+    void PhysicSoftBody::setAeroModel(int model)
+    {
+        if (model < btSoftBody::eAeroModel::V_Point || model > btSoftBody::eAeroModel::F_OneSided)
+        {
+            model = btSoftBody::eAeroModel::V_TwoSided;
+        }
+
+        if (m_bIsDirty || m_aeroModel != model)
+        {
+            m_aeroModel = model;
+            getSoftBody()->m_cfg.aeromodel = (btSoftBody::eAeroModel::_)m_aeroModel;
         }
     }
 
@@ -188,6 +301,7 @@ namespace ige::scene
 
         // Set this to SoftBody
         setSoftBody(true);
+        getSoftBody()->generateBendingConstraints(2);
 
         // Apply pre-configurated values to PhysicBase
         if (m_mass > 0) // mass based on total mass
@@ -207,21 +321,25 @@ namespace ige::scene
         setLocalScale(scale);
 
         // Apply pre-configurated values
-        setDampingCoefficient(m_dampingCoefficient);
+        setDampingCoeff(m_dampingCoeff);
+        setPressureCoeff(m_pressureCoeff);
+        setVolumeConvCoeff(m_volumeConvCoeff);
+        setDynamicFrictionCoeff(m_dynamicFrictionCoeff);
+        setPoseMatchCoeff(m_poseMatchCoeff);
         setRepulsionStiffness(m_repulsionStiffness);
         setSleepingThreshold(m_sleepingThreshold);
         setRestLengthScale(m_restLengthScale);
+        setGravityFactor(m_gravityFactor);
+        setVelocityFactor(m_gravityFactor);
         setSelfCollision(m_bUseSelfCollision);
         setSoftSoftCollision(m_softSoftCollision);
         setWindVelocity(m_windVelocity);
-
-        getSoftBody()->generateBendingConstraints(2);
-        btSoftBodyHelpers::ReoptimizeLinkOrder(getSoftBody());
-
-        //getSoftBody()->m_materials[0]->m_kLST = 0.5f; // Linear stiffness coefficient [0,1]
-        //getSoftBody()->m_cfg.kMT = 0.5f;  // Pose matching coefficient [0,1]
-        //getSoftBody()->m_cfg.kVC = 0.5f;  // Volume conservation coefficient [0,+inf]
-        //getSoftBody()->m_cfg.kPR = 1.f;  // Pressure coefficient [-inf,+inf]
+        setAeroModel(m_aeroModel);
+        setPosIterationNumber(m_positionIterNumber);
+        setRigidContactHardness(m_rigidContactHardness);
+        setKineticContactHardness(m_kineticContactHardness);
+        setSoftContactHardness(m_softContactHardness);
+        setAnchorHardness(m_anchorHardness);
 
         // Apply collision filter group and mask
         setCollisionFilterGroup(m_collisionFilterGroup);
@@ -408,25 +526,49 @@ namespace ige::scene
     void PhysicSoftBody::to_json(json &j) const
     {
         PhysicBase::to_json(j);
-        j["dampCoeff"] = getDampingCoefficient();
+        j["dampCoeff"] = getDampingCoeff();
+        j["presCoeff"] = getPressureCoeff();
+        j["volCoeff"] = getVolumeConvCoeff();
+        j["fricCoeff"] = getDynamicFrictionCoeff();
+        j["poseCoeff"] = getPoseMatchCoeff();
         j["repStiff"] = getRepulsionStiffness();
         j["sleepThr"] = getSleepingThreshold();
         j["restLS"] = getRestLengthScale();
+        j["graF"] = getGravityFactor();
+        j["velF"] = getVelocityFactor();
+        j["pItrNum"] = getPosIterationNumber();
+        j["aero"] = getAeroModel();
         j["isSelfCol"] = isSelfCollision();
         j["isSoftCol"] = isSoftSoftCollision();
         j["windVel"] = PhysicHelper::from_btVector3(getWindVelocity());
+        j["rch"] = getRigidContactHardness();
+        j["kch"] = getKineticContactHardness();
+        j["sch"] = getSoftContactHardness();
+        j["ahr"] = getAnchorHardness();
     }
 
     //! Deserialize
     void PhysicSoftBody::from_json(const json &j)
     {
         PhysicBase::from_json(j);
-        setDampingCoefficient(j.value("dampCoeff", 0.4f));
+        setDampingCoeff(j.value("dampCoeff", 0.4f));
+        setPressureCoeff(j.value("presCoeff", 0.f));
+        setVolumeConvCoeff(j.value("volCoeff", 0.f));
+        setDynamicFrictionCoeff(j.value("fricCoeff", 0.2f));
+        setPoseMatchCoeff(j.value("poseCoeff", 0.f));
         setRepulsionStiffness(j.value("repStiff", 0.5f));
         setSleepingThreshold(j.value("sleepThr", 0.f));
         setRestLengthScale(j.value("restLS", 0.f));
+        setGravityFactor(j.value("graF", 1.f));
+        setVelocityFactor(j.value("velF", 1.f));
+        setPosIterationNumber(j.value("pItrNum", 1));
+        setAeroModel(j.value("aero", 1));
         setSelfCollision(j.value("isSelfCol", false));
         setSoftSoftCollision(j.value("isSoftCol", false));
         setWindVelocity(PhysicHelper::to_btVector3(j.value("windVel", Vec3())));
+        setRigidContactHardness(j.value("rch", 1.f));
+        setKineticContactHardness(j.value("kch", 0.1f));
+        setSoftContactHardness(j.value("sch", 1.f));
+        setAnchorHardness(j.value("ahr", 1.f));
     }
 } // namespace ige::scene

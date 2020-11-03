@@ -49,8 +49,24 @@ namespace ige::scene
         }
 
         //! Damping coefficient
-        virtual float getDampingCoefficient() const { return m_dampingCoefficient; }
-        virtual void setDampingCoefficient(float coeff);
+        virtual float getDampingCoeff() const { return m_dampingCoeff; }
+        virtual void setDampingCoeff(float coeff);
+
+        //! Pressure coefficient
+        virtual float getPressureCoeff() const { return m_pressureCoeff; }
+        virtual void setPressureCoeff(float coeff);
+
+        //! Volume conversation coefficient
+        virtual float getVolumeConvCoeff() const { return m_volumeConvCoeff; }
+        virtual void setVolumeConvCoeff(float coeff);
+
+        //! Dynamic friction coefficient
+        virtual float getDynamicFrictionCoeff() const { return m_dynamicFrictionCoeff; }
+        virtual void setDynamicFrictionCoeff(float coeff);
+
+        //! Pose matching coefficient
+        virtual float getPoseMatchCoeff() const { return m_poseMatchCoeff; }
+        virtual void setPoseMatchCoeff(float coeff);
 
         //! Repulsion Stiffness
         virtual float getRepulsionStiffness() const { return m_repulsionStiffness; }
@@ -63,6 +79,38 @@ namespace ige::scene
         //! Rest Length Scale
         virtual float getRestLengthScale() const { return m_restLengthScale; }
         virtual void setRestLengthScale(float scale);
+
+        //! Gravity factor
+        virtual float getGravityFactor() const { return m_gravityFactor; }
+        virtual void setGravityFactor(float factor);
+
+        //! Velocities correction factor
+        virtual float getVelocityFactor() const { return m_velocityFactor; }
+        virtual void setVelocityFactor(float coeff);
+
+        //! Rigid contacts hardness
+        virtual float getRigidContactHardness() const { return m_rigidContactHardness; }
+        virtual void setRigidContactHardness(float factor);
+
+        //! Kinetic contacts hardness
+        virtual float getKineticContactHardness() const { return m_kineticContactHardness; }
+        virtual void setKineticContactHardness(float factor);
+
+        //! Soft contacts hardness
+        virtual float getSoftContactHardness() const { return m_softContactHardness; }
+        virtual void setSoftContactHardness(float factor);
+
+        //! Anchor hardness
+        virtual float getAnchorHardness() const { return m_anchorHardness; }
+        virtual void setAnchorHardness(float factor);
+
+        //! Gravity factor
+        virtual int getPosIterationNumber() const { return m_positionIterNumber; }
+        virtual void setPosIterationNumber(int number);
+
+        //! Aero Model
+        virtual int getAeroModel() const { return m_aeroModel; }
+        virtual void setAeroModel(int model);
 
         //! Self collision
         virtual bool isSelfCollision() const { return m_bUseSelfCollision; }
@@ -129,16 +177,52 @@ namespace ige::scene
 
     protected:
         //! Damping Coefficient
-        float m_dampingCoefficient = 0.4f;
+        float m_dampingCoeff = 1.f;
 
         //! Repulsion Stiffness
         float m_repulsionStiffness = 0.5f;
 
+        //! Pressure coefficient
+        float m_pressureCoeff = 0.f;
+
+        //! Velocity correction factor
+        float m_velocityFactor = 1.f;
+
+        //! Volume conversation coefficient
+        float m_volumeConvCoeff = 0.f;
+
+        //! Dynamic friction coefficient
+        float m_dynamicFrictionCoeff = 0.2f;
+
+        //! Pose matching coefficient
+        float m_poseMatchCoeff = 0.f;
+
+        //! Rigid contacts hardness
+        float m_rigidContactHardness = 1.f;
+
+        //! Kinetic contacts hardness
+        float m_kineticContactHardness = 0.1f;
+
+        //! Soft contacts hardness
+        float m_softContactHardness = 1.f;
+
+        //! Anchors hardness
+        float m_anchorHardness = 1.f;
+
         //! Sleeping Threshold
-        float m_sleepingThreshold = 0.f;
+        float m_sleepingThreshold = 0.04f;
 
         //! Rest Length Scale
-        float m_restLengthScale = 0.f;
+        float m_restLengthScale = 1.f;
+
+        //! Gravity factor
+        float m_gravityFactor = 1.f;
+
+        //! Position iteration number
+        int m_positionIterNumber = 1;
+
+        //! Aero model
+        int m_aeroModel = (int)btSoftBody::eAeroModel::V_TwoSided;
 
         //! Use Self Collision
         bool m_bUseSelfCollision = false;

@@ -145,7 +145,9 @@ namespace ige::scene
 
         if (path.find("_tmp") == std::string::npos)
         {
-            scene->setPath(path);
+            auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+            std::replace(relPath.begin(), relPath.end(), '\\', '/');
+            scene->setPath(relPath);
         }
 
         m_scenes.push_back(scene);
