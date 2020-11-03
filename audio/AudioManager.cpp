@@ -54,7 +54,7 @@ namespace ige::scene
         auto listenerOpt = getActiveListener();
         if(listenerOpt.has_value())
         {
-            auto listener = listenerOpt.value().get();
+            auto listener = (*listenerOpt).get();
             position = listener.getOwner()->getTransform()->getWorldPosition();
             lookAt = listener.getOwner()->getTransform()->getWorldForward() * -1.0f;
         }

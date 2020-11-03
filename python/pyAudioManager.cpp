@@ -37,7 +37,7 @@ namespace ige::scene
     {
         if(!self->audioManager->getActiveListener().has_value())
             Py_RETURN_NONE;
-        auto listener = self->audioManager->getActiveListener().value().get();
+        auto listener = (*(self->audioManager->getActiveListener())).get();
         auto *listenerObj = PyObject_New(PyObject_AudioListener, &PyTypeObject_AudioListener);
         listenerObj->component = &listener;
         return (PyObject *)listenerObj;

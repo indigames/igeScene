@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components\Component.h"
+#include "components/Component.h"
 #include "event/Event.h"
 
 namespace ige::scene
