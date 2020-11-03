@@ -50,5 +50,14 @@ namespace ige::scene
 
         //! Convex or Concave
         bool m_bIsConvex = true;
+
+        //! Cache btTriangleIndexVertexArray
+        btTriangleIndexVertexArray* m_indexVertexArrays = nullptr;
+
+        //! Cache indices
+        int* m_indices = nullptr;
+
+        //! Cache btPosition
+        btVector3* m_btPositions = nullptr;
     };
 } // namespace ige::scene

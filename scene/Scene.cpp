@@ -68,7 +68,7 @@ namespace ige::scene
         m_showcase->SetShadowBuffer(m_shadowTexture);
 
         m_shadowEdgeMask = ResourceCreator::Instance().NewEditableFigure("shadowEdgeMask");
-        
+
         ShaderDescriptor desc;
         desc.DicardViewProj(true);
         desc.SetVertexColor(true);
@@ -323,7 +323,7 @@ namespace ige::scene
         {
             m_root = nullptr;
         }
-        
+
         // Remove all children
         auto children = obj->getChildren();
         for (int i = 0; i < children.size(); ++i)
@@ -343,6 +343,8 @@ namespace ige::scene
         {
             m_objects.erase(itr);
         }
+
+        return true;
     }
 
     //! Remove scene object by its id
@@ -409,6 +411,7 @@ namespace ige::scene
     {
         j = json {
             {"name", m_name},
+            {"path", m_path},
             {"objId", m_nextObjectID},
         };
         json jRoot;
@@ -421,11 +424,12 @@ namespace ige::scene
     {
         clear();
         j.at("name").get_to(m_name);
+        setPath(j.value("path", std::string()));
 
         auto jRoot = j.at("root");
         m_root = createObject(m_name);
         m_root->from_json(jRoot);
-       
+
         j.at("objId").get_to(m_nextObjectID);
     }
 

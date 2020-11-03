@@ -49,41 +49,27 @@ namespace ige::scene
 
         //! Friction
         virtual float getFriction() const { return m_friction; }
-        virtual void setFriction(float friction) { m_friction = friction;  m_body->setFriction(m_friction); }
+        virtual void setFriction(float friction);
 
         //! Restitution
         virtual float getRestitution() const { return m_restitution; }
-        virtual void setRestitution(float restitution) { m_restitution = restitution;  m_body->setRestitution(m_restitution); }
+        virtual void setRestitution(float restitution);
 
         //! Linear velocity
         virtual const btVector3 &getLinearVelocity() const { return m_linearVelocity; }
-        virtual void setLinearVelocity(const btVector3 &velocity) {
-            m_linearVelocity = velocity;
-            getBody()->setLinearVelocity(m_linearVelocity);
-        }
+        virtual void setLinearVelocity(const btVector3& velocity);
 
         //! Angular velocity
         virtual const btVector3 &getAngularVelocity() const { return m_angularVelocity; }
-        virtual void setAngularVelocity(const btVector3 &velocity) {
-            m_angularVelocity = velocity;
-            getBody()->setAngularVelocity(m_angularVelocity);
-        }
+        virtual void setAngularVelocity(const btVector3& velocity);
 
         //! Linear factor
         virtual const btVector3 &getLinearFactor() const { return m_linearFactor; }
-        virtual void setLinearFactor(const btVector3& factor) { 
-            m_linearFactor = factor;
-            if(getBody())
-                getBody()->setLinearFactor(m_linearFactor);
-        }
+        virtual void setLinearFactor(const btVector3& factor);
 
         //! Angular factor
         virtual const btVector3 &getAngularFactor() const { return m_angularFactor; }
-        virtual void setAngularFactor(const btVector3& factor) { 
-            m_angularFactor = factor;
-            if(getBody())
-                getBody()->setAngularFactor(m_angularFactor);
-        }
+        virtual void setAngularFactor(const btVector3& factor);
 
         //! Indicate object is a trigger object
         virtual bool isTrigger() const { return m_bIsTrigger; }
@@ -124,7 +110,7 @@ namespace ige::scene
 
         //! Collision Margin
         float getCollisionMargin() const { return m_collisionMargin; }
-        void setCollisionMargin(float margin) { m_collisionMargin = margin;  m_body->getCollisionShape()->setMargin(m_collisionMargin); }
+        void setCollisionMargin(float margin);
 
     public:
         //! Apply torque
@@ -289,5 +275,8 @@ namespace ige::scene
 
         //! Cache isSoftBody state
         bool m_bIsSoftBody = false;
+
+        //! Cache dirty state
+        bool m_bIsDirty = false;
     };
 } // namespace ige::scene

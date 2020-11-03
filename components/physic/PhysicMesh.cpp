@@ -22,6 +22,18 @@ namespace ige::scene
     {
         if (m_shape != nullptr)
             m_shape.reset();
+
+        if (m_indexVertexArrays != nullptr)
+            delete m_indexVertexArrays;
+        m_indexVertexArrays = nullptr;
+
+        if (m_indices != nullptr)
+            delete[] m_indices;
+        m_indices = nullptr;
+
+        if (m_btPositions != nullptr)
+            delete[] m_btPositions;
+        m_btPositions = nullptr;
     }
 
     //! Path
@@ -124,14 +136,16 @@ namespace ige::scene
                     }
                 }
                 auto numPoints = positions.size();
-                auto btPositions = new btVector3[numPoints];
+                if (m_btPositions != nullptr)
+                    delete[] m_btPositions;
+                m_btPositions = new btVector3[numPoints];
                 for (size_t i = 0; i < numPoints; ++i)
-                    btPositions[i] = PhysicHelper::to_btVector3(positions[i]);
+                    m_btPositions[i] = PhysicHelper::to_btVector3(positions[i]);
                 positions.clear();
 
                 if (m_bIsConvex)
                 {
-                    auto convexHull = std::make_unique<btConvexHullShape>((btScalar *)btPositions, numPoints);
+                    auto convexHull = std::make_unique<btConvexHullShape>((btScalar *)m_btPositions, numPoints);
                     convexHull->optimizeConvexHull();
                     m_shape = std::move(convexHull);
                     convexHull = nullptr;
@@ -140,21 +154,22 @@ namespace ige::scene
                 {
                     int index = 0;
                     auto mesh = figure->GetMesh(index);
-                    auto indices = new int[mesh->numIndices];
-                    for (uint32_t i = 0; i < mesh->numIndices; ++i)
-                        indices[i] = (int)mesh->indices[i];
 
-                    auto indexVertexArrays = new btTriangleIndexVertexArray(mesh->numIndices / 3, indices, 3 * 4, numPoints, (btScalar *)btPositions, sizeof(btVector3));
+                    if (m_indices != nullptr)
+                        delete[] m_indices;
+                    m_indices = new int[mesh->numIndices];
+                    for (uint32_t i = 0; i < mesh->numIndices; ++i)
+                        m_indices[i] = (int)mesh->indices[i];
+
+                    if (m_indexVertexArrays != nullptr)
+                        delete m_indexVertexArrays;
+                    m_indexVertexArrays = new btTriangleIndexVertexArray(mesh->numIndices / 3, m_indices, 3 * 4, numPoints, (btScalar *)m_btPositions, sizeof(btVector3));
+
                     bool useQuantizedAabbCompression = true;
-                    auto triangleMeshShape = std::make_unique<btBvhTriangleMeshShape>(indexVertexArrays, useQuantizedAabbCompression);
-                    triangleMeshShape->buildOptimizedBvh();
+                    auto triangleMeshShape = std::make_unique<btBvhTriangleMeshShape>(m_indexVertexArrays, useQuantizedAabbCompression);
                     m_shape = std::move(triangleMeshShape);
                     triangleMeshShape = nullptr;
-
-                    delete[] indices;
-                    delete indexVertexArrays;
                 }
-                delete[] btPositions;
             }
             figure->DecReference();
             figure = nullptr;

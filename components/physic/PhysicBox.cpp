@@ -42,7 +42,10 @@ namespace ige::scene
             m_shape.reset();
         m_shape = std::make_unique<btBoxShape>(PhysicHelper::to_btVector3(size));
         m_size = size;
+
+        m_bIsDirty = true;
         setLocalScale(m_previousScale);
+        m_bIsDirty = false;
     }
 
     //! Recreate collision shape

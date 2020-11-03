@@ -38,16 +38,10 @@ namespace ige::scene
         virtual void setIsKinematic(bool isKinematic = true) override {};
 
         //! Linear velocity
-        virtual void setLinearVelocity(const btVector3 &velocity) override {
-            m_linearVelocity = velocity;
-            getSoftBody()->setLinearVelocity(m_linearVelocity);
-        }
+        virtual void setLinearVelocity(const btVector3& velocity) override;
 
         //! Angular velocity
-        virtual void setAngularVelocity(const btVector3 &velocity) override {
-            m_angularVelocity = velocity;
-            getSoftBody()->setAngularVelocity(m_angularVelocity);
-        }
+        virtual void setAngularVelocity(const btVector3& velocity) override;
 
         //! Get AABB
         virtual void getAABB(btVector3& aabbMin, btVector3 aabbMax) override { 
@@ -56,52 +50,31 @@ namespace ige::scene
 
         //! Damping coefficient
         virtual float getDampingCoefficient() const { return m_dampingCoefficient; }
-        virtual void setDampingCoefficient(float coeff) { 
-            m_dampingCoefficient = coeff;
-            getSoftBody()->setDampingCoefficient(m_dampingCoefficient);
-        }
+        virtual void setDampingCoefficient(float coeff);
 
         //! Repulsion Stiffness
         virtual float getRepulsionStiffness() const { return m_repulsionStiffness; }
-        virtual void setRepulsionStiffness(float repulsionStiffness) {
-            m_repulsionStiffness = repulsionStiffness;
-            getSoftBody()->setSpringStiffness(m_repulsionStiffness);
-        }
+        virtual void setRepulsionStiffness(float repulsionStiffness);
 
         //! Sleeping Threshold
         virtual float getSleepingThreshold() const { return m_sleepingThreshold; }
-        virtual void setSleepingThreshold(float threshold) {
-            m_sleepingThreshold = threshold;
-            getSoftBody()->m_sleepingThreshold = m_sleepingThreshold;
-        }
+        virtual void setSleepingThreshold(float threshold);
 
         //! Rest Length Scale
         virtual float getRestLengthScale() const { return m_restLengthScale; }
-        virtual void setRestLengthScale(float scale) {
-            m_restLengthScale = scale;
-            getSoftBody()->setRestLengthScale(m_restLengthScale);
-        }
+        virtual void setRestLengthScale(float scale);
 
         //! Self collision
         virtual bool isSelfCollision() const { return m_bUseSelfCollision; }
-        virtual void setSelfCollision(bool selfCollision = true) {
-            m_bUseSelfCollision = selfCollision;
-            getSoftBody()->setSelfCollision(m_bUseSelfCollision);
-        }
+        virtual void setSelfCollision(bool selfCollision = true);
 
         //! Soft soft collision
         virtual bool isSoftSoftCollision() const { return m_softSoftCollision; }
-        virtual void setSoftSoftCollision(bool soft = true) {
-            m_softSoftCollision = soft;
-            getSoftBody()->m_softSoftCollision = m_softSoftCollision;
-        }
+        virtual void setSoftSoftCollision(bool soft = true);
 
         //! Wind velocity
         virtual const btVector3& getWindVelocity() const { return m_windVelocity; }
-        virtual void setWindVelocity(const btVector3& velocity) {
-            m_windVelocity = velocity;
-            getSoftBody()->setWindVelocity(m_windVelocity);
-        }
+        virtual void setWindVelocity(const btVector3& velocity);
 
     public:
         //! Update Bullet transform
@@ -120,7 +93,6 @@ namespace ige::scene
 
         //! Apply Repulsion Force
         virtual void applyRepulsionForce(float timeStep, bool applySpringForce) { getSoftBody()->applyRepulsionForce(timeStep, applySpringForce); }
-
 
         //! Add Velocity
         virtual void addVelocity(const btVector3& velocity) { getSoftBody()->addVelocity(velocity); }

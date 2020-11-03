@@ -19,6 +19,7 @@ namespace ige::scene
     PhysicSoftBody::PhysicSoftBody(SceneObject &owner)
         : PhysicBase(owner)
     {
+        m_mass = -1.f;
         init();
     }
 
@@ -28,6 +29,89 @@ namespace ige::scene
         if (m_indicesMap != nullptr)
             delete[] m_indicesMap;
         m_indicesMap = nullptr;
+    }
+
+    //! Linear velocity
+    void PhysicSoftBody::setLinearVelocity(const btVector3& velocity)
+    {
+        if (m_bIsDirty || m_linearVelocity != velocity)
+        {
+            m_linearVelocity = velocity;
+            getSoftBody()->setLinearVelocity(m_linearVelocity);
+        }
+    }
+
+    //! Angular velocity
+    void PhysicSoftBody::setAngularVelocity(const btVector3& velocity)
+    {
+        if (m_bIsDirty || m_angularVelocity != velocity)
+        {
+            m_angularVelocity = velocity;
+            getSoftBody()->setAngularVelocity(m_angularVelocity);
+        }
+    }
+
+    void PhysicSoftBody::setDampingCoefficient(float coeff)
+    {
+        if (m_bIsDirty || m_dampingCoefficient != coeff)
+        {
+            m_dampingCoefficient = coeff;
+            getSoftBody()->setDampingCoefficient(m_dampingCoefficient);
+        }
+    }
+
+    void PhysicSoftBody::setRepulsionStiffness(float repulsionStiffness)
+    {
+        if (m_bIsDirty || m_repulsionStiffness != repulsionStiffness)
+        {
+            m_repulsionStiffness = repulsionStiffness;
+            getSoftBody()->setSpringStiffness(m_repulsionStiffness);
+        }
+    }
+
+    void PhysicSoftBody::setSleepingThreshold(float threshold)
+    {
+        if (m_bIsDirty || m_sleepingThreshold != threshold)
+        {
+            m_sleepingThreshold = threshold;
+            getSoftBody()->m_sleepingThreshold = m_sleepingThreshold;
+        }
+    }
+
+    void PhysicSoftBody::setRestLengthScale(float scale)
+    {
+        if (m_bIsDirty || m_restLengthScale != scale)
+        {
+            m_restLengthScale = scale;
+            getSoftBody()->setRestLengthScale(m_restLengthScale);
+        }
+    }
+
+    void PhysicSoftBody::setSelfCollision(bool selfCollision)
+    {
+        if (m_bIsDirty || m_bUseSelfCollision != selfCollision)
+        {
+            m_bUseSelfCollision = selfCollision;
+            getSoftBody()->setSelfCollision(m_bUseSelfCollision);
+        }
+    }
+
+    void PhysicSoftBody::setSoftSoftCollision(bool soft)
+    {
+        if (m_bIsDirty || m_softSoftCollision != soft)
+        {
+            m_softSoftCollision = soft;
+            getSoftBody()->m_softSoftCollision = m_softSoftCollision;
+        }
+    }
+
+    void PhysicSoftBody::setWindVelocity(const btVector3& velocity)
+    {
+        if (m_bIsDirty || m_windVelocity != velocity)
+        {
+            m_windVelocity = velocity;
+            getSoftBody()->setWindVelocity(m_windVelocity);
+        }
     }
 
     //! Create physic body
@@ -100,13 +184,15 @@ namespace ige::scene
         if (m_body == nullptr)
             m_body = std::make_unique<btSoftBody>(&world->getWorldInfo());
         m_body->setUserPointer(this);
-        
+        m_bIsDirty = true;
+
         // Set this to SoftBody
         setSoftBody(true);
 
         // Apply pre-configurated values to PhysicBase
-        if(m_mass > 0) // mass based on total mass
+        if (m_mass > 0) // mass based on total mass
             setMass(m_mass);
+
         setFriction(m_friction);
         setRestitution(m_restitution);
         setLinearVelocity(m_linearVelocity);
@@ -123,13 +209,8 @@ namespace ige::scene
         // Apply pre-configurated values
         setDampingCoefficient(m_dampingCoefficient);
         setRepulsionStiffness(m_repulsionStiffness);
-
-        if(m_sleepingThreshold > 0)
-            setSleepingThreshold(m_sleepingThreshold);
-
-        if(m_restLengthScale > 0)
-            setRestLengthScale(m_restLengthScale);
-
+        setSleepingThreshold(m_sleepingThreshold);
+        setRestLengthScale(m_restLengthScale);
         setSelfCollision(m_bUseSelfCollision);
         setSoftSoftCollision(m_softSoftCollision);
         setWindVelocity(m_windVelocity);
@@ -137,10 +218,10 @@ namespace ige::scene
         getSoftBody()->generateBendingConstraints(2);
         btSoftBodyHelpers::ReoptimizeLinkOrder(getSoftBody());
 
-        getSoftBody()->m_materials[0]->m_kLST = 0.5f; // Linear stiffness coefficient [0,1]
-        getSoftBody()->m_cfg.kMT = 0.5f;  // Pose matching coefficient [0,1]
-        getSoftBody()->m_cfg.kVC = 0.5f;  // Volume conservation coefficient [0,+inf]
-        getSoftBody()->m_cfg.kPR = 1.f;  // Pressure coefficient [-inf,+inf]
+        //getSoftBody()->m_materials[0]->m_kLST = 0.5f; // Linear stiffness coefficient [0,1]
+        //getSoftBody()->m_cfg.kMT = 0.5f;  // Pose matching coefficient [0,1]
+        //getSoftBody()->m_cfg.kVC = 0.5f;  // Volume conservation coefficient [0,+inf]
+        //getSoftBody()->m_cfg.kPR = 1.f;  // Pressure coefficient [-inf,+inf]
 
         // Apply collision filter group and mask
         setCollisionFilterGroup(m_collisionFilterGroup);
@@ -152,6 +233,8 @@ namespace ige::scene
         // Add custom material callback for collision events
         addCollisionFlag(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 
+        m_bIsDirty = false;
+
         // Activate
         if (m_bIsEnabled)
             activate();
@@ -160,9 +243,12 @@ namespace ige::scene
     //! Set local scale
     void PhysicSoftBody::setLocalScale(const Vec3& scale)
     {
-        auto dScale = PhysicHelper::to_btVector3(scale) / PhysicHelper::to_btVector3(m_previousScale);
-        getSoftBody()->scale({ std::abs(dScale[0]), std::abs(dScale[1]), std::abs(dScale[2]) });
-        m_previousScale = scale;
+        if (m_bIsDirty || m_previousScale != scale)
+        {
+            auto dScale = PhysicHelper::to_btVector3(scale) / PhysicHelper::to_btVector3(m_previousScale);
+            getSoftBody()->scale({ std::abs(dScale[0]), std::abs(dScale[1]), std::abs(dScale[2]) });
+            m_previousScale = scale;
+        }
     }
 
     //! Update Bullet transform
@@ -186,6 +272,19 @@ namespace ige::scene
     //! Update IGE transform
     void PhysicSoftBody::updateIgeTransform()
     {
+        // Update transform
+        if (getOwner()->getTransform())
+        {
+            getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(getSoftBody()->m_pose.m_com));
+
+            // Update rotation
+            auto xform = btTransform(getSoftBody()->m_pose.m_rot * getSoftBody()->m_pose.m_scl);
+            getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(xform.getRotation()));
+
+            getOwner()->getTransform()->onUpdate(0.f);
+        }
+
+        // Update position and normal
         auto figureComp = getOwner()->getComponent<FigureComponent>();
         if (!figureComp || !figureComp->getFigure())
             return;

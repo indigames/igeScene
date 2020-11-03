@@ -56,7 +56,10 @@ namespace ige::scene
         m_shape = std::make_unique<btCapsuleShape>(radius, height);
         m_radius = radius;
         m_height = height;
+
+        m_bIsDirty = true;
         setLocalScale(m_previousScale);
+        m_bIsDirty = false;
     }
 
     //! Recreate collision shape

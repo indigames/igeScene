@@ -73,43 +73,136 @@ namespace ige::scene
     //! Set mass
     void PhysicBase::setMass(float mass)
     {
-        m_mass = mass;
-        btVector3 inertia = {0.f, 0.f, 0.f};
-        if (m_mass != 0.0f)
-            m_shape->calculateLocalInertia(m_mass, inertia);
-        getBody()->setMassProps(mass, inertia);
-        getBody()->updateInertiaTensor();
+        if (m_bIsDirty || m_mass != mass)
+        {
+            m_mass = mass;
+            btVector3 inertia = { 0.f, 0.f, 0.f };
+            if (m_mass != 0.0f)
+                m_shape->calculateLocalInertia(m_mass, inertia);
+            getBody()->setMassProps(mass, inertia);
+            getBody()->updateInertiaTensor();
+        }
+    }
+
+    void PhysicBase::setFriction(float friction)
+    { 
+        if (m_bIsDirty || m_friction != friction)
+        {
+            m_friction = friction;
+            m_body->setFriction(m_friction);
+        }
+    }
+
+    void PhysicBase::setRestitution(float restitution)
+    {
+        if (m_bIsDirty || m_restitution != restitution)
+        {
+            m_restitution = restitution;
+            m_body->setRestitution(m_restitution);
+        }
+    }
+
+    void PhysicBase::setLinearVelocity(const btVector3& velocity)
+    {
+        if (m_bIsDirty || m_linearVelocity != velocity)
+        {
+            m_linearVelocity = velocity;
+            getBody()->setLinearVelocity(m_linearVelocity);
+        }
+    }
+
+    void PhysicBase::setAngularVelocity(const btVector3& velocity)
+    {
+        if (m_bIsDirty || m_angularVelocity != velocity)
+        {
+            m_angularVelocity = velocity;
+            getBody()->setAngularVelocity(m_angularVelocity);
+        }
+    }
+    
+    void PhysicBase::setLinearFactor(const btVector3& factor)
+    {
+        if (m_bIsDirty || m_linearFactor != factor)
+        {
+            m_linearFactor = factor;
+            if (getBody())
+                getBody()->setLinearFactor(m_linearFactor);
+        }
+    }
+
+    void PhysicBase::setAngularFactor(const btVector3& factor)
+    {
+        if (m_bIsDirty || m_angularFactor != factor)
+        {
+            m_angularFactor = factor;
+            if (getBody())
+                getBody()->setAngularFactor(m_angularFactor);
+        }
+    }
+
+    void PhysicBase::setCollisionMargin(float margin)
+    { 
+        if (m_bIsDirty || m_collisionMargin != margin)
+        {
+            m_collisionMargin = margin;
+            m_body->getCollisionShape()->setMargin(m_collisionMargin);
+        }
     }
 
     //! Set is trigger
     void PhysicBase::setIsTrigger(bool isTrigger)
     {
-        m_bIsTrigger = isTrigger;
-        if (m_bIsTrigger)
-            addCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-        else
-            removeCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+        if (m_bIsDirty || m_bIsTrigger != isTrigger)
+        {
+            m_bIsTrigger = isTrigger;
+            if (m_bIsTrigger)
+                addCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+            else
+                removeCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+        }
     }
 
     //! Set is kinematic
     void PhysicBase::setIsKinematic(bool isKinematic)
     {
-        m_bIsKinematic = isKinematic;
-        if (m_bIsKinematic)
+        if(m_bIsDirty || m_bIsKinematic != isKinematic)
         {
-            clearForces();
-            setLinearVelocity({0.f, 0.f, 0.f});
-            setAngularVelocity({0.f, 0.f, 0.f});
+            m_bIsKinematic = isKinematic;
+            if (m_bIsKinematic)
+            {
+                setMass(0.f);
+                clearForces();
+                setLinearVelocity({ 0.f, 0.f, 0.f });
+                setAngularVelocity({ 0.f, 0.f, 0.f });
+
+                addCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
+                m_collisionFilterGroup = 2;
+                m_collisionFilterMask = 3;
+            }
+            else
+            {
+                removeCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
+                m_collisionFilterGroup = 1;
+                m_collisionFilterMask = -1;
+            }
+
+            if (m_body->getBroadphaseHandle())
+            {
+                m_body->getBroadphaseHandle()->m_collisionFilterGroup = m_collisionFilterGroup;
+                m_body->getBroadphaseHandle()->m_collisionFilterMask = m_collisionFilterMask;
+            }
         }
-        recreateBody();
     }
 
     //! Set local scale
     void PhysicBase::setLocalScale(const Vec3& scale)
-    { 
-        m_previousScale = scale;
-        if(m_shape)
-            m_shape->setLocalScaling(PhysicHelper::to_btVector3(m_previousScale));
+    {
+        if (m_bIsDirty || m_previousScale != scale)
+        {
+            m_previousScale = scale;
+            if (m_shape)
+                m_shape->setLocalScaling(PhysicHelper::to_btVector3(m_previousScale));
+        }
     }
 
     //! Create physic body
@@ -118,6 +211,8 @@ namespace ige::scene
         m_motion = std::make_unique<btDefaultMotionState>(PhysicHelper::to_btTransform(*(getOwner()->getTransform())));
         m_body = std::make_unique<btRigidBody>(btRigidBody::btRigidBodyConstructionInfo{0.0f, m_motion.get(), m_shape.get(), btVector3(0.0f, 0.0f, 0.0f)});
         m_body->setUserPointer(this);
+
+        m_bIsDirty = true;
 
         // Apply pre-configurated values
         setMass(m_mass);
@@ -128,25 +223,6 @@ namespace ige::scene
         setLinearFactor(m_linearFactor);
         setAngularFactor(m_angularFactor);
         setCollisionMargin(m_collisionMargin);
-
-        // Apply collision filter group and mask
-        if (m_bIsKinematic)
-        {
-            addCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
-            m_collisionFilterGroup = 2;
-            m_collisionFilterMask = 3;
-        }
-        else
-        {
-            m_collisionFilterGroup = 1;
-            m_collisionFilterMask = -1;
-        }
-
-        if (m_body->getBroadphaseHandle())
-        {
-            m_body->getBroadphaseHandle()->m_collisionFilterGroup = m_collisionFilterGroup;
-            m_body->getBroadphaseHandle()->m_collisionFilterMask = m_collisionFilterMask;
-        }
 
         // Continuos detection mode
         setCCD(m_bIsCCD);
@@ -160,6 +236,8 @@ namespace ige::scene
         // Add trigger flag
         if (m_bIsTrigger)
             addCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+
+        m_bIsDirty = false;
 
         if (m_bIsEnabled)
             activate();
@@ -266,6 +344,7 @@ namespace ige::scene
             const btTransform &result = m_body->getWorldTransform();
             getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
             getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
+            getOwner()->getTransform()->onUpdate(0.f);
         }
     }
 

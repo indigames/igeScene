@@ -42,7 +42,10 @@ namespace ige::scene
             m_shape.reset();
         m_shape = std::make_unique<btSphereShape>(radius);
         m_radius = radius;
+
+        m_bIsDirty = true;
         setLocalScale(m_previousScale);
+        m_bIsDirty = false;
     }
 
     //! Recreate collision shape
@@ -60,10 +63,11 @@ namespace ige::scene
     //! Set local scale of the box
     void PhysicSphere::setLocalScale(const Vec3 &scale)
     {
-        if (m_shape)
+        if (m_shape && (m_bIsDirty || m_previousScale != scale))
         {
             float radiusScale = std::max(std::max(scale[0], scale[1]), scale[2]);
             m_shape->setLocalScaling({radiusScale, radiusScale, radiusScale});
+            m_previousScale = scale;
         }
     }
 
