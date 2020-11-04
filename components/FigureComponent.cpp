@@ -113,12 +113,121 @@ namespace ige::scene
         }
     }
 
+    //! Enable cull face
+    void FigureComponent::setCullFaceEnable(bool enable)
+    {
+        if (m_bIsCullFaceEnable != enable)
+        {
+            m_bIsCullFaceEnable = enable;
+            if (m_figure)
+            {
+                // Setup point lights shader
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetFrontFaceCulling(m_bIsCullFaceEnable);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
+            }
+        }
+    }
+
+    //! Enable depth testing
+    void FigureComponent::setDepthTestEnable(bool enable)
+    {
+        if (m_bIsDepthTestEnable != enable)
+        {
+            m_bIsDepthTestEnable = enable;
+            if (m_figure)
+            {
+                // Setup point lights shader
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetZTest(m_bIsDepthTestEnable);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
+            }
+        }
+    }
+
+    //! Enable depth testing
+    void FigureComponent::setDepthWriteEnable(bool enable)
+    {
+        if (m_bIsDepthWriteEnable != enable)
+        {
+            m_bIsDepthWriteEnable = enable;
+            if (m_figure)
+            {
+                // Setup point lights shader
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetZWritee(m_bIsDepthWriteEnable);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
+            }
+        }
+    }
+
+    //! Enable alpha blending
+    void FigureComponent::setAlphaBlendingEnable(bool enable)
+    {
+        if (m_bIsAlphaBlendingEnable != enable)
+        {
+            m_bIsAlphaBlendingEnable = enable;
+            if (m_figure)
+            {
+                // Setup point lights shader
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetAlphaBlend(m_bIsAlphaBlendingEnable);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
+            }
+        }
+    }
+
+    //! Alpha blending operation
+    void FigureComponent::setAlphaBlendingOp(int op)
+    {
+        // Only 4 operations supported now
+        if (op < 0 || op > 4)
+            op = m_alphaBlendingOp;
+
+        if (m_alphaBlendingOp != op)
+        {
+            m_alphaBlendingOp = op;
+            if (m_figure)
+            {
+                // Setup point lights shader
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetAlphaBlendOP(m_alphaBlendingOp);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
+            }
+        }
+    }
+
     //! Serialize
     void FigureComponent::to_json(json &j) const
     {
         j = json{
-            {"path", m_path},
-            {"fog", m_bIsFogEnabled},
+            {"path", getPath()},
+            {"fog", isFogEnabled()},
+            {"cull", isCullFaceEnable()},
+            {"ztest", isDepthTestEnable()},
+            {"zwrite", isDepthWriteEnable()},
+            {"aBlend", isAlphaBlendingEnable()},
+            {"aBlendOp", getAlphaBlendingOp()},
         };
     }
 
@@ -127,5 +236,10 @@ namespace ige::scene
     {
         setPath(j.value("path", std::string()));
         setFogEnabled(j.value("fog", false));
+        setCullFaceEnable(j.value("cull", true));
+        setDepthTestEnable(j.value("ztest", true));
+        setDepthWriteEnable(j.value("zwrite", true));
+        setAlphaBlendingEnable(j.value("aBlend", true));
+        setAlphaBlendingOp(j.value("aBlendOp", 2));
     }
 } // namespace ige::scene

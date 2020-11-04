@@ -32,11 +32,31 @@ namespace ige::scene
 
         //! Path
         void setPath(const std::string &path);
-        const std::string &getPath() { return m_path; }
+        const std::string &getPath() const { return m_path; }
 
         //! Enable fog
-        const bool isFogEnabled() { return m_bIsFogEnabled; }
+        const bool isFogEnabled() const { return m_bIsFogEnabled; }
         void setFogEnabled(bool enable = true);
+
+        //! Enable cull face
+        const bool isCullFaceEnable() const { return m_bIsCullFaceEnable; }
+        void setCullFaceEnable(bool enable = true);
+
+        //! Enable depth test
+        const bool isDepthTestEnable() const { return m_bIsDepthTestEnable; }
+        void setDepthTestEnable(bool enable = true);
+
+        //! Enable depth write
+        const bool isDepthWriteEnable() const { return m_bIsDepthWriteEnable; }
+        void setDepthWriteEnable(bool enable = true);
+
+        //! Enable alpha blending
+        const bool isAlphaBlendingEnable() const { return m_bIsAlphaBlendingEnable; }
+        void setAlphaBlendingEnable(bool enable = true);
+
+        //! Alpha blending operation
+        const int getAlphaBlendingOp() const { return m_alphaBlendingOp; }
+        void setAlphaBlendingOp(int op);
 
     protected:
         //! Serialize
@@ -53,5 +73,20 @@ namespace ige::scene
 
         //! Cache fog state
         bool m_bIsFogEnabled = false;
+
+        //! Cache culling state
+        bool m_bIsCullFaceEnable = true;
+
+        //! Cache z-testing state
+        bool m_bIsDepthTestEnable = true;
+
+        //! Cache z-write state
+        bool m_bIsDepthWriteEnable = true;
+
+        //! Cache alpha blending state
+        bool m_bIsAlphaBlendingEnable = true;
+
+        //! Cache alpha blending operation (COL = 0, ADD = 1, SUB = 2, MUL = 3)
+        int m_alphaBlendingOp = 2;
     };
 } // namespace ige::scene
