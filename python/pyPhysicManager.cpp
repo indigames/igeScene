@@ -1,9 +1,13 @@
 #include "python/pyPhysicManager.h"
 #include "python/pyPhysicManager_doc_en.h"
 #include "python/pySceneObject.h"
+#include "python/pyPhysicBase.h"
 
 #include "physic/PhysicManager.h"
 #include "utils/PhysicHelper.h"
+
+#include "pyRigidBody.h"
+using namespace ige::bullet;
 
 #include <pyVectorMath.h>
 #include <pythonResource.h>
@@ -82,18 +86,18 @@ namespace ige::scene
         auto end = PhysicHelper::to_btVector3(*((Vec3 *)v));
 
         auto hit = self->physicManager->rayTestClosest(start, end, group, mask);
-        if (hit.m_object == nullptr)
+        if (hit.object == nullptr)
             Py_RETURN_NONE;
 
         auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        hitObj->sceneObject = hit.m_object;
+        hitObj->sceneObject = reinterpret_cast<PhysicBase *>(hit.object->getUserPointer())->getOwner();
 
         auto hitPos = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(hit.m_position).P(), 3, hitPos->v);
+        vmath_cpy(PhysicHelper::from_btVector3(hit.position).P(), 3, hitPos->v);
         hitPos->d = 3;
 
         auto hitNorm = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(hit.m_normal).P(), 3, hitNorm->v);
+        vmath_cpy(PhysicHelper::from_btVector3(hit.normal).P(), 3, hitNorm->v);
         hitNorm->d = 3;
 
         PyObject *res = Py_BuildValue("{s:O,s:O,s:O,s:i}",
@@ -134,24 +138,24 @@ namespace ige::scene
         for (int i = 0; i < hits.size(); ++i)
         {
             auto hit = self->physicManager->rayTestClosest(start, end, group, mask);
-            if (hit.m_object == nullptr)
+            if (hit.object == nullptr)
                 Py_RETURN_NONE;
 
             auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            hitObj->sceneObject = hit.m_object;
+            hitObj->sceneObject = reinterpret_cast<PhysicBase *>(hits[i].object->getUserPointer())->getOwner();
 
             auto hitPos = PyObject_New(vec_obj, _Vec3Type);
-            vmath_cpy(PhysicHelper::from_btVector3(hit.m_position).P(), 3, hitPos->v);
+            vmath_cpy(PhysicHelper::from_btVector3(hits[i].position).P(), 3, hitPos->v);
             hitPos->d = 3;
 
             auto hitNorm = PyObject_New(vec_obj, _Vec3Type);
-            vmath_cpy(PhysicHelper::from_btVector3(hit.m_normal).P(), 3, hitNorm->v);
+            vmath_cpy(PhysicHelper::from_btVector3(hits[i].normal).P(), 3, hitNorm->v);
             hitNorm->d = 3;
 
             PyObject *hitTuple = Py_BuildValue("{s:O,s:O,s:O,s:i}",
-                                        "hitObject", hitObj,
-                                        "hitPosition", hitPos,
-                                        "hitNormal", hitNorm);
+                                               "hitObject", hitObj,
+                                               "hitPosition", hitPos,
+                                               "hitNormal", hitNorm);
 
             PyTuple_SetItem(res, i, hitTuple);
 
@@ -160,6 +164,203 @@ namespace ige::scene
             Py_XDECREF(hitNorm);
         }
         return res;
+    }
+
+    // Contact test
+    PyObject *PhysicManager_contactTest(PyObject_PhysicManager *self, PyObject *args)
+    {
+        PyObject *obj;
+        int group = 1;
+        int mask = -1;
+
+        btCollisionObject *object = nullptr;
+
+        if (!PyArg_ParseTuple(args, "O|ii", &obj, &mask, &group))
+        {
+            PyErr_SetString(PyExc_TypeError, "[contactTest] Parameter error!");
+            return NULL;
+        }
+
+        if (obj->ob_type == &PyTypeObject_SceneObject)
+        {
+            auto sceneObj = (PyObject_SceneObject*)obj;
+            auto physicComp = sceneObj->sceneObject->getComponent<PhysicBase>();
+            if (physicComp && physicComp->getBody())
+            {
+                object = physicComp->getBody();
+            }
+        }
+        else if (obj->ob_type == &PyTypeObject_PhysicBase)
+        {
+            auto physicBaseObj = (PyObject_PhysicBase*)obj;
+            if (physicBaseObj->component->getBody())
+                object = physicBaseObj->component->getBody();
+        }
+        else if (obj->ob_type == &RigidBodyType)
+        {
+            auto rigidBodyObject = (rigidbody_obj*)obj;
+            if (rigidBodyObject->btbody)
+                object = (btCollisionObject*)rigidBodyObject->btbody;
+        }
+
+        if (object == nullptr)
+            return PyTuple_New(0);
+
+        auto results = self->physicManager->contactTest(object, group, mask);
+        PyObject *pyResults = PyTuple_New(results.size());
+        for (int i = 0; i < results.size(); ++i)
+        {
+            const auto &result = results[i];
+
+            auto objectA = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            objectA->sceneObject = reinterpret_cast<PhysicBase *>(result.objectA->getUserPointer())->getOwner();
+
+            auto objectB = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            objectB->sceneObject = reinterpret_cast<PhysicBase *>(result.objectB->getUserPointer())->getOwner();
+
+            auto localPosA = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(PhysicHelper::from_btVector3(result.localPosA).P(), 3, localPosA->v);
+            localPosA->d = 3;
+
+            auto localPosB = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(PhysicHelper::from_btVector3(result.localPosB).P(), 3, localPosB->v);
+            localPosB->d = 3;
+
+            auto worldPosA = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(PhysicHelper::from_btVector3(result.worldPosA).P(), 3, worldPosA->v);
+            worldPosA->d = 3;
+
+            auto worldPosB = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(PhysicHelper::from_btVector3(result.worldPosB).P(), 3, worldPosB->v);
+            worldPosB->d = 3;
+
+            auto normalB = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(PhysicHelper::from_btVector3(result.normalB).P(), 3, normalB->v);
+            normalB->d = 3;
+
+            PyObject *pyResult = Py_BuildValue("{s:O,s:O,s:O,s:O,s:O,s:O,s:O}",
+                                               "objectA", objectA,
+                                               "objectB", objectB,
+                                               "localPosA", localPosA,
+                                               "localPosB", localPosB,
+                                               "worldPosA", worldPosA,
+                                               "worldPosB", worldPosB,
+                                               "normalB", normalB);
+
+            PyTuple_SetItem(pyResults, i, pyResult);
+        }
+        return pyResults;
+    }
+
+    // Contact pair test
+    PyObject *PhysicManager_contactPairTest(PyObject_PhysicManager *self, PyObject *args)
+    {
+        PyObject *objA;
+        PyObject *objB;
+        int group = 1;
+        int mask = -1;
+
+        btCollisionObject *objectA = nullptr;
+        btCollisionObject *objectB = nullptr;
+
+        if (!PyArg_ParseTuple(args, "OO|ii", &objA, &objB, &mask, &group))
+        {
+            PyErr_SetString(PyExc_TypeError, "[contactPairTest] Parameter error!");
+            return NULL;
+        }
+
+        if (objA->ob_type == &PyTypeObject_SceneObject)
+        {
+            auto sceneObj = (PyObject_SceneObject*)objA;
+            auto physicComp = sceneObj->sceneObject->getComponent<PhysicBase>();
+            if (physicComp && physicComp->getBody())
+            {
+                objectA = physicComp->getBody();
+            }
+        }
+        else if (objA->ob_type == &PyTypeObject_PhysicBase)
+        {
+            auto physicBaseObj = (PyObject_PhysicBase*)objA;
+            if (physicBaseObj->component->getBody())
+                objectA = physicBaseObj->component->getBody();
+        }
+        else if (objA->ob_type == &RigidBodyType)
+        {
+            auto rigidBodyObject = (rigidbody_obj*)objA;
+            if (rigidBodyObject->btbody)
+                objectA = (btCollisionObject*)rigidBodyObject->btbody;
+        }
+
+        if (objB->ob_type == &PyTypeObject_SceneObject)
+        {
+            auto sceneObj = (PyObject_SceneObject*)objB;
+            auto physicComp = sceneObj->sceneObject->getComponent<PhysicBase>();
+            if (physicComp && physicComp->getBody())
+            {
+                objectB = physicComp->getBody();
+            }
+        }
+        else if (objB->ob_type == &PyTypeObject_PhysicBase)
+        {
+            auto physicBaseObj = (PyObject_PhysicBase*)objB;
+            if (physicBaseObj->component->getBody())
+                objectB = physicBaseObj->component->getBody();
+        }
+        else if (objB->ob_type == &RigidBodyType)
+        {
+            auto rigidBodyObject = (rigidbody_obj*)objB;
+            if (rigidBodyObject->btbody)
+                objectB = (btCollisionObject*)rigidBodyObject->btbody;
+        }
+
+        if (objectA == nullptr || objectB == nullptr)
+            return PyTuple_New(0);
+
+        auto results = self->physicManager->contactPairTest(objectA, objectB, group, mask);
+
+        PyObject *pyResults = PyTuple_New(results.size());
+        for (int i = 0; i < results.size(); ++i)
+        {
+            const auto &result = results[i];
+
+            auto objectA = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            objectA->sceneObject = reinterpret_cast<PhysicBase *>(result.objectA->getUserPointer())->getOwner();
+
+            auto objectB = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            objectB->sceneObject = reinterpret_cast<PhysicBase *>(result.objectB->getUserPointer())->getOwner();
+
+            auto localPosA = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(PhysicHelper::from_btVector3(result.localPosA).P(), 3, localPosA->v);
+            localPosA->d = 3;
+
+            auto localPosB = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(PhysicHelper::from_btVector3(result.localPosB).P(), 3, localPosB->v);
+            localPosB->d = 3;
+
+            auto worldPosA = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(PhysicHelper::from_btVector3(result.worldPosA).P(), 3, worldPosA->v);
+            worldPosA->d = 3;
+
+            auto worldPosB = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(PhysicHelper::from_btVector3(result.worldPosB).P(), 3, worldPosB->v);
+            worldPosB->d = 3;
+
+            auto normalB = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(PhysicHelper::from_btVector3(result.normalB).P(), 3, normalB->v);
+            normalB->d = 3;
+
+            PyObject *pyResult = Py_BuildValue("{s:O,s:O,s:O,s:O,s:O,s:O,s:O}",
+                                               "objectA", objectA,
+                                               "objectB", objectB,
+                                               "localPosA", localPosA,
+                                               "localPosB", localPosB,
+                                               "worldPosA", worldPosA,
+                                               "worldPosB", worldPosB,
+                                               "normalB", normalB);
+
+            PyTuple_SetItem(pyResults, i, pyResult);
+        }
+        return pyResults;
     }
 
     // Get gravity
@@ -263,6 +464,8 @@ namespace ige::scene
         {"isDeformable", (PyCFunction)PhysicManager_isDeformable, METH_NOARGS, PhysicManager_isDeformable_doc},
         {"rayTestClosest", (PyCFunction)PhysicManager_rayTestClosest, METH_VARARGS, PhysicManager_rayTestClosest_doc},
         {"rayTestAll", (PyCFunction)PhysicManager_rayTestAll, METH_VARARGS, PhysicManager_rayTestAll_doc},
+        {"contactTest", (PyCFunction)PhysicManager_contactTest, METH_VARARGS, PhysicManager_contactTest_doc},
+        {"contactPairTest", (PyCFunction)PhysicManager_contactPairTest, METH_VARARGS, PhysicManager_contactPairTest_doc},
         {NULL, NULL}};
 
     // Get/Set

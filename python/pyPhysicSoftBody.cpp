@@ -1,7 +1,9 @@
 #include "python/pyPhysicSoftBody.h"
 #include "python/pyPhysicSoftBody_doc_en.h"
+#include "python/pySceneObject.h"
 
 #include "components/physic/PhysicSoftBody.h"
+#include "scene/SceneObject.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"
@@ -119,7 +121,16 @@ namespace ige::scene
         PyObject* obj = nullptr;
         if (PyArg_ParseTuple(value, "iO", &nodeIdx, &obj) && nodeIdx >= 0 && obj)
         {
-            if(obj->ob_type == &PyTypeObject_PhysicBase)
+            if (obj->ob_type == &PyTypeObject_SceneObject)
+            {
+                auto sceneObj = (PyObject_SceneObject*)obj;
+                auto physicComp = sceneObj->sceneObject->getComponent<PhysicBase>();
+                if (physicComp && physicComp->getBody())
+                {
+                    self->component->appendDeformableAnchor(nodeIdx, physicComp->getBody());
+                }
+            }
+            else if(obj->ob_type == &PyTypeObject_PhysicBase)
             {
                 auto physicBaseObj = (PyObject_PhysicBase*)obj;
                 if(physicBaseObj->component->getBody())
@@ -149,7 +160,16 @@ namespace ige::scene
 
         if (PyArg_ParseTuple(value, "iO|if", &nodeIdx, &obj, &disableLinkedCollission, &influent) && nodeIdx >= 0 && obj)
         {
-            if(obj->ob_type == &PyTypeObject_PhysicBase)
+            if (obj->ob_type == &PyTypeObject_SceneObject)
+            {
+                auto sceneObj = (PyObject_SceneObject*)obj;
+                auto physicComp = sceneObj->sceneObject->getComponent<PhysicBase>();
+                if (physicComp && physicComp->getBody())
+                {
+                    self->component->appendAnchor(nodeIdx, physicComp->getBody(), disableLinkedCollission, influent);
+                }
+            }
+            else if(obj->ob_type == &PyTypeObject_PhysicBase)
             {
                 auto physicBaseObj = (PyObject_PhysicBase*)obj;
                 if(physicBaseObj->component->getBody())

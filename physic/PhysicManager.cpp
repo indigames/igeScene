@@ -257,9 +257,9 @@ namespace ige::scene
         if (closestRayCallback.hasHit())
         {
             // Get closest hit
-            result.m_object = reinterpret_cast<PhysicBase *>(closestRayCallback.m_collisionObject->getUserPointer())->getOwner();
-            result.m_position = closestRayCallback.m_hitPointWorld;
-            result.m_normal = closestRayCallback.m_hitNormalWorld;
+            result.object = closestRayCallback.m_collisionObject;
+            result.position = closestRayCallback.m_hitPointWorld;
+            result.normal = closestRayCallback.m_hitNormalWorld;
         }
         return result;
     }
@@ -269,7 +269,7 @@ namespace ige::scene
     {
         std::vector<RaycastHit> result;
         auto closeRayHit = rayTestClosest(rayFromWorld, rayToWorld, group, mask);
-        if (closeRayHit.m_object == nullptr)
+        if (closeRayHit.object == nullptr)
             return result;
 
         // Get all hits
@@ -283,12 +283,48 @@ namespace ige::scene
         for (int i = 0; i < allHitsRayCallback.m_collisionObjects.size(); i++)
         {
             RaycastHit hit;
-            hit.m_object = reinterpret_cast<PhysicBase *>(allHitsRayCallback.m_collisionObjects[i]->getUserPointer())->getOwner();
-            hit.m_position = allHitsRayCallback.m_hitPointWorld[i];
-            hit.m_normal = allHitsRayCallback.m_hitNormalWorld[i];
+            hit.object = allHitsRayCallback.m_collisionObjects[i];
+            hit.position = allHitsRayCallback.m_hitPointWorld[i];
+            hit.normal = allHitsRayCallback.m_hitNormalWorld[i];
             result.push_back(hit);
         }
         return result;
+    }
+
+    //! Contact result callback
+    btScalar ContactResultCB::addSingleResult(btManifoldPoint& cp,
+        const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0,
+        const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1)
+    {
+        ContactTestResult result;
+        result.objectA = colObj0Wrap->m_collisionObject;
+        result.objectB = colObj1Wrap->m_collisionObject;
+        result.worldPosA = cp.m_positionWorldOnA;
+        result.worldPosB = cp.m_positionWorldOnB;
+        result.localPosA = cp.m_localPointA;
+        result.localPosB = cp.m_localPointB;
+        result.normalB = cp.m_normalWorldOnB;
+        outResults.push_back(result);
+        count++;
+        return 1.f;
+    }
+
+    //! Contact test
+    std::vector<ContactTestResult> PhysicManager::contactTest(btCollisionObject* object, int group, int mask)
+    {
+        std::vector<ContactTestResult> outResults;
+        ContactResultCB cb(outResults, group, mask);
+        m_world->contactTest(object, cb);
+        return outResults;
+    }
+
+    //! Contact pair test
+    std::vector<ContactTestResult> PhysicManager::contactPairTest(btCollisionObject* objectA, btCollisionObject* objectB, int group, int mask)
+    {
+        std::vector<ContactTestResult> outResults;
+        ContactResultCB cb(outResults, group, mask);
+        m_world->contactPairTest(objectA, objectB, cb);
+        return outResults;
     }
 
     bool PhysicManager::collisionCallback(btManifoldPoint &cp, const btCollisionObjectWrapper *obj1, int id1, int index1, const btCollisionObjectWrapper *obj2, int id2, int index2)

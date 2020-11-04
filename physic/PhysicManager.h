@@ -21,9 +21,38 @@ namespace ige::scene
 {
     struct RaycastHit
     {
-        SceneObject* m_object = nullptr;
-        btVector3 m_position;
-        btVector3 m_normal;
+        const btCollisionObject* object;
+        btVector3 position;
+        btVector3 normal;
+    };
+
+    struct ContactTestResult
+    {
+        const btCollisionObject* objectA;
+        const btCollisionObject* objectB;
+        btVector3 localPosA;
+        btVector3 localPosB;
+        btVector3 worldPosA;
+        btVector3 worldPosB;
+        btVector3 normalB;
+    };
+
+    struct ContactResultCB : public btCollisionWorld::ContactResultCallback
+    {
+        int count;
+        std::vector<ContactTestResult>& outResults;
+        ContactResultCB(std::vector<ContactTestResult>& _outResults, 
+                        int group = btBroadphaseProxy::DefaultFilter,
+                        int mask = btBroadphaseProxy::AllFilter)
+            : ContactResultCallback(), outResults(_outResults), count(0) 
+        {
+            m_collisionFilterGroup = group;
+            m_collisionFilterMask = mask;
+        }
+
+        virtual btScalar addSingleResult(btManifoldPoint& cp,
+            const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0,
+            const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1) override;
     };
 
     /**
@@ -60,6 +89,12 @@ namespace ige::scene
 
         //! Get world
         btSoftRigidDynamicsWorld* getDeformableWorld() { return m_world ? (btSoftRigidDynamicsWorld*)m_world.get() : nullptr; }
+
+        //! Contact test
+        std::vector<ContactTestResult> contactTest(btCollisionObject* object, int group = btBroadphaseProxy::DefaultFilter, int mask = btBroadphaseProxy::AllFilter);
+
+        //! Contact pair test
+        std::vector<ContactTestResult> contactPairTest(btCollisionObject* objectA, btCollisionObject* objectB, int group = btBroadphaseProxy::DefaultFilter, int mask = btBroadphaseProxy::AllFilter);
 
         //! Check deformable
         bool isDeformable() { return m_bDeformable; }

@@ -40,6 +40,12 @@ namespace ige::scene
     // Raytest all
     PyObject *PhysicManager_rayTestAll(PyObject_PhysicManager *self, PyObject *value);
 
+    // Contact test
+    PyObject* PhysicManager_contactTest(PyObject_PhysicManager* self, PyObject* value);
+
+    // Contact pair test
+    PyObject* PhysicManager_contactPairTest(PyObject_PhysicManager* self, PyObject* value);
+
     // Get gravity
     PyObject *PhysicManager_getGravity(PyObject_PhysicManager *self);
 

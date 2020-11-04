@@ -59,6 +59,35 @@ PyDoc_STRVAR(PhysicManager_rayTestAll_doc,
              "Return:\n"
              " Tuple of (hitObject: SceneObject, hitPosition: Vec3, hitNormal: Vec3) as Tuple \n");
 
+// contactTest
+PyDoc_STRVAR(PhysicManager_contactTest_doc,
+             "Perform contact test.\n"
+             "\n"
+             "PhysicManager.getInstance().contactTest(collisionObject, group, mask)\n"
+             "\n"
+             "Parameters:\n"
+             "    collisionObject: SceneObject, PhysicBase, or RidgidBody\n"
+             "    group: [int] Collision group\n"
+             "    mask: [int] Collision mask\n"
+             "\n"
+             "Return:\n"
+             " Tuple of (objectA: SceneObject, objectB: SceneObject, localPosA: Vec3, localPosB: Vec3, worldPosA: Vec3, worldPosB: Vec3, normalB: Vec3) as Tuple \n");
+
+// contactPairTest
+PyDoc_STRVAR(PhysicManager_contactPairTest_doc,
+             "Perform contact test between pair of objects.\n"
+             "\n"
+             "PhysicManager.getInstance().contactPairTest(collisionObjectA, collisionObjectB, group, mask)\n"
+             "\n"
+             "Parameters:\n"
+             "    collisionObjectA: SceneObject, PhysicBase, or RidgidBody\n"
+             "    collisionObjectB: SceneObject, PhysicBase, or RidgidBody\n"
+             "    group: [int] Collision group\n"
+             "    mask: [int] Collision mask\n"
+             "\n"
+             "Return:\n"
+             " Tuple of (objectA: SceneObject, objectB: SceneObject, localPosA: Vec3, localPosB: Vec3, worldPosA: Vec3, worldPosB: Vec3, normalB: Vec3) as Tuple \n");
+
 // isDeformable
 PyDoc_STRVAR(PhysicManager_isDeformable_doc,
              "Check if the world is deformable.\n"
