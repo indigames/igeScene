@@ -369,6 +369,43 @@ namespace ige::scene
         }
     }
 
+    //! Get nearest node
+    int PhysicSoftBody::getNearestNodeIndex(const btVector3& pos)
+    {
+        int nearestNo = -1;
+        float dist = FLT_MAX;
+        btVector3 nearestPos(0,0,0);
+
+        int nNodes = getSoftBody()->m_nodes.size();
+        for (int i = 0; i < nNodes; i++)
+        {
+            float l = pos.distance2(getSoftBody()->m_nodes[i].m_x);
+            if (dist > l)
+            {
+                dist = l;
+                nearestNo = i;
+                nearestPos = getSoftBody()->m_nodes[i].m_x;
+            }
+        }
+        return nearestNo;
+    }
+
+    //! Get node position
+    btVector3 PhysicSoftBody::getNodePosition(int idx)
+    {
+        if(idx < 0 || idx >= getSoftBody()->m_nodes.size())
+            return btVector3(FLT_MAX, FLT_MAX, FLT_MAX);
+        return getSoftBody()->m_nodes[idx].m_x;
+    }
+
+    //! Get node normal
+    btVector3 PhysicSoftBody::getNodeNormal(int idx)
+    {
+        if(idx < 0 || idx >= getSoftBody()->m_nodes.size())
+            return btVector3(FLT_MAX, FLT_MAX, FLT_MAX);
+        return getSoftBody()->m_nodes[idx].m_n;
+    }
+
     //! Update Bullet transform
     void PhysicSoftBody::updateBtTransform()
     {
@@ -409,7 +446,7 @@ namespace ige::scene
 
         int index = 0;
         int offset = 0;
-                
+
         auto figure = figureComp->getFigure();
         auto mesh = figure->GetMesh(index);
         auto attIdx = -1;
@@ -449,7 +486,7 @@ namespace ige::scene
             }
             figure->ResetMeshBuffer(index, true, false, true);
         }
-  
+
         attIdx = -1;
         for (uint16_t i = 0; i < mesh->numVertexAttributes; ++i) {
             if (mesh->vertexAttributes[i].id == AttributeID::ATTRIBUTE_ID_NORMAL) {
@@ -489,7 +526,7 @@ namespace ige::scene
     }
 
     //! Optimize mesh
-    void PhysicSoftBody::optimizeMesh(const std::vector<Vec3>& orgPoss, int* indices, int numIndeces, float*& optPoss) 
+    void PhysicSoftBody::optimizeMesh(const std::vector<Vec3>& orgPoss, int* indices, int numIndeces, float*& optPoss)
     {
         if (m_indicesMap != nullptr)
             delete[] m_indicesMap;

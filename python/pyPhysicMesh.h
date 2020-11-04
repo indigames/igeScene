@@ -5,13 +5,13 @@
 #include "components/Component.h"
 #include "components/physic/PhysicMesh.h"
 
-#include "python/pyComponent.h"
+#include "python/pyPhysicBase.h"
 
 namespace ige::scene
 {
     struct PyObject_PhysicMesh
     {
-        PyObject_Component super;
+        PyObject_PhysicBase super;
         PhysicMesh *component;
     };
 

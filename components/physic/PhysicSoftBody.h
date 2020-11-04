@@ -27,7 +27,7 @@ namespace ige::scene
         virtual std::string getName() const override { return "PhysicSoftBody"; }
 
         //! Mass
-        virtual void setMass(float mass) override { 
+        virtual void setMass(float mass) override {
             m_mass = mass;
             if(m_mass > 0.f)
                 getSoftBody()->setTotalMass(m_mass);
@@ -44,7 +44,7 @@ namespace ige::scene
         virtual void setAngularVelocity(const btVector3& velocity) override;
 
         //! Get AABB
-        virtual void getAABB(btVector3& aabbMin, btVector3 aabbMax) override { 
+        virtual void getAABB(btVector3& aabbMin, btVector3 aabbMax) override {
             getSoftBody()->getAabb(aabbMin, aabbMax);
         }
 
@@ -104,7 +104,7 @@ namespace ige::scene
         virtual float getAnchorHardness() const { return m_anchorHardness; }
         virtual void setAnchorHardness(float factor);
 
-        //! Gravity factor
+        //! Position interation number
         virtual int getPosIterationNumber() const { return m_positionIterNumber; }
         virtual void setPosIterationNumber(int number);
 
@@ -116,7 +116,7 @@ namespace ige::scene
         virtual bool isSelfCollision() const { return m_bUseSelfCollision; }
         virtual void setSelfCollision(bool selfCollision = true);
 
-        //! Soft soft collision
+        //! Soft soft-collision
         virtual bool isSoftSoftCollision() const { return m_softSoftCollision; }
         virtual void setSoftSoftCollision(bool soft = true);
 
@@ -143,7 +143,15 @@ namespace ige::scene
         virtual void applyRepulsionForce(float timeStep, bool applySpringForce) { getSoftBody()->applyRepulsionForce(timeStep, applySpringForce); }
 
         //! Add Velocity
-        virtual void addVelocity(const btVector3& velocity) { getSoftBody()->addVelocity(velocity); }
+        virtual void addVelocity(const btVector3& velocity, int nodeIdx = -1)
+        {
+            if (nodeIdx >= 0) {
+                getSoftBody()->addVelocity(velocity, nodeIdx);
+            }
+            else {
+                getSoftBody()->addVelocity(velocity);
+            }
+        }
 
         //! Get Volume
         virtual float getVolume() const { return getSoftBody()->getVolume(); }
@@ -152,12 +160,28 @@ namespace ige::scene
         virtual btVector3 getCenterOfMass() const { return getSoftBody()->getCenterOfMass(); }
 
         //! Append deformable anchor
-        virtual void appendDeformableAnchor(int node, btRigidBody* body) { getSoftBody()->appendDeformableAnchor(node, body); }
+        virtual void appendDeformableAnchor(int node, btRigidBody* body) {
+            getSoftBody()->appendDeformableAnchor(node, body);
+        }
 
         //! Append anchor
-        virtual void appendAnchor(int node, btRigidBody* body, bool disableLinkedColission = false, btScalar influence = 1) {
-            getSoftBody()->appendAnchor(node, body, disableLinkedColission, influence);
+        virtual void appendAnchor(int node, btRigidBody* body, bool disableLinkedCollission = false, btScalar influence = 1) {
+            getSoftBody()->appendAnchor(node, body, disableLinkedCollission, influence);
         }
+
+        //! Remove anchor
+        virtual void removeAnchor(int node) {
+            getSoftBody()->removeAnchor(node);
+        }
+
+        //! Get nearest node index
+        virtual int getNearestNodeIndex(const btVector3& pos);
+
+        //! Get node position
+        virtual btVector3 getNodePosition(int idx);
+
+        //! Get node normal
+        virtual btVector3 getNodeNormal(int idx);
 
     protected:
         //! Serialize
@@ -232,7 +256,7 @@ namespace ige::scene
 
         //! Wind Velocity
         btVector3 m_windVelocity = {0.f, 0.f, 0.f};
-        
+
         //! Cache indices map
         int* m_indicesMap = nullptr;
 };
