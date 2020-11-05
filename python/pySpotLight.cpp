@@ -1,7 +1,7 @@
-#include "python/pyPointLight.h"
-#include "python/pyPointLight_doc_en.h"
+#include "python/pySpotLight.h"
+#include "python/pySpotLight_doc_en.h"
 
-#include "components/light/PointLight.h"
+#include "components/light/SpotLight.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
@@ -11,7 +11,7 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    void PointLight_dealloc(PyObject_PointLight *self)
+    void SpotLight_dealloc(PyObject_SpotLight *self)
     {
         if (self && self->component)
         {
@@ -20,13 +20,13 @@ namespace ige::scene
         PyObject_Del(self);
     }
 
-    PyObject *PointLight_str(PyObject_PointLight *self)
+    PyObject *SpotLight_str(PyObject_SpotLight *self)
     {
-        return PyUnicode_FromString("C++ PointLight object");
+        return PyUnicode_FromString("C++ SpotLight object");
     }
 
     // Color
-    PyObject *PointLight_getColor(PyObject_PointLight *self)
+    PyObject *SpotLight_getColor(PyObject_SpotLight *self)
     {
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getColor().P(), 3, vec3Obj->v);
@@ -34,7 +34,7 @@ namespace ige::scene
         return (PyObject *)vec3Obj;
     }
 
-    int PointLight_setColor(PyObject_PointLight *self, PyObject *value)
+    int SpotLight_setColor(PyObject_SpotLight *self, PyObject *value)
     {
         int d;
         float buff[4];
@@ -46,12 +46,12 @@ namespace ige::scene
     }
 
     //! Intensity
-    PyObject *PointLight_getIntensity(PyObject_PointLight *self)
+    PyObject *SpotLight_getIntensity(PyObject_SpotLight *self)
     {
         return PyFloat_FromDouble(self->component->getIntensity());
     }
 
-    int PointLight_setIntensity(PyObject_PointLight *self, PyObject *value)
+    int SpotLight_setIntensity(PyObject_SpotLight *self, PyObject *value)
     {
         float val;
         if (PyArg_ParseTuple(value, "f", &val))
@@ -63,12 +63,12 @@ namespace ige::scene
     }
 
     //! Range
-    PyObject *PointLight_getRange(PyObject_PointLight *self)
+    PyObject *SpotLight_getRange(PyObject_SpotLight *self)
     {
         return PyFloat_FromDouble(self->component->getRange());
     }
 
-    int PointLight_setRange(PyObject_PointLight *self, PyObject *value)
+    int SpotLight_setRange(PyObject_SpotLight *self, PyObject *value)
     {
         float val;
         if (PyArg_ParseTuple(value, "f", &val))
@@ -79,8 +79,25 @@ namespace ige::scene
         return -1;
     }
 
+    //! Angle
+    PyObject *SpotLight_getAngle(PyObject_SpotLight *self)
+    {
+        return PyFloat_FromDouble(self->component->getAngle());
+    }
+
+    int SpotLight_setAngle(PyObject_SpotLight *self, PyObject *value)
+    {
+        float val;
+        if (PyArg_ParseTuple(value, "f", &val))
+        {
+            self->component->setAngle(val);
+            return 0;
+        }
+        return -1;
+    }
+
     // Position
-    PyObject *PointLight_getPosition(PyObject_PointLight *self)
+    PyObject *SpotLight_getPosition(PyObject_SpotLight *self)
     {
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
@@ -88,18 +105,29 @@ namespace ige::scene
         return (PyObject *)vec3Obj;
     }
 
-    PyGetSetDef PointLight_getsets[] = {
-        {"color", (getter)PointLight_getColor, (setter)PointLight_setColor, PointLight_color_doc, NULL},
-        {"intensity", (getter)PointLight_getIntensity, (setter)PointLight_setIntensity, PointLight_intensity_doc, NULL},
-        {"range", (getter)PointLight_getRange, (setter)PointLight_setRange, PointLight_range_doc, NULL},
-        {"position", (getter)PointLight_getPosition, NULL, PointLight_position_doc, NULL},
+    // Direction
+    PyObject *SpotLight_getDirection(PyObject_SpotLight *self)
+    {
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(self->component->getDirection().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject *)vec3Obj;
+    }
+
+    PyGetSetDef SpotLight_getsets[] = {
+        {"color", (getter)SpotLight_getColor, (setter)SpotLight_setColor, SpotLight_color_doc, NULL},
+        {"intensity", (getter)SpotLight_getIntensity, (setter)SpotLight_setIntensity, SpotLight_intensity_doc, NULL},
+        {"range", (getter)SpotLight_getRange, (setter)SpotLight_setRange, SpotLight_range_doc, NULL},
+        {"angle", (getter)SpotLight_getAngle, (setter)SpotLight_setAngle, SpotLight_angle_doc, NULL},
+        {"position", (getter)SpotLight_getPosition, NULL, SpotLight_position_doc, NULL},
+        {"direction", (getter)SpotLight_getDirection, NULL, SpotLight_direction_doc, NULL},
         {NULL, NULL}};
 
-    PyTypeObject PyTypeObject_PointLight = {
-        PyVarObject_HEAD_INIT(NULL, 1) "igeScene.PointLight", /* tp_name */
-        sizeof(PyObject_PointLight),                          /* tp_basicsize */
+    PyTypeObject PyTypeObject_SpotLight = {
+        PyVarObject_HEAD_INIT(NULL, 1) "igeScene.SpotLight", /* tp_name */
+        sizeof(PyObject_SpotLight),                          /* tp_basicsize */
         0,                                                          /* tp_itemsize */
-        (destructor)PointLight_dealloc,                       /* tp_dealloc */
+        (destructor)SpotLight_dealloc,                       /* tp_dealloc */
         0,                                                          /* tp_print */
         0,                                                          /* tp_getattr */
         0,                                                          /* tp_setattr */
@@ -110,7 +138,7 @@ namespace ige::scene
         0,                                                          /* tp_as_mapping */
         0,                                                          /* tp_hash */
         0,                                                          /* tp_call */
-        (reprfunc)PointLight_str,                             /* tp_str */
+        (reprfunc)SpotLight_str,                             /* tp_str */
         0,                                                          /* tp_getattro */
         0,                                                          /* tp_setattro */
         0,                                                          /* tp_as_buffer */
@@ -124,7 +152,7 @@ namespace ige::scene
         0,                                                          /* tp_iternext */
         0,                                                          /* tp_methods */
         0,                                                          /* tp_members */
-        PointLight_getsets,                                   /* tp_getset */
+        SpotLight_getsets,                                   /* tp_getset */
         &PyTypeObject_Component,                                    /* tp_base */
         0,                                                          /* tp_dict */
         0,                                                          /* tp_descr_get */

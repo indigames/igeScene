@@ -78,13 +78,14 @@ namespace ige::scene
 
             m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
             m_figure->WaitInitialize();
-            
-            // Setup point lights shader
+
+            // Setup lights shader
             for (int i = 0; i < m_figure->NumMaterials(); ++i)
             {
                 auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
                 shaderDesc->SetValue(m_figure->GetShaderName(i));
                 shaderDesc->SetNumPointLamp(MAX_POINT_LIGHT_NUMBER);
+                shaderDesc->SetNumSpotLamp(MAX_SPOT_LIGHT_NUMBER);
                 m_figure->SetShaderName(i, shaderDesc->GetValue());
             }
 

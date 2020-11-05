@@ -17,7 +17,7 @@ namespace ige::scene
     {
         m_sprite = std::make_shared<Sprite>(path, size);
         if (m_sprite->getFigure())
-            getOwner()->getScene()->getResourceAddedEvent().invoke(m_sprite->getFigure());        
+            getOwner()->getScene()->getResourceAddedEvent().invoke(m_sprite->getFigure());
         setBillboard(isBillboard);
     }
 

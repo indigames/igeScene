@@ -11,6 +11,7 @@
 
 #define MAX_DIRECTIONAL_LIGHT_NUMBER    3
 #define MAX_POINT_LIGHT_NUMBER          7
+#define MAX_SPOT_LIGHT_NUMBER           7
 
 
 namespace ige::scene
@@ -120,6 +121,11 @@ namespace ige::scene
         int acquirePointLight();
         void releasePointLight(int index);
 
+        //! Acquire spot light
+        bool isSpotLightAvailable();
+        int acquireSpotLight();
+        void releaseSpotLight(int index);
+
         //! Shadow texture size
         const Vec2& getShadowTextureSize() const;
         void setShadowTextureSize(const Vec2& size);
@@ -167,5 +173,8 @@ namespace ige::scene
 
         //! Point light index
         bool m_pointLights[MAX_POINT_LIGHT_NUMBER] = { false };
+
+        //! Spot light index
+        bool m_spotLights[MAX_SPOT_LIGHT_NUMBER] = { false };
     };
 }

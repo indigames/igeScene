@@ -551,6 +551,44 @@ namespace ige::scene
         m_environment->SetPointLampRange(idx, 100.0f);
     }
 
+    //! Acquire spot light
+    bool Scene::isSpotLightAvailable()
+    {
+        for (auto enable : m_spotLights)
+        {
+            if (!enable)
+                return true;
+        }
+        return false;
+    }
+
+    int Scene::acquireSpotLight()
+    {
+        for (int i = 0; i < MAX_SPOT_LIGHT_NUMBER; ++i)
+        {
+            if (m_spotLights[i] == false)
+            {
+                m_spotLights[i] = true;
+                return i;
+            }
+        }
+        // safe value
+        return 0;
+    }
+
+    void Scene::releaseSpotLight(int idx)
+    {
+        m_spotLights[idx] = false;
+
+        // Reset to default value
+        m_environment->SetSpotLampColor(idx, { 0.5f, 0.5f, 0.5f });
+        m_environment->SetSpotLampPosition(idx, { 0.0f, 100.0f, 0.0f });
+        m_environment->SetSpotLampIntensity(idx, 0.0f);
+        m_environment->SetSpotLampRange(idx, 100.0f);
+        m_environment->SetSpotLampDirection(idx, {0.f, -1.f, 0.f});
+        m_environment->SetSpotLampAngle(idx, 30.f);
+    }
+
     //! Shadow texture size
     const Vec2& Scene::getShadowTextureSize() const
     {

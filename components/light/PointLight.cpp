@@ -83,8 +83,8 @@ namespace ige::scene
     void PointLight::from_json(const json &j)
     {
         setIntensity(j.value("its", 1.f));
-        setColor(j.value("col", Vec3()));
-        setRange(j.value("rng", 1.f));
+        setColor(j.value("col", Vec3(1.f, 1.f, 1.f)));
+        setRange(j.value("rng", 100.0f));
     }
 
 } // namespace ige::scene
