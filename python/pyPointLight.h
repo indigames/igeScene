@@ -3,7 +3,7 @@
 #include <Python.h>
 
 #include "components/Component.h"
-#include "components/PointLight.h"
+#include "components/light/PointLight.h"
 
 #include "python/pyComponent.h"
 

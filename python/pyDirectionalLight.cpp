@@ -1,7 +1,7 @@
 #include "python/pyDirectionalLight.h"
 #include "python/pyDirectionalLight_doc_en.h"
 
-#include "components/DirectionalLight.h"
+#include "components/light/DirectionalLight.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;

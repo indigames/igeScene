@@ -1,7 +1,7 @@
 #include "python/pyAmbientLight.h"
 #include "python/pyAmbientLight_doc_en.h"
 
-#include "components/AmbientLight.h"
+#include "components/light/AmbientLight.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;

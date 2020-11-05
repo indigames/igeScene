@@ -1,7 +1,7 @@
 #include "python/pyPointLight.h"
 #include "python/pyPointLight_doc_en.h"
 
-#include "components/PointLight.h"
+#include "components/light/PointLight.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;

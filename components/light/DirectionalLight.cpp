@@ -1,4 +1,4 @@
-#include "components/DirectionalLight.h"
+#include "components/light/DirectionalLight.h"
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 

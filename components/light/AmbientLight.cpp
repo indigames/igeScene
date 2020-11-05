@@ -1,4 +1,4 @@
-#include "components/AmbientLight.h"
+#include "components/light/AmbientLight.h"
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 

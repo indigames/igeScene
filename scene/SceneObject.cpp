@@ -23,9 +23,9 @@
 #include "components/physic/PhysicSoftBody.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
-#include "components/AmbientLight.h"
-#include "components/DirectionalLight.h"
-#include "components/PointLight.h"
+#include "components/light/AmbientLight.h"
+#include "components/light/DirectionalLight.h"
+#include "components/light/PointLight.h"
 
 namespace ige::scene
 {
