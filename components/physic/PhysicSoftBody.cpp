@@ -31,6 +31,16 @@ namespace ige::scene
         m_indicesMap = nullptr;
     }
 
+    //! Set mesh index
+    void PhysicSoftBody::setMeshIndex(int idx)
+    {
+        if (m_bIsDirty || m_meshIndex != idx)
+        {
+            m_meshIndex = idx;
+            recreateBody();
+        }
+    }
+
     //! Linear velocity
     void PhysicSoftBody::setLinearVelocity(const btVector3& velocity)
     {
@@ -244,14 +254,13 @@ namespace ige::scene
         if (figure != nullptr)
         {
             figure->WaitInitialize();
-            if (figure->NumMeshes() > 0)
+            if (figure->NumMeshes() > 0 && m_meshIndex >= 0 && m_meshIndex < figure->NumMeshes())
             {
-                int index = 0;
                 int offset = 0;
                 int size = 100000000;
-                int space = Space::WorldSpace;
+                int space = Space::LocalSpace;
 
-                auto mesh = figure->GetMesh(index);
+                auto mesh = figure->GetMesh(m_meshIndex);
                 auto attIdx = -1;
                 for (uint16_t i = 0; i < mesh->numVertexAttributes; ++i)
                 {
@@ -272,7 +281,7 @@ namespace ige::scene
                         float* palettebuffer = nullptr;
                         float* inbindSkinningMatrices = nullptr;
                         figure->AllocTransformBuffer(space, palettebuffer, inbindSkinningMatrices);
-                        figure->ReadPositions(index, offset, size, space, palettebuffer, inbindSkinningMatrices, &positions);
+                        figure->ReadPositions(m_meshIndex, offset, size, space, palettebuffer, inbindSkinningMatrices, &positions);
                         if (inbindSkinningMatrices)
                             PYXIE_FREE_ALIGNED(inbindSkinningMatrices);
                         if (palettebuffer)
@@ -444,11 +453,10 @@ namespace ige::scene
         if (!figureComp || !figureComp->getFigure())
             return;
 
-        int index = 0;
         int offset = 0;
 
         auto figure = figureComp->getFigure();
-        auto mesh = figure->GetMesh(index);
+        auto mesh = figure->GetMesh(m_meshIndex);
         auto attIdx = -1;
         for (uint16_t i = 0; i < mesh->numVertexAttributes; ++i) {
             if (mesh->vertexAttributes[i].id == AttributeID::ATTRIBUTE_ID_POSITION) {
@@ -484,7 +492,7 @@ namespace ige::scene
                 uint8_t* location = ((uint8_t*)mesh->vertices) + (i + offset) * mesh->vertexFormatSize + mesh->vertexAttributes[attIdx].offset;
                 memcpy(location, buffer, elemSize * mesh->vertexAttributes[attIdx].size);
             }
-            figure->ResetMeshBuffer(index, true, false, true);
+            figure->ResetMeshBuffer(m_meshIndex, true, false, true);
         }
 
         attIdx = -1;
@@ -521,7 +529,7 @@ namespace ige::scene
                 uint8_t* location = ((uint8_t*)mesh->vertices) + (i + offset) * mesh->vertexFormatSize + mesh->vertexAttributes[attIdx].offset;
                 memcpy(location, buffer, elemSize * mesh->vertexAttributes[attIdx].size);
             }
-            figure->ResetMeshBuffer(index, true, false, true);
+            figure->ResetMeshBuffer(m_meshIndex, true, false, true);
         }
     }
 
@@ -563,6 +571,7 @@ namespace ige::scene
     void PhysicSoftBody::to_json(json &j) const
     {
         PhysicBase::to_json(j);
+        j["meshIdx"] = getMeshIndex();
         j["dampCoeff"] = getDampingCoeff();
         j["presCoeff"] = getPressureCoeff();
         j["volCoeff"] = getVolumeConvCoeff();
@@ -588,6 +597,7 @@ namespace ige::scene
     void PhysicSoftBody::from_json(const json &j)
     {
         PhysicBase::from_json(j);
+        setMeshIndex(j.value("meshIdx", 0));
         setDampingCoeff(j.value("dampCoeff", 0.4f));
         setPressureCoeff(j.value("presCoeff", 0.f));
         setVolumeConvCoeff(j.value("volCoeff", 0.f));

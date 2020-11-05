@@ -2,6 +2,8 @@
 #include <bullet/btBulletDynamicsCommon.h>
 
 #include "components/physic/PhysicMesh.h"
+#include "components/FigureComponent.h"
+#include "scene/SceneObject.h"
 #include "utils/PhysicHelper.h"
 
 #include "utils/filesystem.h"
@@ -10,10 +12,10 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    PhysicMesh::PhysicMesh(SceneObject &owner, const std::string &path)
+    PhysicMesh::PhysicMesh(SceneObject &owner)
         : PhysicBase(owner)
     {
-        createCollisionShape(path);
+        createCollisionShape();
         init();
     }
 
@@ -50,7 +52,18 @@ namespace ige::scene
 
         if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
         {
-            recreateCollisionShape(relPath);
+            m_path = relPath;
+            recreateCollisionShape();
+        }
+    }
+
+    //! Set mesh index
+    void PhysicMesh::setMeshIndex(int idx)
+    {
+        if (m_bIsDirty || m_meshIndex != idx)
+        {
+            m_meshIndex = idx;
+            recreateCollisionShape();
         }
     }
 
@@ -71,7 +84,7 @@ namespace ige::scene
         if (m_bIsConvex != convex)
         {
             m_bIsConvex = convex;
-            recreateCollisionShape(m_path);
+            recreateCollisionShape();
         }
     }
 
@@ -89,25 +102,42 @@ namespace ige::scene
     }
 
     //! Create collision shape
-    void PhysicMesh::createCollisionShape(const std::string &path)
+    void PhysicMesh::createCollisionShape()
     {
         // Create collision shape
         if (m_shape != nullptr)
             m_shape.reset();
 
+        Figure* figure = nullptr;
+        bool figureCreated = false;
         std::vector<Vec3> positions;
-        auto figure = ResourceCreator::Instance().NewFigure(path.c_str());
+
+        // Load from mesh file first
+        if (!m_path.empty() && fs::exists(m_path) && !fs::is_directory(m_path))
+        {
+            figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
+            figureCreated = true;
+        }
+
+        // If failed, try with figure component
+        if (figure == nullptr)
+        {
+            auto figureComp = getOwner()->getComponent<FigureComponent>();
+            if (figureComp)
+                figure = figureComp->getFigure();
+        }
+
+        // Load mesh from figure
         if (figure != nullptr)
         {
             figure->WaitInitialize();
-            if (figure->NumMeshes() > 0)
+            if (figure->NumMeshes() > 0 && m_meshIndex >= 0 && m_meshIndex < figure->NumMeshes())
             {
-                int index = 0;
                 int offset = 0;
                 int size = 100000000;
-                int space = Space::WorldSpace;
+                int space = Space::LocalSpace;
 
-                auto mesh = figure->GetMesh(index);
+                auto mesh = figure->GetMesh(m_meshIndex);
                 auto attIdx = -1;
                 for (uint16_t i = 0; i < mesh->numVertexAttributes; ++i)
                 {
@@ -128,7 +158,7 @@ namespace ige::scene
                         float *palettebuffer = nullptr;
                         float *inbindSkinningMatrices = nullptr;
                         figure->AllocTransformBuffer(space, palettebuffer, inbindSkinningMatrices);
-                        figure->ReadPositions(index, offset, size, space, palettebuffer, inbindSkinningMatrices, &positions);
+                        figure->ReadPositions(m_meshIndex, offset, size, space, palettebuffer, inbindSkinningMatrices, &positions);
                         if (inbindSkinningMatrices)
                             PYXIE_FREE_ALIGNED(inbindSkinningMatrices);
                         if (palettebuffer)
@@ -171,38 +201,36 @@ namespace ige::scene
                     triangleMeshShape = nullptr;
                 }
             }
-            figure->DecReference();
+            if(figureCreated)
+                figure->DecReference();
             figure = nullptr;
         }
 
         if (m_shape == nullptr)
             m_shape = std::make_unique<btConvexHullShape>();
 
-        m_path = path;
         setLocalScale(m_previousScale);
     }
 
     //! Recreate collision shape
-    void PhysicMesh::recreateCollisionShape(const std::string &path)
+    void PhysicMesh::recreateCollisionShape()
     {
-        if (!path.empty())
-        {
-            // Create collision shape
-            if (m_shape != nullptr)
-                m_shape.reset();
+        // Create collision shape
+        if (m_shape != nullptr)
+            m_shape.reset();
 
-            // Create collision shape
-            createCollisionShape(path);
+        // Create collision shape
+        createCollisionShape();
 
-            // Create body
-            recreateBody();
-        }
+        // Create body
+        recreateBody();
     }
 
     //! Serialize
     void PhysicMesh::to_json(json &j) const
     {
         PhysicBase::to_json(j);
+        j["meshIdx"] = getMeshIndex();
         j["convex"] = isConvex();
         j["path"] = getPath();
     }
@@ -211,6 +239,7 @@ namespace ige::scene
     void PhysicMesh::from_json(const json &j)
     {
         PhysicBase::from_json(j);
+        setMeshIndex(j.value("meshIdx", 0));
         setConvex(j.value("convex", (int)(true)));
         setPath(j.value("path", std::string()));
     }

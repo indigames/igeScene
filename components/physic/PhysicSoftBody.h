@@ -26,6 +26,10 @@ namespace ige::scene
         // Inherited via Component
         virtual std::string getName() const override { return "PhysicSoftBody"; }
 
+        //! Mesh Index
+        int getMeshIndex() const { return m_meshIndex; };
+        void setMeshIndex(int idx);
+
         //! Mass
         virtual void setMass(float mass) override {
             m_mass = mass;
@@ -200,6 +204,9 @@ namespace ige::scene
         void optimizeMesh(const std::vector<Vec3>&, int* indices, int numIndeces, float*& optPoss);
 
     protected:
+        //! Mesh index
+        int m_meshIndex = 0;
+
         //! Damping Coefficient
         float m_dampingCoeff = 1.f;
 

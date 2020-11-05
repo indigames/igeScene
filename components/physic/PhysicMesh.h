@@ -12,13 +12,17 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        PhysicMesh(SceneObject& owner, const std::string& path = {});
+        PhysicMesh(SceneObject& owner);
 
         //! Destructor
         virtual ~PhysicMesh();
 
         //! Get name
         std::string getName() const override { return "PhysicMesh"; }
+
+        //! Mesh Index
+        int getMeshIndex() const { return m_meshIndex; };
+        void setMeshIndex(int idx);
 
         //! Path
         const std::string& getPath() const;
@@ -39,14 +43,17 @@ namespace ige::scene
         virtual void from_json(const json& j) override;
 
         //! Create collision shape
-        void createCollisionShape(const std::string& path);
+        void createCollisionShape();
 
         //! Recreate collision shape once radius changed
-        void recreateCollisionShape(const std::string& path);
+        void recreateCollisionShape();
 
     protected:
+        //! Mesh index
+        int m_meshIndex = 0;
+
         //! Path to the model file
-        std::string m_path;
+        std::string m_path = {};
 
         //! Convex or Concave
         bool m_bIsConvex = true;
