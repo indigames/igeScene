@@ -65,10 +65,14 @@ namespace ige::scene
         m_world->setSynchronizeAllMotionStates(true);
 
         // Register event listeners
-        PhysicObject::getOnCreatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onObjectCreated), this, std::placeholders::_1));
-        PhysicObject::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onObjectDestroyed), this, std::placeholders::_1));
-        PhysicObject::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onObjectActivated), this, std::placeholders::_1));
-        PhysicObject::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onObjectDeactivated), this, std::placeholders::_1));
+        PhysicObject::getOnCreatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onCreated), this, std::placeholders::_1));
+        PhysicObject::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onDestroyed), this, std::placeholders::_1));
+        PhysicObject::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onActivated), this, std::placeholders::_1));
+        PhysicObject::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onDeactivated), this, std::placeholders::_1));
+
+        // Constraint event listeners
+        PhysicConstraint::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicConstraint*)>(&PhysicManager::onActivated), this, std::placeholders::_1));
+        PhysicConstraint::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicConstraint*)>(&PhysicManager::onDeactivated), this, std::placeholders::_1));
 
         // Set collision callback
         setCollisionCallback();
@@ -86,6 +90,10 @@ namespace ige::scene
         PhysicObject::getOnDestroyedEvent().removeAllListeners();
         PhysicObject::getOnActivatedEvent().removeAllListeners();
         PhysicObject::getOnDeactivatedEvent().removeAllListeners();
+
+        // Unregister constraint listeners
+        PhysicConstraint::getOnActivatedEvent().removeAllListeners();
+        PhysicConstraint::getOnDeactivatedEvent().removeAllListeners();
 
         m_collisionConfiguration = nullptr;
         m_dispatcher = nullptr;
@@ -181,12 +189,12 @@ namespace ige::scene
     }
 
     //! Create/Destroy event
-    void PhysicManager::onObjectCreated(PhysicObject *object)
+    void PhysicManager::onCreated(PhysicObject *object)
     {
         m_physicObjects.push_back(object);
     }
 
-    void PhysicManager::onObjectDestroyed(PhysicObject *object)
+    void PhysicManager::onDestroyed(PhysicObject *object)
     {
         // Find and remove object from the objects list
         auto found = std::find_if(m_physicObjects.begin(), m_physicObjects.end(), [&object](PhysicObject* element) {
@@ -213,7 +221,7 @@ namespace ige::scene
     }
 
     //! Activate/Deactivate event
-    void PhysicManager::onObjectActivated(PhysicObject *object)
+    void PhysicManager::onActivated(PhysicObject *object)
     {
         if (isDeformable())
         {
@@ -229,7 +237,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicManager::onObjectDeactivated(PhysicObject *object)
+    void PhysicManager::onDeactivated(PhysicObject *object)
     {
         if (isDeformable())
         {
@@ -243,6 +251,18 @@ namespace ige::scene
             if (object->getBody())
                 getWorld()->removeRigidBody(object->getBody());
         }
+    }
+
+    //! Constraint activated event
+    void PhysicManager::onActivated(PhysicConstraint *constraint)
+    {
+        m_world->addConstraint(constraint->getConstraint(), !constraint->isEnableCollisionBetweenBodies());
+    }
+
+    //! Constraint deactivated event
+    void PhysicManager::onDeactivated(PhysicConstraint *constraint)
+    {
+        m_world->removeConstraint(constraint->getConstraint());
     }
 
     //! Ray test closest

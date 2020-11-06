@@ -13,6 +13,7 @@
 #include "scene/SceneObject.h"
 #include "components/physic/PhysicObject.h"
 #include "components/physic/PhysicSoftBody.h"
+#include "components/physic/PhysicConstraint.h"
 
 #include "utils/Singleton.h"
 #include "event/Event.h"
@@ -129,12 +130,16 @@ namespace ige::scene
         static bool collisionCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2);
 
         //! Create/Destroy event
-        void onObjectCreated(PhysicObject* object);
-        void onObjectDestroyed(PhysicObject* object);
+        void onCreated(PhysicObject* object);
+        void onDestroyed(PhysicObject* object);
 
         //! Activate/Deactivate event
-        void onObjectActivated(PhysicObject* object);
-        void onObjectDeactivated(PhysicObject* object);
+        void onActivated(PhysicObject* object);
+        void onDeactivated(PhysicObject* object);
+
+        //! Constraint activated/deactivated event
+        void onActivated(PhysicConstraint* constraint);
+        void onDeactivated(PhysicConstraint* constraint);
 
     protected:
         //! Physic world
