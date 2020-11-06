@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
@@ -10,6 +11,7 @@
 using namespace pyxie;
 
 #include "components/physic/PhysicObject.h"
+#include "scene/Scene.h"
 
 namespace ige::scene
 {
@@ -23,11 +25,14 @@ namespace ige::scene
         //! Destructor
         virtual ~PhysicConstraint();
 
-        //! Initialization
-        virtual bool init();
+        //! Create physic constraint
+        virtual void create();
 
         //! Deinitialization
-        virtual bool destroy();
+        virtual void destroy();
+
+        //! Recreate physic constraint
+        virtual void recreate();
 
         //! Get Owner
         PhysicObject *getOwner() const { return &m_owner; }
@@ -35,14 +40,18 @@ namespace ige::scene
         //! Get Owner RigidBody
         virtual btRigidBody *getOwnerBody() const { return getOwner()->getBody(); }
 
-        //! Get Other
-        PhysicObject *getOther() const { return m_other; }
+        //! Get Other UUID
+        const std::string& getOtherUUID() const { return m_otherUUID; }
+        void setOtherUUID(const std::string& other);
+
+        //! Get other object
+        PhysicObject* getOther();
 
         //! Get Other RigidBody
-        virtual btRigidBody *getOtherBody() const { return m_other ? m_other->getBody() : nullptr; }
+        virtual btRigidBody *getOtherBody() { return getOther() ? getOther()->getBody() : nullptr; }
 
         //! Bullet generic constraint
-        btGeneric6DofConstraint* getConstraint() const { return m_constraint; }
+        btGeneric6DofSpring2Constraint* getConstraint() const { return m_constraint.get(); }
 
         //! Enable collision between bodies
         bool isEnableCollisionBetweenBodies() const { return m_bEnableCollisionBetweenBodies; }
@@ -62,11 +71,8 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json &j);
 
-        //! Create physic constraint
-        virtual void createConstraint() = 0;
-
-        //! Destroy physic constraint
-        virtual void destroyConstraint() = 0;
+        //! Serialize finished event
+        void onSerializeFinished(Scene& scene);
 
     protected:
         //! On created event
@@ -80,12 +86,21 @@ namespace ige::scene
         PhysicObject &m_owner;
 
         //! Pointer to depend object
-        PhysicObject *m_other = nullptr;
+        std::string m_otherUUID = {};
 
         //! Bullet generic constraint
-        btGeneric6DofConstraint* m_constraint;
+        std::unique_ptr<btGeneric6DofSpring2Constraint> m_constraint = nullptr;
 
         //! Enable collision between linked body
         bool m_bEnableCollisionBetweenBodies = true;
+
+        //! Cache other object
+        PhysicObject *m_other = nullptr;
+
+        //! Cache json to serialize
+        json m_json = {};
+
+        //! Cache serialize event id
+        uint64_t m_serializeEventId = (uint64_t)(-1);
     };
 } // namespace ige::scene

@@ -32,6 +32,9 @@ namespace ige::scene
         //! Get ID
         inline uint64_t getId() const { return m_id; }
 
+        //! Get UUID
+        inline std::string getUUID() const { return m_uuid; }
+
         //! Get Name
         inline const std::string &getName() const { return m_name; }
 
@@ -137,7 +140,7 @@ namespace ige::scene
         //! Get transform component
         std::shared_ptr<TransformComponent> &getTransform() { return m_transform; }
 
-        //! Get RectRransform component (GUI only)
+        //! Get RectTransform component (GUI only)
         std::shared_ptr<RectTransform> getRectTransform() { return std::dynamic_pointer_cast<RectTransform>(m_transform); }
 
         //! Set transform component
@@ -153,8 +156,18 @@ namespace ige::scene
         Scene* getScene() { return m_scene; }
 
     protected:
+        //! Helper to generate UUID
+        std::string generateUUID(unsigned int len = 16);
+
+        //! Set UUID
+        inline void setUUID(const std::string& uuid) { m_uuid = uuid; }
+
+    protected:
         //! Node ID
         uint64_t m_id;
+
+        //! Node UUID
+        std::string m_uuid;
 
         //! Node Name
         std::string m_name;

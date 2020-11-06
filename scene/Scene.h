@@ -55,7 +55,7 @@ namespace ige::scene
         virtual void render();
 
         //! Create scene object
-        virtual std::shared_ptr<SceneObject> createObject(std::string name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 }, bool isCanvas = false);
+        virtual std::shared_ptr<SceneObject> createObject(const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 }, bool isCanvas = false);
 
         //! Remove scene object
         virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);
@@ -66,8 +66,11 @@ namespace ige::scene
         //! Find object in hierarchy by it's id
         virtual std::shared_ptr<SceneObject> findObjectById(uint64_t id);
 
+        //! Find object in hierarchy by it's uuid
+        virtual std::shared_ptr<SceneObject> findObjectByUUID(const std::string& uuid);
+
         //! Find object in hierarchy by name
-        virtual std::shared_ptr<SceneObject> findObjectByName(std::string name);
+        virtual std::shared_ptr<SceneObject> findObjectByName(const std::string& name);
 
         //! Serialize
         virtual void to_json(json& j) const;
@@ -102,6 +105,7 @@ namespace ige::scene
         //! Internal event
         Event<Resource*>& getResourceAddedEvent() { return m_resourceAddedEvent; }
         Event<Resource*>& getResourceRemovedEvent() { return m_resourceRemovedEvent; }
+        Event<Scene&>& getSerializeFinishedEvent() { return m_serializeFinishedEvent; }
 
         //! Resource added/removed event
         void onResourceAdded(Resource* resource);
@@ -149,6 +153,7 @@ namespace ige::scene
         //! Internal events
         Event<Resource*> m_resourceAddedEvent;
         Event<Resource*> m_resourceRemovedEvent;
+        Event<Scene&> m_serializeFinishedEvent;
 
         //! Cache active camera
         CameraComponent* m_activeCamera = nullptr;

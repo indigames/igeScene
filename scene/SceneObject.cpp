@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <sstream>
+#include <random>
 
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
@@ -37,9 +39,12 @@ namespace ige::scene
     Event<SceneObject &> SceneObject::s_selectedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(Scene* scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2& size, bool isCanvas)
+    SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size, bool isCanvas)
         : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_bIsCanvas(isCanvas), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr)
     {
+        // Generate new UUID
+        m_uuid = generateUUID();
+
         // Invoke created event
         getCreatedEvent().invoke(*this);
 
@@ -53,7 +58,7 @@ namespace ige::scene
             m_transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
 
         // Update parent transform
-        if(getParent())
+        if (getParent())
             m_transform->setParent(getParent()->getTransform().get());
     }
 
@@ -72,8 +77,20 @@ namespace ige::scene
         getDestroyedEvent().invoke(*this);
     }
 
+    //! Generate UUID
+    std::string SceneObject::generateUUID(unsigned int len)
+    {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, 15);
+        std::stringstream ss;
+        for (auto i = 0; i < len; i++)
+            ss << std::hex << dis(gen);
+        return ss.str();
+    }
+
     //! Set Name
-    void SceneObject::setName(const std::string& name)
+    void SceneObject::setName(const std::string &name)
     {
         if (m_name != name)
         {
@@ -100,7 +117,7 @@ namespace ige::scene
         {
             m_parent = parent;
             m_parent->addChild(this);
-            if(getTransform())
+            if (getTransform())
                 getTransform()->setParent(m_parent->getTransform().get());
             setCanvas(m_parent->getCanvas());
             getAttachedEvent().invoke(*this);
@@ -113,15 +130,14 @@ namespace ige::scene
         return m_parent;
     }
 
-
     //! Get all children
-    const std::vector<SceneObject*> &SceneObject::getChildren() const
+    const std::vector<SceneObject *> &SceneObject::getChildren() const
     {
         return m_children;
     }
 
     //! Add child
-    void SceneObject::addChild(SceneObject* child)
+    void SceneObject::addChild(SceneObject *child)
     {
         auto found = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem == child; });
         if (found == m_children.end())
@@ -129,19 +145,19 @@ namespace ige::scene
     }
 
     //! Removes child
-    void SceneObject::removeChild(SceneObject* child)
+    void SceneObject::removeChild(SceneObject *child)
     {
         if (child == nullptr)
             return;
         auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getId() == child->getId()); });
-        if(itr != m_children.end())
+        if (itr != m_children.end())
             m_children.erase(itr);
     }
 
     //! Remove children
     void SceneObject::removeChildren()
     {
-        for (auto& child : m_children)
+        for (auto &child : m_children)
             child = nullptr;
         m_children.clear();
     }
@@ -339,6 +355,7 @@ namespace ige::scene
     void SceneObject::to_json(json &j)
     {
         j = json{
+            {"uuid", m_uuid},
             {"name", m_name},
             {"active", m_isActive},
             {"gui", m_bIsGui},
@@ -350,7 +367,7 @@ namespace ige::scene
         {
             if (!comp->isSkipSerialize())
             {
-                jComponents.push_back({ comp->getName(), json(*comp.get()) });
+                jComponents.push_back({comp->getName(), json(*comp.get())});
             }
         }
         j["comps"] = jComponents;
@@ -372,6 +389,7 @@ namespace ige::scene
     void SceneObject::from_json(const json &j)
     {
         setName(j.value("name", ""));
+        setUUID(j.value("uuid", getUUID()));
         setActive(j.value("active", false));
         m_bIsGui = j.value("gui", false);
         m_bIsCanvas = j.value("cvs", false);
@@ -384,7 +402,7 @@ namespace ige::scene
             std::shared_ptr<Component> comp = nullptr;
             if (key == "TransformComponent")
             {
-                if(getTransform())
+                if (getTransform())
                     comp = getTransform();
                 else
                     comp = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
@@ -416,7 +434,8 @@ namespace ige::scene
                 comp = addComponent<PhysicMesh>();
             else if (key == "PhysicSoftBody")
                 comp = addComponent<PhysicSoftBody>();
-            else if (key == "Canvas") {
+            else if (key == "Canvas")
+            {
                 comp = addComponent<Canvas>();
                 setCanvas(getComponent<Canvas>());
             }

@@ -78,6 +78,7 @@
         "compare": "cpp",
         "stack": "cpp",
         "optional": "cpp",
-        "__functional_base": "cpp"
+        "__functional_base": "cpp",
+        "random": "cpp"
     }
 }

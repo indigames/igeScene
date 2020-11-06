@@ -260,7 +260,7 @@ namespace ige::scene
         m_showcase->Render();
     }
 
-    std::shared_ptr<SceneObject> Scene::createObject(std::string name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, bool isCanvas)
+    std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, bool isCanvas)
     {
         auto parentObject = parent ? parent : m_root;
 
@@ -364,7 +364,18 @@ namespace ige::scene
         return nullptr;
     }
 
-    std::shared_ptr<SceneObject> Scene::findObjectByName(std::string name)
+    std::shared_ptr<SceneObject> Scene::findObjectByUUID(const std::string& uuid)
+    {
+        auto found = std::find_if(m_objects.begin(), m_objects.end(), [&](auto elem)
+        {
+            return elem->getUUID() == uuid;
+        });
+        if (found != m_objects.end())
+            return std::dynamic_pointer_cast<SceneObject>(*found);
+        return nullptr;
+    }
+
+    std::shared_ptr<SceneObject> Scene::findObjectByName(const std::string& name)
     {
         auto found = std::find_if(m_objects.begin(), m_objects.end(), [&](auto elem)
         {
@@ -431,6 +442,9 @@ namespace ige::scene
         m_root->from_json(jRoot);
 
         j.at("objId").get_to(m_nextObjectID);
+
+        // Notify serialize finished
+        getSerializeFinishedEvent().invoke(*this);
     }
 
     //! Prefab save/load
