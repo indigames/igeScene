@@ -15,13 +15,13 @@
 #include <BulletSoftBody/btDeformableBodySolver.h>
 #include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
 
-#include "components/physic/PhysicBase.h"
+#include "components/physic/PhysicObject.h"
 #include "components/physic/PhysicSoftBody.h"
 
 namespace ige::scene
 {
     //! Static member initialization
-    std::map< std::pair<PhysicBase*, PhysicBase*>, bool> PhysicManager::m_collisionEvents;
+    std::map< std::pair<PhysicObject*, PhysicObject*>, bool> PhysicManager::m_collisionEvents;
 
     //! Constructor
     PhysicManager::PhysicManager()
@@ -65,10 +65,10 @@ namespace ige::scene
         m_world->setSynchronizeAllMotionStates(true);
 
         // Register event listeners
-        PhysicBase::getOnCreatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase*)>(&PhysicManager::onObjectCreated), this, std::placeholders::_1));
-        PhysicBase::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase*)>(&PhysicManager::onObjectDestroyed), this, std::placeholders::_1));
-        PhysicBase::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase*)>(&PhysicManager::onObjectActivated), this, std::placeholders::_1));
-        PhysicBase::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicBase*)>(&PhysicManager::onObjectDeactivated), this, std::placeholders::_1));
+        PhysicObject::getOnCreatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onObjectCreated), this, std::placeholders::_1));
+        PhysicObject::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onObjectDestroyed), this, std::placeholders::_1));
+        PhysicObject::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onObjectActivated), this, std::placeholders::_1));
+        PhysicObject::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onObjectDeactivated), this, std::placeholders::_1));
 
         // Set collision callback
         setCollisionCallback();
@@ -82,10 +82,10 @@ namespace ige::scene
         clear();
 
         // Unregister event listeners
-        PhysicBase::getOnCreatedEvent().removeAllListeners();
-        PhysicBase::getOnDestroyedEvent().removeAllListeners();
-        PhysicBase::getOnActivatedEvent().removeAllListeners();
-        PhysicBase::getOnDeactivatedEvent().removeAllListeners();
+        PhysicObject::getOnCreatedEvent().removeAllListeners();
+        PhysicObject::getOnDestroyedEvent().removeAllListeners();
+        PhysicObject::getOnActivatedEvent().removeAllListeners();
+        PhysicObject::getOnDeactivatedEvent().removeAllListeners();
 
         m_collisionConfiguration = nullptr;
         m_dispatcher = nullptr;
@@ -147,7 +147,7 @@ namespace ige::scene
             element.second = false;
 
         // Update bullet transform
-        std::for_each(m_physicObjects.begin(), m_physicObjects.end(), std::mem_fn(&PhysicBase::updateBtTransform));
+        std::for_each(m_physicObjects.begin(), m_physicObjects.end(), std::mem_fn(&PhysicObject::updateBtTransform));
     }
 
     void PhysicManager::postUpdate()
@@ -177,19 +177,19 @@ namespace ige::scene
         }
 
         // Update object transform
-        std::for_each(m_physicObjects.begin(), m_physicObjects.end(), std::mem_fn(&PhysicBase::updateIgeTransform));
+        std::for_each(m_physicObjects.begin(), m_physicObjects.end(), std::mem_fn(&PhysicObject::updateIgeTransform));
     }
 
     //! Create/Destroy event
-    void PhysicManager::onObjectCreated(PhysicBase *object)
+    void PhysicManager::onObjectCreated(PhysicObject *object)
     {
         m_physicObjects.push_back(object);
     }
 
-    void PhysicManager::onObjectDestroyed(PhysicBase *object)
+    void PhysicManager::onObjectDestroyed(PhysicObject *object)
     {
         // Find and remove object from the objects list
-        auto found = std::find_if(m_physicObjects.begin(), m_physicObjects.end(), [&object](PhysicBase* element) {
+        auto found = std::find_if(m_physicObjects.begin(), m_physicObjects.end(), [&object](PhysicObject* element) {
             return object == element;
         });
 
@@ -213,7 +213,7 @@ namespace ige::scene
     }
 
     //! Activate/Deactivate event
-    void PhysicManager::onObjectActivated(PhysicBase *object)
+    void PhysicManager::onObjectActivated(PhysicObject *object)
     {
         if (isDeformable())
         {
@@ -229,7 +229,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicManager::onObjectDeactivated(PhysicBase *object)
+    void PhysicManager::onObjectDeactivated(PhysicObject *object)
     {
         if (isDeformable())
         {
@@ -242,7 +242,7 @@ namespace ige::scene
         {
             if (object->getBody())
                 getWorld()->removeRigidBody(object->getBody());
-        }        
+        }
     }
 
     //! Ray test closest
@@ -329,8 +329,8 @@ namespace ige::scene
 
     bool PhysicManager::collisionCallback(btManifoldPoint &cp, const btCollisionObjectWrapper *obj1, int id1, int index1, const btCollisionObjectWrapper *obj2, int id2, int index2)
     {
-        auto object1 = reinterpret_cast<PhysicBase *>(obj1->getCollisionObject()->getUserPointer());
-        auto object2 = reinterpret_cast<PhysicBase *>(obj2->getCollisionObject()->getUserPointer());
+        auto object1 = reinterpret_cast<PhysicObject *>(obj1->getCollisionObject()->getUserPointer());
+        auto object2 = reinterpret_cast<PhysicObject *>(obj2->getCollisionObject()->getUserPointer());
 
         if (object1 && object2)
         {

@@ -11,7 +11,7 @@
 #include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
 
 #include "scene/SceneObject.h"
-#include "components/physic/PhysicBase.h"
+#include "components/physic/PhysicObject.h"
 #include "components/physic/PhysicSoftBody.h"
 
 #include "utils/Singleton.h"
@@ -41,10 +41,10 @@ namespace ige::scene
     {
         int count;
         std::vector<ContactTestResult>& outResults;
-        ContactResultCB(std::vector<ContactTestResult>& _outResults, 
+        ContactResultCB(std::vector<ContactTestResult>& _outResults,
                         int group = btBroadphaseProxy::DefaultFilter,
                         int mask = btBroadphaseProxy::AllFilter)
-            : ContactResultCallback(), outResults(_outResults), count(0) 
+            : ContactResultCallback(), outResults(_outResults), count(0)
         {
             m_collisionFilterGroup = group;
             m_collisionFilterMask = mask;
@@ -129,12 +129,12 @@ namespace ige::scene
         static bool collisionCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2);
 
         //! Create/Destroy event
-        void onObjectCreated(PhysicBase* object);
-        void onObjectDestroyed(PhysicBase* object);
+        void onObjectCreated(PhysicObject* object);
+        void onObjectDestroyed(PhysicObject* object);
 
         //! Activate/Deactivate event
-        void onObjectActivated(PhysicBase* object);
-        void onObjectDeactivated(PhysicBase* object);
+        void onObjectActivated(PhysicObject* object);
+        void onObjectDeactivated(PhysicObject* object);
 
     protected:
         //! Physic world
@@ -168,9 +168,9 @@ namespace ige::scene
         btVector3 m_gravity = {0.f, -9.81f, 0.f};
 
         //! Collision event map
-        static std::map< std::pair<PhysicBase*, PhysicBase*>, bool> m_collisionEvents;
+        static std::map< std::pair<PhysicObject*, PhysicObject*>, bool> m_collisionEvents;
 
         //! Physic objects list
-        std::vector<PhysicBase*> m_physicObjects;
+        std::vector<PhysicObject*> m_physicObjects;
     };
 } // namespace ige::scene

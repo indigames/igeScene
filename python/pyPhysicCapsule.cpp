@@ -98,7 +98,7 @@ namespace ige::scene
         0,                                                       /* tp_methods */
         0,                                                       /* tp_members */
         PhysicCapsule_getsets,                                   /* tp_getset */
-        &PyTypeObject_PhysicBase,                                /* tp_base */
+        &PyTypeObject_PhysicObject,                              /* tp_base */
         0,                                                       /* tp_dict */
         0,                                                       /* tp_descr_get */
         0,                                                       /* tp_descr_set */

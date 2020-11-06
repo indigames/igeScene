@@ -8,7 +8,7 @@ namespace ige::scene
 {
     //! Constructor
     PhysicBox::PhysicBox(SceneObject &owner, const Vec3 &size)
-        : PhysicBase(owner)
+        : PhysicObject(owner)
     {
         createCollisionShape(size);
         init();
@@ -61,14 +61,14 @@ namespace ige::scene
     //! Serialize
     void PhysicBox::to_json(json &j) const
     {
-        PhysicBase::to_json(j);
+        PhysicObject::to_json(j);
         j["size"] = getSize();
     }
 
     //! Deserialize
     void PhysicBox::from_json(const json &j)
     {
-        PhysicBase::from_json(j);
+        PhysicObject::from_json(j);
         setSize(j.value("size", Vec3(1.f, 1.f, 1.f)));
     }
 

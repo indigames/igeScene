@@ -17,7 +17,7 @@ namespace ige::scene
 {
     //! Constructor
     PhysicSoftBody::PhysicSoftBody(SceneObject &owner)
-        : PhysicBase(owner)
+        : PhysicObject(owner)
     {
         m_mass = -1.f;
         init();
@@ -312,10 +312,8 @@ namespace ige::scene
         setSoftBody(true);
         getSoftBody()->generateBendingConstraints(2);
 
-        // Apply pre-configurated values to PhysicBase
-        if (m_mass > 0) // mass based on total mass
-            setMass(m_mass);
-
+        // Apply pre-configurated values to PhysicObject
+        setMass(m_mass);
         setFriction(m_friction);
         setRestitution(m_restitution);
         setLinearVelocity(m_linearVelocity);
@@ -570,7 +568,7 @@ namespace ige::scene
     //! Serialize
     void PhysicSoftBody::to_json(json &j) const
     {
-        PhysicBase::to_json(j);
+        PhysicObject::to_json(j);
         j["meshIdx"] = getMeshIndex();
         j["dampCoeff"] = getDampingCoeff();
         j["presCoeff"] = getPressureCoeff();
@@ -596,7 +594,7 @@ namespace ige::scene
     //! Deserialize
     void PhysicSoftBody::from_json(const json &j)
     {
-        PhysicBase::from_json(j);
+        PhysicObject::from_json(j);
         setMeshIndex(j.value("meshIdx", 0));
         setDampingCoeff(j.value("dampCoeff", 0.4f));
         setPressureCoeff(j.value("presCoeff", 0.f));

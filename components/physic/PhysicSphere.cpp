@@ -8,7 +8,7 @@ namespace ige::scene
 {
     //! Constructor
     PhysicSphere::PhysicSphere(SceneObject &owner, float radius)
-        : PhysicBase(owner)
+        : PhysicObject(owner)
     {
         createCollisionShape(radius);
         init();
@@ -74,14 +74,14 @@ namespace ige::scene
     //! Serialize
     void PhysicSphere::to_json(json &j) const
     {
-        PhysicBase::to_json(j);
+        PhysicObject::to_json(j);
         j["radius"] = getRadius();
     }
 
     //! Deserialize
     void PhysicSphere::from_json(const json &j)
     {
-        PhysicBase::from_json(j);
+        PhysicObject::from_json(j);
         setRadius(j.at("radius"));
     }
 

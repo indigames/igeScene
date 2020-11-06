@@ -1,7 +1,7 @@
 #include "python/pyPhysicManager.h"
 #include "python/pyPhysicManager_doc_en.h"
 #include "python/pySceneObject.h"
-#include "python/pyPhysicBase.h"
+#include "python/pyPhysicObject.h"
 
 #include "physic/PhysicManager.h"
 #include "utils/PhysicHelper.h"
@@ -90,7 +90,7 @@ namespace ige::scene
             Py_RETURN_NONE;
 
         auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        hitObj->sceneObject = reinterpret_cast<PhysicBase *>(hit.object->getUserPointer())->getOwner();
+        hitObj->sceneObject = reinterpret_cast<PhysicObject *>(hit.object->getUserPointer())->getOwner();
 
         auto hitPos = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(PhysicHelper::from_btVector3(hit.position).P(), 3, hitPos->v);
@@ -142,7 +142,7 @@ namespace ige::scene
                 Py_RETURN_NONE;
 
             auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            hitObj->sceneObject = reinterpret_cast<PhysicBase *>(hits[i].object->getUserPointer())->getOwner();
+            hitObj->sceneObject = reinterpret_cast<PhysicObject *>(hits[i].object->getUserPointer())->getOwner();
 
             auto hitPos = PyObject_New(vec_obj, _Vec3Type);
             vmath_cpy(PhysicHelper::from_btVector3(hits[i].position).P(), 3, hitPos->v);
@@ -184,17 +184,17 @@ namespace ige::scene
         if (obj->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)obj;
-            auto physicComp = sceneObj->sceneObject->getComponent<PhysicBase>();
+            auto physicComp = sceneObj->sceneObject->getComponent<PhysicObject>();
             if (physicComp && physicComp->getBody())
             {
                 object = physicComp->getBody();
             }
         }
-        else if (obj->ob_type == &PyTypeObject_PhysicBase)
+        else if (obj->ob_type == &PyTypeObject_PhysicObject)
         {
-            auto physicBaseObj = (PyObject_PhysicBase*)obj;
-            if (physicBaseObj->component->getBody())
-                object = physicBaseObj->component->getBody();
+            auto physicObjectObj = (PyObject_PhysicObject*)obj;
+            if (physicObjectObj->component->getBody())
+                object = physicObjectObj->component->getBody();
         }
         else if (obj->ob_type == &RigidBodyType)
         {
@@ -213,10 +213,10 @@ namespace ige::scene
             const auto &result = results[i];
 
             auto objectA = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            objectA->sceneObject = reinterpret_cast<PhysicBase *>(result.objectA->getUserPointer())->getOwner();
+            objectA->sceneObject = reinterpret_cast<PhysicObject *>(result.objectA->getUserPointer())->getOwner();
 
             auto objectB = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            objectB->sceneObject = reinterpret_cast<PhysicBase *>(result.objectB->getUserPointer())->getOwner();
+            objectB->sceneObject = reinterpret_cast<PhysicObject *>(result.objectB->getUserPointer())->getOwner();
 
             auto localPosA = PyObject_New(vec_obj, _Vec3Type);
             vmath_cpy(PhysicHelper::from_btVector3(result.localPosA).P(), 3, localPosA->v);
@@ -272,17 +272,17 @@ namespace ige::scene
         if (objA->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)objA;
-            auto physicComp = sceneObj->sceneObject->getComponent<PhysicBase>();
+            auto physicComp = sceneObj->sceneObject->getComponent<PhysicObject>();
             if (physicComp && physicComp->getBody())
             {
                 objectA = physicComp->getBody();
             }
         }
-        else if (objA->ob_type == &PyTypeObject_PhysicBase)
+        else if (objA->ob_type == &PyTypeObject_PhysicObject)
         {
-            auto physicBaseObj = (PyObject_PhysicBase*)objA;
-            if (physicBaseObj->component->getBody())
-                objectA = physicBaseObj->component->getBody();
+            auto physicObjectObj = (PyObject_PhysicObject*)objA;
+            if (physicObjectObj->component->getBody())
+                objectA = physicObjectObj->component->getBody();
         }
         else if (objA->ob_type == &RigidBodyType)
         {
@@ -294,17 +294,17 @@ namespace ige::scene
         if (objB->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)objB;
-            auto physicComp = sceneObj->sceneObject->getComponent<PhysicBase>();
+            auto physicComp = sceneObj->sceneObject->getComponent<PhysicObject>();
             if (physicComp && physicComp->getBody())
             {
                 objectB = physicComp->getBody();
             }
         }
-        else if (objB->ob_type == &PyTypeObject_PhysicBase)
+        else if (objB->ob_type == &PyTypeObject_PhysicObject)
         {
-            auto physicBaseObj = (PyObject_PhysicBase*)objB;
-            if (physicBaseObj->component->getBody())
-                objectB = physicBaseObj->component->getBody();
+            auto physicObjectObj = (PyObject_PhysicObject*)objB;
+            if (physicObjectObj->component->getBody())
+                objectB = physicObjectObj->component->getBody();
         }
         else if (objB->ob_type == &RigidBodyType)
         {
@@ -324,10 +324,10 @@ namespace ige::scene
             const auto &result = results[i];
 
             auto objectA = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            objectA->sceneObject = reinterpret_cast<PhysicBase *>(result.objectA->getUserPointer())->getOwner();
+            objectA->sceneObject = reinterpret_cast<PhysicObject *>(result.objectA->getUserPointer())->getOwner();
 
             auto objectB = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            objectB->sceneObject = reinterpret_cast<PhysicBase *>(result.objectB->getUserPointer())->getOwner();
+            objectB->sceneObject = reinterpret_cast<PhysicObject *>(result.objectB->getUserPointer())->getOwner();
 
             auto localPosA = PyObject_New(vec_obj, _Vec3Type);
             vmath_cpy(PhysicHelper::from_btVector3(result.localPosA).P(), 3, localPosA->v);

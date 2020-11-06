@@ -6,13 +6,13 @@
 #include "components/physic/PhysicCapsule.h"
 
 #include "python/pyComponent.h"
-#include "python/pyPhysicBase.h"
+#include "python/pyPhysicObject.h"
 
 namespace ige::scene
 {
     struct PyObject_PhysicCapsule
     {
-        PyObject_PhysicBase super;
+        PyObject_PhysicObject super;
         PhysicCapsule *component;
     };
 

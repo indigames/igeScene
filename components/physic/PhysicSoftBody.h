@@ -9,12 +9,12 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "components/physic/PhysicBase.h"
+#include "components/physic/PhysicObject.h"
 
 namespace ige::scene
 {
     //! PhysicSoftBody
-    class PhysicSoftBody : public PhysicBase
+    class PhysicSoftBody : public PhysicObject
     {
     public:
         //! Constructor

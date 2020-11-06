@@ -13,7 +13,7 @@ namespace ige::scene
 {
     //! Constructor
     PhysicMesh::PhysicMesh(SceneObject &owner)
-        : PhysicBase(owner)
+        : PhysicObject(owner)
     {
         createCollisionShape();
         init();
@@ -97,7 +97,7 @@ namespace ige::scene
             {
                 setConvex(true);
             }
-            PhysicBase::setIsKinematic(isKinematic);
+            PhysicObject::setIsKinematic(isKinematic);
         }
     }
 
@@ -229,7 +229,7 @@ namespace ige::scene
     //! Serialize
     void PhysicMesh::to_json(json &j) const
     {
-        PhysicBase::to_json(j);
+        PhysicObject::to_json(j);
         j["meshIdx"] = getMeshIndex();
         j["convex"] = isConvex();
         j["path"] = getPath();
@@ -238,7 +238,7 @@ namespace ige::scene
     //! Deserialize
     void PhysicMesh::from_json(const json &j)
     {
-        PhysicBase::from_json(j);
+        PhysicObject::from_json(j);
         setMeshIndex(j.value("meshIdx", 0));
         setConvex(j.value("convex", (int)(true)));
         setPath(j.value("path", std::string()));

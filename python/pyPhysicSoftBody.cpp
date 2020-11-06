@@ -32,7 +32,7 @@ namespace ige::scene
     }
 
     //! Apply Repulsion Force
-    PyObject* PhysicSoftBody_applyRepulsionForce(PyObject_PhysicSoftBody *self, PyObject *value)
+    PyObject *PhysicSoftBody_applyRepulsionForce(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         float timeStep = 0.f;
         int applySpringForce = 0;
@@ -42,9 +42,9 @@ namespace ige::scene
     }
 
     //! Add Velocity
-    PyObject* PhysicSoftBody_addVelocity(PyObject_PhysicSoftBody *self, PyObject *value)
+    PyObject *PhysicSoftBody_addVelocity(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        PyObject* velocityObj;
+        PyObject *velocityObj;
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "O|i", &velocityObj, &nodeIdx))
         {
@@ -57,13 +57,13 @@ namespace ige::scene
     }
 
     //! Get Volume
-    PyObject* PhysicSoftBody_getVolume(PyObject_PhysicSoftBody *self, PyObject *value)
+    PyObject *PhysicSoftBody_getVolume(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         return PyFloat_FromDouble(self->component->getVolume());
     }
 
     //! Get Center Of Mass
-    PyObject* PhysicSoftBody_getCenterOfMass(PyObject_PhysicSoftBody *self, PyObject *value)
+    PyObject *PhysicSoftBody_getCenterOfMass(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(PhysicHelper::from_btVector3(self->component->getCenterOfMass()).P(), 3, vec3Obj->v);
@@ -72,7 +72,7 @@ namespace ige::scene
     }
 
     //! Get nearest node
-    PyObject* PhysicSoftBody_getNearestNodeIndex(PyObject_PhysicSoftBody *self, PyObject *value)
+    PyObject *PhysicSoftBody_getNearestNodeIndex(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         int d;
         float buff[4];
@@ -85,7 +85,7 @@ namespace ige::scene
     }
 
     //! Get node position
-    PyObject* PhysicSoftBody_getNodePosition(PyObject_PhysicSoftBody *self, PyObject *value)
+    PyObject *PhysicSoftBody_getNodePosition(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "i", &nodeIdx))
@@ -100,7 +100,7 @@ namespace ige::scene
     }
 
     //! Get node normal
-    PyObject* PhysicSoftBody_getNodeNormal(PyObject_PhysicSoftBody *self, PyObject *value)
+    PyObject *PhysicSoftBody_getNodeNormal(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "i", &nodeIdx))
@@ -115,35 +115,35 @@ namespace ige::scene
     }
 
     //! Append deformable anchor
-    PyObject* PhysicSoftBody_appendDeformableAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
+    PyObject *PhysicSoftBody_appendDeformableAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         int nodeIdx = -1;
-        PyObject* obj = nullptr;
+        PyObject *obj = nullptr;
         if (PyArg_ParseTuple(value, "iO", &nodeIdx, &obj) && nodeIdx >= 0 && obj)
         {
             if (obj->ob_type == &PyTypeObject_SceneObject)
             {
-                auto sceneObj = (PyObject_SceneObject*)obj;
-                auto physicComp = sceneObj->sceneObject->getComponent<PhysicBase>();
+                auto sceneObj = (PyObject_SceneObject *)obj;
+                auto physicComp = sceneObj->sceneObject->getComponent<PhysicObject>();
                 if (physicComp && physicComp->getBody())
                 {
                     self->component->appendDeformableAnchor(nodeIdx, physicComp->getBody());
                 }
             }
-            else if(obj->ob_type == &PyTypeObject_PhysicBase)
+            else if (obj->ob_type == &PyTypeObject_PhysicObject)
             {
-                auto physicBaseObj = (PyObject_PhysicBase*)obj;
-                if(physicBaseObj->component->getBody())
+                auto physicObjectObj = (PyObject_PhysicObject *)obj;
+                if (physicObjectObj->component->getBody())
                 {
-                    self->component->appendDeformableAnchor(nodeIdx, physicBaseObj->component->getBody());
+                    self->component->appendDeformableAnchor(nodeIdx, physicObjectObj->component->getBody());
                 }
             }
-            else if(obj->ob_type == &RigidBodyType)
+            else if (obj->ob_type == &RigidBodyType)
             {
-                auto rigidBodyObject = (rigidbody_obj*)obj;
-                if(rigidBodyObject->btbody)
+                auto rigidBodyObject = (rigidbody_obj *)obj;
+                if (rigidBodyObject->btbody)
                 {
-                    self->component->appendDeformableAnchor(nodeIdx, (btRigidBody*)(rigidBodyObject->btbody));
+                    self->component->appendDeformableAnchor(nodeIdx, (btRigidBody *)(rigidBodyObject->btbody));
                 }
             }
         }
@@ -151,10 +151,10 @@ namespace ige::scene
     }
 
     //! Append anchor
-    PyObject* PhysicSoftBody_appendAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
+    PyObject *PhysicSoftBody_appendAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         int nodeIdx = -1;
-        PyObject* obj = nullptr;
+        PyObject *obj = nullptr;
         int disableLinkedCollission = 0;
         float influent = 1.f;
 
@@ -162,27 +162,27 @@ namespace ige::scene
         {
             if (obj->ob_type == &PyTypeObject_SceneObject)
             {
-                auto sceneObj = (PyObject_SceneObject*)obj;
-                auto physicComp = sceneObj->sceneObject->getComponent<PhysicBase>();
+                auto sceneObj = (PyObject_SceneObject *)obj;
+                auto physicComp = sceneObj->sceneObject->getComponent<PhysicObject>();
                 if (physicComp && physicComp->getBody())
                 {
                     self->component->appendAnchor(nodeIdx, physicComp->getBody(), disableLinkedCollission, influent);
                 }
             }
-            else if(obj->ob_type == &PyTypeObject_PhysicBase)
+            else if (obj->ob_type == &PyTypeObject_PhysicObject)
             {
-                auto physicBaseObj = (PyObject_PhysicBase*)obj;
-                if(physicBaseObj->component->getBody())
+                auto physicObjectObj = (PyObject_PhysicObject *)obj;
+                if (physicObjectObj->component->getBody())
                 {
-                    self->component->appendAnchor(nodeIdx, physicBaseObj->component->getBody(), disableLinkedCollission, influent);
+                    self->component->appendAnchor(nodeIdx, physicObjectObj->component->getBody(), disableLinkedCollission, influent);
                 }
             }
-            else if(obj->ob_type == &RigidBodyType)
+            else if (obj->ob_type == &RigidBodyType)
             {
-                auto rigidBodyObject = (rigidbody_obj*)obj;
-                if(rigidBodyObject->btbody)
+                auto rigidBodyObject = (rigidbody_obj *)obj;
+                if (rigidBodyObject->btbody)
                 {
-                    self->component->appendAnchor(nodeIdx, (btRigidBody*)(rigidBodyObject->btbody), disableLinkedCollission, influent);
+                    self->component->appendAnchor(nodeIdx, (btRigidBody *)(rigidBodyObject->btbody), disableLinkedCollission, influent);
                 }
             }
         }
@@ -190,7 +190,7 @@ namespace ige::scene
     }
 
     //! Remove anchor
-    PyObject* PhysicSoftBody_removeAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
+    PyObject *PhysicSoftBody_removeAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "i", &nodeIdx))
@@ -595,7 +595,7 @@ namespace ige::scene
         PhysicSoftBody_methods,                                   /* tp_methods */
         0,                                                        /* tp_members */
         PhysicSoftBody_getsets,                                   /* tp_getset */
-        &PyTypeObject_PhysicBase,                                 /* tp_base */
+        &PyTypeObject_PhysicObject,                               /* tp_base */
         0,                                                        /* tp_dict */
         0,                                                        /* tp_descr_get */
         0,                                                        /* tp_descr_set */

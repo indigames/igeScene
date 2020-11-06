@@ -2,7 +2,7 @@
 #include <algorithm>
 
 #include "components/ScriptComponent.h"
-#include "components/physic/PhysicBase.h"
+#include "components/physic/PhysicObject.h"
 
 #include "python/pySceneObject.h"
 #include "python/pyScript.h"
@@ -124,7 +124,7 @@ namespace ige::scene
         if (getOwner() == nullptr)
             return;
 
-        auto physicComp = getOwner()->getComponent<PhysicBase>();
+        auto physicComp = getOwner()->getComponent<PhysicObject>();
         if (physicComp != nullptr)
         {
             physicComp->getTriggerStartEvent().addListener([this](auto other) {
@@ -165,7 +165,7 @@ namespace ige::scene
         if (getOwner() == nullptr)
             return;
 
-        auto physicComp = getOwner()->getComponent<PhysicBase>();
+        auto physicComp = getOwner()->getComponent<PhysicObject>();
         if (physicComp != nullptr)
         {
             physicComp->getTriggerStartEvent().removeAllListeners();

@@ -1,4 +1,4 @@
-#include "components/physic/PhysicBase.h"
+#include "components/physic/PhysicObject.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
 
@@ -7,24 +7,24 @@
 namespace ige::scene
 {
     //! Initialize static members
-    Event<PhysicBase*> PhysicBase::m_onCreatedEvent;
-    Event<PhysicBase*> PhysicBase::m_onDestroyedEvent;
-    Event<PhysicBase*> PhysicBase::m_onActivatedEvent;
-    Event<PhysicBase*> PhysicBase::m_onDeactivatedEvent;
+    Event<PhysicObject*> PhysicObject::m_onCreatedEvent;
+    Event<PhysicObject*> PhysicObject::m_onDestroyedEvent;
+    Event<PhysicObject*> PhysicObject::m_onActivatedEvent;
+    Event<PhysicObject*> PhysicObject::m_onDeactivatedEvent;
 
     //! Constructor
-    PhysicBase::PhysicBase(SceneObject &owner)
+    PhysicObject::PhysicObject(SceneObject &owner)
         : Component(owner)
     {}
 
     //! Destructor
-    PhysicBase::~PhysicBase()
+    PhysicObject::~PhysicObject()
     {
         destroy();
     }
 
     //! Initialization
-    bool PhysicBase::init()
+    bool PhysicObject::init()
     {
         getOnCreatedEvent().invoke(this);
         createBody();
@@ -32,7 +32,7 @@ namespace ige::scene
     }
 
     //! Initialization
-    bool PhysicBase::destroy()
+    bool PhysicObject::destroy()
     {
         destroyBody();
         getOnDestroyedEvent().invoke(this);
@@ -40,7 +40,7 @@ namespace ige::scene
     }
 
     //! Set enable
-    void PhysicBase::setEnabled(bool enable)
+    void PhysicObject::setEnabled(bool enable)
     {
         if (m_bIsEnabled != enable)
         {
@@ -53,7 +53,7 @@ namespace ige::scene
     }
 
     //! Set enable
-    void PhysicBase::setCCD(bool isCCD)
+    void PhysicObject::setCCD(bool isCCD)
     {
         m_bIsCCD = isCCD;
         if (m_bIsCCD)
@@ -71,7 +71,7 @@ namespace ige::scene
     }
 
     //! Set mass
-    void PhysicBase::setMass(float mass)
+    void PhysicObject::setMass(float mass)
     {
         if (m_bIsDirty || m_mass != mass)
         {
@@ -84,8 +84,8 @@ namespace ige::scene
         }
     }
 
-    void PhysicBase::setFriction(float friction)
-    { 
+    void PhysicObject::setFriction(float friction)
+    {
         if (m_bIsDirty || m_friction != friction)
         {
             m_friction = friction;
@@ -93,7 +93,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicBase::setRestitution(float restitution)
+    void PhysicObject::setRestitution(float restitution)
     {
         if (m_bIsDirty || m_restitution != restitution)
         {
@@ -102,7 +102,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicBase::setLinearVelocity(const btVector3& velocity)
+    void PhysicObject::setLinearVelocity(const btVector3& velocity)
     {
         if (m_bIsDirty || m_linearVelocity != velocity)
         {
@@ -111,7 +111,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicBase::setAngularVelocity(const btVector3& velocity)
+    void PhysicObject::setAngularVelocity(const btVector3& velocity)
     {
         if (m_bIsDirty || m_angularVelocity != velocity)
         {
@@ -119,8 +119,8 @@ namespace ige::scene
             getBody()->setAngularVelocity(m_angularVelocity);
         }
     }
-    
-    void PhysicBase::setLinearFactor(const btVector3& factor)
+
+    void PhysicObject::setLinearFactor(const btVector3& factor)
     {
         if (m_bIsDirty || m_linearFactor != factor)
         {
@@ -130,7 +130,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicBase::setAngularFactor(const btVector3& factor)
+    void PhysicObject::setAngularFactor(const btVector3& factor)
     {
         if (m_bIsDirty || m_angularFactor != factor)
         {
@@ -140,8 +140,8 @@ namespace ige::scene
         }
     }
 
-    void PhysicBase::setCollisionMargin(float margin)
-    { 
+    void PhysicObject::setCollisionMargin(float margin)
+    {
         if (m_bIsDirty || m_collisionMargin != margin)
         {
             m_collisionMargin = margin;
@@ -150,7 +150,7 @@ namespace ige::scene
     }
 
     //! Set is trigger
-    void PhysicBase::setIsTrigger(bool isTrigger)
+    void PhysicObject::setIsTrigger(bool isTrigger)
     {
         if (m_bIsDirty || m_bIsTrigger != isTrigger)
         {
@@ -163,7 +163,7 @@ namespace ige::scene
     }
 
     //! Set is kinematic
-    void PhysicBase::setIsKinematic(bool isKinematic)
+    void PhysicObject::setIsKinematic(bool isKinematic)
     {
         if(m_bIsDirty || m_bIsKinematic != isKinematic)
         {
@@ -195,7 +195,7 @@ namespace ige::scene
     }
 
     //! Set local scale
-    void PhysicBase::setLocalScale(const Vec3& scale)
+    void PhysicObject::setLocalScale(const Vec3& scale)
     {
         if (m_bIsDirty || m_previousScale != scale)
         {
@@ -206,7 +206,7 @@ namespace ige::scene
     }
 
     //! Create physic body
-    void PhysicBase::createBody()
+    void PhysicObject::createBody()
     {
         m_motion = std::make_unique<btDefaultMotionState>(PhysicHelper::to_btTransform(*(getOwner()->getTransform())));
         m_body = std::make_unique<btRigidBody>(btRigidBody::btRigidBodyConstructionInfo{0.0f, m_motion.get(), m_shape.get(), btVector3(0.0f, 0.0f, 0.0f)});
@@ -244,7 +244,7 @@ namespace ige::scene
     }
 
     //! Create physic body
-    void PhysicBase::destroyBody()
+    void PhysicObject::destroyBody()
     {
         deactivate();
         if(m_body) m_body.reset();
@@ -252,7 +252,7 @@ namespace ige::scene
     }
 
     //! Calculate and apply inertia
-    void PhysicBase::applyInertia()
+    void PhysicObject::applyInertia()
     {
         if (getBody())
         {
@@ -271,7 +271,7 @@ namespace ige::scene
     }
 
     //! Collision filter group
-    void PhysicBase::setCollisionFilterGroup(int group)
+    void PhysicObject::setCollisionFilterGroup(int group)
     {
         if (m_collisionFilterGroup != group)
         {
@@ -282,7 +282,7 @@ namespace ige::scene
     }
 
     //! Collision filter mask
-    void PhysicBase::setCollisionFilterMask(int mask)
+    void PhysicObject::setCollisionFilterMask(int mask)
     {
         if (m_collisionFilterMask != mask)
         {
@@ -293,7 +293,7 @@ namespace ige::scene
     }
 
     //! Activate
-    void PhysicBase::activate()
+    void PhysicObject::activate()
     {
         if (!m_bIsActivated)
         {
@@ -304,7 +304,7 @@ namespace ige::scene
     }
 
     //! Deactivate
-    void PhysicBase::deactivate()
+    void PhysicObject::deactivate()
     {
         if (m_bIsActivated)
         {
@@ -315,14 +315,14 @@ namespace ige::scene
     }
 
     //! Recreate Body
-    void PhysicBase::recreateBody()
+    void PhysicObject::recreateBody()
     {
         destroyBody();
         createBody();
     }
 
     //! Update Bullet transform
-    void PhysicBase::updateBtTransform()
+    void PhysicObject::updateBtTransform()
     {
         m_body->setWorldTransform(PhysicHelper::to_btTransform(getOwner()->getTransform()->getWorldRotation(), getOwner()->getTransform()->getWorldPosition()));
 
@@ -337,7 +337,7 @@ namespace ige::scene
     }
 
     //! Update IGE transform
-    void PhysicBase::updateIgeTransform()
+    void PhysicObject::updateIgeTransform()
     {
         if (!m_bIsKinematic)
         {
@@ -349,13 +349,13 @@ namespace ige::scene
     }
 
     //! Get AABB
-    void PhysicBase::getAABB(btVector3 &aabbMin, btVector3 aabbMax)
+    void PhysicObject::getAABB(btVector3 &aabbMin, btVector3 aabbMax)
     {
         getBody()->getAabb(aabbMin, aabbMax);
     }
 
     //! Serialize
-    void PhysicBase::to_json(json &j) const
+    void PhysicObject::to_json(json &j) const
     {
         j = json{
             {"mass", getMass()},
@@ -377,7 +377,7 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void PhysicBase::from_json(const json &j)
+    void PhysicObject::from_json(const json &j)
     {
         setMass(j.value("mass", 1.f));
         setRestitution(j.value("restitution", 1.f));

@@ -3,12 +3,12 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "components/physic/PhysicBase.h"
+#include "components/physic/PhysicObject.h"
 
 namespace ige::scene
 {
     //! PhysicMesh
-    class PhysicMesh : public PhysicBase
+    class PhysicMesh : public PhysicObject
     {
     public:
         //! Constructor

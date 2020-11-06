@@ -3,7 +3,7 @@
 #include <Python.h>
 
 // applyTorque
-PyDoc_STRVAR(PhysicBase_applyTorque_doc,
+PyDoc_STRVAR(PhysicObject_applyTorque_doc,
              "Apply torque.\n"
              "\n"
              "Parameters\n"
@@ -12,7 +12,7 @@ PyDoc_STRVAR(PhysicBase_applyTorque_doc,
              "        torque to apply\n");
 
 // applyForce
-PyDoc_STRVAR(PhysicBase_applyForce_doc,
+PyDoc_STRVAR(PhysicObject_applyForce_doc,
              "Apply force.\n"
              "\n"
              "Parameters\n"
@@ -23,7 +23,7 @@ PyDoc_STRVAR(PhysicBase_applyForce_doc,
              "        Position to apply, or center\n");
 
 // applyImpulse
-PyDoc_STRVAR(PhysicBase_applyImpulse_doc,
+PyDoc_STRVAR(PhysicObject_applyImpulse_doc,
              "Apply impulse.\n"
              "\n"
              "Parameters\n"
@@ -34,74 +34,74 @@ PyDoc_STRVAR(PhysicBase_applyImpulse_doc,
              "        Position to apply, or center\n");
 
 // clearForces
-PyDoc_STRVAR(PhysicBase_clearForces_doc, "Clear all forces.\n");
+PyDoc_STRVAR(PhysicObject_clearForces_doc, "Clear all forces.\n");
 
 // mass
-PyDoc_STRVAR(PhysicBase_mass_doc,
+PyDoc_STRVAR(PhysicObject_mass_doc,
              "Mass.\n"
              "Type: float\n");
 
 // friction
-PyDoc_STRVAR(PhysicBase_friction_doc,
+PyDoc_STRVAR(PhysicObject_friction_doc,
              "Friction.\n"
              "Type: float\n");
 
 // restitution
-PyDoc_STRVAR(PhysicBase_restitution_doc,
+PyDoc_STRVAR(PhysicObject_restitution_doc,
              "Restitution.\n"
              "Type: float\n");
 
 // linearVelocity
-PyDoc_STRVAR(PhysicBase_linearVelocity_doc,
+PyDoc_STRVAR(PhysicObject_linearVelocity_doc,
              "Linear Velocity.\n"
              "Type: Vec3\n");
 
 // angularVelocity
-PyDoc_STRVAR(PhysicBase_angularVelocity_doc,
+PyDoc_STRVAR(PhysicObject_angularVelocity_doc,
              "Angular Velocity.\n"
              "Type: Vec3\n");
 
 // linearFactor
-PyDoc_STRVAR(PhysicBase_linearFactor_doc,
+PyDoc_STRVAR(PhysicObject_linearFactor_doc,
              "Linear Factor.\n"
              "Type: Vec3\n");
 
 // angularFactor
-PyDoc_STRVAR(PhysicBase_angularFactor_doc,
+PyDoc_STRVAR(PhysicObject_angularFactor_doc,
              "Angular Factor.\n"
              "Type: Vec3\n");
 
 // isTrigger
-PyDoc_STRVAR(PhysicBase_isTrigger_doc,
+PyDoc_STRVAR(PhysicObject_isTrigger_doc,
              "Is trigger.\n"
              "Type: bool\n");
 
 // isKinematic
-PyDoc_STRVAR(PhysicBase_isKinematic_doc,
+PyDoc_STRVAR(PhysicObject_isKinematic_doc,
              "Is kinematic.\n"
              "Type: bool\n");
 
 // isEnabled
-PyDoc_STRVAR(PhysicBase_isEnabled_doc,
+PyDoc_STRVAR(PhysicObject_isEnabled_doc,
              "Is enabled.\n"
              "Type: bool\n");
 
 // aabb
-PyDoc_STRVAR(PhysicBase_aabb_doc,
+PyDoc_STRVAR(PhysicObject_aabb_doc,
              "Aabb bounding box.\n"
              "Type: tuple of Vec4\n");
 
 // collisionGroup
-PyDoc_STRVAR(PhysicBase_collisionGroup_doc,
+PyDoc_STRVAR(PhysicObject_collisionGroup_doc,
              "Collision filter group.\n"
              "Type: int\n");
 
 // collisionMask
-PyDoc_STRVAR(PhysicBase_collisionMask_doc,
+PyDoc_STRVAR(PhysicObject_collisionMask_doc,
              "Collision filter mask.\n"
              "Type: int\n");
 
 // continuousDetection
-PyDoc_STRVAR(PhysicBase_continuousDetection_doc,
+PyDoc_STRVAR(PhysicObject_continuousDetection_doc,
              "Continuous Colision Detection.\n"
              "Type: bool\n");

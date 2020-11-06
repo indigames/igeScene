@@ -13,15 +13,15 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    //! PhysicBase
-    class PhysicBase : public Component
+    //! PhysicObject
+    class PhysicObject : public Component
     {
     public:
         //! Constructor
-        PhysicBase(SceneObject &owner);
+        PhysicObject(SceneObject &owner);
 
         //! Destructor
-        virtual ~PhysicBase();
+        virtual ~PhysicObject();
 
         //! Initialization
         virtual bool init();
@@ -37,7 +37,7 @@ namespace ige::scene
         }
 
         //! Get SoftBody
-        virtual btSoftBody* getSoftBody() const { 
+        virtual btSoftBody* getSoftBody() const {
             if(!isSoftBody())
                 return nullptr;
             return (btSoftBody*)m_body.get();
@@ -138,26 +138,26 @@ namespace ige::scene
         virtual void updateIgeTransform();
 
         //! Get onCreatedEvent
-        static Event<PhysicBase*> &getOnCreatedEvent() { return m_onCreatedEvent; }
+        static Event<PhysicObject*> &getOnCreatedEvent() { return m_onCreatedEvent; }
 
         //! Get onDestroyedEvent
-        static Event<PhysicBase*> &getOnDestroyedEvent() { return m_onDestroyedEvent; }
+        static Event<PhysicObject*> &getOnDestroyedEvent() { return m_onDestroyedEvent; }
 
         //! Get onDestroyedEvent
-        static Event<PhysicBase*> &getOnActivatedEvent() { return m_onActivatedEvent; }
+        static Event<PhysicObject*> &getOnActivatedEvent() { return m_onActivatedEvent; }
 
         //! Get onDestroyedEvent
-        static Event<PhysicBase*> &getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
+        static Event<PhysicObject*> &getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
 
         //! Collision events
-        Event<PhysicBase*> &getCollisionStartEvent() { return m_collisionStartEvent; }
-        Event<PhysicBase*> &getCollisionStayEvent() { return m_collisionStayEvent; }
-        Event<PhysicBase*> &getCollisionStopEvent() { return m_collisionStopEvent; }
+        Event<PhysicObject*> &getCollisionStartEvent() { return m_collisionStartEvent; }
+        Event<PhysicObject*> &getCollisionStayEvent() { return m_collisionStayEvent; }
+        Event<PhysicObject*> &getCollisionStopEvent() { return m_collisionStopEvent; }
 
         //! Trigger events
-        Event<PhysicBase*> &getTriggerStartEvent() { return m_triggerStartEvent; }
-        Event<PhysicBase*> &getTriggerStayEvent() { return m_triggerStayEvent; }
-        Event<PhysicBase*> &getTriggerStopEvent() { return m_triggerStopEvent; }
+        Event<PhysicObject*> &getTriggerStartEvent() { return m_triggerStartEvent; }
+        Event<PhysicObject*> &getTriggerStayEvent() { return m_triggerStayEvent; }
+        Event<PhysicObject*> &getTriggerStopEvent() { return m_triggerStopEvent; }
 
     protected:
         //! Serialize
@@ -194,26 +194,26 @@ namespace ige::scene
 
     protected:
         //! On created event
-        static Event<PhysicBase*> m_onCreatedEvent;
+        static Event<PhysicObject*> m_onCreatedEvent;
 
         //! On destroyed event
-        static Event<PhysicBase*> m_onDestroyedEvent;
+        static Event<PhysicObject*> m_onDestroyedEvent;
 
         //! On activated event
-        static Event<PhysicBase*> m_onActivatedEvent;
+        static Event<PhysicObject*> m_onActivatedEvent;
 
         //! On deactivated event
-        static Event<PhysicBase*> m_onDeactivatedEvent;
+        static Event<PhysicObject*> m_onDeactivatedEvent;
 
         //! Collision events
-        Event<PhysicBase*> m_collisionStartEvent;
-        Event<PhysicBase*> m_collisionStayEvent;
-        Event<PhysicBase*> m_collisionStopEvent;
+        Event<PhysicObject*> m_collisionStartEvent;
+        Event<PhysicObject*> m_collisionStayEvent;
+        Event<PhysicObject*> m_collisionStopEvent;
 
         //! Trigger events
-        Event<PhysicBase*> m_triggerStartEvent;
-        Event<PhysicBase*> m_triggerStayEvent;
-        Event<PhysicBase*> m_triggerStopEvent;
+        Event<PhysicObject*> m_triggerStartEvent;
+        Event<PhysicObject*> m_triggerStayEvent;
+        Event<PhysicObject*> m_triggerStopEvent;
 
     protected:
         //! Collision shape
