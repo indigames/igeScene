@@ -13,15 +13,23 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    //! FixedConstraint
-    class FixedConstraint: public PhysicConstraint
+    //! SliderConstraint
+    class SliderConstraint : public PhysicConstraint
     {
     public:
         //! Constructor
-        FixedConstraint(PhysicObject &owner);
+        SliderConstraint(PhysicObject &owner);
 
         //! Destructor
-        virtual ~FixedConstraint();
+        virtual ~SliderConstraint();
+
+        //! Lower angle limit
+        const btVector3& getLowerLimit() const { return m_lowerLimit; }
+        void setLowerLimit(const btVector3& angleMin);
+
+        //! Upper angle limit
+        const btVector3& getUpperLimit() const { return m_upperLimit; }
+        void setUpperLimit(const btVector3& angleMax);
 
     protected:
         //! Serialize
@@ -32,5 +40,12 @@ namespace ige::scene
 
         //! Create physic constraint
         virtual void create() override;
+
+    protected:
+        //! Lower limit
+        btVector3 m_lowerLimit = {0.f, 0.f, 0.f};
+
+        //! Upper limit
+        btVector3 m_upperLimit = {0.f, 0.f, 0.f};
     };
 } // namespace ige::scene

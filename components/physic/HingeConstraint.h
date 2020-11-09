@@ -1,0 +1,82 @@
+#pragma once
+
+#include <bullet/btBulletCollisionCommon.h>
+#include <bullet/btBulletDynamicsCommon.h>
+#include <bullet/BulletSoftBody/btSoftBody.h>
+
+#include "event/Event.h"
+
+#include "utils/PyxieHeaders.h"
+using namespace pyxie;
+
+#include "components/physic/PhysicConstraint.h"
+
+namespace ige::scene
+{
+    //! HingeConstraint
+    class HingeConstraint : public PhysicConstraint
+    {
+    public:
+        //! Constructor
+        HingeConstraint(PhysicObject &owner);
+
+        //! Destructor
+        virtual ~HingeConstraint();
+
+        //! Get constraint
+        btHinge2Constraint *getHingeConstraint() const { return (btHinge2Constraint *)m_constraint.get(); }
+
+        //! Anchor
+        const btVector3 &getAnchor() const { return getHingeConstraint()->getAnchor(); }
+        void setAnchor(const btVector3 &anchor);
+
+        //! Other anchor
+        const btVector3 &getOtherAnchor() const { return getHingeConstraint()->getAnchor2(); }
+
+        //! Axis
+        const btVector3 &getAxis() const { return getHingeConstraint()->getAxis1(); }
+        void setAxis(const btVector3 &axis);
+
+        //! Other axis
+        const btVector3 &getOtherAxis() const { return getHingeConstraint()->getAxis2(); }
+        void setOtherAxis(const btVector3 &axis);
+
+        //! Get angle
+        float getAngle() const { return getHingeConstraint()->getAngle1(); }
+        float getOtherAngle() const { return getHingeConstraint()->getAngle2(); }
+
+        //! Lower angle limit
+        float getLowerLimit() const { return m_lowerLimit; }
+        void setLowerLimit(float angleMin);
+
+        //! Upper angle limit
+        float getUpperLimit() const { return m_upperLimit; }
+        void setUpperLimit(float angleMax);
+
+    protected:
+        //! Serialize
+        virtual void to_json(json &j) const override;
+
+        //! Serialize finished event
+        virtual void onSerializeFinished(Scene &scene);
+
+        //! Create physic constraint
+        virtual void create() override;
+
+    protected:
+        //! Anchor point
+        btVector3 m_anchor = {0.f, 0.f, 0.f};
+
+        //! Axis
+        btVector3 m_axis = {0.f, 0.f, 0.f};
+
+        //! Other Axis
+        btVector3 m_otherAxis = {0.f, 0.f, 0.f};
+
+        //! Lower limit
+        float m_lowerLimit = 0.f;
+
+        //! Upper limit
+        float m_upperLimit = 0.f;
+    };
+} // namespace ige::scene

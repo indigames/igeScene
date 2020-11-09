@@ -90,8 +90,10 @@ namespace ige::scene
     void PhysicConstraint::to_json(json &j) const
     {
         j = json{
-            {"collision", isEnableCollisionBetweenBodies()},
-            {"otherId", m_otherUUID},
+            {"enableCol", isEnableCollisionBetweenBodies()},
+            {"otherId", getOtherUUID()},
+            {"enable", isEnabled()},
+            {"breakTs", getBreakingImpulseThreshold()},
         };
     }
 
@@ -104,11 +106,9 @@ namespace ige::scene
     //! Serialization finished event
     void PhysicConstraint::onSerializeFinished(Scene& scene)
     {
-        if(!m_json.empty())
-        {
-            setEnableCollisionBetweenBodies(m_json.value("collision", true));
-            setOtherUUID(m_json.value("otherId", std::string()));
-            m_json.clear();
-        }
+        setEnableCollisionBetweenBodies(m_json.value("enableCol", true));
+        setOtherUUID(m_json.value("otherId", std::string()));
+        setEnabled(m_json.value("enable", true));
+        setBreakingImpulseThreshold(m_json.value("breakTs", std::numeric_limits<float>().max()));
     }
 }

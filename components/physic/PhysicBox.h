@@ -40,6 +40,7 @@ namespace ige::scene
         void recreateCollisionShape(const Vec3 &size);
 
     protected:
+        //! Box size
         Vec3 m_size;
     };
 } // namespace ige::scene

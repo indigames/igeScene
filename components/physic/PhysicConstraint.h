@@ -41,17 +41,25 @@ namespace ige::scene
         virtual btRigidBody *getOwnerBody() const { return getOwner()->getBody(); }
 
         //! Get Other UUID
-        const std::string& getOtherUUID() const { return m_otherUUID; }
-        void setOtherUUID(const std::string& other);
+        const std::string &getOtherUUID() const { return m_otherUUID; }
+        void setOtherUUID(const std::string &other);
 
         //! Get other object
-        PhysicObject* getOther();
+        PhysicObject *getOther();
 
         //! Get Other RigidBody
         virtual btRigidBody *getOtherBody() { return getOther() ? getOther()->getBody() : nullptr; }
 
         //! Bullet generic constraint
-        btGeneric6DofSpring2Constraint* getConstraint() const { return m_constraint.get(); }
+        btGeneric6DofSpring2Constraint *getConstraint() const { return m_constraint.get(); }
+
+        //! Enable
+        bool isEnabled() const { return getConstraint()->isEnabled(); }
+        void setEnabled(bool enable = true) { getConstraint()->setEnabled(enable); };
+
+        //! Constraint breaking impulse threshold
+        float getBreakingImpulseThreshold() const { return getConstraint()->getBreakingImpulseThreshold(); }
+        void setBreakingImpulseThreshold(float threshold) { getConstraint()->setBreakingImpulseThreshold(threshold); };
 
         //! Enable collision between bodies
         bool isEnableCollisionBetweenBodies() const { return m_bEnableCollisionBetweenBodies; }
@@ -72,7 +80,7 @@ namespace ige::scene
         virtual void from_json(const json &j);
 
         //! Serialize finished event
-        void onSerializeFinished(Scene& scene);
+        virtual void onSerializeFinished(Scene &scene);
 
     protected:
         //! On created event
