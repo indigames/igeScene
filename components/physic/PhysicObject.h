@@ -13,6 +13,8 @@ using namespace pyxie;
 
 namespace ige::scene
 {
+    class PhysicConstraint;
+
     //! PhysicObject
     class PhysicObject : public Component
     {
@@ -111,6 +113,19 @@ namespace ige::scene
         //! Collision Margin
         float getCollisionMargin() const { return m_collisionMargin; }
         void setCollisionMargin(float margin);
+
+        //! Get contraints vector
+        const std::vector<std::shared_ptr<PhysicConstraint>>& getContraints() const { return m_constraints; }
+
+        //! Add constraint
+        void addConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
+
+        //! Remove constraint
+        void removeConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
+
+        //! Add constraint by type
+        template <typename T, typename... Args>
+        std::shared_ptr<T> addConstraint(Args &&... args);
 
     public:
         //! Apply torque
@@ -270,6 +285,9 @@ namespace ige::scene
         //! Collision margin
         float m_collisionMargin = 0.025f;
 
+        //! Associated constraints
+        std::vector<std::shared_ptr<PhysicConstraint>> m_constraints;
+
         //! Cache previous scale value
         Vec3 m_previousScale = {1.f, 1.f, 1.f};
 
@@ -279,4 +297,15 @@ namespace ige::scene
         //! Cache dirty state
         bool m_bIsDirty = false;
     };
+
+    //! Add constraint by type
+    template <typename T, typename... Args>
+    inline std::shared_ptr<T> PhysicObject::addConstraint(Args &&... args)
+    {
+        static_assert(std::is_base_of<PhysicConstraint, T>::value, "T should derive from PhysicConstraint");
+        auto instance = std::make_shared<T>(*this, args...);
+        m_constraints.push_back(instance);
+        return instance;
+    }
+
 } // namespace ige::scene

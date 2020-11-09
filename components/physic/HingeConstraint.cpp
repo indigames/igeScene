@@ -10,6 +10,7 @@ namespace ige::scene
     HingeConstraint::HingeConstraint(PhysicObject &owner)
         : PhysicConstraint(owner)
     {
+        setType(ConstraintType::Hinge);
     }
 
     //! Destructor

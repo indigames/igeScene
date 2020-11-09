@@ -19,11 +19,26 @@ namespace ige::scene
     class PhysicConstraint
     {
     public:
+        enum class ConstraintType
+        {
+            Base = -1,
+            Fixed = 0,
+            Hinge,
+            Slider,
+            Spring,
+            Dof6Spring
+        };
+
+    public:
         //! Constructor
         PhysicConstraint(PhysicObject &owner);
 
         //! Destructor
         virtual ~PhysicConstraint();
+
+        //! Type
+        ConstraintType getType() const { return m_type; }
+        void setType(ConstraintType type) { m_type = type; }
 
         //! Create physic constraint
         virtual void create();
@@ -113,5 +128,8 @@ namespace ige::scene
 
         //! Dirty flag
         bool m_bIsDirty = true;
+
+        //! Constraint type
+        ConstraintType m_type = ConstraintType::Base;
     };
 } // namespace ige::scene

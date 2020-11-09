@@ -10,6 +10,7 @@ namespace ige::scene
     SliderConstraint::SliderConstraint(PhysicObject &owner)
         : PhysicConstraint(owner)
     {
+        setType(ConstraintType::Slider);
     }
 
     //! Destructor

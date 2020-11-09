@@ -92,6 +92,7 @@ namespace ige::scene
     void PhysicConstraint::to_json(json &j) const
     {
         j = json{
+            {"type", (int)getType()},
             {"enableCol", isEnableCollisionBetweenBodies()},
             {"otherId", getOtherUUID()},
             {"enable", isEnabled()},
@@ -108,6 +109,7 @@ namespace ige::scene
     //! Serialization finished event
     void PhysicConstraint::onSerializeFinished(Scene &scene)
     {
+        setType((ConstraintType)m_json.value("type", -1));
         setEnableCollisionBetweenBodies(m_json.value("enableCol", true));
         setOtherUUID(m_json.value("otherId", std::string()));
         setEnabled(m_json.value("enable", true));

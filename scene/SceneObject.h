@@ -68,12 +68,6 @@ namespace ige::scene
         //! Remove a component by name
         virtual bool removeComponent(const std::string &name);
 
-        //! Add a component by raw pointer
-        virtual void addComponent(Component *component);
-
-        //! Remove a component by raw pointer
-        virtual bool removeComponent(Component *component);
-
         //! Remove all components
         virtual bool removeAllComponents();
 

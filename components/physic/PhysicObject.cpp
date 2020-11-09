@@ -39,6 +39,26 @@ namespace ige::scene
         return true;
     }
 
+    //! Add constraint
+    void PhysicObject::addConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+    {
+        m_constraints.push_back(constraint);
+    }
+
+    //! Remove constraint
+    void PhysicObject::removeConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+    {
+        auto found = std::find_if(m_constraints.begin(), m_constraints.end(), [&constraint](const auto& element)
+        {
+            return constraint == element;
+        });
+
+        if (found != m_constraints.end())
+        {
+            m_constraints.erase(found);
+        }
+    }
+
     //! Set enable
     void PhysicObject::setEnabled(bool enable)
     {

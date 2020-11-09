@@ -195,26 +195,6 @@ namespace ige::scene
         return false;
     }
 
-    //! Add a component by raw pointer
-    void SceneObject::addComponent(Component *component)
-    {
-        m_components.push_back(std::shared_ptr<Component>(component));
-    }
-
-    //! Remove a component by raw pointer
-    bool SceneObject::removeComponent(Component *component)
-    {
-        auto it = std::find_if(m_components.begin(), m_components.end(), [&](const auto &comp) {
-            return comp.get() == component;
-        });
-        if (it != m_components.end())
-        {
-            m_components.erase(it);
-            return true;
-        }
-        return false;
-    }
-
     //! Remove all component
     bool SceneObject::removeAllComponents()
     {

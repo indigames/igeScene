@@ -10,6 +10,7 @@ namespace ige::scene
     SpringConstraint::SpringConstraint(PhysicObject &owner)
         : PhysicConstraint(owner)
     {
+        setType(ConstraintType::Spring);
     }
 
     //! Destructor

@@ -10,6 +10,7 @@ namespace ige::scene
     FixedConstraint::FixedConstraint(PhysicObject &owner)
         : PhysicConstraint(owner)
     {
+        setType(ConstraintType::Fixed);
     }
 
     //! Destructor

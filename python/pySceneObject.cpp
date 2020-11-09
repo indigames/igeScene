@@ -369,7 +369,7 @@ namespace ige::scene
             else
             {
                 auto componentObj = (PyObject_Component *)obj;
-                if (self->sceneObject && componentObj && self->sceneObject->removeComponent(componentObj->component))
+                if (self->sceneObject && componentObj && self->sceneObject->removeComponent(componentObj->component->getName()))
                     Py_RETURN_TRUE;
             }
         }

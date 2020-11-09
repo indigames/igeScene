@@ -10,6 +10,7 @@ namespace ige::scene
     Dof6SpringConstraint::Dof6SpringConstraint(PhysicObject &owner)
         : PhysicConstraint(owner)
     {
+        setType(ConstraintType::Dof6Spring);
     }
 
     //! Destructor
