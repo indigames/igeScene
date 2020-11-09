@@ -9,8 +9,8 @@
 namespace ige::scene
 {
     //! Initialize static members
-    Event<PhysicConstraint*> PhysicConstraint::m_onActivatedEvent;
-    Event<PhysicConstraint*> PhysicConstraint::m_onDeactivatedEvent;
+    Event<PhysicConstraint *> PhysicConstraint::m_onActivatedEvent;
+    Event<PhysicConstraint *> PhysicConstraint::m_onDeactivatedEvent;
 
     //! Constructor
     PhysicConstraint::PhysicConstraint(PhysicObject &owner)
@@ -29,16 +29,18 @@ namespace ige::scene
     //! Create
     void PhysicConstraint::create()
     {
-        if(m_constraint)
+        if (m_constraint)
         {
             getOnActivatedEvent().invoke(this);
         }
+        m_bIsDirty = false;
     }
 
     //! Destroy
     void PhysicConstraint::destroy()
     {
-        if(m_constraint)
+        m_bIsDirty = true;
+        if (m_constraint)
         {
             getOnDeactivatedEvent().invoke(this);
             m_constraint.reset();
@@ -53,15 +55,15 @@ namespace ige::scene
     }
 
     //! Get other object
-    PhysicObject* PhysicConstraint::getOther()
+    PhysicObject *PhysicConstraint::getOther()
     {
         return m_other;
     }
 
     // Set other body object
-    void PhysicConstraint::setOtherUUID(const std::string& otherUUID)
+    void PhysicConstraint::setOtherUUID(const std::string &otherUUID)
     {
-        if(m_otherUUID != otherUUID)
+        if (m_otherUUID != otherUUID)
         {
             m_otherUUID = otherUUID;
             auto otherObject = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(m_otherUUID);
@@ -73,7 +75,7 @@ namespace ige::scene
     //! Enable collision between bodies
     void PhysicConstraint::setEnableCollisionBetweenBodies(bool enable)
     {
-        if(m_bEnableCollisionBetweenBodies != enable)
+        if (m_bEnableCollisionBetweenBodies != enable)
         {
             // Remove old constraint
             getOnDeactivatedEvent().invoke(this);
@@ -104,11 +106,11 @@ namespace ige::scene
     }
 
     //! Serialization finished event
-    void PhysicConstraint::onSerializeFinished(Scene& scene)
+    void PhysicConstraint::onSerializeFinished(Scene &scene)
     {
         setEnableCollisionBetweenBodies(m_json.value("enableCol", true));
         setOtherUUID(m_json.value("otherId", std::string()));
         setEnabled(m_json.value("enable", true));
         setBreakingImpulseThreshold(m_json.value("breakTs", std::numeric_limits<float>().max()));
     }
-}
+} // namespace ige::scene

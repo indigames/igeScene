@@ -14,7 +14,7 @@ using namespace pyxie;
 namespace ige::scene
 {
     //! FixedConstraint
-    class FixedConstraint: public PhysicConstraint
+    class FixedConstraint : public PhysicConstraint
     {
     public:
         //! Constructor

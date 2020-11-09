@@ -18,7 +18,7 @@ namespace ige::scene
     }
 
     //! Set lower limit
-    void Dof6SpringConstraint::setLowerLinearLimit(const btVector3& limit)
+    void Dof6SpringConstraint::setLowerLinearLimit(const btVector3 &limit)
     {
         if (m_bIsDirty || m_lowerLinearLimit != limit)
         {
@@ -28,7 +28,7 @@ namespace ige::scene
     }
 
     //! Set upper limit
-    void Dof6SpringConstraint::setUpperLinearLimit(const btVector3& limit)
+    void Dof6SpringConstraint::setUpperLinearLimit(const btVector3 &limit)
     {
         if (m_bIsDirty || m_upperLinearLimit != limit)
         {
@@ -38,7 +38,7 @@ namespace ige::scene
     }
 
     //! Set lower limit
-    void Dof6SpringConstraint::setLowerAngularLimit(const btVector3& limit)
+    void Dof6SpringConstraint::setLowerAngularLimit(const btVector3 &limit)
     {
         if (m_bIsDirty || m_lowerAngularLimit != limit)
         {
@@ -48,7 +48,7 @@ namespace ige::scene
     }
 
     //! Set upper limit
-    void Dof6SpringConstraint::setUpperAngularLimit(const btVector3& limit)
+    void Dof6SpringConstraint::setUpperAngularLimit(const btVector3 &limit)
     {
         if (m_bIsDirty || m_upperAngularLimit != limit)
         {
@@ -60,11 +60,11 @@ namespace ige::scene
     //! Target linear velocity
     void Dof6SpringConstraint::setTargetLinearVelocity(const btVector3 &val)
     {
-        if(m_bIsDirty || m_targetLinearVelocity != val)
+        if (m_bIsDirty || m_targetLinearVelocity != val)
         {
             m_targetLinearVelocity = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setTargetVelocity(i, m_targetLinearVelocity[i]);
             }
@@ -74,11 +74,11 @@ namespace ige::scene
     //! Target angular velocity
     void Dof6SpringConstraint::setTargetAngularVelocity(const btVector3 &val)
     {
-        if(m_bIsDirty || m_targetAngularVelocity != val)
+        if (m_bIsDirty || m_targetAngularVelocity != val)
         {
             m_targetAngularVelocity = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setTargetVelocity(i + 3, m_targetAngularVelocity[i]);
             }
@@ -88,11 +88,11 @@ namespace ige::scene
     //! Linear bounce
     void Dof6SpringConstraint::setLinearBounce(const btVector3 &val)
     {
-        if(m_bIsDirty || m_linearBounce != val)
+        if (m_bIsDirty || m_linearBounce != val)
         {
             m_linearBounce = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setBounce(i, m_linearBounce[i]);
             }
@@ -102,11 +102,11 @@ namespace ige::scene
     //! Angular bounce
     void Dof6SpringConstraint::setAngularBounce(const btVector3 &val)
     {
-        if(m_bIsDirty || m_angularBounce != val)
+        if (m_bIsDirty || m_angularBounce != val)
         {
             m_angularBounce = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setBounce(i + 3, m_angularBounce[i]);
             }
@@ -116,14 +116,14 @@ namespace ige::scene
     //! Enable linear spring
     void Dof6SpringConstraint::setEnableLinearSpring(const btVector3 &val)
     {
-        if(m_bIsDirty || m_bEnableLinearSpring != val)
+        if (m_bIsDirty || m_bEnableLinearSpring != val)
         {
             m_bEnableLinearSpring = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->enableSpring(i, m_bEnableLinearSpring[i]);
-                if(m_bEnableLinearSpring[i])
+                if (m_bEnableLinearSpring[i])
                     getConstraint()->setEquilibriumPoint(i);
                 else
                     getConstraint()->setEquilibriumPoint(i, 0.f);
@@ -134,11 +134,11 @@ namespace ige::scene
     //! Linear stiffness
     void Dof6SpringConstraint::setLinearStiffness(const btVector3 &val)
     {
-        if(m_bIsDirty || m_linearStiffness != val)
+        if (m_bIsDirty || m_linearStiffness != val)
         {
             m_linearStiffness = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setStiffness(i, m_linearStiffness[i]);
             }
@@ -148,14 +148,14 @@ namespace ige::scene
     //! Enable angular spring
     void Dof6SpringConstraint::setEnableAngularSpring(const btVector3 &val)
     {
-        if(m_bIsDirty || m_bEnableAngularSpring != val)
+        if (m_bIsDirty || m_bEnableAngularSpring != val)
         {
             m_bEnableAngularSpring = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->enableSpring(i + 3, m_bEnableAngularSpring[i]);
-                if(m_bEnableAngularSpring[i])
+                if (m_bEnableAngularSpring[i])
                     getConstraint()->setEquilibriumPoint(i + 3);
                 else
                     getConstraint()->setEquilibriumPoint(i + 3, 0.f);
@@ -166,11 +166,11 @@ namespace ige::scene
     //! Angular stiffness
     void Dof6SpringConstraint::setAngularStiffness(const btVector3 &val)
     {
-        if(m_bIsDirty || m_angularStiffness != val)
+        if (m_bIsDirty || m_angularStiffness != val)
         {
             m_angularStiffness = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setStiffness(i + 3, m_angularStiffness[i]);
             }
@@ -180,11 +180,11 @@ namespace ige::scene
     //! Linear damping
     void Dof6SpringConstraint::setLinearDamping(const btVector3 &val)
     {
-        if(m_bIsDirty || m_linearDamping != val)
+        if (m_bIsDirty || m_linearDamping != val)
         {
             m_linearDamping = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setDamping(i, m_linearDamping[i]);
             }
@@ -194,11 +194,11 @@ namespace ige::scene
     //! Angular damping
     void Dof6SpringConstraint::setAngularDamping(const btVector3 &val)
     {
-        if(m_bIsDirty || m_angularDamping != val)
+        if (m_bIsDirty || m_angularDamping != val)
         {
             m_angularDamping = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setDamping(i + 3, m_angularDamping[i]);
             }
@@ -208,11 +208,11 @@ namespace ige::scene
     //! Enable linear motor
     void Dof6SpringConstraint::setEnabledLinearMotor(const btVector3 &val)
     {
-        if(m_bIsDirty || m_bEnableLinearMotor != val)
+        if (m_bIsDirty || m_bEnableLinearMotor != val)
         {
             m_bEnableLinearMotor = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->enableMotor(i, m_bEnableLinearMotor[i]);
             }
@@ -222,11 +222,11 @@ namespace ige::scene
     //! Linear max motor force
     void Dof6SpringConstraint::setLinearMaxMotorForce(const btVector3 &val)
     {
-        if(m_bIsDirty || m_linearMaxMotorForce != val)
+        if (m_bIsDirty || m_linearMaxMotorForce != val)
         {
             m_linearMaxMotorForce = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setMaxMotorForce(i, m_linearMaxMotorForce[i]);
             }
@@ -236,11 +236,11 @@ namespace ige::scene
     //! Enable angular motor
     void Dof6SpringConstraint::setEnabledAngularMotor(const btVector3 &val)
     {
-        if(m_bIsDirty || m_bEnableAngularMotor != val)
+        if (m_bIsDirty || m_bEnableAngularMotor != val)
         {
             m_bEnableAngularMotor = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->enableMotor(i + 3, m_bEnableAngularMotor[i]);
             }
@@ -250,11 +250,11 @@ namespace ige::scene
     //! Angular max motor force
     void Dof6SpringConstraint::setAngularMaxMotorForce(const btVector3 &val)
     {
-        if(m_bIsDirty || m_angularMaxMotorForce != val)
+        if (m_bIsDirty || m_angularMaxMotorForce != val)
         {
             m_angularMaxMotorForce = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setMaxMotorForce(i + 3, m_angularMaxMotorForce[i]);
             }
@@ -264,11 +264,11 @@ namespace ige::scene
     //! Enable linear servo
     void Dof6SpringConstraint::setEnableLinearServo(const btVector3 &val)
     {
-        if(m_bIsDirty || m_bEnableLinearServo != val)
+        if (m_bIsDirty || m_bEnableLinearServo != val)
         {
             m_bEnableLinearServo = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setServo(i, m_bEnableLinearServo[i]);
             }
@@ -278,11 +278,11 @@ namespace ige::scene
     //! Linear servo target
     void Dof6SpringConstraint::setLinearServoTarget(const btVector3 &val)
     {
-        if(m_bIsDirty || m_linearServoTarget != val)
+        if (m_bIsDirty || m_linearServoTarget != val)
         {
             m_linearServoTarget = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setServoTarget(i, m_linearServoTarget[i]);
             }
@@ -292,11 +292,11 @@ namespace ige::scene
     //! Enable angular servo
     void Dof6SpringConstraint::setEnableAngularServo(const btVector3 &val)
     {
-        if(m_bIsDirty || m_bEnableAngularServo != val)
+        if (m_bIsDirty || m_bEnableAngularServo != val)
         {
             m_bEnableAngularServo = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setServo(i + 3, m_bEnableAngularServo[i]);
             }
@@ -306,11 +306,11 @@ namespace ige::scene
     //! Angular servo target
     void Dof6SpringConstraint::setAngularServoTarget(const btVector3 &val)
     {
-        if(m_bIsDirty || m_angularServoTarget != val)
+        if (m_bIsDirty || m_angularServoTarget != val)
         {
             m_angularServoTarget = val;
 
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 getConstraint()->setServoTarget(i + 3, m_angularServoTarget[i]);
             }
@@ -322,8 +322,6 @@ namespace ige::scene
     {
         // Destroy old constrain
         destroy();
-
-        m_bIsDirty = true;
 
         // Create constraint
         auto body = getOwnerBody();
@@ -368,8 +366,6 @@ namespace ige::scene
         setAngularMaxMotorForce(m_angularMaxMotorForce);
         setEnableAngularServo(m_bEnableAngularServo);
         setAngularServoTarget(m_angularServoTarget);
-
-        m_bIsDirty = false;
 
         // Call parent create function to register this constraint to world
         PhysicConstraint::create();

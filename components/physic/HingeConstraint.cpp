@@ -20,7 +20,7 @@ namespace ige::scene
     //! Set anchor
     void HingeConstraint::setAnchor(const btVector3 &anchor)
     {
-        if (m_anchor != anchor)
+        if (m_bIsDirty || m_anchor != anchor)
         {
             m_anchor = anchor;
             recreate();
@@ -30,7 +30,7 @@ namespace ige::scene
     //! Set axis
     void HingeConstraint::setAxis(const btVector3 &axis)
     {
-        if (m_axis != axis)
+        if (m_bIsDirty || m_axis != axis)
         {
             m_axis = axis;
             recreate();
@@ -40,7 +40,7 @@ namespace ige::scene
     //! Set other axis
     void HingeConstraint::setOtherAxis(const btVector3 &axis)
     {
-        if (m_otherAxis != axis)
+        if (m_bIsDirty || m_otherAxis != axis)
         {
             m_otherAxis = axis;
             recreate();
@@ -50,7 +50,7 @@ namespace ige::scene
     //! Set lower limit
     void HingeConstraint::setLowerLimit(float angle)
     {
-        if (m_lowerLimit != angle)
+        if (m_bIsDirty || m_lowerLimit != angle)
         {
             m_lowerLimit = angle;
             getHingeConstraint()->setLowerLimit(m_lowerLimit);
@@ -60,7 +60,7 @@ namespace ige::scene
     //! Set upper limit
     void HingeConstraint::setUpperLimit(float angle)
     {
-        if (m_upperLimit != angle)
+        if (m_bIsDirty || m_upperLimit != angle)
         {
             m_upperLimit = angle;
             getHingeConstraint()->setLowerLimit(m_upperLimit);
@@ -76,6 +76,10 @@ namespace ige::scene
         // Create constraint
         auto otherBody = getOtherBody() ? getOtherBody() : &btGeneric6DofConstraint::getFixedBody();
         m_constraint = std::make_unique<btHinge2Constraint>(*getOwnerBody(), *otherBody, m_anchor, m_axis, m_otherAxis);
+
+        // Apply constraint
+        setLowerLimit(m_lowerLimit);
+        setUpperLimit(m_upperLimit);
 
         // Call parent create function to register this constraint to world
         PhysicConstraint::create();

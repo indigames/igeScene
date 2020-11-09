@@ -24,20 +24,24 @@ namespace ige::scene
         virtual ~SpringConstraint();
 
         //! Lower angle limit
-        const btVector3& getLowerLimit() const { return m_lowerLimit; }
-        void setLowerLimit(const btVector3& angleMin);
+        const btVector3 &getLowerLimit() const { return m_lowerLimit; }
+        void setLowerLimit(const btVector3 &angleMin);
 
         //! Upper angle limit
-        const btVector3& getUpperLimit() const { return m_upperLimit; }
-        void setUpperLimit(const btVector3& angleMax);
+        const btVector3 &getUpperLimit() const { return m_upperLimit; }
+        void setUpperLimit(const btVector3 &angleMax);
+
+        //! Enable
+        const btVector3 &getEnable() const { return m_enable; }
+        void setEnable(const btVector3 &val);
 
         //! Stiffness
-        float getStiffness() const { return m_stiffness; }
-        void setStiffness(float val);
+        const btVector3 &getStiffness() const { return m_stiffness; }
+        void setStiffness(const btVector3 &val);
 
         //! Damping
-        float getDamping() const { return m_damping; }
-        void setDamping(float val);
+        const btVector3 &getDamping() const { return m_damping; }
+        void setDamping(const btVector3 &val);
 
     protected:
         //! Serialize
@@ -56,10 +60,13 @@ namespace ige::scene
         //! Upper limit
         btVector3 m_upperLimit = {0.f, 0.f, 0.f};
 
+        //! Enable spring
+        btVector3 m_enable = {1.f, 0.f, 0.f};
+
         //! Stiffness
-        float m_stiffness = 10.f;
+        btVector3 m_stiffness = {10.f, 0.f, 0.f};
 
         //! Damping
-        float m_damping = 0.5f;
+        btVector3 m_damping = {0.5f, 0.f, 0.f};
     };
 } // namespace ige::scene

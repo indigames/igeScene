@@ -20,7 +20,7 @@ namespace ige::scene
     //! Set lower limit
     void SpringConstraint::setLowerLimit(const btVector3 &limit)
     {
-        if (m_lowerLimit != limit)
+        if (m_bIsDirty || m_lowerLimit != limit)
         {
             m_lowerLimit = limit;
             getConstraint()->setLinearLowerLimit(m_lowerLimit);
@@ -30,33 +30,49 @@ namespace ige::scene
     //! Set upper limit
     void SpringConstraint::setUpperLimit(const btVector3 &limit)
     {
-        if (m_upperLimit != limit)
+        if (m_bIsDirty || m_upperLimit != limit)
         {
             m_upperLimit = limit;
             getConstraint()->setLinearUpperLimit(m_upperLimit);
         }
     }
 
-    void SpringConstraint::setStiffness(float val)
+    void SpringConstraint::setEnable(const btVector3 &val)
     {
-        if (m_stiffness != val)
+        if (m_bIsDirty || m_enable != val)
         {
-            m_stiffness = val;
+            m_enable = val;
             for (int i = 0; i < 3; ++i)
             {
-                m_constraint->setStiffness(i, m_stiffness);
+                m_constraint->enableSpring(i, m_enable[i]);
+                if (m_enable[i])
+                    m_constraint->setEquilibriumPoint(i);
+                else
+                    m_constraint->setEquilibriumPoint(i, 0.f);
             }
         }
     }
 
-    void SpringConstraint::setDamping(float val)
+    void SpringConstraint::setStiffness(const btVector3 &val)
     {
-        if (m_damping != val)
+        if (m_bIsDirty || m_stiffness != val)
+        {
+            m_stiffness = val;
+            for (int i = 0; i < 3; ++i)
+            {
+                m_constraint->setStiffness(i, m_stiffness[i]);
+            }
+        }
+    }
+
+    void SpringConstraint::setDamping(const btVector3 &val)
+    {
+        if (m_bIsDirty || m_damping != val)
         {
             m_damping = val;
             for (int i = 0; i < 3; ++i)
             {
-                m_constraint->setDamping(i, m_damping);
+                m_constraint->setDamping(i, m_damping[i]);
             }
         }
     }
@@ -74,17 +90,13 @@ namespace ige::scene
         auto otherBody = getOtherBody() ? getOtherBody() : &btGeneric6DofConstraint::getFixedBody();
         auto otherTransform = getOther() ? PhysicHelper::to_btTransform(getOther()->getOwner()->getTransform()->getWorldRotation(), getOther()->getOwner()->getTransform()->getWorldPosition()) : btTransform::getIdentity();
         m_constraint = std::make_unique<btGeneric6DofSpring2Constraint>(*body, *otherBody, transform, otherTransform);
-        m_constraint->setLinearLowerLimit(m_lowerLimit);
-        m_constraint->setLinearUpperLimit(m_upperLimit);
 
-        // Apply spring on three dimensions
-        for (int i = 0; i < 3; ++i)
-        {
-            m_constraint->enableSpring(i, true);
-            m_constraint->setStiffness(i, m_stiffness);
-            m_constraint->setDamping(i, m_damping);
-            m_constraint->setEquilibriumPoint(i);
-        }
+        // Apply constraint
+        setLowerLimit(m_lowerLimit);
+        setUpperLimit(m_upperLimit);
+        setEnable(m_enable);
+        setStiffness(m_stiffness);
+        setDamping(m_damping);
 
         // Call parent create function to register this constraint to world
         PhysicConstraint::create();
@@ -96,8 +108,9 @@ namespace ige::scene
         PhysicConstraint::to_json(j);
         j["low"] = PhysicHelper::from_btVector3(getLowerLimit());
         j["up"] = PhysicHelper::from_btVector3(getUpperLimit());
-        j["stiff"] = getStiffness();
-        j["damp"] = getDamping();
+        j["enable"] = PhysicHelper::from_btVector3(getEnable());
+        j["stiff"] = PhysicHelper::from_btVector3(getStiffness());
+        j["damp"] = PhysicHelper::from_btVector3(getDamping());
     }
 
     //! Deserialize
@@ -106,8 +119,9 @@ namespace ige::scene
         PhysicConstraint::onSerializeFinished(scene);
         setLowerLimit(PhysicHelper::to_btVector3(m_json.value("low", Vec3(1.f, 1.f, 1.f))));
         setUpperLimit(PhysicHelper::to_btVector3(m_json.value("up", Vec3(0.f, 0.f, 0.f))));
-        setStiffness(m_json.value("stiff", 10.f));
-        setDamping(m_json.value("damp", 0.5f));
+        setEnable(PhysicHelper::to_btVector3(m_json.value("enable", Vec3(1.f, 0.f, 0.f))));
+        setStiffness(PhysicHelper::to_btVector3(m_json.value("stiff", Vec3(10.f, 0.f, 0.f))));
+        setDamping(PhysicHelper::to_btVector3(m_json.value("damp", Vec3(0.5f, 0.f, 0.f))));
 
         // Serialization done, clear json
         m_json.clear();

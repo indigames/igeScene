@@ -24,12 +24,12 @@ namespace ige::scene
         virtual ~SliderConstraint();
 
         //! Lower angle limit
-        const btVector3& getLowerLimit() const { return m_lowerLimit; }
-        void setLowerLimit(const btVector3& angleMin);
+        const btVector3 &getLowerLimit() const { return m_lowerLimit; }
+        void setLowerLimit(const btVector3 &angleMin);
 
         //! Upper angle limit
-        const btVector3& getUpperLimit() const { return m_upperLimit; }
-        void setUpperLimit(const btVector3& angleMax);
+        const btVector3 &getUpperLimit() const { return m_upperLimit; }
+        void setUpperLimit(const btVector3 &angleMax);
 
     protected:
         //! Serialize

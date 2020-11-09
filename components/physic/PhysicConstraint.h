@@ -110,5 +110,8 @@ namespace ige::scene
 
         //! Cache serialize event id
         uint64_t m_serializeEventId = (uint64_t)(-1);
+
+        //! Dirty flag
+        bool m_bIsDirty = true;
     };
 } // namespace ige::scene

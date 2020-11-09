@@ -56,7 +56,7 @@ namespace ige::scene
         void setAngularBounce(const btVector3 &val);
 
         //! Enable linear spring
-        const btVector3 & getEnableLinearSpring() const { return m_bEnableLinearSpring; }
+        const btVector3 &getEnableLinearSpring() const { return m_bEnableLinearSpring; }
         void setEnableLinearSpring(const btVector3 &val);
 
         //! Linear stiffness
@@ -64,7 +64,7 @@ namespace ige::scene
         void setLinearStiffness(const btVector3 &val);
 
         //! Enable angular spring
-        const btVector3 & getEnableAngularSpring() const { return m_bEnableAngularSpring; }
+        const btVector3 &getEnableAngularSpring() const { return m_bEnableAngularSpring; }
         void setEnableAngularSpring(const btVector3 &val);
 
         //! Angular stiffness
@@ -80,7 +80,7 @@ namespace ige::scene
         void setAngularDamping(const btVector3 &val);
 
         //! Enable linear motor
-        const btVector3 & getEnabledLinearMotor() const { return m_bEnableLinearMotor; }
+        const btVector3 &getEnabledLinearMotor() const { return m_bEnableLinearMotor; }
         void setEnabledLinearMotor(const btVector3 &val);
 
         //! Linear max motor force
@@ -88,7 +88,7 @@ namespace ige::scene
         void setLinearMaxMotorForce(const btVector3 &val);
 
         //! Enable angular motor
-        const btVector3 & getEnabledAngularMotor() const { return m_bEnableAngularMotor; }
+        const btVector3 &getEnabledAngularMotor() const { return m_bEnableAngularMotor; }
         void setEnabledAngularMotor(const btVector3 &val);
 
         //! Angular max motor force
@@ -96,7 +96,7 @@ namespace ige::scene
         void setAngularMaxMotorForce(const btVector3 &val);
 
         //! Enable linear servo
-        const btVector3 & getEnableLinearServo() const { return m_bEnableLinearServo; }
+        const btVector3 &getEnableLinearServo() const { return m_bEnableLinearServo; }
         void setEnableLinearServo(const btVector3 &val);
 
         //! Linear servo target
@@ -104,7 +104,7 @@ namespace ige::scene
         void setLinearServoTarget(const btVector3 &val);
 
         //! Enable angular servo
-        const btVector3 & getEnableAngularServo() const { return m_bEnableAngularServo; }
+        const btVector3 &getEnableAngularServo() const { return m_bEnableAngularServo; }
         void setEnableAngularServo(const btVector3 &val);
 
         //! Angular servo target
@@ -187,8 +187,5 @@ namespace ige::scene
 
         //! Angular servo target
         btVector3 m_angularServoTarget = {0.f, 0.f, 0.f};
-
-        //! Dirty flag
-        bool m_bIsDirty = true;
     };
 } // namespace ige::scene

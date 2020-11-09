@@ -18,9 +18,9 @@ namespace ige::scene
     }
 
     //! Set lower limit
-    void SliderConstraint::setLowerLimit(const btVector3& limit)
+    void SliderConstraint::setLowerLimit(const btVector3 &limit)
     {
-        if (m_lowerLimit != limit)
+        if (m_bIsDirty || m_lowerLimit != limit)
         {
             m_lowerLimit = limit;
             getConstraint()->setLinearLowerLimit(m_lowerLimit);
@@ -28,9 +28,9 @@ namespace ige::scene
     }
 
     //! Set upper limit
-    void SliderConstraint::setUpperLimit(const btVector3& limit)
+    void SliderConstraint::setUpperLimit(const btVector3 &limit)
     {
-        if (m_upperLimit != limit)
+        if (m_bIsDirty || m_upperLimit != limit)
         {
             m_upperLimit = limit;
             getConstraint()->setLinearUpperLimit(m_upperLimit);
@@ -50,8 +50,8 @@ namespace ige::scene
         auto otherBody = getOtherBody() ? getOtherBody() : &btGeneric6DofConstraint::getFixedBody();
         auto otherTransform = getOther() ? PhysicHelper::to_btTransform(getOther()->getOwner()->getTransform()->getWorldRotation(), getOther()->getOwner()->getTransform()->getWorldPosition()) : btTransform::getIdentity();
         m_constraint = std::make_unique<btGeneric6DofSpring2Constraint>(*body, *otherBody, transform, otherTransform);
-        m_constraint->setLinearLowerLimit(m_lowerLimit);
-        m_constraint->setLinearUpperLimit(m_upperLimit);
+        setLowerLimit(m_lowerLimit);
+        setUpperLimit(m_upperLimit);
 
         // Call parent create function to register this constraint to world
         PhysicConstraint::create();
