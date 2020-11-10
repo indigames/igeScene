@@ -112,7 +112,7 @@ namespace ige::scene
         PhysicConstraint::to_json(j);
         j["low"] = PhysicHelper::from_btVector3(getLowerLimit());
         j["up"] = PhysicHelper::from_btVector3(getUpperLimit());
-        j["enable"] = PhysicHelper::from_btVector3(getEnable());
+        j["enableV"] = PhysicHelper::from_btVector3(getEnable());
         j["stiff"] = PhysicHelper::from_btVector3(getStiffness());
         j["damp"] = PhysicHelper::from_btVector3(getDamping());
     }
@@ -123,7 +123,7 @@ namespace ige::scene
         PhysicConstraint::onSerializeFinished(scene);
         setLowerLimit(PhysicHelper::to_btVector3(m_json.value("low", Vec3(1.f, 1.f, 1.f))));
         setUpperLimit(PhysicHelper::to_btVector3(m_json.value("up", Vec3(0.f, 0.f, 0.f))));
-        setEnable(PhysicHelper::to_btVector3(m_json.value("enable", Vec3(1.f, 0.f, 0.f))));
+        setEnable(PhysicHelper::to_btVector3(m_json.value("enableV", Vec3(1.f, 0.f, 0.f))));
         setStiffness(PhysicHelper::to_btVector3(m_json.value("stiff", Vec3(10.f, 0.f, 0.f))));
         setDamping(PhysicHelper::to_btVector3(m_json.value("damp", Vec3(0.5f, 0.f, 0.f))));
 
