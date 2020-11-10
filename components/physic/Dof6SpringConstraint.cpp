@@ -12,7 +12,7 @@ namespace ige::scene
     {
         setType(ConstraintType::Dof6Spring);
 
-        // Create constraint 
+        // Create constraint
         create();
     }
 
@@ -22,69 +22,69 @@ namespace ige::scene
     }
 
     //! Set lower limit
-    void Dof6SpringConstraint::setLowerLinearLimit(const btVector3 &limit)
+    void Dof6SpringConstraint::setLinearLowerLimit(const btVector3 &limit)
     {
-        if (m_bIsDirty || m_lowerLinearLimit != limit)
+        if (m_bIsDirty || m_linearLowerLimit != limit)
         {
-            m_lowerLinearLimit = limit;
-            getConstraint()->setLinearLowerLimit(m_lowerLinearLimit);
+            m_linearLowerLimit = limit;
+            getConstraint()->setLinearLowerLimit(m_linearLowerLimit);
         }
     }
 
     //! Set upper limit
-    void Dof6SpringConstraint::setUpperLinearLimit(const btVector3 &limit)
+    void Dof6SpringConstraint::setLinearUpperLimit(const btVector3 &limit)
     {
-        if (m_bIsDirty || m_upperLinearLimit != limit)
+        if (m_bIsDirty || m_linearUpperLimit != limit)
         {
-            m_upperLinearLimit = limit;
-            getConstraint()->setLinearUpperLimit(m_upperLinearLimit);
+            m_linearUpperLimit = limit;
+            getConstraint()->setLinearUpperLimit(m_linearUpperLimit);
         }
     }
 
     //! Set lower limit
-    void Dof6SpringConstraint::setLowerAngularLimit(const btVector3 &limit)
+    void Dof6SpringConstraint::setAngularLowerLimit(const btVector3 &limit)
     {
-        if (m_bIsDirty || m_lowerAngularLimit != limit)
+        if (m_bIsDirty || m_angularLowerLimit != limit)
         {
-            m_lowerAngularLimit = limit;
-            getConstraint()->setAngularLowerLimit(m_lowerAngularLimit);
+            m_angularLowerLimit = limit;
+            getConstraint()->setAngularLowerLimit(m_angularLowerLimit);
         }
     }
 
     //! Set upper limit
-    void Dof6SpringConstraint::setUpperAngularLimit(const btVector3 &limit)
+    void Dof6SpringConstraint::setAngularUpperLimit(const btVector3 &limit)
     {
-        if (m_bIsDirty || m_upperAngularLimit != limit)
+        if (m_bIsDirty || m_angularUpperLimit != limit)
         {
-            m_upperAngularLimit = limit;
-            getConstraint()->setAngularUpperLimit(m_upperAngularLimit);
+            m_angularUpperLimit = limit;
+            getConstraint()->setAngularUpperLimit(m_angularUpperLimit);
         }
     }
 
     //! Target linear velocity
-    void Dof6SpringConstraint::setTargetLinearVelocity(const btVector3 &val)
+    void Dof6SpringConstraint::setLinearTargetVelocity(const btVector3 &val)
     {
-        if (m_bIsDirty || m_targetLinearVelocity != val)
+        if (m_bIsDirty || m_linearTargetVelocity != val)
         {
-            m_targetLinearVelocity = val;
+            m_linearTargetVelocity = val;
 
             for (int i = 0; i < 3; ++i)
             {
-                getConstraint()->setTargetVelocity(i, m_targetLinearVelocity[i]);
+                getConstraint()->setTargetVelocity(i, m_linearTargetVelocity[i]);
             }
         }
     }
 
     //! Target angular velocity
-    void Dof6SpringConstraint::setTargetAngularVelocity(const btVector3 &val)
+    void Dof6SpringConstraint::setAngularTargetVelocity(const btVector3 &val)
     {
-        if (m_bIsDirty || m_targetAngularVelocity != val)
+        if (m_bIsDirty || m_angularTargetVelocity != val)
         {
-            m_targetAngularVelocity = val;
+            m_angularTargetVelocity = val;
 
             for (int i = 0; i < 3; ++i)
             {
-                getConstraint()->setTargetVelocity(i + 3, m_targetAngularVelocity[i]);
+                getConstraint()->setTargetVelocity(i + 3, m_angularTargetVelocity[i]);
             }
         }
     }
@@ -118,16 +118,16 @@ namespace ige::scene
     }
 
     //! Enable linear spring
-    void Dof6SpringConstraint::setEnableLinearSpring(const btVector3 &val)
+    void Dof6SpringConstraint::setLinearSpringEnabled(const btVector3 &val)
     {
-        if (m_bIsDirty || m_bEnableLinearSpring != val)
+        if (m_bIsDirty || m_linearSpringEnabled != val)
         {
-            m_bEnableLinearSpring = val;
+            m_linearSpringEnabled = val;
 
             for (int i = 0; i < 3; ++i)
             {
-                getConstraint()->enableSpring(i, m_bEnableLinearSpring[i]);
-                if (m_bEnableLinearSpring[i])
+                getConstraint()->enableSpring(i, m_linearSpringEnabled[i]);
+                if (m_linearSpringEnabled[i])
                     getConstraint()->setEquilibriumPoint(i);
                 else
                     getConstraint()->setEquilibriumPoint(i, 0.f);
@@ -150,16 +150,16 @@ namespace ige::scene
     }
 
     //! Enable angular spring
-    void Dof6SpringConstraint::setEnableAngularSpring(const btVector3 &val)
+    void Dof6SpringConstraint::setAngularSpringEnabled(const btVector3 &val)
     {
-        if (m_bIsDirty || m_bEnableAngularSpring != val)
+        if (m_bIsDirty || m_angularSpringEnabled != val)
         {
-            m_bEnableAngularSpring = val;
+            m_angularSpringEnabled = val;
 
             for (int i = 0; i < 3; ++i)
             {
-                getConstraint()->enableSpring(i + 3, m_bEnableAngularSpring[i]);
-                if (m_bEnableAngularSpring[i])
+                getConstraint()->enableSpring(i + 3, m_angularSpringEnabled[i]);
+                if (m_angularSpringEnabled[i])
                     getConstraint()->setEquilibriumPoint(i + 3);
                 else
                     getConstraint()->setEquilibriumPoint(i + 3, 0.f);
@@ -210,15 +210,15 @@ namespace ige::scene
     }
 
     //! Enable linear motor
-    void Dof6SpringConstraint::setEnabledLinearMotor(const btVector3 &val)
+    void Dof6SpringConstraint::setLinearMotorEnabled(const btVector3 &val)
     {
-        if (m_bIsDirty || m_bEnableLinearMotor != val)
+        if (m_bIsDirty || m_linearMotorEnabled != val)
         {
-            m_bEnableLinearMotor = val;
+            m_linearMotorEnabled = val;
 
             for (int i = 0; i < 3; ++i)
             {
-                getConstraint()->enableMotor(i, m_bEnableLinearMotor[i]);
+                getConstraint()->enableMotor(i, m_linearMotorEnabled[i]);
             }
         }
     }
@@ -238,15 +238,15 @@ namespace ige::scene
     }
 
     //! Enable angular motor
-    void Dof6SpringConstraint::setEnabledAngularMotor(const btVector3 &val)
+    void Dof6SpringConstraint::setAngularMotorEnabled(const btVector3 &val)
     {
-        if (m_bIsDirty || m_bEnableAngularMotor != val)
+        if (m_bIsDirty || m_angularMotorEnabled != val)
         {
-            m_bEnableAngularMotor = val;
+            m_angularMotorEnabled = val;
 
             for (int i = 0; i < 3; ++i)
             {
-                getConstraint()->enableMotor(i + 3, m_bEnableAngularMotor[i]);
+                getConstraint()->enableMotor(i + 3, m_angularMotorEnabled[i]);
             }
         }
     }
@@ -266,15 +266,15 @@ namespace ige::scene
     }
 
     //! Enable linear servo
-    void Dof6SpringConstraint::setEnableLinearServo(const btVector3 &val)
+    void Dof6SpringConstraint::setLinearServoEnabled(const btVector3 &val)
     {
-        if (m_bIsDirty || m_bEnableLinearServo != val)
+        if (m_bIsDirty || m_linearServoEnabled != val)
         {
-            m_bEnableLinearServo = val;
+            m_linearServoEnabled = val;
 
             for (int i = 0; i < 3; ++i)
             {
-                getConstraint()->setServo(i, m_bEnableLinearServo[i]);
+                getConstraint()->setServo(i, m_linearServoEnabled[i]);
             }
         }
     }
@@ -294,15 +294,15 @@ namespace ige::scene
     }
 
     //! Enable angular servo
-    void Dof6SpringConstraint::setEnableAngularServo(const btVector3 &val)
+    void Dof6SpringConstraint::setAngularServoEnabled(const btVector3 &val)
     {
-        if (m_bIsDirty || m_bEnableAngularServo != val)
+        if (m_bIsDirty || m_angularServoEnabled != val)
         {
-            m_bEnableAngularServo = val;
+            m_angularServoEnabled = val;
 
             for (int i = 0; i < 3; ++i)
             {
-                getConstraint()->setServo(i + 3, m_bEnableAngularServo[i]);
+                getConstraint()->setServo(i + 3, m_angularServoEnabled[i]);
             }
         }
     }
@@ -336,39 +336,39 @@ namespace ige::scene
         m_constraint = std::make_unique<btGeneric6DofSpring2Constraint>(*body, *otherBody, transform, otherTransform);
 
         // Linear limit
-        setLowerLinearLimit(m_lowerLinearLimit);
-        setUpperLinearLimit(m_upperLinearLimit);
-        setTargetLinearVelocity(m_targetLinearVelocity);
+        setLinearLowerLimit(m_linearLowerLimit);
+        setLinearUpperLimit(m_linearUpperLimit);
+        setLinearTargetVelocity(m_linearTargetVelocity);
 
         // Angular limit
-        setLowerAngularLimit(m_lowerAngularLimit);
-        setUpperAngularLimit(m_upperAngularLimit);
-        setTargetAngularVelocity(m_targetAngularVelocity);
+        setAngularLowerLimit(m_angularLowerLimit);
+        setAngularUpperLimit(m_angularUpperLimit);
+        setAngularTargetVelocity(m_angularTargetVelocity);
 
         // Bounce
         setLinearBounce(m_linearBounce);
         setAngularBounce(m_angularBounce);
 
         // Linear spring
-        setEnableLinearSpring(m_bEnableLinearSpring);
+        setLinearSpringEnabled(m_linearSpringEnabled);
         setLinearStiffness(m_linearStiffness);
         setLinearDamping(m_linearDamping);
 
         // Angular spring
-        setEnableAngularSpring(m_bEnableAngularSpring);
+        setAngularSpringEnabled(m_angularSpringEnabled);
         setAngularStiffness(m_angularStiffness);
         setAngularDamping(m_angularDamping);
 
         // Linear Motor
-        setEnabledLinearMotor(m_bEnableLinearMotor);
+        setLinearMotorEnabled(m_linearMotorEnabled);
         setLinearMaxMotorForce(m_linearMaxMotorForce);
-        setEnableLinearServo(m_bEnableLinearServo);
+        setLinearServoEnabled(m_linearServoEnabled);
         setLinearServoTarget(m_linearServoTarget);
 
         // Angular Motor
-        setEnabledAngularMotor(m_bEnableAngularMotor);
+        setAngularMotorEnabled(m_angularMotorEnabled);
         setAngularMaxMotorForce(m_angularMaxMotorForce);
-        setEnableAngularServo(m_bEnableAngularServo);
+        setAngularServoEnabled(m_angularServoEnabled);
         setAngularServoTarget(m_angularServoTarget);
 
         // Call parent create function to register this constraint to world
@@ -379,27 +379,27 @@ namespace ige::scene
     void Dof6SpringConstraint::to_json(json &j) const
     {
         PhysicConstraint::to_json(j);
-        j["lLow"] = PhysicHelper::from_btVector3(getLowerLinearLimit());
-        j["lUp"] = PhysicHelper::from_btVector3(getUpperLinearLimit());
-        j["lVel"] = PhysicHelper::from_btVector3(getTargetLinearVelocity());
-        j["aLow"] = PhysicHelper::from_btVector3(getLowerAngularLimit());
-        j["aUp"] = PhysicHelper::from_btVector3(getUpperAngularLimit());
-        j["aVel"] = PhysicHelper::from_btVector3(getTargetAngularVelocity());
+        j["lLow"] = PhysicHelper::from_btVector3(getLinearLowerLimit());
+        j["lUp"] = PhysicHelper::from_btVector3(getLinearUpperLimit());
+        j["lVel"] = PhysicHelper::from_btVector3(getLinearTargetVelocity());
+        j["aLow"] = PhysicHelper::from_btVector3(getAngularLowerLimit());
+        j["aUp"] = PhysicHelper::from_btVector3(getAngularUpperLimit());
+        j["aVel"] = PhysicHelper::from_btVector3(getAngularTargetVelocity());
         j["lBounce"] = PhysicHelper::from_btVector3(getLinearBounce());
         j["aBounce"] = PhysicHelper::from_btVector3(getAngularBounce());
-        j["lSpring"] = PhysicHelper::from_btVector3(getEnableLinearSpring());
+        j["lSpring"] = PhysicHelper::from_btVector3(getLinearSpringEnabled());
         j["lStiff"] = PhysicHelper::from_btVector3(getLinearStiffness());
         j["lDamp"] = PhysicHelper::from_btVector3(getLinearDamping());
-        j["aSpring"] = PhysicHelper::from_btVector3(getEnableAngularSpring());
+        j["aSpring"] = PhysicHelper::from_btVector3(getAngularSpringEnabled());
         j["aStiff"] = PhysicHelper::from_btVector3(getAngularStiffness());
         j["aDamp"] = PhysicHelper::from_btVector3(getAngularDamping());
-        j["lMotor"] = PhysicHelper::from_btVector3(getEnabledLinearMotor());
+        j["lMotor"] = PhysicHelper::from_btVector3(getLinearMotorEnabled());
         j["lMForce"] = PhysicHelper::from_btVector3(getLinearMaxMotorForce());
-        j["lServo"] = PhysicHelper::from_btVector3(getEnableLinearServo());
+        j["lServo"] = PhysicHelper::from_btVector3(getLinearServoEnabled());
         j["lSTarget"] = PhysicHelper::from_btVector3(getLinearServoTarget());
-        j["aMotor"] = PhysicHelper::from_btVector3(getEnabledAngularMotor());
+        j["aMotor"] = PhysicHelper::from_btVector3(getAngularMotorEnabled());
         j["aMForce"] = PhysicHelper::from_btVector3(getAngularMaxMotorForce());
-        j["aServo"] = PhysicHelper::from_btVector3(getEnableAngularServo());
+        j["aServo"] = PhysicHelper::from_btVector3(getAngularServoEnabled());
         j["aSTarget"] = PhysicHelper::from_btVector3(getAngularServoTarget());
     }
 
@@ -409,39 +409,39 @@ namespace ige::scene
         PhysicConstraint::onSerializeFinished(scene);
 
         // Linear limit
-        setLowerLinearLimit(PhysicHelper::to_btVector3(m_json.value("lLow", Vec3(0.f, 0.f, 0.f))));
-        setUpperLinearLimit(PhysicHelper::to_btVector3(m_json.value("lUp", Vec3(0.f, 0.f, 0.f))));
-        setTargetLinearVelocity(PhysicHelper::to_btVector3(m_json.value("lVel", Vec3(0.f, 0.f, 0.f))));
+        setLinearLowerLimit(PhysicHelper::to_btVector3(m_json.value("lLow", Vec3(0.f, 0.f, 0.f))));
+        setLinearUpperLimit(PhysicHelper::to_btVector3(m_json.value("lUp", Vec3(0.f, 0.f, 0.f))));
+        setLinearTargetVelocity(PhysicHelper::to_btVector3(m_json.value("lVel", Vec3(0.f, 0.f, 0.f))));
 
         // Angular limit
-        setLowerAngularLimit(PhysicHelper::to_btVector3(m_json.value("aLow", Vec3(0.f, 0.f, 0.f))));
-        setUpperAngularLimit(PhysicHelper::to_btVector3(m_json.value("aUp", Vec3(0.f, 0.f, 0.f))));
-        setTargetAngularVelocity(PhysicHelper::to_btVector3(m_json.value("aVel", Vec3(0.f, 0.f, 0.f))));
+        setAngularLowerLimit(PhysicHelper::to_btVector3(m_json.value("aLow", Vec3(0.f, 0.f, 0.f))));
+        setAngularUpperLimit(PhysicHelper::to_btVector3(m_json.value("aUp", Vec3(0.f, 0.f, 0.f))));
+        setAngularTargetVelocity(PhysicHelper::to_btVector3(m_json.value("aVel", Vec3(0.f, 0.f, 0.f))));
 
         // Bounce
         setLinearBounce(PhysicHelper::to_btVector3(m_json.value("lBounce", Vec3(0.f, 0.f, 0.f))));
         setAngularBounce(PhysicHelper::to_btVector3(m_json.value("aBounce", Vec3(0.f, 0.f, 0.f))));
 
         // Linear spring
-        setEnableLinearSpring(PhysicHelper::to_btVector3(m_json.value("lSpring", Vec3(0.f, 0.f, 0.f))));
+        setLinearSpringEnabled(PhysicHelper::to_btVector3(m_json.value("lSpring", Vec3(0.f, 0.f, 0.f))));
         setLinearStiffness(PhysicHelper::to_btVector3(m_json.value("lStiff", Vec3(0.f, 0.f, 0.f))));
         setLinearDamping(PhysicHelper::to_btVector3(m_json.value("lDamp", Vec3(0.f, 0.f, 0.f))));
 
         // Angular spring
-        setEnableAngularSpring(PhysicHelper::to_btVector3(m_json.value("aSpring", Vec3(0.f, 0.f, 0.f))));
+        setAngularSpringEnabled(PhysicHelper::to_btVector3(m_json.value("aSpring", Vec3(0.f, 0.f, 0.f))));
         setAngularStiffness(PhysicHelper::to_btVector3(m_json.value("aStiff", Vec3(0.f, 0.f, 0.f))));
         setAngularDamping(PhysicHelper::to_btVector3(m_json.value("aDamp", Vec3(0.f, 0.f, 0.f))));
 
         // Linear Motor
-        setEnabledLinearMotor(PhysicHelper::to_btVector3(m_json.value("lMotor", Vec3(0.f, 0.f, 0.f))));
+        setLinearMotorEnabled(PhysicHelper::to_btVector3(m_json.value("lMotor", Vec3(0.f, 0.f, 0.f))));
         setLinearMaxMotorForce(PhysicHelper::to_btVector3(m_json.value("lMForce", Vec3(0.f, 0.f, 0.f))));
-        setEnableLinearServo(PhysicHelper::to_btVector3(m_json.value("lServo", Vec3(0.f, 0.f, 0.f))));
+        setLinearServoEnabled(PhysicHelper::to_btVector3(m_json.value("lServo", Vec3(0.f, 0.f, 0.f))));
         setLinearServoTarget(PhysicHelper::to_btVector3(m_json.value("lSTarget", Vec3(0.f, 0.f, 0.f))));
 
         // Angular Motor
-        setEnabledAngularMotor(PhysicHelper::to_btVector3(m_json.value("aMotor", Vec3(0.f, 0.f, 0.f))));
+        setAngularMotorEnabled(PhysicHelper::to_btVector3(m_json.value("aMotor", Vec3(0.f, 0.f, 0.f))));
         setAngularMaxMotorForce(PhysicHelper::to_btVector3(m_json.value("aMForce", Vec3(0.f, 0.f, 0.f))));
-        setEnableAngularServo(PhysicHelper::to_btVector3(m_json.value("aServo", Vec3(0.f, 0.f, 0.f))));
+        setAngularServoEnabled(PhysicHelper::to_btVector3(m_json.value("aServo", Vec3(0.f, 0.f, 0.f))));
         setAngularServoTarget(PhysicHelper::to_btVector3(m_json.value("aSTarget", Vec3(0.f, 0.f, 0.f))));
 
         // Serialization done, clear json
