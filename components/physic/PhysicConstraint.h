@@ -38,16 +38,6 @@ namespace ige::scene
 
         //! Type
         ConstraintType getType() const { return m_type; }
-        void setType(ConstraintType type) { m_type = type; }
-
-        //! Create physic constraint
-        virtual void create();
-
-        //! Deinitialization
-        virtual void destroy();
-
-        //! Recreate physic constraint
-        virtual void recreate();
 
         //! Get Owner
         PhysicObject* getOwner() const { return &m_owner; }
@@ -56,11 +46,12 @@ namespace ige::scene
         virtual btRigidBody* getOwnerBody() const { return getOwner()->getBody(); }
 
         //! Get Other UUID
-        const std::string& getOtherUUID() const { return m_otherUUID; }
+        const std::string& getOtherUUID() const;
         void setOtherUUID(const std::string& other);
 
         //! Get other object
         PhysicObject* getOther();
+        void setOther(PhysicObject* other);
 
         //! Get Other RigidBody
         virtual btRigidBody* getOtherBody() { return getOther() ? getOther()->getBody() : nullptr; }
@@ -94,6 +85,18 @@ namespace ige::scene
         static Event<PhysicConstraint *> &getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
 
     protected:
+        //! Create physic constraint
+        virtual void create();
+
+        //! Deinitialization
+        virtual void destroy();
+
+        //! Recreate physic constraint
+        virtual void recreate();
+
+        //! Set type
+        void setType(ConstraintType type) { m_type = type; }
+
         //! Serialize
         virtual void to_json(json &j) const;
 
@@ -113,9 +116,6 @@ namespace ige::scene
     protected:
         //! Reference to owner object
         PhysicObject &m_owner;
-
-        //! Pointer to depend object
-        std::string m_otherUUID = {};
 
         //! Bullet generic constraint
         std::unique_ptr<btGeneric6DofSpring2Constraint> m_constraint = nullptr;
