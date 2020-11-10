@@ -1,4 +1,10 @@
 #include "components/physic/PhysicObject.h"
+#include "components/physic/PhysicConstraint.h"
+#include "components/physic/FixedConstraint.h"
+#include "components/physic/HingeConstraint.h"
+#include "components/physic/SliderConstraint.h"
+#include "components/physic/SpringConstraint.h"
+#include "components/physic/Dof6SpringConstraint.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
 
@@ -34,8 +40,15 @@ namespace ige::scene
     //! Initialization
     bool PhysicObject::destroy()
     {
+        // Remove all constraints 
+        removeAllConstraints();
+
+        // Destroy body
         destroyBody();
+
+        // Notify destroyed
         getOnDestroyedEvent().invoke(this);
+
         return true;
     }
 
@@ -57,6 +70,14 @@ namespace ige::scene
         {
             m_constraints.erase(found);
         }
+    }
+
+    //! Remove all constraints
+    void PhysicObject::removeAllConstraints()
+    {
+        for (auto& constraint : m_constraints)
+            constraint = nullptr;
+        m_constraints.clear();
     }
 
     //! Set enable
@@ -394,6 +415,11 @@ namespace ige::scene
             {"ccd", isCCD()},
             {"margin", getCollisionMargin()},
         };
+
+        auto jConstraints = json::array();
+        for (const auto& constraint : m_constraints)
+            jConstraints.push_back({ (int)constraint->getType(), json(*constraint.get()) });        
+        j["consts"] = jConstraints;
     }
 
     //! Deserialize
@@ -414,5 +440,33 @@ namespace ige::scene
         setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
         setCCD(j.value("ccd", false));
         setCollisionMargin(j.value("margin", 0.025f));
+
+        auto jConstraints = j.value("consts", json());
+        for (auto it : jConstraints)
+        {
+            auto key = (int)it.at(0);
+            auto val = it.at(1);
+            std::shared_ptr<PhysicConstraint> constraint = nullptr;
+            switch (key)
+            {
+            case (int)PhysicConstraint::ConstraintType::Fixed:
+                constraint = addConstraint<FixedConstraint>();
+                break;
+            case (int)PhysicConstraint::ConstraintType::Hinge:
+                constraint = addConstraint<HingeConstraint>();
+                break;
+            case (int)PhysicConstraint::ConstraintType::Slider:
+                constraint = addConstraint<SliderConstraint>();
+                break;
+            case (int)PhysicConstraint::ConstraintType::Spring:
+                constraint = addConstraint<SpringConstraint>();
+                break;
+            case (int)PhysicConstraint::ConstraintType::Dof6Spring:
+                constraint = addConstraint<Dof6SpringConstraint>();
+                break;
+            }
+            if (constraint)
+                val.get_to(*constraint);
+        }
     }
 } // namespace ige::scene

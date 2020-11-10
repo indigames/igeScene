@@ -31,7 +31,7 @@ namespace ige::scene
 
     public:
         //! Constructor
-        PhysicConstraint(PhysicObject &owner);
+        PhysicConstraint(PhysicObject& owner);
 
         //! Destructor
         virtual ~PhysicConstraint();
@@ -50,23 +50,23 @@ namespace ige::scene
         virtual void recreate();
 
         //! Get Owner
-        PhysicObject *getOwner() const { return &m_owner; }
+        PhysicObject* getOwner() const { return &m_owner; }
 
         //! Get Owner RigidBody
-        virtual btRigidBody *getOwnerBody() const { return getOwner()->getBody(); }
+        virtual btRigidBody* getOwnerBody() const { return getOwner()->getBody(); }
 
         //! Get Other UUID
-        const std::string &getOtherUUID() const { return m_otherUUID; }
-        void setOtherUUID(const std::string &other);
+        const std::string& getOtherUUID() const { return m_otherUUID; }
+        void setOtherUUID(const std::string& other);
 
         //! Get other object
-        PhysicObject *getOther();
+        PhysicObject* getOther();
 
         //! Get Other RigidBody
-        virtual btRigidBody *getOtherBody() { return getOther() ? getOther()->getBody() : nullptr; }
+        virtual btRigidBody* getOtherBody() { return getOther() ? getOther()->getBody() : nullptr; }
 
         //! Bullet generic constraint
-        btGeneric6DofSpring2Constraint *getConstraint() const { return m_constraint.get(); }
+        btGeneric6DofSpring2Constraint* getConstraint() const { return m_constraint.get(); }
 
         //! Enable
         bool isEnabled() const { return getConstraint()->isEnabled(); }
@@ -79,6 +79,12 @@ namespace ige::scene
         //! Enable collision between bodies
         bool isEnableCollisionBetweenBodies() const { return m_bEnableCollisionBetweenBodies; }
         void setEnableCollisionBetweenBodies(bool enable = true);
+
+        //! Serialize
+        friend void to_json(json& j, const PhysicConstraint& obj) { obj.to_json(j); }
+
+        //! Deserialize
+        friend void from_json(const json& j, PhysicConstraint& obj) { obj.from_json(j); }
 
     public:
         //! Get onCreatedEvent

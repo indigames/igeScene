@@ -123,6 +123,9 @@ namespace ige::scene
         //! Remove constraint
         void removeConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
 
+        //! Remove all constraints
+        void removeAllConstraints();
+
         //! Add constraint by type
         template <typename T, typename... Args>
         std::shared_ptr<T> addConstraint(Args &&... args);
