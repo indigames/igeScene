@@ -22,18 +22,18 @@ PyDoc_STRVAR(PhysicConstraint_other_doc,
 
 // isEnabled
 PyDoc_STRVAR(PhysicConstraint_isEnabled_doc,
-    "Enable/disable this constraint.\n"\
+    "Enable/disable this constraint. Default: true.\n"\
     "Type: bool\n"
 );
 
 // isBodiesCollisionEnabled
 PyDoc_STRVAR(PhysicConstraint_isBodiesCollisionEnabled_doc,
-    "Enable/disable collision between linked bodies.\n"\
+    "Enable/disable collision between linked bodies. Default: true.\n"\
     "Type: bool\n"
 );
 
 // breakingImpulse
 PyDoc_STRVAR(PhysicConstraint_breakingImpulse_doc,
-    "Breaking impulse threshold.\n"\
-    "Type: bool\n"
+    "Breaking impulse threshold. Default: Very big number.\n"\
+    "Type: float\n"
 );
