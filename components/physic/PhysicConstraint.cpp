@@ -63,10 +63,10 @@ namespace ige::scene
     // Set other body object
     void PhysicConstraint::setOtherUUID(const std::string &otherUUID)
     {
-        if (m_otherUUID != otherUUID)
+        if (otherUUID != getOwner()->getOwner()->getUUID() && m_otherUUID != otherUUID)
         {
             m_otherUUID = otherUUID;
-            auto otherObject = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(m_otherUUID);
+            auto otherObject = getOwner()->getOwner()->getScene()->findObjectByUUID(m_otherUUID);
             m_other = otherObject ? otherObject->getComponent<PhysicObject>().get() : nullptr;
             recreate();
         }
