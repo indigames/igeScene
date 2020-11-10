@@ -32,21 +32,21 @@ namespace ige::scene
     }
 
     //! Set axis
-    void HingeConstraint::setAxis(const btVector3 &axis)
+    void HingeConstraint::setAxis1(const btVector3 &axis)
     {
-        if (m_bIsDirty || m_axis != axis)
+        if (m_bIsDirty || m_axis1 != axis)
         {
-            m_axis = axis;
+            m_axis1 = axis;
             recreate();
         }
     }
 
     //! Set other axis
-    void HingeConstraint::setOtherAxis(const btVector3 &axis)
+    void HingeConstraint::setAxis2(const btVector3 &axis)
     {
-        if (m_bIsDirty || m_otherAxis != axis)
+        if (m_bIsDirty || m_axis2 != axis)
         {
-            m_otherAxis = axis;
+            m_axis2 = axis;
             recreate();
         }
     }
@@ -79,7 +79,7 @@ namespace ige::scene
 
         // Create constraint
         auto otherBody = getOtherBody() ? getOtherBody() : &btGeneric6DofConstraint::getFixedBody();
-        m_constraint = std::make_unique<btHinge2Constraint>(*getOwnerBody(), *otherBody, m_anchor, m_axis, m_otherAxis);
+        m_constraint = std::make_unique<btHinge2Constraint>(*getOwnerBody(), *otherBody, m_anchor, m_axis1, m_axis2);
 
         // Apply constraint
         setLowerLimit(m_lowerLimit);
@@ -94,8 +94,8 @@ namespace ige::scene
     {
         PhysicConstraint::to_json(j);
         j["anchor"] = PhysicHelper::from_btVector3(getAnchor());
-        j["axis"] = PhysicHelper::from_btVector3(getAxis());
-        j["axis2"] = PhysicHelper::from_btVector3(getOtherAxis());
+        j["axis1"] = PhysicHelper::from_btVector3(getAxis1());
+        j["axis2"] = PhysicHelper::from_btVector3(getAxis2());
         j["low"] = getLowerLimit();
         j["up"] = getUpperLimit();
     }
@@ -105,10 +105,10 @@ namespace ige::scene
     {
         PhysicConstraint::onSerializeFinished(scene);
         setAnchor(PhysicHelper::to_btVector3(m_json.value("anchor", Vec3(0.f, 0.f, 0.f))));
-        setAxis(PhysicHelper::to_btVector3(m_json.value("axis", Vec3(0.f, 0.f, 0.f))));
-        setOtherAxis(PhysicHelper::to_btVector3(m_json.value("axis2", Vec3(0.f, 0.f, 0.f))));
-        setLowerLimit(m_json.value("low", 0.f));
-        setUpperLimit(m_json.value("up", 0.f));
+        setAxis1(PhysicHelper::to_btVector3(m_json.value("axis1", Vec3(0.f, 1.f, 0.f))));
+        setAxis2(PhysicHelper::to_btVector3(m_json.value("axis2", Vec3(1.f, 0.f, 0.f))));
+        setLowerLimit(m_json.value("low", -SIMD_PI));
+        setUpperLimit(m_json.value("up", SIMD_PI));
 
         // Serialization done, clear json
         m_json.clear();

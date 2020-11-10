@@ -34,12 +34,12 @@ namespace ige::scene
         const btVector3 &getOtherAnchor() const { return getHingeConstraint()->getAnchor2(); }
 
         //! Axis
-        const btVector3 &getAxis() const { return getHingeConstraint()->getAxis1(); }
-        void setAxis(const btVector3 &axis);
+        const btVector3 &getAxis1() const { return getHingeConstraint()->getAxis1(); }
+        void setAxis1(const btVector3 &axis);
 
         //! Other axis
-        const btVector3 &getOtherAxis() const { return getHingeConstraint()->getAxis2(); }
-        void setOtherAxis(const btVector3 &axis);
+        const btVector3 &getAxis2() const { return getHingeConstraint()->getAxis2(); }
+        void setAxis2(const btVector3 &axis);
 
         //! Get angle
         float getAngle() const { return getHingeConstraint()->getAngle1(); }
@@ -68,15 +68,15 @@ namespace ige::scene
         btVector3 m_anchor = {0.f, 0.f, 0.f};
 
         //! Axis
-        btVector3 m_axis = {0.f, 0.f, 0.f};
+        btVector3 m_axis1 = {0.f, 1.f, 0.f};
 
         //! Other Axis
-        btVector3 m_otherAxis = {0.f, 0.f, 0.f};
+        btVector3 m_axis2 = {1.f, 0.f, 0.f};
 
         //! Lower limit
-        float m_lowerLimit = 0.f;
+        float m_lowerLimit = -SIMD_PI;
 
         //! Upper limit
-        float m_upperLimit = 0.f;
+        float m_upperLimit = SIMD_PI;
     };
 } // namespace ige::scene
