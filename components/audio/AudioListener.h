@@ -40,6 +40,6 @@ namespace ige::scene
 
     protected:
         //! Enable/disable
-        bool m_bIsEnabled = false;
+        bool m_bIsEnabled = true;
     };
 } // namespace ige::scene

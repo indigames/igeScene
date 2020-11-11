@@ -119,7 +119,7 @@ namespace ige::scene
 
     protected:
         //! Enable/disable
-        bool m_bIsEnabled = false;
+        bool m_bIsEnabled = true;
 
         //! Play on enabled
         bool m_bPlayOnEnabled = false;
