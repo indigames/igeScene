@@ -495,6 +495,10 @@ namespace ige::scene
         {"applyForce", (PyCFunction)PhysicObject_applyForce, METH_VARARGS, PhysicObject_applyForce_doc},
         {"applyImpulse", (PyCFunction)PhysicObject_applyImpulse, METH_VARARGS, PhysicObject_applyImpulse_doc},
         {"clearForces", (PyCFunction)PhysicObject_clearForces, METH_NOARGS, PhysicObject_clearForces_doc},
+        {"addConstraint", (PyCFunction)PhysicObject_addConstraint, METH_VARARGS, PhysicObject_addConstraint_doc},
+        {"removeConstraint", (PyCFunction)PhysicObject_removeConstraint, METH_VARARGS, PhysicObject_removeConstraint_doc},
+        {"getConstraints", (PyCFunction)PhysicObject_getConstraints, METH_NOARGS, PhysicObject_getConstraints_doc},
+        {"removeConstraints", (PyCFunction)PhysicObject_removeConstraints, METH_NOARGS, PhysicObject_removeConstraints_doc},
         {NULL, NULL},
     };
 
