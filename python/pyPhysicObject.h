@@ -36,6 +36,18 @@ namespace ige::scene
     //! Clear forces
     PyObject* PhysicObject_clearForces(PyObject_PhysicObject *self);
 
+    //! Add constraint
+    PyObject* PhysicObject_addConstraint(PyObject_PhysicObject *self, PyObject* value);
+
+    //! Remove constraint
+    PyObject* PhysicObject_removeConstraint(PyObject_PhysicObject *self, PyObject* value);
+
+    //! Get all constraints
+    PyObject* PhysicObject_getConstraints(PyObject_PhysicObject *self);
+
+    //! Remove all constraints
+    PyObject* PhysicObject_removeConstraints(PyObject_PhysicObject *self);
+
     //! Mass
     PyObject *PhysicObject_getMass(PyObject_PhysicObject *self);
     int PhysicObject_setMass(PyObject_PhysicObject *self, PyObject *value);

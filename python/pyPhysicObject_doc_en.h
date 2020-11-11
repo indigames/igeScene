@@ -33,6 +33,51 @@ PyDoc_STRVAR(PhysicObject_applyImpulse_doc,
              "    [Opt]position : Vec3\n"
              "        Position to apply, or center\n");
 
+// addConstraint
+PyDoc_STRVAR(PhysicObject_addConstraint_doc,
+             "Add constraint.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "    type:\n"
+             "        int: Type of the constraint to be added.\n"
+             "----------\n"
+             "    constraint : PhysicConstraint\n"
+             "        Added constraint\n"
+            );
+
+// getConstraints
+PyDoc_STRVAR(PhysicObject_getConstraints_doc,
+             "Get all constraints.\n"
+             "\n"
+             "Return\n"
+             "----------\n"
+             "    constraints : tuple<PhysicConstraint>\n"
+            );
+
+// removeConstraint
+PyDoc_STRVAR(PhysicObject_removeConstraint_doc,
+             "Add constraint.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "    constraint:\n"
+             "        PhysicConstraint: constraint instance to remove.\n"
+             "Return\n"
+             "----------\n"
+             "    result : bool\n"
+            );
+
+// removeConstraints
+PyDoc_STRVAR(PhysicObject_removeConstraints_doc,
+    "Remove all constraints.\n"
+    "\n"
+    "Return\n"
+    "----------\n"
+    "    result: bool\n"
+);
+
+
 // clearForces
 PyDoc_STRVAR(PhysicObject_clearForces_doc, "Clear all forces.\n");
 

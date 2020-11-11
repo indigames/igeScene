@@ -1,5 +1,11 @@
 #include "python/pyPhysicObject.h"
 #include "python/pyPhysicObject_doc_en.h"
+#include "python/pyPhysicConstraint.h"
+#include "python/pyFixedConstraint.h"
+#include "python/pyHingeConstraint.h"
+#include "python/pySliderConstraint.h"
+#include "python/pySpringConstraint.h"
+#include "python/pyDof6Constraint.h"
 
 #include "components/physic/PhysicObject.h"
 
@@ -70,6 +76,160 @@ namespace ige::scene
     {
         self->component->clearForces();
         Py_RETURN_NONE;
+    }
+
+    //! Add constraint
+    PyObject* PhysicObject_addConstraint(PyObject_PhysicObject* self, PyObject* value)
+    {
+        int type = -1;
+        if (PyArg_ParseTuple(value, "i", &type))
+        {
+            auto constraint = self->component->addConstraint(type);
+            if (constraint != nullptr)
+            {
+                switch (type)
+                {
+                    case (int)PhysicConstraint::ConstraintType::Fixed:
+                    {
+                        auto pyConst = PyObject_New(PyObject_FixedConstraint, &PyTypeObject_FixedConstraint);
+                        pyConst->constraint = (FixedConstraint*)constraint.get();
+                        pyConst->super.constraint = constraint.get();
+                        return (PyObject*)pyConst;
+                    }                    
+                    case (int)PhysicConstraint::ConstraintType::Hinge:
+                    {
+                        auto pyConst = PyObject_New(PyObject_HingeConstraint, &PyTypeObject_HingeConstraint);
+                        pyConst->constraint = (HingeConstraint*)constraint.get();
+                        pyConst->super.constraint = constraint.get();
+                        return (PyObject*)pyConst;
+                    }                    
+                    case (int)PhysicConstraint::ConstraintType::Slider:
+                    {
+                        auto pyConst = PyObject_New(PyObject_SliderConstraint, &PyTypeObject_SliderConstraint);
+                        pyConst->constraint = (SliderConstraint*)constraint.get();
+                        pyConst->super.constraint = constraint.get();
+                        return (PyObject*)pyConst;
+                    }
+                    case (int)PhysicConstraint::ConstraintType::Spring:
+                    {
+                        auto pyConst = PyObject_New(PyObject_SpringConstraint, &PyTypeObject_SpringConstraint);
+                        pyConst->constraint = (SpringConstraint*)constraint.get();
+                        pyConst->super.constraint = constraint.get();
+                        return (PyObject*)pyConst;
+                    }
+                    case (int)PhysicConstraint::ConstraintType::Dof6Spring:
+                    {
+                        auto pyConst = PyObject_New(PyObject_Dof6Constraint, &PyTypeObject_Dof6Constraint);
+                        pyConst->constraint = (Dof6SpringConstraint*)constraint.get();
+                        pyConst->super.constraint = constraint.get();
+                        return (PyObject*)pyConst;
+                    }
+                }
+            }
+        }
+        Py_RETURN_NONE;
+    }
+
+    //! Remove constraint
+    PyObject* PhysicObject_removeConstraint(PyObject_PhysicObject* self, PyObject* value)
+    {
+        if (value->ob_type == &PyTypeObject_PhysicConstraint || value->ob_type == &PyTypeObject_FixedConstraint || value->ob_type == &PyTypeObject_HingeConstraint ||
+            value->ob_type == &PyTypeObject_SliderConstraint || value->ob_type == &PyTypeObject_SpringConstraint || value->ob_type == &PyTypeObject_Dof6Constraint)
+        {
+            auto pyConst = (PyObject_PhysicConstraint*)value;
+            if (pyConst && pyConst->constraint)
+            {
+                self->component->removeConstraint(pyConst->constraint);
+                Py_RETURN_TRUE;
+            }
+        }
+        Py_RETURN_FALSE;
+    }
+
+    //! Get all constraints
+    PyObject* PhysicObject_getConstraints(PyObject_PhysicObject* self)
+    {
+        auto len = self->component->getContraints().size();
+        if (len > 0)
+        {
+            auto constraints = self->component->getContraints();
+            auto compTuple = PyTuple_New(len);
+            for (int i = 0; i < len; ++i)
+            {
+                if (constraints[i] == nullptr)
+                    continue;
+
+                auto constraint = constraints[i];
+                if (constraint != nullptr)
+                {
+                    switch ((int)constraint->getType())
+                    {
+                        case (int)PhysicConstraint::ConstraintType::Fixed:
+                        {
+                            auto pyConst = PyObject_New(PyObject_FixedConstraint, &PyTypeObject_FixedConstraint);
+                            pyConst->constraint = (FixedConstraint*)constraint.get();
+                            pyConst->super.constraint = constraint.get();
+                            PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
+                            Py_XDECREF(pyConst);
+                        }
+                        break;
+                        case (int)PhysicConstraint::ConstraintType::Hinge:
+                        {
+                            auto pyConst = PyObject_New(PyObject_HingeConstraint, &PyTypeObject_HingeConstraint);
+                            pyConst->constraint = (HingeConstraint*)constraint.get();
+                            pyConst->super.constraint = constraint.get();
+                            PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
+                            Py_XDECREF(pyConst);
+                        }
+                        break;
+                        case (int)PhysicConstraint::ConstraintType::Slider:
+                        {
+                            auto pyConst = PyObject_New(PyObject_SliderConstraint, &PyTypeObject_SliderConstraint);
+                            pyConst->constraint = (SliderConstraint*)constraint.get();
+                            pyConst->super.constraint = constraint.get();
+                            PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
+                            Py_XDECREF(pyConst);
+                        }
+                        break;
+                        case (int)PhysicConstraint::ConstraintType::Spring:
+                        {
+                            auto pyConst = PyObject_New(PyObject_SpringConstraint, &PyTypeObject_SpringConstraint);
+                            pyConst->constraint = (SpringConstraint*)constraint.get();
+                            pyConst->super.constraint = constraint.get();
+                            PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
+                            Py_XDECREF(pyConst);
+                        }
+                        break;
+                        case (int)PhysicConstraint::ConstraintType::Dof6Spring:
+                        {
+                            auto pyConst = PyObject_New(PyObject_Dof6Constraint, &PyTypeObject_Dof6Constraint);
+                            pyConst->constraint = (Dof6SpringConstraint*)constraint.get();
+                            pyConst->super.constraint = constraint.get();
+                            PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
+                            Py_XDECREF(pyConst);
+                        }
+                        break;
+                        default:
+                        {
+                            auto pyConst = PyObject_New(PyObject_PhysicConstraint, &PyTypeObject_PhysicConstraint);
+                            pyConst->constraint = constraint.get();
+                            PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
+                            Py_XDECREF(pyConst);
+                        }
+                        break;
+                    }
+                }
+            }
+            return (PyObject*)compTuple;
+        }
+        Py_RETURN_NONE;
+    }
+
+    //! Remove all constraints
+    PyObject* PhysicObject_removeConstraints(PyObject_PhysicObject* self)
+    {
+        self->component->removeAllConstraints();
+        Py_RETURN_TRUE;
     }
 
     //! Mass

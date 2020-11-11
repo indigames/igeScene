@@ -58,12 +58,45 @@ namespace ige::scene
         m_constraints.push_back(constraint);
     }
 
+    //! Add constraint
+    std::shared_ptr<PhysicConstraint> PhysicObject::addConstraint(int type)
+    {
+        switch (type)
+        {
+        case (int)PhysicConstraint::ConstraintType::Fixed:
+            return addConstraint<FixedConstraint>();
+        case (int)PhysicConstraint::ConstraintType::Hinge:
+            return addConstraint<HingeConstraint>();
+        case (int)PhysicConstraint::ConstraintType::Slider:
+            return addConstraint<SliderConstraint>();
+        case (int)PhysicConstraint::ConstraintType::Spring:
+            return addConstraint<SpringConstraint>();
+        case (int)PhysicConstraint::ConstraintType::Dof6Spring:
+            return addConstraint<Dof6SpringConstraint>();
+        }
+        return nullptr;
+    }
+
     //! Remove constraint
     void PhysicObject::removeConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
     {
         auto found = std::find_if(m_constraints.begin(), m_constraints.end(), [&constraint](const auto& element)
         {
             return constraint == element;
+        });
+
+        if (found != m_constraints.end())
+        {
+            m_constraints.erase(found);
+        }
+    }
+
+    //! Remove constraint
+    void PhysicObject::removeConstraint(PhysicConstraint* constraint)
+    {
+        auto found = std::find_if(m_constraints.begin(), m_constraints.end(), [&constraint](const auto& element)
+        {
+            return constraint == element.get();
         });
 
         if (found != m_constraints.end())
