@@ -3,7 +3,7 @@
 #include "python/pySceneObject.h"
 #include "python/pyPhysicObject.h"
 
-#include "physic/PhysicManager.h"
+#include "systems/physic/PhysicManager.h"
 #include "utils/PhysicHelper.h"
 
 #include "pyRigidBody.h"

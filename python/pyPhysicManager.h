@@ -3,7 +3,7 @@
 #include <Python.h>
 
 #include "components/Component.h"
-#include "physic/PhysicManager.h"
+#include "systems/physic/PhysicManager.h"
 
 namespace ige::scene
 {

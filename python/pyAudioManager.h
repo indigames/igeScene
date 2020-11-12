@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Python.h>
-#include "audio/AudioManager.h"
+#include "systems/audio/AudioManager.h"
 
 namespace ige::scene
 {

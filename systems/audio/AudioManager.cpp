@@ -1,4 +1,4 @@
-#include "audio/AudioManager.h"
+#include "systems/audio/AudioManager.h"
 
 #include <optional>
 #include <algorithm>
@@ -9,7 +9,7 @@ namespace ige::scene
 {
     AudioManager::AudioManager()
     {
-        m_engine = std::make_shared<SoLoud::Soloud>();
+        m_engine = std::make_unique<SoLoud::Soloud>();
         m_engine->init();
 
         // Listen to AudioListener events

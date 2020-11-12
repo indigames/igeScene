@@ -12,6 +12,8 @@
                 "${workspaceFolder}/../igeBullet/include/bullet",
                 "${workspaceFolder}/../igeSound/include",
                 "${workspaceFolder}/../igeSound/include/ThirdParty/soloud/include",
+                "${workspaceFolder}/../igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp",
+                "${workspaceFolder}/../igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp/Effekseer",
                 "${workspaceFolder}/../json/include",
                 "${workspaceFolder}/../SDL/include",
                 "${workspaceFolder}/../Python/include",

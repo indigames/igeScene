@@ -93,6 +93,9 @@ set(INCLUDES
     ${LIBS_DIR}/igeSound/include
     ${LIBS_DIR}/igeSound/ThirdParty/soloud/include
     ${LIBS_DIR}/igeSound/include/ThirdParty/soloud/include
+    ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp
+    ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp/Effekseer
+    ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp/EffekseerRendererCommon
     ${LIBS_DIR}/imgui
     ${LIBS_DIR}/imgui/include
     ${LIBS_DIR}/SDL

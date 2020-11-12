@@ -1,7 +1,7 @@
 
 #include "components/audio/AudioSource.h"
+#include "systems/audio/AudioManager.h"
 #include "scene/SceneObject.h"
-#include "audio/AudioManager.h"
 
 #include <soloud.h>
 #include <soloud_wav.h>
