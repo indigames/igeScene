@@ -58,15 +58,15 @@ namespace ige::scene
 
     protected:
         //! AudioSource created/destroyed events
-        void onCreated(Particle &particle);
-        void onDestroyed(Particle &particle);
+        void onCreated(Particle *particle);
+        void onDestroyed(Particle *particle);
 
     protected:
         //! Enable culling
         bool m_bIsCullingEnabled = true;
 
         //! Particles
-        std::vector<std::reference_wrapper<Particle>> m_particles;
+        std::vector<Particle*> m_particles;
 
         //! Manager instance
         Effekseer::Manager* m_manager = nullptr;

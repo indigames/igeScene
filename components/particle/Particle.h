@@ -61,6 +61,10 @@ namespace ige::scene
         const Vec4& getDynamicInputParameter() const { return m_dynamicInputParameter; }
         void setDynamicInputParameter(const Vec4& param);
 
+        //! Dynamic input parameter
+        const Vec4& getColor() const { return m_color; }
+        void setColor(const Vec4& color);
+
         //! Handle
         int getHandle() const { return m_handle; }
 
@@ -77,8 +81,11 @@ namespace ige::scene
         void stop();
 
         //! Created/Destroyed events
-        static Event<Particle&>& getCreatedEvent() { return m_onCreatedEvent; }
-        static Event<Particle&>& getDestroyedEvent() { return m_onDestroyedEvent; }
+        static Event<Particle*>& getCreatedEvent() { return m_onCreatedEvent; }
+        static Event<Particle*>& getDestroyedEvent() { return m_onDestroyedEvent; }
+
+        //! Update function
+        void onUpdate(float dt) override;
 
     protected:
         //! Serialize
@@ -88,10 +95,10 @@ namespace ige::scene
         virtual void from_json(const json& j) override;
 
         //! On created event
-        static Event<Particle &> m_onCreatedEvent;
+        static Event<Particle *> m_onCreatedEvent;
 
         //! On destroyed event
-        static Event<Particle &> m_onDestroyedEvent;
+        static Event<Particle *> m_onDestroyedEvent;
 
     protected:
         //! Effect
@@ -129,5 +136,17 @@ namespace ige::scene
 
         //! Dynamic Input Parameter
         Vec4 m_dynamicInputParameter = {};
+
+        //! Color
+        Vec4 m_color = {1.f, 1.f, 1.f, 1.f};
+
+        //! Cache last position
+        Vec3 m_lastPosition = {};
+
+        //! Cache last rotation
+        Quat m_lastRotation = {};
+
+        //! Cache last scale
+        Vec3 m_lastScale = {};
     };
 } // namespace ige::scene

@@ -28,6 +28,7 @@
 #include "components/light/AmbientLight.h"
 #include "components/light/DirectionalLight.h"
 #include "components/light/PointLight.h"
+#include "components/particle/Particle.h"
 
 namespace ige::scene
 {
@@ -435,6 +436,8 @@ namespace ige::scene
                 comp = addComponent<DirectionalLight>();
             else if (key == "PointLight")
                 comp = addComponent<PointLight>();
+            else if (key == "Particle")
+                comp = addComponent<Particle>();
             if (comp)
                 val.get_to(*comp);
         }

@@ -3,6 +3,9 @@
 
 #include "utils/PyxieHeaders.h"
 
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
+
 namespace ige::scene
 {
     ParticleTextureLoader::ParticleTextureLoader()
@@ -12,15 +15,20 @@ namespace ige::scene
 
     Effekseer::TextureData* ParticleTextureLoader::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
     {
-        auto data = EffekseerRendererGL::TextureLoader::Load(path, textureType);
+        Effekseer::TextureData* data = EffekseerRendererGL::TextureLoader::Load(path, textureType);
         if(data == nullptr)
         {
-            auto texture = (Texture*)ResourceManager::Instance().GetResource((const char*)path, TEXTURETYPE);
+            char utf8Path[512];
+            Effekseer::ConvertUtf16ToUtf8((int8_t*)utf8Path, 512, (const int16_t*)path);
+
+            auto fsPath = fs::path(utf8Path);
+            fsPath = fsPath.replace_extension(".pyxi");
+
+            auto texture = (Texture*)ResourceCreator::Instance().NewTexture((const char*)fsPath.c_str());
             if(texture != nullptr)
             {
                 texture->WaitBuild();
                 data = new Effekseer::TextureData();
-                data->TextureFormat = Effekseer::TextureFormatType::ABGR8;
                 data->Width = texture->GetTextureWidth();
                 data->Height = texture->GetTextureHeight();
                 data->UserID = texture->GetTextureHandle();
@@ -70,8 +78,8 @@ namespace ige::scene
         }
 
         // Listen to AudioSource events
-        Particle::getCreatedEvent().addListener(std::bind(static_cast<void(ParticleManager::*)(Particle&)>(&ParticleManager::onCreated), this, std::placeholders::_1));
-        Particle::getDestroyedEvent().addListener(std::bind(static_cast<void(ParticleManager::*)(Particle&)>(&ParticleManager::onDestroyed), this, std::placeholders::_1));
+        Particle::getCreatedEvent().addListener(std::bind(static_cast<void(ParticleManager::*)(Particle*)>(&ParticleManager::onCreated), this, std::placeholders::_1));
+        Particle::getDestroyedEvent().addListener(std::bind(static_cast<void(ParticleManager::*)(Particle*)>(&ParticleManager::onDestroyed), this, std::placeholders::_1));
     }
 
     ParticleManager::~ParticleManager()
@@ -95,17 +103,16 @@ namespace ige::scene
     void ParticleManager::onUpdate(float dt)
     {
         // Replay looped particles
-        for (const auto& particleRef : m_particles)
+        for (auto particle : m_particles)
         {
-            auto particle = particleRef.get();
-            if (particle.getHandle() != -1 && particle.isLooped() && !m_manager->Exists(particle.getHandle()))
+            if (particle->getHandle() != -1 && !m_manager->Exists(particle->getHandle()) && particle->isLooped())
             {
-                particle.play();
+                particle->play();
             }
         }
 
         // Update manager
-        m_manager->Update(dt);
+        m_manager->Update(dt * 60);
     }
 
     //! Render
@@ -118,7 +125,7 @@ namespace ige::scene
                 m_manager->CalcCulling(m_renderer->GetCameraProjectionMatrix(), true);
             }
             m_manager->Draw();
-        }        
+        }
         m_renderer->EndRendering();
     }
 
@@ -153,18 +160,21 @@ namespace ige::scene
     }
 
     //! Particle created/destroyed events
-    void ParticleManager::onCreated(Particle &particle)
+    void ParticleManager::onCreated(Particle *particle)
     {
-        m_particles.push_back(std::ref(particle));
+        m_particles.push_back(particle);
     }
 
-    void ParticleManager::onDestroyed(Particle &particle)
+    void ParticleManager::onDestroyed(Particle *particle)
     {
         auto found = std::find_if(m_particles.begin(), m_particles.end(), [&particle](auto element) {
-            return std::addressof(particle) == std::addressof(element.get());
+            return particle == element;
         });
 
         if (found != m_particles.end())
+        {
+            m_manager->StopEffect((*found)->getHandle());
             m_particles.erase(found);
+        }
     }
 } // namespace ige::scene
