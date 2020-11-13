@@ -8,6 +8,10 @@
 #include "python/pyCameraComponent.h"
 #include "python/pyFigureComponent.h"
 #include "python/pyEnvironmentComponent.h"
+#include "python/pyAmbientLight.h"
+#include "python/pyDirectionalLight.h"
+#include "python/pyPointLight.h"
+#include "python/pySpotLight.h"
 #include "python/pySpriteComponent.h"
 #include "python/pyRectTransform.h"
 #include "python/pyCanvas.h"
@@ -17,8 +21,11 @@
 #include "python/pyPhysicBox.h"
 #include "python/pyPhysicSphere.h"
 #include "python/pyPhysicCapsule.h"
+#include "python/pyPhysicMesh.h"
+#include "python/pyPhysicSoftBody.h"
 #include "python/pyAudioListener.h"
 #include "python/pyAudioSource.h"
+#include "python/pyParticle.h"
 
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
@@ -218,6 +225,50 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
+            else if (type == "AmbientLight")
+            {
+                auto comp = self->sceneObject->addComponent<AmbientLight>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_AmbientLight, &PyTypeObject_AmbientLight);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "DirectionalLight")
+            {
+                auto comp = self->sceneObject->addComponent<DirectionalLight>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_DirectionalLight, &PyTypeObject_DirectionalLight);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "PointLight")
+            {
+                auto comp = self->sceneObject->addComponent<PointLight>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_PointLight, &PyTypeObject_PointLight);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "SpotLight")
+            {
+                auto comp = self->sceneObject->addComponent<SpotLight>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_SpotLight, &PyTypeObject_SpotLight);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
             else if (type == "FigureComponent")
             {
                 auto comp = self->sceneObject->addComponent<FigureComponent>();
@@ -328,6 +379,28 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
+            else if (type == "PhysicMesh")
+            {
+                auto comp = self->sceneObject->addComponent<PhysicMesh>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_PhysicMesh, &PyTypeObject_PhysicMesh);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "PhysicSoftBody")
+            {
+                auto comp = self->sceneObject->addComponent<PhysicSoftBody>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_PhysicSoftBody, &PyTypeObject_PhysicSoftBody);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
             else if (type == "AudioListener")
             {
                 auto comp = self->sceneObject->addComponent<AudioListener>();
@@ -345,6 +418,17 @@ namespace ige::scene
                 if (comp)
                 {
                     auto *compObj = PyObject_New(PyObject_AudioSource, &PyTypeObject_AudioSource);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "Particle")
+            {
+                auto comp = self->sceneObject->addComponent<Particle>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_Particle, &PyTypeObject_Particle);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;
@@ -411,6 +495,50 @@ namespace ige::scene
                 if (comp)
                 {
                     auto *compObj = PyObject_New(PyObject_EnvironmentComponent, &PyTypeObject_EnvironmentComponent);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "AmbientLight")
+            {
+                auto comp = self->sceneObject->getComponent<AmbientLight>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_AmbientLight, &PyTypeObject_AmbientLight);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "DirectionalLight")
+            {
+                auto comp = self->sceneObject->getComponent<DirectionalLight>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_DirectionalLight, &PyTypeObject_DirectionalLight);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "PointLight")
+            {
+                auto comp = self->sceneObject->getComponent<PointLight>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_PointLight, &PyTypeObject_PointLight);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "SpotLight")
+            {
+                auto comp = self->sceneObject->getComponent<SpotLight>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_SpotLight, &PyTypeObject_SpotLight);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;
@@ -493,6 +621,17 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
+            else if (type == "PhysicObject")
+            {
+                auto comp = self->sceneObject->getComponent<PhysicObject>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_PhysicObject, &PyTypeObject_PhysicObject);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
             else if (type == "PhysicBox")
             {
                 auto comp = self->sceneObject->getComponent<PhysicBox>();
@@ -526,6 +665,28 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
+            else if (type == "PhysicMesh")
+            {
+                auto comp = self->sceneObject->getComponent<PhysicMesh>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_PhysicMesh, &PyTypeObject_PhysicMesh);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "PhysicSoftBody")
+            {
+                auto comp = self->sceneObject->getComponent<PhysicSoftBody>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_PhysicSoftBody, &PyTypeObject_PhysicSoftBody);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
             else if (type == "AudioListener")
             {
                 auto comp = self->sceneObject->getComponent<AudioListener>();
@@ -543,6 +704,17 @@ namespace ige::scene
                 if (comp)
                 {
                     auto *compObj = PyObject_New(PyObject_AudioSource, &PyTypeObject_AudioSource);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "Particle")
+            {
+                auto comp = self->sceneObject->getComponent<Particle>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_Particle, &PyTypeObject_Particle);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;
