@@ -184,8 +184,8 @@ namespace ige::scene
         bool m_bWorldDirty = false;
 
         //! Cached aabb
-        Vec3 m_aabbMin = {0.f, 0.f, 0.f};
-        Vec3 m_aabbMax = {0.f, 0.f, 0.f};
+        Vec3 m_aabbMin = {-0.5f, -0.5f, -0.5f};
+        Vec3 m_aabbMax = {0.5f, 0.5f, 0.5f};
 
         //! Cached center position
         Vec3 m_aabbCenter = {0.f, 0.f, 0.f};
