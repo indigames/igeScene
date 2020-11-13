@@ -169,6 +169,9 @@ namespace ige::scene
     {
         if (m_effect)
         {
+            // Stop playing effect
+            stop();
+
             // Create handle
             auto position = getOwner()->getTransform()->getWorldPosition();
             m_handle = ParticleManager::getInstance()->getManager()->Play(m_effect, { position[0], position[1], position[2] });
