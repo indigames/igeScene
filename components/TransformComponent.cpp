@@ -24,6 +24,12 @@ namespace ige::scene
             if (m_parent)
                 m_parent->addObserver(this);
         }
+        else
+        {
+            // Root object should not have bounding box
+            m_aabbMin = { 0.f, 0.f, 0.f };
+            m_aabbMax = { 0.f, 0.f, 0.f };
+        }
     }
 
     TransformComponent::~TransformComponent()
