@@ -28,6 +28,10 @@ namespace ige::scene
         //! Returns the name of the component
         virtual std::string getName() const = 0;
 
+        //! Enable/Disable
+        bool isEnabled() const { return m_bIsEnabled; }
+        virtual void setEnabled(bool enable = true);
+
         //! Skip serialize
         bool isSkipSerialize() const { return m_bSkipSerialize; }
         void setSkipSerialize(bool skip = true) { m_bSkipSerialize = skip; }
@@ -66,13 +70,16 @@ namespace ige::scene
 
     protected:
         //! Serialize
-        virtual void to_json(json& j) const = 0;
+        virtual void to_json(json &j) const;
 
         //! Deserialize
-        virtual void from_json(const json& j) = 0;
+        virtual void from_json(const json &j);
 
         //! Reference to owner object
         SceneObject &m_owner;
+
+        //! Enable/Disable
+        bool m_bIsEnabled = true;
 
         //! Skip serialize (editor properties)
         bool m_bSkipSerialize = false;

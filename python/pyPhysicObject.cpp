@@ -95,14 +95,14 @@ namespace ige::scene
                         pyConst->constraint = (FixedConstraint*)constraint.get();
                         pyConst->super.constraint = constraint.get();
                         return (PyObject*)pyConst;
-                    }                    
+                    }
                     case (int)PhysicConstraint::ConstraintType::Hinge:
                     {
                         auto pyConst = PyObject_New(PyObject_HingeConstraint, &PyTypeObject_HingeConstraint);
                         pyConst->constraint = (HingeConstraint*)constraint.get();
                         pyConst->super.constraint = constraint.get();
                         return (PyObject*)pyConst;
-                    }                    
+                    }
                     case (int)PhysicConstraint::ConstraintType::Slider:
                     {
                         auto pyConst = PyObject_New(PyObject_SliderConstraint, &PyTypeObject_SliderConstraint);
@@ -417,19 +417,18 @@ namespace ige::scene
     //! Get AABB
     PyObject *PhysicObject_getAABB(PyObject_PhysicObject *self)
     {
-        btVector3 aabbMin, aabbMax;
-        self->component->getAABB(aabbMin, aabbMax);
+        auto aabb = self->component->getAABB();
 
         vec_obj *min = PyObject_New(vec_obj, _Vec3Type);
         vec_obj *max = PyObject_New(vec_obj, _Vec3Type);
-        min->v[0] = aabbMin.getX();
-        min->v[1] = aabbMin.getY();
-        min->v[2] = aabbMin.getZ();
+        min->v[0] = aabb.MinEdge.X();
+        min->v[1] = aabb.MinEdge.Y();
+        min->v[2] = aabb.MinEdge.Z();
         min->d = 3;
 
-        max->v[0] = aabbMax.getX();
-        max->v[1] = aabbMax.getY();
-        max->v[2] = aabbMax.getZ();
+        max->v[0] = aabb.MaxEdge.X();
+        max->v[1] = aabb.MaxEdge.Y();
+        max->v[2] = aabb.MaxEdge.Z();
         max->d = 3;
 
         PyObject *tuple = PyTuple_New(2);

@@ -129,5 +129,8 @@ namespace ige::scene
         setOtherUUID(m_json.value("otherId", std::string()));
         setEnabled(m_json.value("enable", true));
         setBreakingImpulseThreshold(m_json.value("breakTs", std::numeric_limits<float>().max()));
+
+        // Serialization done, clear json
+        m_json.clear();
     }
 } // namespace ige::scene

@@ -37,19 +37,16 @@ namespace ige::scene
     //! Set enabled
     void AudioSource::setEnabled(bool enable)
     {
-        if (m_bIsEnabled != enable)
+        Component::setEnabled(enable);
+
+        if (isEnabled() && m_bPlayOnEnabled)
         {
-            m_bIsEnabled = enable;
+            play();
+        }
 
-            if (m_bPlayOnEnabled && m_bIsEnabled)
-            {
-                play();
-            }
-
-            if (!m_bIsEnabled)
-            {
-                stop();
-            }
+        if (!isEnabled())
+        {
+            stop();
         }
     }
 
@@ -376,28 +373,25 @@ namespace ige::scene
     //! Serialize
     void AudioSource::to_json(json &j) const
     {
-        j = json{
-            {"isEnabled", m_bIsEnabled},
-            {"stream", m_bIsStream},
-            {"path", m_path},
-            {"play", m_bPlayOnEnabled},
-            {"loop", m_bIsLooped},
-            {"single", m_bIsSingleInstance},
-            {"volume", m_volume},
-            {"pan", m_pan},
-            {"velocity", m_velocity},
-            {"minDist", m_minDistance},
-            {"maxDist", m_maxDistance},
-            {"attModel", m_attenuationModel},
-            {"attFactor", m_attenuationRollOffFactor},
-            {"dopFactor", m_dopplerFactor},
-        };
+        Component::to_json(j);
+        j["stream"] = m_bIsStream;
+        j["path"] = m_path;
+        j["play"] = m_bPlayOnEnabled;
+        j["loop"] = m_bIsLooped;
+        j["single"] = m_bIsSingleInstance;
+        j["volume"] = m_volume;
+        j["pan"] = m_pan;
+        j["velocity"] = m_velocity;
+        j["minDist"] = m_minDistance;
+        j["maxDist"] = m_maxDistance;
+        j["attModel"] = m_attenuationModel;
+        j["attFactor"] = m_attenuationRollOffFactor;
+        j["dopFactor"] = m_dopplerFactor;
     }
 
     //! Deserialize
     void AudioSource::from_json(const json &j)
     {
-        setEnabled(j.value("isEnabled", false));
         setStream(j.value("stream", false));
         setPath(j.value("path", std::string()));
         setPlayOnEnabled(j.value("play", false));
@@ -411,6 +405,7 @@ namespace ige::scene
         setAttenuationModel(j.value("attModel", SoLoud::AudioSource::LINEAR_DISTANCE));
         setAttenuationRollOffFactor(j.value("attFactor", 0.5f));
         setDopplerFactor(j.value("dopFactor", 1.f));
+        Component::from_json(j);
     }
 
 } // namespace ige::scene

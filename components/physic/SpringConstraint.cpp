@@ -12,7 +12,7 @@ namespace ige::scene
     {
         setType(ConstraintType::Spring);
 
-        // Create constraint 
+        // Create constraint
         create();
     }
 
@@ -120,7 +120,6 @@ namespace ige::scene
     //! Deserialize
     void SpringConstraint::onSerializeFinished(Scene &scene)
     {
-        PhysicConstraint::onSerializeFinished(scene);
         setLowerLimit(PhysicHelper::to_btVector3(m_json.value("low", Vec3(1.f, 1.f, 1.f))));
         setUpperLimit(PhysicHelper::to_btVector3(m_json.value("up", Vec3(0.f, 0.f, 0.f))));
         setEnable(PhysicHelper::to_btVector3(m_json.value("enableV", Vec3(1.f, 0.f, 0.f))));
@@ -128,6 +127,6 @@ namespace ige::scene
         setDamping(PhysicHelper::to_btVector3(m_json.value("damp", Vec3(0.5f, 0.f, 0.f))));
 
         // Serialization done, clear json
-        m_json.clear();
+        PhysicConstraint::onSerializeFinished(scene);
     }
 } // namespace ige::scene

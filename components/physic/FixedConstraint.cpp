@@ -12,7 +12,7 @@ namespace ige::scene
     {
         setType(ConstraintType::Fixed);
 
-        // Create constraint 
+        // Create constraint
         create();
     }
 
@@ -49,8 +49,5 @@ namespace ige::scene
     void FixedConstraint::onSerializeFinished(Scene &scene)
     {
         PhysicConstraint::onSerializeFinished(scene);
-
-        // Serialization done, clear json
-        m_json.clear();
     }
 } // namespace ige::scene

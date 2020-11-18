@@ -11,7 +11,7 @@ namespace ige::scene
         m_index = getOwner()->getScene()->acquireSpotLight();
 
         // Set default color
-        setColor({ 1.f, 1.f, 1.f });
+        setColor({1.f, 1.f, 1.f});
 
         // Set default intensity
         setIntensity(1.f);
@@ -90,12 +90,11 @@ namespace ige::scene
     //! Serialize
     void SpotLight::to_json(json &j) const
     {
-        j = json{
-            {"its", getIntensity()},
-            {"col", getColor()},
-            {"rng", getRange()},
-            {"angle", getAngle()},
-        };
+        Component::to_json(j);
+        j["its"] = getIntensity();
+        j["col"] = getColor();
+        j["rng"] = getRange();
+        j["angle"] = getAngle();
     }
 
     //! Deserialize
@@ -105,6 +104,7 @@ namespace ige::scene
         setColor(j.value("col", Vec3(0.5f, 0.5f, 0.5f)));
         setRange(j.value("rng", 100.0f));
         setAngle(j.value("angle", 30.f));
+        Component::from_json(j);
     }
 
 } // namespace ige::scene

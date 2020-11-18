@@ -220,7 +220,7 @@ namespace ige::scene
     }
 
     //! Get component by name
-    std::shared_ptr<Component> SceneObject::getComponent(std::string name) const
+    std::shared_ptr<Component> SceneObject::getComponent(const std::string& name) const
     {
         for (int i = 0; i < m_components.size(); ++i)
         {
@@ -228,6 +228,20 @@ namespace ige::scene
                 return m_components[i];
         }
         return nullptr;
+    }
+
+    //! Get components by type recursively
+    void SceneObject::getComponentsRecursive(std::vector<Component*>& components, const std::string& type) const
+    {
+        auto comp = getComponent(type);
+        if(comp != nullptr)
+            components.push_back(comp.get());
+
+        for (const auto &child : m_children)
+        {
+            if (child)
+                child->getComponentsRecursive(components, type);
+        }
     }
 
     //! Update function

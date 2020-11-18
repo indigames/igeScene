@@ -38,9 +38,9 @@ namespace ige::scene
     //! Set enabled
     void Particle::setEnabled(bool enable)
     {
-        m_bIsEnabled = enable;
+        Component::setEnabled(enable);
 
-        if (m_bIsEnabled)
+        if (isEnabled())
         {
             play();
         }
@@ -235,7 +235,7 @@ namespace ige::scene
                 ParticleManager::getInstance()->getManager()->SetRotation(m_handle, euler[0], euler[1], euler[2]);
                 m_lastRotation = rotation;
             }
-            
+
             auto scale = transform->getWorldScale();
             if (m_lastScale != scale)
             {
@@ -248,18 +248,16 @@ namespace ige::scene
     //! Serialize
     void Particle::to_json(json &j) const
     {
-        j = json{
-            {"enable", isEnabled()},
-            {"path", getPath()},
-            {"layer", getLayer()},
-            {"speed", getSpeed()},
-            {"timeScale", getTimeScale()},
-            {"autoDraw", isAutoDrawing()},
-            {"loop", isLooped()},
-            {"target", getTargetLocation()},
-            {"param", getDynamicInputParameter()},
-            {"color", getColor()},
-        };
+        Component::to_json(j);
+        j["path"] = getPath();
+        j["layer"] = getLayer();
+        j["speed"] = getSpeed();
+        j["timeScale"] = getTimeScale();
+        j["autoDraw"] = isAutoDrawing();
+        j["loop"] = isLooped();
+        j["target"] = getTargetLocation();
+        j["param"] = getDynamicInputParameter();
+        j["color"] = getColor();
     }
 
     //! Deserialize
@@ -274,6 +272,6 @@ namespace ige::scene
         setTargetLocation(j.value("target", Vec3(0.f, 0.f, 0.f)));
         setDynamicInputParameter(j.value("param", Vec4(0.f, 0.f, 0.f, 0.f)));
         setColor(j.value("color", Vec4(1.f, 1.f, 1.f, 1.f)));
-        setEnabled(j.value("enable", true));
+        Component::from_json(j);
     }
 } // namespace ige::scene

@@ -12,7 +12,7 @@ namespace ige::scene
     {
         setType(ConstraintType::Hinge);
 
-        // Create constraint 
+        // Create constraint
         create();
     }
 
@@ -103,14 +103,11 @@ namespace ige::scene
     //! Deserialize
     void HingeConstraint::onSerializeFinished(Scene &scene)
     {
-        PhysicConstraint::onSerializeFinished(scene);
         setAnchor(PhysicHelper::to_btVector3(m_json.value("anchor", Vec3(0.f, 0.f, 0.f))));
         setAxis1(PhysicHelper::to_btVector3(m_json.value("axis1", Vec3(0.f, 1.f, 0.f))));
         setAxis2(PhysicHelper::to_btVector3(m_json.value("axis2", Vec3(1.f, 0.f, 0.f))));
         setLowerLimit(m_json.value("low", -SIMD_PI));
         setUpperLimit(m_json.value("up", SIMD_PI));
-
-        // Serialization done, clear json
-        m_json.clear();
+        PhysicConstraint::onSerializeFinished(scene);
     }
 } // namespace ige::scene

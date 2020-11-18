@@ -16,6 +16,17 @@ namespace ige::scene
         }
     }
 
+    void Component::setEnabled(bool enable)
+    {
+        m_bIsEnabled = enable;
+
+        // Invoke enable/disable events
+        if(m_bIsEnabled)
+            onEnable();
+        else
+            onDisable();
+    }
+
     //! Enable
     void Component::onEnable() {}
 
@@ -45,13 +56,27 @@ namespace ige::scene
     void Component::onResume() {}
 
     //! Serialize
+    void Component::to_json(json &j) const
+    {
+        j = json{
+            {"enabled", isEnabled()},
+        };
+    }
+
+    //! Deserialize
+    void Component::from_json(const json &j)
+    {
+        setEnabled(j.value("enabled", true));
+    }
+
+    //! Serialize component
     void to_json(json &j, const Component &obj)
     {
         if (!obj.isSkipSerialize())
             obj.to_json(j);
     }
 
-    //! Deserialize
+    //! Deserialize component
     void from_json(const json &j, Component &obj)
     {
         obj.from_json(j);

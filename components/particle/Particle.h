@@ -20,8 +20,7 @@ namespace ige::scene
         virtual std::string getName() const override { return "Particle"; }
 
         //! Enable/disable
-        bool isEnabled() const { return m_bIsEnabled; }
-        void setEnabled(bool enable = true);
+        void setEnabled(bool enable = true) override;
 
         //! Get path
         const std::string &getPath() const { return m_path; }
@@ -106,9 +105,6 @@ namespace ige::scene
 
         //! Particle handle
         int m_handle = -1;
-
-        //! Enable/disable
-        bool m_bIsEnabled = true;
 
         //! Path to effect file
         std::string m_path;

@@ -146,9 +146,9 @@ namespace ige::scene
             m_worldPosition.Z(m_worldMatrix[3][2]);
 
             Vec3 columns[3] = {
-                { m_worldMatrix[0][0], m_worldMatrix[0][1], m_worldMatrix[0][2]},
-                { m_worldMatrix[1][0], m_worldMatrix[1][1], m_worldMatrix[1][2]},
-                { m_worldMatrix[2][0], m_worldMatrix[2][1], m_worldMatrix[2][2]},
+                {m_worldMatrix[0][0], m_worldMatrix[0][1], m_worldMatrix[0][2]},
+                {m_worldMatrix[1][0], m_worldMatrix[1][1], m_worldMatrix[1][2]},
+                {m_worldMatrix[2][0], m_worldMatrix[2][1], m_worldMatrix[2][2]},
             };
 
             // Update world scale
@@ -567,13 +567,11 @@ namespace ige::scene
     //! Serialize
     void RectTransform::to_json(json &j) const
     {
-        auto size = Vec2(m_rect[2] - m_rect[0], m_rect[3] - m_rect[1]);
-        j = json{
-            {"anchor", m_anchor},
-            {"offset", m_offset},
-            {"pivot", m_pivot},
-            {"size", size},
-        };
+        Component::to_json(j);
+        j["anchor"] = m_anchor;
+        j["offset"] = m_offset;
+        j["pivot"] = m_pivot;
+        j["size"] = Vec2(m_rect[2] - m_rect[0], m_rect[3] - m_rect[1]);
     }
 
     //! Deserialize
@@ -583,6 +581,8 @@ namespace ige::scene
         m_anchor = j.value("anchor", Vec4(0.5f, 0.5f, 0.5f, 0.5f));
         m_pivot = j.value("pivot", Vec2(0.5f, 0.5f));
         setSize(j.value("size", Vec2(128.f, 128.f)));
+        Component::from_json(j);
+
         setRectDirty();
         setTransformDirty();
     }

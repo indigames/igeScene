@@ -51,11 +51,10 @@ namespace ige::scene
     //! Serialize
     void AmbientLight::to_json(json &j) const
     {
-        j = json{
-            {"sky", getSkyColor()},
-            {"gnd", getGroundColor()},
-            {"dir", getDirection()},
-        };
+        Component::to_json(j);
+        j["sky"] = getSkyColor();
+        j["gnd"] = getGroundColor();
+        j["dir"] = getDirection();
     }
 
     //! Deserialize
@@ -64,5 +63,6 @@ namespace ige::scene
         setSkyColor(j.value("sky", Vec3()));
         setGroundColor(j.value("gnd", Vec3()));
         setDirection(j.value("dir", Vec3()));
+        Component::from_json(j);
     }
 } // namespace ige::scene

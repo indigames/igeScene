@@ -85,8 +85,8 @@ namespace ige::scene
     //! Deserialize
     void PhysicCapsule::from_json(const json &j)
     {
-        PhysicObject::from_json(j);
         setHeight(j.at("height"));
         setRadius(j.at("radius"));
+        PhysicObject::from_json(j);
     }
 } // namespace ige::scene

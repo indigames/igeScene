@@ -13,15 +13,16 @@
 namespace ige::scene
 {
     //! Initialize static members
-    Event<PhysicObject*> PhysicObject::m_onCreatedEvent;
-    Event<PhysicObject*> PhysicObject::m_onDestroyedEvent;
-    Event<PhysicObject*> PhysicObject::m_onActivatedEvent;
-    Event<PhysicObject*> PhysicObject::m_onDeactivatedEvent;
+    Event<PhysicObject *> PhysicObject::m_onCreatedEvent;
+    Event<PhysicObject *> PhysicObject::m_onDestroyedEvent;
+    Event<PhysicObject *> PhysicObject::m_onActivatedEvent;
+    Event<PhysicObject *> PhysicObject::m_onDeactivatedEvent;
 
     //! Constructor
     PhysicObject::PhysicObject(SceneObject &owner)
         : Component(owner)
-    {}
+    {
+    }
 
     //! Destructor
     PhysicObject::~PhysicObject()
@@ -40,7 +41,7 @@ namespace ige::scene
     //! Initialization
     bool PhysicObject::destroy()
     {
-        // Remove all constraints 
+        // Remove all constraints
         removeAllConstraints();
 
         // Destroy body
@@ -53,7 +54,7 @@ namespace ige::scene
     }
 
     //! Add constraint
-    void PhysicObject::addConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+    void PhysicObject::addConstraint(const std::shared_ptr<PhysicConstraint> &constraint)
     {
         m_constraints.push_back(constraint);
     }
@@ -78,10 +79,9 @@ namespace ige::scene
     }
 
     //! Remove constraint
-    void PhysicObject::removeConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+    void PhysicObject::removeConstraint(const std::shared_ptr<PhysicConstraint> &constraint)
     {
-        auto found = std::find_if(m_constraints.begin(), m_constraints.end(), [&constraint](const auto& element)
-        {
+        auto found = std::find_if(m_constraints.begin(), m_constraints.end(), [&constraint](const auto &element) {
             return constraint == element;
         });
 
@@ -92,10 +92,9 @@ namespace ige::scene
     }
 
     //! Remove constraint
-    void PhysicObject::removeConstraint(PhysicConstraint* constraint)
+    void PhysicObject::removeConstraint(PhysicConstraint *constraint)
     {
-        auto found = std::find_if(m_constraints.begin(), m_constraints.end(), [&constraint](const auto& element)
-        {
+        auto found = std::find_if(m_constraints.begin(), m_constraints.end(), [&constraint](const auto &element) {
             return constraint == element.get();
         });
 
@@ -108,7 +107,7 @@ namespace ige::scene
     //! Remove all constraints
     void PhysicObject::removeAllConstraints()
     {
-        for (auto& constraint : m_constraints)
+        for (auto &constraint : m_constraints)
             constraint = nullptr;
         m_constraints.clear();
     }
@@ -116,14 +115,11 @@ namespace ige::scene
     //! Set enable
     void PhysicObject::setEnabled(bool enable)
     {
-        if (m_bIsEnabled != enable)
-        {
-            m_bIsEnabled = enable;
-            if (m_bIsEnabled)
-                activate();
-            else
-                deactivate();
-        }
+        Component::setEnabled(enable);
+        if (isEnabled())
+            activate();
+        else
+            deactivate();
     }
 
     //! Set enable
@@ -150,7 +146,7 @@ namespace ige::scene
         if (m_bIsDirty || m_mass != mass)
         {
             m_mass = mass;
-            btVector3 inertia = { 0.f, 0.f, 0.f };
+            btVector3 inertia = {0.f, 0.f, 0.f};
             if (m_mass != 0.0f)
                 m_shape->calculateLocalInertia(m_mass, inertia);
             getBody()->setMassProps(mass, inertia);
@@ -176,7 +172,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setLinearVelocity(const btVector3& velocity)
+    void PhysicObject::setLinearVelocity(const btVector3 &velocity)
     {
         if (m_bIsDirty || m_linearVelocity != velocity)
         {
@@ -185,7 +181,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setAngularVelocity(const btVector3& velocity)
+    void PhysicObject::setAngularVelocity(const btVector3 &velocity)
     {
         if (m_bIsDirty || m_angularVelocity != velocity)
         {
@@ -194,7 +190,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setLinearFactor(const btVector3& factor)
+    void PhysicObject::setLinearFactor(const btVector3 &factor)
     {
         if (m_bIsDirty || m_linearFactor != factor)
         {
@@ -204,7 +200,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setAngularFactor(const btVector3& factor)
+    void PhysicObject::setAngularFactor(const btVector3 &factor)
     {
         if (m_bIsDirty || m_angularFactor != factor)
         {
@@ -239,15 +235,15 @@ namespace ige::scene
     //! Set is kinematic
     void PhysicObject::setIsKinematic(bool isKinematic)
     {
-        if(m_bIsDirty || m_bIsKinematic != isKinematic)
+        if (m_bIsDirty || m_bIsKinematic != isKinematic)
         {
             m_bIsKinematic = isKinematic;
             if (m_bIsKinematic)
             {
                 setMass(0.f);
                 clearForces();
-                setLinearVelocity({ 0.f, 0.f, 0.f });
-                setAngularVelocity({ 0.f, 0.f, 0.f });
+                setLinearVelocity({0.f, 0.f, 0.f});
+                setAngularVelocity({0.f, 0.f, 0.f});
 
                 addCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
                 m_collisionFilterGroup = 2;
@@ -269,7 +265,7 @@ namespace ige::scene
     }
 
     //! Set local scale
-    void PhysicObject::setLocalScale(const Vec3& scale)
+    void PhysicObject::setLocalScale(const Vec3 &scale)
     {
         if (m_bIsDirty || m_previousScale != scale)
         {
@@ -321,8 +317,10 @@ namespace ige::scene
     void PhysicObject::destroyBody()
     {
         deactivate();
-        if(m_body) m_body.reset();
-        if(m_motion) m_motion.reset();
+        if (m_body)
+            m_body.reset();
+        if (m_motion)
+            m_motion.reset();
     }
 
     //! Calculate and apply inertia
@@ -336,7 +334,7 @@ namespace ige::scene
             }
             else
             {
-                btVector3 inertia = { 0.f, 0.f, 0.f };
+                btVector3 inertia = {0.f, 0.f, 0.f};
                 if (m_mass != 0.0f)
                     m_shape->calculateLocalInertia(m_mass, inertia);
                 getBody()->setMassProps(std::max(0.0000001f, m_mass), inertia);
@@ -423,35 +421,35 @@ namespace ige::scene
     }
 
     //! Get AABB
-    void PhysicObject::getAABB(btVector3 &aabbMin, btVector3 aabbMax)
+    AABBox PhysicObject::getAABB()
     {
+        btVector3 aabbMin, aabbMax;
         getBody()->getAabb(aabbMin, aabbMax);
+        return AABBox(PhysicHelper::from_btVector3(aabbMin), PhysicHelper::from_btVector3(aabbMax));
     }
 
     //! Serialize
     void PhysicObject::to_json(json &j) const
     {
-        j = json{
-            {"mass", getMass()},
-            {"restitution", getRestitution()},
-            {"friction", getFriction()},
-            {"linearVelocity", PhysicHelper::from_btVector3(getLinearVelocity())},
-            {"angularVelocity", PhysicHelper::from_btVector3(getAngularVelocity())},
-            {"linearFactor", PhysicHelper::from_btVector3(getLinearFactor())},
-            {"angularFactor", PhysicHelper::from_btVector3(getAngularFactor())},
-            {"isKinematic", isKinematic()},
-            {"isTrigger", isTrigger()},
-            {"isEnabled", isEnabled()},
-            {"scale", getLocalScale()},
-            {"group", getCollisionFilterGroup()},
-            {"mask", getCollisionFilterMask()},
-            {"ccd", isCCD()},
-            {"margin", getCollisionMargin()},
-        };
+        Component::to_json(j);
+        j["mass"] = getMass();
+        j["restitution"] = getRestitution();
+        j["friction"] = getFriction();
+        j["linearVelocity"] = PhysicHelper::from_btVector3(getLinearVelocity());
+        j["angularVelocity"] = PhysicHelper::from_btVector3(getAngularVelocity());
+        j["linearFactor"] = PhysicHelper::from_btVector3(getLinearFactor());
+        j["angularFactor"] = PhysicHelper::from_btVector3(getAngularFactor());
+        j["isKinematic"] = isKinematic();
+        j["isTrigger"] = isTrigger();
+        j["scale"] = getLocalScale();
+        j["group"] = getCollisionFilterGroup();
+        j["mask"] = getCollisionFilterMask();
+        j["ccd"] = isCCD();
+        j["margin"] = getCollisionMargin();
 
         auto jConstraints = json::array();
-        for (const auto& constraint : m_constraints)
-            jConstraints.push_back({ (int)constraint->getType(), json(*constraint.get()) });        
+        for (const auto &constraint : m_constraints)
+            jConstraints.push_back({(int)constraint->getType(), json(*constraint.get())});
         j["consts"] = jConstraints;
     }
 
@@ -467,12 +465,12 @@ namespace ige::scene
         setAngularFactor(PhysicHelper::to_btVector3(j.value("angularFactor", Vec3(1.f, 1.f, 1.f))));
         setIsKinematic(j.value("isKinematic", false));
         setIsTrigger(j.value("isTrigger", false));
-        setEnabled(j.value("isEnabled", true));
         setLocalScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
         setCollisionFilterGroup(j.value("group", isKinematic() ? 2 : 1));
         setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
         setCCD(j.value("ccd", false));
         setCollisionMargin(j.value("margin", 0.025f));
+        Component::from_json(j);
 
         auto jConstraints = j.value("consts", json());
         for (auto it : jConstraints)

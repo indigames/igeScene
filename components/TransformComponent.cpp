@@ -27,8 +27,7 @@ namespace ige::scene
         else
         {
             // Root object should not have bounding box
-            m_aabbMin = { 0.f, 0.f, 0.f };
-            m_aabbMax = { 0.f, 0.f, 0.f };
+            m_aabb = AABBox({0.f, 0.f, 0.f}, {0.f, 0.f, 0.f});
         }
     }
 
@@ -358,8 +357,9 @@ namespace ige::scene
         if (figureComp && figureComp->getFigure())
         {
             figureComp->onUpdate(0.33f);
-            figureComp->getFigure()->CalcAABBox(0, m_aabbMin.P(), m_aabbMax.P(), LocalSpace);
-            m_aabbCenter = Vec3((m_aabbMin[0] + m_aabbMax[0]), (m_aabbMin[1] + m_aabbMax[1]), (m_aabbMin[2] + m_aabbMax[2])) * 0.5f;
+            Vec3 aabbMin, aabbMax;
+            figureComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
+            m_aabb = { aabbMin, aabbMax };
         }
         else
         {
@@ -367,8 +367,9 @@ namespace ige::scene
             if (spriteComp && spriteComp->getFigure())
             {
                 spriteComp->onUpdate(0.33f);
-                spriteComp->getFigure()->CalcAABBox(0, m_aabbMin.P(), m_aabbMax.P());
-                m_aabbCenter = Vec3((m_aabbMin[0] + m_aabbMax[0]), (m_aabbMin[1] + m_aabbMax[1]), (m_aabbMin[2] + m_aabbMax[2])) * 0.5f;
+                Vec3 aabbMin, aabbMax;
+                spriteComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                m_aabb = { aabbMin, aabbMax };
             }
             else
             {
@@ -376,8 +377,9 @@ namespace ige::scene
                 if (uiText && uiText->getFigure())
                 {
                     uiText->onUpdate(0.33f);
-                    uiText->getFigure()->CalcAABBox(0, m_aabbMin.P(), m_aabbMax.P());
-                    m_aabbCenter = Vec3((m_aabbMin[0] + m_aabbMax[0]), (m_aabbMin[1] + m_aabbMax[1]), (m_aabbMin[2] + m_aabbMax[2])) * 0.5f;
+                    Vec3 aabbMin, aabbMax;
+                    uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                    m_aabb = { aabbMin, aabbMax };
                 }
             }
         }
@@ -424,11 +426,10 @@ namespace ige::scene
     //! Serialize
     void TransformComponent::to_json(json &j) const
     {
-        j = json{
-            {"pos", m_localPosition},
-            {"rot", m_localRotation},
-            {"scale", m_localScale},
-        };
+        Component::to_json(j);
+        j["pos"] = m_localPosition;
+        j["rot"] = m_localRotation;
+        j["scale"] = m_localScale;
     }
 
     //! Deserialize
@@ -437,5 +438,6 @@ namespace ige::scene
         setPosition(j.value("pos", Vec3()));
         setRotation(j.value("rot", Quat()));
         setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
+        Component::from_json(j);
     }
 } // namespace ige::scene

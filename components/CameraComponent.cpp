@@ -129,25 +129,24 @@ namespace ige::scene
     //! Serialize
     void CameraComponent::to_json(json &j) const
     {
-        j = json{
-            {"name", m_name},
-            {"wBase", isWidthBase()},
-            {"fov", getFieldOfView()},
-            {"near", getNearPlane()},
-            {"far", getFarPlane()},
-            {"lock", getLockOn()},
-            {"target", getTarget()},
-            {"ortho", isOrthoProjection()},
-            {"orthoW", getOrthoWidth()},
-            {"orthoH", getOrthoHeight()},
-            {"scrScale", getScreenScale()},
-            {"scrOff", getScreenOffset()},
-            {"scrRad", getScreenRadian()},
-            {"up", getUpAxis()},
-            {"pos", getPosition()},
-            {"rot", getRotation()},
-            {"scale", getScale()},
-        };
+        Component::to_json(j);
+        j["name"] = m_name;
+        j["wBase"] = isWidthBase();
+        j["fov"] = getFieldOfView();
+        j["near"] = getNearPlane();
+        j["far"] = getFarPlane();
+        j["lock"] = getLockOn();
+        j["target"] = getTarget();
+        j["ortho"] = isOrthoProjection();
+        j["orthoW"] = getOrthoWidth();
+        j["orthoH"] = getOrthoHeight();
+        j["scrScale"] = getScreenScale();
+        j["scrOff"] = getScreenOffset();
+        j["scrRad"] = getScreenRadian();
+        j["up"] = getUpAxis();
+        j["pos"] = getPosition();
+        j["rot"] = getRotation();
+        j["scale"] = getScale();
     }
 
     //! Deserialize
@@ -166,6 +165,7 @@ namespace ige::scene
         setScreenOffset(j.at("scrOff"));
         setScreenRadian(j.at("scrRad"));
         setUpAxis(j.at("up"));
+        Component::from_json(j);
 
         auto transCmp = getOwner()->getRectTransform();
         if (transCmp)

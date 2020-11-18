@@ -75,7 +75,10 @@ namespace ige::scene
         virtual std::vector<std::shared_ptr<Component>> &getComponents();
 
         //! Get component by name
-        std::shared_ptr<Component> getComponent(std::string name) const;
+        std::shared_ptr<Component> getComponent(const std::string& name) const;
+
+        //! Get components by type recursively
+        void getComponentsRecursive(std::vector<Component*>& components, const std::string& type) const;
 
         //! Get components count
         virtual size_t getComponentsCount();

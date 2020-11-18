@@ -103,9 +103,9 @@ namespace ige::scene
     //! Serialize
     void SpriteComponent::to_json(json &j) const
     {
-        j = json{
-            {"path", getPath()},
-            {"size", getSize()}};
+        Component::to_json(j);
+        j["path"] = getPath();
+        j["size"] = getSize();
     }
 
     //! Deserialize
@@ -113,5 +113,6 @@ namespace ige::scene
     {
         setSize(j.at("size"));
         setPath(j.at("path"));
+        Component::from_json(j);
     }
 } // namespace ige::scene

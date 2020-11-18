@@ -38,5 +38,6 @@ using FileIO = pyxie::pyxieFios;
 using Time = pyxie::pyxieTime;
 using ShaderDescriptor = pyxie::pyxieShaderDescriptor;
 using Drawable = pyxie::pyxieDrawable;
+using AABBox = pyxie::pyxieAABBox;
 
 using namespace pyxie;

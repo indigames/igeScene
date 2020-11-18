@@ -104,12 +104,12 @@ namespace ige::scene
         RenderContext::Instance().SetShadowBias(bias);
     }
 
-    const Vec2& EnvironmentComponent::getShadowTextureSize() const
+    const Vec2 &EnvironmentComponent::getShadowTextureSize() const
     {
         return getOwner()->getScene()->getShadowTextureSize();
     }
 
-    void EnvironmentComponent::setShadowTextureSize(const Vec2& size)
+    void EnvironmentComponent::setShadowTextureSize(const Vec2 &size)
     {
         getOwner()->getScene()->setShadowTextureSize(size);
     }
@@ -117,17 +117,16 @@ namespace ige::scene
     //! Serialize
     void EnvironmentComponent::to_json(json &j) const
     {
-        j = json{
-            {"fogNear", getDistanceFogNear()},
-            {"fogFar", getDistanceFogFar()},
-            {"fogAlpha", getDistanceFogAlpha()},
-            {"fogCol", getDistanceFogColor()},
-            {"shadowCol", getShadowColor()},
-            {"shadowSize", getShadowTextureSize()},
-            {"shadowDensity", getShadowDensity()},
-            {"shadowWideness", getShadowWideness()},
-            {"shadowBias", getShadowBias()},
-        };
+        Component::to_json(j);
+        j["fogNear"] = getDistanceFogNear();
+        j["fogFar"] = getDistanceFogFar();
+        j["fogAlpha"] = getDistanceFogAlpha();
+        j["fogCol"] = getDistanceFogColor();
+        j["shadowCol"] = getShadowColor();
+        j["shadowSize"] = getShadowTextureSize();
+        j["shadowDensity"] = getShadowDensity();
+        j["shadowWideness"] = getShadowWideness();
+        j["shadowBias"] = getShadowBias();
     }
 
     //! Deserialize
@@ -142,5 +141,6 @@ namespace ige::scene
         setShadowDensity(j.value("shadowDensity", 0.5f));
         setShadowWideness(j.value("shadowWideness", 1000.f));
         setShadowBias(j.value("shadowBias", 0.005f));
+        Component::from_json(j);
     }
 } // namespace ige::scene

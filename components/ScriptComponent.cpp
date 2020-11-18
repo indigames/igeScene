@@ -391,14 +391,15 @@ namespace ige::scene
     //! Serialize
     void ScriptComponent::to_json(json &j) const
     {
-        j = json{
-            {"path", m_path}};
+        Component::to_json(j);
+        j["path"] = m_path;
     }
 
     //! Deserialize
     void ScriptComponent::from_json(const json &j)
     {
         setPath(j.at("path"));
+        Component::from_json(j);
     }
 
     //! Path

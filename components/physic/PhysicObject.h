@@ -82,15 +82,14 @@ namespace ige::scene
         virtual void setIsKinematic(bool isKinematic = true);
 
         //! Enable/Disable physic component
-        virtual bool isEnabled() const { return m_bIsEnabled; }
-        virtual void setEnabled(bool enable = true);
+        virtual void setEnabled(bool enable = true) override;
 
         //! Enable/Disable continuos collision detection
         virtual bool isCCD() const { return m_bIsCCD; }
         virtual void setCCD(bool isCCD = true);
 
         //! Get AABB
-        virtual void getAABB(btVector3 &aabbMin, btVector3 aabbMax);
+        virtual AABBox getAABB();
 
         //! Add collision flag
         virtual void addCollisionFlag(btCollisionObject::CollisionFlags flag) {
@@ -275,9 +274,6 @@ namespace ige::scene
 
         //! isTrigger
         bool m_bIsTrigger = false;
-
-        //! Enable physic
-        bool m_bIsEnabled = true;
 
         //! Continuous collision detection
         bool m_bIsCCD = false;

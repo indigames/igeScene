@@ -12,7 +12,7 @@ namespace ige::scene
     {
         setType(ConstraintType::Slider);
 
-        // Create constraint 
+        // Create constraint
         create();
     }
 
@@ -72,11 +72,10 @@ namespace ige::scene
     //! Deserialize
     void SliderConstraint::onSerializeFinished(Scene &scene)
     {
-        PhysicConstraint::onSerializeFinished(scene);
         setLowerLimit(PhysicHelper::to_btVector3(m_json.value("low", Vec3(0.f, 0.f, 0.f))));
         setUpperLimit(PhysicHelper::to_btVector3(m_json.value("up", Vec3(0.f, 0.f, 0.f))));
 
         // Serialization done, clear json
-        m_json.clear();
+        PhysicConstraint::onSerializeFinished(scene);
     }
 } // namespace ige::scene

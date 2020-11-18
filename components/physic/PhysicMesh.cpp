@@ -238,10 +238,10 @@ namespace ige::scene
     //! Deserialize
     void PhysicMesh::from_json(const json &j)
     {
-        PhysicObject::from_json(j);
         setMeshIndex(j.value("meshIdx", 0));
         setConvex(j.value("convex", (int)(true)));
         setPath(j.value("path", std::string()));
+        PhysicObject::from_json(j);
     }
 
 } // namespace ige::scene

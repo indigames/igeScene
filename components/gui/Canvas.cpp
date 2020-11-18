@@ -77,12 +77,11 @@ namespace ige::scene
     //! Serialize
     void Canvas::to_json(json &j) const
     {
-        j = json{
-            {"size", m_canvasSize},
-            {"targetSize", m_targetCanvasSize},
-            {"scale", m_deviceScale},
-            {"viewport", m_canvasToViewportMatrix},
-        };
+        Component::to_json(j);
+        j["size"] = m_canvasSize;
+        j["targetSize"] =  m_targetCanvasSize;
+        j["scale"] =  m_deviceScale;
+        j["viewport"] =  m_canvasToViewportMatrix;
     }
 
     //! Deserialize
@@ -92,5 +91,6 @@ namespace ige::scene
         setTargetCanvasSize(j.value("targetSize", Vec2(560.f, 940.f)));
         m_deviceScale = (j.value("targetSize", Vec2(560.f, 940.f)));
         setCanvasToViewportMatrix(j.value("viewport", Mat4::IdentityMat()));
+        Component::from_json(j);
     }
 } // namespace ige::scene

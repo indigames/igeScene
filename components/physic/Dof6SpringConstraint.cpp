@@ -406,8 +406,6 @@ namespace ige::scene
     //! Deserialize
     void Dof6SpringConstraint::onSerializeFinished(Scene &scene)
     {
-        PhysicConstraint::onSerializeFinished(scene);
-
         // Linear limit
         setLinearLowerLimit(PhysicHelper::to_btVector3(m_json.value("lLow", Vec3(0.f, 0.f, 0.f))));
         setLinearUpperLimit(PhysicHelper::to_btVector3(m_json.value("lUp", Vec3(0.f, 0.f, 0.f))));
@@ -444,7 +442,7 @@ namespace ige::scene
         setAngularServoEnabled(PhysicHelper::to_btVector3(m_json.value("aServo", Vec3(0.f, 0.f, 0.f))));
         setAngularServoTarget(PhysicHelper::to_btVector3(m_json.value("aSTarget", Vec3(0.f, 0.f, 0.f))));
 
-        // Serialization done, clear json
-        m_json.clear();
+        // Serialization done
+        PhysicConstraint::onSerializeFinished(scene);
     }
 } // namespace ige::scene

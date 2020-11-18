@@ -221,15 +221,14 @@ namespace ige::scene
     //! Serialize
     void FigureComponent::to_json(json &j) const
     {
-        j = json{
-            {"path", getPath()},
-            {"fog", isFogEnabled()},
-            {"cull", isCullFaceEnable()},
-            {"ztest", isDepthTestEnable()},
-            {"zwrite", isDepthWriteEnable()},
-            {"aBlend", isAlphaBlendingEnable()},
-            {"aBlendOp", getAlphaBlendingOp()},
-        };
+        Component::to_json(j);
+        j["path"] = getPath();
+        j["fog"] = isFogEnabled();
+        j["cull"] = isCullFaceEnable();
+        j["zTest"] = isDepthTestEnable();
+        j["zWrite"] = isDepthWriteEnable();
+        j["aBlend"] = isAlphaBlendingEnable();
+        j["aBlendOp"] = getAlphaBlendingOp();
     }
 
     //! Deserialize
@@ -238,9 +237,10 @@ namespace ige::scene
         setPath(j.value("path", std::string()));
         setFogEnabled(j.value("fog", false));
         setCullFaceEnable(j.value("cull", true));
-        setDepthTestEnable(j.value("ztest", true));
-        setDepthWriteEnable(j.value("zwrite", true));
+        setDepthTestEnable(j.value("zTest", true));
+        setDepthWriteEnable(j.value("zWrite", true));
         setAlphaBlendingEnable(j.value("aBlend", true));
         setAlphaBlendingOp(j.value("aBlendOp", 2));
+        Component::from_json(j);
     }
 } // namespace ige::scene

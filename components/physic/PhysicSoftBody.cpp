@@ -31,6 +31,15 @@ namespace ige::scene
         m_indicesMap = nullptr;
     }
 
+    //! Get AABB
+    AABBox PhysicSoftBody::getAABB()
+    {
+        btVector3 aabbMin, aabbMax;
+        getSoftBody()->getAabb(aabbMin, aabbMax);
+        return AABBox(PhysicHelper::from_btVector3(aabbMin), PhysicHelper::from_btVector3(aabbMax));
+    }
+
+
     //! Set mesh index
     void PhysicSoftBody::setMeshIndex(int idx)
     {
@@ -42,7 +51,7 @@ namespace ige::scene
     }
 
     //! Linear velocity
-    void PhysicSoftBody::setLinearVelocity(const btVector3& velocity)
+    void PhysicSoftBody::setLinearVelocity(const btVector3 &velocity)
     {
         if (m_bIsDirty || m_linearVelocity != velocity)
         {
@@ -52,7 +61,7 @@ namespace ige::scene
     }
 
     //! Angular velocity
-    void PhysicSoftBody::setAngularVelocity(const btVector3& velocity)
+    void PhysicSoftBody::setAngularVelocity(const btVector3 &velocity)
     {
         if (m_bIsDirty || m_angularVelocity != velocity)
         {
@@ -228,7 +237,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setWindVelocity(const btVector3& velocity)
+    void PhysicSoftBody::setWindVelocity(const btVector3 &velocity)
     {
         if (m_bIsDirty || m_windVelocity != velocity)
         {
@@ -246,10 +255,10 @@ namespace ige::scene
 
         auto world = PhysicManager::getInstance()->getDeformableWorld();
 
-        Figure* figure = nullptr;
+        Figure *figure = nullptr;
         std::vector<Vec3> positions;
         auto figureComp = getOwner()->getComponent<FigureComponent>();
-        if(figureComp && figureComp->getFigure())
+        if (figureComp && figureComp->getFigure())
             figure = figureComp->getFigure();
         if (figure != nullptr)
         {
@@ -278,8 +287,8 @@ namespace ige::scene
 
                     if (size > 0)
                     {
-                        float* palettebuffer = nullptr;
-                        float* inbindSkinningMatrices = nullptr;
+                        float *palettebuffer = nullptr;
+                        float *inbindSkinningMatrices = nullptr;
                         figure->AllocTransformBuffer(space, palettebuffer, inbindSkinningMatrices);
                         figure->ReadPositions(m_meshIndex, offset, size, space, palettebuffer, inbindSkinningMatrices, &positions);
                         if (inbindSkinningMatrices)
@@ -293,7 +302,7 @@ namespace ige::scene
                 for (uint32_t i = 0; i < mesh->numIndices; ++i)
                     indices[i] = (int)mesh->indices[i];
 
-                float* optPoss;
+                float *optPoss;
                 optimizeMesh(positions, indices, mesh->numIndices, optPoss);
                 m_body = std::unique_ptr<btSoftBody>(btSoftBodyHelpers::CreateFromTriMesh(world->getWorldInfo(), optPoss, indices, mesh->numIndices / 3));
 
@@ -366,22 +375,22 @@ namespace ige::scene
     }
 
     //! Set local scale
-    void PhysicSoftBody::setLocalScale(const Vec3& scale)
+    void PhysicSoftBody::setLocalScale(const Vec3 &scale)
     {
         if (m_bIsDirty || m_previousScale != scale)
         {
             auto dScale = PhysicHelper::to_btVector3(scale) / PhysicHelper::to_btVector3(m_previousScale);
-            getSoftBody()->scale({ std::abs(dScale[0]), std::abs(dScale[1]), std::abs(dScale[2]) });
+            getSoftBody()->scale({std::abs(dScale[0]), std::abs(dScale[1]), std::abs(dScale[2])});
             m_previousScale = scale;
         }
     }
 
     //! Get nearest node
-    int PhysicSoftBody::getNearestNodeIndex(const btVector3& pos)
+    int PhysicSoftBody::getNearestNodeIndex(const btVector3 &pos)
     {
         int nearestNo = -1;
         float dist = FLT_MAX;
-        btVector3 nearestPos(0,0,0);
+        btVector3 nearestPos(0, 0, 0);
 
         int nNodes = getSoftBody()->m_nodes.size();
         for (int i = 0; i < nNodes; i++)
@@ -400,7 +409,7 @@ namespace ige::scene
     //! Get node position
     btVector3 PhysicSoftBody::getNodePosition(int idx)
     {
-        if(idx < 0 || idx >= getSoftBody()->m_nodes.size())
+        if (idx < 0 || idx >= getSoftBody()->m_nodes.size())
             return btVector3(FLT_MAX, FLT_MAX, FLT_MAX);
         return getSoftBody()->m_nodes[idx].m_x;
     }
@@ -408,7 +417,7 @@ namespace ige::scene
     //! Get node normal
     btVector3 PhysicSoftBody::getNodeNormal(int idx)
     {
-        if(idx < 0 || idx >= getSoftBody()->m_nodes.size())
+        if (idx < 0 || idx >= getSoftBody()->m_nodes.size())
             return btVector3(FLT_MAX, FLT_MAX, FLT_MAX);
         return getSoftBody()->m_nodes[idx].m_n;
     }
@@ -423,7 +432,7 @@ namespace ige::scene
         getSoftBody()->transformTo(newTrans);
 
         Vec3 scale = getOwner()->getTransform()->getWorldScale();
-        Vec3 dScale = { scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2] };
+        Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
         float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
         if (scaleDelta >= 0.01f)
         {
@@ -456,8 +465,10 @@ namespace ige::scene
         auto figure = figureComp->getFigure();
         auto mesh = figure->GetMesh(m_meshIndex);
         auto attIdx = -1;
-        for (uint16_t i = 0; i < mesh->numVertexAttributes; ++i) {
-            if (mesh->vertexAttributes[i].id == AttributeID::ATTRIBUTE_ID_POSITION) {
+        for (uint16_t i = 0; i < mesh->numVertexAttributes; ++i)
+        {
+            if (mesh->vertexAttributes[i].id == AttributeID::ATTRIBUTE_ID_POSITION)
+            {
                 attIdx = i;
                 break;
             }
@@ -466,36 +477,58 @@ namespace ige::scene
         if (attIdx != -1)
         {
             int elemSize = 0;
-            switch (mesh->vertexAttributes[attIdx].type) {
-            case GL_FLOAT: elemSize = 4; break;
-            case GL_SHORT: elemSize = 2; break;
-            case GL_HALF_FLOAT: elemSize = 2; break;
-            case GL_UNSIGNED_BYTE: elemSize = 1; break;
+            switch (mesh->vertexAttributes[attIdx].type)
+            {
+            case GL_FLOAT:
+                elemSize = 4;
+                break;
+            case GL_SHORT:
+                elemSize = 2;
+                break;
+            case GL_HALF_FLOAT:
+                elemSize = 2;
+                break;
+            case GL_UNSIGNED_BYTE:
+                elemSize = 1;
+                break;
             }
 
-            const auto& nodes = getSoftBody()->m_nodes;
-            for (int i = 0; i < mesh->numVerticies; ++i) {
+            const auto &nodes = getSoftBody()->m_nodes;
+            for (int i = 0; i < mesh->numVerticies; ++i)
+            {
                 int idx = m_indicesMap[i];
-                auto* buffer = (uint8_t*)PYXIE_MALLOC(3 * elemSize);
+                auto *buffer = (uint8_t *)PYXIE_MALLOC(3 * elemSize);
                 MemoryCleaner cleaner(buffer);
 
-                for (int j = 0; j < 3; ++j) {
-                    switch (mesh->vertexAttributes[attIdx].type) {
-                    case GL_FLOAT: ((float*)buffer)[j] = nodes[idx].m_x[j]; break;
-                    case GL_SHORT: ((int16_t*)buffer)[j] = F32toS16(nodes[idx].m_x[j]); break;
-                    case GL_HALF_FLOAT: ((uint16_t*)buffer)[j] = F32toF16(nodes[idx].m_x[j]); break;
-                    case GL_UNSIGNED_BYTE: ((uint8_t*)buffer)[j] = F32toU8(nodes[idx].m_x[j]); break;
+                for (int j = 0; j < 3; ++j)
+                {
+                    switch (mesh->vertexAttributes[attIdx].type)
+                    {
+                    case GL_FLOAT:
+                        ((float *)buffer)[j] = nodes[idx].m_x[j];
+                        break;
+                    case GL_SHORT:
+                        ((int16_t *)buffer)[j] = F32toS16(nodes[idx].m_x[j]);
+                        break;
+                    case GL_HALF_FLOAT:
+                        ((uint16_t *)buffer)[j] = F32toF16(nodes[idx].m_x[j]);
+                        break;
+                    case GL_UNSIGNED_BYTE:
+                        ((uint8_t *)buffer)[j] = F32toU8(nodes[idx].m_x[j]);
+                        break;
                     }
                 }
-                uint8_t* location = ((uint8_t*)mesh->vertices) + (i + offset) * mesh->vertexFormatSize + mesh->vertexAttributes[attIdx].offset;
+                uint8_t *location = ((uint8_t *)mesh->vertices) + (i + offset) * mesh->vertexFormatSize + mesh->vertexAttributes[attIdx].offset;
                 memcpy(location, buffer, elemSize * mesh->vertexAttributes[attIdx].size);
             }
             figure->ResetMeshBuffer(m_meshIndex, true, false, true);
         }
 
         attIdx = -1;
-        for (uint16_t i = 0; i < mesh->numVertexAttributes; ++i) {
-            if (mesh->vertexAttributes[i].id == AttributeID::ATTRIBUTE_ID_NORMAL) {
+        for (uint16_t i = 0; i < mesh->numVertexAttributes; ++i)
+        {
+            if (mesh->vertexAttributes[i].id == AttributeID::ATTRIBUTE_ID_NORMAL)
+            {
                 attIdx = i;
                 break;
             }
@@ -503,28 +536,48 @@ namespace ige::scene
         if (attIdx != -1)
         {
             int elemSize = 0;
-            switch (mesh->vertexAttributes[attIdx].type) {
-            case GL_FLOAT: elemSize = 4; break;
-            case GL_SHORT: elemSize = 2; break;
-            case GL_HALF_FLOAT: elemSize = 2; break;
-            case GL_UNSIGNED_BYTE: elemSize = 1; break;
+            switch (mesh->vertexAttributes[attIdx].type)
+            {
+            case GL_FLOAT:
+                elemSize = 4;
+                break;
+            case GL_SHORT:
+                elemSize = 2;
+                break;
+            case GL_HALF_FLOAT:
+                elemSize = 2;
+                break;
+            case GL_UNSIGNED_BYTE:
+                elemSize = 1;
+                break;
             }
 
-            const auto& nodes = getSoftBody()->m_nodes;
-            for (int i = 0; i < mesh->numVerticies; ++i) {
+            const auto &nodes = getSoftBody()->m_nodes;
+            for (int i = 0; i < mesh->numVerticies; ++i)
+            {
                 int idx = m_indicesMap[i];
-                auto* buffer = (uint8_t*)PYXIE_MALLOC(3 * elemSize);
+                auto *buffer = (uint8_t *)PYXIE_MALLOC(3 * elemSize);
                 MemoryCleaner cleaner(buffer);
 
-                for (int j = 0; j < 3; ++j) {
-                    switch (mesh->vertexAttributes[attIdx].type) {
-                    case GL_FLOAT: ((float*)buffer)[j] = nodes[idx].m_n[j]; break;
-                    case GL_SHORT: ((int16_t*)buffer)[j] = F32toS16(nodes[idx].m_n[j]); break;
-                    case GL_HALF_FLOAT: ((uint16_t*)buffer)[j] = F32toF16(nodes[idx].m_n[j]); break;
-                    case GL_UNSIGNED_BYTE: ((uint8_t*)buffer)[j] = F32toU8(nodes[idx].m_n[j]); break;
+                for (int j = 0; j < 3; ++j)
+                {
+                    switch (mesh->vertexAttributes[attIdx].type)
+                    {
+                    case GL_FLOAT:
+                        ((float *)buffer)[j] = nodes[idx].m_n[j];
+                        break;
+                    case GL_SHORT:
+                        ((int16_t *)buffer)[j] = F32toS16(nodes[idx].m_n[j]);
+                        break;
+                    case GL_HALF_FLOAT:
+                        ((uint16_t *)buffer)[j] = F32toF16(nodes[idx].m_n[j]);
+                        break;
+                    case GL_UNSIGNED_BYTE:
+                        ((uint8_t *)buffer)[j] = F32toU8(nodes[idx].m_n[j]);
+                        break;
                     }
                 }
-                uint8_t* location = ((uint8_t*)mesh->vertices) + (i + offset) * mesh->vertexFormatSize + mesh->vertexAttributes[attIdx].offset;
+                uint8_t *location = ((uint8_t *)mesh->vertices) + (i + offset) * mesh->vertexFormatSize + mesh->vertexAttributes[attIdx].offset;
                 memcpy(location, buffer, elemSize * mesh->vertexAttributes[attIdx].size);
             }
             figure->ResetMeshBuffer(m_meshIndex, true, false, true);
@@ -532,7 +585,7 @@ namespace ige::scene
     }
 
     //! Optimize mesh
-    void PhysicSoftBody::optimizeMesh(const std::vector<Vec3>& orgPoss, int* indices, int numIndeces, float*& optPoss)
+    void PhysicSoftBody::optimizeMesh(const std::vector<Vec3> &orgPoss, int *indices, int numIndeces, float *&optPoss)
     {
         if (m_indicesMap != nullptr)
             delete[] m_indicesMap;
@@ -540,23 +593,27 @@ namespace ige::scene
 
         std::map<Vec3, int> vecList;
         int numOptVertex = 0;
-        for (int i = 0; i < numIndeces; i++) {
+        for (int i = 0; i < numIndeces; i++)
+        {
             int idx = indices[i];
-            const Vec3& v = orgPoss[idx];
-            if (vecList.count(v) == 0) {
+            const Vec3 &v = orgPoss[idx];
+            if (vecList.count(v) == 0)
+            {
                 vecList[v] = numOptVertex;
                 numOptVertex++;
             }
             m_indicesMap[idx] = indices[i] = vecList[v];
         }
         std::map<uint32_t, Vec3> vecListRV;
-        for (const auto& it : vecList)
+        for (const auto &it : vecList)
             vecListRV[it.second] = it.first;
 
         optPoss = new float[vecListRV.size() * 3];
         int numf = 0;
-        for (const auto& it : vecListRV) {
-            for (int i = 0; i < 3; i++) {
+        for (const auto &it : vecListRV)
+        {
+            for (int i = 0; i < 3; i++)
+            {
                 optPoss[numf] = it.second[i];
                 numf++;
             }
@@ -573,7 +630,7 @@ namespace ige::scene
         j["dampCoeff"] = getDampingCoeff();
         j["presCoeff"] = getPressureCoeff();
         j["volCoeff"] = getVolumeConvCoeff();
-        j["fricCoeff"] = getDynamicFrictionCoeff();
+        j["friCoeff"] = getDynamicFrictionCoeff();
         j["poseCoeff"] = getPoseMatchCoeff();
         j["repStiff"] = getRepulsionStiffness();
         j["sleepThr"] = getSleepingThreshold();
@@ -594,12 +651,11 @@ namespace ige::scene
     //! Deserialize
     void PhysicSoftBody::from_json(const json &j)
     {
-        PhysicObject::from_json(j);
         setMeshIndex(j.value("meshIdx", 0));
         setDampingCoeff(j.value("dampCoeff", 0.4f));
         setPressureCoeff(j.value("presCoeff", 0.f));
         setVolumeConvCoeff(j.value("volCoeff", 0.f));
-        setDynamicFrictionCoeff(j.value("fricCoeff", 0.2f));
+        setDynamicFrictionCoeff(j.value("friCoeff", 0.2f));
         setPoseMatchCoeff(j.value("poseCoeff", 0.f));
         setRepulsionStiffness(j.value("repStiff", 0.5f));
         setSleepingThreshold(j.value("sleepThr", 0.f));
@@ -615,5 +671,6 @@ namespace ige::scene
         setKineticContactHardness(j.value("kch", 0.1f));
         setSoftContactHardness(j.value("sch", 1.f));
         setAnchorHardness(j.value("ahr", 1.f));
+        PhysicObject::from_json(j);
     }
 } // namespace ige::scene

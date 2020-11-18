@@ -20,8 +20,7 @@ namespace ige::scene
         virtual std::string getName() const override { return "AudioSource"; }
 
         //! Enable/disable
-        bool isEnabled() const { return m_bIsEnabled; }
-        void setEnabled(bool enable = true);
+        void setEnabled(bool enable = true) override;
 
         //! Get play on enabled
         bool getPlayOnEnabled() const { return m_bPlayOnEnabled; }
@@ -118,9 +117,6 @@ namespace ige::scene
         static Event<AudioSource &> m_onDestroyedEvent;
 
     protected:
-        //! Enable/disable
-        bool m_bIsEnabled = true;
-
         //! Play on enabled
         bool m_bPlayOnEnabled = false;
 

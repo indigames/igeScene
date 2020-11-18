@@ -11,7 +11,7 @@ namespace ige::scene
         m_index = getOwner()->getScene()->acquireDirectionalLight();
 
         // Set default color
-        setColor({ 1.f, 1.f, 1.f });
+        setColor({1.f, 1.f, 1.f});
 
         // Set default intensity
         setIntensity(0.75f);
@@ -61,10 +61,9 @@ namespace ige::scene
     //! Serialize
     void DirectionalLight::to_json(json &j) const
     {
-        j = json{
-            {"its", getIntensity()},
-            {"col", getColor()},
-        };
+        Component::to_json(j);
+        j["its"] = getIntensity();
+        j["col"] = getColor();
     }
 
     //! Deserialize
@@ -72,6 +71,7 @@ namespace ige::scene
     {
         setIntensity(j.value("its", 1.f));
         setColor(j.value("col", Vec3()));
+        Component::from_json(j);
     }
 
 } // namespace ige::scene

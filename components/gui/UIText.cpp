@@ -68,11 +68,11 @@ namespace ige::scene
     //! Serialize
     void UIText::to_json(json &j) const
     {
-        j = json{
-            {"text", getText()},
-            {"font", getFontPath()},
-            {"size", getFontSize()},
-            {"color", getColor()}};
+        Component::to_json(j);
+        j["text"] = getText();
+        j["font"] = getFontPath();
+        j["size"] = getFontSize();
+        j["color"] = getColor();
     }
 
     //! Deserialize
@@ -82,6 +82,7 @@ namespace ige::scene
         setFontPath(j.at("font"));
         setFontSize(j.at("size"));
         setColor(j.at("color"));
+        Component::from_json(j);
     }
 
     //! Text

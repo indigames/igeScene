@@ -115,22 +115,7 @@ namespace ige::scene
         virtual void onUpdate(float dt) override;
 
         //! Aabb min
-        const Vec3 &getAabbMin() const { return m_aabbMin; }
-        inline void setAabbMin(const Vec3 &aabb)
-        {
-            m_aabbMin = aabb;
-            m_aabbCenter = Vec3((m_aabbMin[0] + m_aabbMax[0]), (m_aabbMin[1] + m_aabbMax[1]), (m_aabbMin[2] + m_aabbMax[2])) * 0.5f;
-        }
-
-        //! Aabb max
-        const Vec3 &getAabbMax() const { return m_aabbMax; }
-        inline void setAabbMax(const Vec3 &aabb)
-        {
-            m_aabbMax = aabb;
-            m_aabbCenter = Vec3((m_aabbMin[0] + m_aabbMax[0]), (m_aabbMin[1] + m_aabbMax[1]), (m_aabbMin[2] + m_aabbMax[2])) * 0.5f;
-        }
-
-        const Vec3 &getCenter() const { return m_aabbCenter; }
+        const AABBox &getAABB() const { return m_aabb; }
 
     protected:
         //! Serialize
@@ -157,7 +142,7 @@ namespace ige::scene
         //! Handle notification from parent
         virtual void onNotified(const ETransformMessage &message);
 
-        //! Update bouding box
+        //! Update bounding box
         virtual void updateAabb();
 
     protected:
@@ -184,10 +169,6 @@ namespace ige::scene
         bool m_bWorldDirty = false;
 
         //! Cached aabb
-        Vec3 m_aabbMin = {-0.5f, -0.5f, -0.5f};
-        Vec3 m_aabbMax = {0.5f, 0.5f, 0.5f};
-
-        //! Cached center position
-        Vec3 m_aabbCenter = {0.f, 0.f, 0.f};
+        AABBox m_aabb;
     };
 } // namespace ige::scene

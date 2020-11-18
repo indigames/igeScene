@@ -19,26 +19,4 @@ namespace ige::scene
     {
         m_onDestroyedEvent.invoke(*this);
     }
-
-    //! Set enabled
-    void AudioListener::setEnabled(bool enable)
-    {
-        if (m_bIsEnabled != enable)
-            m_bIsEnabled = enable;
-    }
-
-    //! Serialize
-    void AudioListener::to_json(json &j) const
-    {
-        j = json{
-            {"isEnabled", m_bIsEnabled},
-        };
-    }
-
-    //! Deserialize
-    void AudioListener::from_json(const json &j)
-    {
-        setEnabled(j.value("isEnabled", false));
-    }
-
 } // namespace ige::scene

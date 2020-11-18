@@ -11,7 +11,7 @@ namespace ige::scene
         m_index = getOwner()->getScene()->acquirePointLight();
 
         // Set default color
-        setColor({ 1.f, 1.f, 1.f });
+        setColor({1.f, 1.f, 1.f});
 
         // Set default intensity
         setIntensity(1.f);
@@ -72,11 +72,10 @@ namespace ige::scene
     //! Serialize
     void PointLight::to_json(json &j) const
     {
-        j = json{
-            {"its", getIntensity()},
-            {"col", getColor()},
-            {"rng", getRange()},
-        };
+        Component::to_json(j);
+        j["its"] = getIntensity();
+        j["col"] = getColor();
+        j["rng"] = getRange();
     }
 
     //! Deserialize
@@ -85,6 +84,7 @@ namespace ige::scene
         setIntensity(j.value("its", 1.f));
         setColor(j.value("col", Vec3(1.f, 1.f, 1.f)));
         setRange(j.value("rng", 100.0f));
+        Component::from_json(j);
     }
 
 } // namespace ige::scene
