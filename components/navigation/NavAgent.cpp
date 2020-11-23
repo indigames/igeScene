@@ -8,6 +8,12 @@
 
 namespace ige::scene
 {
+    //! Initialize static members
+    Event<NavAgent*> NavAgent::m_onCreatedEvent;
+    Event<NavAgent*> NavAgent::m_onDestroyedEvent;
+    Event<NavAgent*> NavAgent::m_onActivatedEvent;
+    Event<NavAgent*> NavAgent::m_onDeactivatedEvent;
+
     //! Constructor
     NavAgent::NavAgent(SceneObject &owner)
         : Component(owner)

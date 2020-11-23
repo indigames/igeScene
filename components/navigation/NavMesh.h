@@ -273,21 +273,6 @@ namespace ige::scene
         const Vec3 &getPadding() const { return m_padding; }
         void setPadding(const Vec3 &padding) { m_padding = padding; }
 
-        //! Number of tiles in X direction
-        int getNumTilesX() const { return m_numTilesX; }
-        void setNumTilesX(int numTiles) { m_numTilesX = numTiles; }
-
-        //! Number of tiles in Z direction
-        int getNumTilesZ() const { return m_numTilesZ; }
-        void setNumTilesZ(int numTiles) { m_numTilesZ = numTiles; }
-
-        //! Navigation mesh bounding box
-        const AABBox &getBoundingBox() const { return m_boundingBox; };
-        void setBoundingBox(const AABBox &aabb) { m_boundingBox = aabb; };
-
-        //! World bounding box
-        AABBox getWorldBoundingBox() const;
-
         //! Partitioning type
         EPartitionType getPartitionType() const { return m_partitionType; }
         void setPartitionType(EPartitionType type) { m_partitionType = type; }
@@ -295,6 +280,18 @@ namespace ige::scene
         //! Area cost
         void NavMesh::setAreaCost(uint32_t areaID, float cost);
         float NavMesh::getAreaCost(uint32_t areaID) const;
+
+        //! Number of tiles in X direction
+        int getNumTilesX() const { return m_numTilesX; }
+
+        //! Number of tiles in Z direction
+        int getNumTilesZ() const { return m_numTilesZ; }
+
+        //! Navigation mesh bounding box
+        const AABBox &getBoundingBox() const { return m_boundingBox; };
+
+        //! World bounding box
+        AABBox getWorldBoundingBox() const;
 
         //! Initialize navigation mesh query
         bool initializeQuery();
@@ -343,9 +340,6 @@ namespace ige::scene
         //! Temporary data for finding a path
         std::unique_ptr<FindPathData> m_pathData = nullptr;
 
-        //! Tile size
-        int m_tileSize;
-
         //! Cell size
         float m_cellSize;
 
@@ -384,6 +378,9 @@ namespace ige::scene
 
         //! Bounding box padding
         Vec3 m_padding = {1.f, 1.f, 1.f};
+
+        //! Tile size
+        int m_tileSize;
 
         //! Number of tiles in X direction
         int m_numTilesX = 0;

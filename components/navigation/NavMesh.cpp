@@ -1000,6 +1000,29 @@ namespace ige::scene
         return 1.0f;
     }
 
+
+    bool NavMesh::initializeQuery()
+    {
+        if (!m_navMesh)
+            return false;
+
+        if (m_navMeshQuery)
+            return true;
+
+        m_navMeshQuery = dtAllocNavMeshQuery();
+        if (!m_navMeshQuery)
+        {
+            return false;
+        }
+
+        if (dtStatusFailed(m_navMeshQuery->init(m_navMesh, MAX_POLYS)))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     AABBox NavMesh::getWorldBoundingBox() const
     {
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
