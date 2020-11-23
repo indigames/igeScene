@@ -77,13 +77,16 @@ namespace ige::scene
             m_manager->LaunchWorkerThreads(threadsNumber);
         }
 
-        // Listen to AudioSource events
+        // Register event listeners
         Particle::getCreatedEvent().addListener(std::bind(static_cast<void(ParticleManager::*)(Particle*)>(&ParticleManager::onCreated), this, std::placeholders::_1));
         Particle::getDestroyedEvent().addListener(std::bind(static_cast<void(ParticleManager::*)(Particle*)>(&ParticleManager::onDestroyed), this, std::placeholders::_1));
     }
 
     ParticleManager::~ParticleManager()
     {
+        Particle::getCreatedEvent().removeAllListeners();
+        Particle::getDestroyedEvent().removeAllListeners();
+
         // Clear particles
         m_particles.clear();
 

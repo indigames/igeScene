@@ -96,6 +96,11 @@ set(INCLUDES
     ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp
     ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp/Effekseer
     ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp/EffekseerRendererCommon
+    ${LIBS_DIR}/igeNavigation/include
+    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/Recast/Include
+    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/Detour/Include
+    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/DetourCrowd/Include
+    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/DetourTileCache/Include
     ${LIBS_DIR}/imgui
     ${LIBS_DIR}/imgui/include
     ${LIBS_DIR}/SDL

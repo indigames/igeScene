@@ -166,10 +166,10 @@ namespace ige::scene
         //! Get onDestroyedEvent
         static Event<PhysicObject*> &getOnDestroyedEvent() { return m_onDestroyedEvent; }
 
-        //! Get onDestroyedEvent
+        //! Get onActivatedEvent
         static Event<PhysicObject*> &getOnActivatedEvent() { return m_onActivatedEvent; }
 
-        //! Get onDestroyedEvent
+        //! Get onDeactivatedEvent
         static Event<PhysicObject*> &getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
 
         //! Collision events

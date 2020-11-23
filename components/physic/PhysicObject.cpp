@@ -284,7 +284,7 @@ namespace ige::scene
 
         m_bIsDirty = true;
 
-        // Apply pre-configurated values
+        // Apply pre-configured values
         setMass(m_mass);
         setFriction(m_friction);
         setRestitution(m_restitution);

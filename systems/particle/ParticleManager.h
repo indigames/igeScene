@@ -57,7 +57,7 @@ namespace ige::scene
         void setCameraMatrix(const Mat4& matrix);
 
     protected:
-        //! AudioSource created/destroyed events
+        //! Particle created/destroyed events
         void onCreated(Particle *particle);
         void onDestroyed(Particle *particle);
 
