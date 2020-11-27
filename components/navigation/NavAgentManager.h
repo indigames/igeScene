@@ -5,9 +5,9 @@
 #include <string>
 #include <optional>
 
-#include "utils/Singleton.h"
 #include "event/Event.h"
 
+#include "components/Component.h"
 #include "components/navigation/NavAgent.h"
 #include "components/navigation/NavMesh.h"
 
@@ -17,13 +17,16 @@ struct dtCrowdAgent;
 namespace ige::scene
 {
     /**
-     * Class NavManager: manage navigation system
+     * Class NavAgentManager: manage navigation system
      */
-    class NavManager : public Singleton<NavManager>
+    class NavAgentManager : public Component
     {
     public:
-        NavManager();
-        virtual ~NavManager();
+        NavAgentManager(SceneObject &owner);
+        virtual ~NavAgentManager();
+
+        //! Get name
+        std::string getName() const override { return "NavAgentManager"; }
 
         //! Update
         void onUpdate(float dt);
@@ -108,6 +111,12 @@ namespace ige::scene
         void onActivated(NavAgent *object);
         void onDeactivated(NavAgent *object);
 
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
     protected:
         //! Agents
         std::vector<NavAgent *> m_agents;
@@ -116,10 +125,10 @@ namespace ige::scene
         NavMesh *m_navMesh = nullptr;
 
         //! The maximum number of agents the crowd can manage.
-        uint32_t m_maxAgents;
+        uint32_t m_maxAgents = 512;
 
         //! The maximum radius of any agent that will be added to the crowd.
-        float m_maxAgentRadius;
+        float m_maxAgentRadius = 1.0f;
 
         //! Number of configured area in each filter type. Limit to 64.
         std::vector<uint32_t> m_numAreas;
@@ -128,9 +137,12 @@ namespace ige::scene
         dtCrowd *m_crowd = nullptr;
 
         //! Number of query filter types configured in the crowd. Limit to 16.
-        uint32_t m_numQueryFilterTypes;
+        uint32_t m_numQueryFilterTypes = 0;
 
         //! Number of obstacle avoidance types configured in the crowd. Limit to 8.
-        uint32_t m_numObstacleAvoidanceTypes;
+        uint32_t m_numObstacleAvoidanceTypes = 0;
+
+        //! Cache initialized status
+        bool m_bInitialized = false;
     };
 } // namespace ige::scene

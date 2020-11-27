@@ -6,13 +6,6 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-// Class NavObstacle
-// Shape: Box (center, size), Capsule (center, radius, height)
-// Carve: cut
-// Move threshold
-// Time to stationary
-// Carve only stationary
-
 namespace ige::scene
 {
     class DynamicNavMesh;
@@ -52,6 +45,13 @@ namespace ige::scene
         //! Activated/ Deactivated events
         static Event<NavObstacle *> &getActivatedEvent() { return m_onActivatedEvent; }
         static Event<NavObstacle *> &getDeactivatedEvent() { return m_onDeactivatedEvent; }
+
+    protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
 
     protected:
         //! Radius of this obstacle.

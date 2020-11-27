@@ -154,6 +154,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "NavMesh"; }
 
+        //! Enable
+        virtual void onEnable() override;
+
         //! Build the entire navigation mesh
         virtual bool build();
 
@@ -327,6 +330,12 @@ namespace ige::scene
         //! Read tile data to the navigation mesh.
         bool readTile(MemBuffer& source);
 
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
     protected:
         //! Detour navigation mesh
         dtNavMesh *m_navMesh = nullptr;
@@ -377,7 +386,7 @@ namespace ige::scene
         float m_detailSampleMaxError;
 
         //! Bounding box padding
-        Vec3 m_padding = {1.f, 1.f, 1.f};
+        Vec3 m_padding = {0.f, 10.f, 0.f};
 
         //! Tile size
         int m_tileSize;

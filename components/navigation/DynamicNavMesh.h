@@ -120,18 +120,24 @@ namespace ige::scene
         void onActivated(NavObstacle* obstacle);
         void onDeactivated(NavObstacle* obstacle);
 
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
     protected:
         //! Detour tile cache instance that works with the nav mesh.
-        dtTileCache *m_tileCache;
+        dtTileCache *m_tileCache = nullptr;
 
         //! Used by dtTileCache to allocate blocks of memory.
-        std::unique_ptr<dtTileCacheAlloc> m_allocator;
+        std::unique_ptr<dtTileCacheAlloc> m_allocator = nullptr;
 
         //! Used by dtTileCache to compress the original tiles to use when reconstructing for changes.
-        std::unique_ptr<dtTileCacheCompressor> m_compressor;
+        std::unique_ptr<dtTileCacheCompressor> m_compressor = nullptr;
 
         //! Mesh processor used by Detour, in this case a 'pass-through' processor.
-        std::unique_ptr<dtTileCacheMeshProcess> m_meshProcessor;
+        std::unique_ptr<dtTileCacheMeshProcess> m_meshProcessor = nullptr;
 
         //! Maximum number of obstacle objects allowed.
         uint32_t m_maxObstacles = 1024;

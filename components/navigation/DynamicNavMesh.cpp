@@ -93,8 +93,8 @@ namespace ige::scene
                     for (unsigned i = 0; i < offMeshlinks.size(); ++i)
                     {
                         auto *link = offMeshlinks[i];
-                        auto start = (*(Vec3 *)(inverse * link->getOwner()->getTransform()->getWorldPosition()).P());
-                        auto end = (*(Vec3 *)(inverse * link->getEndPoint()->getTransform()->getWorldPosition()).P());
+                        auto start = inverse * link->getOwner()->getTransform()->getWorldPosition();
+                        auto end = inverse * link->getEndPoint()->getTransform()->getWorldPosition();
 
                         offMeshVertices.push_back(start);
                         offMeshVertices.push_back(end);
@@ -232,7 +232,7 @@ namespace ige::scene
             m_numTilesZ = (gridH + m_tileSize - 1) / m_tileSize;
 
             // Calculate max number of tiles and polygons
-            uint32_t maxTiles = next_power_of_two((uint32_t)(m_numTilesX * m_numTilesZ));
+            uint32_t maxTiles = next_power_of_two((uint32_t)(m_numTilesX * m_numTilesZ)) * m_maxLayers;
             uint32_t tileBits = (uint32_t)std::log2(maxTiles);
             uint32_t maxPolys = 1u << (22 - tileBits);
 
@@ -264,7 +264,7 @@ namespace ige::scene
             tileCacheParams.width = m_tileSize;
             tileCacheParams.height = m_tileSize;
             tileCacheParams.maxSimplificationError = m_edgeMaxError;
-            tileCacheParams.maxTiles = m_numTilesX * m_numTilesZ * m_maxLayers;
+            tileCacheParams.maxTiles = (m_numTilesX * m_numTilesZ) * m_maxLayers;
             tileCacheParams.maxObstacles = m_maxObstacles;
 
             // Settings from NavMesh
@@ -312,6 +312,16 @@ namespace ige::scene
             // not doing so will cause dependent components to crash, like CrowdManager
             m_tileCache->update(0, m_navMesh);
 
+            // Scan for obstacles to insert into us
+            //PODVector<Node*> obstacles;
+            //GetScene()->GetChildrenWithComponent<Obstacle>(obstacles, true);
+            //for (unsigned i = 0; i < obstacles.Size(); ++i)
+            //{
+            //    auto* obs = obstacles[i]->GetComponent<Obstacle>();
+            //    if (obs && obs->IsEnabledEffective())
+            //        AddObstacle(obs);
+            //}
+
             return true;
         }
     }
@@ -341,7 +351,6 @@ namespace ige::scene
         for (int i = 0; i < numTiles; ++i)
         {
             const dtCompressedTile *tile = m_tileCache->getTile(i);
-            assert(tile);
             if (tile->header)
                 m_tileCache->removeTile(m_tileCache->getTileRef(tile), nullptr, nullptr);
         }
@@ -481,8 +490,8 @@ namespace ige::scene
         auto triAreas = new uint8_t[numTriangles];
         memset(triAreas, 0, numTriangles);
 
-        rcMarkWalkableTriangles(build.ctx, cfg.walkableSlopeAngle, build.vertices[0].P(), build.vertices.size(), &build.indices[0], numTriangles, triAreas);
-        rcRasterizeTriangles(build.ctx, build.vertices[0].P(), build.vertices.size(), &build.indices[0], triAreas, numTriangles, *build.heightField, cfg.walkableClimb);
+        rcMarkWalkableTriangles(build.ctx, cfg.walkableSlopeAngle, &(build.vertices[0][0]), build.vertices.size(), &(build.indices[0]), numTriangles, triAreas);
+        rcRasterizeTriangles(build.ctx, &(build.vertices[0][0]), build.vertices.size(), &(build.indices[0]), triAreas, numTriangles, *build.heightField, cfg.walkableClimb);
         rcFilterLowHangingWalkableObstacles(build.ctx, cfg.walkableClimb, *build.heightField);
 
         rcFilterWalkableLowHeightSpans(build.ctx, cfg.walkableHeight, *build.heightField);
@@ -490,13 +499,13 @@ namespace ige::scene
 
         build.compactHeightField = rcAllocCompactHeightfield();
         if (!build.compactHeightField)
-            return false;
+            return 0;
 
         if (!rcBuildCompactHeightfield(build.ctx, cfg.walkableHeight, cfg.walkableClimb, *build.heightField, *build.compactHeightField))
-            return false;
+            return 0;
 
         if (!rcErodeWalkableArea(build.ctx, cfg.walkableRadius, *build.compactHeightField))
-            return false;
+            return 0;
 
         // Mark area volumes
         for (size_t i = 0; i < build.navAreas.size(); ++i)
@@ -505,15 +514,15 @@ namespace ige::scene
         if (m_partitionType == NavMesh::EPartitionType::WATERSHED)
         {
             if (!rcBuildDistanceField(build.ctx, *build.compactHeightField))
-                return false;
+                return 0;
 
             if (!rcBuildRegions(build.ctx, *build.compactHeightField, cfg.borderSize, cfg.minRegionArea, cfg.mergeRegionArea))
-                return false;
+                return 0;
         }
         else
         {
             if (!rcBuildRegionsMonotone(build.ctx, *build.compactHeightField, cfg.borderSize, cfg.minRegionArea, cfg.mergeRegionArea))
-                return false;
+                return 0;
         }
 
         build.heightFieldLayers = rcAllocHeightfieldLayerSet();
@@ -724,4 +733,21 @@ namespace ige::scene
             obstacle->setObstacleId(0);
         }
     }
+
+    //! Serialize
+    void DynamicNavMesh::to_json(json &j) const
+    {
+        NavMesh::to_json(j);
+        j["maxObs"] = getMaxObstacles();
+        j["maxLayers"] = getMaxLayers();
+    }
+
+    //! Deserialize
+    void DynamicNavMesh::from_json(const json &j)
+    {
+        setTileSize(j.value("maxObs", 1024));
+        setMaxLayers(j.value("maxLayers", 16));
+        NavMesh::from_json(j);
+    }
+
 } // namespace ige::scene

@@ -52,7 +52,10 @@ namespace ige::scene
             shader->SetBoneCondition(1, 1);
         }
 
-        auto efig = ResourceCreator::Instance().NewEditableFigure("sprite");
+        auto efig = ResourceCreator::Instance().NewEditableFigure("sprite", true);
+        efig->Initialize();
+        efig->Build();
+
         efig->AddMaterial("mate", *shader);
         efig->AddMesh("mesh", "mate");
 

@@ -25,6 +25,13 @@ namespace ige::scene
         void setRecursive(bool recursive) { m_bIsRecursive = recursive; }
 
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
+    protected:
         //! Recursive
         bool m_bIsRecursive = true;
     };

@@ -1,6 +1,6 @@
 #include "components/navigation/NavAgent.h"
+#include "components/navigation/NavAgentManager.h"
 #include "components/TransformComponent.h"
-#include "systems/navigation/NavManager.h"
 #include "scene/SceneObject.h"
 
 #include <DetourCommon.h>
@@ -9,30 +9,35 @@
 namespace ige::scene
 {
     //! Initialize static members
-    Event<NavAgent*> NavAgent::m_onCreatedEvent;
-    Event<NavAgent*> NavAgent::m_onDestroyedEvent;
-    Event<NavAgent*> NavAgent::m_onActivatedEvent;
-    Event<NavAgent*> NavAgent::m_onDeactivatedEvent;
+    Event<NavAgent *> NavAgent::m_onCreatedEvent;
+    Event<NavAgent *> NavAgent::m_onDestroyedEvent;
+    Event<NavAgent *> NavAgent::m_onActivatedEvent;
+    Event<NavAgent *> NavAgent::m_onDeactivatedEvent;
 
     //! Constructor
     NavAgent::NavAgent(SceneObject &owner)
         : Component(owner)
     {
         getCreatedEvent().invoke(this);
+        setEnabled(true);
     }
 
     NavAgent::~NavAgent()
     {
+        setEnabled(false);
         getDestroyedEvent().invoke(this);
+        m_manager = nullptr;
     }
 
     //! Update
     void NavAgent::onUpdate(float dt)
     {
-        const auto* agent = getDetourCrowdAgent();
+        const auto *agent = getDetourCrowdAgent();
+        if (!agent)
+            return;
 
-        Vec3 newPos = (*(Vec3*)agent->npos);
-        Vec3 newVel = (*(Vec3*)agent->vel);
+        Vec3 newPos = (*(Vec3 *)agent->npos);
+        Vec3 newVel = (*(Vec3 *)agent->vel);
 
         // Notify parent node of the reposition
         if (newPos != m_previousPosition)
@@ -77,7 +82,7 @@ namespace ige::scene
 
     const dtCrowdAgent *NavAgent::getDetourCrowdAgent() const
     {
-        return isInCrowd() ? NavManager::getInstance()->getDetourCrowdAgent(getAgentId()) : nullptr;
+        return isInCrowd() ? m_manager->getDetourCrowdAgent(getAgentId()) : nullptr;
     }
 
     //! Update Detour base parameter.
@@ -140,14 +145,17 @@ namespace ige::scene
             params.queryFilterType = (uint8_t)m_queryFilterType;
             params.obstacleAvoidanceType = (uint8_t)m_obstacleAvoidanceType;
 
-            NavManager::getInstance()->getCrowd()->updateAgentParameters(getAgentId(), &params);
+            if (m_manager)
+                m_manager->getCrowd()->updateAgentParameters(getAgentId(), &params);
         }
     }
 
     //! Return true when the agent has arrived at its target
     bool NavAgent::hasArrived() const
     {
-        const auto *agent = NavManager::getInstance()->getDetourCrowdAgent(m_agentId);
+        if (!m_manager)
+            return false;
+        const auto *agent = m_manager->getDetourCrowdAgent(m_agentId);
         if (!agent || !agent->ncorners)
             return false;
         return (agent->cornerFlags[agent->ncorners - 1] & DT_STRAIGHTPATH_END && dtVdist2D(agent->npos, &agent->cornerVerts[(agent->ncorners - 1) * 3]) <= agent->params.radius);
@@ -156,7 +164,7 @@ namespace ige::scene
     //! Return true when the agent is in crowd
     bool NavAgent::isInCrowd() const
     {
-        return m_agentId != -1;
+        return (m_manager != nullptr && m_agentId != -1);
     }
 
     //! Set target position
@@ -169,20 +177,9 @@ namespace ige::scene
             if (isInCrowd())
             {
                 dtPolyRef nearestRef;
-                auto nearestPos = NavManager::getInstance()->findNearestPoint(pos, m_queryFilterType, &nearestRef);
-                NavManager::getInstance()->getCrowd()->requestMoveTarget(getAgentId(), nearestRef, nearestPos.P());
+                auto nearestPos = m_manager->findNearestPoint(pos, m_queryFilterType, &nearestRef);
+                m_manager->getCrowd()->requestMoveTarget(getAgentId(), nearestRef, nearestPos.P());
             }
-        }
-    }
-
-    //! Set target velocity
-    void NavAgent::setTargetVelocity(const Vec3 &velocity)
-    {
-        if (m_targetVelocity != velocity)
-        {
-            m_targetVelocity = velocity;
-            if (isInCrowd())
-                NavManager::getInstance()->getCrowd()->requestMoveVelocity(getAgentId(), velocity.P());
         }
     }
 
@@ -190,7 +187,7 @@ namespace ige::scene
     void NavAgent::resetTarget()
     {
         if (isInCrowd())
-            NavManager::getInstance()->getCrowd()->resetMoveTarget(getAgentId());
+            m_manager->getCrowd()->resetMoveTarget(getAgentId());
     }
 
     //! Set update node position
@@ -282,29 +279,61 @@ namespace ige::scene
     //! Get target state
     NavAgent::TargetState NavAgent::getTargetState() const
     {
-        const auto* agent = getDetourCrowdAgent();
+        const auto *agent = getDetourCrowdAgent();
         return agent ? (NavAgent::TargetState)agent->targetState : NavAgent::TargetState::NONE;
     }
 
     //! Get agent state
     NavAgent::AgentState NavAgent::getAgentState() const
     {
-        const auto* agent = getDetourCrowdAgent();
+        const auto *agent = getDetourCrowdAgent();
         return agent ? (NavAgent::AgentState)agent->state : NavAgent::AgentState::INVALID;
     }
 
     //! Actual position
     Vec3 NavAgent::getPosition() const
     {
-        const auto* agent = getDetourCrowdAgent();
-        return agent ? *(Vec3*)(agent->npos) : getOwner()->getTransform()->getWorldPosition();
+        const auto *agent = getDetourCrowdAgent();
+        return agent ? *(Vec3 *)(agent->npos) : getOwner()->getTransform()->getWorldPosition();
     }
 
     //! Actual velocity
     Vec3 NavAgent::getVelocity() const
     {
-        const auto* agent = getDetourCrowdAgent();
-        return agent ? *(Vec3*)(agent->vel) : Vec3(0.f, 0.f, 0.f);
+        const auto *agent = getDetourCrowdAgent();
+        return agent ? *(Vec3 *)(agent->vel) : Vec3(0.f, 0.f, 0.f);
+    }
+
+    //! Serialize
+    void NavAgent::to_json(json &j) const
+    {
+        Component::to_json(j);
+        j["targetPos"] = getTargetPosition();
+        j["syncPos"] = isUpdateNodePosition();
+        j["maxAcc"] = getMaxAcceleration();
+        j["maxSpeed"] = getMaxSpeed();
+        j["radius"] = getRadius();
+        j["height"] = getHeight();
+        j["filter"] = getQueryFilterType();
+        j["obsAvoid"] = getObstacleAvoidanceType();
+        j["navQuality"] = (int)getNavigationQuality();
+        j["navPushiness"] = (int)getNavigationPushiness();
+    }
+
+    //! Deserialize
+    void NavAgent::from_json(const json &j)
+    {
+        setTargetPosition(j.value("targetPos", Vec3(0.f, 0.f, 0.f)));
+        setUpdateNodePosition(j.value("syncPos", true));
+        setMaxAcceleration(j.value("maxAcc", 5.f));
+        setMaxSpeed(j.value("maxSpeed", 3.f));
+        setRadius(j.value("radius", 0.f));
+        setHeight(j.value("height", 0.f));
+        setQueryFilterType(j.value("filter", 0));
+        setObstacleAvoidanceType(j.value("obsAvoid", 0));
+        setNavigationQuality((NavQuality)j.value("navQuality", 0));
+        setNavigationPushiness((NavPushiness)j.value("navPushiness", 0));
+        Component::from_json(j);
     }
 
 } // namespace ige::scene

@@ -3,6 +3,7 @@
 #include "components/navigation/NavAgent.h"
 #include "components/navigation/NavObstacle.h"
 #include "components/navigation/OffMeshLink.h"
+#include "components/navigation/NavAgentManager.h"
 #include "components/physic/PhysicMesh.h"
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
@@ -41,57 +42,55 @@ namespace ige::scene
         uint8_t pathFlags[MAX_POLYS] = {};
     };
 
-    NavBuildData::NavBuildData() :
-        ctx(new rcContext(true)),
-        heightField(nullptr),
-        compactHeightField(nullptr)
+    NavBuildData::NavBuildData() : ctx(new rcContext(true)),
+                                   heightField(nullptr),
+                                   compactHeightField(nullptr)
     {
     }
 
     NavBuildData::~NavBuildData()
     {
-        if(ctx)
+        if (ctx)
         {
-            delete(ctx);
+            delete (ctx);
             ctx = nullptr;
         }
 
-        if(heightField)
+        if (heightField)
         {
             rcFreeHeightField(heightField);
             heightField = nullptr;
         }
 
-        if(compactHeightField)
+        if (compactHeightField)
         {
             rcFreeCompactHeightfield(compactHeightField);
             compactHeightField = nullptr;
         }
     }
 
-    SimpleNavBuildData::SimpleNavBuildData() :
-        NavBuildData(),
-        contourSet(nullptr),
-        polyMesh(nullptr),
-        polyMeshDetail(nullptr)
+    SimpleNavBuildData::SimpleNavBuildData() : NavBuildData(),
+                                               contourSet(nullptr),
+                                               polyMesh(nullptr),
+                                               polyMeshDetail(nullptr)
     {
     }
 
     SimpleNavBuildData::~SimpleNavBuildData()
     {
-        if(contourSet)
+        if (contourSet)
         {
             rcFreeContourSet(contourSet);
             contourSet = nullptr;
         }
 
-        if(polyMesh)
+        if (polyMesh)
         {
             rcFreePolyMesh(polyMesh);
             polyMesh = nullptr;
         }
 
-        if(polyMeshDetail)
+        if (polyMeshDetail)
         {
             rcFreePolyMeshDetail(polyMeshDetail);
             polyMeshDetail = nullptr;
@@ -121,6 +120,12 @@ namespace ige::scene
 
         // Build the navigation mesh
         build();
+
+        // Create navigation agent manager for this mesh
+        if (!getOwner()->getComponent<NavAgentManager>())
+        {
+            getOwner()->addComponent<NavAgentManager>();
+        }
     }
 
     NavMesh::~NavMesh()
@@ -135,13 +140,13 @@ namespace ige::scene
 
     void NavMesh::releaseNavMesh()
     {
-        if(m_navMesh)
+        if (m_navMesh)
         {
             dtFreeNavMesh(m_navMesh);
             m_navMesh = nullptr;
         }
 
-        if(m_navMeshQuery)
+        if (m_navMeshQuery)
         {
             dtFreeNavMeshQuery(m_navMeshQuery);
             m_navMeshQuery = nullptr;
@@ -150,6 +155,12 @@ namespace ige::scene
         m_numTilesX = 0;
         m_numTilesZ = 0;
         m_boundingBox.reset(Vec3(0.f, 0.f, 0.f));
+    }
+
+    //! Enable
+    void NavMesh::onEnable()
+    {
+        build();
     }
 
     bool NavMesh::build()
@@ -274,8 +285,7 @@ namespace ige::scene
 
                 auto aabbMin = pos - Vec3(link->getRadius(), link->getRadius(), link->getRadius());
                 auto aabbMax = pos + Vec3(link->getRadius(), link->getRadius(), link->getRadius());
-                auto aabb = AABBox(aabbMin, aabbMax);
-                aabb.Transform(inverse);
+                auto aabb = AABBox(aabbMin, aabbMax).Transform(inverse);
 
                 NavGeoInfo info;
                 info.component = link;
@@ -298,26 +308,19 @@ namespace ige::scene
 
         processedNodes.insert(node);
 
-        auto inverse = node->getTransform()->getWorldMatrix().Inverse();
+        auto inverse = getOwner()->getTransform()->getWorldMatrix().Inverse();
 
-        // Get mesh from Figure components from child nodes
-        std::vector<Component *> figures;
-        getOwner()->getComponentsRecursive(figures, "FigureComponent");
-        for (size_t i = 0; i < figures.size(); ++i)
+        // Get figure component
+        auto figure = node->getComponent<FigureComponent>();
+        if (figure && figure->isEnabled())
         {
-            auto figure = static_cast<FigureComponent *>(figures[i]);
-            if (!figure || !figure->isEnabled())
-                continue;
-
             NavGeoInfo info;
-            info.component = figure;
-            info.transform = inverse * node->getTransform()->getWorldMatrix() * figure->getOwner()->getTransform()->getWorldMatrix();
-            auto aabb = figure->getOwner()->getTransform()->getAABB();
-            aabb.Transform(inverse);
-            info.boundingBox = aabb;
+            info.component = figure.get();
+            info.transform = inverse * node->getTransform()->getWorldMatrix();
+            info.boundingBox = node->getTransform()->getWorldAABB().Transform(inverse);
             geometryList.push_back(info);
         }
-
+       
         // Recursive to child nodes
         if (recursive)
         {
@@ -334,7 +337,7 @@ namespace ige::scene
 
         for (size_t i = 0; i < geometryList.size(); ++i)
         {
-            if (box.IsFullInside(geometryList[i].boundingBox))
+            //if (geometryList[i].boundingBox.IsFullInside(box))
             {
                 const auto &transform = geometryList[i].transform;
 
@@ -343,8 +346,8 @@ namespace ige::scene
                     auto *link = static_cast<OffMeshLink *>(geometryList[i].component);
                     auto start = inverse * link->getOwner()->getTransform()->getWorldPosition();
                     auto end = inverse * link->getEndPoint()->getTransform()->getWorldPosition();
-                    build->offMeshVertices.push_back(*(Vec3 *)start.P());
-                    build->offMeshVertices.push_back(*(Vec3 *)end.P());
+                    build->offMeshVertices.push_back(start);
+                    build->offMeshVertices.push_back(end);
                     build->offMeshRadius.push_back(link->getRadius());
                     build->offMeshFlags.push_back((uint16_t)link->getMask());
                     build->offMeshAreas.push_back((uint8_t)link->getAreaId());
@@ -374,6 +377,12 @@ namespace ige::scene
             {
                 auto mesh = figure->GetMesh(i);
 
+                // Ignore thrash values
+                if (mesh->numVerticies <= 0 || mesh->numIndices <= 0)
+                    continue;
+
+                auto destVertexStart = build->vertices.size();
+
                 // Read vertices from vertices buffer
                 {
                     positions.clear();
@@ -385,22 +394,18 @@ namespace ige::scene
                         PYXIE_FREE_ALIGNED(inbindSkinningMatrices);
                     if (palettebuffer)
                         PYXIE_FREE_ALIGNED(palettebuffer);
-                    build->vertices.insert(build->vertices.end(), positions.begin(), positions.end());
+                    for (auto pos : positions)
+                        build->vertices.push_back(transform * pos);
+                    positions.clear();
                 }
 
                 // Read indices from indices buffer
-                for (int k = 0; k < mesh->numIndices; k++)
+                for (int k = 0; k < mesh->numIndices; ++k)
                 {
-                    uint32_t idx;
-                    if (mesh->numVerticies > 65535)
-                        idx = ((uint32_t *)(mesh->indices))[k];
-                    else
-                        idx = ((uint16_t *)(mesh->indices))[k];
-                    build->indices.push_back(idx);
+                    int idx = (int)mesh->indices[k];
+                    build->indices.push_back(idx + destVertexStart);
                 }
             }
-
-            positions.clear();
         }
     }
 
@@ -590,9 +595,9 @@ namespace ige::scene
     }
 
     //! Write tile data.
-    void NavMesh::writeTile(MemBuffer& dest, int x, int z) const
+    void NavMesh::writeTile(MemBuffer &dest, int x, int z) const
     {
-        const auto* meshTile = m_navMesh->getTileAt(x, z, 0);
+        const auto *meshTile = m_navMesh->getTileAt(x, z, 0);
         if (!meshTile)
             return;
         dest.write<int>(x);
@@ -603,7 +608,7 @@ namespace ige::scene
     }
 
     //! Read tile data to the navigation mesh.
-    bool NavMesh::readTile(MemBuffer& source)
+    bool NavMesh::readTile(MemBuffer &source)
     {
         int x, z;
         source.read<int>(x);
@@ -615,7 +620,7 @@ namespace ige::scene
         uint32_t navDataSize;
         source.read<uint32_t>(navDataSize);
 
-        auto* navData = (uint8_t*)dtAlloc(navDataSize, DT_ALLOC_PERM);
+        auto *navData = (uint8_t *)dtAlloc(navDataSize, DT_ALLOC_PERM);
         if (!navData)
             return false;
         source.read(navData, navDataSize);
@@ -678,9 +683,8 @@ namespace ige::scene
     //! Return index of the tile at the position
     Vec2 NavMesh::getTileIndex(const Vec3 &position) const
     {
-        const float tileEdgeLength = (float)m_tileSize * m_cellSize;
-        auto localPos4 = getOwner()->getTransform()->getWorldMatrix().Inverse() * position;
-        const auto localPosition = (*(Vec3 *)localPos4.P()) - m_boundingBox.MinEdge;
+        const float tileEdgeLength = (float)m_tileSize * m_cellSize;        
+        const auto localPosition = getOwner()->getTransform()->getWorldMatrix().Inverse() * position - m_boundingBox.MinEdge;
         int xIdx = std::min(std::max(0, (int)(localPosition.X() / tileEdgeLength)), getNumTilesX() - 1);
         int zIdx = std::min(std::max(0, (int)(localPosition.Z() / tileEdgeLength)), getNumTilesZ() - 1);
         return Vec2(xIdx, zIdx);
@@ -695,8 +699,8 @@ namespace ige::scene
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
         auto inverse = transform.Inverse();
 
-        auto localStart = (*(Vec3 *)(inverse * start).P());
-        auto localEnd = (*(Vec3 *)(inverse * end).P());
+        auto localStart = inverse *start;
+        auto localEnd = inverse * end;
 
         const auto queryFilter = filter ? filter : m_queryFilter.get();
         dtPolyRef startRef;
@@ -709,7 +713,7 @@ namespace ige::scene
         maxVisited = Max(maxVisited, 0);
         std::vector<dtPolyRef> visited((uint32_t)maxVisited);
         m_navMeshQuery->moveAlongSurface(startRef, localStart.P(), localEnd.P(), queryFilter, resultPos.P(), maxVisited ? &visited[0] : nullptr, &visitedCount, maxVisited);
-        return (*(Vec3 *)(transform * resultPos).P());
+        return transform * resultPos;
     }
 
     //! Find the nearest point on the navigation mesh to a given
@@ -721,13 +725,13 @@ namespace ige::scene
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
         auto inverse = transform.Inverse();
 
-        auto localPoint = (*(Vec3 *)(inverse * point).P());
+        auto localPoint = inverse * point;
         Vec3 nearestPoint;
         dtPolyRef pointRef;
         if (!nearestRef)
             nearestRef = &pointRef;
         m_navMeshQuery->findNearestPoly(localPoint.P(), extents.P(), filter ? filter : m_queryFilter.get(), nearestRef, nearestPoint.P());
-        return *nearestRef ? (*(Vec3 *)(transform * nearestPoint).P()) : point;
+        return *nearestRef ? transform * nearestPoint : point;
     }
 
     //! Find a path between world space points. Return non-empty list of points if successful. Extents specifies how far off the navigation mesh the points can be.
@@ -753,8 +757,8 @@ namespace ige::scene
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
         auto inverse = transform.Inverse();
 
-        auto localStart = (*(Vec3 *)(inverse * start).P());
-        auto localEnd = (*(Vec3 *)(inverse * end).P());
+        auto localStart = inverse * start;
+        auto localEnd = inverse * end;
 
         const dtQueryFilter *queryFilter = filter ? filter : m_queryFilter.get();
         dtPolyRef startRef;
@@ -785,7 +789,7 @@ namespace ige::scene
         for (int i = 0; i < numPathPoints; ++i)
         {
             NavPathPoint pt;
-            pt.position = (*(Vec3 *)(transform * m_pathData->pathPoints[i]).P());
+            pt.position = transform *m_pathData->pathPoints[i];
             pt.flag = (NavPathPoint::Flag)m_pathData->pathFlags[i];
             uint32_t nearestNavAreaID = 0; // 0 is the default nav area ID
 
@@ -794,7 +798,7 @@ namespace ige::scene
             // for (size_t j = 0; j < m_areas.size(); j++)
             // {
             //     NavArea* area = areas[j].Get();
-            //     if (area && area->IsEnabledEffective())
+            //     if (area && area->isEnabled())
             //     {
             //         BoundingBox bb = area->GetWorldBoundingBox();
             //         if (bb.IsInside(pt.position_) == INSIDE)
@@ -827,7 +831,7 @@ namespace ige::scene
         m_navMeshQuery->findRandomPoint(filter ? filter : m_queryFilter.get(), random, randomRef ? randomRef : &polyRef, point.P());
 
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
-        return (*(Vec3 *)(transform * point).P());
+        return transform * point;
     }
 
     //! Return a random point on the navigation mesh within a circle. The circle radius is only a guideline and in practice the returned point may be further away.
@@ -841,7 +845,7 @@ namespace ige::scene
 
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
         auto inverse = transform.Inverse();
-        auto localCenter = (*(Vec3 *)(inverse * center).P());
+        auto localCenter = inverse * center;
         const dtQueryFilter *queryFilter = filter ? filter : m_queryFilter.get();
 
         dtPolyRef startRef;
@@ -856,7 +860,7 @@ namespace ige::scene
         auto point = localCenter;
         auto random = []() { return std::rand() / float(RAND_MAX); };
         m_navMeshQuery->findRandomPointAroundCircle(startRef, localCenter.P(), radius, queryFilter, random, randomRef, point.P());
-        return (*(Vec3 *)(transform * point).P());
+        return transform * point;
     }
 
     //! Return distance to wall from a point. Maximum search radius must be specified.
@@ -873,7 +877,7 @@ namespace ige::scene
 
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
         auto inverse = transform.Inverse();
-        auto localPoint = (*(Vec3 *)(inverse * point).P());
+        auto localPoint = inverse * point;
         const dtQueryFilter *queryFilter = filter ? filter : m_queryFilter.get();
 
         dtPolyRef startRef;
@@ -902,8 +906,8 @@ namespace ige::scene
 
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
         auto inverse = transform.Inverse();
-        auto localStart = (*(Vec3 *)(inverse * start).P());
-        auto localEnd = (*(Vec3 *)(inverse * end).P());
+        auto localStart = inverse * start;
+        auto localEnd = inverse * end;
         const dtQueryFilter *queryFilter = filter ? filter : m_queryFilter.get();
 
         dtPolyRef startRef;
@@ -925,7 +929,7 @@ namespace ige::scene
     }
 
     //! Set navigation data attribute.
-    void NavMesh::setNavDataAttr(MemBuffer& buffer)
+    void NavMesh::setNavDataAttr(MemBuffer &buffer)
     {
         releaseNavMesh();
 
@@ -973,13 +977,13 @@ namespace ige::scene
             ret.write<int>(m_numTilesX);
             ret.write<int>(m_numTilesZ);
 
-            const dtNavMeshParams* params = m_navMesh->getParams();
+            const dtNavMeshParams *params = m_navMesh->getParams();
             ret.write<float>(params->tileWidth);
             ret.write<float>(params->tileHeight);
             ret.write<int>(params->maxTiles);
             ret.write<int>(params->maxPolys);
 
-            const dtNavMesh* navMesh = m_navMesh;
+            const dtNavMesh *navMesh = m_navMesh;
             for (int z = 0; z < m_numTilesZ; ++z)
                 for (int x = 0; x < m_numTilesX; ++x)
                     writeTile(ret, x, z);
@@ -999,7 +1003,6 @@ namespace ige::scene
             return m_queryFilter->getAreaCost((int)areaID);
         return 1.0f;
     }
-
 
     bool NavMesh::initializeQuery()
     {
@@ -1026,9 +1029,53 @@ namespace ige::scene
     AABBox NavMesh::getWorldBoundingBox() const
     {
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
-        auto worldAabb = m_boundingBox;
-        worldAabb.Transform(transform);
+        auto worldAabb = m_boundingBox.Transform(transform);
         return worldAabb;
+    }
+
+    //! Serialize
+    void NavMesh::to_json(json &j) const
+    {
+        Component::to_json(j);
+        j["tileSize"] = getTileSize();
+        j["cellSize"] = getCellSize();
+        j["cellHeight"] = getCellHeight();
+        j["agentHeight"] = getAgentHeight();
+        j["agentRadius"] = getAgentRadius();
+        j["agentMaxClimb"] = getAgentMaxClimb();
+        j["agentMaxSlope"] = getAgentMaxSlope();
+        j["regionMinSize"] = getRegionMinSize();
+        j["regionMergeSize"] = getRegionMergeSize();
+        j["edgeMaxLength"] = getEdgeMaxLength();
+        j["edgeMaxError"] = getEdgeMaxError();
+        j["sampleDist"] = getDetailSampleDistance();
+        j["sampleError"] = getDetailSampleMaxError();
+        j["padding"] = getPadding();
+        j["partType"] = (int)getPartitionType();
+    }
+
+    //! Deserialize
+    void NavMesh::from_json(const json &j)
+    {
+        setTileSize(j.value("tileSize", DEFAULT_TILE_SIZE));
+        setCellSize(j.value("cellSize", DEFAULT_CELL_SIZE));
+        setCellHeight(j.value("cellHeight", DEFAULT_CELL_HEIGHT));
+        setAgentHeight(j.value("agentHeight", DEFAULT_AGENT_HEIGHT));
+        setAgentRadius(j.value("agentRadius", DEFAULT_AGENT_RADIUS));
+        setAgentMaxClimb(j.value("agentMaxClimb", DEFAULT_AGENT_MAX_CLIMB));
+        setAgentMaxSlope(j.value("agentMaxSlope", DEFAULT_AGENT_MAX_SLOPE));
+        setRegionMinSize(j.value("regionMinSize", DEFAULT_REGION_MIN_SIZE));
+        setRegionMergeSize(j.value("regionMergeSize", DEFAULT_REGION_MERGE_SIZE));
+        setEdgeMaxLength(j.value("edgeMaxLength", DEFAULT_EDGE_MAX_LENGTH));
+        setEdgeMaxError(j.value("edgeMaxError", DEFAULT_EDGE_MAX_ERROR));
+        setDetailSampleDistance(j.value("sampleDist", DEFAULT_DETAIL_SAMPLE_DISTANCE));
+        setDetailSampleMaxError(j.value("sampleError", DEFAULT_DETAIL_SAMPLE_MAX_ERROR));
+        setPadding(j.value("padding", Vec3(0.f, 0.f, 0.f)));
+        setPartitionType((EPartitionType)j.value("partType", (int)EPartitionType::WATERSHED));
+        Component::from_json(j);
+
+        // Build after load
+        build();
     }
 
 } // namespace ige::scene

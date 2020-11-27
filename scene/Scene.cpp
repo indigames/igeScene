@@ -67,7 +67,7 @@ namespace ige::scene
         m_shadowTexture->WaitBuild();
         m_showcase->SetShadowBuffer(m_shadowTexture);
 
-        m_shadowEdgeMask = ResourceCreator::Instance().NewEditableFigure("shadowEdgeMask");
+        m_shadowEdgeMask = ResourceCreator::Instance().NewEditableFigure("shadowEdgeMask", true);
 
         ShaderDescriptor desc;
         desc.DicardViewProj(true);
@@ -119,7 +119,7 @@ namespace ige::scene
         // Add editor debug
         if (SceneManager::getInstance()->isEditor())
         {
-            camObj->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
+            camObj->addComponent<SpriteComponent>("sprite/camera", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
             directionalLight->addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
         }
 

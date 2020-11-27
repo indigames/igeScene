@@ -29,6 +29,13 @@
 #include "components/light/DirectionalLight.h"
 #include "components/light/PointLight.h"
 #include "components/particle/Particle.h"
+#include "components/navigation/DynamicNavMesh.h"
+#include "components/navigation/NavAgent.h"
+#include "components/navigation/NavAgentManager.h"
+#include "components/navigation/Navigable.h"
+#include "components/navigation/NavMesh.h"
+#include "components/navigation/NavObstacle.h"
+#include "components/navigation/OffMeshLink.h"
 
 namespace ige::scene
 {
@@ -346,6 +353,12 @@ namespace ige::scene
         return m_isSelected;
     }
 
+    //! Get scene root
+    SceneObject* SceneObject::getRoot()
+    {
+        return m_scene ? m_scene->getRoot().get() : nullptr;
+    }
+
     //! Serialize
     void SceneObject::to_json(json &j)
     {
@@ -452,6 +465,20 @@ namespace ige::scene
                 comp = addComponent<PointLight>();
             else if (key == "Particle")
                 comp = addComponent<Particle>();
+            else if (key == "DynamicNavMesh")
+                comp = addComponent<DynamicNavMesh>();
+            else if (key == "NavAgent")
+                comp = addComponent<NavAgent>();
+            else if (key == "NavAgentManager")
+                comp = addComponent<NavAgentManager>();
+            else if (key == "Navigable")
+                comp = addComponent<Navigable>();
+            else if (key == "NavMesh")
+                comp = addComponent<NavMesh>();
+            else if (key == "NavObstacle")
+                comp = addComponent<NavObstacle>();
+            else if (key == "OffMeshLink")
+                comp = addComponent<OffMeshLink>();
             if (comp)
                 val.get_to(*comp);
         }
@@ -462,7 +489,7 @@ namespace ige::scene
             if (auto camera = getComponent<CameraComponent>())
             {
                 if (!getComponent<FigureComponent>())
-                    addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
+                    addComponent<SpriteComponent>("sprite/camera", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
             }
 
             if (auto canvas = getComponent<Canvas>())

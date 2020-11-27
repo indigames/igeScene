@@ -114,8 +114,11 @@ namespace ige::scene
         //! Update
         virtual void onUpdate(float dt) override;
 
-        //! Aabb min
+        //! Aabb
         const AABBox &getAABB() const { return m_aabb; }
+
+        //! AABB in world space
+        AABBox getWorldAABB() const;
 
     protected:
         //! Serialize

@@ -2,6 +2,12 @@
 
 namespace ige::scene
 {
+    //! Initialize static members
+    Event<NavObstacle*> NavObstacle::m_onCreatedEvent;
+    Event<NavObstacle*> NavObstacle::m_onDestroyedEvent;
+    Event<NavObstacle*> NavObstacle::m_onActivatedEvent;
+    Event<NavObstacle*> NavObstacle::m_onDeactivatedEvent;
+
     //! Constructor
     NavObstacle::NavObstacle(SceneObject &owner)
         : Component(owner)
@@ -53,5 +59,21 @@ namespace ige::scene
 
         if(m_bIsActivated)
             getActivatedEvent().invoke(this);
+    }
+
+    //! Serialize
+    void NavObstacle::to_json(json &j) const
+    {
+        Component::to_json(j);
+        j["radius"] = getRadius();
+        j["height"] = getHeight();
+    }
+
+    //! Deserialize
+    void NavObstacle::from_json(const json &j)
+    {
+        setRadius(j.value("radius", 1.f));
+        setHeight(j.value("height", 1.f));
+        Component::from_json(j);
     }
 } // namespace ige::scene

@@ -152,6 +152,9 @@ namespace ige::scene
         //! Get scene
         Scene* getScene() { return m_scene; }
 
+        //! Get scene root
+        SceneObject* getRoot();
+
     protected:
         //! Helper to generate UUID
         std::string generateUUID(unsigned int len = 16);

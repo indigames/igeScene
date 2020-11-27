@@ -26,7 +26,7 @@ namespace ige::scene
 
         //! Radius
         float getRadius() const { return m_radius; }
-        void setRecursive(float radius) { m_radius = radius; }
+        void setRadius(float radius) { m_radius = radius; }
 
         //! Bidirectional
         bool isBidirectional() const { return m_bIsBidirectional; }
@@ -39,6 +39,13 @@ namespace ige::scene
         //! Area ID
         uint32_t getAreaId() const { return m_areaId; }
         void setAreaId(uint32_t id) { m_areaId = id; }
+
+    protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
 
     protected:
         //! Endpoint object

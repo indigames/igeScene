@@ -12,6 +12,8 @@ class dtCrowdAgent;
 
 namespace ige::scene
 {
+    class NavAgentManager;
+
     //! NavAgent
     class NavAgent : public Component
     {
@@ -74,6 +76,10 @@ namespace ige::scene
         //! Enable/disable
         void setEnabled(bool enable = true) override;
 
+        //! Cache NavAgentManager
+        NavAgentManager* getManager() const { return m_manager; }
+        void setManager(NavAgentManager* manager) { m_manager = manager; }
+
         //! Agent Id
         int getAgentId() const { return m_agentId; }
         void setAgentId(int id) { m_agentId = id; }
@@ -84,10 +90,6 @@ namespace ige::scene
 
         //! Actual position
         Vec3 getPosition() const;
-
-        //! Target velocity
-        const Vec3 &getTargetVelocity() const { return m_targetVelocity; }
-        void setTargetVelocity(const Vec3 &vel);
 
         //! Actual velocity
         Vec3 getVelocity() const;
@@ -172,6 +174,12 @@ namespace ige::scene
         //! Update Detour parameters.
         void updateParameters();
 
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
     protected:
         //! Agent Id
         int m_agentId = -1;
@@ -179,17 +187,14 @@ namespace ige::scene
         //! Target position
         Vec3 m_targetPosition = {0.f, 0.f, 0.f};
 
-        //! Target velocity
-        Vec3 m_targetVelocity = {0.f, 0.f, 0.f};
-
         //! Update position by Detour crowd manager
         bool m_bUpdateNodePosition = true;
 
         //! Agent's max acceleration
-        float m_maxAccel = 0.f;
+        float m_maxAccel = 5.f;
 
         //! Agent's max velocity
-        float m_maxSpeed = 0.f;
+        float m_maxSpeed = 3.f;
 
         //! Agent's radius, if 0 the navigation mesh's setting will be used.
         float m_radius = 0.f;
@@ -226,6 +231,9 @@ namespace ige::scene
 
         //! Cache activated status
         bool m_bIsActivated = false;
+
+        //! Cache NavAgentManager
+        NavAgentManager* m_manager = nullptr;
 
         //! On created event
         static Event<NavAgent *> m_onCreatedEvent;
