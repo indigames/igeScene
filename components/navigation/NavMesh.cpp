@@ -316,7 +316,7 @@ namespace ige::scene
 
         // Get figure component
         auto figure = node->getComponent<FigureComponent>();
-        if (figure && figure->isEnabled())
+        if (figure && figure->isEnabled() && !figure->isSkipSerialize())
         {
             NavGeoInfo info;
             info.component = figure.get();

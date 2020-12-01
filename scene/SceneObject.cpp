@@ -489,7 +489,7 @@ namespace ige::scene
             if (auto camera = getComponent<CameraComponent>())
             {
                 if (!getComponent<FigureComponent>())
-                    addComponent<SpriteComponent>("sprite/camera", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                    addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
             }
 
             if (auto canvas = getComponent<Canvas>())
