@@ -1,7 +1,4 @@
 #pragma once
-
-#include <limits>
-
 #include "components/Component.h"
 #include "event/Event.h"
 
@@ -78,7 +75,7 @@ namespace ige::scene
 
         //! Cache NavAgentManager
         NavAgentManager* getManager() const { return m_manager; }
-        void setManager(NavAgentManager* manager) { m_manager = manager; }
+        void setManager(NavAgentManager* manager) { m_manager = manager; updateParameters(); }
 
         //! Agent Id
         int getAgentId() const { return m_agentId; }

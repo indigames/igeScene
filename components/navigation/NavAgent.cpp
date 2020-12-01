@@ -36,8 +36,8 @@ namespace ige::scene
         if (!agent)
             return;
 
-        Vec3 newPos = (*(Vec3 *)agent->npos);
-        Vec3 newVel = (*(Vec3 *)agent->vel);
+        auto newPos = Vec3(agent->npos[0], agent->npos[1], agent->npos[2]);
+        auto newVel = Vec3(agent->vel[0], agent->vel[1], agent->vel[2]);
 
         // Notify parent node of the reposition
         if (newPos != m_previousPosition)
@@ -71,6 +71,22 @@ namespace ige::scene
         {
             getActivatedEvent().invoke(this);
             m_bIsActivated = true;
+            m_previousPosition = getOwner()->getTransform()->getWorldPosition();
+
+            if (isInCrowd())
+            {
+                auto* agent = const_cast<dtCrowdAgent*>(getDetourCrowdAgent());
+                if (!agent)
+                    return;
+
+                auto& agentPos = reinterpret_cast<Vec3&>(agent->npos);
+                if (agentPos != m_previousPosition)
+                    agentPos = m_previousPosition;
+
+                dtPolyRef nearestRef;
+                auto nearestPos = m_manager->findNearestPoint(m_targetPosition, m_queryFilterType, &nearestRef);
+                m_manager->getCrowd()->requestMoveTarget(getAgentId(), nearestRef, nearestPos.P());
+            }
         }
 
         if (!isEnabled() && m_bIsActivated)
@@ -176,6 +192,10 @@ namespace ige::scene
 
             if (isInCrowd())
             {
+                auto* agent = const_cast<dtCrowdAgent*>(getDetourCrowdAgent());
+                if (agent && agent->state == DT_CROWDAGENT_STATE_INVALID)
+                    agent->state = DT_CROWDAGENT_STATE_WALKING;
+
                 dtPolyRef nearestRef;
                 auto nearestPos = m_manager->findNearestPoint(pos, m_queryFilterType, &nearestRef);
                 m_manager->getCrowd()->requestMoveTarget(getAgentId(), nearestRef, nearestPos.P());

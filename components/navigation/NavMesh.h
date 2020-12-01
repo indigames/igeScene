@@ -15,8 +15,6 @@ class dtNavMesh;
 class dtNavMeshQuery;
 class dtQueryFilter;
 
-using dtPolyRef = uint32_t;
-
 namespace ige::scene
 {
     /// FindPathData: Data for path finding
@@ -336,6 +334,9 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j) override;
 
+        //! Update
+        virtual void onUpdate(float dt) override;
+
     protected:
         //! Detour navigation mesh
         dtNavMesh *m_navMesh = nullptr;
@@ -386,7 +387,7 @@ namespace ige::scene
         float m_detailSampleMaxError;
 
         //! Bounding box padding
-        Vec3 m_padding = {0.f, 10.f, 0.f};
+        Vec3 m_padding = {1.f, 1.f, 1.f};
 
         //! Tile size
         int m_tileSize;

@@ -126,6 +126,9 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j) override;
 
+        //! Update
+        virtual void onUpdate(float dt) override;
+
     protected:
         //! Detour tile cache instance that works with the nav mesh.
         dtTileCache *m_tileCache = nullptr;

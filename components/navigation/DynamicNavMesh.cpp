@@ -493,9 +493,10 @@ namespace ige::scene
         rcMarkWalkableTriangles(build.ctx, cfg.walkableSlopeAngle, &(build.vertices[0][0]), build.vertices.size(), &(build.indices[0]), numTriangles, triAreas);
         rcRasterizeTriangles(build.ctx, &(build.vertices[0][0]), build.vertices.size(), &(build.indices[0]), triAreas, numTriangles, *build.heightField, cfg.walkableClimb);
         rcFilterLowHangingWalkableObstacles(build.ctx, cfg.walkableClimb, *build.heightField);
+        delete[] triAreas;
 
-        rcFilterWalkableLowHeightSpans(build.ctx, cfg.walkableHeight, *build.heightField);
         rcFilterLedgeSpans(build.ctx, cfg.walkableHeight, cfg.walkableClimb, *build.heightField);
+        rcFilterWalkableLowHeightSpans(build.ctx, cfg.walkableHeight, *build.heightField);
 
         build.compactHeightField = rcAllocCompactHeightfield();
         if (!build.compactHeightField)
@@ -732,6 +733,13 @@ namespace ige::scene
             }
             obstacle->setObstacleId(0);
         }
+    }
+
+    //! Update
+    void DynamicNavMesh::onUpdate(float dt)
+    {
+        if (m_tileCache && m_navMesh && isEnabled())
+            m_tileCache->update(dt, m_navMesh);
     }
 
     //! Serialize

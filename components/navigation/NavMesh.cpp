@@ -9,7 +9,7 @@
 #include "components/FigureComponent.h"
 #include "scene/SceneObject.h"
 
-#define DEFAULT_TILE_SIZE 128
+#define DEFAULT_TILE_SIZE 64
 #define DEFAULT_CELL_SIZE 0.3f
 #define DEFAULT_CELL_HEIGHT 0.2f
 #define DEFAULT_AGENT_HEIGHT 2.0f
@@ -23,6 +23,11 @@
 #define DEFAULT_DETAIL_SAMPLE_DISTANCE 6.0f
 #define DEFAULT_DETAIL_SAMPLE_MAX_ERROR 1.0f
 #define MAX_POLYS 2048
+
+#ifndef INFINITY
+    #include <limits>
+    #define INFINITY std::numeric_limits<float>::max()
+#endif
 
 namespace ige::scene
 {
@@ -154,7 +159,7 @@ namespace ige::scene
 
         m_numTilesX = 0;
         m_numTilesZ = 0;
-        m_boundingBox.reset(Vec3(0.f, 0.f, 0.f));
+        m_boundingBox.reset({ Vec3(INFINITY, INFINITY, INFINITY), Vec3(-INFINITY, -INFINITY, -INFINITY) });
     }
 
     //! Enable
@@ -280,7 +285,6 @@ namespace ige::scene
             auto link = static_cast<OffMeshLink *>(offMeshLinks[i]);
             if (link->isEnabled() && link->getEndPoint())
             {
-                const auto &transform = link->getOwner()->getTransform()->getWorldMatrix();
                 const auto &pos = link->getOwner()->getTransform()->getWorldPosition();
 
                 auto aabbMin = pos - Vec3(link->getRadius(), link->getRadius(), link->getRadius());
@@ -337,7 +341,7 @@ namespace ige::scene
 
         for (size_t i = 0; i < geometryList.size(); ++i)
         {
-            //if (geometryList[i].boundingBox.IsFullInside(box))
+            if (box.IsPartiallyInside(geometryList[i].boundingBox))
             {
                 const auto &transform = geometryList[i].transform;
 
@@ -381,30 +385,30 @@ namespace ige::scene
                 if (mesh->numVerticies <= 0 || mesh->numIndices <= 0)
                     continue;
 
-                auto destVertexStart = build->vertices.size();
-
                 // Read vertices from vertices buffer
+                positions.clear();
+                float *palettebuffer = nullptr;
+                float *inbindSkinningMatrices = nullptr;
+                figure->AllocTransformBuffer(space, palettebuffer, inbindSkinningMatrices);
+                figure->ReadPositions(i, 0, mesh->numVerticies, space, palettebuffer, inbindSkinningMatrices, &positions);
+
+                auto destVertexStart = build->vertices.size();
+                if (positions.size() > 0)
                 {
-                    positions.clear();
-                    float *palettebuffer = nullptr;
-                    float *inbindSkinningMatrices = nullptr;
-                    figure->AllocTransformBuffer(space, palettebuffer, inbindSkinningMatrices);
-                    figure->ReadPositions(i, 0, mesh->numVerticies, space, palettebuffer, inbindSkinningMatrices, &positions);
-                    if (inbindSkinningMatrices)
-                        PYXIE_FREE_ALIGNED(inbindSkinningMatrices);
-                    if (palettebuffer)
-                        PYXIE_FREE_ALIGNED(palettebuffer);
+                    // Read vertices
                     for (auto pos : positions)
                         build->vertices.push_back(transform * pos);
-                    positions.clear();
                 }
+
+                positions.clear();
+                if (inbindSkinningMatrices)
+                    PYXIE_FREE_ALIGNED(inbindSkinningMatrices);
+                if (palettebuffer)
+                    PYXIE_FREE_ALIGNED(palettebuffer);
 
                 // Read indices from indices buffer
                 for (int k = 0; k < mesh->numIndices; ++k)
-                {
-                    int idx = (int)mesh->indices[k];
-                    build->indices.push_back(idx + destVertexStart);
-                }
+                    build->indices.push_back(mesh->indices[k] + destVertexStart);
             }
         }
     }
@@ -684,7 +688,7 @@ namespace ige::scene
     Vec2 NavMesh::getTileIndex(const Vec3 &position) const
     {
         const float tileEdgeLength = (float)m_tileSize * m_cellSize;        
-        const auto localPosition = getOwner()->getTransform()->getWorldMatrix().Inverse() * position - m_boundingBox.MinEdge;
+        const auto localPosition = (getOwner()->getTransform()->getWorldMatrix().Inverse() * position) - m_boundingBox.MinEdge;
         int xIdx = std::min(std::max(0, (int)(localPosition.X() / tileEdgeLength)), getNumTilesX() - 1);
         int zIdx = std::min(std::max(0, (int)(localPosition.Z() / tileEdgeLength)), getNumTilesZ() - 1);
         return Vec2(xIdx, zIdx);
@@ -727,9 +731,11 @@ namespace ige::scene
 
         auto localPoint = inverse * point;
         Vec3 nearestPoint;
+
         dtPolyRef pointRef;
         if (!nearestRef)
             nearestRef = &pointRef;
+
         m_navMeshQuery->findNearestPoly(localPoint.P(), extents.P(), filter ? filter : m_queryFilter.get(), nearestRef, nearestPoint.P());
         return *nearestRef ? transform * nearestPoint : point;
     }
@@ -1032,6 +1038,13 @@ namespace ige::scene
         auto worldAabb = m_boundingBox.Transform(transform);
         return worldAabb;
     }
+
+    //! Update
+    void NavMesh::onUpdate(float dt)
+    {
+
+    }
+
 
     //! Serialize
     void NavMesh::to_json(json &j) const
