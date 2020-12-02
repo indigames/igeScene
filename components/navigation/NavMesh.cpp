@@ -1,5 +1,6 @@
 #include "components/navigation/NavMesh.h"
 #include "components/navigation/Navigable.h"
+#include "components/navigation/NavArea.h"
 #include "components/navigation/NavAgent.h"
 #include "components/navigation/NavObstacle.h"
 #include "components/navigation/OffMeshLink.h"
@@ -125,12 +126,6 @@ namespace ige::scene
 
         // Build the navigation mesh
         build();
-
-        // Create navigation agent manager for this mesh
-        if (!getOwner()->getComponent<NavAgentManager>())
-        {
-            getOwner()->addComponent<NavAgentManager>();
-        }
     }
 
     NavMesh::~NavMesh()
@@ -145,6 +140,10 @@ namespace ige::scene
 
     void NavMesh::releaseNavMesh()
     {
+        auto navAgentManager = getOwner()->getComponent<NavAgentManager>();
+        if (navAgentManager)
+            navAgentManager->deactivateAllAgents();
+
         if (m_navMesh)
         {
             dtFreeNavMesh(m_navMesh);
@@ -170,6 +169,11 @@ namespace ige::scene
 
     bool NavMesh::build()
     {
+        // Create navigation agent manager for this mesh
+        auto navAgentManager = getOwner()->getComponent<NavAgentManager>();
+        if (!navAgentManager)
+            navAgentManager = getOwner()->addComponent<NavAgentManager>();
+
         // Release old data
         releaseNavMesh();
 
@@ -226,6 +230,7 @@ namespace ige::scene
             // Build tiles
             buildTiles(geometryList, Vec2(0.f, 0.f), Vec2(getNumTilesX() - 1.f, getNumTilesZ() - 1.f));
         }
+        navAgentManager->reactivateAllAgents();
         return true;
     }
 
@@ -297,6 +302,23 @@ namespace ige::scene
                 geometryList.push_back(info);
             }
         }
+
+        // Get nav area volumes
+        std::vector<Component *> navAreas;
+        getOwner()->getComponentsRecursive(navAreas, "NavArea");
+        m_areas.clear();
+        for (auto areaComp : navAreas)
+        {
+            auto area = static_cast<NavArea *>(areaComp);
+            if (area && area->isEnabled())
+            {
+                NavGeoInfo info;
+                info.component = area;
+                info.boundingBox = area->getWorldBoundingBox();
+                geometryList.push_back(info);
+                m_areas.push_back(area);
+            }
+        }
     }
 
     //! Visit nodes and collect navigable geometry
@@ -324,7 +346,7 @@ namespace ige::scene
             info.boundingBox = node->getTransform()->getWorldAABB().Transform(inverse);
             geometryList.push_back(info);
         }
-       
+
         // Recursive to child nodes
         if (recursive)
         {
@@ -696,7 +718,7 @@ namespace ige::scene
     //! Return index of the tile at the position
     Vec2 NavMesh::getTileIndex(const Vec3 &position) const
     {
-        const float tileEdgeLength = (float)m_tileSize * m_cellSize;        
+        const float tileEdgeLength = (float)m_tileSize * m_cellSize;
         const auto localPosition = (getOwner()->getTransform()->getWorldMatrix().Inverse() * position) - m_boundingBox.MinEdge;
         int xIdx = std::min(std::max(0, (int)floor(localPosition.X() / tileEdgeLength)), getNumTilesX() - 1);
         int zIdx = std::min(std::max(0, (int)floor(localPosition.Z() / tileEdgeLength)), getNumTilesZ() - 1);
@@ -809,25 +831,24 @@ namespace ige::scene
             uint32_t nearestNavAreaID = 0; // 0 is the default nav area ID
 
             // Walk through all NavAreas and find nearest
-            // float nearestDistance = std::numeric_limits<float>::max();
-            // for (size_t j = 0; j < m_areas.size(); j++)
-            // {
-            //     NavArea* area = areas[j].Get();
-            //     if (area && area->isEnabled())
-            //     {
-            //         BoundingBox bb = area->GetWorldBoundingBox();
-            //         if (bb.IsInside(pt.position_) == INSIDE)
-            //         {
-            //             Vector3 areaWorldCenter = area->GetNode()->GetWorldPosition();
-            //             float distance = (areaWorldCenter - pt.position_).LengthSquared();
-            //             if (distance < nearestDistance)
-            //             {
-            //                 nearestDistance = distance;
-            //                 nearestNavAreaID = area->GetAreaID();
-            //             }
-            //         }
-            //     }
-            // }
+            float nearestDistance = std::numeric_limits<float>::max();
+            for (auto area: m_areas)
+            {
+                if (area && area->isEnabled())
+                {
+                    auto aabb = area->getWorldBoundingBox();
+                    if (aabb.isPointInside(pt.position))
+                    {
+                        auto areaWorldCenter = area->getOwner()->getTransform()->getWorldPosition();
+                        float distance = Vec3::LengthSqr(areaWorldCenter - pt.position);
+                        if (distance < nearestDistance)
+                        {
+                            nearestDistance = distance;
+                            nearestNavAreaID = area->getAreaId();
+                        }
+                    }
+                }
+            }
             pt.areaID = (uint8_t)nearestNavAreaID;
             dest.push_back(pt);
         }

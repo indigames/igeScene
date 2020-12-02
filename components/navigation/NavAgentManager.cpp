@@ -111,6 +111,35 @@ namespace ige::scene
         return m_crowd ? m_crowd->getFilter(queryFilterType) : nullptr;
     }
 
+    //! Remove all agents
+    void NavAgentManager::deactivateAllAgents()
+    {
+        for (auto& agent : m_agents)
+        {
+            onDeactivated(agent);
+        }
+
+        // Deallocate crowd
+        if (m_crowd)
+        {
+            dtFreeCrowd(m_crowd);
+            m_crowd = nullptr;
+        }
+        m_navMesh = nullptr;
+        m_bInitialized = false;
+    }
+
+    //! Reactivate all agents
+    void NavAgentManager::reactivateAllAgents()
+    {
+        for (auto& agent : m_agents)
+        {
+            if(agent && agent->isEnabled())
+                onActivated(agent);
+        }
+    }
+
+
     //! Initialize crowd
     bool NavAgentManager::initCrowd()
     {

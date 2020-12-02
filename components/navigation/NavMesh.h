@@ -17,6 +17,8 @@ class dtQueryFilter;
 
 namespace ige::scene
 {
+    class NavArea;
+
     /// FindPathData: Data for path finding
     struct FindPathData;
 
@@ -403,5 +405,8 @@ namespace ige::scene
 
         //! Partitioning type
         EPartitionType m_partitionType;
+
+        //! NavAreas
+        std::vector<NavArea*> m_areas;
     };
 } // namespace ige::scene

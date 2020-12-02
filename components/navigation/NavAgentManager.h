@@ -102,6 +102,12 @@ namespace ige::scene
         //! Get the internal detour crowd component.
         dtCrowd *getCrowd() const { return m_crowd; }
 
+        //! Deactivate all agents
+        void deactivateAllAgents();
+
+        //! Reactivate all agents
+        void reactivateAllAgents();
+
     protected:
         //! NavAgent created/destroyed events
         void onCreated(NavAgent *agent);

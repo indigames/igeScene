@@ -1,6 +1,7 @@
 #include "components/navigation/DynamicNavMesh.h"
 #include "components/navigation/NavObstacle.h"
 #include "components/navigation/OffMeshLink.h"
+#include "components/navigation/NavAgentManager.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
 #include "external/lz4/lz4.h"
@@ -186,7 +187,7 @@ namespace ige::scene
     DynamicNavMesh::DynamicNavMesh(SceneObject &owner)
         : NavMesh(owner)
     {
-        m_allocator = std::make_unique<LinearAllocator>(32000); //32kb to start
+        m_allocator = std::make_unique<LinearAllocator>(32000); //32kb
         m_compressor = std::make_unique<TileCompressor>();
         m_meshProcessor = std::make_unique<MeshProcess>(this);
     }
@@ -203,6 +204,12 @@ namespace ige::scene
     //! Build/rebuild the entire navigation mesh
     bool DynamicNavMesh::build()
     {
+        // Create navigation agent manager for this mesh
+        auto navAgentManager = getOwner()->getComponent<NavAgentManager>();
+        if (!navAgentManager)
+            navAgentManager = getOwner()->addComponent<NavAgentManager>();
+        navAgentManager->deactivateAllAgents();
+
         // Release old data
         releaseNavMesh();
 
@@ -312,16 +319,19 @@ namespace ige::scene
             // not doing so will cause dependent components to crash, like CrowdManager
             m_tileCache->update(0, m_navMesh);
 
-            // Scan for obstacles to insert into us
-            //PODVector<Node*> obstacles;
-            //GetScene()->GetChildrenWithComponent<Obstacle>(obstacles, true);
-            //for (unsigned i = 0; i < obstacles.Size(); ++i)
-            //{
-            //    auto* obs = obstacles[i]->GetComponent<Obstacle>();
-            //    if (obs && obs->IsEnabledEffective())
-            //        AddObstacle(obs);
-            //}
+            // Scan for obstacles
+            std::vector<Component*> obstacles;
+            getOwner()->getComponentsRecursive(obstacles, "NavObstacle");
+            for (auto comp : obstacles)
+            {
+                auto obstacle = static_cast<NavObstacle*>(comp);
+                if (obstacle && obstacle->isEnabled())
+                {
+                    onActivated(obstacle);
+                }
+            }
 
+            navAgentManager->reactivateAllAgents();
             return true;
         }
     }
@@ -616,8 +626,9 @@ namespace ige::scene
     std::vector<OffMeshLink *> DynamicNavMesh::collectOffMeshLinks(const AABBox &bounds)
     {
         std::vector<Component *> offMeshLinkComps;
-        std::vector<OffMeshLink *> offMeshLinks;
         getOwner()->getComponentsRecursive(offMeshLinkComps, "OffMeshLink");
+
+        std::vector<OffMeshLink*> offMeshLinks;
         for (auto comp : offMeshLinkComps)
         {
             auto link = static_cast<OffMeshLink *>(comp);
