@@ -80,7 +80,7 @@ namespace ige::scene
         AABBox worldBoundingBox;
 
         //! Vertices from geometries
-        std::vector<Vec3> vertices;
+        std::vector<std::array<float, 3>> vertices;
 
         //! Triangle indices from geometries
         std::vector<int> indices;

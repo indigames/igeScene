@@ -393,14 +393,13 @@ namespace ige::scene
                 figure->ReadPositions(i, 0, mesh->numVerticies, space, palettebuffer, inbindSkinningMatrices, &positions);
 
                 auto destVertexStart = build->vertices.size();
-                if (positions.size() > 0)
+                for (auto pos : positions)
                 {
-                    // Read vertices
-                    for (auto pos : positions)
-                        build->vertices.push_back(transform * pos);
+                    auto relPos = transform * pos;
+                    build->vertices.push_back({ relPos[0], relPos[1], relPos[2]});
                 }
-
                 positions.clear();
+
                 if (inbindSkinningMatrices)
                     PYXIE_FREE_ALIGNED(inbindSkinningMatrices);
                 if (palettebuffer)
@@ -408,7 +407,12 @@ namespace ige::scene
 
                 // Read indices from indices buffer
                 for (int k = 0; k < mesh->numIndices; ++k)
-                    build->indices.push_back(mesh->indices[k] + destVertexStart);
+                {
+                    if (mesh->numVerticies > 65535)
+                        build->indices.push_back(((uint32_t*)mesh->indices)[k] + destVertexStart);
+                    else
+                        build->indices.push_back(mesh->indices[k] + destVertexStart);
+                }
             }
         }
     }
@@ -464,8 +468,8 @@ namespace ige::scene
         auto triAreas = new uint8_t[numTriangles];
         memset(triAreas, 0, numTriangles);
 
-        rcMarkWalkableTriangles(build.ctx, cfg.walkableSlopeAngle, build.vertices[0].P(), build.vertices.size(), &build.indices[0], numTriangles, triAreas);
-        rcRasterizeTriangles(build.ctx, build.vertices[0].P(), build.vertices.size(), &build.indices[0], triAreas, numTriangles, *build.heightField, cfg.walkableClimb);
+        rcMarkWalkableTriangles(build.ctx, cfg.walkableSlopeAngle, &(build.vertices[0][0]), build.vertices.size(), &build.indices[0], numTriangles, triAreas);
+        rcRasterizeTriangles(build.ctx, &(build.vertices[0][0]), build.vertices.size(), &build.indices[0], triAreas, numTriangles, *build.heightField, cfg.walkableClimb);
         rcFilterLowHangingWalkableObstacles(build.ctx, cfg.walkableClimb, *build.heightField);
 
         rcFilterWalkableLowHeightSpans(build.ctx, cfg.walkableHeight, *build.heightField);
@@ -679,9 +683,14 @@ namespace ige::scene
     AABBox NavMesh::getTileBoundingBox(const Vec2 &tile) const
     {
         const float tileEdgeLength = (float)m_tileSize * m_cellSize;
-        auto aabbMin = Vec3(m_boundingBox.MinEdge.X() + tileEdgeLength * (float)tile.X(), m_boundingBox.MinEdge.Y(), m_boundingBox.MinEdge.Z() + tileEdgeLength * (float)tile.Y());
-        auto aabbMax = Vec3(m_boundingBox.MaxEdge.X() + tileEdgeLength * (float)(tile.X() + 1), m_boundingBox.MaxEdge.Y(), m_boundingBox.MaxEdge.Z() + tileEdgeLength * (float)(tile.Y() + 1));
-        return AABBox(aabbMin, aabbMax);
+        return AABBox(
+            Vec3(m_boundingBox.MinEdge.X() + tileEdgeLength * (float)tile.X(),
+                m_boundingBox.MinEdge.Y(),
+                m_boundingBox.MinEdge.Z() + tileEdgeLength * (float)tile.Y()),
+            Vec3(m_boundingBox.MinEdge.X() + tileEdgeLength * (float)(tile.X() + 1),
+                m_boundingBox.MaxEdge.Y(),
+                m_boundingBox.MinEdge.Z() + tileEdgeLength * (float)(tile.Y() + 1))
+        );
     }
 
     //! Return index of the tile at the position
@@ -689,8 +698,8 @@ namespace ige::scene
     {
         const float tileEdgeLength = (float)m_tileSize * m_cellSize;        
         const auto localPosition = (getOwner()->getTransform()->getWorldMatrix().Inverse() * position) - m_boundingBox.MinEdge;
-        int xIdx = std::min(std::max(0, (int)(localPosition.X() / tileEdgeLength)), getNumTilesX() - 1);
-        int zIdx = std::min(std::max(0, (int)(localPosition.Z() / tileEdgeLength)), getNumTilesZ() - 1);
+        int xIdx = std::min(std::max(0, (int)floor(localPosition.X() / tileEdgeLength)), getNumTilesX() - 1);
+        int zIdx = std::min(std::max(0, (int)floor(localPosition.Z() / tileEdgeLength)), getNumTilesZ() - 1);
         return Vec2(xIdx, zIdx);
     }
 
