@@ -55,13 +55,13 @@ namespace ige::scene
 
     protected:
         //! Radius of this obstacle.
-        float m_radius;
+        float m_radius = 1.f;
 
         //! Height of this obstacle
-        float m_height;
+        float m_height = 1.f;
 
         //! Obstacle id received from tile cache.
-        uint32_t m_obstacleId;
+        uint32_t m_obstacleId = 0;
 
         //! Cache the owner NavMesh
         DynamicNavMesh *m_ownerMesh = nullptr;
