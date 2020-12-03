@@ -29,11 +29,13 @@ namespace ige::scene
         if(enabled && !m_bIsActivated)
         {
             getActivatedEvent().invoke(this);
+            m_bIsActivated = true;
         }
 
         if(!enabled && m_bIsActivated)
         {
             getDeactivatedEvent().invoke(this);
+            m_bIsActivated = false;
         }
     }
 

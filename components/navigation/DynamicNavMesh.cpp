@@ -190,11 +190,17 @@ namespace ige::scene
         m_allocator = std::make_unique<LinearAllocator>(32000); //32kb
         m_compressor = std::make_unique<TileCompressor>();
         m_meshProcessor = std::make_unique<MeshProcess>(this);
+
+        NavObstacle::getActivatedEvent().addListener(std::bind(static_cast<void (DynamicNavMesh::*)(NavObstacle*)>(&DynamicNavMesh::onActivated), this, std::placeholders::_1));
+        NavObstacle::getDeactivatedEvent().addListener(std::bind(static_cast<void (DynamicNavMesh::*)(NavObstacle*)>(&DynamicNavMesh::onDeactivated), this, std::placeholders::_1));
     }
 
     DynamicNavMesh::~DynamicNavMesh()
     {
         releaseNavMesh();
+
+        NavObstacle::getActivatedEvent().removeAllListeners();
+        NavObstacle::getDeactivatedEvent().removeAllListeners();
 
         m_allocator = nullptr;
         m_compressor = nullptr;
