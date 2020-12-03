@@ -49,7 +49,7 @@ namespace ige::scene
 
     protected:
         //! Endpoint object
-        SceneObject* m_endPoint;
+        SceneObject* m_endPoint = nullptr;
 
         //! Radius
         float m_radius = 1.f;

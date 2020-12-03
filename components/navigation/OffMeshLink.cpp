@@ -12,6 +12,7 @@ namespace ige::scene
 
     OffMeshLink::~OffMeshLink()
     {
+        m_endPoint = nullptr;
     }
 
     //! Serialize
