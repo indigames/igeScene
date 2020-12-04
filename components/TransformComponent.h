@@ -118,7 +118,7 @@ namespace ige::scene
         const AABBox &getAABB() const { return m_aabb; }
 
         //! AABB in world space
-        AABBox getWorldAABB() const;
+        const AABBox& getWorldAABB() const { return m_aabbWorld; }
 
     protected:
         //! Serialize
@@ -173,5 +173,8 @@ namespace ige::scene
 
         //! Cached aabb
         AABBox m_aabb;
+
+        //! Cached aabb
+        AABBox m_aabbWorld;
     };
 } // namespace ige::scene

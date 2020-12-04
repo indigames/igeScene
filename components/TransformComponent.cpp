@@ -55,12 +55,6 @@ namespace ige::scene
             m_parent->addObserver(this);
     }
 
-    //! AABB in world space
-    AABBox TransformComponent::getWorldAABB() const
-    {
-        return m_aabb.Transform(getWorldMatrix());
-    }
-
     void TransformComponent::onUpdate(float dt)
     {
         if (m_bLocalDirty)
@@ -389,6 +383,9 @@ namespace ige::scene
                 }
             }
         }
+
+        // Recalculate world aabb
+        m_aabbWorld = m_aabb.Transform(getWorldMatrix());
     }
 
     void TransformComponent::addObserver(TransformComponent *observer)

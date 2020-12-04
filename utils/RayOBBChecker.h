@@ -9,18 +9,18 @@ namespace ige::scene
     class RayOBBChecker
     {
     public:
-        static void screenPosToWorldRay(
+        static std::pair<Vec3, Vec3> screenPosToWorldRay(
             int x, int y,                       // Screen space position, in pixels
             int screenWidth, int screenHeight,  // Window size, in pixels
             const Mat4& viewInversedMatrix,     // View inversed matrix
             const Mat4& projectionMatrix        // Projection matrix
         );
 
-        static bool checkIntersect(            
-            const Vec3& aabb_min,               // Min AABB coords
-            const Vec3& aabb_max,               // Maximum AABB coords
+        static bool checkIntersect(
+            const AABBox& aabb,                 // AABB box
             const Mat4& modelMatrix,            // World transformation matrix
-            float& intersection_distance        // Output: intersection distance
+            float& intersection_distance,       // Output: intersection distance
+            float max_distance = 10000.f        // Max distance
         );
 
         static Vec3 g_origin;

@@ -134,6 +134,9 @@ namespace ige::scene
         const Vec2& getShadowTextureSize() const;
         void setShadowTextureSize(const Vec2& size);
 
+        //! Raycast: return first hit point from single ray
+        std::pair<SceneObject*, Vec3> raycast(const Vec2& screenPos, Camera* camera, float maxDistance = 10000.f, const Vec2& screenSize = { -1.f, -1.f });
+       
     protected:
         void populateTestData(const std::shared_ptr<SceneObject>& parent = nullptr, int num = 1000);
 

@@ -20,6 +20,7 @@
 #include "components/gui/UIImage.h"
 
 #include "utils/GraphicsHelper.h"
+#include "utils/RayOBBChecker.h"
 
 #include "utils/filesystem.h"
 namespace fs = ghc::filesystem;
@@ -417,36 +418,6 @@ namespace ige::scene
             m_showcase->Remove(resource);
     }
 
-    //! Serialize
-    void Scene::to_json(json& j) const
-    {
-        j = json {
-            {"name", m_name},
-            {"path", m_path},
-            {"objId", m_nextObjectID},
-        };
-        json jRoot;
-        m_root->to_json(jRoot);
-        j["root"] = jRoot;
-    }
-
-    //! Deserialize
-    void Scene::from_json(const json& j)
-    {
-        clear();
-        j.at("name").get_to(m_name);
-        setPath(j.value("path", std::string()));
-
-        auto jRoot = j.at("root");
-        m_root = createObject(m_name);
-        m_root->from_json(jRoot);
-
-        j.at("objId").get_to(m_nextObjectID);
-
-        // Notify serialize finished
-        getSerializeFinishedEvent().invoke(*this);
-    }
-
     //! Prefab save/load
     bool Scene::savePrefab(uint64_t objectId, const std::string& path)
     {
@@ -616,5 +587,77 @@ namespace ige::scene
             m_shadowTextureSize = size;
             m_shadowFBO->Resize(size[0], size[1]);
         }
+    }
+
+    //! Raycast
+    std::pair<SceneObject*, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance, const Vec2& screenSize)
+    {
+        std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());
+        if(!camera)
+            return hit;
+
+        auto screenWidth = screenSize.X() > 0 ? screenSize.X() : SystemInfo::Instance().GetGameW();
+        auto screenHeight = screenSize.Y() > 0 ? screenSize.Y() : SystemInfo::Instance().GetGameH();
+
+        Mat4 proj;
+        camera->GetProjectionMatrix(proj);
+
+        Mat4 viewInv;
+        camera->GetViewInverseMatrix(viewInv);
+
+        auto ray = RayOBBChecker::screenPosToWorldRay(screenPos.X(), screenPos.Y(), screenWidth, screenHeight, viewInv, proj);
+        float distance, minDistance = maxDistance;
+
+        for (const auto& obj : m_objects)
+        {
+            if (obj)
+            {
+                const auto& transform = obj->getTransform();
+                auto aabbTransform = Mat4::IdentityMat();
+                vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
+                vmath_mat_appendScale(aabbTransform.P(), transform->getWorldScale().P(), 4, 4, aabbTransform.P());
+                auto aabb = transform->getAABB().Transform(aabbTransform);
+                if (RayOBBChecker::checkIntersect(aabb, transform->getWorldMatrix(), distance, maxDistance))
+                {
+                    if (minDistance > distance)
+                    {
+                        minDistance = distance;
+                        hit.first = obj.get();
+                        hit.second = ray.first + ray.second * distance;
+                    }
+                }
+            }
+        }
+        return hit;
+    }
+
+    //! Serialize
+    void Scene::to_json(json& j) const
+    {
+        j = json{
+            {"name", m_name},
+            {"path", m_path},
+            {"objId", m_nextObjectID},
+        };
+        json jRoot;
+        m_root->to_json(jRoot);
+        j["root"] = jRoot;
+    }
+
+    //! Deserialize
+    void Scene::from_json(const json& j)
+    {
+        clear();
+        j.at("name").get_to(m_name);
+        setPath(j.value("path", std::string()));
+
+        auto jRoot = j.at("root");
+        m_root = createObject(m_name);
+        m_root->from_json(jRoot);
+
+        j.at("objId").get_to(m_nextObjectID);
+
+        // Notify serialize finished
+        getSerializeFinishedEvent().invoke(*this);
     }
 }
