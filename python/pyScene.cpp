@@ -8,6 +8,7 @@
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 
+#include <pyVectorMath.h>
 #include <pythonResource.h>
 
 namespace ige::scene
@@ -214,6 +215,80 @@ namespace ige::scene
         return (PyObject *)obj;
     }
 
+    // Raycast
+    PyObject* Scene_raycast(PyObject_Scene *self, PyObject* args)
+    {
+        PyObject *screenPosObj;
+        PyObject *cameraObj;
+        PyObject *screenSizeObj = nullptr;
+        float distance = 10000.f;
+
+        if (!PyArg_ParseTuple(args, "OO|iO", &screenPosObj, &cameraObj, &distance, &screenSizeObj))
+            return NULL;
+
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat(screenPosObj, buff, d);
+        if (!v)
+            return NULL;
+
+        Vec2 screenPos = Vec2(v[0], v[1]);
+        Camera* camera = nullptr;
+        if(cameraObj->ob_type == &CameraType)
+        {
+            auto camObj = (camera_obj*)cameraObj;
+            camera = camObj->camera;
+        }
+        else if(cameraObj->ob_type == &PyTypeObject_CameraComponent)
+        {
+            auto cameraCompObj = (PyObject_CameraComponent*)cameraObj;
+            camera = cameraCompObj->component->getCamera();
+        }
+        else if(cameraObj->ob_type == &PyTypeObject_SceneObject)
+        {
+            auto sceneObj = (PyObject_SceneObject*)cameraObj;
+            auto cameraComp = sceneObj->sceneObject->getComponent<CameraComponent>();
+            if(cameraComp)
+            {
+                camera = cameraComp->getCamera();
+            }
+        }
+
+        if (!camera)
+            return NULL;
+
+        Vec2 screenSize(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameH());
+        if(screenSizeObj != nullptr)
+        {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat(screenPosObj, buff, d);
+            if (v)
+            {
+                screenSize.X(v[0]);
+                screenSize.Y(v[1]);
+            }
+        }
+
+        auto hit = self->scene->raycast(screenPos, camera, distance, screenSize);
+        if(hit.first == nullptr)
+            Py_RETURN_NONE;
+
+        auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+        hitObj->sceneObject = hit.first;
+
+        auto hitPos = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(hit.second.P(), 3, hitPos->v);
+        hitPos->d = 3;
+
+        PyObject *res = Py_BuildValue("{s:O,s:O,s:O,s:i}",
+                                      "hitObject", hitObj,
+                                      "hitPosition", hitPos);
+        Py_XDECREF(hitObj);
+        Py_XDECREF(hitPos);
+        return res;
+    }
+
     // Compare function
     static PyObject* Scene_richcompare(PyObject* self, PyObject* other, int op)
     {
@@ -258,6 +333,7 @@ namespace ige::scene
         { "getPath", (PyCFunction)Scene_getPath, METH_NOARGS, Scene_getPath_doc },
         { "getShowcase", (PyCFunction)Scene_getShowcase, METH_NOARGS, Scene_getShowcase_doc },
         { "getEnvironment", (PyCFunction)Scene_getEnvironment, METH_NOARGS, Scene_getEnvironment_doc },
+        { "raycast", (PyCFunction)Scene_raycast, METH_VARARGS, Scene_raycast_doc },
         { NULL, NULL }
     };
 

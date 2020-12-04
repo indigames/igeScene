@@ -57,4 +57,7 @@ namespace ige::scene
 
     // Get environment
     PyObject* Scene_getEnvironment(PyObject_Scene *self);
+
+    // Raycast
+    PyObject* Scene_raycast(PyObject_Scene *self, PyObject* args);
 }

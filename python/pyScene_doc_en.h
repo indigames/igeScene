@@ -101,6 +101,26 @@ PyDoc_STRVAR(Scene_getEnvironment_doc,
 			 "----------\n"
 			 "    Type: igeCore.environment\n");
 
+// Raycast
+PyDoc_STRVAR(Scene_raycast_doc,
+			 "Perform raycast to get the hit object and hit position.\n"
+			 "\n"
+			 "Scene().raycast(screenPos: Vec2, camera: Camera, distance: float, screenSize: Vec2)\n"
+			 "\n"
+			 "Parameters:\n"
+			 "----------\n"
+			 "    screenPos: Vec2\n"
+			 "      Screen position (2d screen space)\n"
+			 "    camera: pyxieCamera, CameraComponent, Camera SceneObject\n"
+			 "      Camera to perform raycast\n"
+			 "    distance: float\n"
+			 "      Max distance. Default: 10000.f\n"
+			 "    screenSize: Vec2\n"
+			 "      Screen size. Default: (-1.f, -1.f) to use GameSize.\n"
+			 "Return:\n"
+			 "----------\n"
+			 "    Tuple: [object, position]\n");
+
 // name
 PyDoc_STRVAR(Scene_name_doc,
 			 "Name of scene.\n"
