@@ -161,14 +161,11 @@ namespace ige::scene
         m_boundingBox.reset({ Vec3(INFINITY, INFINITY, INFINITY), Vec3(-INFINITY, -INFINITY, -INFINITY) });
     }
 
-    //! Enable
-    void NavMesh::onEnable()
-    {
-        build();
-    }
-
     bool NavMesh::build()
     {
+        if(!isEnabled())
+            return false;
+
         // Create navigation agent manager for this mesh
         auto navAgentManager = getOwner()->getComponent<NavAgentManager>();
         if (!navAgentManager)

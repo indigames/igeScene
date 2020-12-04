@@ -154,9 +154,6 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "NavMesh"; }
 
-        //! Enable
-        virtual void onEnable() override;
-
         //! Build the entire navigation mesh
         virtual bool build();
 
