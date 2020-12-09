@@ -151,6 +151,10 @@ namespace ige::scene
         }
 
         m_scenes.push_back(scene);
+
+        if (m_currScene == nullptr)
+            m_currScene = scene;
+
         return scene;
     }
 

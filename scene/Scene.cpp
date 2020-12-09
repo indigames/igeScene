@@ -659,5 +659,13 @@ namespace ige::scene
 
         // Notify serialize finished
         getSerializeFinishedEvent().invoke(*this);
+
+        // Set active camera
+        if (getActiveCamera() == nullptr)
+        {
+            auto cam = getRoot()->getComponent<CameraComponent>();
+            if(cam)
+                setActiveCamera(cam.get());
+        }
     }
 }
