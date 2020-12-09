@@ -262,25 +262,63 @@ namespace ige::scene
         return queryFilterType < m_numQueryFilterTypes ? m_numAreas[queryFilterType] : 0;
     }
 
-    /// Get the include flags for the specified query filter type.
+    //! Get the include flags for the specified query filter type.
     uint16_t NavAgentManager::getIncludeFlags(uint32_t queryFilterType) const
     {
         const auto filter = getDetourQueryFilter(queryFilterType);
         return (uint16_t)(filter ? filter->getIncludeFlags() : 0xffff);
     }
 
-    /// Get the exclude flags for the specified query filter type.
+    //! Set the include flags for the specified query filter type.
+    void NavAgentManager::setIncludeFlags(uint32_t queryFilterType, uint16_t flags)
+    {
+        auto* filter = const_cast<dtQueryFilter*>(getDetourQueryFilter(queryFilterType));
+        if(filter)
+        {
+            filter->setIncludeFlags(flags);
+            if (m_numQueryFilterTypes < queryFilterType + 1)
+                m_numQueryFilterTypes = queryFilterType + 1;
+        }
+    }
+
+    //! Get the exclude flags for the specified query filter type.
     uint16_t NavAgentManager::getExcludeFlags(uint32_t queryFilterType) const
     {
         const auto filter = getDetourQueryFilter(queryFilterType);
         return (uint16_t)(filter ? filter->getExcludeFlags() : 0xffff);
     }
 
-    /// Get the cost of an area for the specified query filter type.
+    //! Set the exclude flags for the specified query filter type.
+    void NavAgentManager::setExcludeFlags(uint32_t queryFilterType, uint16_t flags)
+    {
+        auto* filter = const_cast<dtQueryFilter*>(getDetourQueryFilter(queryFilterType));
+        if(filter)
+        {
+            filter->setExcludeFlags(flags);
+            if (m_numQueryFilterTypes < queryFilterType + 1)
+                m_numQueryFilterTypes = queryFilterType + 1;
+        }
+    }
+
+    //! Get the cost of an area for the specified query filter type.
     float NavAgentManager::getAreaCost(uint32_t queryFilterType, uint32_t areaID) const
     {
         const auto filter = getDetourQueryFilter(queryFilterType);
         return filter ? filter->getAreaCost((int)areaID) : 1.f;
+    }
+
+    //! Get the cost of an area for the specified query filter type.
+    void NavAgentManager::setAreaCost(uint32_t queryFilterType, uint32_t areaID, float cost)
+    {
+        auto* filter = const_cast<dtQueryFilter*>(getDetourQueryFilter(queryFilterType));
+        if(filter)
+        {
+            filter->setAreaCost((int)areaID, cost);
+            if (m_numQueryFilterTypes < queryFilterType + 1)
+                m_numQueryFilterTypes = queryFilterType + 1;
+            if (m_numAreas[queryFilterType] < areaID + 1)
+                m_numAreas[queryFilterType] = areaID + 1;
+        }
     }
 
     //! Serialize

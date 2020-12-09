@@ -22,6 +22,22 @@ namespace ige::scene
     class NavAgentManager : public Component
     {
     public:
+        //! Obstacle avoidance params
+        struct ObstacleParams
+        {
+            float velBias;
+            float weightDesVel;
+            float weightCurVel;
+            float weightSide;
+            float weightToi;
+            float horizTime;
+            uint8_t gridSize;
+            uint8_t adaptiveDivs;
+            uint8_t adaptiveRings;
+            uint8_t adaptiveDepth;
+        };
+
+    public:
         NavAgentManager(SceneObject &owner);
         virtual ~NavAgentManager();
 
@@ -47,24 +63,37 @@ namespace ige::scene
         uint32_t getNumQueryFilterTypes() const { return m_numQueryFilterTypes; }
         void setNumQueryFilterTypes(uint32_t num) { m_numQueryFilterTypes = num; }
 
-        //! Number of obstacle avoidance types configured in the crowd. Limit to 8.
-        uint32_t getNumObstacleAvoidanceType() const { return m_numObstacleAvoidanceTypes; }
-        void setNumObstacleAvoidanceType(uint32_t num) { m_numObstacleAvoidanceTypes = num; }
-
         //! Number of configured area in each filter type. Limit to 64 each.
         const std::vector<uint32_t> &getNumAreas() const { return m_numAreas; }
 
         //! Number of configured area in the specified query filter type.
         uint32_t getNumAreas(uint32_t queryFilterType) const;
 
-        /// Get the include flags for the specified query filter type.
+        //! Get the include flags for the specified query filter type.
         uint16_t getIncludeFlags(uint32_t queryFilterType) const;
 
-        /// Get the exclude flags for the specified query filter type.
+        //! Set the include flags for the specified query filter type.
+        void setIncludeFlags(uint32_t queryFilterType, uint16_t flag);
+
+        //! Get the exclude flags for the specified query filter type.
         uint16_t getExcludeFlags(uint32_t queryFilterType) const;
 
-        /// Get the cost of an area for the specified query filter type.
+        //! Set the exclude flags for the specified query filter type.
+        void setExcludeFlags(uint32_t queryFilterType, uint16_t flag);
+
+        //! Get the cost of an area for the specified query filter type.
         float getAreaCost(uint32_t queryFilterType, uint32_t areaID) const;
+
+        //! Set the cost of an area for the specified query filter type.
+        void setAreaCost(uint32_t queryFilterType, uint32_t areaID, float cost);
+
+        //! Number of obstacle avoidance types configured in the crowd. Limit to 8.
+        uint32_t getNumObstacleAvoidanceType() const { return m_numObstacleAvoidanceTypes; }
+        void setNumObstacleAvoidanceType(uint32_t num) { m_numObstacleAvoidanceTypes = num; }
+
+        //! The params for the specified obstacle avoidance type.
+        ObstacleParams getObstacleAvoidanceParams(uint32_t obstacleAvoidanceType) const;
+        void setObstacleAvoidanceParams(uint32_t obstacleAvoidanceType, const ObstacleParams& params);
 
         //! Agents
         const std::vector<NavAgent *> &getAgents() const { return m_agents; }

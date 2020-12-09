@@ -338,8 +338,11 @@ namespace ige::scene
             }
 
             navAgentManager->reactivateAllAgents();
-            return true;
         }
+
+        // TODO: Save/load the built data using filesystem
+        // auto meshBuff = getNavDataAttr();
+        return true;
     }
 
     //! Remove tile from navigation mesh.

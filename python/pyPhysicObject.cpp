@@ -471,7 +471,7 @@ namespace ige::scene
         return -1;
     }
 
-    //! Continous Collision Detection mode
+    //! Continuos Collision Detection mode
     PyObject *PhysicObject_isCCD(PyObject_PhysicObject *self)
     {
         return PyBool_FromLong(self->component->isCCD());

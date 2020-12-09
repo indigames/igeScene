@@ -121,7 +121,6 @@ namespace ige::scene
           m_detailSampleMaxError(DEFAULT_DETAIL_SAMPLE_MAX_ERROR),
           m_partitionType(EPartitionType::WATERSHED)
     {
-        m_queryFilter = std::make_unique<dtQueryFilter>();
         m_pathData = std::make_unique<FindPathData>();
 
         // Build the navigation mesh
@@ -134,7 +133,6 @@ namespace ige::scene
 
         m_navMesh = nullptr;
         m_navMeshQuery = nullptr;
-        m_queryFilter = nullptr;
         m_pathData = nullptr;
     }
 
@@ -375,6 +373,15 @@ namespace ige::scene
                     build->offMeshFlags.push_back((uint16_t)link->getMask());
                     build->offMeshAreas.push_back((uint8_t)link->getAreaId());
                     build->offMeshDir.push_back((uint8_t)(link->isBidirectional() ? DT_OFFMESH_CON_BIDIR : 0));
+                    continue;
+                }
+                else if (geometryList[i].component->getName() == "NavArea")
+                {
+                    auto* area = static_cast<NavArea*>(geometryList[i].component);
+                    NavAreaStub stub;
+                    stub.areaID = area->getAreaId();
+                    stub.bounds = area->getWorldBoundingBox();
+                    build->navAreas.push_back(stub);
                     continue;
                 }
 
@@ -725,7 +732,7 @@ namespace ige::scene
     //! Try to move along the surface from one point to another
     Vec3 NavMesh::moveAlongSurface(const Vec3 &start, const Vec3 &end, const Vec3 &extents, int maxVisited, const dtQueryFilter *filter)
     {
-        if (!initializeQuery())
+        if (!filter || !initializeQuery())
             return end;
 
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
@@ -734,9 +741,8 @@ namespace ige::scene
         auto localStart = inverse *start;
         auto localEnd = inverse * end;
 
-        const auto queryFilter = filter ? filter : m_queryFilter.get();
         dtPolyRef startRef;
-        m_navMeshQuery->findNearestPoly(localStart.P(), extents.P(), queryFilter, &startRef, nullptr);
+        m_navMeshQuery->findNearestPoly(localStart.P(), extents.P(), filter, &startRef, nullptr);
         if (!startRef)
             return end;
 
@@ -744,14 +750,14 @@ namespace ige::scene
         int visitedCount = 0;
         maxVisited = Max(maxVisited, 0);
         std::vector<dtPolyRef> visited((uint32_t)maxVisited);
-        m_navMeshQuery->moveAlongSurface(startRef, localStart.P(), localEnd.P(), queryFilter, resultPos.P(), maxVisited ? &visited[0] : nullptr, &visitedCount, maxVisited);
+        m_navMeshQuery->moveAlongSurface(startRef, localStart.P(), localEnd.P(), filter, resultPos.P(), maxVisited ? &visited[0] : nullptr, &visitedCount, maxVisited);
         return transform * resultPos;
     }
 
     //! Find the nearest point on the navigation mesh to a given
     Vec3 NavMesh::findNearestPoint(const Vec3 &point, const Vec3 &extents, const dtQueryFilter *filter, dtPolyRef *nearestRef)
     {
-        if (!initializeQuery())
+        if (!filter || !initializeQuery())
             return point;
 
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
@@ -764,7 +770,7 @@ namespace ige::scene
         if (!nearestRef)
             nearestRef = &pointRef;
 
-        m_navMeshQuery->findNearestPoly(localPoint.P(), extents.P(), filter ? filter : m_queryFilter.get(), nearestRef, nearestPoint.P());
+        m_navMeshQuery->findNearestPoly(localPoint.P(), extents.P(), filter, nearestRef, nearestPoint.P());
         return *nearestRef ? transform * nearestPoint : point;
     }
 
@@ -784,7 +790,7 @@ namespace ige::scene
     {
         dest.clear();
 
-        if (!initializeQuery())
+        if (!filter || !initializeQuery())
             return;
 
         // Navigation data is in local space. Transform path points from world to local
@@ -794,11 +800,10 @@ namespace ige::scene
         auto localStart = inverse * start;
         auto localEnd = inverse * end;
 
-        const dtQueryFilter *queryFilter = filter ? filter : m_queryFilter.get();
         dtPolyRef startRef;
         dtPolyRef endRef;
-        m_navMeshQuery->findNearestPoly(localStart.P(), extents.P(), queryFilter, &startRef, nullptr);
-        m_navMeshQuery->findNearestPoly(localEnd.P(), extents.P(), queryFilter, &endRef, nullptr);
+        m_navMeshQuery->findNearestPoly(localStart.P(), extents.P(), filter, &startRef, nullptr);
+        m_navMeshQuery->findNearestPoly(localEnd.P(), extents.P(), filter, &endRef, nullptr);
 
         if (!startRef || !endRef)
             return;
@@ -806,7 +811,7 @@ namespace ige::scene
         int numPolys = 0;
         int numPathPoints = 0;
 
-        m_navMeshQuery->findPath(startRef, endRef, localStart.P(), localEnd.P(), queryFilter, m_pathData->polys, &numPolys, MAX_POLYS);
+        m_navMeshQuery->findPath(startRef, endRef, localStart.P(), localEnd.P(), filter, m_pathData->polys, &numPolys, MAX_POLYS);
         if (!numPolys)
             return;
 
@@ -854,14 +859,14 @@ namespace ige::scene
     //! Return a random point on the navigation mesh.
     Vec3 NavMesh::getRandomPoint(const dtQueryFilter *filter, dtPolyRef *randomRef)
     {
-        if (!initializeQuery())
+        if (!filter || !initializeQuery())
             return {0.f, 0.f, 0.f};
 
         dtPolyRef polyRef;
         Vec3 point = {0.f, 0.f, 0.f};
 
         auto random = []() { return std::rand() / float(RAND_MAX); };
-        m_navMeshQuery->findRandomPoint(filter ? filter : m_queryFilter.get(), random, randomRef ? randomRef : &polyRef, point.P());
+        m_navMeshQuery->findRandomPoint(filter, random, randomRef ? randomRef : &polyRef, point.P());
 
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
         return transform * point;
@@ -873,16 +878,15 @@ namespace ige::scene
         if (randomRef)
             *randomRef = 0;
 
-        if (!initializeQuery())
+        if (!filter || !initializeQuery())
             return center;
 
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
         auto inverse = transform.Inverse();
         auto localCenter = inverse * center;
-        const dtQueryFilter *queryFilter = filter ? filter : m_queryFilter.get();
 
         dtPolyRef startRef;
-        m_navMeshQuery->findNearestPoly(localCenter.P(), extents.P(), queryFilter, &startRef, nullptr);
+        m_navMeshQuery->findNearestPoly(localCenter.P(), extents.P(), filter, &startRef, nullptr);
         if (!startRef)
             return center;
 
@@ -892,7 +896,7 @@ namespace ige::scene
 
         auto point = localCenter;
         auto random = []() { return std::rand() / float(RAND_MAX); };
-        m_navMeshQuery->findRandomPointAroundCircle(startRef, localCenter.P(), radius, queryFilter, random, randomRef, point.P());
+        m_navMeshQuery->findRandomPointAroundCircle(startRef, localCenter.P(), radius, filter, random, randomRef, point.P());
         return transform * point;
     }
 
@@ -905,16 +909,15 @@ namespace ige::scene
         if (hitNormal)
             *hitNormal = {0.f, -1.f, 0.f};
 
-        if (!initializeQuery())
+        if (!filter || !initializeQuery())
             return radius;
 
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
         auto inverse = transform.Inverse();
         auto localPoint = inverse * point;
-        const dtQueryFilter *queryFilter = filter ? filter : m_queryFilter.get();
 
         dtPolyRef startRef;
-        m_navMeshQuery->findNearestPoly(localPoint.P(), extents.P(), queryFilter, &startRef, nullptr);
+        m_navMeshQuery->findNearestPoly(localPoint.P(), extents.P(), filter, &startRef, nullptr);
         if (!startRef)
             return radius;
         float hitDist = radius;
@@ -924,7 +927,7 @@ namespace ige::scene
         Vec3 normal;
         if (!hitNormal)
             hitNormal = &normal;
-        m_navMeshQuery->findDistanceToWall(startRef, localPoint.P(), radius, queryFilter, &hitDist, hitPos->P(), hitNormal->P());
+        m_navMeshQuery->findDistanceToWall(startRef, localPoint.P(), radius, filter, &hitDist, hitPos->P(), hitNormal->P());
         return hitDist;
     }
 
@@ -934,17 +937,16 @@ namespace ige::scene
         if (hitNormal)
             *hitNormal = {0.f, -1.f, 0.f};
 
-        if (!initializeQuery())
+        if (!filter || !initializeQuery())
             return end;
 
         const auto &transform = getOwner()->getTransform()->getWorldMatrix();
         auto inverse = transform.Inverse();
         auto localStart = inverse * start;
         auto localEnd = inverse * end;
-        const dtQueryFilter *queryFilter = filter ? filter : m_queryFilter.get();
 
         dtPolyRef startRef;
-        m_navMeshQuery->findNearestPoly(localStart.P(), extents.P(), queryFilter, &startRef, nullptr);
+        m_navMeshQuery->findNearestPoly(localStart.P(), extents.P(), filter, &startRef, nullptr);
         if (!startRef)
             return end;
 
@@ -954,7 +956,7 @@ namespace ige::scene
         float t;
         int numPolys;
 
-        m_navMeshQuery->raycast(startRef, localStart.P(), localEnd.P(), queryFilter, &t, hitNormal->P(), m_pathData->polys, &numPolys, MAX_POLYS);
+        m_navMeshQuery->raycast(startRef, localStart.P(), localEnd.P(), filter, &t, hitNormal->P(), m_pathData->polys, &numPolys, MAX_POLYS);
         if (t == FLT_MAX)
             t = 1.0f;
 
@@ -1022,19 +1024,6 @@ namespace ige::scene
                     writeTile(ret, x, z);
         }
         return ret;
-    }
-
-    void NavMesh::setAreaCost(uint32_t areaID, float cost)
-    {
-        if (m_queryFilter)
-            m_queryFilter->setAreaCost((int)areaID, cost);
-    }
-
-    float NavMesh::getAreaCost(uint32_t areaID) const
-    {
-        if (m_queryFilter)
-            return m_queryFilter->getAreaCost((int)areaID);
-        return 1.0f;
     }
 
     bool NavMesh::initializeQuery()

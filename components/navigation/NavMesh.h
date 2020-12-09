@@ -277,10 +277,6 @@ namespace ige::scene
         EPartitionType getPartitionType() const { return m_partitionType; }
         void setPartitionType(EPartitionType type) { m_partitionType = type; }
 
-        //! Area cost
-        void NavMesh::setAreaCost(uint32_t areaID, float cost);
-        float NavMesh::getAreaCost(uint32_t areaID) const;
-
         //! Number of tiles in X direction
         int getNumTilesX() const { return m_numTilesX; }
 
@@ -342,9 +338,6 @@ namespace ige::scene
 
         //! Detour navigation mesh query
         dtNavMeshQuery *m_navMeshQuery = nullptr;
-
-        //! Detour navigation mesh query filter
-        std::unique_ptr<dtQueryFilter> m_queryFilter = nullptr;
 
         //! Temporary data for finding a path
         std::unique_ptr<FindPathData> m_pathData = nullptr;

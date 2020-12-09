@@ -74,7 +74,6 @@ namespace ige::scene
         //! Build/rebuild the entire navigation mesh
         bool build() override;
 
-
         //! Remove tile from navigation mesh.
         void removeTile(const Vec2 &tile) override;
 
