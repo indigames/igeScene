@@ -186,7 +186,9 @@ namespace ige::scene
                     m_currScene->setName(fsPath.filename().stem());
                 }
 
-                m_currScene->setPath(fsPath.string());
+                auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()).string() : fsPath.string();
+                std::replace(relPath.begin(), relPath.end(), '\\', '/');
+                m_currScene->setPath(relPath);
             }
 
             json jScene;

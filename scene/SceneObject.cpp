@@ -18,16 +18,19 @@
 #include "components/gui/UIImage.h"
 #include "components/gui/UIText.h"
 #include "components/gui/UITextField.h"
+#include "components/physic/PhysicManager.h"
 #include "components/physic/PhysicBox.h"
 #include "components/physic/PhysicCapsule.h"
 #include "components/physic/PhysicSphere.h"
 #include "components/physic/PhysicMesh.h"
 #include "components/physic/PhysicSoftBody.h"
+#include "components/audio/AudioManager.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
 #include "components/light/AmbientLight.h"
 #include "components/light/DirectionalLight.h"
 #include "components/light/PointLight.h"
+#include "components/particle/ParticleManager.h"
 #include "components/particle/Particle.h"
 #include "components/navigation/DynamicNavMesh.h"
 #include "components/navigation/NavAgent.h"
@@ -432,6 +435,8 @@ namespace ige::scene
                 comp = addComponent<SpriteComponent>(val.at("path"), val.at("size"));
             else if (key == "ScriptComponent")
                 comp = addComponent<ScriptComponent>();
+            else if (key == "PhysicManager")
+                comp = addComponent<PhysicManager>();
             else if (key == "PhysicBox")
                 comp = addComponent<PhysicBox>();
             else if (key == "PhysicSphere")
@@ -453,6 +458,8 @@ namespace ige::scene
                 comp = addComponent<UIText>();
             else if (key == "UITextField")
                 comp = addComponent<UITextField>();
+            else if (key == "AudioManager")
+                comp = addComponent<AudioManager>();
             else if (key == "AudioSource")
                 comp = addComponent<AudioSource>();
             else if (key == "AudioListener")
@@ -463,6 +470,8 @@ namespace ige::scene
                 comp = addComponent<DirectionalLight>();
             else if (key == "PointLight")
                 comp = addComponent<PointLight>();
+            else if (key == "ParticleManager")
+                comp = addComponent<ParticleManager>();
             else if (key == "Particle")
                 comp = addComponent<Particle>();
             else if (key == "DynamicNavMesh")

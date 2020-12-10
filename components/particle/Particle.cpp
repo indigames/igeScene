@@ -48,9 +48,9 @@ namespace ige::scene
         Component::setEnabled(enable);
 
         if (isEnabled())
-        {
             play();
-        }
+        else
+            stop();
     }
 
     //! Set path
@@ -165,7 +165,7 @@ namespace ige::scene
     {
         m_targetLocation = location;
 
-        if (m_handle)
+        if (m_handle != -1)
         {
             getManager()->getEffekseerManager()->SetTargetLocation(m_handle, m_targetLocation[0], m_targetLocation[1], m_targetLocation[2]);
         }
@@ -223,7 +223,7 @@ namespace ige::scene
     void Particle::onUpdate(float dt)
     {
         // Apply transform
-        if (m_handle)
+        if (m_handle != -1)
         {
             auto transform = getOwner()->getTransform();
             auto position = transform->getWorldPosition();

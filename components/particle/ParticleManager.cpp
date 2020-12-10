@@ -108,6 +108,15 @@ namespace ige::scene
         {
             m_manager->LaunchWorkerThreads(m_numThreads);
         }
+
+        // Replay particles
+        for (auto& particle : m_particles)
+        {
+            if (particle->isEnabled())
+            {
+                particle->play();
+            }
+        }
     }
 
     //! Destroy
@@ -116,6 +125,15 @@ namespace ige::scene
         // Destroy manager
         if (m_manager)
         {
+            // Stop particles
+            for (auto& particle : m_particles)
+            {
+                if (m_manager->Exists(particle->getHandle()))
+                {
+                    particle->stop();
+                }
+            }
+
             m_manager->Destroy();
             m_manager = nullptr;
         }
@@ -125,7 +143,7 @@ namespace ige::scene
     void ParticleManager::onUpdate(float dt)
     {
         // Replay looped particles
-        for (auto particle : m_particles)
+        for (auto& particle : m_particles)
         {
             if (particle->getHandle() != -1 && !m_manager->Exists(particle->getHandle()) && particle->isLooped())
             {
