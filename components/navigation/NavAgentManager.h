@@ -17,7 +17,7 @@ struct dtCrowdAgent;
 namespace ige::scene
 {
     /**
-     * Class NavAgentManager: manage navigation system
+     * Class NavAgentManager: manage navigation system. Should be added to the root node.
      */
     class NavAgentManager : public Component
     {

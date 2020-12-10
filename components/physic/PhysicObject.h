@@ -14,6 +14,7 @@ using namespace pyxie;
 namespace ige::scene
 {
     class PhysicConstraint;
+    class PhysicManager;
 
     //! PhysicObject
     class PhysicObject : public Component
@@ -24,6 +25,10 @@ namespace ige::scene
 
         //! Destructor
         virtual ~PhysicObject();
+
+        //! Cache PhysicManager
+        PhysicManager* getManager() const { return m_manager; }
+        void setManager(PhysicManager* manager) { m_manager = manager; }
 
         //! Initialization
         virtual bool init();
@@ -301,6 +306,9 @@ namespace ige::scene
 
         //! Cache dirty state
         bool m_bIsDirty = false;
+
+        //! Cache PhysicManager
+        PhysicManager* m_manager = nullptr;
     };
 
     //! Add constraint by type

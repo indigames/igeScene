@@ -7,22 +7,24 @@
 
 #include <soloud.h>
 
-#include "utils/Singleton.h"
 #include "event/Event.h"
-
+#include "components/Component.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
 
 namespace ige::scene
 {
     /**
-     * Class AudioManager: Manage audio sources and listeners
+     * Class AudioManager: Manage audio sources and listeners. Should be added to the root node.
      */
-    class AudioManager : public Singleton<AudioManager>
+    class AudioManager : public Component
     {
     public:
-        AudioManager();
+        AudioManager(SceneObject &owner);
         virtual ~AudioManager();
+
+        //! Get name
+        std::string getName() const override { return "AudioManager"; }
 
         //! Update
         void onUpdate(float dt);
@@ -47,6 +49,12 @@ namespace ige::scene
         //! AudioListener created/destroyed events
         void onCreated(AudioListener &listener);
         void onDestroyed(AudioListener &listener);
+
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
 
     protected:
         //! Audio sources

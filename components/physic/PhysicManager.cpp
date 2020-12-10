@@ -1,4 +1,4 @@
-#include "systems/physic/PhysicManager.h"
+#include "components/physic/PhysicManager.h"
 
 #include <algorithm>
 
@@ -17,6 +17,9 @@
 
 #include "components/physic/PhysicObject.h"
 #include "components/physic/PhysicSoftBody.h"
+#include "components/physic/BulletDebugRender.h"
+#include "scene/SceneManager.h"
+#include "utils/PhysicHelper.h"
 
 namespace ige::scene
 {
@@ -24,16 +27,15 @@ namespace ige::scene
     std::map< std::pair<PhysicObject*, PhysicObject*>, bool> PhysicManager::m_collisionEvents;
 
     //! Constructor
-    PhysicManager::PhysicManager()
+    PhysicManager::PhysicManager(SceneObject& owner, int numIteration, bool deformable)
+        : Component(owner), m_numIteration(numIteration), m_bDeformable(deformable)
     {
+        initialize();
     }
 
-    bool PhysicManager::initialize(int numIteration, bool deformable)
+    bool PhysicManager::initialize()
     {
-        m_numIteration = numIteration;
-        m_bDeformable = deformable;
-
-        if (deformable)
+        if (m_bDeformable)
         {
             m_collisionConfiguration = std::make_unique<btSoftBodyRigidBodyCollisionConfiguration>();
             m_dispatcher = std::make_unique<btCollisionDispatcher>(m_collisionConfiguration.get());
@@ -59,7 +61,7 @@ namespace ige::scene
         }
 
         m_world->setGravity(m_gravity);
-        m_world->getSolverInfo().m_numIterations = numIteration;
+        m_world->getSolverInfo().m_numIterations = m_numIteration;
         m_world->getDispatchInfo().m_useContinuous = true;
         m_world->getSolverInfo().m_splitImpulse = false;
         m_world->setSynchronizeAllMotionStates(true);
@@ -76,6 +78,10 @@ namespace ige::scene
 
         // Set collision callback
         setCollisionCallback();
+
+        // Init debug renderer
+        m_debugRenderer = std::make_unique<BulletDebugRender>();
+        m_world->setDebugDrawer(m_debugRenderer.get());
 
         return true;
     }
@@ -101,6 +107,7 @@ namespace ige::scene
         m_solver = nullptr;
         m_ghostPairCallback = nullptr;
         m_world = nullptr;
+        m_debugRenderer = nullptr;
     }
 
     //! Clear world
@@ -141,9 +148,17 @@ namespace ige::scene
     void PhysicManager::onUpdate(float dt)
     {
         preUpdate();
-        if (m_world->stepSimulation(dt * m_frameUpdateRatio, m_frameMaxSubStep, m_fixedTimeStep))
-            postUpdate();
 
+        // Run simulation if not in edit mode
+        if (!SceneManager::getInstance()->isEditor())
+            if (m_world->stepSimulation(dt * m_frameUpdateRatio, m_frameMaxSubStep, m_fixedTimeStep))
+                postUpdate();
+
+        // Show debug
+        if(isShowDebug())
+            getWorld()->debugDrawWorld();
+
+        // Do GC
         if(getDeformableWorld())
             getDeformableWorld()->getWorldInfo().m_sparsesdf.GarbageCollect();
     }
@@ -205,16 +220,16 @@ namespace ige::scene
             m_physicObjects.erase(found);
 
         // Find and remove collision events
-        auto evfound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [&object](auto pair) {
+        auto evFound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [&object](auto pair) {
             return object == pair.first.first || object == pair.first.second;
         });
 
         // Find and remove all collision events
-        while (evfound != m_collisionEvents.end())
+        while (evFound != m_collisionEvents.end())
         {
-            m_collisionEvents.erase(evfound);
+            m_collisionEvents.erase(evFound);
 
-            evfound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [&object](auto pair) {
+            evFound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [&object](auto pair) {
                 return object == pair.first.first || object == pair.first.second;
             });
         }
@@ -415,7 +430,6 @@ namespace ige::scene
                 }
             }
         }
-
         return false;
     }
 
@@ -424,4 +438,29 @@ namespace ige::scene
         gContactAddedCallback = &PhysicManager::collisionCallback;
     }
 
+    //! Serialize
+    void PhysicManager::to_json(json &j) const
+    {
+        Component::to_json(j);
+        j["deform"] = isDeformable();
+        j["numIter"] = getNumIteration();
+        j["timeStep"] = getFixedTimeStep();
+        j["maxSupStep"] = getFrameMaxSubStep();
+        j["timeRatio"] = getFrameUpdateRatio();
+        j["gravity"] = PhysicHelper::from_btVector3(getGravity());
+        j["debug"] = isShowDebug();
+    }
+
+    //! Deserialize
+    void PhysicManager::from_json(const json &j)
+    {
+        setDeformable(j.value("deform", false));
+        setNumIteration(j.value("numIter", 10.f));
+        setFixedTimeStep(j.value("timeStep", 1 / 240.f));
+        setFrameMaxSubStep(j.value("maxSupStep", 4));
+        setFrameUpdateRatio(j.value("timeRatio", 1.f));
+        setGravity(PhysicHelper::to_btVector3(j.value("gravity", Vec3(0.f, -9.81f, 0.f))));
+        setShowDebug(j.value("debug", false));
+        Component::from_json(j);
+    }
 } // namespace ige::scene

@@ -10,6 +10,7 @@
 #include "components/TransformComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/FigureComponent.h"
+#include "utils/ShapeDrawer.h"
 
 #include <Python.h>
 
@@ -71,6 +72,9 @@ namespace ige::scene
 
             Py_Initialize();
 
+            // Initialize shape drawer
+            ShapeDrawer::initialize();
+
             m_bInitialized = true;
         }
         if(m_currScene) m_currScene->update(dt);
@@ -88,7 +92,12 @@ namespace ige::scene
 
     void SceneManager::render()
     {
-        if (m_currScene) m_currScene->render();
+        if (m_currScene)
+        {
+            ShapeDrawer::setViewProjectionMatrix(RenderContext::InstancePtr()->GetRenderViewProjectionMatrix());
+            m_currScene->render();
+            ShapeDrawer::flush();
+        }
     }
 
     std::shared_ptr<Scene> SceneManager::createScene(const std::string& name)

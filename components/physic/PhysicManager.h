@@ -11,6 +11,7 @@
 #include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
 
 #include "scene/SceneObject.h"
+#include "components/Component.h"
 #include "components/physic/PhysicObject.h"
 #include "components/physic/PhysicSoftBody.h"
 #include "components/physic/PhysicConstraint.h"
@@ -20,6 +21,8 @@
 
 namespace ige::scene
 {
+    class BulletDebugRender;
+
     struct RaycastHit
     {
         const btCollisionObject* object;
@@ -57,19 +60,22 @@ namespace ige::scene
     };
 
     /**
-     * Class PhysicManager: manage physic simulation
+     * Class PhysicManager: manage physic simulation. Should be added to the root node.
      */
-    class PhysicManager : public Singleton<PhysicManager>
+    class PhysicManager : public Component
     {
     public:
         //! Constructor
-        PhysicManager();
+        PhysicManager(SceneObject& owner, int numIteration = 10, bool deformable = true);
 
         //! Destructor
         virtual ~PhysicManager();
 
+        //! Get name
+        std::string getName() const override { return "PhysicManager"; }
+
         //! Initialize
-        bool initialize(int numIteration = 10, bool deformable = true);
+        bool initialize();
 
         //! Clear world
         void clear();
@@ -97,32 +103,33 @@ namespace ige::scene
         //! Contact pair test
         std::vector<ContactTestResult> contactPairTest(btCollisionObject* objectA, btCollisionObject* objectB, int group = btBroadphaseProxy::DefaultFilter, int mask = btBroadphaseProxy::AllFilter);
 
-        //! Check deformable
-        bool isDeformable() { return m_bDeformable; }
-
-        //! Number of iteration
-        int getNumIteration() { return m_numIteration; }
-        void setNumIteration(int numIteration) { m_numIteration = numIteration; }
-
-        //! Frame update ratio (speedup/slower effects)
-        float getFrameUpdateRatio() { return m_frameUpdateRatio; };
-        void setFrameUpdateRatio(float ratio) { m_frameUpdateRatio = ratio; }
-
-        //! Frame max simulation sub step
-        int getFrameMaxSubStep() { return m_frameMaxSubStep; }
-        void setFrameMaxSubStep(int nSteps) { m_frameMaxSubStep = nSteps; }
-
-        //! Fixed time steps
-        float getFixedTimeStep() { return m_fixedTimeStep; }
-        void setFixedTimeStep(float timeStep) { m_fixedTimeStep = timeStep; }
-
-        //! Gravity
-        const btVector3 &getGravity() { return m_gravity; }
-        void setGravity(const btVector3 &gravity) { m_gravity = gravity; }
-
         //! Deformable
         bool isDeformable() const { return m_bDeformable; }
         void setDeformable(bool deformable = true);
+
+        //! Number of iteration
+        int getNumIteration() const { return m_numIteration; }
+        void setNumIteration(int numIteration) { m_numIteration = numIteration; }
+
+        //! Fixed time steps
+        float getFixedTimeStep() CONST { return m_fixedTimeStep; }
+        void setFixedTimeStep(float timeStep) { m_fixedTimeStep = timeStep; }
+
+        //! Frame max simulation sub step
+        int getFrameMaxSubStep() const { return m_frameMaxSubStep; }
+        void setFrameMaxSubStep(int nSteps) { m_frameMaxSubStep = nSteps; }
+
+        //! Frame update ratio (speedup/slower effects)
+        float getFrameUpdateRatio() CONST { return m_frameUpdateRatio; };
+        void setFrameUpdateRatio(float ratio) { m_frameUpdateRatio = ratio; }
+
+        //! Gravity
+        const btVector3 &getGravity() const { return m_gravity; }
+        void setGravity(const btVector3 &gravity) { m_gravity = gravity; }
+
+        //! Render debug
+        bool isShowDebug() const { return m_bShowDebug; }
+        void setShowDebug(bool debug = true) { m_bShowDebug = debug; }
 
     protected:
         //! Collision callback
@@ -141,6 +148,11 @@ namespace ige::scene
         void onActivated(PhysicConstraint* constraint);
         void onDeactivated(PhysicConstraint* constraint);
 
+        //! Serialize
+        virtual void to_json(json &j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json &j) override;
     protected:
         //! Physic world
         std::unique_ptr<btDiscreteDynamicsWorld> m_world = nullptr;
@@ -177,5 +189,11 @@ namespace ige::scene
 
         //! Physic objects list
         std::vector<PhysicObject*> m_physicObjects;
+
+        //! Debug renderer
+        std::unique_ptr<BulletDebugRender> m_debugRenderer = nullptr;
+
+        //! Render debug
+        bool m_bShowDebug = false;
     };
 } // namespace ige::scene

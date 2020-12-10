@@ -7,6 +7,8 @@
 
 namespace ige::scene
 {
+    class AudioManager;
+
     /**
      * Class AudioSource
      */
@@ -18,6 +20,10 @@ namespace ige::scene
 
         //! Get name
         virtual std::string getName() const override { return "AudioSource"; }
+
+        //! Cache AudioManager
+        AudioManager* getManager() const { return m_manager; }
+        void setManager(AudioManager* manager) { m_manager = manager; }
 
         //! Enable/disable
         void setEnabled(bool enable = true) override;
@@ -161,5 +167,8 @@ namespace ige::scene
 
         //! Doppler factor
         float m_dopplerFactor = 1.f;
+
+        //! Cache audio manager
+        AudioManager* m_manager = nullptr;
     };
 } // namespace ige::scene

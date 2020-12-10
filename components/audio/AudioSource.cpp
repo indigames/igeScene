@@ -1,6 +1,6 @@
 
 #include "components/audio/AudioSource.h"
-#include "systems/audio/AudioManager.h"
+#include "components/audio/AudioManager.h"
 #include "scene/SceneObject.h"
 
 #include <soloud.h>
@@ -20,10 +20,17 @@ namespace ige::scene
     AudioSource::AudioSource(SceneObject &owner, const std::string &path, bool stream)
         : Component(owner), m_bIsStream(stream)
     {
+        // Register audio manager
+        auto manager = getOwner()->getRoot()->getComponent<AudioManager>();
+        setManager(manager ? manager.get() : getOwner()->getRoot()->addComponent<AudioManager>().get());
+
+        // Set path
         if (!path.empty())
         {
             setPath(path);
         }
+
+        // Invoke created event
         m_onCreatedEvent.invoke(*this);
     }
 
@@ -32,6 +39,7 @@ namespace ige::scene
     {
         m_onDestroyedEvent.invoke(*this);
         m_audioSource = nullptr;
+        m_manager = nullptr;
     }
 
     //! Set enabled
@@ -62,7 +70,7 @@ namespace ige::scene
             m_path = relPath;
             m_audioSource = nullptr;
 
-            auto engine = AudioManager::getInstance()->getEngine();
+            auto engine = getManager()->getEngine();
             if (m_bIsStream)
             {
                 auto source = std::make_unique<SoLoud::WavStream>();
@@ -110,7 +118,7 @@ namespace ige::scene
                 m_audioSource->setLooping(m_bIsLooped);
             if (!isStopped())
             {
-                auto engine = AudioManager::getInstance()->getEngine();
+                auto engine = getManager()->getEngine();
                 engine->setLooping(m_handle, m_bIsLooped);
             }
         }
@@ -130,7 +138,7 @@ namespace ige::scene
             m_volume = volume;
             if (!isStopped())
             {
-                auto engine = AudioManager::getInstance()->getEngine();
+                auto engine = getManager()->getEngine();
                 engine->fadeVolume(m_handle, m_volume, fadingTime);
             }
         }
@@ -165,7 +173,7 @@ namespace ige::scene
             m_pan = pan;
             if (!isStopped())
             {
-                auto engine = AudioManager::getInstance()->getEngine();
+                auto engine = getManager()->getEngine();
                 engine->setPan(m_handle, m_pan);
             }
         }
@@ -184,7 +192,7 @@ namespace ige::scene
             m_velocity = velocity;
             if (!isStopped())
             {
-                auto engine = AudioManager::getInstance()->getEngine();
+                auto engine = getManager()->getEngine();
                 engine->set3dSourceVelocity(m_handle, m_velocity[0], m_velocity[1], m_velocity[2]);
             }
         }
@@ -209,7 +217,7 @@ namespace ige::scene
 
             if (!isStopped())
             {
-                auto engine = AudioManager::getInstance()->getEngine();
+                auto engine = getManager()->getEngine();
                 engine->set3dSourceMinMaxDistance(m_handle, m_minDistance, m_maxDistance);
             }
         }
@@ -232,7 +240,7 @@ namespace ige::scene
             }
             if (!isStopped())
             {
-                auto engine = AudioManager::getInstance()->getEngine();
+                auto engine = getManager()->getEngine();
                 engine->set3dSourceMinMaxDistance(m_handle, m_minDistance, m_maxDistance);
             }
         }
@@ -255,7 +263,7 @@ namespace ige::scene
             }
             if (!isStopped())
             {
-                auto engine = AudioManager::getInstance()->getEngine();
+                auto engine = getManager()->getEngine();
                 engine->set3dSourceAttenuation(m_handle, m_attenuationModel, m_attenuationRollOffFactor);
             }
         }
@@ -278,7 +286,7 @@ namespace ige::scene
             }
             if (!isStopped())
             {
-                auto engine = AudioManager::getInstance()->getEngine();
+                auto engine = getManager()->getEngine();
                 engine->set3dSourceAttenuation(m_handle, m_attenuationModel, m_attenuationRollOffFactor);
             }
         }
@@ -301,7 +309,7 @@ namespace ige::scene
             }
             if (!isStopped())
             {
-                auto engine = AudioManager::getInstance()->getEngine();
+                auto engine = getManager()->getEngine();
                 engine->set3dSourceDopplerFactor(m_handle, m_dopplerFactor);
             }
         }
@@ -310,7 +318,7 @@ namespace ige::scene
     //! Play
     void AudioSource::play()
     {
-        auto engine = AudioManager::getInstance()->getEngine();
+        auto engine = getManager()->getEngine();
         auto position = getOwner()->getTransform()->getWorldPosition();
         m_handle = engine->play3d(*m_audioSource.get(), position[0], position[0], position[2], m_velocity[0], m_velocity[1], m_velocity[2], m_volume);
         engine->setPan(m_handle, m_pan);
@@ -321,7 +329,7 @@ namespace ige::scene
     {
         if (!isStopped())
         {
-            auto engine = AudioManager::getInstance()->getEngine();
+            auto engine = getManager()->getEngine();
             engine->seek(m_handle, seconds);
         }
     }
@@ -331,7 +339,7 @@ namespace ige::scene
     {
         if (!isStopped())
         {
-            auto engine = AudioManager::getInstance()->getEngine();
+            auto engine = getManager()->getEngine();
             engine->setPause(m_handle, true);
         }
     }
@@ -341,7 +349,7 @@ namespace ige::scene
     {
         if (!isStopped())
         {
-            auto engine = AudioManager::getInstance()->getEngine();
+            auto engine = getManager()->getEngine();
             engine->setPause(m_handle, false);
         }
     }
@@ -351,7 +359,7 @@ namespace ige::scene
     {
         if (!isStopped())
         {
-            auto engine = AudioManager::getInstance()->getEngine();
+            auto engine = getManager()->getEngine();
             engine->stop(m_handle);
             m_handle = 0;
         }
@@ -360,7 +368,7 @@ namespace ige::scene
     //! Check if sound paused
     bool AudioSource::isPaused()
     {
-        auto engine = AudioManager::getInstance()->getEngine();
+        auto engine = getManager()->getEngine();
         return (!isStopped()) && engine->getPause(m_handle);
     }
 

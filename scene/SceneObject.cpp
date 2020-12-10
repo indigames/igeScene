@@ -208,7 +208,7 @@ namespace ige::scene
     {
         for (auto &comp : m_components)
         {
-            comp = nullptr;
+            if(comp) comp = nullptr;
         }
         m_components.clear();
         return true;

@@ -1,4 +1,5 @@
 #include "components/physic/PhysicObject.h"
+#include "components/physic/PhysicManager.h"
 #include "components/physic/PhysicConstraint.h"
 #include "components/physic/FixedConstraint.h"
 #include "components/physic/HingeConstraint.h"
@@ -22,12 +23,16 @@ namespace ige::scene
     PhysicObject::PhysicObject(SceneObject &owner)
         : Component(owner)
     {
+        // Register manager
+        auto manager = getOwner()->getRoot()->getComponent<PhysicManager>();
+        setManager(manager ? manager.get() : getOwner()->getRoot()->addComponent<PhysicManager>().get());
     }
 
     //! Destructor
     PhysicObject::~PhysicObject()
     {
         destroy();
+        m_manager = nullptr;
     }
 
     //! Initialization

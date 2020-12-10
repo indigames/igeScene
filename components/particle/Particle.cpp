@@ -1,6 +1,6 @@
 
 #include "components/particle/Particle.h"
-#include "systems/particle/ParticleManager.h"
+#include "components/particle/ParticleManager.h"
 #include "scene/SceneObject.h"
 
 #include "utils/filesystem.h"
@@ -16,10 +16,17 @@ namespace ige::scene
     Particle::Particle(SceneObject &owner, const std::string &path)
         : Component(owner)
     {
+        // Register manager
+        auto manager = getOwner()->getRoot()->getComponent<ParticleManager>();
+        setManager(manager ? manager.get() : getOwner()->getRoot()->addComponent<ParticleManager>().get());
+
+        // Set path
         if (!path.empty())
         {
             setPath(path);
         }
+
+        // Invoke created event
         m_onCreatedEvent.invoke(this);
     }
 
@@ -29,10 +36,10 @@ namespace ige::scene
         m_onDestroyedEvent.invoke(this);
         if (m_effect)
         {
-            stop();
             m_effect->Release();
             m_effect = nullptr;
         }
+        m_manager = nullptr;
     }
 
     //! Set enabled
@@ -68,7 +75,7 @@ namespace ige::scene
             Effekseer::ConvertUtf8ToUtf16(path, 512, m_path.c_str());
 
             // Create new effect
-            m_effect = Effekseer::Effect::Create(ParticleManager::getInstance()->getManager(), (const EFK_CHAR*)path);
+            m_effect = Effekseer::Effect::Create(getManager()->getEffekseerManager(), (const EFK_CHAR*)path);
 
             if(isEnabled())
                 play();
@@ -80,7 +87,7 @@ namespace ige::scene
     {
         m_layer = layer;
         if (m_handle != -1)
-            ParticleManager::getInstance()->getManager()->SetLayer(m_handle, m_layer);
+            getManager()->getEffekseerManager()->SetLayer(m_handle, m_layer);
     }
 
     //! Group mask
@@ -88,7 +95,7 @@ namespace ige::scene
     {
         m_groupMask = mask;
         if (m_handle != -1)
-            ParticleManager::getInstance()->getManager()->SetGroupMask(m_handle, m_groupMask);
+            getManager()->getEffekseerManager()->SetGroupMask(m_handle, m_groupMask);
     }
 
     //! Speed
@@ -96,21 +103,21 @@ namespace ige::scene
     {
         m_speed = speed;
         if (m_handle != -1)
-            ParticleManager::getInstance()->getManager()->SetSpeed(m_handle, m_speed);
+            getManager()->getEffekseerManager()->SetSpeed(m_handle, m_speed);
     }
 
     //! Time scale
     void Particle::setTimeScale(float timeScale)
     {
         if (m_handle != -1)
-            ParticleManager::getInstance()->getManager()->SetTimeScaleByHandle(m_handle, timeScale);
+            getManager()->getEffekseerManager()->SetTimeScaleByHandle(m_handle, timeScale);
     }
 
     //! Auto Drawing
     void Particle::setAutoDrawing(bool autoDraw)
     {
         if (m_handle != -1)
-            ParticleManager::getInstance()->getManager()->SetAutoDrawing(m_handle, autoDraw);
+            getManager()->getEffekseerManager()->SetAutoDrawing(m_handle, autoDraw);
     }
 
     //! Dynamic input parameter
@@ -122,7 +129,7 @@ namespace ige::scene
         {
             for (int i = 0; i < 4; ++i)
             {
-                ParticleManager::getInstance()->getManager()->SetDynamicInput(m_handle, i, m_dynamicInputParameter[i]);
+                getManager()->getEffekseerManager()->SetDynamicInput(m_handle, i, m_dynamicInputParameter[i]);
             }
         }
     }
@@ -134,7 +141,7 @@ namespace ige::scene
 
         if (m_handle != -1)
         {
-            ParticleManager::getInstance()->getManager()->SetAllColor(m_handle, { (uint8_t)(m_color[0] * 255), (uint8_t)(m_color[1] * 255), (uint8_t)(m_color[2] * 255), (uint8_t)(m_color[3] * 255) });
+            getManager()->getEffekseerManager()->SetAllColor(m_handle, { (uint8_t)(m_color[0] * 255), (uint8_t)(m_color[1] * 255), (uint8_t)(m_color[2] * 255), (uint8_t)(m_color[3] * 255) });
         }
     }
 
@@ -160,7 +167,7 @@ namespace ige::scene
 
         if (m_handle)
         {
-            ParticleManager::getInstance()->getManager()->SetTargetLocation(m_handle, m_targetLocation[0], m_targetLocation[1], m_targetLocation[2]);
+            getManager()->getEffekseerManager()->SetTargetLocation(m_handle, m_targetLocation[0], m_targetLocation[1], m_targetLocation[2]);
         }
     }
 
@@ -174,7 +181,7 @@ namespace ige::scene
 
             // Create handle
             auto position = getOwner()->getTransform()->getWorldPosition();
-            m_handle = ParticleManager::getInstance()->getManager()->Play(m_effect, { position[0], position[1], position[2] });
+            m_handle = getManager()->getEffekseerManager()->Play(m_effect, { position[0], position[1], position[2] });
             m_effect->AddRef();
 
             // Apply configuration
@@ -194,21 +201,21 @@ namespace ige::scene
     void Particle::pause()
     {
         if (m_handle != -1)
-            ParticleManager::getInstance()->getManager()->SetPaused(m_handle, true);
+            getManager()->getEffekseerManager()->SetPaused(m_handle, true);
     }
 
     //! Resume
     void Particle::resume()
     {
         if (m_handle != -1)
-            ParticleManager::getInstance()->getManager()->SetPaused(m_handle, false);
+            getManager()->getEffekseerManager()->SetPaused(m_handle, false);
     }
 
     //! Stop
     void Particle::stop()
     {
         if (m_handle != -1)
-            ParticleManager::getInstance()->getManager()->StopEffect(m_handle);
+            getManager()->getEffekseerManager()->StopEffect(m_handle);
         m_handle = -1;
     }
 
@@ -223,7 +230,7 @@ namespace ige::scene
 
             if(m_lastPosition != position)
             {
-                ParticleManager::getInstance()->getManager()->SetLocation(m_handle, position[0], position[1], position[2]);
+                getManager()->getEffekseerManager()->SetLocation(m_handle, position[0], position[1], position[2]);
                 m_lastPosition = position;
             }
 
@@ -232,14 +239,14 @@ namespace ige::scene
             {
                 Vec3 euler;
                 vmath_quatToEuler(rotation.P(), euler.P());
-                ParticleManager::getInstance()->getManager()->SetRotation(m_handle, euler[0], euler[1], euler[2]);
+                getManager()->getEffekseerManager()->SetRotation(m_handle, euler[0], euler[1], euler[2]);
                 m_lastRotation = rotation;
             }
 
             auto scale = transform->getWorldScale();
             if (m_lastScale != scale)
             {
-                ParticleManager::getInstance()->getManager()->SetScale(m_handle, scale[0], scale[1], scale[2]);
+                getManager()->getEffekseerManager()->SetScale(m_handle, scale[0], scale[1], scale[2]);
                 m_lastScale = scale;
             }
         }

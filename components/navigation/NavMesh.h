@@ -277,6 +277,10 @@ namespace ige::scene
         EPartitionType getPartitionType() const { return m_partitionType; }
         void setPartitionType(EPartitionType type) { m_partitionType = type; }
 
+        //! Debug
+        bool isShowDebug() const { return m_bShowDebug; }
+        void setShowDebug(bool show = true) { m_bShowDebug = show; }
+
         //! Number of tiles in X direction
         int getNumTilesX() const { return m_numTilesX; }
 
@@ -331,6 +335,9 @@ namespace ige::scene
 
         //! Update
         virtual void onUpdate(float dt) override;
+
+        //! Render
+        virtual void onRender() override;
 
     protected:
         //! Detour navigation mesh
@@ -398,5 +405,8 @@ namespace ige::scene
 
         //! NavAreas
         std::vector<NavArea*> m_areas;
+
+        //! Debug
+        bool m_bShowDebug = false;
     };
 } // namespace ige::scene

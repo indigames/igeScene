@@ -1,10 +1,10 @@
 #include "components/physic/PhysicSoftBody.h"
+#include "components/physic/PhysicManager.h"
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
 #include "scene/SceneObject.h"
 #include "scene/SceneManager.h"
-#include "systems/physic/PhysicManager.h"
 
 #include "utils/PhysicHelper.h"
 
@@ -253,7 +253,7 @@ namespace ige::scene
         if (m_body)
             m_body.reset();
 
-        auto world = PhysicManager::getInstance()->getDeformableWorld();
+        auto world = getManager()->getDeformableWorld();
 
         Figure *figure = nullptr;
         std::vector<Vec3> positions;

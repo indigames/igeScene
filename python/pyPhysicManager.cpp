@@ -3,7 +3,10 @@
 #include "python/pySceneObject.h"
 #include "python/pyPhysicObject.h"
 
-#include "systems/physic/PhysicManager.h"
+#include "components/physic/PhysicManager.h"
+#include "scene/SceneManager.h"
+#include "scene/Scene.h"
+#include "scene/SceneObject.h"
 #include "utils/PhysicHelper.h"
 
 #include "pyRigidBody.h"
@@ -33,21 +36,17 @@ namespace ige::scene
     // Get singleton instance
     PyObject *PhysicManager_getInstance()
     {
-        auto *self = PyObject_New(PyObject_PhysicManager, &PyTypeObject_PhysicManager);
-        self->physicManager = PhysicManager::getInstance().get();
-        return (PyObject *)self;
-    }
-
-    // Initialize
-    PyObject *PhysicManager_initialize(PyObject_PhysicManager *self, PyObject *value)
-    {
-        int numIter = 4, deformable = 0;
-        if (PyArg_ParseTuple(value, "ii", &numIter, &deformable))
+        if (SceneManager::getInstance()->getCurrentScene())
         {
-            self->physicManager->initialize(numIter, deformable);
-            Py_RETURN_TRUE;
+            auto physicManager = SceneManager::getInstance()->getCurrentScene()->getRoot()->getComponent<PhysicManager>();
+            if (physicManager)
+            {
+                auto* self = PyObject_New(PyObject_PhysicManager, &PyTypeObject_PhysicManager);
+                self->physicManager = SceneManager::getInstance()->getCurrentScene()->getRoot()->getComponent<PhysicManager>().get();
+                return (PyObject*)self;
+            }
         }
-        Py_RETURN_FALSE;
+        Py_RETURN_NONE;
     }
 
     // Clear
@@ -459,7 +458,6 @@ namespace ige::scene
     // Methods
     PyMethodDef PhysicManager_methods[] = {
         {"getInstance", (PyCFunction)PhysicManager_getInstance, METH_NOARGS | METH_STATIC, PhysicManager_getInstance_doc},
-        {"initialize", (PyCFunction)PhysicManager_initialize, METH_VARARGS, PhysicManager_initialize_doc},
         {"clear", (PyCFunction)PhysicManager_clear, METH_NOARGS, PhysicManager_clear_doc},
         {"isDeformable", (PyCFunction)PhysicManager_isDeformable, METH_NOARGS, PhysicManager_isDeformable_doc},
         {"rayTestClosest", (PyCFunction)PhysicManager_rayTestClosest, METH_VARARGS, PhysicManager_rayTestClosest_doc},

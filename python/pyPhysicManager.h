@@ -3,7 +3,7 @@
 #include <Python.h>
 
 #include "components/Component.h"
-#include "systems/physic/PhysicManager.h"
+#include "components/physic/PhysicManager.h"
 
 namespace ige::scene
 {
@@ -24,9 +24,6 @@ namespace ige::scene
 
     // Get instance
     PyObject *PhysicManager_getInstance();
-
-    // Initialize
-    PyObject *PhysicManager_initialize(PyObject_PhysicManager *self, PyObject *value);
 
     // Clear
     PyObject *PhysicManager_clear(PyObject_PhysicManager *self);

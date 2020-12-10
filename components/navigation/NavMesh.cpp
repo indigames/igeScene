@@ -9,6 +9,7 @@
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
 #include "scene/SceneObject.h"
+#include "utils/ShapeDrawer.h"
 
 #define DEFAULT_TILE_SIZE 64
 #define DEFAULT_CELL_SIZE 0.3f
@@ -1058,9 +1059,56 @@ namespace ige::scene
     //! Update
     void NavMesh::onUpdate(float dt)
     {
-
+        
     }
 
+    //! Render
+    void NavMesh::onRender()
+    {
+        if (isShowDebug())
+        {
+            // Render navigation mesh
+            if (!getNavMesh())
+                return;
+
+            const dtNavMesh* mesh = getNavMesh();
+            const auto& worldTransform = getOwner()->getRoot()->getTransform()->getWorldMatrix();
+
+            for (int i = 0; i < mesh->getMaxTiles(); ++i)
+            {
+                const auto* tile = mesh->getTile(i);
+                if (!tile || !tile->header)
+                    continue;
+
+                for (int j = 0; j < tile->header->polyCount; ++j)
+                {
+                    auto poly = tile->polys + j;
+                    for (int k = 0; k < poly->vertCount; ++k)
+                    {
+                        auto start = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[k] * 3]);
+                        auto end = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(k + 1) % poly->vertCount] * 3]);
+                        ShapeDrawer::drawLine(start, end, { 1.f, 1.f, 0.f });
+                    }
+                }
+            }
+
+            // Render off-mesh links
+            std::vector<Component*> offMeshLinkComps;
+            getOwner()->getRoot()->getComponentsRecursive(offMeshLinkComps, "OffMeshLink");
+
+            std::vector<OffMeshLink*> offMeshLinks;
+            for (auto comp : offMeshLinkComps)
+            {
+                auto link = static_cast<OffMeshLink*>(comp);
+                if (link && link->isEnabled() && link->getEndPoint())
+                {
+                    const auto& start = link->getOwner()->getTransform()->getWorldPosition();
+                    const auto& end = link->getEndPoint()->getTransform()->getWorldPosition();;
+                    ShapeDrawer::drawLine(start, end, { 1.f, 0.f, 0.f });
+                }
+            }
+        }
+    }
 
     //! Serialize
     void NavMesh::to_json(json &j) const
@@ -1081,6 +1129,7 @@ namespace ige::scene
         j["sampleError"] = getDetailSampleMaxError();
         j["padding"] = getPadding();
         j["partType"] = (int)getPartitionType();
+        j["debug"] = isShowDebug();
     }
 
     //! Deserialize
@@ -1101,6 +1150,7 @@ namespace ige::scene
         setDetailSampleMaxError(j.value("sampleError", DEFAULT_DETAIL_SAMPLE_MAX_ERROR));
         setPadding(j.value("padding", Vec3(0.f, 0.f, 0.f)));
         setPartitionType((EPartitionType)j.value("partType", (int)EPartitionType::WATERSHED));
+        setShowDebug(j.value("debug", false));
         Component::from_json(j);
 
         // Build after load

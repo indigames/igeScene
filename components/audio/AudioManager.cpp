@@ -1,4 +1,4 @@
-#include "systems/audio/AudioManager.h"
+#include "components/audio/AudioManager.h"
 
 #include <optional>
 #include <algorithm>
@@ -7,7 +7,8 @@
 
 namespace ige::scene
 {
-    AudioManager::AudioManager()
+    AudioManager::AudioManager(SceneObject &owner)
+        : Component(owner)
     {
         m_engine = std::make_unique<SoLoud::Soloud>();
         m_engine->init();
@@ -124,4 +125,18 @@ namespace ige::scene
         return {};
     }
 
+    //! Serialize
+    void AudioManager::to_json(json &j) const
+    {
+        Component::to_json(j);
+        j["gVol"] = getGlobalVolume();
+
+    }
+
+    //! Deserialize
+    void AudioManager::from_json(const json &j)
+    {
+        setGlobalVolume(j.value("gVol", 1.f));
+        Component::from_json(j);
+    }
 } // namespace ige::scene
