@@ -105,7 +105,7 @@ PyDoc_STRVAR(Scene_getEnvironment_doc,
 PyDoc_STRVAR(Scene_raycast_doc,
 			 "Perform raycast to get the hit object and hit position.\n"
 			 "\n"
-			 "Scene().raycast(screenPos: Vec2, camera: Camera, distance: float, screenSize: Vec2)\n"
+			 "Scene().raycast(screenPos: Vec2, camera: Camera, distance: float)\n"
 			 "\n"
 			 "Parameters:\n"
 			 "----------\n"
@@ -113,10 +113,8 @@ PyDoc_STRVAR(Scene_raycast_doc,
 			 "      Screen position (2d screen space)\n"
 			 "    camera: pyxieCamera, CameraComponent, Camera SceneObject\n"
 			 "      Camera to perform raycast\n"
-			 "    distance: float\n"
+			 "    distance: float [Optional]\n"
 			 "      Max distance. Default: 10000.f\n"
-			 "    screenSize: Vec2\n"
-			 "      Screen size. Default: (-1.f, -1.f) to use GameSize.\n"
 			 "Return:\n"
 			 "----------\n"
 			 "    Tuple: [object, position]\n");

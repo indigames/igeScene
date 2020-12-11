@@ -220,10 +220,9 @@ namespace ige::scene
     {
         PyObject *screenPosObj;
         PyObject *cameraObj;
-        PyObject *screenSizeObj = nullptr;
         float distance = 10000.f;
 
-        if (!PyArg_ParseTuple(args, "OO|iO", &screenPosObj, &cameraObj, &distance, &screenSizeObj))
+        if (!PyArg_ParseTuple(args, "OO|i", &screenPosObj, &cameraObj, &distance))
             return NULL;
 
         int d;
@@ -257,20 +256,7 @@ namespace ige::scene
         if (!camera)
             return NULL;
 
-        Vec2 screenSize(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameH());
-        if(screenSizeObj != nullptr)
-        {
-            int d;
-            float buff[4];
-            auto v = pyObjToFloat(screenPosObj, buff, d);
-            if (v)
-            {
-                screenSize.X(v[0]);
-                screenSize.Y(v[1]);
-            }
-        }
-
-        auto hit = self->scene->raycast(screenPos, camera, distance, screenSize);
+        auto hit = self->scene->raycast(screenPos, camera, distance);
         if(hit.first == nullptr)
             Py_RETURN_NONE;
 

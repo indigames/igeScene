@@ -590,14 +590,28 @@ namespace ige::scene
     }
 
     //! Raycast
-    std::pair<SceneObject*, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance, const Vec2& screenSize)
+    std::pair<SceneObject*, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance)
     {
         std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());
         if(!camera)
             return hit;
 
-        auto screenWidth = screenSize.X() > 0 ? screenSize.X() : SystemInfo::Instance().GetGameW();
-        auto screenHeight = screenSize.Y() > 0 ? screenSize.Y() : SystemInfo::Instance().GetGameH();
+        auto size = getWindowSize();
+        float w = size.X() > 0 ? size.X() : SystemInfo::Instance().GetGameW();
+        float h = size.Y() > 0 ? size.Y() : SystemInfo::Instance().GetGameH();
+
+        auto pos = getWindowPosition();
+        float dx = pos.X();
+        float dy = pos.Y();
+
+        float x = screenPos.X() - dx / 2.f;
+        float y = screenPos.Y() + dy / 2.f;
+
+        if(size.X() > 0)
+            x = x + (SystemInfo::Instance().GetGameW() - (w + dx)) / 2.f;
+
+        if(size.Y() > 0)
+            y = y - (SystemInfo::Instance().GetGameH() - (h + dy)) / 2.f;
 
         Mat4 proj;
         camera->GetProjectionMatrix(proj);
@@ -605,7 +619,7 @@ namespace ige::scene
         Mat4 viewInv;
         camera->GetViewInverseMatrix(viewInv);
 
-        auto ray = RayOBBChecker::screenPosToWorldRay(screenPos.X(), screenPos.Y(), screenWidth, screenHeight, viewInv, proj);
+        auto ray = RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
         float distance, minDistance = maxDistance;
 
         for (const auto& obj : m_objects)

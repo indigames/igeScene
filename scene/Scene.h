@@ -135,8 +135,16 @@ namespace ige::scene
         void setShadowTextureSize(const Vec2& size);
 
         //! Raycast: return first hit point from single ray
-        std::pair<SceneObject*, Vec3> raycast(const Vec2& screenPos, Camera* camera, float maxDistance = 10000.f, const Vec2& screenSize = { -1.f, -1.f });
-       
+        std::pair<SceneObject*, Vec3> raycast(const Vec2& screenPos, Camera* camera, float maxDistance = 10000.f);
+
+        //! Window position
+        const Vec2& getWindowPosition() const { return m_windowPosition; }
+        void setWindowPosition(const Vec2& pos) { m_windowPosition = pos; }
+
+        //! Window size
+        const Vec2& getWindowSize() const { return m_windowSize; }
+        void setWindowSize(const Vec2& size) { m_windowSize = size; }
+
     protected:
         void populateTestData(const std::shared_ptr<SceneObject>& parent = nullptr, int num = 1000);
 
@@ -184,5 +192,11 @@ namespace ige::scene
 
         //! Spot light index
         bool m_spotLights[MAX_SPOT_LIGHT_NUMBER] = { false };
+
+        //! Cache window position
+        Vec2 m_windowPosition = {0.f, 0.f};
+
+        //! Cache window size
+        Vec2 m_windowSize = {-1.f, -1.f};
     };
 }
