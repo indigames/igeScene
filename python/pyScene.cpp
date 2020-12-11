@@ -281,7 +281,7 @@ namespace ige::scene
         vmath_cpy(hit.second.P(), 3, hitPos->v);
         hitPos->d = 3;
 
-        PyObject *res = Py_BuildValue("{s:O,s:O,s:O,s:i}",
+        PyObject *res = Py_BuildValue("{s:O,s:O}",
                                       "hitObject", hitObj,
                                       "hitPosition", hitPos);
         Py_XDECREF(hitObj);
