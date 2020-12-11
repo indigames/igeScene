@@ -109,7 +109,7 @@ namespace ige::scene
         int m_maxParticleNumber = 2000;
 
         //! Number of threads
-        int m_numThreads = 2;
+        int m_numThreads = 1;
 
         //! Particles
         std::vector<Particle *> m_particles;

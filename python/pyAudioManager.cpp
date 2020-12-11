@@ -2,6 +2,10 @@
 #include "python/pyAudioManager_doc_en.h"
 #include "python/pyAudioListener.h"
 
+#include "scene/SceneManager.h"
+#include "scene/Scene.h"
+#include "scene/SceneObject.h"
+
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
@@ -12,9 +16,9 @@ namespace ige::scene
 {
     void AudioManager_dealloc(PyObject_AudioManager *self)
     {
-        if (self && self->audioManager)
+        if (self && self->component)
         {
-            self->audioManager = nullptr;
+            self->component = nullptr;
         }
         PyObject_Del(self);
     }
@@ -27,17 +31,25 @@ namespace ige::scene
     // Get singleton instance
     PyObject *AudioManager_getInstance()
     {
-        auto *self = PyObject_New(PyObject_AudioManager, &PyTypeObject_AudioManager);
-        self->audioManager = AudioManager::getInstance().get();
-        return (PyObject *)self;
+        if (SceneManager::getInstance()->getCurrentScene())
+        {
+            auto audioManager = SceneManager::getInstance()->getCurrentScene()->getRoot()->getComponent<AudioManager>();
+            if (audioManager)
+            {
+                auto* self = PyObject_New(PyObject_AudioManager, &PyTypeObject_AudioManager);
+                self->component = audioManager.get();
+                return (PyObject*)self;
+            }
+        }
+        Py_RETURN_NONE;
     }
 
     // getActiveListener
     PyObject *AudioManager_getActiveListener(PyObject_AudioManager *self)
     {
-        if(!self->audioManager->getActiveListener().has_value())
+        if(!self->component->getActiveListener().has_value())
             Py_RETURN_NONE;
-        auto listener = (*(self->audioManager->getActiveListener())).get();
+        auto listener = (*(self->component->getActiveListener())).get();
         auto *listenerObj = PyObject_New(PyObject_AudioListener, &PyTypeObject_AudioListener);
         listenerObj->component = &listener;
         return (PyObject *)listenerObj;
@@ -46,7 +58,7 @@ namespace ige::scene
     // globalVolume
     PyObject *AudioManager_getGlobalVolume(PyObject_AudioManager *self)
     {
-        return PyFloat_FromDouble(self->audioManager->getGlobalVolume());
+        return PyFloat_FromDouble(self->component->getGlobalVolume());
     }
 
     int AudioManager_setGlobalVolume(PyObject_AudioManager *self, PyObject *value)
@@ -54,7 +66,7 @@ namespace ige::scene
         float val;
         if (PyArg_ParseTuple(value, "f", &val))
         {
-            self->audioManager->setGlobalVolume(val);
+            self->component->setGlobalVolume(val);
             return 0;
         }
         return -1;
@@ -103,7 +115,7 @@ namespace ige::scene
         AudioManager_methods,                                   /* tp_methods */
         0,                                                      /* tp_members */
         AudioManager_getsets,                                   /* tp_getset */
-        0,                                                      /* tp_base */
+        &PyTypeObject_Component,                                /* tp_base */
         0,                                                      /* tp_dict */
         0,                                                      /* tp_descr_get */
         0,                                                      /* tp_descr_set */

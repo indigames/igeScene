@@ -56,6 +56,7 @@ namespace ige::scene
             self->component->setEnabled(val);
             return 0;
         }
+        return -1;
     }
 
     //! isLooped
@@ -72,6 +73,7 @@ namespace ige::scene
             self->component->setLoop(val);
             return 0;
         }
+        return -1;
     }
 
     //! isAutoDrawing
@@ -88,6 +90,7 @@ namespace ige::scene
             self->component->setAutoDrawing(val);
             return 0;
         }
+        return -1;
     }
 
     //! layer
@@ -104,6 +107,7 @@ namespace ige::scene
             self->component->setLayer(val);
             return 0;
         }
+        return -1;
     }
 
     //! groupMask
@@ -120,6 +124,7 @@ namespace ige::scene
             self->component->setGroupMask(val);
             return 0;
         }
+        return -1;
     }
 
     //! speed
@@ -136,6 +141,7 @@ namespace ige::scene
             self->component->setSpeed(val);
             return 0;
         }
+        return -1;
     }
 
     //! timeScale
@@ -152,6 +158,7 @@ namespace ige::scene
             self->component->setTimeScale(val);
             return 0;
         }
+        return -1;
     }
 
     //! targetLocation

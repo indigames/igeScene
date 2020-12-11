@@ -4,13 +4,14 @@
 
 #include "components/Component.h"
 #include "components/physic/PhysicManager.h"
+#include "python/pyComponent.h"
 
 namespace ige::scene
 {
     struct PyObject_PhysicManager
     {
-        PyObject_HEAD;
-        PhysicManager *physicManager;
+        PyObject_Component super;
+        PhysicManager *component;
     };
 
     // Type declaration

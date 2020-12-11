@@ -1,14 +1,15 @@
 #pragma once
 
 #include <Python.h>
-#include "systems/audio/AudioManager.h"
+#include "components/audio/AudioManager.h"
+#include "python/pyComponent.h"
 
 namespace ige::scene
 {
     struct PyObject_AudioManager
     {
-        PyObject_HEAD;
-        AudioManager *audioManager;
+        PyObject_Component super;
+        AudioManager *component;
     };
 
     // Type declaration

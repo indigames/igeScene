@@ -22,7 +22,7 @@ namespace ige::scene
     {
         if (self)
         {
-            self->physicManager = nullptr;
+            self->component = nullptr;
         }
         PyObject_Del(self);
     }
@@ -42,7 +42,7 @@ namespace ige::scene
             if (physicManager)
             {
                 auto* self = PyObject_New(PyObject_PhysicManager, &PyTypeObject_PhysicManager);
-                self->physicManager = SceneManager::getInstance()->getCurrentScene()->getRoot()->getComponent<PhysicManager>().get();
+                self->component = physicManager.get();
                 return (PyObject*)self;
             }
         }
@@ -52,14 +52,14 @@ namespace ige::scene
     // Clear
     PyObject *PhysicManager_clear(PyObject_PhysicManager *self)
     {
-        self->physicManager->clear();
+        self->component->clear();
         Py_RETURN_NONE;
     }
 
     // Get deformable
     PyObject *PhysicManager_isDeformable(PyObject_PhysicManager *self)
     {
-        return PyBool_FromLong(self->physicManager->isDeformable());
+        return PyBool_FromLong(self->component->isDeformable());
     }
 
     // Raytest closest
@@ -84,7 +84,7 @@ namespace ige::scene
             return NULL;
         auto end = PhysicHelper::to_btVector3(*((Vec3 *)v));
 
-        auto hit = self->physicManager->rayTestClosest(start, end, group, mask);
+        auto hit = self->component->rayTestClosest(start, end, group, mask);
         if (hit.object == nullptr)
             Py_RETURN_NONE;
 
@@ -131,12 +131,12 @@ namespace ige::scene
             return NULL;
         auto end = PhysicHelper::to_btVector3(*((Vec3 *)v));
 
-        auto hits = self->physicManager->rayTestAll(start, end, group, mask);
+        auto hits = self->component->rayTestAll(start, end, group, mask);
         PyObject *res = PyTuple_New(hits.size());
 
         for (int i = 0; i < hits.size(); ++i)
         {
-            auto hit = self->physicManager->rayTestClosest(start, end, group, mask);
+            auto hit = self->component->rayTestClosest(start, end, group, mask);
             if (hit.object == nullptr)
                 Py_RETURN_NONE;
 
@@ -205,7 +205,7 @@ namespace ige::scene
         if (object == nullptr)
             return PyTuple_New(0);
 
-        auto results = self->physicManager->contactTest(object, group, mask);
+        auto results = self->component->contactTest(object, group, mask);
         PyObject *pyResults = PyTuple_New(results.size());
         for (int i = 0; i < results.size(); ++i)
         {
@@ -315,7 +315,7 @@ namespace ige::scene
         if (objectA == nullptr || objectB == nullptr)
             return PyTuple_New(0);
 
-        auto results = self->physicManager->contactPairTest(objectA, objectB, group, mask);
+        auto results = self->component->contactPairTest(objectA, objectB, group, mask);
 
         PyObject *pyResults = PyTuple_New(results.size());
         for (int i = 0; i < results.size(); ++i)
@@ -366,7 +366,7 @@ namespace ige::scene
     PyObject *PhysicManager_getGravity(PyObject_PhysicManager *self)
     {
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(self->physicManager->getGravity()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(self->component->getGravity()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
@@ -379,14 +379,14 @@ namespace ige::scene
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->physicManager->setGravity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        self->component->setGravity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         return 0;
     }
 
     // Get number of iteration
     PyObject *PhysicManager_getNumIteration(PyObject_PhysicManager *self)
     {
-        return PyLong_FromLong(self->physicManager->getNumIteration());
+        return PyLong_FromLong(self->component->getNumIteration());
     }
 
     // Set number of iteration
@@ -395,7 +395,7 @@ namespace ige::scene
         int val;
         if (PyArg_ParseTuple(value, "i", &val))
         {
-            self->physicManager->setNumIteration(val);
+            self->component->setNumIteration(val);
             return 0;
         }
         return -1;
@@ -404,7 +404,7 @@ namespace ige::scene
     // Get frame update ratio (speedup/slower effects)
     PyObject *PhysicManager_getFrameUpdateRatio(PyObject_PhysicManager *self)
     {
-        return PyFloat_FromDouble(self->physicManager->getFrameUpdateRatio());
+        return PyFloat_FromDouble(self->component->getFrameUpdateRatio());
     }
 
     // Set frame update ratio
@@ -413,7 +413,7 @@ namespace ige::scene
         float val;
         if (PyArg_ParseTuple(value, "f", &val))
         {
-            self->physicManager->setFrameUpdateRatio(val);
+            self->component->setFrameUpdateRatio(val);
             return 0;
         }
         return -1;
@@ -422,7 +422,7 @@ namespace ige::scene
     // Get frame max simulation sub step
     PyObject *PhysicManager_getFrameMaxSubStep(PyObject_PhysicManager *self)
     {
-        return PyLong_FromLong(self->physicManager->getFrameMaxSubStep());
+        return PyLong_FromLong(self->component->getFrameMaxSubStep());
     }
 
     // Set frame max simulation sub step
@@ -431,7 +431,7 @@ namespace ige::scene
         int val;
         if (PyArg_ParseTuple(value, "i", &val))
         {
-            self->physicManager->setFrameMaxSubStep(val);
+            self->component->setFrameMaxSubStep(val);
             return 0;
         }
         return -1;
@@ -440,7 +440,7 @@ namespace ige::scene
     // Get fixed time steps
     PyObject *PhysicManager_getFixedTimeStep(PyObject_PhysicManager *self)
     {
-        return PyFloat_FromDouble(self->physicManager->getFixedTimeStep());
+        return PyFloat_FromDouble(self->component->getFixedTimeStep());
     }
 
     // Set fixed time steps
@@ -449,7 +449,7 @@ namespace ige::scene
         float val;
         if (PyArg_ParseTuple(value, "f", &val))
         {
-            self->physicManager->setFixedTimeStep(val);
+            self->component->setFixedTimeStep(val);
             return 0;
         }
         return -1;
@@ -506,7 +506,7 @@ namespace ige::scene
         PhysicManager_methods,                                   /* tp_methods */
         0,                                                       /* tp_members */
         PhysicManager_getsets,                                   /* tp_getset */
-        0,                                                       /* tp_base */
+        &PyTypeObject_Component,                                 /* tp_base */
         0,                                                       /* tp_dict */
         0,                                                       /* tp_descr_get */
         0,                                                       /* tp_descr_set */

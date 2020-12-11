@@ -18,14 +18,25 @@
 #include "python/pyUIImage.h"
 #include "python/pyUIText.h"
 #include "python/pyUITextField.h"
+#include "python/pyPhysicManager.h"
 #include "python/pyPhysicBox.h"
 #include "python/pyPhysicSphere.h"
 #include "python/pyPhysicCapsule.h"
 #include "python/pyPhysicMesh.h"
 #include "python/pyPhysicSoftBody.h"
+#include "python/pyAudioManager.h"
 #include "python/pyAudioListener.h"
 #include "python/pyAudioSource.h"
 #include "python/pyParticle.h"
+#include "python/pyParticleManager.h"
+#include "python/pyNavAgent.h"
+#include "python/pyNavAgentManager.h"
+#include "python/pyNavArea.h"
+#include "python/pyNavMesh.h"
+#include "python/pyNavObstacle.h"
+#include "python/pyNavigable.h"
+#include "python/pyDynamicNavMesh.h"
+#include "python/pyOffMeshLink.h"
 
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
@@ -346,6 +357,17 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
+            else if (type == "PhysicManager")
+            {
+                auto comp = self->sceneObject->addComponent<PhysicManager>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_PhysicManager, &PyTypeObject_PhysicManager);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
             else if (type == "PhysicBox")
             {
                 auto comp = self->sceneObject->addComponent<PhysicBox>();
@@ -401,6 +423,17 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
+            else if (type == "AudioManager")
+            {
+                auto comp = self->sceneObject->addComponent<AudioManager>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_AudioManager, &PyTypeObject_AudioManager);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
             else if (type == "AudioListener")
             {
                 auto comp = self->sceneObject->addComponent<AudioListener>();
@@ -429,6 +462,105 @@ namespace ige::scene
                 if (comp)
                 {
                     auto *compObj = PyObject_New(PyObject_Particle, &PyTypeObject_Particle);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "ParticleManager")
+            {
+                auto comp = self->sceneObject->addComponent<ParticleManager>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_ParticleManager, &PyTypeObject_ParticleManager);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "NavArea")
+            {
+                auto comp = self->sceneObject->addComponent<NavArea>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_NavArea, &PyTypeObject_NavArea);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "NavAgentr")
+            {
+                auto comp = self->sceneObject->addComponent<NavAgent>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_NavAgent, &PyTypeObject_NavAgent);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "NavAgentManager")
+            {
+                auto comp = self->sceneObject->addComponent<NavAgentManager>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_NavAgentManager, &PyTypeObject_NavAgentManager);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "Navigable")
+            {
+                auto comp = self->sceneObject->addComponent<Navigable>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_Navigable, &PyTypeObject_Navigable);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "NavMesh")
+            {
+                auto comp = self->sceneObject->addComponent<NavMesh>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_NavMesh, &PyTypeObject_NavMesh);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "NavObstacle")
+            {
+                auto comp = self->sceneObject->addComponent<NavObstacle>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_NavObstacle, &PyTypeObject_NavObstacle);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "OffMeshLink")
+            {
+                auto comp = self->sceneObject->addComponent<OffMeshLink>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_OffMeshLink, &PyTypeObject_OffMeshLink);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "DynamicNavMesh")
+            {
+                auto comp = self->sceneObject->addComponent<DynamicNavMesh>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_DynamicNavMesh, &PyTypeObject_DynamicNavMesh);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;
@@ -621,6 +753,17 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
+            else if (type == "PhysicManager")
+            {
+                auto comp = self->sceneObject->getComponent<PhysicManager>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_PhysicManager, &PyTypeObject_PhysicManager);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
             else if (type == "PhysicObject")
             {
                 auto comp = self->sceneObject->getComponent<PhysicObject>();
@@ -687,6 +830,17 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
+            else if (type == "AudioManager")
+            {
+                auto comp = self->sceneObject->getComponent<AudioManager>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_AudioManager, &PyTypeObject_AudioManager);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
             else if (type == "AudioListener")
             {
                 auto comp = self->sceneObject->getComponent<AudioListener>();
@@ -709,12 +863,111 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
+            else if (type == "ParticleManager")
+            {
+                auto comp = self->sceneObject->getComponent<ParticleManager>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_ParticleManager, &PyTypeObject_ParticleManager);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
             else if (type == "Particle")
             {
                 auto comp = self->sceneObject->getComponent<Particle>();
                 if (comp)
                 {
                     auto *compObj = PyObject_New(PyObject_Particle, &PyTypeObject_Particle);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "NavAgent")
+            {
+                auto comp = self->sceneObject->getComponent<NavAgent>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_NavAgent, &PyTypeObject_NavAgent);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "NavAgentManager")
+            {
+                auto comp = self->sceneObject->getComponent<NavAgentManager>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_NavAgentManager, &PyTypeObject_NavAgentManager);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "NavArea")
+            {
+                auto comp = self->sceneObject->getComponent<NavArea>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_NavArea, &PyTypeObject_NavArea);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "Navigable")
+            {
+                auto comp = self->sceneObject->getComponent<Navigable>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_Navigable, &PyTypeObject_Navigable);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "NavMesh")
+            {
+                auto comp = self->sceneObject->getComponent<NavMesh>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_NavMesh, &PyTypeObject_NavMesh);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "DynamicNavMesh")
+            {
+                auto comp = self->sceneObject->getComponent<DynamicNavMesh>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_DynamicNavMesh, &PyTypeObject_DynamicNavMesh);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "NavObstacle")
+            {
+                auto comp = self->sceneObject->getComponent<NavObstacle>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_NavObstacle, &PyTypeObject_NavObstacle);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "OffMeshLink")
+            {
+                auto comp = self->sceneObject->getComponent<OffMeshLink>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_OffMeshLink, &PyTypeObject_OffMeshLink);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;
