@@ -27,7 +27,7 @@ namespace ige::scene
         std::string getName() const override { return "AudioManager"; }
 
         //! Update
-        void onUpdate(float dt);
+        void onUpdate(float dt) override;
 
         //! Get global volume
         float getGlobalVolume() const;

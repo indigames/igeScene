@@ -52,7 +52,7 @@ void main()
     GLuint m_positionBufferID;
     GLuint m_colorBufferID;
     Mat4 m_viewProjection;
-    
+
     uint32_t ShapeDrawer::loadShaders(const char* vertexShaderCode, const char* fragmentShaderCode)
     {
         GLint result = GL_FALSE;
@@ -193,14 +193,14 @@ void main()
         glBindBuffer(GL_ARRAY_BUFFER, m_colorBufferID);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glLineWidth(1.f);
         glDrawArrays(GL_LINES, 0, numVertices);
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glBindVertexArray(0);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         glUseProgram(0);
         if (depthBackup)

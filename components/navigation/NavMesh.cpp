@@ -24,7 +24,6 @@
 #define DEFAULT_EDGE_MAX_ERROR 1.3f
 #define DEFAULT_DETAIL_SAMPLE_DISTANCE 6.0f
 #define DEFAULT_DETAIL_SAMPLE_MAX_ERROR 1.0f
-#define MAX_POLYS 2048
 
 #ifndef INFINITY
     #include <limits>
@@ -33,22 +32,6 @@
 
 namespace ige::scene
 {
-    //! Path finding data
-    struct FindPathData
-    {
-        // Polygons.
-        dtPolyRef polys[MAX_POLYS] = {};
-
-        // Polygons on the path.
-        dtPolyRef pathPolys[MAX_POLYS] = {};
-
-        // Points on the path.
-        Vec3 pathPoints[MAX_POLYS] = {};
-
-        // Flags on the path.
-        uint8_t pathFlags[MAX_POLYS] = {};
-    };
-
     NavBuildData::NavBuildData() : ctx(new rcContext(true)),
                                    heightField(nullptr),
                                    compactHeightField(nullptr)
@@ -1059,7 +1042,7 @@ namespace ige::scene
     //! Update
     void NavMesh::onUpdate(float dt)
     {
-        
+
     }
 
     //! Render

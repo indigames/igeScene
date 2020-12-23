@@ -44,10 +44,10 @@ namespace ige::scene
         std::string getName() const override { return "ParticleManager"; }
 
         //! Update
-        void onUpdate(float dt);
+        void onUpdate(float dt) override;
 
         //! Render.
-        void onRender();
+        void onRender() override;
 
         //! Get manager
         Effekseer::Manager *getEffekseerManager() { return m_manager; }

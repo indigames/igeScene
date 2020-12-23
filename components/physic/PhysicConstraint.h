@@ -46,7 +46,7 @@ namespace ige::scene
         virtual btRigidBody* getOwnerBody() const { return getOwner()->getBody(); }
 
         //! Get Other UUID
-        const std::string& getOtherUUID() const;
+        std::string getOtherUUID() const;
         void setOtherUUID(const std::string& other);
 
         //! Get other object

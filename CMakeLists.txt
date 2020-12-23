@@ -96,11 +96,17 @@ set(INCLUDES
     ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp
     ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp/Effekseer
     ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp/EffekseerRendererCommon
-    ${LIBS_DIR}/igeNavigation/include
+    ${LIBS_DIR}/igeEffekSeer/ThirdParty/Effekseer/Dev/Cpp
+    ${LIBS_DIR}/igeEffekSeer/ThirdParty/Effekseer/Dev/Cpp/Effekseer
+    ${LIBS_DIR}/igeEffekSeer/ThirdParty/Effekseer/Dev/Cpp/EffekseerRendererCommon
     ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/Recast/Include
     ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/Detour/Include
     ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/DetourCrowd/Include
     ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/DetourTileCache/Include
+    ${LIBS_DIR}/igeNavigation/3rd-party/recast/Recast/Include
+    ${LIBS_DIR}/igeNavigation/3rd-party/recast/Detour/Include
+    ${LIBS_DIR}/igeNavigation/3rd-party/recast/DetourCrowd/Include
+    ${LIBS_DIR}/igeNavigation/3rd-party/recast/DetourTileCache/Include
     ${LIBS_DIR}/imgui
     ${LIBS_DIR}/imgui/include
     ${LIBS_DIR}/SDL
@@ -157,6 +163,13 @@ if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 else()
     set(DEFINITIONS ${DEFINITIONS} _X86_)
 endif()
+
+if (ANDROID OR IOS)
+    set(DEFINITIONS ${DEFINITIONS} __EFFEKSEER_RENDERER_GLES3__)
+endif ()
+
+
+
 target_compile_definitions(${TARGET_NAME} PUBLIC ${DEFINITIONS})
 
 if(${APP_STYLE} MATCHES "SHARED")

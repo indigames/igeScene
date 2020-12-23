@@ -45,7 +45,7 @@ namespace ige::scene
         std::string getName() const override { return "NavAgentManager"; }
 
         //! Update
-        void onUpdate(float dt);
+        void onUpdate(float dt) override;
 
         //! NavMesh for which the crowd was created.
         NavMesh *getNavMesh() const { return m_navMesh; }

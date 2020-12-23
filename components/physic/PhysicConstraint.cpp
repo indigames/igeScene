@@ -71,7 +71,7 @@ namespace ige::scene
     }
 
     // Get other body object UUID
-    const std::string& PhysicConstraint::getOtherUUID() const
+    std::string PhysicConstraint::getOtherUUID() const
     {
         return m_other ? m_other->getOwner()->getUUID() : std::string();
     }

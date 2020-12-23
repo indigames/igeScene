@@ -15,14 +15,13 @@
 #include "components/physic/PhysicObject.h"
 #include "components/physic/PhysicSoftBody.h"
 #include "components/physic/PhysicConstraint.h"
+#include "components/physic/BulletDebugRender.h"
 
 #include "utils/Singleton.h"
 #include "event/Event.h"
 
 namespace ige::scene
 {
-    class BulletDebugRender;
-
     struct RaycastHit
     {
         const btCollisionObject* object;
@@ -81,7 +80,7 @@ namespace ige::scene
         void clear();
 
         //! Update
-        void onUpdate(float dt);
+        void onUpdate(float dt) override;
         void preUpdate();
         void postUpdate();
 
@@ -112,7 +111,7 @@ namespace ige::scene
         void setNumIteration(int numIteration) { m_numIteration = numIteration; }
 
         //! Fixed time steps
-        float getFixedTimeStep() CONST { return m_fixedTimeStep; }
+        float getFixedTimeStep() const { return m_fixedTimeStep; }
         void setFixedTimeStep(float timeStep) { m_fixedTimeStep = timeStep; }
 
         //! Frame max simulation sub step
@@ -120,7 +119,7 @@ namespace ige::scene
         void setFrameMaxSubStep(int nSteps) { m_frameMaxSubStep = nSteps; }
 
         //! Frame update ratio (speedup/slower effects)
-        float getFrameUpdateRatio() CONST { return m_frameUpdateRatio; };
+        float getFrameUpdateRatio() const { return m_frameUpdateRatio; };
         void setFrameUpdateRatio(float ratio) { m_frameUpdateRatio = ratio; }
 
         //! Gravity

@@ -10,6 +10,8 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
+#define MAX_POLYS 2048
+
 //! Declare Recast/Detour classes
 class dtNavMesh;
 class dtNavMeshQuery;
@@ -19,8 +21,21 @@ namespace ige::scene
 {
     class NavArea;
 
-    /// FindPathData: Data for path finding
-    struct FindPathData;
+    //! Path finding data
+    struct FindPathData
+    {
+        // Polygons.
+        dtPolyRef polys[MAX_POLYS] = {};
+
+        // Polygons on the path.
+        dtPolyRef pathPolys[MAX_POLYS] = {};
+
+        // Points on the path.
+        Vec3 pathPoints[MAX_POLYS] = {};
+
+        // Flags on the path.
+        uint8_t pathFlags[MAX_POLYS] = {};
+    };
 
     //! NavGeoInfo: Navigation Geometry Info
     struct NavGeoInfo

@@ -6,15 +6,11 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-//! Classes and structs for dynamic navigation system
-class dtTileCache;
-struct dtTileCacheAlloc;
-struct dtTileCacheCompressor;
-struct dtTileCacheMeshProcess;
-struct dtTileCacheLayer;
-struct dtTileCacheContourSet;
-struct dtTileCachePolyMesh;
-struct rcHeightfieldLayerSet;
+#include <DetourNavMesh.h>
+#include <DetourNavMeshBuilder.h>
+#include <DetourTileCache.h>
+#include <DetourTileCacheBuilder.h>
+#include <Recast.h>
 
 namespace ige::scene
 {

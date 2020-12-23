@@ -48,7 +48,7 @@ namespace ige::scene
         virtual void to_json(json &j) const override;
 
         //! Serialize finished event
-        virtual void onSerializeFinished(Scene &scene);
+        virtual void onSerializeFinished(Scene &scene) override;
 
         //! Create physic constraint
         virtual void create() override;
