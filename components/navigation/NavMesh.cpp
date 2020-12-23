@@ -257,6 +257,7 @@ namespace ige::scene
             auto navigable = static_cast<Navigable *>(navigables[i]);
             if (navigable->isEnabled())
             {
+                // Ensure transform updated
                 collectGeometries(geometryList, navigable->getOwner(), processedNodes, navigable->isRecursive());
             }
         }
@@ -321,6 +322,7 @@ namespace ige::scene
         {
             NavGeoInfo info;
             info.component = figure.get();
+            node->getTransform()->onUpdate(0.f);
             info.transform = inverse * node->getTransform()->getWorldMatrix();
             info.boundingBox = node->getTransform()->getWorldAABB().Transform(inverse);
             geometryList.push_back(info);
@@ -1135,9 +1137,16 @@ namespace ige::scene
         setPartitionType((EPartitionType)j.value("partType", (int)EPartitionType::WATERSHED));
         setShowDebug(j.value("debug", false));
         Component::from_json(j);
-
-        // Build after load
-        build();
     }
 
+    void NavMesh::onSerializeFinished(Scene* scene)
+    {
+        Component::onSerializeFinished(scene);
+
+        // Ensure transform updated
+        getOwner()->getTransform()->onUpdate(0.f);
+
+        // Build after load finish
+        build();
+    }
 } // namespace ige::scene

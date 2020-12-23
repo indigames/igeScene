@@ -1,14 +1,21 @@
 #include "components/Component.h"
 #include "scene/SceneObject.h"
+#include "scene/Scene.h"
 
 namespace ige::scene
 {
     //! Constructor
-    Component::Component(SceneObject &owner) : m_owner(owner) {}
+    Component::Component(SceneObject &owner)
+        : m_owner(owner)
+    {
+        m_serializeEventId = getOwner()->getScene()->getSerializeFinishedEvent().addListener(std::bind(&Component::onSerializeFinished, this, std::placeholders::_1));
+    }
 
     //! Destructor
     Component::~Component()
     {
+        getOwner()->getScene()->getSerializeFinishedEvent().removeListener(m_serializeEventId);
+
         if (getOwner()->isActive())
         {
             onDisable();

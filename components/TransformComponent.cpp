@@ -27,7 +27,7 @@ namespace ige::scene
         else
         {
             // Root object should not have bounding box
-            m_aabb = AABBox({0.f, 0.f, 0.f}, {0.f, 0.f, 0.f});
+            m_aabbWorld = m_aabb = AABBox({0.f, 0.f, 0.f}, {0.f, 0.f, 0.f});
         }
     }
 
@@ -350,9 +350,6 @@ namespace ige::scene
 
     void TransformComponent::updateAabb()
     {
-        if (!SceneManager::getInstance()->isEditor())
-            return;
-
         auto figureComp = getOwner()->getComponent<FigureComponent>();
         if (figureComp && figureComp->getFigure())
         {
@@ -380,6 +377,10 @@ namespace ige::scene
                     Vec3 aabbMin, aabbMax;
                     uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
                     m_aabb = { aabbMin, aabbMax };
+                }
+                else
+                {
+                    m_aabb = { {0.f, 0.f, 0.f}, {0.f, 0.f, 0.f} };
                 }
             }
         }

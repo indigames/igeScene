@@ -104,7 +104,7 @@ namespace ige::scene
         virtual void from_json(const json &j);
 
         //! Serialize finished event
-        virtual void onSerializeFinished(Scene &scene);
+        virtual void onSerializeFinished(Scene *scene);
 
     protected:
         //! On created event

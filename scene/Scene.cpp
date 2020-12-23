@@ -14,6 +14,8 @@
 #include "components/EnvironmentComponent.h"
 #include "components/light/AmbientLight.h"
 #include "components/light/DirectionalLight.h"
+#include "components/light/PointLight.h"
+#include "components/light/SpotLight.h"
 #include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
@@ -672,7 +674,7 @@ namespace ige::scene
         j.at("objId").get_to(m_nextObjectID);
 
         // Notify serialize finished
-        getSerializeFinishedEvent().invoke(*this);
+        getSerializeFinishedEvent().invoke(this);
 
         // Set active camera
         if (getActiveCamera() == nullptr)

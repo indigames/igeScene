@@ -46,7 +46,7 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void FixedConstraint::onSerializeFinished(Scene &scene)
+    void FixedConstraint::onSerializeFinished(Scene *scene)
     {
         PhysicConstraint::onSerializeFinished(scene);
     }

@@ -118,7 +118,7 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void SpringConstraint::onSerializeFinished(Scene &scene)
+    void SpringConstraint::onSerializeFinished(Scene *scene)
     {
         setLowerLimit(PhysicHelper::to_btVector3(m_json.value("low", Vec3(1.f, 1.f, 1.f))));
         setUpperLimit(PhysicHelper::to_btVector3(m_json.value("up", Vec3(0.f, 0.f, 0.f))));

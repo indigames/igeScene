@@ -105,7 +105,7 @@ namespace ige::scene
         //! Internal event
         Event<Resource*>& getResourceAddedEvent() { return m_resourceAddedEvent; }
         Event<Resource*>& getResourceRemovedEvent() { return m_resourceRemovedEvent; }
-        Event<Scene&>& getSerializeFinishedEvent() { return m_serializeFinishedEvent; }
+        Event<Scene*>& getSerializeFinishedEvent() { return m_serializeFinishedEvent; }
 
         //! Resource added/removed event
         void onResourceAdded(Resource* resource);
@@ -164,7 +164,7 @@ namespace ige::scene
         //! Internal events
         Event<Resource*> m_resourceAddedEvent;
         Event<Resource*> m_resourceRemovedEvent;
-        Event<Scene&> m_serializeFinishedEvent;
+        Event<Scene*> m_serializeFinishedEvent;
 
         //! Cache active camera
         CameraComponent* m_activeCamera = nullptr;

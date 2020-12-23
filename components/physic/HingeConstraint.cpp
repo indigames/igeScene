@@ -101,7 +101,7 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void HingeConstraint::onSerializeFinished(Scene &scene)
+    void HingeConstraint::onSerializeFinished(Scene *scene)
     {
         setAnchor(PhysicHelper::to_btVector3(m_json.value("anchor", Vec3(0.f, 0.f, 0.f))));
         setAxis1(PhysicHelper::to_btVector3(m_json.value("axis1", Vec3(0.f, 1.f, 0.f))));

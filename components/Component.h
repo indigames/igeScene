@@ -8,6 +8,7 @@
 
 namespace ige::scene
 {
+    class Scene;
     class SceneObject;
 
     /**
@@ -75,6 +76,9 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json &j);
 
+        //! Serialize finished event
+        virtual void onSerializeFinished(Scene* scene) {}
+
         //! Reference to owner object
         SceneObject &m_owner;
 
@@ -83,6 +87,9 @@ namespace ige::scene
 
         //! Skip serialize (editor properties)
         bool m_bSkipSerialize = false;
+
+        //! Cache serialize event id
+        uint64_t m_serializeEventId = (uint64_t)(-1);
     };
 
     //! Serialize

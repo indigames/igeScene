@@ -122,7 +122,7 @@ namespace ige::scene
     }
 
     //! Serialization finished event
-    void PhysicConstraint::onSerializeFinished(Scene &scene)
+    void PhysicConstraint::onSerializeFinished(Scene *scene)
     {
         setType((ConstraintType)m_json.value("type", -1));
         setEnableCollisionBetweenBodies(m_json.value("enableCol", true));

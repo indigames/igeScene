@@ -404,7 +404,7 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void Dof6SpringConstraint::onSerializeFinished(Scene &scene)
+    void Dof6SpringConstraint::onSerializeFinished(Scene *scene)
     {
         // Linear limit
         setLinearLowerLimit(PhysicHelper::to_btVector3(m_json.value("lLow", Vec3(0.f, 0.f, 0.f))));

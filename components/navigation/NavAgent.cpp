@@ -192,13 +192,14 @@ namespace ige::scene
 
             if (isInCrowd())
             {
-                auto* agent = const_cast<dtCrowdAgent*>(getDetourCrowdAgent());
-                if (agent && agent->state == DT_CROWDAGENT_STATE_INVALID)
-                    agent->state = DT_CROWDAGENT_STATE_WALKING;
-
                 dtPolyRef nearestRef;
                 auto nearestPos = m_manager->findNearestPoint(pos, m_queryFilterType, &nearestRef);
                 m_manager->getCrowd()->requestMoveTarget(getAgentId(), nearestRef, nearestPos.P());
+
+                // Start moving
+                auto* agent = const_cast<dtCrowdAgent*>(getDetourCrowdAgent());
+                if (agent && agent->state == DT_CROWDAGENT_STATE_INVALID)
+                    agent->state = DT_CROWDAGENT_STATE_WALKING;
             }
         }
     }
