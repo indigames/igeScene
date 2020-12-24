@@ -9,8 +9,13 @@ using namespace pyxie;
 #include <DetourNavMesh.h>
 #include <DetourNavMeshBuilder.h>
 #include <DetourTileCache.h>
-#include <DetourTileCacheBuilder.h>
 #include <Recast.h>
+
+// Fix for MSVC Debug configuration
+#if defined(free)
+    #undef free
+#endif
+#include <DetourTileCacheBuilder.h>
 
 namespace ige::scene
 {

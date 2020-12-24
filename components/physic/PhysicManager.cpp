@@ -131,6 +131,7 @@ namespace ige::scene
             world->removeVehicle((btRaycastVehicle *)((*it).get()));
         }
         m_vehicles.clear();
+        m_collisionEvents.clear();
     }
 
 

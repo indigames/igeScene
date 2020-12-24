@@ -46,14 +46,17 @@ namespace ige::scene
     //! Initialization
     bool PhysicObject::destroy()
     {
+        // Deactivate
+        deactivate();
+
+        // Notify destroyed
+        getOnDestroyedEvent().invoke(this);
+
         // Remove all constraints
         removeAllConstraints();
 
         // Destroy body
         destroyBody();
-
-        // Notify destroyed
-        getOnDestroyedEvent().invoke(this);
 
         return true;
     }
