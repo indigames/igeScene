@@ -679,9 +679,15 @@ namespace ige::scene
         // Set active camera
         if (getActiveCamera() == nullptr)
         {
-            auto cam = getRoot()->getComponent<CameraComponent>();
-            if(cam)
-                setActiveCamera(cam.get());
+            auto camObj = findObjectByName("Default Camera");
+            if (camObj)
+            {
+                auto cam = camObj->getComponent<CameraComponent>();
+                if (cam)
+                {
+                    setActiveCamera(cam.get());
+                }
+            }
         }
     }
 }
