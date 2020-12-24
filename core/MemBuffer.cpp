@@ -6,12 +6,12 @@
 
 namespace ige::scene
 {
-    MemBuffer::MemBuffer(size_t size)
+    MemBuffer::MemBuffer(unsigned long size)
         : m_buffer(nullptr), m_size(size), m_position(0)
     {
         if(m_size > 0)
         {
-            m_buffer = new uint8_t[m_size];
+            m_buffer = new unsigned char[m_size];
         }
     }
 
@@ -24,11 +24,11 @@ namespace ige::scene
         }
     }
 
-    size_t MemBuffer::resize(size_t newSize)
+    unsigned long MemBuffer::resize(unsigned long newSize)
     {
         if(newSize > m_size)
         {
-            auto newBuffer = new uint8_t[newSize];
+            auto newBuffer = new unsigned char[newSize];
             if(m_buffer)
             {
                 memcpy(newBuffer, m_buffer, m_size);
@@ -41,7 +41,7 @@ namespace ige::scene
     }
 
     //! Read bytes
-    size_t MemBuffer::read(void* dest, size_t size)
+    unsigned long MemBuffer::read(void* dest, unsigned long size)
     {
         if (size + m_position > m_size)
             size = m_size - m_position;
@@ -54,7 +54,7 @@ namespace ige::scene
     }
 
     /// Seek
-    size_t MemBuffer::seek(size_t position)
+    unsigned long MemBuffer::seek(unsigned long position)
     {
         if (position > m_size)
             position = m_size;
@@ -63,7 +63,7 @@ namespace ige::scene
     }
 
     /// Write bytes
-    size_t MemBuffer::write(const void* data, size_t size)
+    unsigned long MemBuffer::write(const void* data, unsigned long size)
     {
         if (!size)
             return 0;
@@ -71,7 +71,7 @@ namespace ige::scene
         if (size + m_position > m_size)
             resize(size + m_position);
 
-        auto* srcPtr = (uint8_t*)data;
+        auto* srcPtr = (unsigned char*)data;
         auto* destPtr = &m_buffer[m_position];
         memcpy(destPtr, srcPtr, size);
         m_position += size;
