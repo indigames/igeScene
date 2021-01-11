@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 namespace ige::scene
 {
     //! MemBuffer: memory buffer
@@ -9,13 +7,13 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        MemBuffer(size_t size = 0);
+        MemBuffer(unsigned long size = 0);
 
         //! Destructor
         virtual ~MemBuffer();
 
         //! Size
-        size_t size() const { return m_size; }
+        unsigned long size() const { return m_size; }
 
         //! Check empty
         bool empty() const { return m_size == 0; }
@@ -24,40 +22,40 @@ namespace ige::scene
         bool isEof() const { return m_position >= m_size; }
 
         //! Read bytes. Return number of read bytes;
-        size_t read(void *dest, size_t size);
+        unsigned long read(void *dest, unsigned long size);
 
         //! Seek to position.
-        size_t seek(size_t position);
+        unsigned long seek(unsigned long position);
 
         //! Write bytes to the memory area.
-        size_t write(const void *data, size_t size);
+        unsigned long write(const void *data, unsigned long size);
 
         //! Read template
         template <typename T>
-        size_t read(T &t)
+        unsigned long read(T &t)
         {
             return read(&t, sizeof(T));
         }
 
         //! Write template
         template <typename T>
-        size_t write(const T &t)
+        unsigned long write(const T &t)
         {
             return write(reinterpret_cast<const void *>(&t), sizeof(T));
         }
 
     protected:
         //! Resize
-        virtual size_t resize(size_t size);
+        virtual unsigned long resize(unsigned long size);
 
     protected:
         //! Size
-        size_t m_size;
+        unsigned long m_size;
 
         //! Position
-        size_t m_position;
+        unsigned long m_position;
 
         //! Internal buffer
-        uint8_t *m_buffer;
+        unsigned char *m_buffer;
     };
 } // namespace ige::scene
