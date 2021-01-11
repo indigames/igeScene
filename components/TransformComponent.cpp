@@ -24,10 +24,11 @@ namespace ige::scene
             if (m_parent)
                 m_parent->addObserver(this);
         }
-        else
+
+        // Root object should not have bounding box
+        if (getOwner()->getParent() == nullptr)
         {
-            // Root object should not have bounding box
-            m_aabb = AABBox({0.f, 0.f, 0.f}, {0.f, 0.f, 0.f});
+            m_aabb = AABBox({0.f, 0.f, 0.f}, {-1.f, -1.f, -1.f});
         }
     }
 
@@ -350,6 +351,14 @@ namespace ige::scene
 
     void TransformComponent::updateAabb()
     {
+        // Ignore canvas object
+        if (getOwner()->getComponent<Canvas>() != nullptr)
+        {
+            m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
+            m_aabbWorld = m_aabb.Transform(getWorldMatrix());
+            return;
+        }
+
         auto figureComp = getOwner()->getComponent<FigureComponent>();
         if (figureComp && figureComp->getFigure())
         {
@@ -357,32 +366,32 @@ namespace ige::scene
             Vec3 aabbMin, aabbMax;
             figureComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
             m_aabb = { aabbMin, aabbMax };
-        }
-        else
-        {
-            auto spriteComp = getOwner()->getComponent<SpriteComponent>();
-            if (spriteComp && spriteComp->getFigure())
-            {
-                spriteComp->onUpdate(0.33f);
-                Vec3 aabbMin, aabbMax;
-                spriteComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
-                m_aabb = { aabbMin, aabbMax };
-            }
-            else
-            {
-                auto uiText = getOwner()->getComponent<UIText>();
-                if (uiText && uiText->getFigure())
-                {
-                    uiText->onUpdate(0.33f);
-                    Vec3 aabbMin, aabbMax;
-                    uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
-                    m_aabb = { aabbMin, aabbMax };
-                }
-            }
+            m_aabbWorld = m_aabb.Transform(getWorldMatrix());
+            return;
         }
 
-        // Recalculate world aabb
-        m_aabbWorld = m_aabb.Transform(getWorldMatrix());
+        auto spriteComp = getOwner()->getComponent<SpriteComponent>();
+        if (spriteComp && spriteComp->getFigure())
+        {
+            spriteComp->onUpdate(0.33f);
+            Vec3 aabbMin, aabbMax;
+            spriteComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+            m_aabb = { aabbMin, aabbMax };
+            m_aabbWorld = m_aabb.Transform(getWorldMatrix());
+            return;
+        }
+
+        auto uiText = getOwner()->getComponent<UIText>();
+        if (uiText && uiText->getFigure())
+        {
+            uiText->onUpdate(0.33f);
+            Vec3 aabbMin, aabbMax;
+            uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+            m_aabb = { aabbMin, aabbMax };
+            m_aabbWorld = m_aabb.Transform(getWorldMatrix());
+            return;
+        }
+
     }
 
     void TransformComponent::addObserver(TransformComponent *observer)
