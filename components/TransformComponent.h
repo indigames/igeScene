@@ -120,6 +120,9 @@ namespace ige::scene
         //! AABB in world space
         const AABBox& getWorldAABB() const { return m_aabbWorld; }
 
+        // Get Frame AABB in world space (use for )
+        const AABBox &getFrameAABB() const { return m_frameAABB; }
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -176,5 +179,16 @@ namespace ige::scene
 
         //! Cached aabb
         AABBox m_aabbWorld;
+
+        //! Cached frame aabb
+        AABBox m_frameAABB;
+        //! obj will not update frameAABB
+        bool m_bLockFrameAABB = false;
+
+        //using to access protected Member
+        friend class CameraComponent;
+        friend class LightComponent;
+        
+
     };
 } // namespace ige::scene

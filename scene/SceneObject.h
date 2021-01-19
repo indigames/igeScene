@@ -212,6 +212,8 @@ namespace ige::scene
 
         //! Cache isCanvas
         bool m_bIsCanvas = false;
+        
+        bool m_bIsCustomAABB = true;
     };
 
     //! Get component by type

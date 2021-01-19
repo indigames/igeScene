@@ -4,11 +4,12 @@
 using namespace pyxie;
 
 #include "components/Component.h"
+#include "components/LightComponent.h"
 
 namespace ige::scene
 {
     //! PointLight
-    class PointLight : public Component
+    class PointLight : public LightComponent
     {
     public:
         //! Constructor

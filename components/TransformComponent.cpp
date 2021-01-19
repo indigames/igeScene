@@ -30,6 +30,7 @@ namespace ige::scene
         {
             m_aabb = AABBox({0.f, 0.f, 0.f}, {-1.f, -1.f, -1.f});
         }
+        m_frameAABB = AABBox({ -5.f, -5.f, -5.f }, { 5.f, 5.f, 5.f });
     }
 
     TransformComponent::~TransformComponent()
@@ -367,6 +368,7 @@ namespace ige::scene
             figureComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
             m_aabb = { aabbMin, aabbMax };
             m_aabbWorld = m_aabb.Transform(getWorldMatrix());
+            m_frameAABB = m_bLockFrameAABB ? m_frameAABB : m_aabbWorld;
             return;
         }
 
@@ -378,6 +380,7 @@ namespace ige::scene
             spriteComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
             m_aabb = { aabbMin, aabbMax };
             m_aabbWorld = m_aabb.Transform(getWorldMatrix());
+            m_frameAABB = m_bLockFrameAABB ? m_frameAABB : m_aabbWorld;
             return;
         }
 
@@ -389,6 +392,7 @@ namespace ige::scene
             uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
             m_aabb = { aabbMin, aabbMax };
             m_aabbWorld = m_aabb.Transform(getWorldMatrix());
+            m_frameAABB = m_bLockFrameAABB ? m_frameAABB : m_aabbWorld;
             return;
         }
 
