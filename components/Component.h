@@ -69,6 +69,8 @@ namespace ige::scene
         //! Deserialize
         friend void from_json(const json &j, Component &obj);
 
+        uint64_t getInstanceId() { return m_instanceId; }
+
     protected:
         //! Serialize
         virtual void to_json(json &j) const;
@@ -90,6 +92,9 @@ namespace ige::scene
 
         //! Cache serialize event id
         uint64_t m_serializeEventId = (uint64_t)(-1);
+        
+        uint64_t m_instanceId;
+        static std::atomic<uint64_t> s_instanceID;
     };
 
     //! Serialize
