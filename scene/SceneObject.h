@@ -121,6 +121,7 @@ namespace ige::scene
         static Event<SceneObject &> &getAttachedEvent() { return s_attachedEvent; }
         static Event<SceneObject &> &getDetachedEvent() { return s_detachedEvent; }
         static Event<SceneObject &> &getSelectedEvent() { return s_selectedEvent; }
+        static Event<SceneObject&>& getDeselectedEvent() { return s_deselectedEvent; }
 
         //! Serialize
         void to_json(json &j);
@@ -200,6 +201,7 @@ namespace ige::scene
         static Event<SceneObject &> s_attachedEvent;
         static Event<SceneObject &> s_detachedEvent;
         static Event<SceneObject &> s_selectedEvent;
+        static Event<SceneObject&> s_deselectedEvent;
 
         //! Cache transform component
         std::shared_ptr<TransformComponent> m_transform = nullptr;
@@ -212,6 +214,8 @@ namespace ige::scene
 
         //! Cache isCanvas
         bool m_bIsCanvas = false;
+        
+        bool m_bIsCustomAABB = true;
     };
 
     //! Get component by type

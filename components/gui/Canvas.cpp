@@ -44,6 +44,9 @@ namespace ige::scene
     {
         m_canvasSize = canvasSize;
 
+        auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
+        setCanvasToViewportMatrix(transformToViewport);
+
         // Recompute transform
         auto transform = getOwner()->getRectTransform();
         transform->setTransformDirty();

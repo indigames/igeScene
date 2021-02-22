@@ -6,7 +6,7 @@ namespace ige::scene
 {
     //! Constructor
     PointLight::PointLight(SceneObject &owner)
-        : Component(owner)
+        : LightComponent(owner)
     {
         m_index = getOwner()->getScene()->acquirePointLight();
 

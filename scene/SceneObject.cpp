@@ -48,6 +48,7 @@ namespace ige::scene
     Event<SceneObject &> SceneObject::s_attachedEvent;
     Event<SceneObject &> SceneObject::s_detachedEvent;
     Event<SceneObject &> SceneObject::s_selectedEvent;
+    Event<SceneObject&> SceneObject::s_deselectedEvent;
 
     //! Constructor
     SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size, bool isCanvas)
@@ -340,6 +341,10 @@ namespace ige::scene
             if (m_isSelected)
             {
                 getSelectedEvent().invoke(*this);
+            }
+            else
+            {
+                getDeselectedEvent().invoke(*this);
             }
         }
 
