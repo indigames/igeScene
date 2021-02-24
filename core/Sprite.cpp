@@ -6,7 +6,7 @@
 namespace ige::scene
 {
     Sprite::Sprite(const std::string& path, const Vec2& size)
-        : m_figure(nullptr), m_size(size)
+        : m_figure(nullptr), m_size(size), m_tiling(1,1), m_offset(0,0), m_wrapMode(SamplerState::CLAMP)
     {
         setPath(path);
     }
@@ -39,6 +39,68 @@ namespace ige::scene
         }
     }
 
+    void Sprite::setTiling(const Vec2& value)
+    {
+        if (m_tiling != value)
+        {
+            m_tiling = value;
+
+            if (m_figure)
+            {
+                auto ow = m_offset.X();
+                auto oh = m_offset.Y();
+                auto tw = ow + m_tiling.X();
+                auto th = oh + m_tiling.Y();
+                const std::vector<float> uvs = { ow, th, tw, th, ow, oh, tw, oh };
+
+                auto meshIdx = m_figure->GetMeshIndex(GenerateNameHash("mesh"));
+                if (meshIdx == -1) return;
+                m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);
+            }
+        }
+    }
+
+    void Sprite::setOffset(const Vec2& value)
+    {
+        if (m_offset != value)
+        {
+            m_offset = value;
+
+            if (m_figure)
+            {
+                auto ow = m_offset.X();
+                auto oh = m_offset.Y();
+                auto tw = ow + m_tiling.X();
+                auto th = oh + m_tiling.Y();
+                const std::vector<float> uvs = { ow, th, tw, th, ow, oh, tw, oh };
+
+                auto meshIdx = m_figure->GetMeshIndex(GenerateNameHash("mesh"));
+                if (meshIdx == -1) return;
+                m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);
+            }
+        }
+    }
+
+    void Sprite::setWrapMode(const SamplerState::WrapMode& value) 
+    {
+        if (m_wrapMode != value)
+        {
+            m_wrapMode = value;
+
+            if (m_figure)
+            {
+                
+                int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
+                
+                const FigureMaterialParam* paramS = m_figure->GetMaterialParam(materialIdx, "ColorSampler");
+                FigureMaterialParam*& param = const_cast<FigureMaterialParam*&>(paramS);
+                param->sampler.samplerState.wrap_s = m_wrapMode;
+                param->sampler.samplerState.wrap_t = m_wrapMode;
+                m_figure->SetMaterialParam(materialIdx, "ColorSampler", &param->sampler);
+            }
+        }
+    }
+
     void Sprite::setPath(const std::string& path)
     {
         if(strcmp(m_path.c_str(), path.c_str()) != 0)
@@ -62,6 +124,8 @@ namespace ige::scene
                             texture = nullptr;
                         }
                     }
+
+                    m_texture = nullptr;
                 }
 
                 // Create figure if needed
@@ -72,19 +136,23 @@ namespace ige::scene
 
                     const std::vector<float> points = { -w,h,0.f, w,h,0.f, -w,-h,0.f, w,-h,0.f };
                     const std::vector<uint32_t> triangles = { 0, 2, 1, 1, 2, 3, 1, 2, 0, 3, 2, 1 };
-                    const std::vector<float> uvs = { 0.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f };
-
+                    //const std::vector<float> uvs = { 0.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f };
+                    auto ow = m_offset.X();
+                    auto oh = m_offset.Y();
+                    auto tw = ow + m_tiling.X();
+                    auto th = oh + m_tiling.Y();
+                    const std::vector<float> uvs = { ow, th, tw, th, ow, oh, tw, oh };
                     m_figure = GraphicsHelper::getInstance()->createMesh(points, triangles, path, uvs);
                     m_figure->WaitInitialize();
                 }
-
+                m_texture = ResourceCreator::Instance().NewTexture(m_path.c_str());
                 Sampler sampler;
                 sampler.samplerSlotNo = 0;
-                sampler.samplerState.wrap_s = SamplerState::CLAMP;
-                sampler.samplerState.wrap_t = SamplerState::CLAMP;
+                sampler.samplerState.wrap_s = m_wrapMode;
+                sampler.samplerState.wrap_t = m_wrapMode;
                 sampler.samplerState.minfilter = SamplerState::LINEAR;
                 sampler.samplerState.magfilter = SamplerState::LINEAR;
-                sampler.tex = ResourceCreator::Instance().NewTexture(m_path.c_str());
+                sampler.tex = m_texture;//ResourceCreator::Instance().NewTexture(m_path.c_str());
                 sampler.tex->WaitInitialize();
                 sampler.tex->WaitBuild();
 
@@ -96,7 +164,6 @@ namespace ige::scene
 
                 int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
                 m_figure->SetMaterialParam(materialIdx, "ColorSampler", &sampler);
-
                 const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
                 uint32_t blendVal[4] = { 1,0,0,0 };
                 m_figure->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, blendVal);

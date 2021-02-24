@@ -43,6 +43,18 @@ namespace ige::scene
         void setBillboard(bool isBillboard = true);
         const bool isBillboard() const { return m_bIsBillboard; }
 
+        //! Tiling
+        void setTiling(const Vec2& value);
+        const Vec2& getTiling() const { return m_sprite->getTiling(); }
+
+        //! Offset
+        void setOffset(const Vec2& value);
+        const Vec2& getOffset() const { return m_sprite->getOffset(); }
+
+        //! Offset
+        void setWrapMode(int value);
+        const SamplerState::WrapMode& getWrapMode() const { return m_sprite->getWrapMode(); }
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

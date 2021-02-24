@@ -100,18 +100,41 @@ namespace ige::scene
         }
     }
 
+    //! Set size
+    void SpriteComponent::setTiling(const Vec2& value)
+    {
+        m_sprite->setTiling(value);
+    }
+
+    //! Set size
+    void SpriteComponent::setOffset(const Vec2& value)
+    {
+        m_sprite->setOffset(value);
+    }
+
+    //! Wrap mode
+    void SpriteComponent::setWrapMode(int value)
+    {
+        m_sprite->setWrapMode((SamplerState::WrapMode)value);
+    }
+
+
     //! Serialize
     void SpriteComponent::to_json(json &j) const
     {
         Component::to_json(j);
         j["path"] = getPath();
         j["size"] = getSize();
+        j["tiling"] = getSize();
+        j["offset"] = getSize();
     }
 
     //! Deserialize
     void SpriteComponent::from_json(const json &j)
     {
         setSize(j.at("size"));
+        setTiling(j.at("tiling"));
+        setOffset(j.at("offset"));
         setPath(j.at("path"));
         Component::from_json(j);
     }

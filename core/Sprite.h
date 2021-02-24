@@ -21,10 +21,28 @@ namespace ige::scene
 
         EditableFigure* getFigure() { return m_figure; }
 
+        const Vec2& getTiling() { return m_tiling; }
+        void setTiling(const Vec2& value);
+
+        const Vec2& getOffset() { return m_offset; }
+        void setOffset(const Vec2& value);
+
+        const SamplerState::WrapMode& getWrapMode() { return m_wrapMode; }
+        void setWrapMode(const SamplerState::WrapMode& value);
     protected:
         std::string m_path;
         Vec2 m_texSize;
         Vec2 m_size;
+
+        //! UV Map Loop
+        Vec2 m_tiling;
+        //! UV Map Offset
+        Vec2 m_offset;
+
         EditableFigure* m_figure;
+        Texture* m_texture;
+
+        SamplerState::WrapMode m_wrapMode;
+
     };
 }
