@@ -28,6 +28,7 @@ namespace ige::scene
             if (getOwner()->getScene())
                 getOwner()->getScene()->getResourceRemovedEvent().invoke(m_sprite->getFigure());
         m_sprite = nullptr;
+        getOwner()->getTransform()->makeDirty();
     }
 
     //! Update
@@ -75,12 +76,15 @@ namespace ige::scene
             shaderDesc->SetBillboard(m_bIsBillboard);
             newFigure->SetShaderName(0, shaderDesc->GetValue());
         }
+
+        getOwner()->getTransform()->makeDirty();
     }
 
     //! Set size
     void SpriteComponent::setSize(const Vec2 &size)
     {
         m_sprite->setSize(size);
+        getOwner()->getTransform()->makeDirty();
     }
 
     //! Set billboard
@@ -100,19 +104,19 @@ namespace ige::scene
         }
     }
 
-    //! Set size
+    //! Set Tiling
     void SpriteComponent::setTiling(const Vec2& value)
     {
         m_sprite->setTiling(value);
     }
 
-    //! Set size
+    //! Set Offset
     void SpriteComponent::setOffset(const Vec2& value)
     {
         m_sprite->setOffset(value);
     }
 
-    //! Wrap mode
+    //! Set Wrap mode
     void SpriteComponent::setWrapMode(int value)
     {
         m_sprite->setWrapMode((SamplerState::WrapMode)value);
@@ -125,8 +129,9 @@ namespace ige::scene
         Component::to_json(j);
         j["path"] = getPath();
         j["size"] = getSize();
-        j["tiling"] = getSize();
-        j["offset"] = getSize();
+        j["tiling"] = getTiling();
+        j["offset"] = getOffset();
+        j["wrapmode"] = (int)getWrapMode();
     }
 
     //! Deserialize
@@ -135,6 +140,7 @@ namespace ige::scene
         setSize(j.at("size"));
         setTiling(j.at("tiling"));
         setOffset(j.at("offset"));
+        setWrapMode(j.at("wrapmode"));
         setPath(j.at("path"));
         Component::from_json(j);
     }

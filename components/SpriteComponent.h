@@ -51,7 +51,7 @@ namespace ige::scene
         void setOffset(const Vec2& value);
         const Vec2& getOffset() const { return m_sprite->getOffset(); }
 
-        //! Wrap Mode
+        //! WrapMode
         void setWrapMode(int value);
         const SamplerState::WrapMode& getWrapMode() const { return m_sprite->getWrapMode(); }
 

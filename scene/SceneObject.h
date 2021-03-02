@@ -214,11 +214,11 @@ namespace ige::scene
         Event<SceneObject &> m_transformChangedEvent;
 
         //! Public events
-        static Event<SceneObject &> s_destroyedEvent;
-        static Event<SceneObject &> s_createdEvent;
-        static Event<SceneObject &> s_attachedEvent;
-        static Event<SceneObject &> s_detachedEvent;
-        static Event<SceneObject &> s_selectedEvent;
+        static Event<SceneObject&> s_destroyedEvent;
+        static Event<SceneObject&> s_createdEvent;
+        static Event<SceneObject&> s_attachedEvent;
+        static Event<SceneObject&> s_detachedEvent;
+        static Event<SceneObject&> s_selectedEvent;
         static Event<SceneObject&> s_deselectedEvent;
 
         //! Cache transform component
@@ -270,7 +270,7 @@ namespace ige::scene
         if (found)
             return found;
         auto instance = std::make_shared<T>(*this, args...);
-        m_components.push_back(instance);
+        addComponent(instance);
         return instance;
     }
 } // namespace ige::scene
