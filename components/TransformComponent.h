@@ -7,6 +7,8 @@ using namespace pyxie;
 
 #include "components/Component.h"
 
+#include "core/Macros.h"
+
 namespace ige::scene
 {
 
@@ -123,6 +125,8 @@ namespace ige::scene
         // Get Frame AABB in world space (use for )
         const AABBox &getFrameAABB() const { return m_frameAABB; }
 
+        virtual void makeDirty();
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -188,7 +192,6 @@ namespace ige::scene
         //using to access protected Member
         friend class CameraComponent;
         friend class LightComponent;
-        
 
     };
 } // namespace ige::scene

@@ -7,6 +7,9 @@
 #include "scene/Scene.h"
 #include "scene/SceneManager.h"
 
+#include <functional>
+
+
 namespace ige::scene
 {
     TransformComponent::TransformComponent(SceneObject &owner, const Vec3 &pos, const Quat &rot, const Vec3 &scale)
@@ -38,6 +41,7 @@ namespace ige::scene
         if (m_parent)
             m_parent->removeObserver(this);
         m_parent = nullptr;
+
         notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
         m_observers.clear();
     }
@@ -357,6 +361,7 @@ namespace ige::scene
         {
             m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
             m_aabbWorld = m_aabb.Transform(getWorldMatrix());
+            m_frameAABB = m_aabbWorld;
             return;
         }
 
@@ -368,7 +373,6 @@ namespace ige::scene
             figureComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
             m_aabb = { aabbMin, aabbMax };
             m_aabbWorld = m_aabb.Transform(getWorldMatrix());
-            m_frameAABB = m_bLockFrameAABB ? m_frameAABB : m_aabbWorld;
             return;
         }
 
@@ -396,6 +400,16 @@ namespace ige::scene
             return;
         }
 
+        //! Reset Zero AABB
+        Vec3 aabbMin, aabbMax;
+        m_aabb = { aabbMin, aabbMax };
+        m_aabbWorld = m_aabb.Transform(getWorldMatrix());
+        m_frameAABB = m_bLockFrameAABB ? m_frameAABB : m_aabbWorld;
+    }
+
+    void TransformComponent::makeDirty() {
+        m_bWorldDirty = true;
+        m_bLocalDirty = true;
     }
 
     void TransformComponent::addObserver(TransformComponent *observer)

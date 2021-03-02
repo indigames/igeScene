@@ -21,4 +21,10 @@
 #endif //_FINAL
 #endif
 
+
+#define RAD_TO_DEGREE                   57.2957795f
+#define DEGREE_TO_RAD                   0.01745329f
+#define DEG360_TO_RAD                   6.2831844f
+
+
 #endif
