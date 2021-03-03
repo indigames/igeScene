@@ -43,7 +43,9 @@ elseif(APPLE)
     endif()
 endif()
 
-set(LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+if (NOT DEFINED LIBS_DIR)
+    set(LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+endif()
 
 set (PYTHON_INCLUDE_DIRS ${LIBS_DIR}/cpython/Include)
 list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/Include)
@@ -115,8 +117,8 @@ set(INCLUDES
     ${LIBS_DIR}/stb/include
     ${LIBS_DIR}/igeBullet
     ${LIBS_DIR}/igeBullet/include
-    ${LIBS_DIR}/igeBullet/bullet
-    ${LIBS_DIR}/igeBullet/include/bullet
+    ${LIBS_DIR}/bullet/include
+    ${LIBS_DIR}/bullet/include/src
 )
 
 if(APPLE)

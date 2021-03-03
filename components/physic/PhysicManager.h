@@ -5,8 +5,8 @@
 #include <string>
 #include <tuple>
 
-#include <bullet/btBulletDynamicsCommon.h>
-#include <bullet/btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
 

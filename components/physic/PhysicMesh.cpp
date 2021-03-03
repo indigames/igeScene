@@ -1,5 +1,5 @@
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "components/physic/PhysicMesh.h"
 #include "components/FigureComponent.h"

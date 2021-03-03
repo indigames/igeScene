@@ -1,8 +1,8 @@
 #pragma once
 
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
-#include <bullet/BulletSoftBody/btSoftBody.h>
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
+#include <BulletSoftBody/btSoftBody.h>
 
 #include "event/Event.h"
 

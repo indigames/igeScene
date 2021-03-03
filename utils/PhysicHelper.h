@@ -1,5 +1,5 @@
 #pragma once
-#include <bullet/btBulletCollisionCommon.h>
+#include <btBulletCollisionCommon.h>
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
