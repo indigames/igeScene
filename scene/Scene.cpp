@@ -632,7 +632,7 @@ namespace ige::scene
                 auto aabbTransform = Mat4::IdentityMat();
                 vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
                 vmath_mat_appendScale(aabbTransform.P(), transform->getWorldScale().P(), 4, 4, aabbTransform.P());
-                auto aabb = transform->getAABB().Transform(aabbTransform);
+                auto aabb = obj->getAABB().Transform(aabbTransform);
                 if (RayOBBChecker::checkIntersect(aabb, transform->getWorldMatrix(), distance, maxDistance))
                 {
                     if (minDistance > distance)

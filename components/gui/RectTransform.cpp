@@ -167,9 +167,6 @@ namespace ige::scene
             Mat3 rotationMatrix(columns[0], columns[1], columns[2]);
             m_worldRotation = Quat(rotationMatrix);
 
-            // Update aabb
-            updateAabb();
-
             // Fire transform changed event
             getOwner()->getTransformChangedEvent().invoke(*getOwner());
 

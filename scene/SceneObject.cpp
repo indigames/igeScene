@@ -72,11 +72,18 @@ namespace ige::scene
         // Update parent transform
         if (getParent())
             m_transform->setParent(getParent()->getTransform().get());
+
+        // Set AABB to default
+        m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
+        m_frameAABB = AABBox({ -5.f, -5.f, -5.f }, { 5.f, 5.f, 5.f });
+        getTransformChangedEvent().addListener(std::bind(&SceneObject::onTransformChanged, this, std::placeholders::_1));
     }
 
     //! Destructor
     SceneObject::~SceneObject()
     {
+        getTransformChangedEvent().removeAllListeners();
+
         setParent(nullptr);
         setCanvas(nullptr);
 
@@ -365,6 +372,64 @@ namespace ige::scene
     SceneObject* SceneObject::getRoot()
     {
         return m_scene ? m_scene->getRoot().get() : nullptr;
+    }
+
+    //! Transform changed event
+    void SceneObject::onTransformChanged(SceneObject& sceneObject)
+    {
+        updateAabb();
+    }
+
+    //! Update AABB
+    void SceneObject::updateAabb()
+    {
+        // Ignore canvas object
+        if (getComponent<Canvas>() != nullptr || getParent() == nullptr)
+        {
+            m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
+            m_aabbWorld = m_aabb.Transform(m_transform->getWorldMatrix());
+            return;
+        }
+
+        auto figureComp = getComponent<FigureComponent>();
+        if (figureComp && figureComp->getFigure())
+        {
+            figureComp->onUpdate(0.33f);
+            Vec3 aabbMin, aabbMax;
+            figureComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
+            m_aabb = { aabbMin, aabbMax };
+            m_aabbWorld = m_aabb.Transform(m_transform->getWorldMatrix());
+            m_frameAABB = m_bLockedFrameAABB ? m_frameAABB : m_aabbWorld;
+            return;
+        }
+
+        auto spriteComp = getComponent<SpriteComponent>();
+        if (spriteComp && spriteComp->getFigure())
+        {
+            spriteComp->onUpdate(0.33f);
+            Vec3 aabbMin, aabbMax;
+            spriteComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+            m_aabb = { aabbMin, aabbMax };
+            m_aabbWorld = m_aabb.Transform(m_transform->getWorldMatrix());
+            m_frameAABB = m_bLockedFrameAABB ? m_frameAABB : m_aabbWorld;
+            return;
+        }
+
+        auto uiText = getComponent<UIText>();
+        if (uiText && uiText->getFigure())
+        {
+            uiText->onUpdate(0.33f);
+            Vec3 aabbMin, aabbMax;
+            uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+            m_aabb = { aabbMin, aabbMax };
+            m_aabbWorld = m_aabb.Transform(m_transform->getWorldMatrix());
+            m_frameAABB = m_bLockedFrameAABB ? m_frameAABB : m_aabbWorld;
+            return;
+        }
+
+        m_aabb = AABBox({ 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
+        m_aabbWorld = m_aabb.Transform(m_transform->getWorldMatrix());
+        return;
     }
 
     //! Serialize

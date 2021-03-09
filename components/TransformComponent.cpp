@@ -24,13 +24,6 @@ namespace ige::scene
             if (m_parent)
                 m_parent->addObserver(this);
         }
-
-        // Root object should not have bounding box
-        if (getOwner()->getParent() == nullptr)
-        {
-            m_aabb = AABBox({0.f, 0.f, 0.f}, {-1.f, -1.f, -1.f});
-        }
-        m_frameAABB = AABBox({ -5.f, -5.f, -5.f }, { 5.f, 5.f, 5.f });
     }
 
     TransformComponent::~TransformComponent()
@@ -289,9 +282,6 @@ namespace ige::scene
 
         // Fire transform changed event
         getOwner()->getTransformChangedEvent().invoke(*getOwner());
-
-        // Update aabb
-        updateAabb();
     }
 
     void TransformComponent::updateWorldToLocal()
@@ -345,57 +335,6 @@ namespace ige::scene
 
         // Fire transform changed event
         getOwner()->getTransformChangedEvent().invoke(*getOwner());
-
-        // Update aabb
-        updateAabb();
-    }
-
-    void TransformComponent::updateAabb()
-    {
-        // Ignore canvas object
-        if (getOwner()->getComponent<Canvas>() != nullptr)
-        {
-            m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
-            m_aabbWorld = m_aabb.Transform(getWorldMatrix());
-            return;
-        }
-
-        auto figureComp = getOwner()->getComponent<FigureComponent>();
-        if (figureComp && figureComp->getFigure())
-        {
-            figureComp->onUpdate(0.33f);
-            Vec3 aabbMin, aabbMax;
-            figureComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
-            m_aabb = { aabbMin, aabbMax };
-            m_aabbWorld = m_aabb.Transform(getWorldMatrix());
-            m_frameAABB = m_bLockFrameAABB ? m_frameAABB : m_aabbWorld;
-            return;
-        }
-
-        auto spriteComp = getOwner()->getComponent<SpriteComponent>();
-        if (spriteComp && spriteComp->getFigure())
-        {
-            spriteComp->onUpdate(0.33f);
-            Vec3 aabbMin, aabbMax;
-            spriteComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
-            m_aabb = { aabbMin, aabbMax };
-            m_aabbWorld = m_aabb.Transform(getWorldMatrix());
-            m_frameAABB = m_bLockFrameAABB ? m_frameAABB : m_aabbWorld;
-            return;
-        }
-
-        auto uiText = getOwner()->getComponent<UIText>();
-        if (uiText && uiText->getFigure())
-        {
-            uiText->onUpdate(0.33f);
-            Vec3 aabbMin, aabbMax;
-            uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
-            m_aabb = { aabbMin, aabbMax };
-            m_aabbWorld = m_aabb.Transform(getWorldMatrix());
-            m_frameAABB = m_bLockFrameAABB ? m_frameAABB : m_aabbWorld;
-            return;
-        }
-
     }
 
     void TransformComponent::addObserver(TransformComponent *observer)
