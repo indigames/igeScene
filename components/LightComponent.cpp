@@ -8,10 +8,7 @@ namespace ige::scene
     LightComponent::LightComponent(SceneObject& owner)
         : Component(owner)
     {
-        auto transform = owner.getComponent<TransformComponent>();
-        if (transform) {
-            transform->m_bLockFrameAABB = true;
-        }
+        owner.setLockedFrameAABB(true);
     }
 
     //! Destructor

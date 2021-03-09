@@ -114,15 +114,6 @@ namespace ige::scene
         //! Update
         virtual void onUpdate(float dt) override;
 
-        //! Aabb
-        const AABBox &getAABB() const { return m_aabb; }
-
-        //! AABB in world space
-        const AABBox& getWorldAABB() const { return m_aabbWorld; }
-
-        // Get Frame AABB in world space (use for )
-        const AABBox &getFrameAABB() const { return m_frameAABB; }
-
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -148,9 +139,6 @@ namespace ige::scene
         //! Handle notification from parent
         virtual void onNotified(const ETransformMessage &message);
 
-        //! Update bounding box
-        virtual void updateAabb();
-
     protected:
         //! Local transform
         Vec3 m_localPosition;
@@ -173,22 +161,5 @@ namespace ige::scene
         //! Dirty flag
         bool m_bLocalDirty = false;
         bool m_bWorldDirty = false;
-
-        //! Cached aabb
-        AABBox m_aabb;
-
-        //! Cached aabb
-        AABBox m_aabbWorld;
-
-        //! Cached frame aabb
-        AABBox m_frameAABB;
-        //! obj will not update frameAABB
-        bool m_bLockFrameAABB = false;
-
-        //using to access protected Member
-        friend class CameraComponent;
-        friend class LightComponent;
-        
-
     };
 } // namespace ige::scene

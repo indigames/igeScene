@@ -12,11 +12,7 @@ namespace ige::scene
     {
         static int name_count = 0;
         m_camera = ResourceCreator::Instance().NewCamera((name + std::to_string(name_count++)).c_str(), nullptr);
-
-        auto transform = owner.getComponent<TransformComponent>();
-        if (transform) {
-            transform->m_bLockFrameAABB = true;
-        }
+        owner.setLockedFrameAABB(true);
     }
 
     //! Destructor

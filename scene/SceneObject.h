@@ -156,12 +156,30 @@ namespace ige::scene
         //! Get scene root
         SceneObject* getRoot();
 
+        //! Aabb
+        const AABBox& getAABB() const { return m_aabb; }
+
+        //! AABB in world space
+        const AABBox& getWorldAABB() const { return m_aabbWorld; }
+
+        //! Get Frame AABB in world space (use for )
+        const AABBox& getFrameAABB() const { return m_frameAABB; }
+
+        //! Set locked frame AABB
+        void setLockedFrameAABB(bool locked = true) { m_bLockedFrameAABB = locked; }
+
     protected:
         //! Helper to generate UUID
         std::string generateUUID(unsigned int len = 16);
 
         //! Set UUID
         inline void setUUID(const std::string& uuid) { m_uuid = uuid; }
+
+        //! Transform changed event
+        void onTransformChanged(SceneObject& sceneObject);
+
+        //! Update AABB
+        virtual void updateAabb();
 
     protected:
         //! Node ID
@@ -214,8 +232,18 @@ namespace ige::scene
 
         //! Cache isCanvas
         bool m_bIsCanvas = false;
-        
-        bool m_bIsCustomAABB = true;
+
+        //! Cached aabb
+        AABBox m_aabb;
+
+        //! Cached world aabb
+        AABBox m_aabbWorld;
+
+        //! Cached frame aabb
+        AABBox m_frameAABB;
+
+        //! Obj will not update frame AABB
+        bool m_bLockedFrameAABB = false;
     };
 
     //! Get component by type

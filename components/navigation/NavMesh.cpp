@@ -324,7 +324,7 @@ namespace ige::scene
             info.component = figure.get();
             node->getTransform()->onUpdate(0.f);
             info.transform = inverse * node->getTransform()->getWorldMatrix();
-            info.boundingBox = node->getTransform()->getWorldAABB().Transform(inverse);
+            info.boundingBox = node->getWorldAABB().Transform(inverse);
             geometryList.push_back(info);
         }
 
