@@ -29,6 +29,15 @@ namespace ige::scene
 
         const SamplerState::WrapMode& getWrapMode() { return m_wrapMode; }
         void setWrapMode(const SamplerState::WrapMode& value);
+
+        //! Enable alpha blending
+        const bool isAlphaBlendingEnable() const { return m_bIsAlphaBlendingEnable; }
+        void setAlphaBlendingEnable(bool enable = true);
+
+        //! Alpha blending operation
+        const int getAlphaBlendingOp() const { return m_alphaBlendingOp; }
+        void setAlphaBlendingOp(int op);
+
     protected:
         std::string m_path;
         Vec2 m_texSize;
@@ -36,13 +45,20 @@ namespace ige::scene
 
         //! UV Map Loop
         Vec2 m_tiling;
+
         //! UV Map Offset
         Vec2 m_offset;
 
         EditableFigure* m_figure;
         Texture* m_texture;
 
+        //! Wrap Mode
         SamplerState::WrapMode m_wrapMode;
 
+        //! Cache alpha blending state
+        bool m_bIsAlphaBlendingEnable = true;
+
+        //! Cache alpha blending operation (COL = 0, ADD = 1, SUB = 2, MUL = 3)
+        int m_alphaBlendingOp = 2;
     };
 }

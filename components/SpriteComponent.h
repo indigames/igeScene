@@ -51,9 +51,17 @@ namespace ige::scene
         void setOffset(const Vec2& value);
         const Vec2& getOffset() const { return m_sprite->getOffset(); }
 
-        //! Offset
+        //! Wrap Mode
         void setWrapMode(int value);
         const SamplerState::WrapMode& getWrapMode() const { return m_sprite->getWrapMode(); }
+
+        //! Alpha blending
+        const bool isAlphaBlendingEnable() const { return m_sprite && m_sprite->isAlphaBlendingEnable(); }
+        void setAlphaBlendingEnable(bool enable = true) { if (m_sprite) m_sprite->setAlphaBlendingEnable(enable); }
+
+        //! Alpha blending operation
+        const int getAlphaBlendingOp() const { return m_sprite ? m_sprite->getAlphaBlendingOp() : 0; }
+        void setAlphaBlendingOp(int op) { if (m_sprite) m_sprite->setAlphaBlendingOp(op); }
 
     protected:
         //! Serialize

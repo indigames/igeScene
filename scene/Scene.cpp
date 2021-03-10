@@ -254,13 +254,13 @@ namespace ige::scene
 
     void Scene::render()
     {
-        for (auto& obj : m_objects)
-            if (obj) obj->onRender();
-
         if (!SceneManager::getInstance()->isEditor() && m_activeCamera)
             m_activeCamera->onRender();
 
         m_showcase->Render();
+
+        for (auto& obj : m_objects)
+            if (obj) obj->onRender();
     }
 
     std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, bool isCanvas)

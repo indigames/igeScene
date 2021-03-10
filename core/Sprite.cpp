@@ -164,9 +164,60 @@ namespace ige::scene
 
                 int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
                 m_figure->SetMaterialParam(materialIdx, "ColorSampler", &sampler);
-                const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
+                const ShaderParameterInfo* blendParam = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
                 uint32_t blendVal[4] = { 1,0,0,0 };
-                m_figure->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, blendVal);
+                m_figure->SetMaterialState(materialIdx, (ShaderParameterKey)blendParam->key, blendVal);
+
+                const ShaderParameterInfo* blendOpParam = RenderContext::Instance().GetShaderParameterInfoByName("blend_func");
+                uint32_t blendOp[4] = { GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0,0 };
+                m_figure->SetMaterialState(materialIdx, (ShaderParameterKey)blendOpParam->key, blendOp);
+
+                const ShaderParameterInfo* blendEqParam = RenderContext::Instance().GetShaderParameterInfoByName("blend_equation");
+                uint32_t blendEq[4] = { GL_FUNC_ADD, 0,0,0 };
+                m_figure->SetMaterialState(materialIdx, (ShaderParameterKey)blendEqParam->key, blendEq);
+            }
+        }
+    }
+
+    //! Enable alpha blending
+    void Sprite::setAlphaBlendingEnable(bool enable)
+    {
+        if (m_bIsAlphaBlendingEnable != enable)
+        {
+            m_bIsAlphaBlendingEnable = enable;
+            if (m_figure)
+            {
+                // Setup point lights shader
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetAlphaBlend(m_bIsAlphaBlendingEnable);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
+            }
+        }
+    }
+
+    //! Alpha blending operation
+    void Sprite::setAlphaBlendingOp(int op)
+    {
+        // Only 4 operations supported now
+        if (op < ShaderDescriptor::AlphaBlendOP::COL || op > ShaderDescriptor::AlphaBlendOP::MUL)
+            op = m_alphaBlendingOp;
+
+        if (m_alphaBlendingOp != op)
+        {
+            m_alphaBlendingOp = op;
+            if (m_figure)
+            {
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetAlphaBlendOP(m_alphaBlendingOp);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
             }
         }
     }
