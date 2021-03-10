@@ -621,26 +621,17 @@ namespace ige::scene
         Mat4 viewInv;
         camera->GetViewInverseMatrix(viewInv);
 
-        auto ray = RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
         float distance, minDistance = maxDistance;
-
+        auto ray = RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
         for (const auto& obj : m_objects)
         {
-            if (obj)
+            if (obj && RayOBBChecker::checkIntersect(obj->getAABB(), obj->getTransform()->getWorldMatrix(), distance, maxDistance))
             {
-                const auto& transform = obj->getTransform();
-                auto aabbTransform = Mat4::IdentityMat();
-                vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
-                vmath_mat_appendScale(aabbTransform.P(), transform->getWorldScale().P(), 4, 4, aabbTransform.P());
-                auto aabb = obj->getAABB().Transform(aabbTransform);
-                if (RayOBBChecker::checkIntersect(aabb, transform->getWorldMatrix(), distance, maxDistance))
+                if (minDistance > distance)
                 {
-                    if (minDistance > distance)
-                    {
-                        minDistance = distance;
-                        hit.first = obj.get();
-                        hit.second = ray.first + ray.second * distance;
-                    }
+                    minDistance = distance;
+                    hit.first = obj.get();
+                    hit.second = ray.first + ray.second * distance;
                 }
             }
         }
