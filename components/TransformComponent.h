@@ -7,7 +7,7 @@ using namespace pyxie;
 
 #include "components/Component.h"
 
-#include "core/Macros.h"
+#include "core/igeSceneMacros.h"
 
 namespace ige::scene
 {

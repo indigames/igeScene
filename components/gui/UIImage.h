@@ -5,7 +5,7 @@ using namespace pyxie;
 
 #include "event/Event.h"
 #include "components/SpriteComponent.h"
-#include "components/gui/GUITypes.h"
+
 
 namespace ige::scene
 {
@@ -46,9 +46,6 @@ namespace ige::scene
         const bool getClockwise() const { return m_sprite->getClockwise(); }
         
     protected:
-        
-
-
         //! Serialize
         virtual void to_json(json &j) const override;
 

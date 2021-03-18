@@ -14,7 +14,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SpriteComponent(SceneObject &owner, const std::string &texture = "", const Vec2 &size = {32.f, 32.f}, bool isBillboard = false);
+        SpriteComponent(SceneObject &owner, const std::string &texture = "", const Vec2 &size = {32.f, 32.f}, bool isBillboard = false, bool isGUI = false);
 
         //! Destructor
         virtual ~SpriteComponent();
@@ -63,17 +63,30 @@ namespace ige::scene
         const int getAlphaBlendingOp() const { return m_sprite ? m_sprite->getAlphaBlendingOp() : 0; }
         void setAlphaBlendingOp(int op) { if (m_sprite) m_sprite->setAlphaBlendingOp(op); }
 
+
+        //! Alpha
+        void setAlpha(float value);
+        const float getAlpha()  const { return m_sprite->getAlpha(); }
+
+
     protected:
+
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
         virtual void from_json(const json& j) override;
 
+    protected:
+
         //! Sprite
         std::shared_ptr<Sprite> m_sprite;
 
         //! Billboard setting
         bool m_bIsBillboard = false;
+
+        bool m_bIsGUI = false;
+
+        friend class UIImage;
     };
 } // namespace ige::scene

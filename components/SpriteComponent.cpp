@@ -12,12 +12,22 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    SpriteComponent::SpriteComponent(SceneObject &owner, const std::string &path, const Vec2 &size, bool isBillboard)
-        : Component(owner)
+    SpriteComponent::SpriteComponent(SceneObject &owner, const std::string &path, const Vec2 &size, bool isBillboard, bool isGUI)
+        : Component(owner), m_bIsGUI(isGUI)
     {
-        m_sprite = std::make_shared<Sprite>(path, size);
+        if(path.empty())
+            m_sprite = std::make_shared<Sprite>(size);
+        else
+            m_sprite = std::make_shared<Sprite>(path, size);
+
         if (m_sprite->getFigure())
-            getOwner()->getScene()->getResourceAddedEvent().invoke(m_sprite->getFigure());
+        {
+            if(m_bIsGUI)
+                getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_sprite->getFigure());
+            else 
+                getOwner()->getScene()->getResourceAddedEvent().invoke(m_sprite->getFigure());
+        }
+
         setBillboard(isBillboard);
     }
 
@@ -25,11 +35,16 @@ namespace ige::scene
     SpriteComponent::~SpriteComponent()
     {
         if (m_sprite && m_sprite->getFigure())
-            if (getOwner()->getScene())
-                getOwner()->getScene()->getResourceRemovedEvent().invoke(m_sprite->getFigure());
+            if (getOwner()->getScene()) {
+                if (m_bIsGUI)
+                    getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_sprite->getFigure());
+                else 
+                    getOwner()->getScene()->getResourceRemovedEvent().invoke(m_sprite->getFigure());
+            }
         m_sprite = nullptr;
         getOwner()->getTransform()->makeDirty();
     }
+
 
     //! Update
     void SpriteComponent::onUpdate(float dt)
@@ -66,8 +81,12 @@ namespace ige::scene
         m_sprite->setPath(relPath);
         auto newFigure = m_sprite->getFigure();
 
-        if (oldFigure == nullptr && newFigure)
-            getOwner()->getScene()->getResourceAddedEvent().invoke(newFigure);
+        if (oldFigure == nullptr && newFigure) {
+            if(m_bIsGUI)
+                getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+            else
+                getOwner()->getScene()->getResourceAddedEvent().invoke(newFigure);
+        }
 
         if (newFigure)
         {
@@ -122,6 +141,11 @@ namespace ige::scene
         m_sprite->setWrapMode((SamplerState::WrapMode)value);
     }
 
+    //! Set Alpha
+    void SpriteComponent::setAlpha(float value)
+    {
+        m_sprite->setAlpha(value);
+    }
 
     //! Serialize
     void SpriteComponent::to_json(json &j) const
@@ -132,6 +156,7 @@ namespace ige::scene
         j["tiling"] = getTiling();
         j["offset"] = getOffset();
         j["wrapmode"] = (int)getWrapMode();
+        j["alpha"] = getAlpha();
     }
 
     //! Deserialize
@@ -141,6 +166,7 @@ namespace ige::scene
         setTiling(j.at("tiling"));
         setOffset(j.at("offset"));
         setWrapMode(j.at("wrapmode"));
+        setAlpha(j.at("alpha"));
         setPath(j.at("path"));
         Component::from_json(j);
     }

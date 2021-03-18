@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utils/PyxieHeaders.h"
-#include "core/Macros.h"
+#include "core/igeSceneMacros.h"
 
 using namespace pyxie;
 
@@ -34,6 +34,7 @@ namespace ige::scene
     class Sprite
     {
     public:
+        Sprite(const Vec2& size = { 64.f, 64.f });
         Sprite(const std::string& path, const Vec2& size = {64.f, 64.f});
         virtual ~Sprite();
 
@@ -76,7 +77,11 @@ namespace ige::scene
         const bool getClockwise() const { return m_clockwise; }
         void setClockwise(bool value);
 
+        const float getAlpha() const { return m_alpha; }
+        void setAlpha(float value);
 
+        Texture* getTexture() const { return m_texture; }
+        void setTexture(Texture* texture);
     protected:
         virtual void draw();
         
@@ -126,6 +131,9 @@ namespace ige::scene
 
         //! UV Map Offset
         Vec2 m_offset;
+
+        //!Alpha value
+        float m_alpha;
 
         EditableFigure* m_figure;
         Texture* m_texture;

@@ -6,8 +6,9 @@ namespace ige::scene
 {
     //! Constructor
     UIImage::UIImage(SceneObject &owner, const std::string &path, const Vec2 &size)
-        : SpriteComponent(owner, path, size)
+        : SpriteComponent(owner, path, size, false, true)
     {
+        getOwner()->setIsRaycastTarget(true);
     }
 
     //! Destructor
@@ -67,6 +68,7 @@ namespace ige::scene
         j["fillmethod"] = getFillMethod();
         j["fillorigin"] = getFillOrigin();
         j["fillamount"] = getFillAmount();
+        j["alpha"] = getAlpha();
     }
 
     //! Deserialize
@@ -76,6 +78,7 @@ namespace ige::scene
         setFillMethod(j.at("fillmethod"));
         setFillOrigin(j.at("fillorigin"));
         setFillAmount(j.at("fillamount"));
+        setAlpha(j.at("alpha"));
         setPath(j.at("path"));
         Component::from_json(j);
     }

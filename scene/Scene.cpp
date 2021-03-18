@@ -20,6 +20,7 @@
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
+#include "components/tween/TweenManager.h"
 
 #include "utils/GraphicsHelper.h"
 #include "utils/RayOBBChecker.h"
@@ -72,6 +73,8 @@ namespace ige::scene
 
         m_shadowEdgeMask = ResourceCreator::Instance().NewEditableFigure("shadowEdgeMask", true);
 
+        m_uiShowcase = ResourceCreator::Instance().NewShowcase((m_name + "_ui_showcase").c_str());
+
         ShaderDescriptor desc;
         desc.DicardViewProj(true);
         desc.SetVertexColor(true);
@@ -97,14 +100,20 @@ namespace ige::scene
         getResourceAddedEvent().addListener(std::bind(&Scene::onResourceAdded, this, std::placeholders::_1));
         getResourceRemovedEvent().addListener(std::bind(&Scene::onResourceRemoved, this, std::placeholders::_1));
 
+        getUIResourceAddedEvent().addListener(std::bind(&Scene::onUIResourceAdded, this, std::placeholders::_1));
+        getUIResourceRemovedEvent().addListener(std::bind(&Scene::onUIResourceRemoved, this, std::placeholders::_1));
+
         // Create root object
-        m_root = createObject(m_name);
+        m_root = createRootObject(m_name);
 
         // Set ambient color
         m_root->addComponent<AmbientLight>()->setSkyColor({ 0.75f, 0.75f, 0.75f });
 
         // Set general environment
         m_root->addComponent<EnvironmentComponent>();
+
+        // Create Canvas Object
+        m_rootUI = createRootObject("UI");
 
         // Create default camera
         auto camObj = createObject("Default Camera");
@@ -128,6 +137,16 @@ namespace ige::scene
 
         // Fill up test data
         // populateTestData(sceneObject, 1000);
+
+        m_tweenManager = std::make_shared<TweenManager>();
+        m_tweenManager->init();
+
+        m_canvasCamera = ResourceCreator::Instance().NewCamera("canvas_camera", nullptr);
+        m_canvasCamera->SetPosition({ 0.f, 0.f, 10.f });
+        m_canvasCamera->LockonTarget(false);
+        m_canvasCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+        m_canvasCamera->SetOrthographicProjection(true);
+        m_canvasCamera->SetWidthBase(false);
     }
 
     Scene::~Scene()
@@ -136,6 +155,9 @@ namespace ige::scene
 
         getResourceAddedEvent().removeAllListeners();
         getResourceRemovedEvent().removeAllListeners();
+
+        getUIResourceAddedEvent().removeAllListeners();
+        getUIResourceRemovedEvent().removeAllListeners();
 
         if (m_shadowTexture)
         {
@@ -170,6 +192,23 @@ namespace ige::scene
             m_environment = nullptr;
         }
 
+        if (m_tweenManager) {
+            m_tweenManager->clean();
+            m_tweenManager = nullptr;
+        }
+
+        if (m_canvasCamera) {
+            m_canvasCamera->DecReference();
+            m_canvasCamera = nullptr;
+        }
+
+        if (m_uiShowcase)
+        {
+            m_uiShowcase->Clear();
+            m_uiShowcase->DecReference();
+            m_uiShowcase = nullptr;
+        }
+
         ResourceManager::Instance().DeleteDaemon();
     }
 
@@ -190,6 +229,10 @@ namespace ige::scene
         }
 
         m_root = nullptr;
+
+        m_rootUI = nullptr;
+
+        m_canvas = nullptr;
 
         // Destroy all objects
         for (auto& obj : m_objects)
@@ -227,17 +270,21 @@ namespace ige::scene
         {
             renderContext->BeginScene(m_shadowFBO, Vec4(1.f, 1.f, 1.f, 1.f), true, true);
 
-            if (!SceneManager::getInstance()->isEditor() && m_activeCamera)
+            if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
                 m_activeCamera->onRender();
+            }
 
             m_showcase->Render(RenderPassFilter::ShadowPass);
 
             renderContext->BeginPass(TransparentPass);
             m_shadowEdgeMask->Pose();
             m_shadowEdgeMask->Render();
-
             renderContext->EndScene();
         }
+
+        m_uiShowcase->Update(dt);
+
+        if(m_tweenManager) m_tweenManager->update(dt);
     }
 
     void Scene::fixedUpdate(float dt)
@@ -252,10 +299,17 @@ namespace ige::scene
             if (obj) obj->onLateUpdate(dt);
     }
 
+    void Scene::resetFlag()
+    {
+        m_raycastCapture = false;
+    }
+
     void Scene::render()
     {
-        if (!SceneManager::getInstance()->isEditor() && m_activeCamera)
+
+        if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
             m_activeCamera->onRender();
+        }
 
         m_showcase->Render();
 
@@ -263,30 +317,58 @@ namespace ige::scene
             if (obj) obj->onRender();
     }
 
+    void Scene::renderUI() {
+        if (!SceneManager::getInstance()->isEditor() && m_canvasCamera) {
+            auto canvasObject = findObjectByName("Canvas");
+            if (canvasObject) {
+                auto canvas = canvasObject->getComponent<ige::scene::Canvas>();
+                if (canvas) {
+                    auto position = canvasObject->getTransform()->getWorldPosition();
+                    m_canvasCamera->SetPosition({ position.X(), position.Y(), position.Z() + 10.0f});
+                    m_canvasCamera->Render();
+                }
+            }
+        }
+        
+        m_uiShowcase->Render();
+    }
+
     std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, bool isCanvas)
     {
         auto parentObject = parent ? parent : m_root;
+        if (isGUI) {
+            parentObject = parentObject->isGUIObject() ? parentObject : m_canvas ? m_canvas : m_rootUI;
+            if (parentObject == m_rootUI && !isCanvas) {
+                auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", parentObject.get(), true, size, true);
+                auto canvas = canvasObject->addComponent<Canvas>();
+                canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
+                Vec2 canvasSize(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW());
+                canvas->setTargetCanvasSize(canvasSize);
+                canvasObject->setCanvas(canvas);
 
-        // Not canvas, create defaut canvas
-        if (isGUI && !parentObject->getCanvas() && !isCanvas)
-        {
-            auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", parentObject.get(), true, size, true);
-            auto canvas = canvasObject->addComponent<Canvas>();
-            canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
-            canvas->setTargetCanvasSize(Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW()));
-            canvasObject->setCanvas(canvas);
+        
+                parentObject = canvasObject;
+                m_objects.push_back(canvasObject);
 
-            if (SceneManager::getInstance()->isEditor())
-                canvasObject->addComponent<UIImage>("sprite/rect")->setSkipSerialize(true);
-
-            parentObject = canvasObject;
-            m_objects.push_back(canvasObject);
+                m_canvas = canvasObject;
+            }
+        }
+        else if (parentObject) {
+            if(parentObject->isGUIObject())
+                parentObject = m_root;
         }
 
         auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parentObject.get(), isGUI, size, isCanvas);
         m_objects.push_back(sceneObject);
         return sceneObject;
     }
+
+    std::shared_ptr<SceneObject> Scene::createRootObject(const std::string& name) {
+        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name);
+        m_objects.push_back(sceneObject);
+        return sceneObject;
+    }
+
 
     void Scene::populateTestData(const std::shared_ptr<SceneObject>& parent, int numObjects)
     {
@@ -325,6 +407,15 @@ namespace ige::scene
         if (obj == m_root)
         {
             m_root = nullptr;
+        }
+
+        if (obj == m_rootUI)
+        {
+            m_rootUI = nullptr;
+        }
+
+        if (obj == m_canvas) {
+            m_canvas = nullptr;
         }
 
         // Remove all children
@@ -409,15 +500,33 @@ namespace ige::scene
     //! Resource added event
     void Scene::onResourceAdded(Resource* resource)
     {
-        if (resource)
+        if (resource) {
             m_showcase->Add(resource);
+        }
     }
 
     //! Resource removed event
     void Scene::onResourceRemoved(Resource* resource)
     {
-        if (resource)
+        if (resource) {
             m_showcase->Remove(resource);
+        }
+    }
+
+    //! UI Resource added event
+    void Scene::onUIResourceAdded(Resource* resource)
+    {
+        if (resource) {
+            m_uiShowcase->Add(resource);
+        }
+    }
+
+    //! UI Resource removed event
+    void Scene::onUIResourceRemoved(Resource* resource)
+    {
+        if (resource) {
+            m_uiShowcase->Remove(resource);
+        }
     }
 
     //! Prefab save/load
@@ -592,10 +701,13 @@ namespace ige::scene
     }
 
     //! Raycast
-    std::pair<SceneObject*, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance)
+    std::pair<SceneObject*, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance, bool forceRaycast)
     {
         std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());
         if(!camera)
+            return hit;
+
+        if (m_raycastCapture && !forceRaycast)
             return hit;
 
         auto size = getWindowSize();
@@ -638,6 +750,81 @@ namespace ige::scene
         return hit;
     }
 
+    std::pair<SceneObject*, Vec3> Scene::raycastUI(const Vec2& screenPos)
+    {
+        std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());
+        if (!m_canvasCamera)
+            return hit;
+        auto size = getWindowSize();
+        float w = size.X() > 0 ? size.X() : SystemInfo::Instance().GetGameW();
+        float h = size.Y() > 0 ? size.Y() : SystemInfo::Instance().GetGameH();
+
+        auto pos = getWindowPosition();
+        float dx = pos.X();
+        float dy = pos.Y();
+
+        float x = screenPos.X() - dx / 2.f;
+        float y = screenPos.Y() + dy / 2.f;
+
+        if (size.X() > 0)
+            x = x + (SystemInfo::Instance().GetGameW() - (w + dx)) / 2.f;
+
+        if (size.Y() > 0)
+            y = y - (SystemInfo::Instance().GetGameH() - (h + dy)) / 2.f;
+
+        Mat4 proj;
+        m_canvasCamera->GetProjectionMatrix(proj);
+
+        Mat4 viewInv;
+        m_canvasCamera->GetViewInverseMatrix(viewInv);
+
+        auto ray = RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
+        float distance, minDistance = 100.0f;
+
+        bool m_isEnd = false;
+        std::shared_ptr<SceneObject> m_node = m_canvas;
+
+        hit = findIntersectInHierachy(m_node.get(), ray);
+        if(hit.first != nullptr) m_raycastCapture = true;
+        return hit;
+    }
+
+    std::pair<SceneObject*, Vec3> Scene::findIntersectInHierachy(const SceneObject* target, std::pair<Vec3, Vec3> ray)
+    {
+        std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());
+        if (target == nullptr) return hit;
+        SceneObject* obj = const_cast<SceneObject*>(target);
+        const auto& transform = obj->getTransform();
+        auto aabbTransform = Mat4::IdentityMat();
+        vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
+        vmath_mat_appendScale(aabbTransform.P(), transform->getWorldScale().P(), 4, 4, aabbTransform.P());
+        auto &m_aabb = transform->getAABB();
+        auto aabb = m_aabb.Transform(aabbTransform);
+        float distance = 100.f;
+        if (obj->isRaycastTarget()) {
+            if (RayOBBChecker::checkIntersect(aabb, transform->getWorldMatrix(), distance, 100.f))
+            {
+                hit.first = obj;
+                hit.second = ray.first + ray.second * distance;
+            }
+        }
+        if (target->getChildren().size() > 0) {
+            const auto& children = target->getChildren();
+            for (size_t i = 0; i < children.size(); ++i) {
+                auto temp_hit = findIntersectInHierachy(children[i], ray);
+                if (temp_hit.first != nullptr) {
+                    hit = temp_hit;
+                }
+            }
+        }
+        return hit;
+    }
+
+    std::shared_ptr<TweenManager> Scene::getTweenManager() const
+    {
+        return m_tweenManager;
+    }
+
     //! Serialize
     void Scene::to_json(json& j) const
     {
@@ -649,6 +836,10 @@ namespace ige::scene
         json jRoot;
         m_root->to_json(jRoot);
         j["root"] = jRoot;
+
+        json jUI;
+        m_rootUI->to_json(jUI);
+        j["ui"] = jUI;
     }
 
     //! Deserialize
@@ -663,6 +854,15 @@ namespace ige::scene
         m_root->from_json(jRoot);
 
         j.at("objId").get_to(m_nextObjectID);
+
+        if (j.contains("ui")) {
+            auto jUI = j.at("ui");
+            m_rootUI = createRootObject("UI");
+            m_rootUI->from_json(jUI);
+        }
+        else {
+            m_rootUI = createRootObject("UI");
+        }
 
         // Notify serialize finished
         getSerializeFinishedEvent().invoke(this);
@@ -679,6 +879,10 @@ namespace ige::scene
                     setActiveCamera(cam.get());
                 }
             }
+        }
+
+        if (m_canvas == nullptr) {
+            m_canvas = findObjectByName("Canvas");
         }
     }
 }

@@ -6,9 +6,16 @@
 
 namespace ige::scene
 {
+    Sprite::Sprite(const Vec2& size)
+        : m_figure(nullptr), m_size(size), m_tiling(1, 1), m_offset(0, 0), m_wrapMode(SamplerState::CLAMP),
+        m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1)
+    {
+        
+    }
+
     Sprite::Sprite(const std::string& path, const Vec2& size)
         : m_figure(nullptr), m_size(size), m_tiling(1,1), m_offset(0,0), m_wrapMode(SamplerState::CLAMP),
-        m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1)
+        m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1)
     {
         setPath(path);
     }
@@ -205,6 +212,39 @@ namespace ige::scene
             {
                 draw();
             }
+        }
+    }
+
+    void Sprite::setAlpha(float value) {
+        if (m_alpha != value) {
+            m_alpha = value > 1.f ? 1.f : value < 0 ? 0 : value;
+            
+            if (m_figure)
+            {
+                draw();
+            }
+        }
+    }
+
+    void Sprite::setTexture(Texture* value) {
+        if (m_texture != value) {
+            m_texture = value;
+            if (m_figure != nullptr)
+            {
+                const auto& textureSources = m_figure->GetTextureSources();
+                if (textureSources.size() > 0)
+                {
+                    auto& textureSource = textureSources[0];
+                    auto texture = (Texture*)ResourceManager::Instance().GetResource(textureSource.path, TEXTURETYPE);
+                    if (texture)
+                    {
+                        texture->DecReference();
+                        texture = nullptr;
+                    }
+                }
+            }
+            draw();
+            applyTexture();
         }
     }
 
@@ -1052,12 +1092,12 @@ namespace ige::scene
             m_figure->SetMeshVertexValues(meshIdx, (const void*)points.data(), (uint32_t)(points.size() / 3), ATTRIBUTE_ID_POSITION, 0);
             m_figure->SetMeshIndices(meshIdx, 0, (const uint32_t*)triangles.data(), (uint32_t)(triangles.size() / 3), 4);
             m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);
+            m_figure->SetMeshAlpha(meshIdx, m_alpha);
         }
     }
 
     void Sprite::applyTexture() {
         if (m_figure == nullptr) return;
-
         Sampler sampler;
         sampler.samplerSlotNo = 0;
         sampler.samplerState.wrap_s = m_wrapMode;
@@ -1096,43 +1136,6 @@ namespace ige::scene
 
     Vec2 Sprite::boundaryTexCoord(int index)
     {
-        /*switch (m_fillMethod)
-        {
-        case FillMethod::Radial90:
-            if (m_clockwise)
-            {
-                return Vec2(index > 1 ? 1 : 0, index % 3 > 0 ? 1 : 0);
-            }
-            else
-            {
-                return Vec2(index % 3 > 0 ? 1 : 0, index > 1 ? 1 : 0);
-            }
-            break;
-        case FillMethod::Radial180:
-            if (m_clockwise) {
-                return Vec2(index > 1 ? 1 : 0, index % 3 > 0 ? 1 : 0);
-            }
-            else {
-                return Vec2(index % 3 > 0 ? 1 : 0, index > 1 ? 1 : 0);
-            }
-            break;
-        case FillMethod::Radial360:
-            if (index < 4)
-            {
-                if (!m_clockwise)
-                {
-                    return Vec2((4 >> (7 - (index << 1))) & 1, (4 >> (7 - ((index << 1) + 1))) & 1);
-                }
-                else
-                {
-                    return Vec2((4 >> ((index << 1) + 1)) & 1, (4 >> (index << 1)) & 1);
-                }
-            }
-            break;
-        default:
-            break;
-        }
-        return Vec2(0,0);*/
         if (m_clockwise)
         {
             return Vec2(index > 1 ? 1 : 0, index % 3 > 0 ? 1 : 0);

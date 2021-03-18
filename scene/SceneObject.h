@@ -5,6 +5,8 @@
 #include <string>
 
 #include "event/Event.h"
+#include "event/EventContext.h"
+
 #include "components/Component.h"
 #include "components/TransformComponent.h"
 #include "components/gui/RectTransform.h"
@@ -20,7 +22,7 @@ namespace ige::scene
     /**
     * SceneObject represents an object in scene hierarchy
     */
-    class SceneObject
+    class SceneObject : std::enable_shared_from_this<SceneObject>
     {
     public:
         //! Constructor
@@ -76,6 +78,9 @@ namespace ige::scene
 
         //! Get component by name
         std::shared_ptr<Component> getComponent(const std::string& name) const;
+
+        //! Get component by id
+        std::shared_ptr<Component> getComponent(const uint64_t id) const;
 
         //! Get components by type recursively
         void getComponentsRecursive(std::vector<Component*>& components, const std::string& type) const;
@@ -156,6 +161,17 @@ namespace ige::scene
         //! Get scene root
         SceneObject* getRoot();
 
+        void setIsRaycastTarget(bool value) { m_bIsRaycastTarget = value; }
+        bool isRaycastTarget() const { return m_bIsRaycastTarget; }
+
+        //! Event 
+        void addEventListener(int eventType, const EventCallback& callback);
+        void removeEventListener(int eventType);
+        void removeEventListeners();
+        bool hasEventListener(int eventType) const;
+        bool dispatchEvent(int eventType, const Value& dataValue = Value::Null);
+        bool bubbleEvent(int eventType, const Value& dataValue = Value::Null);
+
         //! Aabb
         const AABBox& getAABB() const { return m_aabb; }
 
@@ -174,6 +190,10 @@ namespace ige::scene
 
         //! Set UUID
         inline void setUUID(const std::string& uuid) { m_uuid = uuid; }
+
+        //! Event
+        void doDispatch(int eventType, EventContext* context);
+        void doBubble(int eventType, EventContext* context);
 
         //! Transform changed event
         void onTransformChanged(SceneObject& sceneObject);
@@ -244,6 +264,20 @@ namespace ige::scene
 
         //! Obj will not update frame AABB
         bool m_bLockedFrameAABB = false;
+
+        bool m_bIsRaycastTarget = false;
+
+        //Event Dispatch
+        struct EventCallbackItem
+        {
+            EventCallback callback;
+            int eventType;
+            int dispatching;
+        };
+
+        std::vector<EventCallbackItem*> m_callbacks;
+        int m_dispatching;
+
     };
 
     //! Get component by type

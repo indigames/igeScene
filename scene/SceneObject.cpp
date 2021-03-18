@@ -6,6 +6,8 @@
 #include "scene/Scene.h"
 #include "scene/SceneManager.h"
 
+#include "event/InputProcessor.h"
+
 #include "components/Component.h"
 #include "components/TransformComponent.h"
 #include "components/CameraComponent.h"
@@ -40,6 +42,7 @@
 #include "components/navigation/NavObstacle.h"
 #include "components/navigation/OffMeshLink.h"
 
+
 namespace ige::scene
 {
     //! Events
@@ -52,7 +55,8 @@ namespace ige::scene
 
     //! Constructor
     SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size, bool isCanvas)
-        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_bIsCanvas(isCanvas), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr)
+        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_bIsCanvas(isCanvas), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr),
+        m_dispatching(0)
     {
         // Generate new UUID
         m_uuid = generateUUID();
@@ -94,6 +98,9 @@ namespace ige::scene
         m_transform = nullptr;
 
         getDestroyedEvent().invoke(*this);
+
+        m_dispatching = 0;
+        removeEventListeners();
     }
 
     //! Generate UUID
@@ -248,6 +255,17 @@ namespace ige::scene
         return nullptr;
     }
 
+    //! Get component by id
+    std::shared_ptr<Component> SceneObject::getComponent(const uint64_t id) const
+    {
+        for (int i = 0; i < m_components.size(); ++i)
+        {
+            if (m_components[i]->getInstanceId() == id)
+                return m_components[i];
+        }
+        return nullptr;
+    }
+
     //! Get components by type recursively
     void SceneObject::getComponentsRecursive(std::vector<Component*>& components, const std::string& type) const
     {
@@ -374,6 +392,164 @@ namespace ige::scene
         return m_scene ? m_scene->getRoot().get() : nullptr;
     }
 
+    //! Event Dispatch System 
+    void SceneObject::addEventListener(int eventType, const EventCallback& callback)
+    {
+        EventCallbackItem* item = new EventCallbackItem();
+        item->callback = callback;
+        item->eventType = eventType;
+        item->dispatching = 0;
+        m_callbacks.push_back(item);
+    }
+
+    void SceneObject::removeEventListener(int eventType)
+    {
+        if (m_callbacks.empty())
+            return;
+
+        for (auto it = m_callbacks.begin(); it != m_callbacks.end(); )
+        {
+            if ((*it)->eventType == eventType)
+            {
+                if (m_dispatching > 0)
+                {
+                    (*it)->callback = nullptr;
+                    it++;
+                }
+                else
+                {
+                    delete (*it);
+                    it = m_callbacks.erase(it);
+                }
+            }
+            else
+                it++;
+        }
+    }
+
+    void SceneObject::removeEventListeners()
+    {
+        if (m_callbacks.empty())
+            return;
+
+        if (m_dispatching > 0)
+        {
+            for (auto it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+                (*it)->callback = nullptr;
+        }
+        else
+        {
+            for (auto it = m_callbacks.begin(); it != m_callbacks.end(); it++)
+                delete (*it);
+            m_callbacks.clear();
+        }
+    }
+
+    bool SceneObject::hasEventListener(int eventType) const
+    {
+        if (m_callbacks.empty())
+            return false;
+
+        for (auto it = m_callbacks.cbegin(); it != m_callbacks.cend(); ++it)
+        {
+            if ((*it)->eventType == eventType && (*it)->callback != nullptr)
+                return true;
+        }
+        return false;
+    }
+
+    bool SceneObject::dispatchEvent(int eventType, const Value& dataValue)
+    {
+        if (m_callbacks.size() == 0)
+            return false;
+
+        EventContext context;
+        context.m_sender = this->shared_from_this();
+        context.m_type = eventType;
+        context.m_dataValue = dataValue;
+
+        doDispatch(eventType, &context);
+
+        return context.isDefaultPrevented();
+    }
+
+    bool SceneObject::bubbleEvent(int eventType, const Value& dataValue)
+    {
+        EventContext context;
+        if (InputProcessor::getInstance())
+            context.m_inputEvent = InputProcessor::getInstance()->getRecentInput();
+        context.m_type = eventType;
+        context.m_dataValue = dataValue;
+
+        doBubble(eventType, &context);
+
+        return context.m_defaultPrevented;
+    }
+
+
+    void SceneObject::doDispatch(int eventType, EventContext* context)
+    {
+        m_dispatching++;
+        bool hasDeletedItems = false;
+
+        size_t cnt = m_callbacks.size(); //dont use iterator, because new item would be added in callback.
+        for (size_t i = 0; i < cnt; i++)
+        {
+            EventCallbackItem* ci = m_callbacks[i];
+            if (ci->callback == nullptr)
+            {
+                hasDeletedItems = true;
+                continue;
+            }
+            if (ci->eventType == eventType)
+            {
+                ci->dispatching++;
+                context->m_touchCapture = 0;
+                ci->callback(context);
+                ci->dispatching--;
+                if (context->m_touchCapture != 0 && dynamic_cast<SceneObject*>(this))
+                {
+                    if (context->m_touchCapture == 1 && eventType == (int)EventType::TouchBegin)
+                        context->getInput()->getProcessor()->addTouchMonitor(context->getInput()->getTouchId(), this->shared_from_this());
+                    else if (context->m_touchCapture == 2)
+                        context->getInput()->getProcessor()->removeTouchMonitor(this->shared_from_this());
+                }
+            }
+        }
+
+        m_dispatching--;
+        if (hasDeletedItems && m_dispatching == 0)
+        {
+            for (auto it = m_callbacks.begin(); it != m_callbacks.end(); )
+            {
+                if ((*it)->callback == nullptr)
+                {
+                    delete (*it);
+                    it = m_callbacks.erase(it);
+                }
+                else
+                    it++;
+            }
+        }
+    }
+    
+    void SceneObject::doBubble(int eventType, EventContext* context)
+    {
+        //parent maybe disposed in callbacks
+        auto p = this->getParent();
+
+        if (!m_callbacks.empty())
+        {
+            context->m_bIsStopped = false;
+            doDispatch(eventType, context);
+            if (context->m_bIsStopped)
+                return;
+        }
+
+        if (p)
+            p->doBubble(eventType, context);
+    }
+
     //! Transform changed event
     void SceneObject::onTransformChanged(SceneObject& sceneObject)
     {
@@ -434,6 +610,7 @@ namespace ige::scene
             {"active", m_isActive},
             {"gui", m_bIsGui},
             {"cvs", m_bIsCanvas},
+            {"raycast", m_bIsRaycastTarget},
         };
 
         auto jComponents = json::array();
@@ -467,6 +644,7 @@ namespace ige::scene
         setActive(j.value("active", false));
         m_bIsGui = j.value("gui", false);
         m_bIsCanvas = j.value("cvs", false);
+        m_bIsRaycastTarget = j.value("raycast", false);
 
         auto jComps = j.at("comps");
         for (auto it : jComps)
@@ -566,8 +744,8 @@ namespace ige::scene
 
             if (auto canvas = getComponent<Canvas>())
             {
-                if (!getComponent<UIImage>())
-                    addComponent<UIImage>("sprite/rect")->setSkipSerialize(true);
+                /*if (!getComponent<UIImage>())
+                    addComponent<UIImage>("sprite/rect")->setSkipSerialize(true);*/
             }
 
             if (auto directionalLight = getComponent<DirectionalLight>())
