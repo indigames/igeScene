@@ -81,7 +81,7 @@ Vec2 InputProcessor::getTouchPosition(int touchId)
     return m_recentInput.getPosition();
 }
 
-void InputProcessor::addTouchMonitor(int touchId, std::shared_ptr<SceneObject> target)
+void InputProcessor::addTouchMonitor(int touchId, SceneObject* target)
 {
     TouchInfo* ti = getTouch(touchId, false);
     if (!ti)
@@ -92,7 +92,7 @@ void InputProcessor::addTouchMonitor(int touchId, std::shared_ptr<SceneObject> t
         ti->touchMonitors.push_back(target->getId());
 }
 
-void InputProcessor::removeTouchMonitor(std::shared_ptr<SceneObject> target)
+void InputProcessor::removeTouchMonitor(SceneObject* target)
 {
     for (auto it = m_touches.cbegin(); it != m_touches.cend(); ++it)
     {
@@ -217,7 +217,8 @@ void InputProcessor::onTouchBegan(int touchId, float x, float y)
     if (m_captureCallback)
         m_captureCallback((int)EventType::TouchBegin);
 
-    target->bubbleEvent((int)EventType::TouchBegin);
+    if(target->isInteractable())
+        target->bubbleEvent((int)EventType::TouchBegin);
 
     handleRollOver(ti, target);
 
@@ -326,19 +327,10 @@ void InputProcessor::onTouchEnded(int touchId, float x, float y)
     m_activeProcessor = nullptr;
 }
 
-void InputProcessor::onTouchCancelled(int touchId, float x, float y)
-{
-
-}
-
 std::pair<SceneObject*, Vec3> InputProcessor::hitTestUI(float touchX, float touchY) {
     auto scene = SceneManager::getInstance()->getCurrentScene();
     if (scene) {
         auto hit = scene->raycastUI(Vec2(touchX, touchY));
-        if (hit.first)
-        {
-            pyxie_printf("Hit Object %s\n", hit.first->getName().c_str());
-        }
         return hit;
     }
     std::pair<SceneObject*, Vec3> hitNull(nullptr, Vec3());

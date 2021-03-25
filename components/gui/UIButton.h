@@ -14,14 +14,15 @@ NS_IGE_SCENE_BEGIN
 class UIImage;
 class UIEventContext;
 class EventContext;
+class Tweener;
 
-enum TransitionMode {
+enum class TransitionMode {
 	ColorTint,
 	SpriteSwap,
 	Custom
 };
 
-enum AnimationMode {
+enum class AnimationMode {
 	None,
 	Elastic,
 	Bounce,
@@ -29,9 +30,8 @@ enum AnimationMode {
 
 enum class ButtonState {
 	NORMAL = 0,
-	HIGHLIGHT = 1,
-	PRESSED = 2,
-	SELECTED = 3,
+	PRESSED = 1,
+	SELECTED = 2,
 	DISABLE = -1
 };
 
@@ -53,46 +53,84 @@ public:
 	AnimationMode getAnimationMode() const { return m_animationMode; }
 	void setAnimationMode(AnimationMode value);
 
+	void setTexturePath(const std::string& texturePath, ButtonState setState);
+
+	Event<>& getOnClickedEvent() { return m_onClickedEvent; }
+	Event<>& getOnPressedEvent() { return m_onPressedEvent; }
+	Event<>& getOnReleasedEvent() { return m_onReleasedEvent; }
+	Event<>& getOnSelectedEvent() { return m_onSelectedEvent; }
+
+	const std::string& getPressedPath() const { return m_pressedPath; }
+	const std::string& getSelectedPath() const { return m_selectedPath; }
+	const std::string& getDisabledPath() const { return m_disabledPath; }
+
+	//! NormalColor
+	void setColor(float r, float g, float b, float a = 1) override;
+	void setColor(const Vec4& value) override;
+	const Vec4 getColor()  const override { return m_normalColor; }
+
+	//! PresssedColor
+	void setPressedColor(float r, float g, float b, float a = 1);
+	void setPressedColor(const Vec4& value);
+	const Vec4 getPressedColor()  const { return m_pressedColor; }
+
+	//! SelectedColor
+	void setSelectedColor(float r, float g, float b, float a = 1);
+	void setSelectedColor(const Vec4& value);
+	const Vec4 getSelectedColor()  const { return m_selectedColor; }
+
+	//! DisabledColor
+	void setDisabledColor(float r, float g, float b, float a = 1);
+	void setDisabledColor(const Vec4& value);
+	const Vec4 getDisabledColor()  const { return m_disableColor; }
+
+	void setFadeDuration(float value) { m_fadeDuration = value; }
+	const float getFadeDuration() const { return m_fadeDuration; }
 protected:
 
 	void _onTouchPress(EventContext* context);
 	void _onTouchRelease(EventContext* context);
 	void _onSelected(EventContext* context);
+	void _onClick(EventContext* context);
 	void _onExit(EventContext* context);
-		
-	Texture* _loadTexture(std::string path);
-	void _releaseTexture(std::string path);
+	
+	virtual void onClick() override;
 
-	void changeState(ButtonState state);
+	void changeState(ButtonState state, bool forced = false);
+	Texture* getTextureByState(ButtonState state) const;
+	Vec4 getColorByState(ButtonState state) const;
 
 protected:
 	TransitionMode m_transitionMode;
 	AnimationMode m_animationMode;
 
 	//! Events
-	Event<UIEventContext*> m_onClickedEvent;
-	Event<UIEventContext*> m_onPressedEvent;
-	Event<UIEventContext*> m_onReleasedEvent;
-	Event<UIEventContext*> m_onSelectedEvent;
+	Event<> m_onClickedEvent;
+	Event<> m_onPressedEvent;
+	Event<> m_onReleasedEvent;
+	Event<> m_onSelectedEvent;
 
 	//! Color Tint
 	Vec4 m_normalColor;
-	Vec4 m_highlightedColor;
 	Vec4 m_pressedColor;
 	Vec4 m_selectedColor;
 	Vec4 m_disableColor;
 	float m_fadeDuration;
 
 	//! Sprite Swap
-	Texture* m_normalTexture;
-	Texture* m_highlightedTexture;
 	Texture* m_pressedTexture;
 	Texture* m_selectedTexture;
 	Texture* m_disabledTexture;
 
+	std::string m_pressedPath;
+	std::string m_selectedPath;
+	std::string m_disabledPath;
+
 	ButtonState m_btnState;
 
 	bool m_bIsSelectable = false;
+
+	std::shared_ptr<Tweener> tween = nullptr;
 
 protected:
 	//! Serialize

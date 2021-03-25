@@ -11,6 +11,8 @@
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
 
+#include "event/EventContext.h"
+
 #include "utils/filesystem.h"
 namespace fs = ghc::filesystem;
 
@@ -24,12 +26,19 @@ namespace ige::scene
         : Component(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
     {
         m_bPathDirty = true;
+        getOwner()->addEventListener((int)EventType::Click, std::bind(&ScriptComponent::onClickEvent, this, std::placeholders::_1), m_instanceId);
     }
 
     //! Destructor
     ScriptComponent::~ScriptComponent()
     {
         unloadPyModule();
+        getOwner()->removeEventListener((int)EventType::Click, m_instanceId);
+    }
+
+    void ScriptComponent::onClickEvent(EventContext* context)
+    {
+        this->onClick();
     }
 
     void ScriptComponent::loadPyModule()
@@ -414,4 +423,6 @@ namespace ige::scene
             m_bPathDirty = true;
         }
     }
+
+    
 } // namespace ige::scene

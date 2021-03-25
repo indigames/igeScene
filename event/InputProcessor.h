@@ -25,8 +25,8 @@ public :
 
 	Vec2 getTouchPosition(int touchId);
 
-	void addTouchMonitor(int touchId, std::shared_ptr<SceneObject> target);
-	void removeTouchMonitor(std::shared_ptr<SceneObject> target);
+	void addTouchMonitor(int touchId, SceneObject* target);
+	void removeTouchMonitor(SceneObject* target);
 
 	void cancelClick(int touchId);
 
@@ -40,7 +40,6 @@ private:
 	void onTouchBegan(int touchId, float x, float y);
 	void onTouchMoved(int touchId, float x, float y);
 	void onTouchEnded(int touchId, float x, float y);
-	void onTouchCancelled(int touchId, float x, float y);
 
 
 	TouchInfo* getTouch(int touchId, bool createIfNotExists = true);

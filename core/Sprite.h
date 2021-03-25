@@ -2,7 +2,6 @@
 
 #include "utils/PyxieHeaders.h"
 #include "core/igeSceneMacros.h"
-
 using namespace pyxie;
 
 
@@ -35,14 +34,11 @@ namespace ige::scene
     {
     public:
         Sprite(const Vec2& size = { 64.f, 64.f });
-        Sprite(const std::string& path, const Vec2& size = {64.f, 64.f});
+        Sprite(Texture* texture, const Vec2& size = {64.f, 64.f});
         virtual ~Sprite();
 
         const Vec2& getSize() const { return m_size; }
         void setSize(const Vec2& size);
-
-        const std::string& getPath() const { return m_path; }
-        void setPath(const std::string& path);
 
         const Vec2& getTexSize() const { return m_texSize; }
 
@@ -80,6 +76,10 @@ namespace ige::scene
         const float getAlpha() const { return m_alpha; }
         void setAlpha(float value);
 
+        const Vec4 getColor() const { return m_color; }
+        void setColor(float r, float g, float b, float a = 1, bool redraw = true);
+        void setColor(const Vec4& value, bool redraw = true);
+
         Texture* getTexture() const { return m_texture; }
         void setTexture(Texture* texture);
     protected:
@@ -95,8 +95,10 @@ namespace ige::scene
 
         virtual void applyMesh(const std::vector<float> &points, const std::vector<uint32_t> &triangles, const std::vector<float> &uvs);
         virtual void applyTexture();
-        
+
         Vec2 boundaryTexCoord(int index);
+
+        void releaseSprite();
 
     protected:
         static Vec2 rotateByAngle(const Vec2& pivot, const Vec2& target, float angle);
@@ -122,7 +124,7 @@ namespace ige::scene
             float* S = nullptr, float* T = nullptr);
 
     protected:
-        std::string m_path;
+        //std::string m_path;
         Vec2 m_texSize;
         Vec2 m_size;
 
@@ -134,6 +136,7 @@ namespace ige::scene
 
         //!Alpha value
         float m_alpha;
+        Vec4 m_color;
 
         EditableFigure* m_figure;
         Texture* m_texture;

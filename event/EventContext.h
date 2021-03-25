@@ -51,7 +51,7 @@ public:
 	virtual ~EventContext();
 
 	int getType() const { return m_type; }
-	std::shared_ptr<SceneObject> getSender() const { return m_sender; }
+	SceneObject* getSender() const { return m_sender; }
 	InputEvent* getInput() const { return m_inputEvent; }
 	void stopPropagation() { m_bIsStopped = true; }
 	void preventDefault() { m_defaultPrevented = true; }
@@ -62,7 +62,7 @@ public:
 	const Value& getDataValue() const { return m_dataValue; }
 
 protected:
-	std::shared_ptr<SceneObject> m_sender;
+	SceneObject* m_sender;
 	Value m_dataValue;
 
 	InputEvent* m_inputEvent;

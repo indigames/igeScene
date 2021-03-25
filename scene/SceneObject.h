@@ -164,11 +164,14 @@ namespace ige::scene
         void setIsRaycastTarget(bool value) { m_bIsRaycastTarget = value; }
         bool isRaycastTarget() const { return m_bIsRaycastTarget; }
 
+        void setIsInteractable(bool value) { m_bIsInteractable = value; }
+        bool isInteractable() const { return m_bIsInteractable; }
+
         //! Event 
-        void addEventListener(int eventType, const EventCallback& callback);
-        void removeEventListener(int eventType);
+        void addEventListener(int eventType, const EventCallback& callback, const uint64_t tag = 0);
+        void removeEventListener(int eventType, const uint64_t tag = 0);
         void removeEventListeners();
-        bool hasEventListener(int eventType) const;
+        bool hasEventListener(int eventType, const uint64_t tag = 0) const;
         bool dispatchEvent(int eventType, const Value& dataValue = Value::Null);
         bool bubbleEvent(int eventType, const Value& dataValue = Value::Null);
 
@@ -265,13 +268,17 @@ namespace ige::scene
         //! Obj will not update frame AABB
         bool m_bLockedFrameAABB = false;
 
+        //! Define if object will cast with UI
         bool m_bIsRaycastTarget = false;
+        //! Define if object is interactable
+        bool m_bIsInteractable = false;
 
         //Event Dispatch
         struct EventCallbackItem
         {
             EventCallback callback;
             int eventType;
+            uint64_t tag; //! Component Ref ID
             int dispatching;
         };
 

@@ -32,4 +32,9 @@
 #define CALLBACK_2(__selector__,__target__, ...) std::bind(&__selector__,__target__, std::placeholders::_1, std::placeholders::_2, ##__VA_ARGS__)
 #define CALLBACK_3(__selector__,__target__, ...) std::bind(&__selector__,__target__, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, ##__VA_ARGS__)
 
+
+#define MATH_MIN(a,b)            (((a) < (b)) ? (a) : (b))
+#define MATH_MAX(a,b)            (((a) > (b)) ? (a) : (b))
+#define MATH_CLAMP(x, l, h)      (MATH_MIN((h), MATH_MAX((x), (l))))
+
 #endif // __MACROS_SCENE_H__

@@ -8,6 +8,7 @@ struct _object;
 
 namespace ige::scene
 {
+    class EventContext;
     //! ScriptComponent
     class ScriptComponent : public Component
     {
@@ -82,6 +83,10 @@ namespace ige::scene
 
         void registerPhysicEvents();
         void unregisterPhysicEvents();
+
+        void onClickEvent(EventContext* context);
+
+    protected:
 
         //! Path to figure file
         std::string m_path;

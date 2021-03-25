@@ -20,6 +20,7 @@
 #include "components/gui/UIImage.h"
 #include "components/gui/UIText.h"
 #include "components/gui/UITextField.h"
+#include "components/gui/UIButton.h"
 #include "components/physic/PhysicManager.h"
 #include "components/physic/PhysicBox.h"
 #include "components/physic/PhysicCapsule.h"
@@ -387,29 +388,42 @@ namespace ige::scene
     }
 
     //! Get scene root
-    SceneObject* SceneObject::getRoot()
+    SceneObject* SceneObject::getRoot()         
     {
         return m_scene ? m_scene->getRoot().get() : nullptr;
     }
 
     //! Event Dispatch System 
-    void SceneObject::addEventListener(int eventType, const EventCallback& callback)
+    void SceneObject::addEventListener(int eventType, const EventCallback& callback, const uint64_t tag)
     {
+        if (tag != 0)
+        {
+            for (auto it = m_callbacks.begin(); it != m_callbacks.end(); it++)
+            {
+                if ((*it)->eventType == eventType && (*it)->tag == tag)
+                {
+                    (*it)->callback = callback;
+                    return;
+                }
+            }
+        }
+
         EventCallbackItem* item = new EventCallbackItem();
         item->callback = callback;
         item->eventType = eventType;
         item->dispatching = 0;
+        item->tag = tag;
         m_callbacks.push_back(item);
     }
 
-    void SceneObject::removeEventListener(int eventType)
+    void SceneObject::removeEventListener(int eventType, const uint64_t tag)
     {
         if (m_callbacks.empty())
             return;
 
         for (auto it = m_callbacks.begin(); it != m_callbacks.end(); )
         {
-            if ((*it)->eventType == eventType)
+            if ((*it)->eventType == eventType && (((*it)->tag == tag || tag == 0)))
             {
                 if (m_dispatching > 0)
                 {
@@ -445,14 +459,14 @@ namespace ige::scene
         }
     }
 
-    bool SceneObject::hasEventListener(int eventType) const
+    bool SceneObject::hasEventListener(int eventType, const uint64_t tag) const
     {
         if (m_callbacks.empty())
             return false;
 
         for (auto it = m_callbacks.cbegin(); it != m_callbacks.cend(); ++it)
         {
-            if ((*it)->eventType == eventType && (*it)->callback != nullptr)
+            if ((*it)->eventType == eventType && (((*it)->tag == tag || tag == 0)) && (*it)->callback != nullptr)
                 return true;
         }
         return false;
@@ -464,7 +478,7 @@ namespace ige::scene
             return false;
 
         EventContext context;
-        context.m_sender = this->shared_from_this();
+        context.m_sender = this;
         context.m_type = eventType;
         context.m_dataValue = dataValue;
 
@@ -490,6 +504,7 @@ namespace ige::scene
     void SceneObject::doDispatch(int eventType, EventContext* context)
     {
         m_dispatching++;
+        context->m_sender = this;
         bool hasDeletedItems = false;
 
         size_t cnt = m_callbacks.size(); //dont use iterator, because new item would be added in callback.
@@ -510,9 +525,9 @@ namespace ige::scene
                 if (context->m_touchCapture != 0 && dynamic_cast<SceneObject*>(this))
                 {
                     if (context->m_touchCapture == 1 && eventType == (int)EventType::TouchBegin)
-                        context->getInput()->getProcessor()->addTouchMonitor(context->getInput()->getTouchId(), this->shared_from_this());
+                        context->getInput()->getProcessor()->addTouchMonitor(context->getInput()->getTouchId(), this);
                     else if (context->m_touchCapture == 2)
-                        context->getInput()->getProcessor()->removeTouchMonitor(this->shared_from_this());
+                        context->getInput()->getProcessor()->removeTouchMonitor(this);
                 }
             }
         }
@@ -545,9 +560,9 @@ namespace ige::scene
             if (context->m_bIsStopped)
                 return;
         }
-
-        if (p)
+        if (p != nullptr) {
             p->doBubble(eventType, context);
+        }
     }
 
     //! Transform changed event
@@ -699,6 +714,8 @@ namespace ige::scene
                 comp = addComponent<UIText>();
             else if (key == "UITextField")
                 comp = addComponent<UITextField>();
+            else if (key == "UIButton")
+                comp = addComponent<UIButton>();
             else if (key == "AudioManager")
                 comp = addComponent<AudioManager>();
             else if (key == "AudioSource")

@@ -32,8 +32,8 @@ namespace ige::scene
         EditableFigure *getFigure() { return m_sprite->getFigure(); }
 
         //! Path
-        void setPath(const std::string &path);
-        const std::string &getPath() const { return m_sprite->getPath(); }
+        virtual void setPath(const std::string &path);
+        virtual const std::string &getPath() const { return m_path; }
 
         //! Size
         void setSize(const Vec2 &size);
@@ -66,10 +66,18 @@ namespace ige::scene
 
         //! Alpha
         void setAlpha(float value);
-        const float getAlpha()  const { return m_sprite->getAlpha(); }
+        const float getAlpha() const;
+
+        //! Color
+        virtual void setColor(float r, float g, float b, float a = 1);
+        virtual void setColor(const Vec4& value);
+        virtual const Vec4 getColor()  const { return m_sprite->getColor(); }
 
 
     protected:
+        void onCreateFigure(EditableFigure* figure);
+        void onRemoveFigure(EditableFigure* figure);
+
 
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -81,6 +89,9 @@ namespace ige::scene
 
         //! Sprite
         std::shared_ptr<Sprite> m_sprite;
+
+        std::string m_path;
+        Texture* m_texture;
 
         //! Billboard setting
         bool m_bIsBillboard = false;

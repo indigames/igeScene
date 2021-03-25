@@ -45,11 +45,16 @@ namespace ige::scene
         void setClockwise(bool value);
         const bool getClockwise() const { return m_sprite->getClockwise(); }
         
+        void setInteractable(bool value);
+        const bool isInteractable() const { return m_bIsInteractable; }
     protected:
         //! Serialize
         virtual void to_json(json &j) const override;
 
         //! Deserialize
         virtual void from_json(const json &j) override;
+
+    protected:
+        bool m_bIsInteractable;
     };
 }

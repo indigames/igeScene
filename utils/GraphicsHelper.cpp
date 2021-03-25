@@ -3,6 +3,8 @@
 #include <bitmapHelper.h>
 #include "utils/GraphicsHelper.h"
 
+#include <algorithm>
+
 namespace ige::scene
 {
     EditableFigure* GraphicsHelper::createSprite(const Vec2& size, const std::string& texture, const Vec2& uv_top_left, const Vec2& uv_bottom_right, Vec3* normal, uint32_t pivot, ShaderDescriptor* shader)
@@ -42,8 +44,78 @@ namespace ige::scene
         }
         return createMesh(_points, _tris, texture, uvs, shader);
     }
+    
+    EditableFigure* GraphicsHelper::createMesh(const std::vector<float>& points, const std::vector<uint32_t>& trianglesIndices, pyxieTexture* texture, const std::vector<float>& uvs, ShaderDescriptor* shader, Vec3* normals, const Vec4& color)
+    {
+        if (shader == nullptr)
+        {
+            shader = ResourceCreator::Instance().NewShaderDescriptor();
+            if (texture != nullptr) shader->SetColorTexture(true);
+            shader->SetBoneCondition(1, 1);
+        }
 
-    EditableFigure* GraphicsHelper::createMesh(const std::vector<float>& points, const std::vector<uint32_t>& trianglesIndices, const std::string& texture, const std::vector<float>& uvs, ShaderDescriptor* shader, Vec3* normals)
+        auto efig = ResourceCreator::Instance().NewEditableFigure("sprite", true);
+        efig->Initialize();
+        efig->Build();
+
+        efig->AddMaterial("mate", *shader);
+        efig->AddMesh("mesh", "mate");
+
+        auto meshIdx = efig->GetMeshIndex(GenerateNameHash("mesh"));
+        if (meshIdx == -1) return nullptr;
+
+        //efig->SetVertexElements("mesh", ATTRIBUTE_ID_POSITION, points);
+        efig->SetMeshVertexValues(meshIdx, (const void*)points.data(), (uint32_t)(points.size() / 3), ATTRIBUTE_ID_POSITION, 0);
+
+        // if (uvs) efig->SetVertexElements("mesh", ATTRIBUTE_ID_UV0, uvs);
+        if (uvs.size() > 0) efig->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);
+
+        // if (normals) efig->SetVertexElements("mesh", ATTRIBUTE_ID_NORMAL, normals);
+        if (normals) efig->SetMeshVertexValues(meshIdx, (const void*)normals, 1, ATTRIBUTE_ID_NORMAL, 0);
+
+        // efig->SetTriangles("mesh", trianglesIndices);
+        efig->SetMeshIndices(meshIdx, 0, (const uint32_t*)trianglesIndices.data(), (uint32_t)(trianglesIndices.size() / 3), 4);
+
+        //efig->AddJoint("joint");
+        Joint joint;
+        int parentIndex = -1;
+        efig->AddJoint(parentIndex, joint, false, "joint");
+
+        //efig->SetMaterialParam("mate", "DiffuseColor", Vec4(1.f, 1.f, 1.f, 1.f));
+        int materialIdx = efig->GetMaterialIndex(GenerateNameHash("mate"));
+        float _color[4] = { color[0], color[1], color[2], color[3] };
+        efig->SetMaterialParam(materialIdx, "DiffuseColor", _color, ParamTypeFloat4);
+
+        // efig->SetMaterialRenderState("mate", "cull_face_enable", false);
+
+        if (texture != nullptr)
+        {
+            Sampler sampler;
+            sampler.samplerSlotNo = 0;
+            sampler.samplerState.wrap_s = SamplerState::WRAP;
+            sampler.samplerState.wrap_t = SamplerState::WRAP;
+            sampler.samplerState.minfilter = SamplerState::LINEAR;
+            sampler.samplerState.magfilter = SamplerState::LINEAR;
+            sampler.tex = texture;
+            sampler.tex->WaitInitialize();
+            sampler.tex->WaitBuild();
+
+            TextureSource texSrc;
+            strncpy(texSrc.path, texture->ResourceName(), MAX_PATH);
+            texSrc.normal = false;
+            texSrc.wrap = false;
+            sampler.textureNameIndex = efig->SetTextureSource(texSrc);
+            efig->SetMaterialParam(materialIdx, "ColorSampler", &sampler);
+
+            // efig->SetMaterialRenderState("mate", "blend_enable", true);
+            const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
+            uint32_t blendVal[4] = { 1,0,0,0 };
+            efig->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, blendVal);
+        }
+        return efig;
+    }
+
+    EditableFigure* GraphicsHelper::createMesh(const std::vector<float>& points, const std::vector<uint32_t>& trianglesIndices, const std::string& texture, const std::vector<float>& uvs, ShaderDescriptor* shader, Vec3* normals, const Vec4& color)
     {
         if (shader == nullptr)
         {
@@ -81,8 +153,8 @@ namespace ige::scene
 
         //efig->SetMaterialParam("mate", "DiffuseColor", Vec4(1.f, 1.f, 1.f, 1.f));
         int materialIdx = efig->GetMaterialIndex(GenerateNameHash("mate"));
-        float color[4] = { 1.f, 1.f, 1.f, 1.f };
-        efig->SetMaterialParam(materialIdx, "DiffuseColor", color, ParamTypeFloat4);
+        float _color[4] = { color[0], color[1], color[2], color[3] };
+        efig->SetMaterialParam(materialIdx, "DiffuseColor", _color, ParamTypeFloat4);
 
         // efig->SetMaterialRenderState("mate", "cull_face_enable", false);
 
@@ -288,6 +360,4 @@ namespace ige::scene
             pyxie::PYXIE_FREE(bitmap2);
         }
     }
-
-
 }

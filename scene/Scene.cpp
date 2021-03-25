@@ -449,12 +449,36 @@ namespace ige::scene
 
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id)
     {
-        auto found = std::find_if(m_objects.begin(), m_objects.end(), [&](auto elem)
-        {
-            return (elem->getId() == id);
-        });
-        if (found != m_objects.end())
-            return std::dynamic_pointer_cast<SceneObject>(*found);
+        //! Interpolation Search   
+        uint64_t cnt = m_objects.size();
+        if (cnt > 0) {
+            uint64_t l = 0;
+            uint64_t r = cnt - 1;
+            while (m_objects[r]->getId() != m_objects[l]->getId() 
+                && id >= m_objects[l]->getId() && id <= m_objects[r]->getId())
+            {
+                uint64_t mid = l + (r - 1) * (id - m_objects[l]->getId()) / (m_objects[r]->getId() - m_objects[l]->getId());
+                if (mid >= cnt) {
+                    break;
+                }
+                if (m_objects[mid]->getId() < id) {
+                    l = mid + 1;
+                }
+                else if (m_objects[mid]->getId() > id) {
+                    r = mid - 1;
+                }
+                else {
+                    if (mid > 0 && m_objects[mid - 1]->getId() == id) {
+                        r = mid - 1;
+                    }
+                    else {
+                        return m_objects[mid];
+                    }
+                }
+            }
+            if (m_objects[l]->getId() == id)
+                return m_objects[l];
+        }
         return nullptr;
     }
 
@@ -801,19 +825,22 @@ namespace ige::scene
         auto &m_aabb = transform->getAABB();
         auto aabb = m_aabb.Transform(aabbTransform);
         float distance = 100.f;
-        if (obj->isRaycastTarget()) {
+        if (target->isRaycastTarget()) {
             if (RayOBBChecker::checkIntersect(aabb, transform->getWorldMatrix(), distance, 100.f))
             {
                 hit.first = obj;
                 hit.second = ray.first + ray.second * distance;
             }
         }
+
         if (target->getChildren().size() > 0) {
             const auto& children = target->getChildren();
-            for (size_t i = 0; i < children.size(); ++i) {
+            int cnt = children.size();
+            for (int i = cnt-1; i >= 0; i--) {
                 auto temp_hit = findIntersectInHierachy(children[i], ray);
                 if (temp_hit.first != nullptr) {
                     hit = temp_hit;
+                    break;
                 }
             }
         }

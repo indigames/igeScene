@@ -18,6 +18,7 @@
 #include "python/pyUIImage.h"
 #include "python/pyUIText.h"
 #include "python/pyUITextField.h"
+#include "python/pyUIButton.h"
 #include "python/pyPhysicManager.h"
 #include "python/pyPhysicBox.h"
 #include "python/pyPhysicSphere.h"
@@ -355,6 +356,17 @@ namespace ige::scene
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;
+                }
+            }
+            else if (type == "UIButton")
+            {
+                auto comp = self->sceneObject->addComponent<UIButton>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_UIButton, &PyTypeObject_UIButton);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
                 }
             }
             else if (type == "PhysicManager")
@@ -751,6 +763,17 @@ namespace ige::scene
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;
+                }
+            }
+            else if (type == "UIButton")
+            {
+                auto comp = self->sceneObject->getComponent<UIButton>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_UIButton, &PyTypeObject_UIButton);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
                 }
             }
             else if (type == "PhysicManager")

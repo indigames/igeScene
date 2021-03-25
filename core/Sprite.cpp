@@ -8,16 +8,18 @@ namespace ige::scene
 {
     Sprite::Sprite(const Vec2& size)
         : m_figure(nullptr), m_size(size), m_tiling(1, 1), m_offset(0, 0), m_wrapMode(SamplerState::CLAMP),
-        m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1)
+        m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1), m_texture(nullptr),
+        m_color(1.f, 1.f, 1.f, 1.f)
     {
-        
     }
 
-    Sprite::Sprite(const std::string& path, const Vec2& size)
+    Sprite::Sprite(Texture* texture, const Vec2& size)
         : m_figure(nullptr), m_size(size), m_tiling(1,1), m_offset(0,0), m_wrapMode(SamplerState::CLAMP),
-        m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1)
+        m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1), m_texture(nullptr),
+        m_color(1.f, 1.f, 1.f, 1.f)
     {
-        setPath(path);
+        if(texture != nullptr)
+            setTexture(texture);
     }
 
     Sprite::~Sprite()
@@ -40,6 +42,13 @@ namespace ige::scene
             m_figure->DecReference();
             m_figure = nullptr;
         }
+
+        if (m_texture) 
+        {
+            m_texture->DecReference();
+            m_texture = nullptr;
+        }
+            
     }
 
     void Sprite::setSize(const Vec2& size)
@@ -123,39 +132,6 @@ namespace ige::scene
         }
     }
 
-    void Sprite::setPath(const std::string& path)
-    {
-        if(strcmp(m_path.c_str(), path.c_str()) != 0)
-        {
-            m_path = path;
-            std::replace(m_path.begin(), m_path.end(), '\\', '/');
-
-            if (m_path.length() > 0)
-            {
-                // Free old texture
-                if(m_figure != nullptr)
-                {
-                    const auto& textureSources = m_figure->GetTextureSources();
-                    if(textureSources.size() > 0)
-                    {
-                        auto& textureSource = textureSources[0];
-                        auto texture = (Texture*)ResourceManager::Instance().GetResource(textureSource.path, TEXTURETYPE);
-                        if(texture)
-                        {
-                            texture->DecReference();
-                            texture = nullptr;
-                        }
-                    }
-
-                    m_texture = nullptr;
-                }
-                m_texture = ResourceCreator::Instance().NewTexture(m_path.c_str());
-                draw();
-                applyTexture();
-            }
-        }
-    }
-
     void Sprite::setFillMethod(const FillMethod& value)
     {
         if (m_fillMethod != value)
@@ -227,24 +203,67 @@ namespace ige::scene
     }
 
     void Sprite::setTexture(Texture* value) {
-        if (m_texture != value) {
-            m_texture = value;
+        if (m_texture != value) 
+        {
             if (m_figure != nullptr)
             {
-                const auto& textureSources = m_figure->GetTextureSources();
-                if (textureSources.size() > 0)
-                {
-                    auto& textureSource = textureSources[0];
-                    auto texture = (Texture*)ResourceManager::Instance().GetResource(textureSource.path, TEXTURETYPE);
-                    if (texture)
-                    {
-                        texture->DecReference();
-                        texture = nullptr;
-                    }
+                if (m_texture) {
+                    m_texture->DecReference();
+                    m_texture = nullptr;
                 }
             }
-            draw();
-            applyTexture();
+            m_texture = value;
+            if (value == nullptr)
+                releaseSprite();
+            else
+            {
+                m_texture->IncReference();
+                draw();
+                applyTexture();
+            }
+        }
+    }
+
+    void Sprite::setColor(float r, float g, float b, float a, bool redraw)
+    {
+        Vec4 newColor(r, g, b, a);
+        setColor(newColor, redraw);
+    }
+
+    void Sprite::setColor(const Vec4& value, bool redraw) {
+        if (m_color != value) {
+            m_color[0] = MATH_CLAMP(value[0], 0.0f, 1.0f);
+            m_color[1] = MATH_CLAMP(value[1], 0.0f, 1.0f);
+            m_color[2] = MATH_CLAMP(value[2], 0.0f, 1.0f);
+            m_color[3] = MATH_CLAMP(value[3], 0.0f, 1.0f);
+
+            if (m_figure && redraw)
+            {
+                draw();
+            }
+        }
+    }
+
+    //!===============================================
+
+    void Sprite::releaseSprite() {
+        if (m_figure)
+        {
+            const auto& textureSources = m_figure->GetTextureSources();
+            if (textureSources.size() > 0)
+            {
+                auto& textureSource = textureSources[0];
+                auto texture = (Texture*)ResourceManager::Instance().GetResource(textureSource.path, TEXTURETYPE);
+                if (texture)
+                {
+                    texture->DecReference();
+                    texture = nullptr;
+                }
+            }
+            m_texture = nullptr;
+
+            m_figure->DecReference();
+            m_figure = nullptr;
         }
     }
 
@@ -1081,7 +1100,7 @@ namespace ige::scene
     void Sprite::applyMesh(const std::vector<float>& points, const std::vector<uint32_t>& triangles, const std::vector<float>& uvs) {
         if (m_figure == nullptr)
         {
-            m_figure = GraphicsHelper::getInstance()->createMesh(points, triangles, m_path, uvs);
+            m_figure = GraphicsHelper::getInstance()->createMesh(points, triangles, m_texture, uvs, nullptr, nullptr, m_color);
             m_figure->WaitInitialize();
         }
         else
@@ -1093,26 +1112,33 @@ namespace ige::scene
             m_figure->SetMeshIndices(meshIdx, 0, (const uint32_t*)triangles.data(), (uint32_t)(triangles.size() / 3), 4);
             m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);
             m_figure->SetMeshAlpha(meshIdx, m_alpha);
+
+            int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
+            float color[4] = { m_color[0], m_color[1], m_color[2], m_color[3] };
+            m_figure->SetMaterialParam(materialIdx, "DiffuseColor", color, ParamTypeFloat4);
         }
     }
 
     void Sprite::applyTexture() {
         if (m_figure == nullptr) return;
+
         Sampler sampler;
         sampler.samplerSlotNo = 0;
         sampler.samplerState.wrap_s = m_wrapMode;
         sampler.samplerState.wrap_t = m_wrapMode;
         sampler.samplerState.minfilter = SamplerState::LINEAR;
         sampler.samplerState.magfilter = SamplerState::LINEAR;
-        sampler.tex = m_texture;
-        sampler.tex->WaitInitialize();
-        sampler.tex->WaitBuild();
+        if (m_texture) {
+            sampler.tex = m_texture;
+            sampler.tex->WaitInitialize();
+            sampler.tex->WaitBuild();
 
-        TextureSource texSrc;
-        strncpy(texSrc.path, m_path.c_str(), MAX_PATH);
-        texSrc.normal = false;
-        texSrc.wrap = false;
-        sampler.textureNameIndex = m_figure->SetTextureSource(texSrc);
+            TextureSource texSrc;
+            strncpy(texSrc.path, m_texture->ResourceName(), MAX_PATH);
+            texSrc.normal = false;
+            texSrc.wrap = false;
+            sampler.textureNameIndex = m_figure->SetTextureSource(texSrc);
+        }
 
         int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
         m_figure->SetMaterialParam(materialIdx, "ColorSampler", &sampler);

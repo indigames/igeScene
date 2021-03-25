@@ -6,7 +6,8 @@ namespace ige::scene
 {
     //! Constructor
     UIImage::UIImage(SceneObject &owner, const std::string &path, const Vec2 &size)
-        : SpriteComponent(owner, path, size, false, true)
+        : SpriteComponent(owner, path, size, false, true), 
+        m_bIsInteractable(false)
     {
         getOwner()->setIsRaycastTarget(true);
     }
@@ -59,6 +60,12 @@ namespace ige::scene
         m_sprite->setClockwise(value);
     }
 
+    //! Set Interactable
+    void UIImage::setInteractable(bool value) {
+        m_bIsInteractable = value;
+        getOwner()->setIsInteractable(m_bIsInteractable);
+    }
+
     //! Serialize
     void UIImage::to_json(json &j) const
     {
@@ -68,7 +75,8 @@ namespace ige::scene
         j["fillmethod"] = getFillMethod();
         j["fillorigin"] = getFillOrigin();
         j["fillamount"] = getFillAmount();
-        j["alpha"] = getAlpha();
+        j["color"] = getColor();
+        j["interactable"] = isInteractable();
     }
 
     //! Deserialize
@@ -78,7 +86,8 @@ namespace ige::scene
         setFillMethod(j.at("fillmethod"));
         setFillOrigin(j.at("fillorigin"));
         setFillAmount(j.at("fillamount"));
-        setAlpha(j.at("alpha"));
+        setColor(j.at("color"));
+        setInteractable(j.at("interactable"));
         setPath(j.at("path"));
         Component::from_json(j);
     }
