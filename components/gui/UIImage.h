@@ -9,6 +9,8 @@ using namespace pyxie;
 
 namespace ige::scene
 {
+    class UIEventContext;
+    class EventContext;
 
     //! UIImage
     class UIImage : public SpriteComponent
@@ -47,7 +49,21 @@ namespace ige::scene
         
         void setInteractable(bool value);
         const bool isInteractable() const { return m_bIsInteractable; }
+
+        Event<>& getOnClickedEvent() { return m_onClickedEvent; }
+        Event<>& getOnPressedEvent() { return m_onPressedEvent; }
+        Event<>& getOnDragEvent() { return m_onDragEvent; }
+        Event<>& getOnReleasedEvent() { return m_onReleasedEvent; }
+        Event<>& getOnSelectedEvent() { return m_onSelectedEvent; }
+
     protected:
+        virtual void _onTouchPress(EventContext* context);
+        virtual void _onTouchDrag(EventContext* context);
+        virtual void _onTouchRelease(EventContext* context);
+        virtual void _onSelected(EventContext* context);
+        virtual void _onClick(EventContext* context);
+        virtual void _onExit(EventContext* context);
+
         //! Serialize
         virtual void to_json(json &j) const override;
 
@@ -56,5 +72,12 @@ namespace ige::scene
 
     protected:
         bool m_bIsInteractable;
+
+        //! Events
+        Event<> m_onClickedEvent;
+        Event<> m_onPressedEvent;
+        Event<> m_onDragEvent;
+        Event<> m_onReleasedEvent;
+        Event<> m_onSelectedEvent;
     };
 }

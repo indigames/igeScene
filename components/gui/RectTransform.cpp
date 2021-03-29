@@ -291,6 +291,8 @@ namespace ige::scene
                 }
             }
         }
+
+        getOwner()->getTransformChangedEvent().invoke(*getOwner());
     }
 
     void RectTransform::setAnchor(const Vec4 &anchor)

@@ -27,6 +27,7 @@ namespace ige::scene
     {
         m_bPathDirty = true;
         getOwner()->addEventListener((int)EventType::Click, std::bind(&ScriptComponent::onClickEvent, this, std::placeholders::_1), m_instanceId);
+        getOwner()->addEventListener((int)EventType::Changed, std::bind(&ScriptComponent::onChangedValueEvent, this, std::placeholders::_1), m_instanceId);
     }
 
     //! Destructor
@@ -34,11 +35,17 @@ namespace ige::scene
     {
         unloadPyModule();
         getOwner()->removeEventListener((int)EventType::Click, m_instanceId);
+        getOwner()->removeEventListener((int)EventType::Changed, m_instanceId);
     }
 
     void ScriptComponent::onClickEvent(EventContext* context)
     {
         this->onClick();
+    }
+
+    void ScriptComponent::onChangedValueEvent(EventContext* context)
+    {
+        this->onChangedValue(context->getDataValue());
     }
 
     void ScriptComponent::loadPyModule()
@@ -322,6 +329,66 @@ namespace ige::scene
             Py_XDECREF(ret);
         }
     }
+
+    //! Change Value
+    void ScriptComponent::onChangedValue(Value value)
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onChangedValue"))
+        {
+            switch (value.getType()) {
+            case Value::Type::NONE:
+            default:
+                {
+                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", nullptr);
+                    Py_XDECREF(ret);
+                }
+                break;
+            case Value::Type::BYTE:
+                {
+                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(b)", value.asByte());
+                    Py_XDECREF(ret);
+                }
+                break;
+            case Value::Type::INTEGER:
+                {
+                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(i)", value.asInt());
+                    Py_XDECREF(ret);
+                }
+                break;
+            case Value::Type::UNSIGNED:
+                {
+                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(I)", value.asUnsignedInt());
+                    Py_XDECREF(ret);
+                }
+                break;
+            case Value::Type::FLOAT:
+                {
+                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(f)", value.asFloat());
+                    Py_XDECREF(ret);
+                }
+                break;
+            case Value::Type::DOUBLE:
+                {
+                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(d)", value.asDouble());
+                    Py_XDECREF(ret);
+                }
+                break;
+            case Value::Type::BOOLEAN:
+                {
+                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(i)", value.asBool());
+                    Py_XDECREF(ret);
+                }
+                break;
+            case Value::Type::STRING:
+                {
+                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(s)", value.asString().c_str());
+                    Py_XDECREF(ret);
+                }
+                break;
+            }
+        }
+    }
+
 
     //! Trigger events
     void ScriptComponent::onTriggerStart(SceneObject &other)

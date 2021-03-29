@@ -1,6 +1,7 @@
 #include "components/gui/UIImage.h"
 #include "components/gui/RectTransform.h"
 #include "scene/SceneObject.h"
+#include "event/EventContext.h"
 
 namespace ige::scene
 {
@@ -15,6 +16,11 @@ namespace ige::scene
     //! Destructor
     UIImage::~UIImage()
     {
+        m_onClickedEvent.removeAllListeners();
+        m_onPressedEvent.removeAllListeners();
+        m_onDragEvent.removeAllListeners();
+        m_onReleasedEvent.removeAllListeners();
+        m_onSelectedEvent.removeAllListeners();
     }
 
     //! Update
@@ -65,6 +71,45 @@ namespace ige::scene
         m_bIsInteractable = value;
         getOwner()->setIsInteractable(m_bIsInteractable);
     }
+
+
+    //==================================
+
+    void UIImage::_onTouchPress(EventContext* context)
+    {
+        if (!isInteractable()) return;
+        getOnPressedEvent().invoke();
+    }
+
+    void UIImage::_onTouchRelease(EventContext* context)
+    {
+        if (!isInteractable()) return;
+        getOnReleasedEvent().invoke();
+    }
+
+    void UIImage::_onTouchDrag(EventContext* context)
+    {
+        if (!isInteractable()) return;
+        getOnDragEvent().invoke();
+    }
+
+    void UIImage::_onClick(EventContext* context)
+    {
+        if (!isInteractable()) return;
+        getOnClickedEvent().invoke();
+    }
+
+    void UIImage::_onSelected(EventContext* context)
+    {
+        if (!isInteractable()) return;
+        getOnSelectedEvent().invoke();
+    }
+
+    void UIImage::_onExit(EventContext* context)
+    {
+        
+    }
+
 
     //! Serialize
     void UIImage::to_json(json &j) const

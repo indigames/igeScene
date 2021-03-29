@@ -2,6 +2,7 @@
 
 #include "components/Component.h"
 #include "event/Event.h"
+#include "core/Value.h"
 
 //! PyObject declaration
 struct _object;
@@ -54,6 +55,9 @@ namespace ige::scene
         //! Resume
         virtual void onResume() override;
 
+        //! Change Value
+        virtual void onChangedValue(Value value);
+
         //! Trigger events
         virtual void onTriggerStart(SceneObject &other);
         virtual void onTriggerStay(SceneObject &other);
@@ -85,6 +89,7 @@ namespace ige::scene
         void unregisterPhysicEvents();
 
         void onClickEvent(EventContext* context);
+        void onChangedValueEvent(EventContext* context);
 
     protected:
 

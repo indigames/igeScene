@@ -822,7 +822,7 @@ namespace ige::scene
         auto aabbTransform = Mat4::IdentityMat();
         vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
         vmath_mat_appendScale(aabbTransform.P(), transform->getWorldScale().P(), 4, 4, aabbTransform.P());
-        auto &m_aabb = transform->getAABB();
+        auto &m_aabb = obj->getAABB();
         auto aabb = m_aabb.Transform(aabbTransform);
         float distance = 100.f;
         if (target->isRaycastTarget()) {

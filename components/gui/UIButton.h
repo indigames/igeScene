@@ -11,7 +11,6 @@ USING_NS_PYXIE
 
 NS_IGE_SCENE_BEGIN
 
-class UIImage;
 class UIEventContext;
 class EventContext;
 class Tweener;
@@ -55,11 +54,6 @@ public:
 
 	void setTexturePath(const std::string& texturePath, ButtonState setState);
 
-	Event<>& getOnClickedEvent() { return m_onClickedEvent; }
-	Event<>& getOnPressedEvent() { return m_onPressedEvent; }
-	Event<>& getOnReleasedEvent() { return m_onReleasedEvent; }
-	Event<>& getOnSelectedEvent() { return m_onSelectedEvent; }
-
 	const std::string& getPressedPath() const { return m_pressedPath; }
 	const std::string& getSelectedPath() const { return m_selectedPath; }
 	const std::string& getDisabledPath() const { return m_disabledPath; }
@@ -88,11 +82,11 @@ public:
 	const float getFadeDuration() const { return m_fadeDuration; }
 protected:
 
-	void _onTouchPress(EventContext* context);
-	void _onTouchRelease(EventContext* context);
-	void _onSelected(EventContext* context);
-	void _onClick(EventContext* context);
-	void _onExit(EventContext* context);
+	virtual void _onTouchPress(EventContext* context) override;
+	virtual void _onTouchRelease(EventContext* context) override;
+	virtual void _onSelected(EventContext* context) override;
+	virtual void _onClick(EventContext* context) override;
+	virtual void _onExit(EventContext* context) override;
 	
 	virtual void onClick() override;
 
@@ -103,12 +97,6 @@ protected:
 protected:
 	TransitionMode m_transitionMode;
 	AnimationMode m_animationMode;
-
-	//! Events
-	Event<> m_onClickedEvent;
-	Event<> m_onPressedEvent;
-	Event<> m_onReleasedEvent;
-	Event<> m_onSelectedEvent;
 
 	//! Color Tint
 	Vec4 m_normalColor;
