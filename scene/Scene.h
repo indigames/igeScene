@@ -17,6 +17,7 @@
 namespace ige::scene
 {
     class SceneObject;
+    class TweenManager;
 
     /**
      * Class Scene: Manage scene objects hierarchy
@@ -51,8 +52,14 @@ namespace ige::scene
         //! Late update
         virtual void lateUpdate(float dt);
 
+        //! Reset flag
+        virtual void resetFlag();
+
         //! Render
         virtual void render();
+
+        //! Canvas Render
+        virtual void renderUI();
 
         //! Create scene object
         virtual std::shared_ptr<SceneObject> createObject(const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 }, bool isCanvas = false);
@@ -81,6 +88,9 @@ namespace ige::scene
         //! Get root of scene
         std::shared_ptr<SceneObject>& getRoot() { return m_root; };
 
+        //! Get root UI scene
+        std::shared_ptr<SceneObject>& getRootUI() { return m_rootUI; };
+
         //! Get objects list
         std::vector<std::shared_ptr<SceneObject>>& getObjects() { return m_objects; };
 
@@ -99,17 +109,24 @@ namespace ige::scene
         //! Get showcase
         Showcase* getShowcase() { return m_showcase; }
 
+        //! Get ui showcase
+        Showcase* getUIShowcase() { return m_uiShowcase; }
+
         //! Get environment
         Environment* getEnvironment() { return m_environment; }
 
         //! Internal event
         Event<Resource*>& getResourceAddedEvent() { return m_resourceAddedEvent; }
         Event<Resource*>& getResourceRemovedEvent() { return m_resourceRemovedEvent; }
+        Event<Resource*>& getUIResourceAddedEvent() { return m_uiResourceAddedEvent; }
+        Event<Resource*>& getUIResourceRemovedEvent() { return m_uiResourceRemovedEvent; }
         Event<Scene*>& getSerializeFinishedEvent() { return m_serializeFinishedEvent; }
 
         //! Resource added/removed event
         void onResourceAdded(Resource* resource);
         void onResourceRemoved(Resource* resource);
+        void onUIResourceAdded(Resource* resource);
+        void onUIResourceRemoved(Resource* resource);
 
         //! Prefab save/load
         bool savePrefab(uint64_t objectId, const std::string& file);
@@ -135,7 +152,11 @@ namespace ige::scene
         void setShadowTextureSize(const Vec2& size);
 
         //! Raycast: return first hit point from single ray
-        std::pair<SceneObject*, Vec3> raycast(const Vec2& screenPos, Camera* camera, float maxDistance = 10000.f);
+        //! forceRaycast : can ignore raycastCapture
+        std::pair<SceneObject*, Vec3> raycast(const Vec2& screenPos, Camera* camera, float maxDistance = 10000.f, bool forceRaycast = false);
+
+        //! Raycast UI 
+        std::pair<SceneObject*, Vec3> raycastUI(const Vec2& screenPos);
 
         //! Window position
         const Vec2& getWindowPosition() const { return m_windowPosition; }
@@ -145,12 +166,23 @@ namespace ige::scene
         const Vec2& getWindowSize() const { return m_windowSize; }
         void setWindowSize(const Vec2& size) { m_windowSize = size; }
 
+        std::shared_ptr<TweenManager> getTweenManager() const;
+
     protected:
+        //! Create root Objects
+        virtual std::shared_ptr<SceneObject> createRootObject(const std::string& name = "");
+
         void populateTestData(const std::shared_ptr<SceneObject>& parent = nullptr, int num = 1000);
+
+        std::pair<SceneObject*, Vec3>  findIntersectInHierachy(const SceneObject* target, std::pair<Vec3, Vec3> ray);
 
     protected:
         //! Scene root node
         std::shared_ptr<SceneObject> m_root;
+        //! UI root node
+        std::shared_ptr<SceneObject> m_rootUI;
+        //! Canvas
+        std::shared_ptr<SceneObject> m_canvas;
 
         //! Cache all objects
         std::vector<std::shared_ptr<SceneObject>> m_objects;
@@ -158,16 +190,26 @@ namespace ige::scene
         //! Showcase which contains all rendering resources
         Showcase* m_showcase = nullptr;
 
+        Showcase* m_uiShowcase = nullptr;
+
         //! Environment settings of the scene
         Environment* m_environment = nullptr;
 
         //! Internal events
+        //! Main ShowCase
         Event<Resource*> m_resourceAddedEvent;
         Event<Resource*> m_resourceRemovedEvent;
+        //! UI ShowCase
+        Event<Resource*> m_uiResourceAddedEvent;
+        Event<Resource*> m_uiResourceRemovedEvent;
+
         Event<Scene*> m_serializeFinishedEvent;
 
         //! Cache active camera
         CameraComponent* m_activeCamera = nullptr;
+
+        //! Canvas Camera 
+        Camera* m_canvasCamera = nullptr;
 
         //! Shadow render target
         Texture* m_shadowTexture = nullptr;
@@ -198,5 +240,12 @@ namespace ige::scene
 
         //! Cache window size
         Vec2 m_windowSize = {-1.f, -1.f};
+
+        //!TweenManager
+        std::shared_ptr<TweenManager> m_tweenManager;
+
+        //!Capture flag
+        bool m_raycastCapture;
+
     };
 }

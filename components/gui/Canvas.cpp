@@ -11,6 +11,7 @@ namespace ige::scene
     Canvas::Canvas(SceneObject &owner)
         : Component(owner)
     {
+        setCanvasToViewportMatrix(Mat4::IdentityMat());
     }
 
     //! Destructor
@@ -25,7 +26,9 @@ namespace ige::scene
             m_viewportToCanvasMatrix = m_canvasToViewportMatrix.Inverse();
 
             // Recompute viewport transform
+            getOwner()->getRectTransform()->setRectDirty();
             getOwner()->getRectTransform()->setTransformDirty();
+            
         }
     }
 
@@ -43,9 +46,6 @@ namespace ige::scene
     void Canvas::setDesignCanvasSize(const Vec2 &canvasSize)
     {
         m_canvasSize = canvasSize;
-
-        auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
-        setCanvasToViewportMatrix(transformToViewport);
 
         // Recompute transform
         auto transform = getOwner()->getRectTransform();

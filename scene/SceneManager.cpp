@@ -77,7 +77,10 @@ namespace ige::scene
 
             m_bInitialized = true;
         }
-        if(m_currScene) m_currScene->update(dt);
+        if (m_currScene) {
+            m_currScene->update(dt);
+            m_currScene->resetFlag();
+        }
     }
 
     void SceneManager::fixedUpdate(float dt)
@@ -96,6 +99,7 @@ namespace ige::scene
         {
             ShapeDrawer::setViewProjectionMatrix(RenderContext::InstancePtr()->GetRenderViewProjectionMatrix());
             m_currScene->render();
+            m_currScene->renderUI();
             ShapeDrawer::flush();
         }
     }

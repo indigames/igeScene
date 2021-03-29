@@ -7,6 +7,8 @@ using namespace pyxie;
 
 #include "components/Component.h"
 
+#include "core/igeSceneMacros.h"
+
 namespace ige::scene
 {
 
@@ -113,6 +115,8 @@ namespace ige::scene
 
         //! Update
         virtual void onUpdate(float dt) override;
+
+        virtual void makeDirty();
 
     protected:
         //! Serialize

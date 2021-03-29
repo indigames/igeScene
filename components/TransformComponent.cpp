@@ -7,6 +7,9 @@
 #include "scene/Scene.h"
 #include "scene/SceneManager.h"
 
+#include <functional>
+
+
 namespace ige::scene
 {
     TransformComponent::TransformComponent(SceneObject &owner, const Vec3 &pos, const Quat &rot, const Vec3 &scale)
@@ -31,6 +34,7 @@ namespace ige::scene
         if (m_parent)
             m_parent->removeObserver(this);
         m_parent = nullptr;
+
         notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
         m_observers.clear();
     }
@@ -335,6 +339,11 @@ namespace ige::scene
 
         // Fire transform changed event
         getOwner()->getTransformChangedEvent().invoke(*getOwner());
+    }
+
+    void TransformComponent::makeDirty() {
+        m_bWorldDirty = true;
+        m_bLocalDirty = true;
     }
 
     void TransformComponent::addObserver(TransformComponent *observer)

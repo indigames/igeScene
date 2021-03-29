@@ -27,6 +27,8 @@ namespace ige::scene
             m_figure->DecReference();
             m_figure = nullptr;
         }
+        if (getOwner() && getOwner()->getTransform())
+            getOwner()->getTransform()->makeDirty();
     }
 
     //! Update
@@ -90,6 +92,7 @@ namespace ige::scene
             }
 
             getOwner()->getScene()->getResourceAddedEvent().invoke(m_figure);
+            getOwner()->getTransform()->makeDirty();
         }
     }
 

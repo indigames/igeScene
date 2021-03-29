@@ -2,12 +2,14 @@
 
 #include "components/Component.h"
 #include "event/Event.h"
+#include "core/Value.h"
 
 //! PyObject declaration
 struct _object;
 
 namespace ige::scene
 {
+    class EventContext;
     //! ScriptComponent
     class ScriptComponent : public Component
     {
@@ -53,6 +55,9 @@ namespace ige::scene
         //! Resume
         virtual void onResume() override;
 
+        //! Change Value
+        virtual void onChangedValue(Value value);
+
         //! Trigger events
         virtual void onTriggerStart(SceneObject &other);
         virtual void onTriggerStay(SceneObject &other);
@@ -82,6 +87,11 @@ namespace ige::scene
 
         void registerPhysicEvents();
         void unregisterPhysicEvents();
+
+        void onClickEvent(EventContext* context);
+        void onChangedValueEvent(EventContext* context);
+
+    protected:
 
         //! Path to figure file
         std::string m_path;

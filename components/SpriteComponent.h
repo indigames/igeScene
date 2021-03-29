@@ -14,7 +14,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SpriteComponent(SceneObject &owner, const std::string &texture = "", const Vec2 &size = {32.f, 32.f}, bool isBillboard = false);
+        SpriteComponent(SceneObject &owner, const std::string &texture = "", const Vec2 &size = {32.f, 32.f}, bool isBillboard = false, bool isGUI = false);
 
         //! Destructor
         virtual ~SpriteComponent();
@@ -32,8 +32,8 @@ namespace ige::scene
         EditableFigure *getFigure() { return m_sprite->getFigure(); }
 
         //! Path
-        void setPath(const std::string &path);
-        const std::string &getPath() const { return m_sprite->getPath(); }
+        virtual void setPath(const std::string &path);
+        virtual const std::string &getPath() const { return m_path; }
 
         //! Size
         void setSize(const Vec2 &size);
@@ -51,7 +51,7 @@ namespace ige::scene
         void setOffset(const Vec2& value);
         const Vec2& getOffset() const { return m_sprite->getOffset(); }
 
-        //! Wrap Mode
+        //! WrapMode
         void setWrapMode(int value);
         const SamplerState::WrapMode& getWrapMode() const { return m_sprite->getWrapMode(); }
 
@@ -63,17 +63,41 @@ namespace ige::scene
         const int getAlphaBlendingOp() const { return m_sprite ? m_sprite->getAlphaBlendingOp() : 0; }
         void setAlphaBlendingOp(int op) { if (m_sprite) m_sprite->setAlphaBlendingOp(op); }
 
+
+        //! Alpha
+        void setAlpha(float value);
+        const float getAlpha() const;
+
+        //! Color
+        virtual void setColor(float r, float g, float b, float a = 1);
+        virtual void setColor(const Vec4& value);
+        virtual const Vec4 getColor()  const { return m_sprite->getColor(); }
+
+
     protected:
+        void onCreateFigure(EditableFigure* figure);
+        void onRemoveFigure(EditableFigure* figure);
+
+
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
         virtual void from_json(const json& j) override;
 
+    protected:
+
         //! Sprite
         std::shared_ptr<Sprite> m_sprite;
 
+        std::string m_path;
+        Texture* m_texture;
+
         //! Billboard setting
         bool m_bIsBillboard = false;
+
+        bool m_bIsGUI = false;
+
+        friend class UIImage;
     };
 } // namespace ige::scene

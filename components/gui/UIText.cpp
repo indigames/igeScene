@@ -12,15 +12,16 @@ namespace ige::scene
     {
         m_text = std::make_shared<Text>(text, fontPath, fontSize, color);
         if (m_text->getFigure())
-            getOwner()->getScene()->getResourceAddedEvent().invoke(m_text->getFigure());
+            getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_text->getFigure());
     }
 
     //! Destructor
     UIText::~UIText()
     {
         if (m_text->getFigure())
-            getOwner()->getScene()->getResourceRemovedEvent().invoke(m_text->getFigure());
+            getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_text->getFigure());
         m_text = nullptr;
+        getOwner()->getTransform()->makeDirty();
     }
 
     //! Update
@@ -94,10 +95,11 @@ namespace ige::scene
         if (oldFigure != newFigure)
         {
             if (oldFigure)
-                getOwner()->getScene()->getResourceRemovedEvent().invoke(oldFigure);
+                getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
             if (newFigure)
-                getOwner()->getScene()->getResourceAddedEvent().invoke(newFigure);
+                getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
         }
+        getOwner()->getTransform()->makeDirty();
     }
 
     //! Font Path
@@ -109,10 +111,11 @@ namespace ige::scene
         if (oldFigure != newFigure)
         {
             if (oldFigure)
-                getOwner()->getScene()->getResourceRemovedEvent().invoke(oldFigure);
+                getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
             if (newFigure)
-                getOwner()->getScene()->getResourceAddedEvent().invoke(newFigure);
+                getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
         }
+        getOwner()->getTransform()->makeDirty();
     }
 
     //! Font Size
@@ -124,10 +127,11 @@ namespace ige::scene
         if (oldFigure != newFigure)
         {
             if (oldFigure)
-                getOwner()->getScene()->getResourceRemovedEvent().invoke(oldFigure);
+                getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
             if (newFigure)
-                getOwner()->getScene()->getResourceAddedEvent().invoke(newFigure);
+                getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
         }
+        getOwner()->getTransform()->makeDirty();
     }
 
     //! Color

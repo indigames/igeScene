@@ -275,6 +275,7 @@ namespace ige::scene
     void RectTransform::setTransformDirty()
     {
         m_bLocalDirty = true;
+        //m_bWorldDirty = true;
         m_viewportTransformDirty = true;
         m_canvasTransformDirty = true;
 
@@ -290,6 +291,8 @@ namespace ige::scene
                 }
             }
         }
+
+        getOwner()->getTransformChangedEvent().invoke(*getOwner());
     }
 
     void RectTransform::setAnchor(const Vec4 &anchor)
