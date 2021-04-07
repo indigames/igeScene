@@ -6,11 +6,17 @@
 namespace ige::scene
 {
     //! Constructor
-    UIImage::UIImage(SceneObject &owner, const std::string &path, const Vec2 &size)
+    UIImage::UIImage(SceneObject &owner, const std::string &path, const Vec2 &size, const bool isSliced, const Vec4& border)
         : SpriteComponent(owner, path, size, false, true), 
         m_bIsInteractable(false)
     {
         getOwner()->setIsRaycastTarget(true);
+        if (m_sprite) {
+            m_sprite->setIsScaleBorder(true);
+        }
+        if (isSliced)
+            setSpriteType(1);
+        setBorder(border);
     }
 
     //! Destructor
@@ -122,6 +128,8 @@ namespace ige::scene
         j["fillamount"] = getFillAmount();
         j["color"] = getColor();
         j["interactable"] = isInteractable();
+        j["spritetype"] = (int)getSpriteType();
+        j["border"] = getBorder();
     }
 
     //! Deserialize
@@ -133,6 +141,8 @@ namespace ige::scene
         setFillAmount(j.at("fillamount"));
         setColor(j.at("color"));
         setInteractable(j.at("interactable"));
+        setSpriteType(j.at("spritetype"));
+        setBorder(j.at("border"));
         setPath(j.at("path"));
         Component::from_json(j);
     }

@@ -57,7 +57,7 @@ namespace ige::scene
     //! Constructor
     SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size, bool isCanvas)
         : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_bIsCanvas(isCanvas), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr),
-        m_dispatching(0)
+        m_dispatching(0), m_aabbDirty(2)
     {
         // Generate new UUID
         m_uuid = generateUUID();
@@ -284,6 +284,11 @@ namespace ige::scene
     //! Update function
     void SceneObject::onUpdate(float dt)
     {
+        if (m_aabbDirty > 0) {
+            updateAabb();
+            m_aabbDirty--;
+        }
+
         if (isActive())
         {
             for (auto &comp : m_components)
@@ -568,7 +573,9 @@ namespace ige::scene
     //! Transform changed event
     void SceneObject::onTransformChanged(SceneObject& sceneObject)
     {
-        updateAabb();
+        if (m_aabbDirty != 0) return;
+        //updateAabb();
+        m_aabbDirty = 2;
     }
 
     //! Update AABB

@@ -46,6 +46,14 @@ namespace ige::scene
         const Vec4 &getOffset() const { return m_offset; }
         void setOffset(const Vec4 &offset);
 
+        //! Anchor Offset
+        const Vec4& getAnchorOffset() const { return m_anchorOffset; }
+
+        //! Anchored Position
+        const Vec2& getAnchoredPosition() const { return m_anchoredPosition; }
+        void setAnchoredPosition(const Vec2& value);
+
+
         //! Size
         Vec2 getSize();
         void setSize(const Vec2 &size);
@@ -100,11 +108,21 @@ namespace ige::scene
         //! Anchor
         Vec4 m_anchor;
 
+        //! Anchored Position
+        Vec2 m_anchoredPosition;
+
         // Offset
         Vec4 m_offset;
 
+        //! Anchor Offset 
+        //! L,R,T,B base on anchor vs parent
+        Vec4 m_anchorOffset;
+
         //! Pivot: center of the content
         Vec2 m_pivot;
+
+        //! Size of Rect 
+        Vec2 m_size;
 
         //! Cached rect in canvas space (no scale, no rotate)
         Vec4 m_rect;

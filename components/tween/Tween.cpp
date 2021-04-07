@@ -23,7 +23,7 @@ std::shared_ptr<Tweener> Tween::tween(float start, float end, float duration)
 	return nullptr;
 }
 
-std::shared_ptr<Tweener> Tween::tween(Vec2 start, Vec2 end, float duration)
+std::shared_ptr<Tweener> Tween::tween(const Vec2& start, const Vec2& end, float duration)
 {
 	if (SceneManager::getInstance() == nullptr) return nullptr;
 	auto scene = SceneManager::getInstance()->getCurrentScene();
@@ -37,7 +37,7 @@ std::shared_ptr<Tweener> Tween::tween(Vec2 start, Vec2 end, float duration)
 	return nullptr;
 }
 
-std::shared_ptr<Tweener> Tween::tween(Vec3 start, Vec3 end, float duration)
+std::shared_ptr<Tweener> Tween::tween(const Vec3& start, const Vec3& end, float duration)
 {
 	if (SceneManager::getInstance() == nullptr) return nullptr;
 	auto scene = SceneManager::getInstance()->getCurrentScene();
@@ -51,7 +51,7 @@ std::shared_ptr<Tweener> Tween::tween(Vec3 start, Vec3 end, float duration)
 	return nullptr;
 }
 
-std::shared_ptr<Tweener> Tween::tween(Vec4 start, Vec4 end, float duration)
+std::shared_ptr<Tweener> Tween::tween(const Vec4& start, const Vec4& end, float duration)
 {
 	if (SceneManager::getInstance() == nullptr) return nullptr;
 	auto scene = SceneManager::getInstance()->getCurrentScene();

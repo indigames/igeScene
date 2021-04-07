@@ -8,14 +8,16 @@ namespace ige::scene
 {
     Sprite::Sprite(const Vec2& size)
         : m_figure(nullptr), m_size(size), m_tiling(1, 1), m_offset(0, 0), m_wrapMode(SamplerState::CLAMP),
-        m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1), m_texture(nullptr),
-        m_color(1.f, 1.f, 1.f, 1.f)
+        m_spriteType(SpriteType::Simple), m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1), m_texture(nullptr),
+        m_border(0.f, 0.f, 0.f, 0.f), m_bIsScaleBorder (false),
+        m_color(1.f, 1.f, 1.f, 1.f) 
     {
     }
 
     Sprite::Sprite(Texture* texture, const Vec2& size)
         : m_figure(nullptr), m_size(size), m_tiling(1,1), m_offset(0,0), m_wrapMode(SamplerState::CLAMP),
-        m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1), m_texture(nullptr),
+        m_spriteType(SpriteType::Simple), m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1), m_texture(nullptr),
+        m_border(0.f, 0.f, 0.f, 0.f), m_bIsScaleBorder(false),
         m_color(1.f, 1.f, 1.f, 1.f)
     {
         if(texture != nullptr)
@@ -59,13 +61,14 @@ namespace ige::scene
 
             if (m_figure)
             {
-                auto w = m_size.X() / 2.f;
+                /*auto w = m_size.X() / 2.f;
                 auto h = m_size.Y() / 2.f;
                 const std::vector<float> points = { -w,h,0.f, w,h,0.f, -w,-h,0.f, w,-h,0.f };
 
                 auto meshIdx = m_figure->GetMeshIndex(GenerateNameHash("mesh"));
                 if (meshIdx == -1) return;
-                m_figure->SetMeshVertexValues(meshIdx, (const void*)points.data(), (uint32_t)(points.size() / 3), ATTRIBUTE_ID_POSITION, 0);
+                m_figure->SetMeshVertexValues(meshIdx, (const void*)points.data(), (uint32_t)(points.size() / 3), ATTRIBUTE_ID_POSITION, 0);*/
+                draw();
             }
         }
     }
@@ -78,7 +81,7 @@ namespace ige::scene
 
             if (m_figure && m_fillMethod == FillMethod::None)
             {
-                auto ow = m_offset.X();
+                /*auto ow = m_offset.X();
                 auto oh = m_offset.Y();
                 auto tw = ow + m_tiling.X();
                 auto th = oh + m_tiling.Y();
@@ -86,7 +89,8 @@ namespace ige::scene
 
                 auto meshIdx = m_figure->GetMeshIndex(GenerateNameHash("mesh"));
                 if (meshIdx == -1) return;
-                m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);
+                m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);*/
+                draw();
             }
         }
     }
@@ -99,7 +103,7 @@ namespace ige::scene
 
             if (m_figure && m_fillMethod == FillMethod::None)
             {
-                auto ow = m_offset.X();
+                /*auto ow = m_offset.X();
                 auto oh = m_offset.Y();
                 auto tw = ow + m_tiling.X();
                 auto th = oh + m_tiling.Y();
@@ -107,7 +111,8 @@ namespace ige::scene
 
                 auto meshIdx = m_figure->GetMeshIndex(GenerateNameHash("mesh"));
                 if (meshIdx == -1) return;
-                m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);
+                m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);*/
+                draw();
             }
         }
     }
@@ -128,6 +133,19 @@ namespace ige::scene
                 param->sampler.samplerState.wrap_s = m_wrapMode;
                 param->sampler.samplerState.wrap_t = m_wrapMode;
                 m_figure->SetMaterialParam(materialIdx, "ColorSampler", &param->sampler);
+            }
+        }
+    }
+
+    void Sprite::setSpriteType(const SpriteType& value)
+    {
+        if (m_spriteType != value)
+        {
+            m_spriteType = value;
+            m_fillMethod = FillMethod::None;
+            if (m_figure)
+            {
+                draw();
             }
         }
     }
@@ -218,6 +236,8 @@ namespace ige::scene
             else
             {
                 m_texture->IncReference();
+                m_texSize.X(m_texture->GetTextureWidth());
+                m_texSize.Y(m_texture->GetTextureHeight());
                 draw();
                 applyTexture();
             }
@@ -238,6 +258,105 @@ namespace ige::scene
             m_color[3] = MATH_CLAMP(value[3], 0.0f, 1.0f);
 
             if (m_figure && redraw)
+            {
+                draw();
+            }
+        }
+    }
+
+    void Sprite::setBorder(float left, float right, float top, float bottom)
+    {
+        /*auto w = m_texSize.X();
+        auto h = m_texSize.Y();*/
+
+        m_border[0] = left < 0 ? 0 : left;
+        m_border[1] = right < 0 ? 0 : right;
+        m_border[2] = top < 0 ? 0 : top;
+        m_border[3] = bottom < 0 ? 0 : bottom;
+
+        if (m_figure && m_spriteType == SpriteType::Sliced)
+        {
+            draw();
+        }
+    }
+
+    void Sprite::setBorderLeft(float value)
+    {
+        auto dd = value;
+        if (dd < 0) dd = 0;
+        auto w = m_texSize.X();
+        if (dd > w) dd = w;
+
+        if (m_border[0] != dd)
+        {
+            m_border[0] = dd;
+
+            if (m_figure && m_spriteType == SpriteType::Sliced)
+            {
+                draw();
+            }
+        }
+    }
+
+    void Sprite::setBorderRight(float value)
+    {
+        auto dd = value;
+        if (dd < 0) dd = 0;
+        auto w = m_texSize.X();
+        if (dd > w) dd = w;
+
+        if (m_border[1] != dd)
+        {
+            m_border[1] = dd;
+
+            if (m_figure && m_spriteType == SpriteType::Sliced)
+            {
+                draw();
+            }
+        }
+    }
+
+    void Sprite::setBorderTop(float value)
+    {
+        auto dd = value;
+        if (dd < 0) dd = 0;
+        auto h = m_texSize.Y();
+        if (dd > h) dd = h;
+
+        if (m_border[2] != dd)
+        {
+            m_border[2] = dd;
+
+            if (m_figure && m_spriteType == SpriteType::Sliced)
+            {
+                draw();
+            }
+        }
+    }
+
+    void Sprite::setBorderBottom(float value)
+    {
+        auto dd = value;
+        if (dd < 0) dd = 0;
+        auto h = m_texSize.Y();
+        if (dd > h) dd = h;
+
+        if (m_border[3] != dd)
+        {
+            m_border[3] = dd;
+
+            if (m_figure && m_spriteType == SpriteType::Sliced)
+            {
+                draw();
+            }
+        }
+    }
+
+    void Sprite::setIsScaleBorder(bool value)
+    {
+        if (m_bIsScaleBorder != value) {
+            m_bIsScaleBorder = value;
+            if (m_figure && m_spriteType == SpriteType::Sliced)
             {
                 draw();
             }
@@ -268,27 +387,31 @@ namespace ige::scene
     }
 
     void Sprite::draw() {
-        switch (m_fillMethod)
-        {
-        case FillMethod::None:
-        default:
-            drawNormal();
-            break;
-        case FillMethod::Horizontal:
-        case FillMethod::Vertical:
-            drawFillBar();
-            break;
-        case FillMethod::Radial90:
-            drawFillRadial90();
-            break;
-        case FillMethod::Radial180:
-            drawFillRadial180();
-            break;
-        case FillMethod::Radial360:
-            drawFillRadial360();
-            break;
+        if (m_spriteType == SpriteType::Sliced) {
+            drawNineSliced();
         }
-        
+        else {
+            switch (m_fillMethod)
+            {
+            case FillMethod::None:
+            default:
+                drawNormal();
+                break;
+            case FillMethod::Horizontal:
+            case FillMethod::Vertical:
+                drawFillBar();
+                break;
+            case FillMethod::Radial90:
+                drawFillRadial90();
+                break;
+            case FillMethod::Radial180:
+                drawFillRadial180();
+                break;
+            case FillMethod::Radial360:
+                drawFillRadial360();
+                break;
+            }
+        }
     }
 
     void Sprite::drawNormal() {
@@ -746,49 +869,6 @@ namespace ige::scene
         }
     }
 
-    //! Enable alpha blending
-    void Sprite::setAlphaBlendingEnable(bool enable)
-    {
-        if (m_bIsAlphaBlendingEnable != enable)
-        {
-            m_bIsAlphaBlendingEnable = enable;
-            if (m_figure)
-            {
-                // Setup point lights shader
-                for (int i = 0; i < m_figure->NumMaterials(); ++i)
-                {
-                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                    shaderDesc->SetValue(m_figure->GetShaderName(i));
-                    shaderDesc->SetAlphaBlend(m_bIsAlphaBlendingEnable);
-                    m_figure->SetShaderName(i, shaderDesc->GetValue());
-                }
-            }
-        }
-    }
-
-    //! Alpha blending operation
-    void Sprite::setAlphaBlendingOp(int op)
-    {
-        // Only 4 operations supported now
-        if (op < ShaderDescriptor::AlphaBlendOP::COL || op > ShaderDescriptor::AlphaBlendOP::MUL)
-            op = m_alphaBlendingOp;
-
-        if (m_alphaBlendingOp != op)
-        {
-            m_alphaBlendingOp = op;
-            if (m_figure)
-            {
-                for (int i = 0; i < m_figure->NumMaterials(); ++i)
-                {
-                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                    shaderDesc->SetValue(m_figure->GetShaderName(i));
-                    shaderDesc->SetAlphaBlendOP(m_alphaBlendingOp);
-                    m_figure->SetShaderName(i, shaderDesc->GetValue());
-                }
-            }
-        }
-    }
-
     void Sprite::drawFillRadial360()
     {
         float angle = 2.0f * ((float)PI) * (m_clockwise ? (1.f - m_fillAmount) : m_fillAmount);
@@ -947,7 +1027,7 @@ namespace ige::scene
                 };
 
                 const std::vector<uint32_t> triangles = { 0, 2, 1, 1, 2, 3, 1, 2, 0, 3, 2, 1 };
-                const std::vector<float> uvs = { start.X(), start.Y(), edge_1.X(), edge_1.Y(), mid.X(), mid.Y(), hit.X(), hit.Y()};
+                const std::vector<float> uvs = { start.X(), start.Y(), edge_1.X(), edge_1.Y(), mid.X(), mid.Y(), hit.X(), hit.Y() };
                 applyMesh(points, triangles, uvs);
             }
             else {
@@ -957,16 +1037,16 @@ namespace ige::scene
                     btmLeft.X() + w * start.X(), btmLeft.Y() + h * start.Y(), 0.f,
                     btmLeft.X() + w * hit.X(), btmLeft.Y() + h * hit.Y(), 0.f,
                     btmLeft.X() + w * mid.X(), btmLeft.Y() + h * mid.Y(), 0.f
-                    
+
                 };
 
                 const std::vector<uint32_t> triangles = { 0, 2, 1, 1, 2, 3, 1, 2, 0, 3, 2, 1 };
-                const std::vector<float> uvs = { edge_4.X(), edge_4.Y() ,  start.X(), start.Y() , hit.X(), hit.Y(),  mid.X(), mid.Y()};
+                const std::vector<float> uvs = { edge_4.X(), edge_4.Y() ,  start.X(), start.Y() , hit.X(), hit.Y(),  mid.X(), mid.Y() };
                 applyMesh(points, triangles, uvs);
             }
         }
         break;
-        case 3: 
+        case 3:
         {
             auto w = m_size.X();
             auto h = m_size.Y();
@@ -981,7 +1061,7 @@ namespace ige::scene
                     btmLeft.X() + w * hit.X(), btmLeft.Y() + h * hit.Y(), 0.f
                 };
 
-                const std::vector<uint32_t> triangles = { 0, 2, 1, 1, 2, 3, 2, 4, 3, 
+                const std::vector<uint32_t> triangles = { 0, 2, 1, 1, 2, 3, 2, 4, 3,
                                                           1, 2, 0, 3, 2, 1, 3, 4, 2 };
                 const std::vector<float> uvs = { start.X(), start.Y(), edge_1.X(), edge_1.Y(), mid.X(), mid.Y(), edge_2.X(), edge_2.Y(), hit.X(), hit.Y() };
                 applyMesh(points, triangles, uvs);
@@ -1061,7 +1141,7 @@ namespace ige::scene
 
                 const std::vector<uint32_t> triangles = { 0, 3, 1, 0, 2, 3, 3, 2, 4, 3, 4, 5, 6, 3, 5,
                                                           1, 3, 0, 3, 2, 0, 4, 2, 3, 5, 4, 3, 5, 3, 6 };
-                const std::vector<float> uvs = { edge_4.X(), edge_4.Y(), hit.X(), hit.Y(), edge_3.X(), edge_3.Y(), mid.X(), mid.Y(), edge_2.X(), edge_2.Y(), edge_1.X(), edge_1.Y(), start.X(), start.Y()};
+                const std::vector<float> uvs = { edge_4.X(), edge_4.Y(), hit.X(), hit.Y(), edge_3.X(), edge_3.Y(), mid.X(), mid.Y(), edge_2.X(), edge_2.Y(), edge_1.X(), edge_1.Y(), start.X(), start.Y() };
                 applyMesh(points, triangles, uvs);
             }
             else {
@@ -1094,6 +1174,131 @@ namespace ige::scene
             applyMesh(points, triangles, uvs);
         }
         break;
+        }
+    }
+
+    // (0,1)  
+    // v0----------------------
+    // |        |      |      |
+    // |        |      |      |
+    // v1-------O------+------|
+    // |        |      |      |
+    // |        |      |      |
+    // v2-------+------+------|
+    // |        |      |      |
+    // |        |      |      |
+    // v3-------------------- (1,0)  
+    // u0       u1     u2     u3
+
+    //
+    // y3----------------------(w, h)
+    // |        |      |      |
+    // |        |      |      |
+    // y2-------O------+------|
+    // |        |      |      |
+    // |        |      |      |
+    // y1-------+------+------|
+    // |        |      |      |
+    // |        |      |      |
+    //x0,y0--------------------
+    //         x1     x2     x3
+    
+    // x1 = Border Left
+    // x2 = Border Right
+    // y1 = Border Bottom
+    // y2 = Border Top
+
+    void Sprite::drawNineSliced() {
+
+        auto ww = m_texSize.X();
+        auto hh = m_texSize.Y();
+        if (ww == 0 || hh == 0) return;
+        auto w = m_size.X();
+        auto h = m_size.Y();
+        float pW = w / ww;
+        float pH = h / hh;
+        //auto pe = m_bIsScaleBorder ? (pW > pH ? pH : pW) : 1; 
+        auto pe = 1.0f;
+        if(pW < 1.0f || pH < 1.0f)
+            pe = m_bIsScaleBorder ? (pW > pH ? pH : pW) : 1;
+
+        w /= 2;
+        h /= 2;
+        
+        auto bL = w - m_border[0] * pe;
+        auto bR = w - m_border[1] * pe;
+        auto bT = h - m_border[2] * pe;
+        auto bB = h - m_border[3] * pe;
+
+        const std::vector<float> points = { -w,h,0.f,       -bL,h,0.f,      bR,h,0.f,       w,h,0.f,
+                                            -w,bT,0.f,      -bL,bT,0.f,     bR,bT,0.f,      w,bT,0.f,
+                                            -w,-bB,0.f,     -bL,-bB,0.f,    bR,-bB,0.f,     w,-bB,0.f,
+                                            -w,-h,0.f,      -bL,-h,0.f,     bR,-h,0.f,      w,-h,0.f };
+
+        const std::vector<uint32_t> triangles = {   0, 4, 1, 1, 4, 5,       1, 5, 2, 2, 5, 6,       2, 6, 3, 3, 6, 7,
+                                                    4, 8, 5, 5, 8, 9,       5, 9, 6, 6, 9, 10,      6, 10, 7, 7, 10, 11,
+                                                    8, 12, 9, 9, 12, 13,    9, 13, 10, 10, 13, 14,  10, 14, 11, 11, 14, 15,     
+                                                    1, 4, 0, 5, 4, 1,       2, 5, 1, 6, 5 ,2,       3, 6, 2, 7, 6, 3,
+                                                    5, 8, 4, 9, 8, 5,       6, 9, 5, 10, 9, 6,      7, 10, 6, 11, 10, 7,
+                                                    9, 12, 8, 13, 12, 9,    10, 13, 9, 14, 13, 10,  11, 14, 10, 15, 14, 11
+                                                };
+        
+        auto ow = 0.f;
+        auto oh = 0.f;
+        auto tw = 1.f;
+        auto th = 1.f;
+        auto ubl = m_border[0] / ww;
+        auto ubr = 1 - m_border[1] / ww;
+        auto ubt = 1 - m_border[2] / hh;
+        auto ubb = m_border[3] / hh;
+        const std::vector<float> uvs = {    ow, th, ubl, th, ubr, th, tw, th, 
+                                            ow, ubt, ubl, ubt, ubr, ubt, tw, ubt,
+                                            ow, ubb, ubl, ubb, ubr, ubb, tw, ubb,
+                                            ow, oh, ubl, oh, ubr, oh, tw, oh };
+
+        applyMesh(points, triangles, uvs);
+    }
+
+    //! Enable alpha blending
+    void Sprite::setAlphaBlendingEnable(bool enable)
+    {
+        if (m_bIsAlphaBlendingEnable != enable)
+        {
+            m_bIsAlphaBlendingEnable = enable;
+            if (m_figure)
+            {
+                // Setup point lights shader
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetAlphaBlend(m_bIsAlphaBlendingEnable);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
+            }
+        }
+    }
+
+    //! Alpha blending operation
+    void Sprite::setAlphaBlendingOp(int op)
+    {
+        // Only 4 operations supported now
+        if (op < ShaderDescriptor::AlphaBlendOP::COL || op > ShaderDescriptor::AlphaBlendOP::MUL)
+            op = m_alphaBlendingOp;
+
+        if (m_alphaBlendingOp != op)
+        {
+            m_alphaBlendingOp = op;
+            if (m_figure)
+            {
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetAlphaBlendOP(m_alphaBlendingOp);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
+            }
         }
     }
 

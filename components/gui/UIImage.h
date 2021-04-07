@@ -17,7 +17,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        UIImage(SceneObject &owner, const std::string &texture = "", const Vec2 &size = {128.f, 128.f});
+        UIImage(SceneObject& owner, const std::string& texture = "", const Vec2& size = { 128.f, 128.f }, const bool isSliced = false, const Vec4& border = { 0.f, 0.f, 0.f, 0.f });
 
         //! Destructor
         virtual ~UIImage();

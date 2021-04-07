@@ -38,7 +38,7 @@ class UIButton : public UIImage
 {
 public:
 
-	UIButton(SceneObject& owner, const std::string& texture = "", const Vec2& size = { 128.f, 128.f });
+	UIButton(SceneObject& owner, const std::string& texture = "", const Vec2& size = { 128.f, 128.f }, const bool isSliced = false, const Vec4& border = { 0.f, 0.f, 0.f, 0.f });
 	virtual ~UIButton();
 
 	//! Get component name

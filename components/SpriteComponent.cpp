@@ -30,6 +30,8 @@ namespace ige::scene
                 getOwner()->getScene()->getResourceAddedEvent().invoke(m_sprite->getFigure());
         }
 
+        m_sprite->setIsScaleBorder(true);
+
         setBillboard(isBillboard);
     }
 
@@ -197,6 +199,31 @@ namespace ige::scene
         m_sprite->setColor(r, g, b, a);
     }
 
+    //! SpriteType
+    void SpriteComponent::setSpriteType(int value) {
+        m_sprite->setSpriteType((SpriteType)value);
+    }
+
+    void SpriteComponent::setBorderLeft(float value) {
+        m_sprite->setBorderLeft(value);
+    }
+
+    void SpriteComponent::setBorderRight(float value) {
+        m_sprite->setBorderRight(value);
+    }
+
+    void SpriteComponent::setBorderTop(float value) {
+        m_sprite->setBorderTop(value);
+    }
+
+    void SpriteComponent::setBorderBottom(float value) {
+        m_sprite->setBorderBottom(value);
+    }
+
+    void SpriteComponent::setBorder(const Vec4& value) {
+        m_sprite->setBorder(value[0], value[1], value[2], value[3]);
+    }
+
     //! Serialize
     void SpriteComponent::to_json(json &j) const
     {
@@ -207,6 +234,8 @@ namespace ige::scene
         j["offset"] = getOffset();
         j["wrapmode"] = (int)getWrapMode();
         j["color"] = getColor();
+        j["spritetype"] = (int)getSpriteType();
+        j["border"] = getBorder();
     }
 
     //! Deserialize
@@ -217,6 +246,8 @@ namespace ige::scene
         setOffset(j.at("offset"));
         setWrapMode(j.at("wrapmode"));
         setColor(j.at("color"));
+        setSpriteType(j.at("spritetype"));
+        setBorder(j.at("border"));
         setPath(j.at("path"));
         Component::from_json(j);
     }
