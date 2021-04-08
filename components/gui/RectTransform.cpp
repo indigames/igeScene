@@ -261,7 +261,7 @@ namespace ige::scene
         m_rectDirty = true;
 
         // Recursive update flag of all child object
-        for (auto &child : getOwner()->getChildren())
+        for (auto& child : getOwner()->getChildren())
         {
             if (child)
             {
@@ -272,6 +272,7 @@ namespace ige::scene
                 }
             }
         }
+
     }
 
     void RectTransform::setTransformDirty()
@@ -531,12 +532,14 @@ namespace ige::scene
             {
                 auto parentRect = parentRectTransform->getRect();
                 auto centerParent = getRectCenter(parentRect);
+                auto parentSize = parentRectTransform->getSize();
+                Vec2 centerParentSize(parentSize[0] /2 , parentSize[1] / 2);
 
-                rect[0] = (m_anchorOffset[0] + m_offset[0]) - parentRect[0];
-                rect[2] = (m_anchorOffset[2] + m_offset[2]) - parentRect[0];
-                rect[1] = (m_anchorOffset[1] + m_offset[1]) - parentRect[1];
-                rect[3] = (m_anchorOffset[3] + m_offset[3]) - parentRect[1];
+                rect[0] = (centerParentSize[0] + m_offset[0] + (m_anchor[0] - 0.5f) * parentSize[0]);
+                rect[2] = (centerParentSize[0] + m_offset[2] + (m_anchor[2] - 0.5f) * parentSize[0]);
 
+                rect[1] = (centerParentSize[1] + m_offset[1] + (m_anchor[1] - 0.5f) * parentSize[1]);
+                rect[3] = (centerParentSize[1] + m_offset[3] + (m_anchor[3] - 0.5f) * parentSize[1]);
             }
             auto center = getRectCenter(rect);
 
@@ -556,8 +559,11 @@ namespace ige::scene
             else
             {
                 auto parentRect = parentRectTransform->getRect();
+                auto parentSize = parentRectTransform->getSize();
                 auto centerParent = getRectCenter(parentRect);
-                posVec2 = centerPoint - centerParent;
+                Vec2 parentPos(parentRectTransform->getPosition().X(), parentRectTransform->getPosition().Y());
+                auto parentOffsetCenter = getRectCenter(parentRectTransform->getOffset());
+                posVec2 = centerPoint - parentSize * 0.5f;
             }
 
             auto w = m_rect[2] - m_rect[0];
@@ -565,13 +571,14 @@ namespace ige::scene
             if (w != m_size[0]) m_size[0] = w;
             if (h != m_size[0]) m_size[1] = h;
 
+
             auto centerOffset = getRectCenter(m_offset);
             centerOffset[0] += (m_pivot[0] - 0.5f) * m_size[0];
             centerOffset[1] += (m_pivot[1] - 0.5f) * m_size[1];
             m_anchoredPosition = centerOffset;
 
             m_localPosition = Vec3(posVec2.X(), posVec2.Y(), m_localPosition.Z());
-
+            
             m_rectDirty = false;
             setTransformDirty();
         }
@@ -587,15 +594,15 @@ namespace ige::scene
         auto diffW = newPos[0] - lastPos[0];
         auto diffH = newPos[1] - lastPos[1];
 
-        m_offset[0] += diffW;
-        m_offset[2] += diffW;
-        m_offset[1] += diffH;
-        m_offset[3] += diffH;
+        auto offset = m_offset;
+        offset[0] += diffW;
+        offset[2] += diffW;
+        offset[1] += diffH;
+        offset[3] += diffH;
 
         m_anchoredPosition = newPos;
 
-        setOffset(m_offset);
-        setRectDirty();
+        setOffset(offset);
     }
 
     //! Serialize
