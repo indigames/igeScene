@@ -36,7 +36,7 @@ namespace ige::scene
         TransformComponent *getParent() const;
 
         //! Set parent transform
-        void setParent(TransformComponent *comp);
+        virtual void setParent(TransformComponent *comp);
 
         //! Translate
         virtual void translate(const Vec3 &trans);

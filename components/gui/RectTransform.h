@@ -58,6 +58,9 @@ namespace ige::scene
         Vec2 getSize();
         void setSize(const Vec2 &size);
 
+        //! Set Parent
+        virtual void setParent(TransformComponent* comp) override;
+
         //! Translate
         void worldTranslate(const Vec3 &trans) override;
 
@@ -104,6 +107,10 @@ namespace ige::scene
         Vec2 getPivotInCanvasSpace();
         Vec2 getAnchorCenterInCanvasSpace();
 
+
+        void setLocalToRectDirty();
+        void updateLocalToRect();
+
     protected:
         //! Anchor
         Vec4 m_anchor;
@@ -127,6 +134,8 @@ namespace ige::scene
         //! Cached rect in canvas space (no scale, no rotate)
         Vec4 m_rect;
         bool m_rectDirty = true;
+        //! Flag update rect from localPosition
+        bool m_bLocalToRectDirty = true;
 
         //! Cached transform to viewport space
         Mat4 m_viewportTransform;
