@@ -110,6 +110,7 @@ namespace ige::scene
 
         void setLocalToRectDirty();
         void updateLocalToRect();
+        void updateAnchorOffset();
 
     protected:
         //! Anchor

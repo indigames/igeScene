@@ -5,6 +5,7 @@
 #include "utils/PyxieHeaders.h"
 
 #include "components/gui/UIImage.h"
+#include "components/gui/RectTransform.h"
 #include "event/Event.h"
 
 USING_NS_PYXIE
@@ -115,8 +116,9 @@ protected:
 	std::shared_ptr<SceneObject> m_fillObj;
 	std::shared_ptr<SceneObject> m_handleObj;
 	
-	std::shared_ptr<UIImage> m_imgBG;
-	std::shared_ptr<UIImage> m_imgFill;
+	std::shared_ptr<RectTransform> m_rectBG;
+	std::shared_ptr<RectTransform> m_rectFill;
+	std::shared_ptr<RectTransform> m_rectHandle;
 	std::shared_ptr<UIImage> m_imgHandle;
 
 	//! Color Tint

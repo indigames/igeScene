@@ -9,7 +9,7 @@ NS_IGE_SCENE_BEGIN
 UISlider::UISlider(SceneObject& owner) :
 	Component(owner), 
 	m_min(0), m_max(1), m_value(0), m_wholeNumbers(false), 
-	m_fillObj(nullptr), m_handleObj(nullptr), 
+	m_fillObj(nullptr), m_handleObj(nullptr), m_bgObj(nullptr), m_rectBG(nullptr), m_rectFill(nullptr), m_rectHandle(nullptr), m_imgHandle(nullptr), 
 	m_normalColor(1.0f, 1.0f, 1.0f, 1.0f), m_pressedColor(0.78f, 0.78f, 0.78f, 1.0f), m_disableColor(0.78f, 0.78f, 0.78f, 0.5f), m_fadeDuration(0.1f)
 {
 
@@ -24,19 +24,20 @@ UISlider::~UISlider()
 {
 	if (m_bgObj)
 	{
-		if (m_imgBG) m_imgBG = nullptr;
+		if (m_rectBG) m_rectBG = nullptr;
 		m_bgObj = nullptr;
 	}
 
 	if (m_fillObj) 
 	{
-		if (m_imgFill) m_imgFill = nullptr;
+		if (m_rectFill) m_rectFill = nullptr;
 		m_fillObj = nullptr;
 	}
 
 	if (m_handleObj)
 	{
 		if (m_imgHandle) m_imgHandle = nullptr;
+		if (m_rectHandle) m_rectHandle = nullptr;
 		m_handleObj = nullptr;
 	}
 
@@ -128,7 +129,14 @@ void UISlider::setBackgroundObject(std::shared_ptr<SceneObject> obj)
 {
 	if (m_bgObj != obj) {
 		m_bgObj = obj;
-		m_imgBG = m_bgObj->getComponent<UIImage>();
+		m_rectBG = m_bgObj->getComponent<RectTransform>();
+		if (m_rectBG)
+		{
+			m_rectBG->setAnchor(Vec4(0, 0.25f, 1, 0.75f));
+			auto size = m_rectBG->getSize();
+			size[1] *= 0.5f;
+			m_rectBG->setSize(size);
+		}
 		_update();
 	}
 }
@@ -137,6 +145,7 @@ void UISlider::setFillObject(std::shared_ptr<SceneObject> obj)
 {
 	if (m_fillObj != obj) {
 		m_fillObj = obj;
+		m_rectFill = m_fillObj->getComponent<RectTransform>();
 		_update();
 	}
 }
@@ -145,6 +154,7 @@ void UISlider::setHandleObject(std::shared_ptr<SceneObject> obj)
 {
 	if (m_handleObj != obj) {
 		m_handleObj = obj;
+		m_rectHandle = m_handleObj->getComponent<RectTransform>();
 		_update();
 	}
 }
