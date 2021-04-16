@@ -118,6 +118,8 @@ namespace ige::scene
 
         virtual void makeDirty();
 
+        virtual Vec3 globalToLocal(Vec3 point) const;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

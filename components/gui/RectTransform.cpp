@@ -369,6 +369,7 @@ namespace ige::scene
         if (lastAnchor != m_anchor || lastOffset != m_offset) {
             updateAnchorOffset();//setRectDirty();
             setLocalToRectDirty();
+            onUpdate(0.f);
         }
     }
 
@@ -396,7 +397,8 @@ namespace ige::scene
         auto newOffset = offset;
 
         if (m_offset != newOffset) {
-            
+            m_offset = newOffset;
+
             if (parentRectTransform)
             {
                 if (m_anchor[0] == m_anchor[2] && newOffset[0] > newOffset[2])
@@ -418,12 +420,8 @@ namespace ige::scene
                 auto centerOffset = getRectCenter(newOffset);
                 centerOffset[0] += (m_pivot[0] - 0.5f) * m_size[0] * 0.5f;
                 centerOffset[1] += (m_pivot[1] - 0.5f) * m_size[1] * 0.5f;
-                m_anchoredPosition = centerOffset;
+                setAnchoredPosition(centerOffset);
             }
-
-            m_offset = newOffset;
-
-            setRectDirty();
         }
     }
 

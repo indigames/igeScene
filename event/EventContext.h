@@ -42,6 +42,8 @@ enum class EventType {
 	DragMove = 51,
 	DragEnd = 52,
 	Drop = 53,
+
+	Delete = 999,
 };
 
 class EventContext

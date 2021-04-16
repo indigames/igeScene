@@ -21,6 +21,7 @@
 #include "components/gui/UIText.h"
 #include "components/gui/UITextField.h"
 #include "components/gui/UIButton.h"
+#include "components/gui/UISlider.h"
 #include "components/physic/PhysicManager.h"
 #include "components/physic/PhysicBox.h"
 #include "components/physic/PhysicCapsule.h"
@@ -87,6 +88,8 @@ namespace ige::scene
     //! Destructor
     SceneObject::~SceneObject()
     {
+        dispatchEvent((int)EventType::Delete);
+
         getTransformChangedEvent().removeAllListeners();
 
         setParent(nullptr);
@@ -483,6 +486,8 @@ namespace ige::scene
             return false;
 
         EventContext context;
+        if (InputProcessor::getInstance())
+            context.m_inputEvent = InputProcessor::getInstance()->getRecentInput();
         context.m_sender = this;
         context.m_type = eventType;
         context.m_dataValue = dataValue;
@@ -585,7 +590,7 @@ namespace ige::scene
         if (getComponent<Canvas>() != nullptr || getParent() == nullptr)
             m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
         else // Set default AABB
-            m_aabb = AABBox({ 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
+            m_aabb = AABBox({ -0.5f, -0.5f, -0.5f }, { 0.5f, 0.5f, 0.5f });
 
         if (getComponent<FigureComponent>() != nullptr)
         {
@@ -617,6 +622,12 @@ namespace ige::scene
                 m_aabb = { aabbMin, aabbMax };
             }
         }
+        else if (getComponent<RectTransform>() != nullptr) {
+            auto rect = getComponent<RectTransform>();
+            auto size = rect->getSize();
+            auto scale = rect->getScale();
+            m_aabb = AABBox({ -size[0] * scale[0] * 0.5f, -size[1] * scale[1] * 0.5f, -0.5f }, { size[0] * scale[0] * 0.5f, size[1] * scale[1] * 0.5f, 0.5f });
+        }
 
         // Update world AABB
         m_aabbWorld = m_aabb.Transform(m_transform->getWorldMatrix());
@@ -633,6 +644,7 @@ namespace ige::scene
             {"gui", m_bIsGui},
             {"cvs", m_bIsCanvas},
             {"raycast", m_bIsRaycastTarget},
+            {"interactable", m_bIsInteractable}
         };
 
         auto jComponents = json::array();
@@ -667,6 +679,7 @@ namespace ige::scene
         m_bIsGui = j.value("gui", false);
         m_bIsCanvas = j.value("cvs", false);
         m_bIsRaycastTarget = j.value("raycast", false);
+        m_bIsInteractable = j.value("interactable", false);
 
         auto jComps = j.at("comps");
         for (auto it : jComps)
@@ -723,6 +736,8 @@ namespace ige::scene
                 comp = addComponent<UITextField>();
             else if (key == "UIButton")
                 comp = addComponent<UIButton>();
+            else if (key == "UISlider")
+                comp = addComponent<UISlider>();
             else if (key == "AudioManager")
                 comp = addComponent<AudioManager>();
             else if (key == "AudioSource")
@@ -793,4 +808,5 @@ namespace ige::scene
             child->from_json(it);
         }
     }
+
 } // namespace ige::scene

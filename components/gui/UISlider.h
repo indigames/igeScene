@@ -44,14 +44,9 @@ public:
 	bool getWholeNumbers() const { return m_wholeNumbers; }
 	void setWholeNumbers(bool value);
 
-	void setBackgroundObject(std::shared_ptr<SceneObject> obj);
-	std::shared_ptr<SceneObject> getBackgroundObject() const { return m_bgObj; }
-
 	void setFillObject(std::shared_ptr<SceneObject> obj);
-	std::shared_ptr<SceneObject> getFillObject() const { return m_fillObj; }
 
 	void setHandleObject(std::shared_ptr<SceneObject> obj);
-	std::shared_ptr<SceneObject> getHandleObject() const { return m_handleObj; }
 
 	//! NormalColor
 	void setColor(float r, float g, float b, float a = 1);
@@ -78,6 +73,8 @@ public:
 	void setDirection(Direction value);
 	const Direction& getDirection() const { return m_direction; }
 
+	virtual void onSerializeFinished(Scene* scene) override;
+
 protected:
 	void updateWithPercent(float percent, bool manual);
 
@@ -86,7 +83,9 @@ protected:
 	void _onTouchRelease(EventContext* context);
 	
 	void _update();
-	void _init();
+
+	void init();
+	void clear();
 
 	Vec4 getColorByState(int state) const;
 	void changeState(int state, bool forced = false);
@@ -98,6 +97,7 @@ protected:
 
 	//! Deserialize
 	virtual void from_json(const json& j) override;
+
 
 protected:
 	float m_min;
@@ -111,15 +111,15 @@ protected:
 	float m_barMaxSizeDelta;
 	float m_barStart;
 
-	
-	std::shared_ptr<SceneObject> m_bgObj;
-	std::shared_ptr<SceneObject> m_fillObj;
-	std::shared_ptr<SceneObject> m_handleObj;
-	
-	std::shared_ptr<RectTransform> m_rectBG;
+	Vec2 m_clickPos;
+		
 	std::shared_ptr<RectTransform> m_rectFill;
 	std::shared_ptr<RectTransform> m_rectHandle;
 	std::shared_ptr<UIImage> m_imgHandle;
+
+	std::string m_fillUUID;
+	std::string m_handleUUID;
+	bool m_dirtySetObj;
 
 	//! Color Tint
 	Vec4 m_normalColor;

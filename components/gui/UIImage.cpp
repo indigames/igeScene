@@ -10,7 +10,6 @@ namespace ige::scene
         : SpriteComponent(owner, path, size, false, true), 
         m_bIsInteractable(false)
     {
-        getOwner()->setIsRaycastTarget(true);
         if (m_sprite) {
             m_sprite->setIsScaleBorder(true);
         }
@@ -76,6 +75,7 @@ namespace ige::scene
     void UIImage::setInteractable(bool value) {
         m_bIsInteractable = value;
         getOwner()->setIsInteractable(m_bIsInteractable);
+        getOwner()->setIsRaycastTarget(m_bIsInteractable);
     }
 
 

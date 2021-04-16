@@ -25,7 +25,8 @@ UIButton::UIButton(SceneObject& owner, const std::string& texture, const Vec2& s
     m_bIsInteractable = true;
     m_btnState = ButtonState::NORMAL;
     m_transitionMode = TransitionMode::ColorTint;
-    this->getOwner()->setIsInteractable(m_bIsInteractable);
+    getOwner()->setIsInteractable(m_bIsInteractable);
+    getOwner()->setIsRaycastTarget(m_bIsInteractable);
     
     getOwner()->addEventListener((int)EventType::TouchBegin, std::bind(&UIButton::_onTouchPress, this, std::placeholders::_1), m_instanceId);
     getOwner()->addEventListener((int)EventType::TouchEnd, std::bind(&UIButton::_onTouchRelease, this, std::placeholders::_1), m_instanceId);

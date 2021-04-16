@@ -52,7 +52,8 @@ namespace ige::scene
         }
 
         m_sprite = nullptr;
-        getOwner()->getTransform()->makeDirty();
+        if(getOwner()->getTransform())
+            getOwner()->getTransform()->makeDirty();
     }
 
 
