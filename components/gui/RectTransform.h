@@ -56,7 +56,7 @@ namespace ige::scene
 
         //! Size
         Vec2 getSize();
-        void setSize(const Vec2 &size);
+        void setSize(const Vec2 &size, bool relate = true);
 
         //! Set Parent
         virtual void setParent(TransformComponent* comp) override;
@@ -91,12 +91,14 @@ namespace ige::scene
         //! Set transform dirty
         void setTransformDirty();
 
+        //! Set local & Size dirty
+        void setLocalToRectDirty();
+
         //! OnUpdate
         void onUpdate(float dt) override;
 
         //! Handle notification from parent: just do nothing
         void onNotified(const ETransformMessage &message) override;
-
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -108,10 +110,12 @@ namespace ige::scene
         Vec2 getAnchorCenterInCanvasSpace();
 
 
-        void setLocalToRectDirty();
+        
         void updateLocalToRect();
         void updateAnchorOffset();
+        void updateFromParent();
 
+        void setParentDirty();
     protected:
         //! Anchor
         Vec4 m_anchor;
@@ -135,6 +139,10 @@ namespace ige::scene
         //! Cached rect in canvas space (no scale, no rotate)
         Vec4 m_rect;
         bool m_rectDirty = true;
+        
+        //! Update when Parent change 
+        bool m_parentDirty = false;
+
         //! Flag update rect from localPosition
         bool m_bLocalToRectDirty = true;
 

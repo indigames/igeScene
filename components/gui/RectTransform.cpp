@@ -278,6 +278,8 @@ namespace ige::scene
         TransformComponent::onUpdate(dt);
 
         updateLocalToRect();
+
+        updateFromParent();
     }
 
     void RectTransform::setRectDirty()
@@ -338,6 +340,23 @@ namespace ige::scene
             }
         }
 
+    }
+
+    void RectTransform::setParentDirty() {
+        m_parentDirty = true;
+
+        // Recursive update flag of all child object
+        for (auto& child : getOwner()->getChildren())
+        {
+            if (child)
+            {
+                auto childTransform = child->getComponent<RectTransform>();
+                if (childTransform)
+                {
+                    childTransform->setParentDirty();
+                }
+            }
+        }
     }
 
     void RectTransform::setAnchor(const Vec4 &anchor)
@@ -422,6 +441,18 @@ namespace ige::scene
                 centerOffset[1] += (m_pivot[1] - 0.5f) * m_size[1] * 0.5f;
                 setAnchoredPosition(centerOffset);
             }
+
+            for (auto& child : getOwner()->getChildren())
+            {
+                if (child)
+                {
+                    auto childTransform = child->getComponent<RectTransform>();
+                    if (childTransform)
+                    {
+                        childTransform->setParentDirty();
+                    }
+                }
+            }
         }
     }
 
@@ -431,11 +462,25 @@ namespace ige::scene
         return m_size;
     }
 
-    void RectTransform::setSize(const Vec2 &size)
+    void RectTransform::setSize(const Vec2 &size, bool relate)
     {        
         if (m_size != size) {
             m_size = size;
-            setRectDirty();
+            if (relate)
+            {
+                setRectDirty();
+                for (auto& child : getOwner()->getChildren())
+                {
+                    if (child)
+                    {
+                        auto childTransform = child->getComponent<RectTransform>();
+                        if (childTransform)
+                        {
+                            childTransform->setParentDirty();
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -470,7 +515,6 @@ namespace ige::scene
             {
                 parentSize = parentRectTransform->getSize();
                 //auto parentRect = parentRectTransform->getRect();
-
                 m_anchorOffset[0] = parentRectTransform->getWorldPosition()[0] + parentSize[0] * (m_anchor[0] - 0.5f);
                 m_anchorOffset[1] = parentRectTransform->getWorldPosition()[1] + parentSize[1] * (m_anchor[1] - 0.5f);
                 m_anchorOffset[2] = parentRectTransform->getWorldPosition()[0] + parentSize[0] * (m_anchor[2] - 0.5f);
@@ -612,6 +656,37 @@ namespace ige::scene
             m_anchorOffset[1] = parentRectTransform->getWorldPosition()[1] + parentSize[1] * (m_anchor[1] - 0.5f);
             m_anchorOffset[2] = parentRectTransform->getWorldPosition()[0] + parentSize[0] * (m_anchor[2] - 0.5f);
             m_anchorOffset[3] = parentRectTransform->getWorldPosition()[1] + parentSize[1] * (m_anchor[3] - 0.5f);
+        }
+    }
+
+    void RectTransform::updateFromParent() 
+    {
+        if (m_parentDirty) 
+        {
+            m_parentDirty = false;
+            auto parent = getOwner()->getParent();
+            if (parent == nullptr) return;
+            auto parentRect = parent->getRectTransform();
+            if (parentRect == nullptr) return;
+            auto parentSize = parentRect->getSize();
+            auto oldSize = getSize();
+            auto oldAnchoredPos = getAnchoredPosition();
+
+            Vec4 rect;
+            rect[0] = parentSize[0] * (m_anchor[0] - 0.5f) + m_offset[0];
+            rect[1] = parentSize[1] * (m_anchor[1] - 0.5f) + m_offset[1];
+            rect[2] = parentSize[0] * (m_anchor[2] - 0.5f) + m_offset[2];
+            rect[3] = parentSize[1] * (m_anchor[3] - 0.5f) + m_offset[3];
+
+            m_anchorOffset[0] = parentRect->getWorldPosition()[0] + parentSize[0] * (m_anchor[0] - 0.5f);
+            m_anchorOffset[1] = parentRect->getWorldPosition()[1] + parentSize[1] * (m_anchor[1] - 0.5f);
+            m_anchorOffset[2] = parentRect->getWorldPosition()[0] + parentSize[0] * (m_anchor[2] - 0.5f);
+            m_anchorOffset[3] = parentRect->getWorldPosition()[1] + parentSize[1] * (m_anchor[3] - 0.5f);
+
+            auto rectSize = getRectSize(rect);
+            if (rectSize != m_size)
+                m_size = rectSize;
+            setAnchoredPosition(oldAnchoredPos);
         }
     }
 

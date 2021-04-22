@@ -179,6 +179,8 @@ namespace ige::scene
 
         std::pair<SceneObject*, Vec3>  findIntersectInHierachy(const SceneObject* target, std::pair<Vec3, Vec3> ray);
                 
+        //! Raycast UI 
+        Vec3 raycastCanvas(const Vec2& screenPos);
     protected:
         //! Scene root node
         std::shared_ptr<SceneObject> m_root;

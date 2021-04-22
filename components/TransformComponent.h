@@ -119,6 +119,7 @@ namespace ige::scene
         virtual void makeDirty();
 
         virtual Vec3 globalToLocal(Vec3 point) const;
+        virtual Vec3 localToGlobal(Vec3 point) const;
 
     protected:
         //! Serialize

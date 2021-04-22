@@ -822,8 +822,50 @@ namespace ige::scene
 
         hit = findIntersectInHierachy(m_node.get(), ray);
         if(hit.first != nullptr && hit.first->isInteractable()) m_raycastCapture = true;
-        if (hit.first != nullptr)
-            pyxie_printf("UI HIT %s\n", hit.first->getName().c_str());
+        else if (hit.first == nullptr) {
+            if (m_canvas) {
+                hit.first = m_canvas.get();
+                hit.second = raycastCanvas(screenPos);
+            }
+        }
+        return hit;
+    }
+
+    Vec3 Scene::raycastCanvas(const Vec2& screenPos)
+    {
+        Vec3 hit;
+        if (!m_canvasCamera)
+            return hit;
+        auto size = getWindowSize();
+        float w = size.X() > 0 ? size.X() : SystemInfo::Instance().GetGameW();
+        float h = size.Y() > 0 ? size.Y() : SystemInfo::Instance().GetGameH();
+
+        auto pos = getWindowPosition();
+        float dx = pos.X();
+        float dy = pos.Y();
+
+        float x = screenPos.X() - dx / 2.f;
+        float y = screenPos.Y() + dy / 2.f;
+
+        if (size.X() > 0)
+            x = x + (SystemInfo::Instance().GetGameW() - (w + dx)) / 2.f;
+
+        if (size.Y() > 0)
+            y = y - (SystemInfo::Instance().GetGameH() - (h + dy)) / 2.f;
+
+        Mat4 proj;
+        m_canvasCamera->GetProjectionMatrix(proj);
+
+        Mat4 viewInv;
+        m_canvasCamera->GetViewInverseMatrix(viewInv);
+
+        auto ray = RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
+        float distance, minDistance = 100.0f;
+
+        bool m_isEnd = false;
+        std::shared_ptr<SceneObject> m_node = m_canvas;
+        auto worldPos = m_canvas->getTransform()->getWorldPosition();
+        hit = ray.first;
         return hit;
     }
 

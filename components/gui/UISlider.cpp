@@ -14,7 +14,7 @@ UISlider::UISlider(SceneObject& owner) :
 	m_min(0), m_max(1), m_value(0), m_wholeNumbers(false),
 	m_rectFill(nullptr), m_rectHandle(nullptr), m_imgHandle(nullptr),
 	m_normalColor(1.0f, 1.0f, 1.0f, 1.0f), m_pressedColor(0.78f, 0.78f, 0.78f, 1.0f), m_disableColor(0.78f, 0.78f, 0.78f, 0.5f), m_fadeDuration(0.1f),
-	m_dirtySetObj(false)
+	m_dirtySetObj(false), m_bIsHorizontal(false), m_bIsRevert(false), m_direction(Direction::LEFT_TO_RIGHT), m_bIsInit(false)
 {
 	m_bIsInteractable = true;
 	init();
@@ -47,6 +47,10 @@ void UISlider::init()
 	getOwner()->addEventListener((int)EventType::TouchBegin, std::bind(&UISlider::_onTouchPress, this, std::placeholders::_1), m_instanceId);
 	getOwner()->addEventListener((int)EventType::TouchEnd, std::bind(&UISlider::_onTouchRelease, this, std::placeholders::_1), m_instanceId);
 	getOwner()->addEventListener((int)EventType::TouchMove, std::bind(&UISlider::_onTouchDrag, this, std::placeholders::_1), m_instanceId);
+
+	m_bIsInit = true;
+
+	onChangeDirection();
 }
 
 void UISlider::clear() {
@@ -94,14 +98,43 @@ void UISlider::updateWithPercent(float percent, bool manual)
 
 	//!Update Position handle
 	if (m_rectHandle) {
-		m_rectHandle->setAnchor(Vec4(percent, 0, percent, 1));
 		auto currentPos = m_rectHandle->getAnchoredPosition();
-		currentPos[0] = 0;
+		if (m_bIsHorizontal)
+		{
+			if (m_bIsRevert)
+				m_rectHandle->setAnchor(Vec4(0, 1 - percent, 1, 1 - percent));
+			else
+				m_rectHandle->setAnchor(Vec4(0, percent, 1, percent));
+		}
+		else {
+			if (m_bIsRevert)
+				m_rectHandle->setAnchor(Vec4(1 - percent, 0, 1 - percent, 1));
+			else
+				m_rectHandle->setAnchor(Vec4(percent, 0, percent, 1));
+		}
+
+		if(m_bIsHorizontal)
+			currentPos[1] = 0;
+		else
+			currentPos[0] = 0;
 		m_rectHandle->setAnchoredPosition(currentPos);
 	}
 	//!Update Fill bar
 	if (m_rectFill) {
-		m_rectFill->setAnchor(Vec4(0, 0, percent, 1));
+		if (m_bIsHorizontal)
+		{
+			if (m_bIsRevert)
+				m_rectFill->setAnchor(Vec4(0, 1 - percent, 1, 1));
+			else
+				m_rectFill->setAnchor(Vec4(0, 0, 1, percent));
+		}
+		else
+		{
+			if (m_bIsRevert)
+				m_rectFill->setAnchor(Vec4(1 - percent, 0, 1, 1));
+			else
+				m_rectFill->setAnchor(Vec4(0, 0, percent, 1));
+		}
 		m_rectFill->setOffset(Vec4(0, 0, 0, 0));
 	}
 
@@ -186,9 +219,18 @@ void UISlider::_onTouchPress(EventContext* context)
 	float percent = MATH_CLAMP((m_value - m_min) / (m_max - m_min), 0, 1);
 	
 	m_clickPos = clickPoint;
-	float delta = 0;
-	delta = point[0] / parentSize[0] + 0.5f;
-	percent = MATH_CLAMP(delta, 0, 1);
+	float deltaX = point[0] / parentSize[0] + 0.5f;
+	float deltaY = point[1] / parentSize[1] + 0.5f;
+	
+	if (m_bIsHorizontal)
+		percent = deltaY;
+	else
+		percent = deltaX;
+
+	if (m_bIsRevert)
+		percent = 1 - percent;
+
+	percent = MATH_CLAMP(percent, 0, 1);
 	updateWithPercent(percent, true);
 }
 
@@ -212,11 +254,22 @@ void UISlider::_onTouchDrag(EventContext* context)
 
 	float deltaX = (clickPoint[0] - m_clickPos[0]) / parentSize[0];
 	float deltaY = (clickPoint[1] - m_clickPos[1]) / parentSize[1];
+	
+	if (m_bIsRevert) 
+	{
+		deltaX = -deltaX;
+		deltaY = -deltaY;
+	}
 
-	percent += deltaX;
+	if (m_bIsHorizontal) 
+		percent += deltaY;
+	else
+		percent += deltaX;
+	
 	m_clickPos = clickPoint;
 	
 	percent = MATH_CLAMP(percent, 0, 1);
+	
 	updateWithPercent(percent, true);
 }
 
@@ -341,7 +394,92 @@ void UISlider::changeState(int state, bool forced)
 
 void UISlider::onChangeDirection() 
 {
+	bool oldRot = m_bIsHorizontal;
+	switch (m_direction) {
+	case Direction::LEFT_TO_RIGHT:
+		m_bIsHorizontal = false;
+		m_bIsRevert = false;
+		break;
+	case Direction::RIGHT_TO_LEFT:
+		m_bIsHorizontal = false;
+		m_bIsRevert = true;
+		break;
+	case Direction::BOTTOM_TO_TOP:
+		m_bIsHorizontal = true;
+		m_bIsRevert = false;
+		break;
+	case Direction::TOP_TO_BOTTOM:
+		m_bIsHorizontal = true;
+		m_bIsRevert = true;
+		break;
+	}
 	
+	if (!m_bIsInit) return;
+
+	if (oldRot != m_bIsHorizontal) {
+		//! Change Parent Size 
+		auto rect = getOwner()->getRectTransform();
+		if (rect)
+		{
+			auto size = rect->getSize();
+			Vec2 newSize(size[1], size[0]);
+			rect->setSize(newSize);
+		}
+
+		//! Change Anchor, offset
+		for (auto& child : getOwner()->getChildren())
+		{
+			if (child)
+			{
+				onRotateDirection(child);
+			}
+		}
+
+	}
+
+	_update();
+
+	if (oldRot != m_bIsHorizontal) {
+		//! Raise flag to update rect value
+		for (auto& child : getOwner()->getChildren())
+		{
+			if (child)
+			{
+				auto childTransform = child->getComponent<RectTransform>();
+				if (childTransform)
+				{
+					childTransform->setLocalToRectDirty();
+				}
+			}
+		}
+	}
+}
+
+void UISlider::onRotateDirection(SceneObject* obj)
+{
+	if (obj)
+	{
+		auto rect = obj->getComponent<RectTransform>();
+		if (rect)
+		{
+			auto anchor = rect->getAnchor();
+			auto offset = rect->getOffset();
+			auto size = rect->getSize();
+			Vec4 newAnchor(anchor[1], anchor[0], anchor[3], anchor[2]);
+			rect->setAnchor(newAnchor);
+			Vec4 newOffset(offset[1], offset[0], offset[3], offset[2]);
+			rect->setOffset(newOffset);
+			rect->setSize(Vec2(size[1], size[0]), false);
+		}
+
+		for (auto& child : obj->getChildren())
+		{
+			if (child)
+			{
+				onRotateDirection(child);
+			}
+		}
+	}
 }
 
 void UISlider::onSerializeFinished(Scene* scene) 
@@ -373,31 +511,21 @@ void UISlider::to_json(json& j) const
 	j["fadeduration"] = getFadeDuration();
 	j["fill"] = m_rectFill ? m_rectFill->getOwner()->getUUID() : "";
 	j["handle"] = m_rectHandle ? m_rectHandle->getOwner()->getUUID() : "";
+	j["direction"] = (int)getDirection();
 }
 
 //! Deserialize
 void UISlider::from_json(const json& j)
 {
+	m_bIsInit = false;
 	setColor(j.at("color"));
 	setPressedColor(j.at("pressedcolor"));
 	setDisabledColor(j.at("disabledcolor"));
 	setFadeDuration(j.at("fadeduration"));
 	m_dirtySetObj = true;
-	//auto scene = getOwner()->getScene();
 	m_fillUUID = j.value("fill", "");
-	/*if (!idFill.empty()) {
-		auto obj = scene->findObjectByUUID(idFill);
-		if (obj) {
-			setFillObject(obj);
-		}
-	}*/
 	m_handleUUID = j.value("handle", "");
-	/*if (!idHD.empty()) {
-		auto obj = scene->findObjectByUUID(idHD);
-		if (obj) {
-			setHandleObject(obj);
-		}
-	}*/
+	setDirection((int)j.at("direction"));
 	Component::from_json(j);
 	init();
 }

@@ -91,6 +91,7 @@ protected:
 	void changeState(int state, bool forced = false);
 
 	void onChangeDirection();
+	void onRotateDirection(SceneObject* obj);
 
 	//! Serialize
 	virtual void to_json(json& j) const override;
@@ -98,8 +99,11 @@ protected:
 	//! Deserialize
 	virtual void from_json(const json& j) override;
 
+	
 
 protected:
+	bool m_bIsInit;
+
 	float m_min;
 	float m_max;
 	float m_value;
@@ -110,6 +114,9 @@ protected:
 	float m_barMaxSize;
 	float m_barMaxSizeDelta;
 	float m_barStart;
+
+	bool m_bIsHorizontal;
+	bool m_bIsRevert;
 
 	Vec2 m_clickPos;
 		

@@ -602,7 +602,7 @@ namespace ige::scene
                 m_aabb = { aabbMin, aabbMax };
             }
         }
-        else if (getComponent<SpriteComponent>() != nullptr)
+        else if (getComponent<SpriteComponent>() != nullptr && !isGUIObject())
         {
             auto spriteComp = getComponent<SpriteComponent>();
             if (spriteComp->getFigure())
@@ -612,21 +612,28 @@ namespace ige::scene
                 m_aabb = { aabbMin, aabbMax };
             }
         }
-        else if (getComponent<UIText>() != nullptr)
-        {
-            auto uiText = getComponent<UIText>();
-            if (uiText->getFigure())
+        else if (isGUIObject()) {
+            if (getComponent<UIText>() != nullptr)
             {
-                Vec3 aabbMin, aabbMax;
-                uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
-                m_aabb = { aabbMin, aabbMax };
+                auto uiText = getComponent<UIText>();
+                if (uiText->getFigure())
+                {
+                    Vec3 aabbMin, aabbMax;
+                    uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                    m_aabb = { aabbMin, aabbMax };
+                }
             }
-        }
-        else if (getComponent<RectTransform>() != nullptr) {
-            auto rect = getComponent<RectTransform>();
-            auto size = rect->getSize();
-            auto scale = rect->getScale();
-            m_aabb = AABBox({ -size[0] * scale[0] * 0.5f, -size[1] * scale[1] * 0.5f, -0.5f }, { size[0] * scale[0] * 0.5f, size[1] * scale[1] * 0.5f, 0.5f });
+            else if (getComponent<RectTransform>() != nullptr) {
+                auto rect = getComponent<RectTransform>();
+                if (rect) {
+                    auto size = rect->getSize();
+                    auto scale = rect->getScale();
+                    auto rot = rect->getRotation();
+                    Vec3 min(-size[0] * 0.5f, -size[1] * 0.5f, -0.5f);
+                    Vec3 max(size[0] * 0.5f, size[1] * 0.5f, 0.5f);
+                    m_aabb = { min, max };
+                }
+            }
         }
 
         // Update world AABB
