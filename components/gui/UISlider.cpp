@@ -72,9 +72,10 @@ void UISlider::_update() {
 	updateWithPercent(percent, false);
 }
 
-void UISlider::updateWithPercent(float percent, bool manual) 
+bool UISlider::updateWithPercent(float percent, bool manual)
 {
 	percent = MATH_CLAMP(percent, 0, 1);
+	bool kq = false;
 	if (manual)
 	{
 		float newValue = m_min + (m_max - m_min) * percent;
@@ -91,8 +92,8 @@ void UISlider::updateWithPercent(float percent, bool manual)
 		if (newValue != m_value)
 		{
 			m_value = newValue;
-			if (this->getOwner()->dispatchEvent((int)EventType::Changed, Value(m_value)))
-				return;
+			this->getOwner()->dispatchEvent((int)EventType::Changed, Value(m_value));
+			kq = true;
 		}
 	}
 
@@ -138,6 +139,7 @@ void UISlider::updateWithPercent(float percent, bool manual)
 		m_rectFill->setOffset(Vec4(0, 0, 0, 0));
 	}
 
+	return kq;
 }
 
 void UISlider::setMin(float value) {
@@ -265,12 +267,11 @@ void UISlider::_onTouchDrag(EventContext* context)
 		percent += deltaY;
 	else
 		percent += deltaX;
-	
-	m_clickPos = clickPoint;
-	
+		
 	percent = MATH_CLAMP(percent, 0, 1);
 	
-	updateWithPercent(percent, true);
+	if(updateWithPercent(percent, true))
+		m_clickPos = clickPoint;
 }
 
 void UISlider::_onTouchRelease(EventContext* context)
@@ -512,6 +513,10 @@ void UISlider::to_json(json& j) const
 	j["fill"] = m_rectFill ? m_rectFill->getOwner()->getUUID() : "";
 	j["handle"] = m_rectHandle ? m_rectHandle->getOwner()->getUUID() : "";
 	j["direction"] = (int)getDirection();
+	j["wholenumbers"] = getWholeNumbers();
+	j["min"] = getMin();
+	j["max"] = getMax();
+	j["value"] = getValue();
 }
 
 //! Deserialize
@@ -522,6 +527,10 @@ void UISlider::from_json(const json& j)
 	setPressedColor(j.at("pressedcolor"));
 	setDisabledColor(j.at("disabledcolor"));
 	setFadeDuration(j.at("fadeduration"));
+	setWholeNumbers(j.at("wholenumbers"));
+	setMin(j.value("min", 0));
+	setMax(j.value("max", 1));
+	setValue(j.value("value", 0));
 	m_dirtySetObj = true;
 	m_fillUUID = j.value("fill", "");
 	m_handleUUID = j.value("handle", "");

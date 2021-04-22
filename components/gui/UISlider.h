@@ -76,7 +76,7 @@ public:
 	virtual void onSerializeFinished(Scene* scene) override;
 
 protected:
-	void updateWithPercent(float percent, bool manual);
+	bool updateWithPercent(float percent, bool manual);
 
 	void _onTouchPress(EventContext* context);
 	void _onTouchDrag(EventContext* context);
