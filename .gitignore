@@ -32,3 +32,5 @@
 *.app
 /build
 
+/_ige_build
+/_ige_release

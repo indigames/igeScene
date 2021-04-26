@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.15.0)
 
 if (NOT DEFINED APP_STYLE)
     set(APP_STYLE STATIC)
@@ -6,6 +6,9 @@ endif()
 
 if(${APP_STYLE} MATCHES "SHARED")
     set(TARGET_NAME igeScene)
+    if (NOT DEFINED PYTHON_VERSION)
+        set(PYTHON_VERSION 3.7)
+    endif()
 else()
     set(TARGET_NAME igeScene-static)
 endif()
@@ -36,32 +39,35 @@ elseif(MSVC)
         set(CMAKE_CXX_FLAGS_RELEASE "/MD /O2 /Ob2 /Zc:inline")
         set(CMAKE_CXX_FLAGS_DEBUG "/MD /JMC /ZI /Od")
     endif()
-    add_compile_options(/MP)
+    add_compile_options(/MP /std:c++17)
 elseif(APPLE)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         add_compile_options(-g0 -Ofast)
     endif()
 endif()
 
-if (NOT DEFINED LIBS_DIR)
-    set(LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+if(${APP_STYLE} MATCHES "SHARED")
+    find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
+else()
+    set (Python3_INCLUDE_DIRS "")
 endif()
 
-set (PYTHON_INCLUDE_DIRS ${LIBS_DIR}/cpython/Include)
-list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/Include)
-if (MSVC)
-    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/cpython/PC)
-    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/PC)
-elseif (OSX)
-    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/cpython/Mac)
-    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/Mac)
-elseif (ANDROID)
-    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/cpython/Android)
-    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/Android)
-elseif (IOS)
-    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/cpython/IOS)
-    list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/IOS)
-endif ()
+# [IGE]: try include conan build config
+if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+
+    # Do not use python from conan for shared
+    if(${APP_STYLE} MATCHES "SHARED")
+        set(CONAN_INCLUDE_DIRS_PYTHON "")
+        set(CONAN_LIBS_PYTHON "")
+        set(CONAN_PKG_LIBS_PYTHON "")
+    endif()
+
+    conan_basic_setup()
+
+    list(GET CONAN_INCLUDE_DIRS_PYXCORE 0 PYXCORE_INCLUDE_DIRS)
+endif()
+# [/IGE]
 
 file(GLOB_RECURSE SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
@@ -71,108 +77,19 @@ file(GLOB_RECURSE SRC
 )
 
 set(INCLUDES
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${PYTHON_INCLUDE_DIRS}
-    ${LIBS_DIR}/pyxCore/pyxcore
-    ${LIBS_DIR}/pyxCore/include/pyxcore
-    ${LIBS_DIR}/pyxCore/ThirdParty/GLEW
-    ${LIBS_DIR}/pyxCore/include/ThirdParty/GLEW
-    ${LIBS_DIR}/pyxCore/ThirdParty/edge/include
-    ${LIBS_DIR}/pyxCore/include/ThirdParty/edge/include
-    ${LIBS_DIR}/pyxCore/ThirdParty/spdlog/include
-    ${LIBS_DIR}/pyxCore/include/ThirdParty/spdlog/include
-    ${LIBS_DIR}/tracy
-    ${LIBS_DIR}/tracy/include
-    ${LIBS_DIR}/json
-    ${LIBS_DIR}/json/include
-    ${LIBS_DIR}/igeVmath
-    ${LIBS_DIR}/igeVmath/include
-    ${LIBS_DIR}/igeCore
-    ${LIBS_DIR}/igeCore/include
-    ${LIBS_DIR}/igeScene
-    ${LIBS_DIR}/igeScene/include
-    ${LIBS_DIR}/igeSound
-    ${LIBS_DIR}/igeSound/include
-    ${LIBS_DIR}/igeSound/ThirdParty/soloud/include
-    ${LIBS_DIR}/igeSound/include/ThirdParty/soloud/include
-    ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp
-    ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp/Effekseer
-    ${LIBS_DIR}/igeEffekSeer/include/ThirdParty/Effekseer/Dev/Cpp/EffekseerRendererCommon
-    ${LIBS_DIR}/igeEffekSeer/ThirdParty/Effekseer/Dev/Cpp
-    ${LIBS_DIR}/igeEffekSeer/ThirdParty/Effekseer/Dev/Cpp/Effekseer
-    ${LIBS_DIR}/igeEffekSeer/ThirdParty/Effekseer/Dev/Cpp/EffekseerRendererCommon
-    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/Recast/Include
-    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/Detour/Include
-    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/DetourCrowd/Include
-    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/DetourTileCache/Include
-    ${LIBS_DIR}/igeNavigation/3rd-party/recast/Recast/Include
-    ${LIBS_DIR}/igeNavigation/3rd-party/recast/Detour/Include
-    ${LIBS_DIR}/igeNavigation/3rd-party/recast/DetourCrowd/Include
-    ${LIBS_DIR}/igeNavigation/3rd-party/recast/DetourTileCache/Include
-    ${LIBS_DIR}/imgui
-    ${LIBS_DIR}/imgui/include
-    ${LIBS_DIR}/SDL
-    ${LIBS_DIR}/SDL/include
-    ${LIBS_DIR}/stb
-    ${LIBS_DIR}/stb/include
-    ${LIBS_DIR}/igeBullet
-    ${LIBS_DIR}/igeBullet/include
-    ${LIBS_DIR}/bullet/include
-    ${LIBS_DIR}/bullet/include/src
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${Python3_INCLUDE_DIRS}"
+    "${CONAN_INCLUDE_DIRS}"
+    "${PYXCORE_INCLUDE_DIRS}/pyxcore"
+    "${PYXCORE_INCLUDE_DIRS}/ThirdParty/GLEW"
 )
 
-if(APPLE)
-    if(IOS)
-        set(INCLUDES ${INCLUDES} "${CMAKE_CURRENT_SOURCE_DIR}/platform/ios")
-        file(GLOB EXTRA_SOURCES
-            "${CMAKE_CURRENT_SOURCE_DIR}/platform/ios/*.h"
-            "${CMAKE_CURRENT_SOURCE_DIR}/platform/ios/*.mm"
-        )
-        set(SRC ${SRC} ${EXTRA_SOURCES})
-    elseif(OSX)
-        set(INCLUDES ${INCLUDES} "${CMAKE_CURRENT_SOURCE_DIR}/platform/macos")
-        file(GLOB EXTRA_SOURCES
-            "${CMAKE_CURRENT_SOURCE_DIR}/platform/macos/*.mm"
-            "${CMAKE_CURRENT_SOURCE_DIR}/platform/macos/*.h"
-            "${CMAKE_CURRENT_SOURCE_DIR}/platform/macos/*.cpp"
-        )
-        set(SRC ${SRC} ${EXTRA_SOURCES})
-    endif()
-elseif(ANDROID)
-    set(INCLUDES ${INCLUDES} "${CMAKE_CURRENT_SOURCE_DIR}/platform/android")
-    file(GLOB EXTRA_SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/platform/android/*.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/platform/android/*.cpp"
-    )
-    set(SRC ${SRC} ${EXTRA_SOURCES})
-elseif(MSVC)
-    set(INCLUDES ${INCLUDES} "${CMAKE_CURRENT_SOURCE_DIR}/platform/win32")
-    file(GLOB EXTRA_SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/platform/win32/*.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/platform/win32/*.cpp"
-    )
-    set(SRC ${SRC} ${EXTRA_SOURCES})
-endif()
 
 add_library(${TARGET_NAME} ${APP_STYLE} ${SRC})
 
 target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDES})
 
-# Python37
-set (DEFINITIONS Py_NO_ENABLE_SHARED USE_IGE)
-if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set(DEFINITIONS ${DEFINITIONS} _AMD64_)
-else()
-    set(DEFINITIONS ${DEFINITIONS} _X86_)
-endif()
-
-if (ANDROID OR IOS)
-    set(DEFINITIONS ${DEFINITIONS} __EFFEKSEER_RENDERER_GLES3__)
-endif ()
-
-
-
-target_compile_definitions(${TARGET_NAME} PUBLIC ${DEFINITIONS})
+target_compile_definitions(${TARGET_NAME} PRIVATE ${DEFINES} ${CONAN_DEFINES})
 
 if(${APP_STYLE} MATCHES "SHARED")
     set_target_properties(
@@ -182,13 +99,14 @@ if(${APP_STYLE} MATCHES "SHARED")
             OUTPUT_NAME ${TARGET_NAME}
             LINKER_LANGUAGE C
     )
-    if(WIN32)
+
+    if(MSVC)
         set_target_properties(
             ${TARGET_NAME}
             PROPERTIES
             SUFFIX ".pyd"
         )
     endif()
-    target_link_libraries(${TARGET_NAME} ${PYTHON_LIBRARIES})
+    target_link_libraries(${TARGET_NAME} ${Python3_LIBRARIES} ${CONAN_LIBS})
 endif()
 
