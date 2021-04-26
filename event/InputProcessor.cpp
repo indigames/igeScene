@@ -230,8 +230,12 @@ void InputProcessor::onTouchMoved(int touchId, float x, float y)
     auto hit = hitTestUI(x, y);
     if (hit.first == nullptr) {
         auto scene = SceneManager::getInstance()->getCurrentScene();
-        if (scene)
-            hit.first = scene->getRootUI().get();
+        if (scene) {
+            if (scene->getCanvas())
+                hit.first = scene->getCanvas().get();
+            else 
+                hit.first = scene->getRootUI().get();
+        }
     }
     auto target = hit.first;
     if (target == nullptr) return;
@@ -242,7 +246,7 @@ void InputProcessor::onTouchMoved(int touchId, float x, float y)
 
     updateRecentInput(ti, target);
     m_activeProcessor = this;
-
+    
     if (m_captureCallback)
         m_captureCallback((int)EventType::TouchMove);
 

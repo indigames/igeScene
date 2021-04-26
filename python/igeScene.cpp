@@ -20,6 +20,7 @@
 #include "python/pyUIImage.h"
 #include "python/pyUIText.h"
 #include "python/pyUIButton.h"
+#include "python/pyUISlider.h"
 
 using namespace ige::scene;
 
@@ -108,6 +109,10 @@ PyMODINIT_FUNC PyInit_igeScene()
     if (PyType_Ready(&PyTypeObject_UIButton) < 0) return NULL;
     Py_INCREF(&PyTypeObject_UIButton);
     PyModule_AddObject(module, "UIButton", (PyObject*)&PyTypeObject_UIButton);
+
+    if (PyType_Ready(&PyTypeObject_UISlider) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_UISlider);
+    PyModule_AddObject(module, "UISlider", (PyObject*)&PyTypeObject_UISlider);
 
     if (PyType_Ready(&PyTypeObject_Script) < 0) return NULL;
     Py_INCREF(&PyTypeObject_Script);

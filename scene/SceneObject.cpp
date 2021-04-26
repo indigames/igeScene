@@ -21,6 +21,7 @@
 #include "components/gui/UIText.h"
 #include "components/gui/UITextField.h"
 #include "components/gui/UIButton.h"
+#include "components/gui/UISlider.h"
 #include "components/physic/PhysicManager.h"
 #include "components/physic/PhysicBox.h"
 #include "components/physic/PhysicCapsule.h"
@@ -57,7 +58,7 @@ namespace ige::scene
     //! Constructor
     SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size, bool isCanvas)
         : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_bIsCanvas(isCanvas), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr),
-        m_dispatching(0)
+        m_dispatching(0), m_aabbDirty(2)
     {
         // Generate new UUID
         m_uuid = generateUUID();
@@ -87,6 +88,8 @@ namespace ige::scene
     //! Destructor
     SceneObject::~SceneObject()
     {
+        dispatchEvent((int)EventType::Delete);
+
         getTransformChangedEvent().removeAllListeners();
 
         setParent(nullptr);
@@ -284,6 +287,11 @@ namespace ige::scene
     //! Update function
     void SceneObject::onUpdate(float dt)
     {
+        if (m_aabbDirty > 0) {
+            updateAabb();
+            m_aabbDirty--;
+        }
+
         if (isActive())
         {
             for (auto &comp : m_components)
@@ -478,6 +486,8 @@ namespace ige::scene
             return false;
 
         EventContext context;
+        if (InputProcessor::getInstance())
+            context.m_inputEvent = InputProcessor::getInstance()->getRecentInput();
         context.m_sender = this;
         context.m_type = eventType;
         context.m_dataValue = dataValue;
@@ -568,7 +578,9 @@ namespace ige::scene
     //! Transform changed event
     void SceneObject::onTransformChanged(SceneObject& sceneObject)
     {
-        updateAabb();
+        if (m_aabbDirty != 0) return;
+        //updateAabb();
+        m_aabbDirty = 2;
     }
 
     //! Update AABB
@@ -578,7 +590,7 @@ namespace ige::scene
         if (getComponent<Canvas>() != nullptr || getParent() == nullptr)
             m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
         else // Set default AABB
-            m_aabb = AABBox({ 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
+            m_aabb = AABBox({ -0.5f, -0.5f, -0.5f }, { 0.5f, 0.5f, 0.5f });
 
         if (getComponent<FigureComponent>() != nullptr)
         {
@@ -590,7 +602,7 @@ namespace ige::scene
                 m_aabb = { aabbMin, aabbMax };
             }
         }
-        else if (getComponent<SpriteComponent>() != nullptr)
+        else if (getComponent<SpriteComponent>() != nullptr && !isGUIObject())
         {
             auto spriteComp = getComponent<SpriteComponent>();
             if (spriteComp->getFigure())
@@ -600,14 +612,27 @@ namespace ige::scene
                 m_aabb = { aabbMin, aabbMax };
             }
         }
-        else if (getComponent<UIText>() != nullptr)
-        {
-            auto uiText = getComponent<UIText>();
-            if (uiText->getFigure())
+        else if (isGUIObject()) {
+            if (getComponent<UIText>() != nullptr)
             {
-                Vec3 aabbMin, aabbMax;
-                uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
-                m_aabb = { aabbMin, aabbMax };
+                auto uiText = getComponent<UIText>();
+                if (uiText->getFigure())
+                {
+                    Vec3 aabbMin, aabbMax;
+                    uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                    m_aabb = { aabbMin, aabbMax };
+                }
+            }
+            else if (getComponent<RectTransform>() != nullptr) {
+                auto rect = getComponent<RectTransform>();
+                if (rect) {
+                    auto size = rect->getSize();
+                    auto scale = rect->getScale();
+                    auto rot = rect->getRotation();
+                    Vec3 min(-size[0] * 0.5f, -size[1] * 0.5f, -0.5f);
+                    Vec3 max(size[0] * 0.5f, size[1] * 0.5f, 0.5f);
+                    m_aabb = { min, max };
+                }
             }
         }
 
@@ -626,6 +651,7 @@ namespace ige::scene
             {"gui", m_bIsGui},
             {"cvs", m_bIsCanvas},
             {"raycast", m_bIsRaycastTarget},
+            {"interactable", m_bIsInteractable}
         };
 
         auto jComponents = json::array();
@@ -660,6 +686,7 @@ namespace ige::scene
         m_bIsGui = j.value("gui", false);
         m_bIsCanvas = j.value("cvs", false);
         m_bIsRaycastTarget = j.value("raycast", false);
+        m_bIsInteractable = j.value("interactable", false);
 
         auto jComps = j.at("comps");
         for (auto it : jComps)
@@ -716,6 +743,8 @@ namespace ige::scene
                 comp = addComponent<UITextField>();
             else if (key == "UIButton")
                 comp = addComponent<UIButton>();
+            else if (key == "UISlider")
+                comp = addComponent<UISlider>();
             else if (key == "AudioManager")
                 comp = addComponent<AudioManager>();
             else if (key == "AudioSource")
@@ -786,4 +815,5 @@ namespace ige::scene
             child->from_json(it);
         }
     }
+
 } // namespace ige::scene

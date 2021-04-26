@@ -30,6 +30,11 @@ namespace ige::scene
         BottomRight,    //!Radial90
     };
 
+    enum class SpriteType {
+        Simple = 0,
+        Sliced = 1,
+    };
+
     class Sprite
     {
     public:
@@ -67,6 +72,9 @@ namespace ige::scene
         const FillOrigin& getFillOrigin() { return m_fillOrigin; }
         void setFillOrigin(const FillOrigin& value);
 
+        const SpriteType& getSpriteType() { return m_spriteType; }
+        void setSpriteType(const SpriteType& value);
+
         const float getFillAmount() const { return m_fillAmount; }
         void setFillAmount(float amount);
 
@@ -76,12 +84,33 @@ namespace ige::scene
         const float getAlpha() const { return m_alpha; }
         void setAlpha(float value);
 
-        const Vec4 getColor() const { return m_color; }
+        const Vec4& getColor() const { return m_color; }
         void setColor(float r, float g, float b, float a = 1, bool redraw = true);
         void setColor(const Vec4& value, bool redraw = true);
 
         Texture* getTexture() const { return m_texture; }
         void setTexture(Texture* texture);
+
+        //! Border
+        void setBorder(float left, float right, float top, float bottom);
+        const Vec4& getBorder() const { return m_border; }
+
+        const float getBorderLeft() const { return m_border[0]; }
+        void setBorderLeft(float value);
+
+        const float getBorderRight() const { return m_border[1]; }
+        void setBorderRight(float value);
+
+        const float getBorderTop() const { return m_border[2]; }
+        void setBorderTop(float value);
+
+        const float getBorderBottom() const { return m_border[3]; }
+        void setBorderBottom(float value);
+
+        const bool isScaleBorder() const { return m_bIsScaleBorder; }
+        void setIsScaleBorder(bool value);
+
+
     protected:
         virtual void draw();
         
@@ -92,6 +121,9 @@ namespace ige::scene
         virtual void drawFillRadial90();
         virtual void drawFillRadial180();
         virtual void drawFillRadial360();
+
+        //! Draw Nine Sliced
+        virtual void drawNineSliced();
 
         virtual void applyMesh(const std::vector<float> &points, const std::vector<uint32_t> &triangles, const std::vector<float> &uvs);
         virtual void applyTexture();
@@ -138,12 +170,21 @@ namespace ige::scene
         float m_alpha;
         Vec4 m_color;
 
+        //! Border 
+        /*float m_borderLeft;
+        float m_borderRight;
+        float m_borderTop;
+        float m_borderBottom;*/
+        Vec4 m_border;
+        bool m_bIsScaleBorder;
+
         EditableFigure* m_figure;
         Texture* m_texture;
 
         //! Wrap Mode
         SamplerState::WrapMode m_wrapMode;
         
+        SpriteType m_spriteType;
         FillMethod m_fillMethod;
         FillOrigin m_fillOrigin;
         float m_fillAmount;

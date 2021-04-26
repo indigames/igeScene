@@ -341,7 +341,39 @@ namespace ige::scene
         getOwner()->getTransformChangedEvent().invoke(*getOwner());
     }
 
-    void TransformComponent::makeDirty() {
+    Vec3 TransformComponent::localToGlobal(Vec3 point) const
+    {
+        Mat4 localMatrix;
+        localMatrix.Identity();
+        vmath_mat4_from_rottrans(m_localRotation.P(), point.P(), localMatrix.P());
+        vmath_mat_appendScale(localMatrix.P(), m_localScale.P(), 4, 4, localMatrix.P());
+
+        auto worldMatrix = (m_parent) ? m_parent->getWorldMatrix() * localMatrix : localMatrix;
+        Vec3 lpoint;
+        lpoint.X(worldMatrix[3][0]);
+        lpoint.Y(worldMatrix[3][1]);
+        lpoint.Z(worldMatrix[3][2]);
+        return lpoint;
+    }
+
+    Vec3 TransformComponent::globalToLocal(Vec3 point) const
+    {
+        // Update world matrix
+        Mat4 worldMatrix;
+        worldMatrix.Identity();
+        vmath_mat4_from_rottrans(m_worldRotation.P(), point.P(), worldMatrix.P());
+        vmath_mat_appendScale(worldMatrix.P(), m_worldScale.P(), 4, 4, worldMatrix.P());
+
+        auto localMatrix = m_parent ? m_parent->getWorldMatrix().Inverse() * worldMatrix : worldMatrix;
+        Vec3 lpoint;
+        lpoint.X(localMatrix[3][0]);
+        lpoint.Y(localMatrix[3][1]);
+        lpoint.Z(localMatrix[3][2]);
+        return lpoint;
+    }
+
+    void TransformComponent::makeDirty() 
+    {
         m_bWorldDirty = true;
         m_bLocalDirty = true;
     }

@@ -15,8 +15,8 @@ namespace fs = ghc::filesystem;
 
 NS_IGE_SCENE_BEGIN
 
-UIButton::UIButton(SceneObject& owner, const std::string& texture, const Vec2& size) : 
-	UIImage(owner, texture, size),
+UIButton::UIButton(SceneObject& owner, const std::string& texture, const Vec2& size, const bool isSliced, const Vec4& border) :
+	UIImage(owner, texture, size, isSliced, border),
     m_pressedTexture(nullptr), m_selectedTexture(nullptr), m_disabledTexture(nullptr),
 	m_normalColor(1.0f, 1.0f, 1.0f, 1.0f), m_pressedColor(0.78f, 0.78f, 0.78f, 1.0f), 
     m_selectedColor(0.98f, 0.98f, 0.98f, 1.0f), m_disableColor(0.78f, 0.78f, 0.78f, 0.5f),
@@ -25,7 +25,8 @@ UIButton::UIButton(SceneObject& owner, const std::string& texture, const Vec2& s
     m_bIsInteractable = true;
     m_btnState = ButtonState::NORMAL;
     m_transitionMode = TransitionMode::ColorTint;
-    this->getOwner()->setIsInteractable(m_bIsInteractable);
+    getOwner()->setIsInteractable(m_bIsInteractable);
+    getOwner()->setIsRaycastTarget(m_bIsInteractable);
     
     getOwner()->addEventListener((int)EventType::TouchBegin, std::bind(&UIButton::_onTouchPress, this, std::placeholders::_1), m_instanceId);
     getOwner()->addEventListener((int)EventType::TouchEnd, std::bind(&UIButton::_onTouchRelease, this, std::placeholders::_1), m_instanceId);
@@ -325,6 +326,8 @@ void UIButton::to_json(json& j) const
     j["disabledcolor"] = getDisabledColor();
     j["transitionmode"] = (int)getTransitionMode();
     j["fadeduration"] = getFadeDuration();
+    j["spritetype"] = (int)getSpriteType();
+    j["border"] = getBorder();
 }
 
 //! Deserialize
@@ -344,6 +347,8 @@ void UIButton::from_json(const json& j)
     setTexturePath(j.at("path"), ButtonState::NORMAL);
     setTransitionMode((TransitionMode)j.at("transitionmode"));
     setFadeDuration(j.at("fadeduration"));
+    setSpriteType(j.at("spritetype"));
+    setBorder(j.at("border"));
     Component::from_json(j);
 }
 

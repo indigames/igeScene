@@ -273,6 +273,8 @@ namespace ige::scene
         //! Define if object is interactable
         bool m_bIsInteractable = false;
 
+        int m_aabbDirty = 2;
+
         //Event Dispatch
         struct EventCallbackItem
         {

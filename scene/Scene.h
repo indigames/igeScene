@@ -91,6 +91,9 @@ namespace ige::scene
         //! Get root UI scene
         std::shared_ptr<SceneObject>& getRootUI() { return m_rootUI; };
 
+        //! Get Canvas
+        std::shared_ptr<SceneObject>& getCanvas() { return m_canvas; };
+
         //! Get objects list
         std::vector<std::shared_ptr<SceneObject>>& getObjects() { return m_objects; };
 
@@ -175,7 +178,9 @@ namespace ige::scene
         void populateTestData(const std::shared_ptr<SceneObject>& parent = nullptr, int num = 1000);
 
         std::pair<SceneObject*, Vec3>  findIntersectInHierachy(const SceneObject* target, std::pair<Vec3, Vec3> ray);
-
+                
+        //! Raycast UI 
+        Vec3 raycastCanvas(const Vec2& screenPos);
     protected:
         //! Scene root node
         std::shared_ptr<SceneObject> m_root;
@@ -246,6 +251,5 @@ namespace ige::scene
 
         //!Capture flag
         bool m_raycastCapture;
-
     };
 }

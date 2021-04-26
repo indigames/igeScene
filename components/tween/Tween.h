@@ -15,9 +15,9 @@ namespace ige::scene {
 	{
 	public:
 		static std::shared_ptr<Tweener> tween(float start, float end, float duration);
-		static std::shared_ptr<Tweener> tween(Vec2 start, Vec2 end, float duration);
-		static std::shared_ptr<Tweener> tween(Vec3 start, Vec3 end, float duration);
-		static std::shared_ptr<Tweener> tween(Vec4 start, Vec4 end, float duration);
+		static std::shared_ptr<Tweener> tween(const Vec2& start,const Vec2& end, float duration);
+		static std::shared_ptr<Tweener> tween(const Vec3& start,const Vec3& end, float duration);
+		static std::shared_ptr<Tweener> tween(const Vec4& start,const Vec4& end, float duration);
 
 		static std::shared_ptr<Tweener> doMove(TransformComponent* component, Vec3 start, Vec3 end, float duration);
 		static std::shared_ptr<Tweener> doMoveX(TransformComponent* component, float start, float end, float duration);

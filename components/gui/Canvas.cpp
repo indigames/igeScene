@@ -12,6 +12,7 @@ namespace ige::scene
         : Component(owner)
     {
         setCanvasToViewportMatrix(Mat4::IdentityMat());
+        getOwner()->setIsRaycastTarget(true);
     }
 
     //! Destructor

@@ -19,6 +19,7 @@
 #include "python/pyUIText.h"
 #include "python/pyUITextField.h"
 #include "python/pyUIButton.h"
+#include "python/pyUISlider.h"
 #include "python/pyPhysicManager.h"
 #include "python/pyPhysicBox.h"
 #include "python/pyPhysicSphere.h"
@@ -364,6 +365,17 @@ namespace ige::scene
                 if (comp)
                 {
                     auto* compObj = PyObject_New(PyObject_UIButton, &PyTypeObject_UIButton);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if (type == "UISlider")
+            {
+                auto comp = self->sceneObject->addComponent<UISlider>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_UISlider, &PyTypeObject_UISlider);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject*)compObj;

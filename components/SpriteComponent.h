@@ -55,6 +55,22 @@ namespace ige::scene
         void setWrapMode(int value);
         const SamplerState::WrapMode& getWrapMode() const { return m_sprite->getWrapMode(); }
 
+        //! SpriteType
+        void setSpriteType(int value);
+        const SpriteType& getSpriteType() const { return m_sprite->getSpriteType(); }
+
+        void setBorderLeft(float value);
+        const float getBorderLeft() const { return m_sprite->getBorderLeft(); }
+
+        void setBorderRight(float value);
+        const float getBorderRight() const { return m_sprite->getBorderRight(); }
+
+        void setBorderTop(float value);
+        const float getBorderTop() const { return m_sprite->getBorderTop(); }
+
+        void setBorderBottom(float value);
+        const float getBorderBottom() const { return m_sprite->getBorderBottom(); }
+
         //! Alpha blending
         const bool isAlphaBlendingEnable() const { return m_sprite && m_sprite->isAlphaBlendingEnable(); }
         void setAlphaBlendingEnable(bool enable = true) { if (m_sprite) m_sprite->setAlphaBlendingEnable(enable); }
@@ -78,6 +94,8 @@ namespace ige::scene
         void onCreateFigure(EditableFigure* figure);
         void onRemoveFigure(EditableFigure* figure);
 
+        const Vec4& getBorder() const { return m_sprite->getBorder(); }
+        void setBorder(const Vec4& value);
 
         //! Serialize
         virtual void to_json(json& j) const override;

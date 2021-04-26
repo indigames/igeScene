@@ -27,7 +27,7 @@ namespace ige::scene
     // get center of rect with left-top-right-bottom
     inline Vec2 getRectCenter(const Vec4 &vec)
     {
-        return Vec2((vec[2] + vec[0]) * 0.5f, (vec[3] + vec[1]) * 0.5f);
+        return Vec2((vec[2] + vec[0]) * 0.5f, (vec[1] + vec[3]) * 0.5f);
     }
 
     //! Translation
@@ -54,7 +54,9 @@ namespace ige::scene
         m_offset = Vec4(0.f, 0.f, 0.f, 0.f);
         m_anchor = Vec4(0.5f, 0.5f, 0.5f, 0.5f);
         m_pivot = Vec2(0.5f, 0.5f);
-        setSize(size);
+        m_size = size;
+        m_anchoredPosition = Vec2(0, 0);
+        setAnchor(m_anchor);
         setRectDirty();
         setTransformDirty();
     }
@@ -169,7 +171,6 @@ namespace ige::scene
 
             // Fire transform changed event
             getOwner()->getTransformChangedEvent().invoke(*getOwner());
-
             m_viewportTransformDirty = false;
 
             // Notify all children
@@ -184,6 +185,24 @@ namespace ige::scene
 
         // Update new transform
         onUpdate(0.f);
+    }
+
+    void RectTransform::setParent(TransformComponent* comp)
+    {
+        bool flag = false;
+        if (comp != nullptr) {
+            auto oldParent = getOwner()->getParent();
+            if (oldParent)
+            {
+                auto oldParentRect = oldParent->getRectTransform();
+                auto parentRect = comp->getOwner()->getRectTransform();
+                if (parentRect && oldParentRect && !m_rectDirty) {
+                    flag = true;
+                }
+            }
+        }
+        TransformComponent::setParent(comp);
+        if(flag) setLocalToRectDirty();
     }
 
     void RectTransform::worldTranslate(const Vec3 &trans)
@@ -208,18 +227,11 @@ namespace ige::scene
     {
         if (m_localPosition != pos)
         {
-            auto deltaPos = pos - m_localPosition;
-            auto newOffset = m_offset;
-            translateRect(newOffset, Vec2(deltaPos[0], deltaPos[1]));
-            setOffset(newOffset);
-
-            if (m_localPosition[3] != pos.Z())
-            {
-                m_localPosition.Z(pos.Z());
-                setTransformDirty();
-            }
+            m_localPosition = pos;
+            setTransformDirty();
 
             onUpdate(0.f);
+            setLocalToRectDirty();
         }
     }
 
@@ -249,9 +261,11 @@ namespace ige::scene
 
         // Ensure transform updated
         getViewportTransform();
-
+        
         // Allow object picking
         TransformComponent::onUpdate(dt);
+
+        updateLocalToRect();
     }
 
     void RectTransform::setRectDirty()
@@ -259,7 +273,7 @@ namespace ige::scene
         m_rectDirty = true;
 
         // Recursive update flag of all child object
-        for (auto &child : getOwner()->getChildren())
+        for (auto& child : getOwner()->getChildren())
         {
             if (child)
             {
@@ -270,6 +284,7 @@ namespace ige::scene
                 }
             }
         }
+
     }
 
     void RectTransform::setTransformDirty()
@@ -278,7 +293,7 @@ namespace ige::scene
         //m_bWorldDirty = true;
         m_viewportTransformDirty = true;
         m_canvasTransformDirty = true;
-
+        
         // Recursive update flag of all child object
         for (auto &child : getOwner()->getChildren())
         {
@@ -291,8 +306,26 @@ namespace ige::scene
                 }
             }
         }
-
         getOwner()->getTransformChangedEvent().invoke(*getOwner());
+    }
+
+    void RectTransform::setLocalToRectDirty()
+    {
+        m_bLocalToRectDirty = true;
+
+        // Recursive update flag of all child object
+        for (auto& child : getOwner()->getChildren())
+        {
+            if (child)
+            {
+                auto childTransform = child->getComponent<RectTransform>();
+                if (childTransform)
+                {
+                    childTransform->setLocalToRectDirty();
+                }
+            }
+        }
+
     }
 
     void RectTransform::setAnchor(const Vec4 &anchor)
@@ -319,32 +352,14 @@ namespace ige::scene
             else
                 m_anchor[1] = m_anchor[3];
         }
-
-        // Update offsets
-        auto parent = getOwner()->getParent();
-        if (parent)
-        {
-            auto parentRectTransform = parent->getRectTransform();
-            if (parentRectTransform)
-            {
-                auto parentRect = parentRectTransform->getRect();
-                m_offset[0] -= getRectWidth(parentRect) * (m_anchor[0] - lastAnchor[0]);
-                m_offset[2] -= getRectWidth(parentRect) * (m_anchor[2] - lastAnchor[2]);
-                m_offset[1] -= getRectHeight(parentRect) * (m_anchor[1] - lastAnchor[1]);
-                m_offset[3] -= getRectHeight(parentRect) * (m_anchor[3] - lastAnchor[3]);
-            }
-        }
-
-        // Avoid negative width and height
-        if (m_anchor[0] == m_anchor[2] && m_offset[0] > m_offset[2])
-            m_offset[0] = m_offset[2] = (m_offset[0] + m_offset[2]) * 0.5f;
-
-        if (m_anchor[1] == m_anchor[3] && m_offset[1] > m_offset[3])
-            m_offset[1] = m_offset[3] = (m_offset[1] + m_offset[3]) * 0.5f;
-
+                
         // Recompute
-        if (lastAnchor != m_anchor || lastOffset != m_offset)
-            setRectDirty();
+        if (lastAnchor != m_anchor || lastOffset != m_offset) {
+            //updateAnchorOffset();//setRectDirty();
+            //setLocalToRectDirty();
+            //onUpdate(0.f);
+            updateRect();
+        }
     }
 
     void RectTransform::setPivot(const Vec2 &pivot)
@@ -352,56 +367,11 @@ namespace ige::scene
         if (m_pivot == pivot)
             return;
 
-        // Calculate rect by pivot point
-        auto rect = getRect();
-        float x = rect[0] + getRectWidth(rect) * m_pivot.X();
-        float y = rect[1] + getRectHeight(rect) * m_pivot.Y();
-        auto curPivot = Vec2(x, y);
-
-        auto transformToPivotSpace = Mat4::Translate(Vec3(-curPivot.X(), -curPivot.Y(), m_localPosition.Z()));
-        auto transformFromPivotSpace = Mat4::Translate(Vec3(curPivot.X(), curPivot.Y(), m_localPosition.Z()));
-        auto localTransform = transformFromPivotSpace * Mat4::Rotation(m_localRotation) * Mat4::Scale(m_localScale) * transformToPivotSpace;
-
-        // Get the rect points
-        auto leftTop = Vec4(rect[0], rect[1], m_localPosition.Z(), 1.f);
-        auto rightTop = Vec4(rect[2], rect[1], m_localPosition.Z(), 1.f);
-        auto leftBottom = Vec4(rect[0], rect[3], m_localPosition.Z(), 1.f);
-        auto rightBottom = Vec4(rect[2], rect[3], m_localPosition.Z(), 1.f);
-
-        // Apply transformation
-        leftTop = localTransform * leftTop;
-        rightTop = localTransform * rightTop;
-        leftBottom = localTransform * leftBottom;
-        rightBottom = localTransform * rightBottom;
-
         // Set new pivot
         m_pivot = pivot;
-        setTransformDirty();
 
-        // Calculate pivot in transformed space
-        auto rightVec4 = rightTop - leftTop;
-        auto downVec4 = leftBottom - leftTop;
-        auto leftTopVec = Vec2(leftTop.X(), leftTop.Y());
-        auto rightVec = Vec2(rightVec4.X(), rightVec4.Y());
-        auto downVec = Vec2(downVec4.X(), downVec4.Y());
-        auto transPivot = leftTopVec + (rightVec * pivot.X()) + (downVec * pivot.Y());
-
-        // Adjust the size based on transformed pivot
-        auto oldSize = getRectSize(rect);
-        float newLeft = transPivot.X() - oldSize.X() * pivot.X();
-        float newTop = transPivot.Y() - oldSize.Y() * pivot.Y();
-
-        float deltaX = newLeft - rect[0];
-        float deltaY = newTop - rect[1];
-
-        // Adjust the offset values
-        m_offset[0] += deltaX;
-        m_offset[2] += deltaX;
-        m_offset[1] += deltaY;
-        m_offset[3] += deltaY;
-
-        // Recalculate rect
-        setRectDirty();
+        //setLocalToRectDirty();
+        updateRect();
     }
 
     void RectTransform::setOffset(const Vec4 &offset)
@@ -414,154 +384,362 @@ namespace ige::scene
         if (!parentRectTransform)
             return;
 
-        auto lastOffset = m_offset;
         auto newOffset = offset;
 
-        auto parentRect = parentRectTransform->getRect();
-        float left = parentRect[0] + getRectWidth(parentRect) * m_anchor[0] + offset[0];
-        float right = parentRect[0] + getRectWidth(parentRect) * m_anchor[2] + offset[2];
-        float top = parentRect[1] + getRectHeight(parentRect) * m_anchor[1] + offset[1];
-        float bottom = parentRect[1] + getRectHeight(parentRect) * m_anchor[3] + offset[3];
-
-        if (left > right)
-        {
-            // left - right offsets are flipped
-            bool leftChanged = newOffset[0] != lastOffset[0];
-            bool rightChanged = newOffset[2] != lastOffset[2];
-
-            if (leftChanged && rightChanged)
-            {
-                float newValue = left * (1.0f - m_pivot.X()) + right * m_pivot.X();
-                newOffset[0] = newValue - (parentRect[0] + getRectWidth(parentRect) * m_anchor[0]);
-                newOffset[2] = newValue - (parentRect[0] + getRectWidth(parentRect) * m_anchor[2]);
-            }
-            else if (rightChanged)
-            {
-                newOffset[2] = left - (parentRect[0] + getRectWidth(parentRect) * m_anchor[2]);
-            }
-            else if (leftChanged)
-            {
-                newOffset[0] = right - (parentRect[0] + getRectWidth(parentRect) * m_anchor[0]);
-            }
-        }
-
-        if (top > bottom)
-        {
-            // top - bottom offsets are flipped
-            bool topChanged = newOffset[1] != lastOffset[1];
-            bool bottomChanged = newOffset[3] != lastOffset[3];
-
-            if (topChanged && bottomChanged)
-            {
-                float newValue = top * (1.0f - m_pivot.Y()) + bottom * m_pivot.Y();
-                newOffset[1] = newValue - (parentRect[1] + getRectHeight(parentRect) * m_anchor[1]);
-                newOffset[3] = newValue - (parentRect[1] + getRectHeight(parentRect) * m_anchor[3]);
-            }
-            else if (bottomChanged)
-            {
-                newOffset[3] = top - (parentRect[1] + getRectHeight(parentRect) * m_anchor[3]);
-            }
-            else if (topChanged)
-            {
-                newOffset[1] = bottom - (parentRect[1] + getRectHeight(parentRect) * m_anchor[1]);
-            }
-        }
-
-        if (m_offset != newOffset)
-        {
+        if (m_offset != newOffset) {
             m_offset = newOffset;
-            setRectDirty();
+
+            if (parentRectTransform)
+            {
+                if (m_anchor[0] == m_anchor[2] && newOffset[0] > newOffset[2])
+                    newOffset[0] = newOffset[2] = m_size[0] / 2;
+                if (m_anchor[1] == m_anchor[3] && newOffset[1] > newOffset[3])
+                    newOffset[1] = newOffset[3] = m_size[1] / 2;
+
+                auto parentSize = parentRectTransform->getSize();
+                Vec4 rect;
+                rect[0] = parentSize[0] * (m_anchor[0] - 0.5f) + newOffset[0];
+                rect[1] = parentSize[1] * (m_anchor[1] - 0.5f) + newOffset[1];
+                rect[2] = parentSize[0] * (m_anchor[2] - 0.5f) + newOffset[2];
+                rect[3] = parentSize[1] * (m_anchor[3] - 0.5f) + newOffset[3];
+                
+                auto rectSize = getRectSize(rect);
+                if (rectSize != m_size)
+                    m_size = rectSize;
+
+                auto centerOffset = getRectCenter(newOffset);
+                centerOffset[0] += (m_pivot[0] - 0.5f) * m_size[0] * 0.5f;
+                centerOffset[1] += (m_pivot[1] - 0.5f) * m_size[1] * 0.5f;
+                setAnchoredPosition(centerOffset);
+            }
+
+            for (auto& child : getOwner()->getChildren())
+            {
+                if (child)
+                {
+                    auto childTransform = child->getComponent<RectTransform>();
+                    if (childTransform)
+                    {
+                        childTransform->updateSize();
+                    }
+                }
+            }
         }
     }
 
     Vec2 RectTransform::getSize()
     {
-        return getRectSize(getRect());
+        return m_size;
     }
 
     void RectTransform::setSize(const Vec2 &size)
-    {
-        auto offset = getOffset();
+    {      
+        if (m_size != size) {
+            m_size = size;
+            //! update child Size
+            //setRectDirty();
+            updateRect(true);
+            for (auto& child : getOwner()->getChildren())
+            {
+                if (child)
+                {
+                    auto childTransform = child->getComponent<RectTransform>();
+                    if (childTransform)
+                    {
+                        childTransform->updateSize();
+                    }
+                }
+            }
+            
+            onUpdate(0.f);
+        }
+    }
 
-        // Adjust width
+    void RectTransform::updateSize()
+    {
+        auto parent = getOwner()->getParent();
+        if (parent == nullptr) return;
+        auto parentRect = parent->getRectTransform();
+        if (parentRect == nullptr) return;
+        auto parentSize = parentRect->getSize();
+        Vec4 rect;
+        auto centerParentSize = parentSize * 0.5f;
+
+        Vec4 anchorRect;
+        anchorRect[0] = parentSize[0] * m_anchor[0];
+        anchorRect[1] = parentSize[1] * m_anchor[1];
+        anchorRect[2] = parentSize[0] * m_anchor[2];
+        anchorRect[3] = parentSize[1] * m_anchor[3];
+
+        auto anchorCenter = getRectCenter(anchorRect);
+        auto diffW = anchorCenter[0] - centerParentSize[0];
+        auto diffH = anchorCenter[1] - centerParentSize[1];
+
+        //! Determine anchor
+        //! If Same : change offset 
+        //! If Diff : change size 
         if (m_anchor[0] == m_anchor[2])
         {
-            auto curWidth = m_offset[2] - m_offset[0];
-            auto diff = size.X() - curWidth;
-            offset[0] -= diff * m_pivot.X();
-            offset[2] += diff * (1.0f - m_pivot.X());
+            auto posX = m_anchoredPosition[0] - (m_pivot[0] - 0.5f) * m_size[0] + diffW;
+            m_offset[0] = posX - m_size[0] * 0.5f - (m_anchor[0] - 0.5f) * parentSize[0];
+            m_offset[2] = posX + m_size[0] * 0.5f - (m_anchor[2] - 0.5f) * parentSize[0];
         }
 
-        // Adjust height
         if (m_anchor[1] == m_anchor[3])
         {
-            auto curHeight = m_offset[3] - m_offset[1];
-            auto diff = size.Y() - curHeight;
-            offset[1] -= diff * m_pivot.Y();
-            offset[3] += diff * (1.0f - m_pivot.Y());
+            auto posY = m_anchoredPosition[1] - (m_pivot[1] - 0.5f) * m_size[1] + diffH;
+            m_offset[1] = posY - m_size[1] * 0.5f - (m_anchor[1] - 0.5f) * parentSize[1];
+            m_offset[3] = posY + m_size[1] * 0.5f - (m_anchor[3] - 0.5f) * parentSize[1];
         }
 
-        // Set new offset
-        setOffset(offset);
+        rect[0] = parentSize[0] * (m_anchor[0] - 0.5f) + m_offset[0];
+        rect[2] = parentSize[0] * (m_anchor[2] - 0.5f) + m_offset[2];
+        rect[1] = parentSize[1] * (m_anchor[1] - 0.5f) + m_offset[1];
+        rect[3] = parentSize[1] * (m_anchor[3] - 0.5f) + m_offset[3];
+        
+        auto rectSize = getRectSize(rect);
+        if (rectSize != m_size) {
+            m_size = rectSize;
+        }
+
+        auto centerOffset = getRectCenter(m_offset);
+        centerOffset[0] += (m_pivot[0] - 0.5f) * m_size[0] * 0.5f;
+        centerOffset[1] += (m_pivot[1] - 0.5f) * m_size[1] * 0.5f;
+        setAnchoredPosition(centerOffset);
+        
+        m_anchorOffset[0] = parentRect->getWorldPosition()[0] + parentSize[0] * (m_anchor[0] - 0.5f);
+        m_anchorOffset[1] = parentRect->getWorldPosition()[1] + parentSize[1] * (m_anchor[1] - 0.5f);
+        m_anchorOffset[2] = parentRect->getWorldPosition()[0] + parentSize[0] * (m_anchor[2] - 0.5f);
+        m_anchorOffset[3] = parentRect->getWorldPosition()[1] + parentSize[1] * (m_anchor[3] - 0.5f);
+
+        for (auto& child : getOwner()->getChildren())
+        {
+            if (child)
+            {
+                auto childTransform = child->getComponent<RectTransform>();
+                if (childTransform)
+                {
+                    childTransform->updateSize();
+                }
+            }
+        }
     }
+
+    void RectTransform::updateRect(bool only)
+    {
+        auto parent = getOwner()->getParent();
+        if (parent == nullptr) return;
+        auto parentRect = parent->getRectTransform();
+        if (parentRect == nullptr) return;
+        auto parentSize = parentRect->getSize();
+
+        //! Update AnchorOffset
+        m_anchorOffset[0] = parentRect->getWorldPosition()[0] + parentSize[0] * (m_anchor[0] - 0.5f);
+        m_anchorOffset[1] = parentRect->getWorldPosition()[1] + parentSize[1] * (m_anchor[1] - 0.5f);
+        m_anchorOffset[2] = parentRect->getWorldPosition()[0] + parentSize[0] * (m_anchor[2] - 0.5f);
+        m_anchorOffset[3] = parentRect->getWorldPosition()[1] + parentSize[1] * (m_anchor[3] - 0.5f);
+
+        //! Update Offset
+        m_offset[0] = m_localPosition[0] - m_size[0] * 0.5f - (m_anchor[0] - 0.5f) * parentSize[0];
+        m_offset[2] = m_localPosition[0] + m_size[0] * 0.5f - (m_anchor[2] - 0.5f) * parentSize[0];
+        m_offset[1] = m_localPosition[1] - m_size[1] * 0.5f - (m_anchor[1] - 0.5f) * parentSize[1];
+        m_offset[3] = m_localPosition[1] + m_size[1] * 0.5f - (m_anchor[3] - 0.5f) * parentSize[1];
+
+        //! Update AnchoredPosition
+        auto centerOffset = getRectCenter(m_offset);
+        centerOffset[0] += (m_pivot[0] - 0.5f) * m_size[0] * 0.5f;
+        centerOffset[1] += (m_pivot[1] - 0.5f) * m_size[1] * 0.5f;
+        //m_anchoredPosition = centerOffset;
+        setAnchoredPosition(centerOffset);
+
+        if (!only) {
+            for (auto& child : getOwner()->getChildren())
+            {
+                if (child)
+                {
+                    auto childTransform = child->getComponent<RectTransform>();
+                    if (childTransform)
+                    {
+                        childTransform->updateRect();
+                    }
+                }
+            }
+        }
+    }
+
 
     const Vec4 &RectTransform::getRect()
     {
-        if (m_rectDirty)
+        if (m_rectDirty && !m_bLocalToRectDirty)
         {
             Vec4 rect;
             rect[0] = rect[1] = 0.f;
-
+            bool is_Canvas = false;
             auto canvas = getOwner()->getCanvas();
-            if (canvas)
+            auto parent = getOwner()->getParent();
+            std::shared_ptr<RectTransform> parentRectTransform = nullptr;
+
+            Vec2 parentSize;
+            if (parent)
+            {
+                parentRectTransform = parent->getRectTransform();
+                is_Canvas = parentRectTransform == nullptr;
+            }
+
+            if (canvas && is_Canvas)
             {
                 auto size = canvas->getDesignCanvasSize();
                 rect[2] = size.X();
                 rect[3] = size.Y();
+                m_size = size;
             }
-
-            auto parent = getOwner()->getParent();
-            if (parent)
-            {
-                auto parentRectTransform = parent->getRectTransform();
-                if (parentRectTransform)
-                {
-                    auto parentRect = parentRectTransform->getRect();
-                    rect[0] = parentRect[0] + getRectWidth(parentRect) * m_anchor[0] + m_offset[0];
-                    rect[2] = parentRect[0] + getRectWidth(parentRect) * m_anchor[2] + m_offset[2];
-                    rect[1] = parentRect[1] + getRectHeight(parentRect) * m_anchor[1] + m_offset[1];
-                    rect[3] = parentRect[1] + getRectHeight(parentRect) * m_anchor[3] + m_offset[3];
-                }
-            }
-
-            auto center = getRectCenter(rect);
-
-            // Avoid flipped rect
-            if (rect[0] > rect[2])
-                rect[0] = rect[2] = center[0];
-
-            if (rect[1] > rect[3])
-                rect[1] = rect[3] = center[1];
-
             m_rect = rect;
-
             auto centerPoint = getRectCenter(m_rect);
-            auto posVec2 = centerPoint - getAnchorCenterInCanvasSpace();
+            if (parentRectTransform)
+            {
+                parentSize = parentRectTransform->getSize();
+                m_anchorOffset[0] = parentRectTransform->getWorldPosition()[0] + parentSize[0] * (m_anchor[0] - 0.5f);
+                m_anchorOffset[1] = parentRectTransform->getWorldPosition()[1] + parentSize[1] * (m_anchor[1] - 0.5f);
+                m_anchorOffset[2] = parentRectTransform->getWorldPosition()[0] + parentSize[0] * (m_anchor[2] - 0.5f);
+                m_anchorOffset[3] = parentRectTransform->getWorldPosition()[1] + parentSize[1] * (m_anchor[3] - 0.5f);
+            }
 
-            // Adjust center point to fit the edges of parent
-            auto anchorCenter = getRectCenter(m_anchor);
-            posVec2.X(posVec2.X() - (0.5f - anchorCenter[0]) * getRectWidth(rect));
-            posVec2.Y(posVec2.Y() - (0.5f - anchorCenter[1]) * getRectHeight(rect));
+            Vec2 posVec2;
+            if (is_Canvas)
+            {
+                posVec2 = centerPoint - getAnchorCenterInCanvasSpace();
+            }
+            else
+            {
+                auto centerSize = parentSize * 0.5f;
 
-            // Update local position
+                Vec4 anchorRect;
+                anchorRect[0] = parentSize[0] * m_anchor[0];
+                anchorRect[1] = parentSize[1] * m_anchor[1];
+                anchorRect[2] = parentSize[0] * m_anchor[2];
+                anchorRect[3] = parentSize[1] * m_anchor[3];
+
+                auto anchorCenter = getRectCenter(anchorRect);
+                auto diffW = anchorCenter[0] - centerSize[0];
+                auto diffH = anchorCenter[1] - centerSize[1];
+
+                posVec2[0] = m_anchoredPosition[0] + diffW;
+                posVec2[1] = m_anchoredPosition[1] + diffH;
+            }
             m_localPosition = Vec3(posVec2.X(), posVec2.Y(), m_localPosition.Z());
-
             m_rectDirty = false;
-
-            // Recompute world transform
             setTransformDirty();
         }
         return m_rect;
+    }
+
+    void RectTransform::updateLocalToRect()
+    {
+        if (m_bLocalToRectDirty)
+        {
+            updateWorldToLocal();
+
+            m_bLocalToRectDirty = false; 
+            //! change m_offset, m_anchoredPosition, m_rect
+            auto canvas = getOwner()->getCanvas();
+            auto parent = getOwner()->getParent();
+            std::shared_ptr<RectTransform> parentRectTransform = nullptr;
+            bool is_Canvas = false;
+            if (parent)
+            {
+                parentRectTransform = parent->getRectTransform();
+                is_Canvas = parentRectTransform == nullptr;
+            }
+
+            if (!is_Canvas)
+            {
+                auto parentSize = parentRectTransform->getSize();
+                m_offset[0] = m_localPosition[0] - m_size[0] * 0.5f - (m_anchor[0] - 0.5f) * parentSize[0];
+                m_offset[2] = m_localPosition[0] + m_size[0] * 0.5f - (m_anchor[2] - 0.5f) * parentSize[0];
+                m_offset[1] = m_localPosition[1] - m_size[1] * 0.5f - (m_anchor[1] - 0.5f) * parentSize[1];
+                m_offset[3] = m_localPosition[1] + m_size[1] * 0.5f - (m_anchor[3] - 0.5f) * parentSize[1];
+                
+                //Update anchored Pos
+                auto centerOffset = getRectCenter(m_offset);
+                centerOffset[0] += (m_pivot[0] - 0.5f) * m_size[0];
+                centerOffset[1] += (m_pivot[1] - 0.5f) * m_size[1];
+                m_anchoredPosition = centerOffset;
+
+                //Update m_rect
+                auto parentRect = parentRectTransform->getRect();
+                auto centerParent = getRectCenter(parentRect);
+                Vec2 centerParentSize(parentSize[0] / 2, parentSize[1] / 2);
+                Vec4 rect;
+                rect[0] = (centerParentSize[0] + m_offset[0] + (m_anchor[0] - 0.5f) * parentSize[0]);
+                rect[2] = (centerParentSize[0] + m_offset[2] + (m_anchor[2] - 0.5f) * parentSize[0]);
+
+                rect[1] = (centerParentSize[1] + m_offset[1] + (m_anchor[1] - 0.5f) * parentSize[1]);
+                rect[3] = (centerParentSize[1] + m_offset[3] + (m_anchor[3] - 0.5f) * parentSize[1]);
+
+                auto center = getRectCenter(rect);
+                if (rect[0] > rect[2])
+                    rect[0] = rect[2] = center[0];
+
+                if (rect[1] > rect[3])
+                    rect[1] = rect[3] = center[1];
+                m_rect = rect;
+            }
+
+            updateAnchorOffset();
+        }
+    }
+    
+    void RectTransform::setAnchoredPosition(const Vec2& value)
+    {
+
+        //! Convert AnchoredPosition to Local Position
+        auto parent = getOwner()->getParent();
+        if (parent == nullptr)
+            return;
+
+        auto parentRectTransform = parent->getRectTransform();
+        if (parentRectTransform == nullptr)
+            return;
+        m_anchoredPosition = value;
+        
+        auto parentSize = parentRectTransform->getSize();
+        auto centerSize = parentSize * 0.5f;
+
+        Vec4 anchorRect;
+        anchorRect[0] = parentSize[0] * m_anchor[0];
+        anchorRect[1] = parentSize[1] * m_anchor[1];
+        anchorRect[2] = parentSize[0] * m_anchor[2];
+        anchorRect[3] = parentSize[1] * m_anchor[3];
+
+        auto anchorCenter = getRectCenter(anchorRect);
+        auto diffW = anchorCenter[0] - centerSize[0];
+        auto diffH = anchorCenter[1] - centerSize[1];
+
+        m_localPosition[0] = m_anchoredPosition[0] - (m_pivot[0] - 0.5f) * m_size[0] + diffW;
+        m_localPosition[1] = m_anchoredPosition[1] - (m_pivot[1] - 0.5f) * m_size[1] + diffH;
+
+        setTransformDirty();
+    }
+
+    void RectTransform::updateAnchorOffset()
+    {
+        auto parent = getOwner()->getParent();
+        if (!parent)
+            return;
+
+        auto parentRectTransform = parent->getRectTransform();
+        if (!parentRectTransform)
+            return;
+
+        if (parentRectTransform)
+        {
+            auto parentSize = parentRectTransform->getSize();
+
+            m_anchorOffset[0] = parentRectTransform->getWorldPosition()[0] + parentSize[0] * (m_anchor[0] - 0.5f);
+            m_anchorOffset[1] = parentRectTransform->getWorldPosition()[1] + parentSize[1] * (m_anchor[1] - 0.5f);
+            m_anchorOffset[2] = parentRectTransform->getWorldPosition()[0] + parentSize[0] * (m_anchor[2] - 0.5f);
+            m_anchorOffset[3] = parentRectTransform->getWorldPosition()[1] + parentSize[1] * (m_anchor[3] - 0.5f);
+        }
     }
 
     //! Serialize
@@ -571,7 +749,9 @@ namespace ige::scene
         j["anchor"] = m_anchor;
         j["offset"] = m_offset;
         j["pivot"] = m_pivot;
-        j["size"] = Vec2(m_rect[2] - m_rect[0], m_rect[3] - m_rect[1]);
+        j["size"] = m_size;
+        j["anchorposition"] = m_anchoredPosition;
+        j["anchoroffset"] = m_anchorOffset;
     }
 
     //! Deserialize
@@ -580,9 +760,11 @@ namespace ige::scene
         m_offset = j.value("offset", Vec4(0.f, 0.f, 0.f, 0.f));
         m_anchor = j.value("anchor", Vec4(0.5f, 0.5f, 0.5f, 0.5f));
         m_pivot = j.value("pivot", Vec2(0.5f, 0.5f));
-        setSize(j.value("size", Vec2(128.f, 128.f)));
+        m_size = j.value("size", Vec2(128.f, 128.f));
+        m_anchoredPosition = j.value("anchorposition", Vec2(0.f, 0.f));
+        m_anchorOffset = j.value("anchoroffset", Vec4(0.f, 0.f, 0.f, 0.f));
+        m_bLocalToRectDirty = false;
         Component::from_json(j);
-
         setRectDirty();
         setTransformDirty();
     }

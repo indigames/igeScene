@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include <cstdlib>
 #include <ctime>
 
@@ -103,6 +103,7 @@ namespace ige::scene
         getUIResourceAddedEvent().addListener(std::bind(&Scene::onUIResourceAdded, this, std::placeholders::_1));
         getUIResourceRemovedEvent().addListener(std::bind(&Scene::onUIResourceRemoved, this, std::placeholders::_1));
 
+        m_nextObjectID = 2;
         // Create root object
         m_root = createRootObject(m_name);
 
@@ -354,8 +355,8 @@ namespace ige::scene
             }
         }
         else if (parentObject) {
-            if(parentObject->isGUIObject())
-                parentObject = m_root;
+            if (parentObject->isGUIObject())
+                isGUI = true;//parentObject = m_root;
         }
 
         auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parentObject.get(), isGUI, size, isCanvas);
@@ -454,11 +455,12 @@ namespace ige::scene
         if (cnt > 0) {
             uint64_t l = 0;
             uint64_t r = cnt - 1;
+            uint64_t o = -1;
             while (m_objects[r]->getId() != m_objects[l]->getId() 
                 && id >= m_objects[l]->getId() && id <= m_objects[r]->getId())
             {
                 uint64_t mid = l + (r - 1) * (id - m_objects[l]->getId()) / (m_objects[r]->getId() - m_objects[l]->getId());
-                if (mid >= cnt) {
+                if (mid >= cnt || mid == o) {
                     break;
                 }
                 if (m_objects[mid]->getId() < id) {
@@ -470,11 +472,13 @@ namespace ige::scene
                 else {
                     if (mid > 0 && m_objects[mid - 1]->getId() == id) {
                         r = mid - 1;
+                        return m_objects[r];
                     }
                     else {
                         return m_objects[mid];
                     }
                 }
+                o = mid;
             }
             if (m_objects[l]->getId() == id)
                 return m_objects[l];
@@ -761,7 +765,14 @@ namespace ige::scene
         auto ray = RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
         for (const auto& obj : m_objects)
         {
-            if (obj && RayOBBChecker::checkIntersect(obj->getAABB(), obj->getTransform()->getWorldMatrix(), distance, maxDistance))
+            const auto& transform = obj->getTransform();
+            auto aabbTransform = Mat4::IdentityMat();
+            vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
+            vmath_mat_appendScale(aabbTransform.P(), transform->getWorldScale().P(), 4, 4, aabbTransform.P());
+            auto& m_aabb = obj->getAABB();
+            auto aabb = m_aabb.Transform(aabbTransform);
+
+            if (obj && RayOBBChecker::checkIntersect(aabb, obj->getTransform()->getWorldMatrix(), distance, maxDistance))
             {
                 if (minDistance > distance)
                 {
@@ -771,6 +782,7 @@ namespace ige::scene
                 }
             }
         }
+
         return hit;
     }
 
@@ -809,7 +821,51 @@ namespace ige::scene
         std::shared_ptr<SceneObject> m_node = m_canvas;
 
         hit = findIntersectInHierachy(m_node.get(), ray);
-        if(hit.first != nullptr) m_raycastCapture = true;
+        if(hit.first != nullptr && hit.first->isInteractable()) m_raycastCapture = true;
+        else if (hit.first == nullptr) {
+            if (m_canvas) {
+                hit.first = m_canvas.get();
+                hit.second = raycastCanvas(screenPos);
+            }
+        }
+        return hit;
+    }
+
+    Vec3 Scene::raycastCanvas(const Vec2& screenPos)
+    {
+        Vec3 hit;
+        if (!m_canvasCamera)
+            return hit;
+        auto size = getWindowSize();
+        float w = size.X() > 0 ? size.X() : SystemInfo::Instance().GetGameW();
+        float h = size.Y() > 0 ? size.Y() : SystemInfo::Instance().GetGameH();
+
+        auto pos = getWindowPosition();
+        float dx = pos.X();
+        float dy = pos.Y();
+
+        float x = screenPos.X() - dx / 2.f;
+        float y = screenPos.Y() + dy / 2.f;
+
+        if (size.X() > 0)
+            x = x + (SystemInfo::Instance().GetGameW() - (w + dx)) / 2.f;
+
+        if (size.Y() > 0)
+            y = y - (SystemInfo::Instance().GetGameH() - (h + dy)) / 2.f;
+
+        Mat4 proj;
+        m_canvasCamera->GetProjectionMatrix(proj);
+
+        Mat4 viewInv;
+        m_canvasCamera->GetViewInverseMatrix(viewInv);
+
+        auto ray = RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
+        float distance, minDistance = 100.0f;
+
+        bool m_isEnd = false;
+        std::shared_ptr<SceneObject> m_node = m_canvas;
+        auto worldPos = m_canvas->getTransform()->getWorldPosition();
+        hit = ray.first;
         return hit;
     }
 
@@ -825,14 +881,14 @@ namespace ige::scene
         auto &m_aabb = obj->getAABB();
         auto aabb = m_aabb.Transform(aabbTransform);
         float distance = 100.f;
-        if (target->isRaycastTarget()) {
+        if (target->isRaycastTarget()) 
+        {
             if (RayOBBChecker::checkIntersect(aabb, transform->getWorldMatrix(), distance, 100.f))
             {
                 hit.first = obj;
                 hit.second = ray.first + ray.second * distance;
             }
         }
-
         if (target->getChildren().size() > 0) {
             const auto& children = target->getChildren();
             int cnt = children.size();
@@ -877,20 +933,23 @@ namespace ige::scene
         setPath(j.value("path", std::string()));
 
         auto jRoot = j.at("root");
-        m_root = createObject(m_name);
+        m_root = createRootObject(m_name);
+
+        m_rootUI = createRootObject("UI");
+
+        //m_nextObjectID = 2;
         m_root->from_json(jRoot);
-
-        j.at("objId").get_to(m_nextObjectID);
-
-        if (j.contains("ui")) {
+        if(j.contains("ui")) {
             auto jUI = j.at("ui");
-            m_rootUI = createRootObject("UI");
             m_rootUI->from_json(jUI);
         }
-        else {
-            m_rootUI = createRootObject("UI");
-        }
 
+        if (j.contains("objId")) {
+            uint64_t nextId = m_nextObjectID;
+            j.at("objId").get_to(nextId);
+            if (nextId > m_nextObjectID)
+                m_nextObjectID = nextId;
+        }
         // Notify serialize finished
         getSerializeFinishedEvent().invoke(this);
 

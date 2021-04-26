@@ -36,7 +36,7 @@ namespace ige::scene
         TransformComponent *getParent() const;
 
         //! Set parent transform
-        void setParent(TransformComponent *comp);
+        virtual void setParent(TransformComponent *comp);
 
         //! Translate
         virtual void translate(const Vec3 &trans);
@@ -117,6 +117,9 @@ namespace ige::scene
         virtual void onUpdate(float dt) override;
 
         virtual void makeDirty();
+
+        virtual Vec3 globalToLocal(Vec3 point) const;
+        virtual Vec3 localToGlobal(Vec3 point) const;
 
     protected:
         //! Serialize
