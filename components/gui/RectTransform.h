@@ -56,7 +56,7 @@ namespace ige::scene
 
         //! Size
         Vec2 getSize();
-        void setSize(const Vec2 &size, bool relate = true);
+        void setSize(const Vec2 &size);
 
         //! Set Parent
         virtual void setParent(TransformComponent* comp) override;
@@ -99,6 +99,9 @@ namespace ige::scene
 
         //! Handle notification from parent: just do nothing
         void onNotified(const ETransformMessage &message) override;
+
+        void updateRect(bool only = false);
+        void updateSize();
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -113,9 +116,6 @@ namespace ige::scene
         
         void updateLocalToRect();
         void updateAnchorOffset();
-        void updateFromParent();
-
-        void setParentDirty();
     protected:
         //! Anchor
         Vec4 m_anchor;

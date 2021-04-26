@@ -470,7 +470,6 @@ void UISlider::onRotateDirection(SceneObject* obj)
 			rect->setAnchor(newAnchor);
 			Vec4 newOffset(offset[1], offset[0], offset[3], offset[2]);
 			rect->setOffset(newOffset);
-			rect->setSize(Vec2(size[1], size[0]), false);
 		}
 
 		for (auto& child : obj->getChildren())
