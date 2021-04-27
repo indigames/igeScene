@@ -89,7 +89,7 @@ add_library(${TARGET_NAME} ${APP_STYLE} ${SRC})
 
 target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDES})
 
-target_compile_definitions(${TARGET_NAME} PRIVATE ${DEFINES} ${CONAN_DEFINES})
+target_compile_definitions(${TARGET_NAME} PRIVATE ${DEFINES} ${CONAN_DEFINES} Py_NO_ENABLE_SHARED)
 
 if(${APP_STYLE} MATCHES "SHARED")
     set_target_properties(
