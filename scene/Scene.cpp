@@ -286,6 +286,8 @@ namespace ige::scene
         m_uiShowcase->Update(dt);
 
         if(m_tweenManager) m_tweenManager->update(dt);
+
+        resetFlag();
     }
 
     void Scene::fixedUpdate(float dt)
@@ -916,13 +918,20 @@ namespace ige::scene
             {"path", m_path},
             {"objId", m_nextObjectID},
         };
-        json jRoot;
-        m_root->to_json(jRoot);
-        j["root"] = jRoot;
 
-        json jUI;
-        m_rootUI->to_json(jUI);
-        j["ui"] = jUI;
+        if (m_root)
+        {
+            json jRoot;
+            m_root->to_json(jRoot);
+            j["root"] = jRoot;
+        }
+
+        if (m_rootUI)
+        {
+            json jUI;
+            m_rootUI->to_json(jUI);
+            j["ui"] = jUI;
+        }
     }
 
     //! Deserialize

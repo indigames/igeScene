@@ -75,6 +75,12 @@ namespace ige::scene
         //! Script changed event
         Event<const std::string &> &getOnScriptChangedEvent() { return m_onScriptChangedEvent; }
 
+        //! Access to members
+        const std::unordered_map<std::string, Value>& getMembers() { return m_members; }
+
+        //! Member value changed
+        virtual void onMemberValueChanged(const std::string& key, Value value);
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -82,9 +88,9 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j) override;
 
+        //! Load/unload modules
         void loadPyModule();
         void unloadPyModule();
-
         void registerPhysicEvents();
         void unregisterPhysicEvents();
 
@@ -95,7 +101,9 @@ namespace ige::scene
 
         //! Path to figure file
         std::string m_path;
-        bool m_bPathDirty = false;
+
+        //! Flags for onAwake() event
+        bool m_bOnAwakeCalled = false;
 
         //! Flags for onStart() event
         bool m_bOnStartCalled = false;
@@ -108,5 +116,8 @@ namespace ige::scene
 
         //! PyObject: instance of Python class
         _object *m_pyInstance;
+
+        //! Python class members
+        std::unordered_map<std::string, Value> m_members;
     };
 } // namespace ige::scene

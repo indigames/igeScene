@@ -52,9 +52,6 @@ namespace ige::scene
         //! Late update
         virtual void lateUpdate(float dt);
 
-        //! Reset flag
-        virtual void resetFlag();
-
         //! Render
         virtual void render();
 
@@ -181,6 +178,10 @@ namespace ige::scene
                 
         //! Raycast UI 
         Vec3 raycastCanvas(const Vec2& screenPos);
+
+        //! Reset flag
+        virtual void resetFlag();
+
     protected:
         //! Scene root node
         std::shared_ptr<SceneObject> m_root;

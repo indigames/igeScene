@@ -25,7 +25,6 @@ namespace ige::scene
     ScriptComponent::ScriptComponent(SceneObject &owner, const std::string &path)
         : Component(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
     {
-        m_bPathDirty = true;
         getOwner()->addEventListener((int)EventType::Click, std::bind(&ScriptComponent::onClickEvent, this, std::placeholders::_1), m_instanceId);
         getOwner()->addEventListener((int)EventType::Changed, std::bind(&ScriptComponent::onChangedValueEvent, this, std::placeholders::_1), m_instanceId);
     }
@@ -55,7 +54,8 @@ namespace ige::scene
         if (!m_path.empty())
         {
             // Load the module from python source file
-            m_pyModule = PyImport_ImportModule(m_path.c_str());
+            auto path = fs::path(m_path);
+            m_pyModule = PyImport_ImportModule(path.stem().c_str());
 
             // Reload from source
             if (m_pyModule)
@@ -109,14 +109,45 @@ namespace ige::scene
 
             PyErr_Clear();
 
-            // Register physic events
-            registerPhysicEvents();
+            key = nullptr;
+            value = nullptr;
+            pos = 0;
+            dict = PyObject_GenericGetDict(m_pyInstance, nullptr);
+            while (PyDict_Next(dict, &pos, &key, &value))
+            {
+                auto key_str = std::string(PyUnicode_AsUTF8(key));
+                if (!PyObject_IsInstance(value, (PyObject*)&PyFunction_Type))
+                {
+                    if (value == Py_None)
+                    {
+                        m_members[key_str] = nullptr;
+                    }
+                    else if (PyUnicode_Check(value))
+                    {
+                        m_members[key_str] = std::string(PyUnicode_AsUTF8(value));
+                    }
+                    else if (PyBool_Check(value))
+                    {
+                        m_members[key_str] = (bool)(PyLong_AsLong(value));
+                    }
+                    else if (PyLong_Check(value))
+                    {
+                        m_members[key_str] = PyLong_AsLong(value);
+                    }
+                    else if (PyFloat_Check(value))
+                    {
+                        m_members[key_str] = PyFloat_AsDouble(value);
+                    }
+                    else if (value->ob_type == &PyTypeObject_SceneObject)
+                    {
+                        auto sceneObj = (PyObject_SceneObject*)(value);
+                        m_members[key_str] = sceneObj->sceneObject->getUUID();
+                    }
+                }
+            }
 
-            // Initialized, call invoke onAwake()
-            onAwake();
-
-            // Enable call onStart() next frame
-            m_bOnStartCalled = false;
+            // Enable call onAwake() next frame
+            m_bOnAwakeCalled = false;
         }
     }
 
@@ -131,6 +162,7 @@ namespace ige::scene
             m_pyModule = nullptr;
         }
 
+        m_members.clear();
         unregisterPhysicEvents();
     }
 
@@ -240,11 +272,16 @@ namespace ige::scene
         if (SceneManager::getInstance()->isEditor())
             return;
 
-        // Check reload script
-        if (m_bPathDirty)
+        if (!m_bOnAwakeCalled)
         {
-            loadPyModule();
-            m_bPathDirty = false;
+            // Register physic events
+            registerPhysicEvents();
+
+            // Initialized, call invoke onAwake()
+            onAwake();
+
+            m_bOnAwakeCalled = true;
+            m_bOnStartCalled = false;
         }
 
         // Check call onStart()
@@ -389,6 +426,51 @@ namespace ige::scene
         }
     }
 
+    //! Member value changed
+    void ScriptComponent::onMemberValueChanged(const std::string& key, Value value)
+    {
+        // Change saved value
+        m_members[key] = value;
+
+        // Apply changes to script instance
+        if (m_pyInstance)
+        {
+            PyObject* pyValue = Py_None;
+
+            switch (value.getType()) 
+            {
+                case Value::Type::UNSIGNED:
+                case Value::Type::INTEGER:
+                {
+                    pyValue = PyLong_FromLong(value.asInt());
+                }
+                break;
+
+                case Value::Type::FLOAT:
+                case Value::Type::DOUBLE:
+                {
+                    pyValue = PyFloat_FromDouble(value.asDouble());
+                }
+                break;
+
+                case Value::Type::BOOLEAN:
+                {
+                    pyValue = PyBool_FromLong(value.asInt());
+                }
+                break;
+
+                case Value::Type::STRING:
+                {
+                    pyValue = PyUnicode_FromString(value.asString().c_str());
+                }
+                break;
+            }
+
+            PyObject_SetAttrString(m_pyInstance, key.c_str(), pyValue);
+            Py_XDECREF(pyValue);
+        }
+    }
+
 
     //! Trigger events
     void ScriptComponent::onTriggerStart(SceneObject &other)
@@ -469,25 +551,89 @@ namespace ige::scene
     {
         Component::to_json(j);
         j["path"] = m_path;
+
+        auto jMembers = json::array();
+        for (const auto& pair : m_members)
+        {
+            auto key = pair.first;
+            auto value = pair.second;
+
+            switch (value.getType())
+            {
+                case Value::Type::STRING:
+                {
+                    jMembers.push_back({ key, value.asString() });
+                }
+                break;
+
+                case Value::Type::INTEGER:
+                case Value::Type::UNSIGNED:
+                {
+                    jMembers.push_back({ key, value.asInt() });
+                }
+                break;
+
+                case Value::Type::DOUBLE:
+                case Value::Type::FLOAT:
+                {
+                    jMembers.push_back({ key, value.asDouble() });
+                }
+                break;
+
+                case Value::Type::BOOLEAN:
+                {
+                    jMembers.push_back({ key, value.asBool() });
+                }
+                break;
+            }
+        }
+        j["members"] = jMembers;
     }
 
     //! Deserialize
     void ScriptComponent::from_json(const json &j)
     {
         setPath(j.at("path"));
+
+        auto jMembers = j.value("members", json::array());
+        for (auto it : jMembers)
+        {
+            auto key = it.at(0);
+            auto val = it.at(1);
+
+            if (m_members.find(key) != m_members.end())
+            {
+                if (val.is_boolean())
+                {
+                    onMemberValueChanged(key, Value(val.get<bool>()));
+                }
+                else if (val.is_number_integer() || val.is_number_unsigned())
+                {
+                    onMemberValueChanged(key, Value(val.get<int>()));
+                }
+                else if (val.is_number_float())
+                {
+                    onMemberValueChanged(key, Value(val.get<double>()));
+                }
+                else if (val.is_string())
+                {
+                    onMemberValueChanged(key, Value(val.get<std::string>()));
+                }
+            }
+        }
         Component::from_json(j);
     }
 
     //! Path
     void ScriptComponent::setPath(const std::string &path)
     {
-        auto scriptName = fs::path(path).stem().string();
+        auto scriptName = fs::path(path).string();
         std::replace(scriptName.begin(), scriptName.end(), '\\', '/');
 
         if (strcmp(m_path.c_str(), scriptName.c_str()) != 0)
         {
             m_path = scriptName;
-            m_bPathDirty = true;
+            loadPyModule();
         }
     }
 

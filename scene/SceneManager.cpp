@@ -18,6 +18,7 @@
 namespace fs = ghc::filesystem;
 
 #include "utils/PyxieHeaders.h"
+#include <iomanip>
 using namespace pyxie;
 
 #ifdef _WIN32
@@ -31,6 +32,7 @@ namespace ige::scene
     SceneManager::SceneManager()
     {
         m_currScene = nullptr;
+        init();
     }
 
     SceneManager::~SceneManager()
@@ -45,41 +47,54 @@ namespace ige::scene
         Py_Finalize();
     }
 
+    void SceneManager::init()
+    {
+        // Initialize python runtime
+        std::string root = pyxieFios::Instance().GetRoot();
+        std::string path = root;
+
+        wchar_t pathw[1024];
+        mbstowcs(pathw, path.c_str(), 1024);
+        Py_SetPythonHome(pathw);
+
+        path.append(DELIMITER);
+        path.append("scripts");
+
+        for (const auto& entry : fs::directory_iterator(fs::path("scripts")))
+        {
+            if (entry.is_directory())
+            {
+                auto scriptName = entry.path().string();
+                std::replace(scriptName.begin(), scriptName.end(), '\\', '/');
+
+                if (scriptName.find("/__pycache__") == std::string::npos)
+                {
+                    path.append(DELIMITER);
+                    path.append(scriptName);
+                }
+            }
+        }
+
+        path.append(DELIMITER);
+        path.append(root);
+        path.append("PyLib");
+
+        path.append(DELIMITER);
+        path.append(root);
+        path.append("PyLib/site-packages");
+        mbstowcs(pathw, path.c_str(), 1024);
+        Py_SetPath(pathw);
+
+        Py_Initialize();
+
+        // Initialize shape drawer
+        ShapeDrawer::initialize();
+    }
+
     void SceneManager::update(float dt)
     {
-        if (!m_bInitialized)
-        {
-            // Initialize python runtime
-            std::string root = pyxieFios::Instance().GetRoot();
-            std::string path = root;
-
-            wchar_t pathw[1024];
-            mbstowcs(pathw, path.c_str(), 1024);
-            Py_SetPythonHome(pathw);
-
-            path.append(DELIMITER);
-            path.append("scripts");
-
-            path.append(DELIMITER);
-            path.append(root);
-            path.append("PyLib");
-
-            path.append(DELIMITER);
-            path.append(root);
-            path.append("PyLib/site-packages");
-            mbstowcs(pathw, path.c_str(), 1024);
-            Py_SetPath(pathw);
-
-            Py_Initialize();
-
-            // Initialize shape drawer
-            ShapeDrawer::initialize();
-
-            m_bInitialized = true;
-        }
         if (m_currScene) {
             m_currScene->update(dt);
-            m_currScene->resetFlag();
         }
     }
 
@@ -198,7 +213,7 @@ namespace ige::scene
             json jScene;
             m_currScene->to_json(jScene);
             std::ofstream file(fsPath.string());
-            file << jScene;
+            file << std::setw(2) << jScene << std::endl;
             return true;
         }
         return false;

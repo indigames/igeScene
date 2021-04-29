@@ -73,14 +73,15 @@ namespace ige::scene
         void setIsEditor(bool isEditor) { m_bIsEditor = isEditor; }
 
     protected:
+
+        //! Initialize
+        void init();
+
         //! Scene root node
         std::shared_ptr<Scene> m_currScene;
 
         //! List of all Scenes
         std::vector<std::shared_ptr<Scene>> m_scenes;
-
-        //! Init in main thread
-        bool m_bInitialized = false;
 
         //! Editor mode
         bool m_bIsEditor = false;
