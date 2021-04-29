@@ -625,12 +625,12 @@ namespace ige::scene
     }
 
     //! Path
-    void ScriptComponent::setPath(const std::string &path)
+    void ScriptComponent::setPath(const std::string &path, bool forceReload)
     {
         auto scriptName = fs::path(path).string();
         std::replace(scriptName.begin(), scriptName.end(), '\\', '/');
 
-        if (strcmp(m_path.c_str(), scriptName.c_str()) != 0)
+        if (forceReload || strcmp(m_path.c_str(), scriptName.c_str()) != 0)
         {
             m_path = scriptName;
             loadPyModule();

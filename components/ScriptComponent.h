@@ -69,7 +69,7 @@ namespace ige::scene
         virtual void onCollisionStop(SceneObject &other);
 
         //! Path
-        void setPath(const std::string &path);
+        void setPath(const std::string &path, bool forceReload = false);
         const std::string &getPath() { return m_path; }
 
         //! Script changed event
