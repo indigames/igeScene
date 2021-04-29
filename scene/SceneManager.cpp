@@ -193,12 +193,12 @@ namespace ige::scene
             auto fsPath = path.empty() ? fs::path(m_currScene->getPath()) : fs::path(path);
             auto ext = fsPath.extension();
 
-            if (ext.string() != ".scene")
+            if (ext.string() != ".scene" && ext.string() != ".tmp")
             {
                 fsPath = fsPath.replace_extension(".scene");
             }
 
-            if (path.find("_tmp") == std::string::npos)
+            if (path.find(".tmp") == std::string::npos)
             {
                 if (m_currScene->getName() == "Untitled")
                 {
