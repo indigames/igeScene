@@ -68,6 +68,12 @@ namespace ige::scene
         return PyLong_FromUnsignedLongLong(self->sceneObject->getId());
     }
 
+    // Get UUID
+    PyObject *SceneObject_getUUID(PyObject_SceneObject *self)
+    {
+        return PyUnicode_FromString(self->sceneObject->getUUID().c_str());
+    }
+
     // Get name
     PyObject *SceneObject_getName(PyObject_SceneObject *self)
     {
@@ -1089,6 +1095,7 @@ namespace ige::scene
     // Get/Set
     PyGetSetDef SceneObject_getsets[] = {
         {"id", (getter)SceneObject_getId, NULL, SceneObject_id_doc, NULL},
+        {"uuid", (getter)SceneObject_getUUID, NULL, SceneObject_uuid_doc, NULL},
         {"name", (getter)SceneObject_getName, (setter)SceneObject_setName, SceneObject_name_doc, NULL},
         {"active", (getter)SceneObject_getActive, (setter)SceneObject_setActive, SceneObject_active_doc, NULL},
         {"selected", (getter)SceneObject_getSelected, (setter)SceneObject_setSelected, SceneObject_selected_doc, NULL},

@@ -118,11 +118,7 @@ namespace ige::scene
                 auto key_str = std::string(PyUnicode_AsUTF8(key));
                 if (!PyObject_IsInstance(value, (PyObject*)&PyFunction_Type))
                 {
-                    if (value == Py_None)
-                    {
-                        m_members[key_str] = nullptr;
-                    }
-                    else if (PyUnicode_Check(value))
+                    if (PyUnicode_Check(value))
                     {
                         m_members[key_str] = std::string(PyUnicode_AsUTF8(value));
                     }
@@ -142,6 +138,14 @@ namespace ige::scene
                     {
                         auto sceneObj = (PyObject_SceneObject*)(value);
                         m_members[key_str] = sceneObj->sceneObject->getUUID();
+                    }
+                    else if (value == Py_None)
+                    {
+                        m_members[key_str] = nullptr;
+                    }
+                    else
+                    {
+                        // Just ignore non parsed types
                     }
                 }
             }
@@ -461,7 +465,17 @@ namespace ige::scene
 
                 case Value::Type::STRING:
                 {
-                    pyValue = PyUnicode_FromString(value.asString().c_str());
+                    auto obj = getOwner()->getScene()->findObjectByUUID(value.asString());
+                    if (obj) 
+                    {
+                        auto pyObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+                        pyObj->sceneObject = obj.get();
+                        pyValue = (PyObject*)pyObj;
+                    }
+                    else
+                    {
+                        pyValue = PyUnicode_FromString(value.asString().c_str());
+                    }
                 }
                 break;
             }
@@ -622,6 +636,23 @@ namespace ige::scene
             }
         }
         Component::from_json(j);
+    }
+
+    //! Serialize finished event
+    void ScriptComponent::onSerializeFinished(Scene* scene)
+    {
+        // Check and set object UUID to object reference once load done
+        for (const auto& pair : m_members)
+        {
+            auto key = pair.first;
+            auto value = pair.second;
+
+            if (value.getType() == Value::Type::STRING)
+            {
+                onMemberValueChanged(key, value);
+            }
+        }
+        Component::onSerializeFinished(scene);
     }
 
     //! Path

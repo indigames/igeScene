@@ -105,6 +105,12 @@ PyDoc_STRVAR(SceneObject_id_doc,
     "Type: number (unsigned long long).\n"
 );
 
+// uuid
+PyDoc_STRVAR(SceneObject_uuid_doc,
+    "The UUID of the scene object.\n"\
+    "Type: string.\n"
+);
+
 // name
 PyDoc_STRVAR(SceneObject_name_doc,
     "The ID of the scene object.\n"\
