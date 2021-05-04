@@ -128,7 +128,7 @@ namespace ige::scene
                     }
                     else if (PyLong_Check(value))
                     {
-                        m_members[key_str] = PyLong_AsLong(value);
+                        m_members[key_str] = (int)PyLong_AsLong(value);
                     }
                     else if (PyFloat_Check(value))
                     {

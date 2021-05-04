@@ -192,7 +192,7 @@ void UIButton::setAnimationMode(AnimationMode value)
 {
     if (m_animationMode != value)
     {
-        m_animationMode == value;
+        m_animationMode = value;
     }
 }
 
