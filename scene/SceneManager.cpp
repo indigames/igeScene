@@ -157,21 +157,18 @@ namespace ige::scene
 
         auto fsPath = fs::path(path);
         auto ext = fsPath.extension();
-        if (ext.string() != ".scene")
-        {
-            fsPath = fsPath.replace_extension(".scene");
-        }
 
         std::ifstream file(fsPath);
         if (!file.is_open())
             return nullptr;
 
         file >> jScene;
+        file.close();
 
         auto scene = std::make_shared<Scene>(jScene.at("name"));
         scene->from_json(jScene);
 
-        if (path.find("_tmp") == std::string::npos)
+        if (ext.string() != ".tmp")
         {
             auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
             std::replace(relPath.begin(), relPath.end(), '\\', '/');
@@ -212,8 +209,10 @@ namespace ige::scene
 
             json jScene;
             m_currScene->to_json(jScene);
+            fs::create_directories(fsPath.parent_path());
             std::ofstream file(fsPath.string());
             file << std::setw(2) << jScene << std::endl;
+            file.close();
             return true;
         }
         return false;
