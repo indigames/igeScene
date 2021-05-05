@@ -19,7 +19,6 @@ namespace ige::scene
         : Component(owner)
     {
         getCreatedEvent().invoke(this);
-        setEnabled(true);
     }
 
     NavAgent::~NavAgent()

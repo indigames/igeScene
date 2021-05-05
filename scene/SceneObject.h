@@ -187,6 +187,9 @@ namespace ige::scene
         //! Set locked frame AABB
         void setLockedFrameAABB(bool locked = true) { m_bLockedFrameAABB = locked; }
 
+        //! Update AABB
+        virtual void updateAabb();
+
     protected:
         //! Helper to generate UUID
         std::string generateUUID(unsigned int len = 16);
@@ -200,9 +203,6 @@ namespace ige::scene
 
         //! Transform changed event
         void onTransformChanged(SceneObject& sceneObject);
-
-        //! Update AABB
-        virtual void updateAabb();
 
     protected:
         //! Node ID

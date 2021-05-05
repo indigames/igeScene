@@ -75,7 +75,13 @@ namespace ige::scene
     //! Deserialize
     void Component::from_json(const json &j)
     {
-        setEnabled(j.value("enabled", true));
+        m_bIsEnabled = j.value("enabled", true);
+    }
+
+    //! Serialize finished event
+    void Component::onSerializeFinished(Scene* scene)
+    {
+        setEnabled(m_bIsEnabled);
     }
 
     //! Serialize component

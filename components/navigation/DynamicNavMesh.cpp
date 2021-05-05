@@ -777,4 +777,12 @@ namespace ige::scene
         setMaxLayers(j.value("maxLayers", 16));
         NavMesh::from_json(j);
     }
+
+    //! Serialize finished event
+    void DynamicNavMesh::onSerializeFinished(Scene* scene)
+    {
+        NavMesh::onSerializeFinished(scene);
+        build();
+    }
+
 } // namespace ige::scene

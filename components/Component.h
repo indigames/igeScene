@@ -79,7 +79,7 @@ namespace ige::scene
         virtual void from_json(const json &j);
 
         //! Serialize finished event
-        virtual void onSerializeFinished(Scene* scene) {}
+        virtual void onSerializeFinished(Scene* scene);
 
         //! Reference to owner object
         SceneObject &m_owner;

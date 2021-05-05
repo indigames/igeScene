@@ -314,6 +314,8 @@ namespace ige::scene
 
         processedNodes.insert(node);
 
+        getOwner()->getTransform()->onUpdate(0.f);
+        getOwner()->updateAabb();
         auto inverse = getOwner()->getTransform()->getWorldMatrix().Inverse();
 
         // Get figure component
@@ -323,6 +325,7 @@ namespace ige::scene
             NavGeoInfo info;
             info.component = figure.get();
             node->getTransform()->onUpdate(0.f);
+            node->updateAabb();
             info.transform = inverse * node->getTransform()->getWorldMatrix();
             info.boundingBox = node->getWorldAABB().Transform(inverse);
             geometryList.push_back(info);
