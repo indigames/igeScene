@@ -102,8 +102,6 @@ namespace ige::scene
 
         //! Return the cached path
         const std::string& getPath() const { return m_path; }
-
-        //! Cache the path
         void setPath(const std::string& path) { m_path = path; }
 
         //! Get showcase
@@ -172,10 +170,9 @@ namespace ige::scene
         //! Create root Objects
         virtual std::shared_ptr<SceneObject> createRootObject(const std::string& name = "");
 
-        void populateTestData(const std::shared_ptr<SceneObject>& parent = nullptr, int num = 1000);
+        //! find intersect in hierarchy
+        std::pair<SceneObject*, Vec3> findIntersectInHierachy(const SceneObject* target, std::pair<Vec3, Vec3> ray);
 
-        std::pair<SceneObject*, Vec3>  findIntersectInHierachy(const SceneObject* target, std::pair<Vec3, Vec3> ray);
-                
         //! Raycast UI 
         Vec3 raycastCanvas(const Vec2& screenPos);
 
@@ -221,7 +218,7 @@ namespace ige::scene
         Texture* m_shadowTexture = nullptr;
         RenderTarget* m_shadowFBO = nullptr;
         EditableFigure* m_shadowEdgeMask = nullptr;
-        Vec2 m_shadowTextureSize = {2048, 2048};
+        Vec2 m_shadowTextureSize = { 2048, 2048 };
 
         //! Object ID counter
         uint64_t m_nextObjectID = 0;

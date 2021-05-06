@@ -72,10 +72,17 @@ namespace ige::scene
         //! Set editor mode
         void setIsEditor(bool isEditor) { m_bIsEditor = isEditor; }
 
+        //! Editor path
+        const std::string& getEditorPath() const { return m_editorPath; }
+        void setEditorPath(const std::string& path);
+
     protected:
 
         //! Initialize
         void init();
+
+        //! Editor path
+        std::string m_editorPath = {};
 
         //! Scene root node
         std::shared_ptr<Scene> m_currScene;

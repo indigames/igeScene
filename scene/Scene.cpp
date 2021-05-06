@@ -55,7 +55,75 @@ namespace ige::scene
     Scene::Scene(const std::string& name)
         : m_name(name)
     {
-        m_environment = ResourceCreator::Instance().NewEnvironmentSet(name.c_str(), nullptr);
+        initialize();
+    }
+
+    Scene::~Scene()
+    {
+        clear();
+
+        getResourceAddedEvent().removeAllListeners();
+        getResourceRemovedEvent().removeAllListeners();
+
+        getUIResourceAddedEvent().removeAllListeners();
+        getUIResourceRemovedEvent().removeAllListeners();
+
+        if (m_shadowTexture)
+        {
+            m_shadowTexture->DecReference();
+            m_shadowTexture = nullptr;
+        }
+
+        if (m_shadowFBO)
+        {
+            m_shadowFBO->DecReference();
+            m_shadowFBO = nullptr;
+        }
+
+        if (m_shadowEdgeMask)
+        {
+            m_shadowEdgeMask->DecReference();
+            m_shadowEdgeMask = nullptr;
+        }
+
+        if (m_showcase)
+        {
+            if(m_environment)
+                m_showcase->Remove(m_environment);
+            m_showcase->Clear();
+            m_showcase->DecReference();
+            m_showcase = nullptr;
+        }
+
+        if (m_environment)
+        {
+            m_environment->DecReference();
+            m_environment = nullptr;
+        }
+
+        if (m_tweenManager) {
+            m_tweenManager->clean();
+            m_tweenManager = nullptr;
+        }
+
+        if (m_canvasCamera) {
+            m_canvasCamera->DecReference();
+            m_canvasCamera = nullptr;
+        }
+
+        if (m_uiShowcase)
+        {
+            m_uiShowcase->Clear();
+            m_uiShowcase->DecReference();
+            m_uiShowcase = nullptr;
+        }
+
+        ResourceManager::Instance().DeleteDaemon();
+    }
+
+    bool Scene::initialize()
+    {
+        m_environment = ResourceCreator::Instance().NewEnvironmentSet(m_name.c_str(), nullptr);
         m_environment->WaitBuild();
 
         // Set directional lights deactivated
@@ -126,95 +194,28 @@ namespace ige::scene
         // Create default directional light
         auto directionalLight = createObject("Directional Light");
         directionalLight->addComponent<DirectionalLight>();
-        directionalLight->getTransform()->setPosition({0.f, 5.f, 0.f});
+        directionalLight->getTransform()->setPosition({ 0.f, 5.f, 0.f });
         directionalLight->getTransform()->setRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
 
         // Add editor debug
         if (SceneManager::getInstance()->isEditor())
         {
-            camObj->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
-            directionalLight->addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+            camObj->addComponent<FigureComponent>(SceneManager::getInstance()->getEditorPath() + "/figures/camera.pyxf")->setSkipSerialize(true);
+            directionalLight->addComponent<SpriteComponent>(SceneManager::getInstance()->getEditorPath() + "/sprites/direct-light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
         }
 
-        // Fill up test data
-        // populateTestData(sceneObject, 1000);
-
+        // Tween manager
         m_tweenManager = std::make_shared<TweenManager>();
         m_tweenManager->init();
 
+        // Canvas camera
         m_canvasCamera = ResourceCreator::Instance().NewCamera("canvas_camera", nullptr);
         m_canvasCamera->SetPosition({ 0.f, 0.f, 10.f });
         m_canvasCamera->LockonTarget(false);
         m_canvasCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
         m_canvasCamera->SetOrthographicProjection(true);
         m_canvasCamera->SetWidthBase(false);
-    }
 
-    Scene::~Scene()
-    {
-        clear();
-
-        getResourceAddedEvent().removeAllListeners();
-        getResourceRemovedEvent().removeAllListeners();
-
-        getUIResourceAddedEvent().removeAllListeners();
-        getUIResourceRemovedEvent().removeAllListeners();
-
-        if (m_shadowTexture)
-        {
-            m_shadowTexture->DecReference();
-            m_shadowTexture = nullptr;
-        }
-
-        if (m_shadowFBO)
-        {
-            m_shadowFBO->DecReference();
-            m_shadowFBO = nullptr;
-        }
-
-        if (m_shadowEdgeMask)
-        {
-            m_shadowEdgeMask->DecReference();
-            m_shadowEdgeMask = nullptr;
-        }
-
-        if (m_showcase)
-        {
-            if(m_environment)
-                m_showcase->Remove(m_environment);
-            m_showcase->Clear();
-            m_showcase->DecReference();
-            m_showcase = nullptr;
-        }
-
-        if (m_environment)
-        {
-            m_environment->DecReference();
-            m_environment = nullptr;
-        }
-
-        if (m_tweenManager) {
-            m_tweenManager->clean();
-            m_tweenManager = nullptr;
-        }
-
-        if (m_canvasCamera) {
-            m_canvasCamera->DecReference();
-            m_canvasCamera = nullptr;
-        }
-
-        if (m_uiShowcase)
-        {
-            m_uiShowcase->Clear();
-            m_uiShowcase->DecReference();
-            m_uiShowcase = nullptr;
-        }
-
-        ResourceManager::Instance().DeleteDaemon();
-    }
-
-    bool Scene::initialize()
-    {
         return true;
     }
 
@@ -370,29 +371,6 @@ namespace ige::scene
         auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name);
         m_objects.push_back(sceneObject);
         return sceneObject;
-    }
-
-
-    void Scene::populateTestData(const std::shared_ptr<SceneObject>& parent, int numObjects)
-    {
-        //! [IGE]: To test performance with huge amount of objects
-        std::srand(std::time(nullptr));
-
-        for (int i = 0; i < numObjects; ++i)
-        {
-            auto newObj = createObject("Object_" + std::to_string(i), parent);
-            if((std::rand() / (float)RAND_MAX) < 0.5f)
-                if ((std::rand() / (float)RAND_MAX) < 0.5f)
-                    newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, -std::rand() % 50));
-                else
-                    newObj->getTransform()->setPosition(Vec3(-std::rand() % 50, 0.f, std::rand() % 50));
-            else
-                if ((std::rand() / (float)RAND_MAX) < 0.5f)
-                    newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, -std::rand() % 50));
-                else
-                    newObj->getTransform()->setPosition(Vec3(std::rand() % 50, 0.f, std::rand() % 50));
-            newObj->addComponent<FigureComponent>("figure/Tree/Tree.pyxf");
-        }
     }
 
     bool Scene::removeObject(const std::shared_ptr<SceneObject>& obj)

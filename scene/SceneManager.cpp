@@ -49,6 +49,9 @@ namespace ige::scene
 
     void SceneManager::init()
     {
+        // Set editor path
+        setEditorPath(fs::current_path().string());
+
         // Initialize python runtime
         std::string root = pyxieFios::Instance().GetRoot();
         std::string path = root;
@@ -58,30 +61,37 @@ namespace ige::scene
         Py_SetPythonHome(pathw);
 
         path.append(DELIMITER);
-        path.append("scripts");
-
-        for (const auto& entry : fs::directory_iterator(fs::path("scripts")))
-        {
-            if (entry.is_directory())
-            {
-                auto scriptName = entry.path().string();
-                std::replace(scriptName.begin(), scriptName.end(), '\\', '/');
-
-                if (scriptName.find("/__pycache__") == std::string::npos)
-                {
-                    path.append(DELIMITER);
-                    path.append(scriptName);
-                }
-            }
-        }
-
-        path.append(DELIMITER);
         path.append(root);
         path.append("PyLib");
 
         path.append(DELIMITER);
         path.append(root);
         path.append("PyLib/site-packages");
+
+        FileIO::Instance().SetRoot(".");
+        root = pyxieFios::Instance().GetRoot();
+        path.append(DELIMITER);
+        path.append(root);
+        
+        path.append(DELIMITER);
+        path.append(root);
+        path.append("scripts");
+
+        for (const auto& entry : fs::directory_iterator(fs::path(root).append("scripts")))
+        {
+            if (entry.is_directory())
+            {
+                auto scriptDir = entry.path().string();
+                std::replace(scriptDir.begin(), scriptDir.end(), '\\', '/');
+
+                if (scriptDir.find("/__pycache__") == std::string::npos)
+                {
+                    path.append(DELIMITER);
+                    path.append(scriptDir);
+                }
+            }
+        }
+
         mbstowcs(pathw, path.c_str(), 1024);
         Py_SetPath(pathw);
 
@@ -119,10 +129,17 @@ namespace ige::scene
         }
     }
 
+    void SceneManager::setEditorPath(const std::string& path)
+    {
+        if (m_editorPath.compare(path) != 0)
+        {
+            m_editorPath = path;
+        }
+    }
+
     std::shared_ptr<Scene> SceneManager::createScene(const std::string& name)
     {
         auto scene = std::make_shared<Scene>(name);
-        scene->initialize();
         m_scenes.push_back(scene);
         return scene;
     }

@@ -785,25 +785,19 @@ namespace ige::scene
             if (auto camera = getComponent<CameraComponent>())
             {
                 if (!getComponent<FigureComponent>())
-                    addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
-            }
-
-            if (auto canvas = getComponent<Canvas>())
-            {
-                /*if (!getComponent<UIImage>())
-                    addComponent<UIImage>("sprite/rect")->setSkipSerialize(true);*/
+                    addComponent<FigureComponent>(SceneManager::getInstance()->getEditorPath() + "/figures/camera.pyxf")->setSkipSerialize(true);
             }
 
             if (auto directionalLight = getComponent<DirectionalLight>())
             {
                 if (!getComponent<FigureComponent>() && !getComponent<SpriteComponent>())
-                    addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                    addComponent<SpriteComponent>(SceneManager::getInstance()->getEditorPath() + "/sprites/direct-light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
             }
 
             if (auto pointLight = getComponent<PointLight>())
             {
                 if (!getComponent<FigureComponent>() && !getComponent<SpriteComponent>())
-                    addComponent<SpriteComponent>("sprite/light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                    addComponent<SpriteComponent>(SceneManager::getInstance()->getEditorPath() + "/sprites/point-light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
             }
         }
 
