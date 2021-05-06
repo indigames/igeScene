@@ -505,6 +505,15 @@ namespace ige::scene
         }
     }
 
+    //! Set path
+    void Scene::setPath(const std::string& path)
+    {
+        auto fsPath = fs::path(path);
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+        m_path = relPath;
+    }
+
     //! Resource added event
     void Scene::onResourceAdded(Resource* resource)
     {

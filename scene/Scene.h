@@ -102,7 +102,7 @@ namespace ige::scene
 
         //! Return the cached path
         const std::string& getPath() const { return m_path; }
-        void setPath(const std::string& path) { m_path = path; }
+        void setPath(const std::string& path);
 
         //! Get showcase
         Showcase* getShowcase() { return m_showcase; }
