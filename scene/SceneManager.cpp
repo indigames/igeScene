@@ -73,21 +73,23 @@ namespace ige::scene
         path.append(DELIMITER);
         path.append(root);
         
-        path.append(DELIMITER);
-        path.append(root);
-        path.append("scripts");
-
-        for (const auto& entry : fs::directory_iterator(fs::path(root).append("scripts")))
+        if (fs::exists(fs::path(root).append("scripts")))
         {
-            if (entry.is_directory())
-            {
-                auto scriptDir = entry.path().string();
-                std::replace(scriptDir.begin(), scriptDir.end(), '\\', '/');
+            path.append(DELIMITER);
+            path.append(root);
+            path.append("scripts");
 
-                if (scriptDir.find("/__pycache__") == std::string::npos)
+            for (const auto& entry : fs::directory_iterator(fs::path(root).append("scripts")))
+            {
+                if (entry.is_directory())
                 {
-                    path.append(DELIMITER);
-                    path.append(scriptDir);
+                    auto scriptDir = entry.path().string();
+                    std::replace(scriptDir.begin(), scriptDir.end(), '\\', '/');
+                    if (scriptDir.find("/__pycache__") == std::string::npos)
+                    {
+                        path.append(DELIMITER);
+                        path.append(scriptDir);
+                    }
                 }
             }
         }
