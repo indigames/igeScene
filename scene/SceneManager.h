@@ -72,6 +72,10 @@ namespace ige::scene
         //! Set editor mode
         void setIsEditor(bool isEditor) { m_bIsEditor = isEditor; }
 
+        //! Project path
+        const std::string& getProjectPath() const { return m_projectPath; }
+        void setProjectPath(const std::string& path);
+
         //! Editor path
         const std::string& getEditorPath() const { return m_editorPath; }
         void setEditorPath(const std::string& path);
@@ -80,6 +84,12 @@ namespace ige::scene
 
         //! Initialize
         void init();
+
+        //! Deinit
+        void deinit();
+
+        //! Project path
+        std::string m_projectPath = {};
 
         //! Editor path
         std::string m_editorPath = {};
@@ -93,4 +103,6 @@ namespace ige::scene
         //! Editor mode
         bool m_bIsEditor = false;
     };
+
+    std::string GetEditorResource(const std::string& path);
 }

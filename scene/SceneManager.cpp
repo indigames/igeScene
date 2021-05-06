@@ -33,24 +33,21 @@ namespace ige::scene
     {
         m_currScene = nullptr;
         init();
+
+        // Initialize shape drawer
+        ShapeDrawer::initialize();
     }
 
     SceneManager::~SceneManager()
     {
-        m_currScene = nullptr;
-
-        for (auto& scene : m_scenes)
-            scene = nullptr;
-        m_scenes.clear();
-
-        // Destroy python runtime
-        Py_Finalize();
+        deinit();
     }
 
     void SceneManager::init()
     {
         // Set editor path
-        setEditorPath(fs::current_path().string());
+        if(m_editorPath.empty())
+            setEditorPath(fs::current_path().string());
 
         // Initialize python runtime
         std::string root = pyxieFios::Instance().GetRoot();
@@ -98,9 +95,18 @@ namespace ige::scene
         Py_SetPath(pathw);
 
         Py_Initialize();
+    }
 
-        // Initialize shape drawer
-        ShapeDrawer::initialize();
+    void SceneManager::deinit()
+    {
+        m_currScene = nullptr;
+
+        for (auto& scene : m_scenes)
+            scene = nullptr;
+        m_scenes.clear();
+
+        // Destroy python runtime
+        Py_Finalize();
     }
 
     void SceneManager::update(float dt)
@@ -128,6 +134,16 @@ namespace ige::scene
             m_currScene->render();
             m_currScene->renderUI();
             ShapeDrawer::flush();
+        }
+    }
+
+    void SceneManager::setProjectPath(const std::string& path)
+    {
+        if (m_projectPath.compare(path) != 0)
+        {
+            m_projectPath = path;
+            deinit();
+            init();
         }
     }
 
@@ -273,5 +289,14 @@ namespace ige::scene
         m_currScene = nullptr;
         unloadScene(name);
         loadScene(path);
+    }
+
+    std::string GetEditorResource(const std::string& path)
+    {
+        if (SceneManager::getInstance()->getEditorPath().compare(SceneManager::getInstance()->getProjectPath()) == 0)
+            return path;
+        auto retPath = (fs::path(SceneManager::getInstance()->getEditorPath()).append(path)).string();
+        std::replace(retPath.begin(), retPath.end(), '\\', '/');
+        return retPath;
     }
 }
