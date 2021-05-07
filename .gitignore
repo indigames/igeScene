@@ -34,3 +34,6 @@
 
 /_ige_build
 /_ige_release
+/__pycache__
+/dist
+/igeScene.egg-info

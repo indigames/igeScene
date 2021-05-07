@@ -26,18 +26,24 @@
 #include "python/pyPhysicCapsule.h"
 #include "python/pyPhysicMesh.h"
 #include "python/pyPhysicSoftBody.h"
+#include "python/pyPhysicConstraint.h"
+#include "python/pyDof6Constraint.h"
+#include "python/pyFixedConstraint.h"
+#include "python/pyHingeConstraint.h"
+#include "python/pySliderConstraint.h"
+#include "python/pySpringConstraint.h"
 #include "python/pyAudioManager.h"
 #include "python/pyAudioListener.h"
 #include "python/pyAudioSource.h"
-#include "python/pyParticle.h"
 #include "python/pyParticleManager.h"
-#include "python/pyNavAgent.h"
+#include "python/pyParticle.h"
 #include "python/pyNavAgentManager.h"
-#include "python/pyNavArea.h"
+#include "python/pyNavAgent.h"
 #include "python/pyNavMesh.h"
+#include "python/pyDynamicNavMesh.h"
+#include "python/pyNavArea.h"
 #include "python/pyNavObstacle.h"
 #include "python/pyNavigable.h"
-#include "python/pyDynamicNavMesh.h"
 #include "python/pyOffMeshLink.h"
 
 #include "scene/SceneObject.h"
@@ -789,6 +795,17 @@ namespace ige::scene
                 if (comp)
                 {
                     auto* compObj = PyObject_New(PyObject_UIButton, &PyTypeObject_UIButton);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if (type == "UISlider")
+            {
+                auto comp = self->sceneObject->getComponent<UISlider>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_UISlider, &PyTypeObject_UISlider);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject*)compObj;

@@ -61,6 +61,7 @@ if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
         set(CONAN_INCLUDE_DIRS_PYTHON "")
         set(CONAN_LIBS_PYTHON "")
         set(CONAN_PKG_LIBS_PYTHON "")
+        set(CONAN_LIBS_SDL "SDL2")
     endif()
 
     conan_basic_setup()
@@ -75,6 +76,21 @@ file(GLOB_RECURSE SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
+set (EXCLUDE_DIR
+    "/build"
+    "/example"
+    "/bin"
+    "/misc"
+    "/docs"
+)
+foreach (TMP_PATH ${SRC})
+    foreach (TMP_DIR ${EXCLUDE_DIR})
+        string (FIND ${TMP_PATH} ${TMP_DIR} EXCLUDE_DIR_FOUND)
+        if (NOT ${EXCLUDE_DIR_FOUND} EQUAL -1)
+            list (REMOVE_ITEM SRC ${TMP_PATH})
+        endif ()
+    endforeach(TMP_DIR)
+endforeach(TMP_PATH)
 
 set(INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -84,14 +100,19 @@ set(INCLUDES
     "${PYXCORE_INCLUDE_DIRS}/ThirdParty/GLEW"
 )
 
-
 add_library(${TARGET_NAME} ${APP_STYLE} ${SRC})
 
 target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDES})
 
-target_compile_definitions(${TARGET_NAME} PRIVATE ${DEFINES} ${CONAN_DEFINES} Py_NO_ENABLE_SHARED)
+target_compile_definitions(${TARGET_NAME} PRIVATE ${DEFINES} ${CONAN_DEFINES})
+
+if(${APP_STYLE} MATCHES "STATIC")
+    target_compile_definitions(${TARGET_NAME} PRIVATE Py_NO_ENABLE_SHARED)
+endif()
 
 if(${APP_STYLE} MATCHES "SHARED")
+    target_compile_definitions(${TARGET_NAME} PRIVATE GHC_WITH_EXCEPTIONS)
+
     set_target_properties(
         ${TARGET_NAME}
         PROPERTIES
@@ -107,6 +128,23 @@ if(${APP_STYLE} MATCHES "SHARED")
             SUFFIX ".pyd"
         )
     endif()
-    target_link_libraries(${TARGET_NAME} ${Python3_LIBRARIES} ${CONAN_LIBS})
+
+    target_link_libraries(${TARGET_NAME}
+      ${CONAN_LIBS}
+      ${Python3_LIBRARIES}
+      user32
+      Gdi32
+      Crypt32
+      dinput8
+      dxguid
+      winmm
+      imm32
+      ole32
+      oleaut32
+      shell32
+      version
+      uuid
+      Setupapi
+    )
 endif()
 
