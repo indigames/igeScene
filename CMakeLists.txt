@@ -77,6 +77,8 @@ file(GLOB_RECURSE SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
 set (EXCLUDE_DIR
+    "/_ige_build"
+    "/_ige_release"
     "/build"
     "/example"
     "/bin"
