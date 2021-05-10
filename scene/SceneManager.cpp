@@ -32,7 +32,6 @@ namespace ige::scene
     SceneManager::SceneManager()
     {
         m_currScene = nullptr;
-        init();
 
         // Initialize shape drawer
         ShapeDrawer::initialize();
@@ -45,28 +44,28 @@ namespace ige::scene
 
     void SceneManager::init()
     {
-        // Set editor path
-        if(m_editorPath.empty())
-            setEditorPath(fs::current_path().string());
-
         // Initialize python runtime
-        std::string root = pyxieFios::Instance().GetRoot();
-        std::string path = root;
+    #if EDITOR_MODE
+        std::string root = m_editorPath;
+    #else
+        std::string root = m_projectPath;
+    #endif
 
+        std::string path = root;
         wchar_t pathw[1024];
         mbstowcs(pathw, path.c_str(), 1024);
         Py_SetPythonHome(pathw);
 
         path.append(DELIMITER);
         path.append(root);
-        path.append("PyLib");
+        path.append("/PyLib");
 
         path.append(DELIMITER);
         path.append(root);
-        path.append("PyLib/site-packages");
+        path.append("/PyLib/site-packages");
 
-        FileIO::Instance().SetRoot(".");
-        root = pyxieFios::Instance().GetRoot();
+        FileIO::Instance().SetRoot(m_projectPath.c_str());
+        root = m_projectPath;
         path.append(DELIMITER);
         path.append(root);
         
