@@ -36,6 +36,7 @@ namespace ige::scene
 
         //! Get UUID
         inline std::string getUUID() const { return m_uuid; }
+        inline void setUUID(const std::string& uuid) { m_uuid = uuid; }
 
         //! Get Name
         inline const std::string &getName() const { return m_name; }
@@ -193,9 +194,6 @@ namespace ige::scene
     protected:
         //! Helper to generate UUID
         std::string generateUUID(unsigned int len = 16);
-
-        //! Set UUID
-        inline void setUUID(const std::string& uuid) { m_uuid = uuid; }
 
         //! Event
         void doDispatch(int eventType, EventContext* context);
