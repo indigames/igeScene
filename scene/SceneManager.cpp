@@ -45,16 +45,21 @@ namespace ige::scene
     void SceneManager::init()
     {
         // Initialize python runtime
-    #if EDITOR_MODE
-        std::string root = m_editorPath;
-    #else
-        std::string root = m_projectPath;
-    #endif
-
+        auto root = m_projectPath;
+        std::replace(root.begin(), root.end(), '\\', '/');
         std::string path = root;
         wchar_t pathw[1024];
         mbstowcs(pathw, path.c_str(), 1024);
         Py_SetPythonHome(pathw);
+
+        FileIO::Instance().SetRoot(m_projectPath.c_str());
+        path.append(DELIMITER);
+        path.append(root);
+
+#if EDITOR_MODE
+        root = m_editorPath;
+        std::replace(root.begin(), root.end(), '\\', '/');
+#endif
 
         path.append(DELIMITER);
         path.append(root);
@@ -63,32 +68,6 @@ namespace ige::scene
         path.append(DELIMITER);
         path.append(root);
         path.append("/PyLib/site-packages");
-
-        FileIO::Instance().SetRoot(m_projectPath.c_str());
-        root = m_projectPath;
-        path.append(DELIMITER);
-        path.append(root);
-        
-        if (fs::exists(fs::path(root).append("scripts")))
-        {
-            path.append(DELIMITER);
-            path.append(root);
-            path.append("scripts");
-
-            for (const auto& entry : fs::directory_iterator(fs::path(root).append("scripts")))
-            {
-                if (entry.is_directory())
-                {
-                    auto scriptDir = entry.path().string();
-                    std::replace(scriptDir.begin(), scriptDir.end(), '\\', '/');
-                    if (scriptDir.find("/__pycache__") == std::string::npos)
-                    {
-                        path.append(DELIMITER);
-                        path.append(scriptDir);
-                    }
-                }
-            }
-        }
 
         mbstowcs(pathw, path.c_str(), 1024);
         Py_SetPath(pathw);

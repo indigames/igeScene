@@ -54,8 +54,13 @@ namespace ige::scene
         if (!m_path.empty())
         {
             // Load the module from python source file
-            auto path = fs::path(m_path);
-            m_pyModule = PyImport_ImportModule(path.stem().c_str());
+            auto path = fs::absolute(fs::path(m_path));
+            auto appendCmd = std::string("import sys\nsys.path.append('") + path.parent_path().string() + "'\n)";
+            std::replace(appendCmd.begin(), appendCmd.end(), '\\', '/');
+            PyRun_SimpleString(appendCmd.c_str());
+
+            auto module = path.stem().string();
+            m_pyModule = PyImport_ImportModule(module.c_str());
 
             // Reload from source
             if (m_pyModule)
@@ -68,6 +73,11 @@ namespace ige::scene
             // Return if the module was not loaded
             if (m_pyModule == nullptr)
             {
+                PyObject* ptype, * pvalue, * ptraceback;
+                PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+                auto pStrErrorMessage = PyUnicode_AsUTF8(PyObject_Str(pvalue));
+                if (pStrErrorMessage != nullptr)
+                    pyxie_printf(pStrErrorMessage);
                 PyErr_Clear();
                 return;
             }
