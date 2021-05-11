@@ -2,11 +2,11 @@
 #define __MACROS_SCENE_H__
 
 #define NS_IGE_SCENE_BEGIN				namespace ige::scene {
-#define NS_IGE_SCENE_END}
+#define NS_IGE_SCENE_END				}
 #define USING_NS_IGE_CREATOR			using namespace ige::creator;
 #define USING_NS_IGE_SCENE				using namespace ige::scene;
 #define NS_IGE_SCENE					ige::scene
-#define USING_NS_PYXIE					using namespace pyxie;	
+#define USING_NS_PYXIE					using namespace pyxie;
 
 #define IGE_PLATFORM_UNKNOWN			0
 #define IGE_PLATFORM_EDITOR				1
