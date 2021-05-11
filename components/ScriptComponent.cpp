@@ -33,6 +33,7 @@ namespace ige::scene
     ScriptComponent::~ScriptComponent()
     {
         unloadPyModule();
+        m_members.clear();
         getOwner()->removeEventListener((int)EventType::Click, m_instanceId);
         getOwner()->removeEventListener((int)EventType::Changed, m_instanceId);
     }
@@ -128,35 +129,42 @@ namespace ige::scene
                 auto key_str = std::string(PyUnicode_AsUTF8(key));
                 if (!PyObject_IsInstance(value, (PyObject*)&PyFunction_Type))
                 {
-                    if (PyUnicode_Check(value))
+                    if (m_members.count(key_str) > 0)
                     {
-                        m_members[key_str] = std::string(PyUnicode_AsUTF8(value));
-                    }
-                    else if (PyBool_Check(value))
-                    {
-                        m_members[key_str] = (bool)(PyLong_AsLong(value));
-                    }
-                    else if (PyLong_Check(value))
-                    {
-                        m_members[key_str] = (int)PyLong_AsLong(value);
-                    }
-                    else if (PyFloat_Check(value))
-                    {
-                        m_members[key_str] = PyFloat_AsDouble(value);
-                    }
-                    else if (value->ob_type == &PyTypeObject_SceneObject)
-                    {
-                        auto sceneObj = (PyObject_SceneObject*)(value);
-                        m_members[key_str] = sceneObj->sceneObject->getUUID();
-                    }
-                    else if (value == Py_None)
-                    {
-                        m_members[key_str] = nullptr;
+                        onMemberValueChanged(key_str, m_members[key_str]);
                     }
                     else
                     {
-                        // Just ignore non parsed types
-                    }
+                        if (PyUnicode_Check(value))
+                        {
+                            m_members[key_str] = std::string(PyUnicode_AsUTF8(value));
+                        }
+                        else if (PyBool_Check(value))
+                        {
+                            m_members[key_str] = (bool)(PyLong_AsLong(value));
+                        }
+                        else if (PyLong_Check(value))
+                        {
+                            m_members[key_str] = (int)PyLong_AsLong(value);
+                        }
+                        else if (PyFloat_Check(value))
+                        {
+                            m_members[key_str] = PyFloat_AsDouble(value);
+                        }
+                        else if (value->ob_type == &PyTypeObject_SceneObject)
+                        {
+                            auto sceneObj = (PyObject_SceneObject*)(value);
+                            m_members[key_str] = sceneObj->sceneObject->getUUID();
+                        }
+                        else if (value == Py_None)
+                        {
+                            m_members[key_str] = nullptr;
+                        }
+                        else
+                        {
+                            // Just ignore non parsed types
+                        }
+                    }                    
                 }
             }
 
@@ -176,7 +184,6 @@ namespace ige::scene
             m_pyModule = nullptr;
         }
 
-        m_members.clear();
         unregisterPhysicEvents();
     }
 
