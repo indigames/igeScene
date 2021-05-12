@@ -88,23 +88,24 @@ namespace ige::scene
     //! Destructor
     SceneObject::~SceneObject()
     {
-        dispatchEvent((int)EventType::Delete);
+        removeChildren();
 
+        dispatchEvent((int)EventType::Delete);
         getTransformChangedEvent().removeAllListeners();
 
         setParent(nullptr);
         setCanvas(nullptr);
 
-        removeAllComponents();
-        removeChildren();
-
-        getTransform()->setParent(nullptr);
-        m_transform = nullptr;
-
         getDestroyedEvent().invoke(*this);
 
         m_dispatching = 0;
         removeEventListeners();
+
+        getTransform()->setParent(nullptr);
+        m_transform = nullptr;
+
+        removeAllComponents();
+        m_scene = nullptr;
     }
 
     //! Generate UUID
@@ -229,9 +230,7 @@ namespace ige::scene
     bool SceneObject::removeAllComponents()
     {
         for (auto &comp : m_components)
-        {
-            if(comp) comp = nullptr;
-        }
+            comp = nullptr;
         m_components.clear();
         return true;
     }

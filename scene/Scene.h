@@ -32,7 +32,7 @@ namespace ige::scene
         virtual ~Scene();
 
         //! Initialize
-        bool initialize();
+        bool initialize(bool empty = false);
 
         //! Clear
         void clear();

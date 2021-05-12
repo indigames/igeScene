@@ -20,7 +20,8 @@ namespace ige::scene
     //! Destructor
     SpotLight::~SpotLight()
     {
-        getOwner()->getScene()->releaseSpotLight(m_index);
+        if(getOwner()->getScene())
+            getOwner()->getScene()->releaseSpotLight(m_index);
     }
 
     //! Range

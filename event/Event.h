@@ -39,7 +39,7 @@ namespace ige::scene
     template<class... Args>
     bool Event<Args...>::removeListener(uint64_t id)
     {
-        return (m_callbacks.erase(id) > 0);
+        return (m_callbacks.size() > 0 && m_callbacks.count(id) > 0 && m_callbacks.erase(id) > 0);
     }
 
     template<class... Args>

@@ -20,7 +20,8 @@ namespace ige::scene
     //! Destructor
     DirectionalLight::~DirectionalLight()
     {
-        getOwner()->getScene()->releaseDirectionalLight(m_index);
+        if(getOwner()->getScene())
+            getOwner()->getScene()->releaseDirectionalLight(m_index);
     }
 
     //! Intensity

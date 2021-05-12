@@ -18,7 +18,7 @@ namespace ige::scene
     //! Destructor
     UIText::~UIText()
     {
-        if (m_text->getFigure())
+        if (m_text->getFigure() && getOwner()->getScene())
             getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_text->getFigure());
         m_text = nullptr;
         getOwner()->getTransform()->makeDirty();

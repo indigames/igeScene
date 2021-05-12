@@ -22,7 +22,7 @@ namespace ige::scene
             m_sprite = std::make_shared<Sprite>(m_texture, size);
         }
 
-        if (m_sprite->getFigure())
+        if (m_sprite->getFigure() && getOwner()->getScene())
         {
             if(m_bIsGUI)
                 getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_sprite->getFigure());

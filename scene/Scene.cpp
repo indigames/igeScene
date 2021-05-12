@@ -61,67 +61,9 @@ namespace ige::scene
     Scene::~Scene()
     {
         clear();
-
-        getResourceAddedEvent().removeAllListeners();
-        getResourceRemovedEvent().removeAllListeners();
-
-        getUIResourceAddedEvent().removeAllListeners();
-        getUIResourceRemovedEvent().removeAllListeners();
-
-        if (m_shadowTexture)
-        {
-            m_shadowTexture->DecReference();
-            m_shadowTexture = nullptr;
-        }
-
-        if (m_shadowFBO)
-        {
-            m_shadowFBO->DecReference();
-            m_shadowFBO = nullptr;
-        }
-
-        if (m_shadowEdgeMask)
-        {
-            m_shadowEdgeMask->DecReference();
-            m_shadowEdgeMask = nullptr;
-        }
-
-        if (m_showcase)
-        {
-            if(m_environment)
-                m_showcase->Remove(m_environment);
-            m_showcase->Clear();
-            m_showcase->DecReference();
-            m_showcase = nullptr;
-        }
-
-        if (m_environment)
-        {
-            m_environment->DecReference();
-            m_environment = nullptr;
-        }
-
-        if (m_tweenManager) {
-            m_tweenManager->clean();
-            m_tweenManager = nullptr;
-        }
-
-        if (m_canvasCamera) {
-            m_canvasCamera->DecReference();
-            m_canvasCamera = nullptr;
-        }
-
-        if (m_uiShowcase)
-        {
-            m_uiShowcase->Clear();
-            m_uiShowcase->DecReference();
-            m_uiShowcase = nullptr;
-        }
-
-        ResourceManager::Instance().DeleteDaemon();
     }
 
-    bool Scene::initialize()
+    bool Scene::initialize(bool empty)
     {
         m_environment = ResourceCreator::Instance().NewEnvironmentSet(m_name.c_str(), nullptr);
         m_environment->WaitBuild();
@@ -171,38 +113,41 @@ namespace ige::scene
         getUIResourceAddedEvent().addListener(std::bind(&Scene::onUIResourceAdded, this, std::placeholders::_1));
         getUIResourceRemovedEvent().addListener(std::bind(&Scene::onUIResourceRemoved, this, std::placeholders::_1));
 
-        m_nextObjectID = 2;
-        // Create root object
-        m_root = createRootObject(m_name);
-
-        // Set ambient color
-        m_root->addComponent<AmbientLight>()->setSkyColor({ 0.75f, 0.75f, 0.75f });
-
-        // Set general environment
-        m_root->addComponent<EnvironmentComponent>();
-
-        // Create Canvas Object
-        m_rootUI = createRootObject("UI");
-
-        // Create default camera
-        auto camObj = createObject("Default Camera");
-        camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
-        auto camComp = camObj->addComponent<CameraComponent>("default_camera");
-        camComp->lockOnTarget(false);
-        camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
-
-        // Create default directional light
-        auto directionalLight = createObject("Directional Light");
-        directionalLight->addComponent<DirectionalLight>();
-        directionalLight->getTransform()->setPosition({ 0.f, 5.f, 0.f });
-        directionalLight->getTransform()->setRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
-
-        // Add editor debug
-        if (SceneManager::getInstance()->isEditor())
+        if (!empty)
         {
-            camObj->addComponent<FigureComponent>(GetEditorResource("figures/camera.pyxf"))->setSkipSerialize(true);
-            directionalLight->addComponent<SpriteComponent>(GetEditorResource("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
-        }
+            m_nextObjectID = 2;
+            // Create root object
+            m_root = createRootObject(m_name);
+
+            // Set ambient color
+            m_root->addComponent<AmbientLight>()->setSkyColor({ 0.75f, 0.75f, 0.75f });
+
+            // Set general environment
+            m_root->addComponent<EnvironmentComponent>();
+
+            // Create Canvas Object
+            m_rootUI = createRootObject("UI");
+
+            // Create default camera
+            auto camObj = createObject("Default Camera");
+            camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
+            auto camComp = camObj->addComponent<CameraComponent>("default_camera");
+            camComp->lockOnTarget(false);
+            camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+
+            // Create default directional light
+            auto directionalLight = createObject("Directional Light");
+            directionalLight->addComponent<DirectionalLight>();
+            directionalLight->getTransform()->setPosition({ 0.f, 5.f, 0.f });
+            directionalLight->getTransform()->setRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
+
+            // Add editor debug
+            if (SceneManager::getInstance()->isEditor())
+            {
+                camObj->addComponent<FigureComponent>(GetEditorResource("figures/camera.pyxf"))->setSkipSerialize(true);
+                directionalLight->addComponent<SpriteComponent>(GetEditorResource("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+            }
+        }        
 
         // Tween manager
         m_tweenManager = std::make_shared<TweenManager>();
@@ -221,27 +166,73 @@ namespace ige::scene
 
     void Scene::clear()
     {
+        for (auto& obj : m_objects)
+            obj = nullptr;
+        m_objects.clear();
+
+        getResourceAddedEvent().removeAllListeners();
+        getResourceRemovedEvent().removeAllListeners();
+        getUIResourceAddedEvent().removeAllListeners();
+        getUIResourceRemovedEvent().removeAllListeners();
+        getSerializeFinishedEvent().removeAllListeners();
+
         m_nextObjectID = 0;
         m_activeCamera = nullptr;
-
-        for (auto& obj : m_objects)
-        {
-            obj->removeChildren();
-            obj->setParent(nullptr);
-        }
-
         m_root = nullptr;
-
         m_rootUI = nullptr;
-
         m_canvas = nullptr;
 
-        // Destroy all objects
-        for (auto& obj : m_objects)
+        if (m_shadowTexture)
         {
-            obj = nullptr;
+            m_shadowTexture->DecReference();
+            m_shadowTexture = nullptr;
         }
-        m_objects.clear();
+
+        if (m_shadowFBO)
+        {
+            m_shadowFBO->DecReference();
+            m_shadowFBO = nullptr;
+        }
+
+        if (m_shadowEdgeMask)
+        {
+            m_shadowEdgeMask->DecReference();
+            m_shadowEdgeMask = nullptr;
+        }
+
+        if (m_showcase)
+        {
+            if (m_environment)
+                m_showcase->Remove(m_environment);
+            m_showcase->Clear();
+            m_showcase->DecReference();
+            m_showcase = nullptr;
+        }
+
+        if (m_environment)
+        {
+            m_environment->DecReference();
+            m_environment = nullptr;
+        }
+
+        if (m_tweenManager) {
+            m_tweenManager->clean();
+            m_tweenManager = nullptr;
+        }
+
+        if (m_canvasCamera) {
+            m_canvasCamera->DecReference();
+            m_canvasCamera = nullptr;
+        }
+
+        if (m_uiShowcase)
+        {
+            m_uiShowcase->Clear();
+            m_uiShowcase->DecReference();
+            m_uiShowcase = nullptr;
+        }
+
+        ResourceManager::Instance().DeleteDaemon();
     }
 
     void Scene::setName(const std::string& name)
@@ -622,9 +613,12 @@ namespace ige::scene
         m_directionalLights[idx] = false;
 
         // Reset to default value
-        m_environment->SetDirectionalLampColor(idx, { 0.5f, 0.5f, 0.5f });
-        m_environment->SetDirectionalLampDirection(idx, { 5.f, 10.f, 5.f });
-        m_environment->SetDirectionalLampIntensity(idx, 0.f);
+        if (m_environment)
+        {
+            m_environment->SetDirectionalLampColor(idx, { 0.5f, 0.5f, 0.5f });
+            m_environment->SetDirectionalLampDirection(idx, { 5.f, 10.f, 5.f });
+            m_environment->SetDirectionalLampIntensity(idx, 0.f);
+        }
     }
 
     //! Acquire point light
@@ -925,12 +919,13 @@ namespace ige::scene
     void Scene::from_json(const json& j)
     {
         clear();
+        initialize(true);
+        
         j.at("name").get_to(m_name);
         setPath(j.value("path", std::string()));
 
         auto jRoot = j.at("root");
         m_root = createRootObject(m_name);
-
         m_rootUI = createRootObject("UI");
 
         //m_nextObjectID = 2;

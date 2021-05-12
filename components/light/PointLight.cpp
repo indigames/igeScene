@@ -20,7 +20,8 @@ namespace ige::scene
     //! Destructor
     PointLight::~PointLight()
     {
-        getOwner()->getScene()->releasePointLight(m_index);
+        if(getOwner()->getScene())
+            getOwner()->getScene()->releasePointLight(m_index);
     }
 
     //! Range

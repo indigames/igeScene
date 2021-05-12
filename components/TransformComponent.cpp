@@ -34,9 +34,8 @@ namespace ige::scene
         if (m_parent)
             m_parent->removeObserver(this);
         m_parent = nullptr;
-
-        notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
         m_observers.clear();
+        notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
     }
 
     TransformComponent *TransformComponent::getParent() const
@@ -47,11 +46,16 @@ namespace ige::scene
     //! Set parent transform
     void TransformComponent::setParent(TransformComponent *comp)
     {
-        if (m_parent)
-            m_parent->removeObserver(this);
-        m_parent = comp;
-        if (m_parent)
-            m_parent->addObserver(this);
+        if (comp != nullptr)
+        {
+            if (m_parent)
+                m_parent->removeObserver(this);
+            m_parent = comp;
+            if (m_parent)
+                m_parent->addObserver(this);
+        }
+        else
+            m_parent = nullptr;
     }
 
     void TransformComponent::onUpdate(float dt)
@@ -393,9 +397,10 @@ namespace ige::scene
 
     void TransformComponent::notifyObservers(const ETransformMessage &message)
     {
-        for (auto observer : m_observers)
+        for (const auto& observer : m_observers)
         {
-            observer->onNotified(message);
+            if(observer)
+                observer->onNotified(message);
         }
     }
 

@@ -22,7 +22,8 @@ namespace ige::scene
     //! Destructor
     PhysicConstraint::~PhysicConstraint()
     {
-        getOwner()->getOwner()->getScene()->getSerializeFinishedEvent().removeListener(m_serializeEventId);
+        if(getOwner()->getOwner()->getScene())
+            getOwner()->getOwner()->getScene()->getSerializeFinishedEvent().removeListener(m_serializeEventId);
         destroy();
     }
 
