@@ -13,6 +13,7 @@
 #include "components/CameraComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/FigureComponent.h"
+#include "components/BoneTransform.h"
 #include "components/SpriteComponent.h"
 #include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
@@ -640,6 +641,18 @@ namespace ige::scene
         m_frameAABB = m_bLockedFrameAABB ? m_frameAABB : m_aabbWorld;
     }
 
+    //! Find first child by name
+    SceneObject* SceneObject::findChildByName(const std::string& name)
+    {
+        auto found = std::find_if(m_children.begin(), m_children.end(), [&](auto elem)
+        {
+            return elem->getName() == name;
+        });
+        if (found != m_children.end())
+            return (*found);
+        return nullptr;
+    }
+
     //! Serialize
     void SceneObject::to_json(json &j)
     {
@@ -711,6 +724,8 @@ namespace ige::scene
                 comp = addComponent<CameraComponent>(val.at("name"));
             else if (key == "EnvironmentComponent")
                 comp = addComponent<EnvironmentComponent>();
+            else if (key == "BoneTransform")
+                comp = addComponent<BoneTransform>();
             else if (key == "FigureComponent")
                 comp = addComponent<FigureComponent>(val.at("path"));
             else if (key == "SpriteComponent")

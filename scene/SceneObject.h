@@ -62,6 +62,9 @@ namespace ige::scene
         //! Removes all children
         virtual void removeChildren();
 
+        //! Find first child by name
+        virtual SceneObject* findChildByName(const std::string& name);
+
         //! Add a component
         virtual void addComponent(const std::shared_ptr<Component> &component);
 
