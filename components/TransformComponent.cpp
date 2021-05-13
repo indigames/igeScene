@@ -437,5 +437,6 @@ namespace ige::scene
         setRotation(j.value("rot", Quat()));
         setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
         Component::from_json(j);
+        onUpdate(0.f); // pre-warm
     }
 } // namespace ige::scene

@@ -30,11 +30,12 @@ namespace ige::scene
     PhysicManager::PhysicManager(SceneObject& owner, int numIteration, bool deformable)
         : Component(owner), m_numIteration(numIteration), m_bDeformable(deformable)
     {
-        initialize();
     }
 
     bool PhysicManager::initialize()
     {
+        clear();
+
         if (m_bDeformable)
         {
             m_collisionConfiguration = std::make_unique<btSoftBodyRigidBodyCollisionConfiguration>();
@@ -66,6 +67,13 @@ namespace ige::scene
         m_world->getSolverInfo().m_splitImpulse = false;
         m_world->setSynchronizeAllMotionStates(true);
 
+        // Set collision callback
+        setCollisionCallback();
+
+        // Init debug renderer
+        m_debugRenderer = std::make_unique<BulletDebugRender>();
+        m_world->setDebugDrawer(m_debugRenderer.get());
+
         // Register event listeners
         PhysicObject::getOnCreatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onCreated), this, std::placeholders::_1));
         PhysicObject::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicObject*)>(&PhysicManager::onDestroyed), this, std::placeholders::_1));
@@ -76,13 +84,6 @@ namespace ige::scene
         PhysicConstraint::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicConstraint*)>(&PhysicManager::onActivated), this, std::placeholders::_1));
         PhysicConstraint::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicConstraint*)>(&PhysicManager::onDeactivated), this, std::placeholders::_1));
 
-        // Set collision callback
-        setCollisionCallback();
-
-        // Init debug renderer
-        m_debugRenderer = std::make_unique<BulletDebugRender>();
-        m_world->setDebugDrawer(m_debugRenderer.get());
-
         return true;
     }
 
@@ -90,7 +91,11 @@ namespace ige::scene
     PhysicManager::~PhysicManager()
     {
         clear();
+    }
 
+    //! Clear world
+    void PhysicManager::clear()
+    {
         // Unregister event listeners
         PhysicObject::getOnCreatedEvent().removeAllListeners();
         PhysicObject::getOnDestroyedEvent().removeAllListeners();
@@ -101,6 +106,31 @@ namespace ige::scene
         PhysicConstraint::getOnActivatedEvent().removeAllListeners();
         PhysicConstraint::getOnDeactivatedEvent().removeAllListeners();
 
+        // Destroy world
+        if (m_world)
+        {
+            auto world = ((btDiscreteDynamicsWorld*)m_world.get());
+            for (int i = world->getNumCollisionObjects() - 1; i >= 0; i--)
+            {
+                auto obj = world->getCollisionObjectArray()[i];
+                world->removeCollisionObject(obj);
+            }
+
+            for (int i = world->getNumConstraints() - 1; i >= 0; i--)
+            {
+                auto obj = world->getConstraint(i);
+                world->removeConstraint(obj);
+            }
+
+            for (auto it = m_vehicles.begin(); it != m_vehicles.end(); it++)
+            {
+                world->removeVehicle((btRaycastVehicle*)((*it).get()));
+            }
+        }
+
+        m_vehicles.clear();
+        m_collisionEvents.clear();
+
         m_collisionConfiguration = nullptr;
         m_dispatcher = nullptr;
         m_broadphase = nullptr;
@@ -110,30 +140,6 @@ namespace ige::scene
         m_debugRenderer = nullptr;
     }
 
-    //! Clear world
-    void PhysicManager::clear()
-    {
-        auto world = ((btDiscreteDynamicsWorld *)m_world.get());
-        for (int i = world->getNumCollisionObjects() - 1; i >= 0; i--)
-        {
-            auto obj = world->getCollisionObjectArray()[i];
-            world->removeCollisionObject(obj);
-        }
-
-        for (int i = world->getNumConstraints() - 1; i >= 0; i--)
-        {
-            auto obj = world->getConstraint(i);
-            world->removeConstraint(obj);
-        }
-
-        for (auto it = m_vehicles.begin(); it != m_vehicles.end(); it++)
-        {
-            world->removeVehicle((btRaycastVehicle *)((*it).get()));
-        }
-        m_vehicles.clear();
-        m_collisionEvents.clear();
-    }
-
 
     // Set deformable
     void PhysicManager::setDeformable(bool deformable)
@@ -141,8 +147,15 @@ namespace ige::scene
         if (m_bDeformable != deformable)
         {
             m_bDeformable = deformable;
-            // TODO: recreate world
         }
+    }
+
+    // Set gravity
+    void PhysicManager::setGravity(const btVector3& gravity)
+    {
+        m_gravity = gravity;
+        if (m_world)
+            m_world->setGravity(m_gravity);
     }
 
     //! Update
@@ -160,7 +173,7 @@ namespace ige::scene
             getWorld()->debugDrawWorld();
 
         // Do GC
-        if(getDeformableWorld())
+        if(isDeformable() && getDeformableWorld())
             getDeformableWorld()->getWorldInfo().m_sparsesdf.GarbageCollect();
     }
 
@@ -463,5 +476,6 @@ namespace ige::scene
         setGravity(PhysicHelper::to_btVector3(j.value("gravity", Vec3(0.f, -9.81f, 0.f))));
         setShowDebug(j.value("debug", false));
         Component::from_json(j);
+        initialize();
     }
 } // namespace ige::scene

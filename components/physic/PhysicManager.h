@@ -124,7 +124,7 @@ namespace ige::scene
 
         //! Gravity
         const btVector3 &getGravity() const { return m_gravity; }
-        void setGravity(const btVector3 &gravity) { m_gravity = gravity; }
+        void setGravity(const btVector3& gravity);
 
         //! Render debug
         bool isShowDebug() const { return m_bShowDebug; }
