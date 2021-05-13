@@ -421,39 +421,13 @@ namespace ige::scene
 
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id)
     {
-        //! Interpolation Search   
-        uint64_t cnt = m_objects.size();
-        if (cnt > 0) {
-            uint64_t l = 0;
-            uint64_t r = cnt - 1;
-            uint64_t o = -1;
-            while (m_objects[r]->getId() != m_objects[l]->getId() 
-                && id >= m_objects[l]->getId() && id <= m_objects[r]->getId())
-            {
-                uint64_t mid = l + (r - 1) * (id - m_objects[l]->getId()) / (m_objects[r]->getId() - m_objects[l]->getId());
-                if (mid >= cnt || mid == o) {
-                    break;
-                }
-                if (m_objects[mid]->getId() < id) {
-                    l = mid + 1;
-                }
-                else if (m_objects[mid]->getId() > id) {
-                    r = mid - 1;
-                }
-                else {
-                    if (mid > 0 && m_objects[mid - 1]->getId() == id) {
-                        r = mid - 1;
-                        return m_objects[r];
-                    }
-                    else {
-                        return m_objects[mid];
-                    }
-                }
-                o = mid;
-            }
-            if (m_objects[l]->getId() == id)
-                return m_objects[l];
-        }
+        // Perform binary search for best performance, 'cause m_objects sorted by id.
+        auto found = std::lower_bound(m_objects.begin(), m_objects.end(), id, [&](auto elem, int id)
+        {
+            return elem->getId() < id;
+        });
+        if (found != m_objects.end())
+            return std::dynamic_pointer_cast<SceneObject>(*found);
         return nullptr;
     }
 
