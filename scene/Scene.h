@@ -120,6 +120,10 @@ namespace ige::scene
         Event<Resource*>& getUIResourceRemovedEvent() { return m_uiResourceRemovedEvent; }
         Event<Scene*>& getSerializeFinishedEvent() { return m_serializeFinishedEvent; }
 
+        static Event<SceneObject*>& getTargetAddedEvent() { return m_targetAddedEvent; }
+        static Event<SceneObject*>& getTargetRemovedEvent() { return m_targetRemovedEvent; }
+        static Event<>& getTargetClearedEvent() { return m_targetClearedEvent; }
+
         //! Resource added/removed event
         void onResourceAdded(Resource* resource);
         void onResourceRemoved(Resource* resource);
@@ -164,7 +168,20 @@ namespace ige::scene
         const Vec2& getWindowSize() const { return m_windowSize; }
         void setWindowSize(const Vec2& size) { m_windowSize = size; }
 
+        //! Get tween manager
         std::shared_ptr<TweenManager> getTweenManager() const;
+
+        //! Get targeted objects
+        const std::vector<SceneObject*>& getTargets() const { return m_targets; }
+
+        //! Add target
+        void addTarget(SceneObject* target, bool clear = false);
+
+        //! Remove target
+        void removeTarget(SceneObject* target);
+
+        //! Remove all target
+        void clearTargets();
 
     protected:
         //! Create root Objects
@@ -202,11 +219,18 @@ namespace ige::scene
         //! Main ShowCase
         Event<Resource*> m_resourceAddedEvent;
         Event<Resource*> m_resourceRemovedEvent;
+
         //! UI ShowCase
         Event<Resource*> m_uiResourceAddedEvent;
         Event<Resource*> m_uiResourceRemovedEvent;
 
+        //! Serialize event
         Event<Scene*> m_serializeFinishedEvent;
+
+        //! Targeted event
+        static Event<SceneObject*> m_targetAddedEvent;
+        static Event<SceneObject*> m_targetRemovedEvent;
+        static Event<> m_targetClearedEvent;
 
         //! Cache active camera
         CameraComponent* m_activeCamera = nullptr;
@@ -244,10 +268,13 @@ namespace ige::scene
         //! Cache window size
         Vec2 m_windowSize = {-1.f, -1.f};
 
-        //!TweenManager
+        //! TweenManager
         std::shared_ptr<TweenManager> m_tweenManager;
 
-        //!Capture flag
+        //! Capture flag
         bool m_raycastCapture;
+
+        //! Targeted objects
+        std::vector<SceneObject*> m_targets = {};
     };
 }

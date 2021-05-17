@@ -51,6 +51,9 @@ namespace ige::scene
         7,6,2, 7,2,3
     };
 
+    Event<SceneObject*> Scene::m_targetAddedEvent;
+    Event<SceneObject*> Scene::m_targetRemovedEvent;
+    Event<> Scene::m_targetClearedEvent;
 
     Scene::Scene(const std::string& name)
         : m_name(name)
@@ -166,6 +169,8 @@ namespace ige::scene
 
     void Scene::clear()
     {
+        clearTargets();
+
         for (auto& obj : m_objects)
             obj = nullptr;
         m_objects.clear();
@@ -865,6 +870,40 @@ namespace ige::scene
         return m_tweenManager;
     }
 
+    //! Add target
+    void Scene::addTarget(SceneObject* target, bool clear)
+    {
+        if (clear) clearTargets();
+
+        if (target)
+        {
+            target->setSelected(true);
+            m_targets.push_back(target);
+            getTargetAddedEvent().invoke(target);
+        }        
+    }
+
+    //! Remove target
+    void Scene::removeTarget(SceneObject* target)
+    {
+        auto itr = std::find(m_targets.begin(), m_targets.end(), target);
+        if (itr != m_targets.end())
+        {
+            (*itr)->setSelected(false);
+            m_targets.erase(itr);
+            getTargetRemovedEvent().invoke(target);
+        }
+    }
+
+    //! Remove all target
+    void Scene::clearTargets()
+    {
+        for (auto& target : m_targets)
+            if (target) target->setSelected(false);
+        m_targets.clear();
+        getTargetClearedEvent().invoke();
+    }
+
     //! Serialize
     void Scene::to_json(json& j) const
     {
@@ -935,5 +974,8 @@ namespace ige::scene
         if (m_canvas == nullptr) {
             m_canvas = findObjectByName("Canvas");
         }
+
+        // Default to select the root node
+        addTarget(m_root.get());
     }
 }
