@@ -144,6 +144,14 @@ void main()
             m_lines.push_back(DebugLine(start, end, color));
     }
 
+    void ShapeDrawer::drawRect(const Vec2 &start, const Vec2 &end, const Vec3 &color)
+    {     
+        m_lines.push_back(DebugLine({ start.X(), start.Y(), 1.f }, {end.X(), start.Y(), 1.f}, color));
+        m_lines.push_back(DebugLine({ end.X(), start.Y(), 1.f }, {end.X(), end.Y(), 1.f}, color));
+        m_lines.push_back(DebugLine({ end.X(), end.Y(), 1.f }, { start.X(), end.Y(), 1.f}, color));
+        m_lines.push_back(DebugLine({ start.X(), end.Y(), 1.f }, { start.X(), start.Y(), 1.f}, color));
+    }
+
     void ShapeDrawer::flush()
     {
         auto numVertices = m_lines.size() * 2;

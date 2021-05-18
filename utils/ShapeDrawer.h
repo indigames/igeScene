@@ -32,6 +32,7 @@ namespace ige::scene
         static uint32_t loadShaders(const char* vShader, const char* fShader);
         static void setViewProjectionMatrix(const Mat4 &viewProjection);
         static void drawLine(const Vec3 &start, const Vec3 &end, const Vec3 &color = { 0.f, 1.f, 0.f });
+        static void drawRect(const Vec2 &start, const Vec2 &end, const Vec3 &color = { 0.f, 1.f, 0.f });
         static void flush();
     };
 } // namespace ige::scene

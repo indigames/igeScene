@@ -588,9 +588,12 @@ namespace ige::scene
     {
         // Ignore Canvas and root object
         if (getComponent<Canvas>() != nullptr || getParent() == nullptr)
-            m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
-        else // Set default AABB
-            m_aabb = AABBox({ -0.5f, -0.5f, -0.5f }, { 0.5f, 0.5f, 0.5f });
+        {
+            m_frameAABB = m_aabbWorld = m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
+            return;
+        }
+
+        m_aabb = AABBox({ -0.5f, -0.5f, -0.5f }, { 0.5f, 0.5f, 0.5f });
 
         if (getComponent<FigureComponent>() != nullptr)
         {

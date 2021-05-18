@@ -166,7 +166,10 @@ namespace ige::scene
 
         //! Window size
         const Vec2& getWindowSize() const { return m_windowSize; }
-        void setWindowSize(const Vec2& size) { m_windowSize = size; }
+        void setWindowSize(const Vec2& size);
+
+        //! Screen coordinate to client coordinate
+        Vec2 screenToClient(const Vec2& pos);
 
         //! Get tween manager
         std::shared_ptr<TweenManager> getTweenManager() const;

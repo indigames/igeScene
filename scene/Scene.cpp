@@ -164,6 +164,7 @@ namespace ige::scene
         m_canvasCamera->SetOrthographicProjection(true);
         m_canvasCamera->SetWidthBase(false);
 
+        setWindowSize({ -1.f, -1.f });
         return true;
     }
 
@@ -690,6 +691,23 @@ namespace ige::scene
         }
     }
 
+    void Scene::setWindowSize(const Vec2& size)
+    {
+        m_windowSize[0] = size.X() > 0 ? size.X() : SystemInfo::Instance().GetGameW();
+        m_windowSize[1] = size.Y() > 0 ? size.Y() : SystemInfo::Instance().GetGameH();
+    }
+
+    Vec2 Scene::screenToClient(const Vec2& pos)
+    {
+        auto wSize = getWindowSize();
+        auto wPos = getWindowPosition();
+        auto x = pos.X() - wPos.X() / 2.f;
+        auto y = pos.Y() + wPos.Y() / 2.f;
+        x = x + (SystemInfo::Instance().GetGameW() - (wSize.X() + wPos.X())) / 2.f;
+        y = y - (SystemInfo::Instance().GetGameH() - (wSize.Y() + wPos.Y())) / 2.f;
+        return Vec2(x, y);
+    }
+
     //! Raycast
     std::pair<SceneObject*, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance, bool forceRaycast)
     {
@@ -700,22 +718,8 @@ namespace ige::scene
         if (m_raycastCapture && !forceRaycast)
             return hit;
 
-        auto size = getWindowSize();
-        float w = size.X() > 0 ? size.X() : SystemInfo::Instance().GetGameW();
-        float h = size.Y() > 0 ? size.Y() : SystemInfo::Instance().GetGameH();
-
-        auto pos = getWindowPosition();
-        float dx = pos.X();
-        float dy = pos.Y();
-
-        float x = screenPos.X() - dx / 2.f;
-        float y = screenPos.Y() + dy / 2.f;
-
-        if(size.X() > 0)
-            x = x + (SystemInfo::Instance().GetGameW() - (w + dx)) / 2.f;
-
-        if(size.Y() > 0)
-            y = y - (SystemInfo::Instance().GetGameH() - (h + dy)) / 2.f;
+        auto wSize = getWindowSize();
+        auto pos = screenToClient(screenPos);
 
         Mat4 proj;
         camera->GetProjectionMatrix(proj);
@@ -724,17 +728,10 @@ namespace ige::scene
         camera->GetViewInverseMatrix(viewInv);
 
         float distance, minDistance = maxDistance;
-        auto ray = RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
+        auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
         for (const auto& obj : m_objects)
         {
-            const auto& transform = obj->getTransform();
-            auto aabbTransform = Mat4::IdentityMat();
-            vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
-            vmath_mat_appendScale(aabbTransform.P(), transform->getWorldScale().P(), 4, 4, aabbTransform.P());
-            auto& m_aabb = obj->getAABB();
-            auto aabb = m_aabb.Transform(aabbTransform);
-
-            if (obj && RayOBBChecker::checkIntersect(aabb, obj->getTransform()->getWorldMatrix(), distance, maxDistance))
+            if (obj && RayOBBChecker::checkIntersect(obj->getAABB(), obj->getTransform()->getWorldMatrix(), distance, maxDistance))
             {
                 if (minDistance > distance)
                 {
@@ -744,7 +741,6 @@ namespace ige::scene
                 }
             }
         }
-
         return hit;
     }
 
@@ -753,22 +749,9 @@ namespace ige::scene
         std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());
         if (!m_canvasCamera)
             return hit;
-        auto size = getWindowSize();
-        float w = size.X() > 0 ? size.X() : SystemInfo::Instance().GetGameW();
-        float h = size.Y() > 0 ? size.Y() : SystemInfo::Instance().GetGameH();
 
-        auto pos = getWindowPosition();
-        float dx = pos.X();
-        float dy = pos.Y();
-
-        float x = screenPos.X() - dx / 2.f;
-        float y = screenPos.Y() + dy / 2.f;
-
-        if (size.X() > 0)
-            x = x + (SystemInfo::Instance().GetGameW() - (w + dx)) / 2.f;
-
-        if (size.Y() > 0)
-            y = y - (SystemInfo::Instance().GetGameH() - (h + dy)) / 2.f;
+        auto wSize = getWindowSize();
+        auto pos = screenToClient(screenPos);
 
         Mat4 proj;
         m_canvasCamera->GetProjectionMatrix(proj);
@@ -776,7 +759,7 @@ namespace ige::scene
         Mat4 viewInv;
         m_canvasCamera->GetViewInverseMatrix(viewInv);
 
-        auto ray = RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
+        auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
         float distance, minDistance = 100.0f;
 
         bool m_isEnd = false;
@@ -798,22 +781,8 @@ namespace ige::scene
         Vec3 hit;
         if (!m_canvasCamera)
             return hit;
-        auto size = getWindowSize();
-        float w = size.X() > 0 ? size.X() : SystemInfo::Instance().GetGameW();
-        float h = size.Y() > 0 ? size.Y() : SystemInfo::Instance().GetGameH();
-
-        auto pos = getWindowPosition();
-        float dx = pos.X();
-        float dy = pos.Y();
-
-        float x = screenPos.X() - dx / 2.f;
-        float y = screenPos.Y() + dy / 2.f;
-
-        if (size.X() > 0)
-            x = x + (SystemInfo::Instance().GetGameW() - (w + dx)) / 2.f;
-
-        if (size.Y() > 0)
-            y = y - (SystemInfo::Instance().GetGameH() - (h + dy)) / 2.f;
+        auto wSize = getWindowSize();
+        auto pos = screenToClient(screenPos);
 
         Mat4 proj;
         m_canvasCamera->GetProjectionMatrix(proj);
@@ -821,7 +790,7 @@ namespace ige::scene
         Mat4 viewInv;
         m_canvasCamera->GetViewInverseMatrix(viewInv);
 
-        auto ray = RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
+        auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
         float distance, minDistance = 100.0f;
 
         bool m_isEnd = false;
@@ -837,15 +806,10 @@ namespace ige::scene
         if (target == nullptr) return hit;
         SceneObject* obj = const_cast<SceneObject*>(target);
         const auto& transform = obj->getTransform();
-        auto aabbTransform = Mat4::IdentityMat();
-        vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
-        vmath_mat_appendScale(aabbTransform.P(), transform->getWorldScale().P(), 4, 4, aabbTransform.P());
-        auto &m_aabb = obj->getAABB();
-        auto aabb = m_aabb.Transform(aabbTransform);
         float distance = 100.f;
         if (target->isRaycastTarget()) 
         {
-            if (RayOBBChecker::checkIntersect(aabb, transform->getWorldMatrix(), distance, 100.f))
+            if (RayOBBChecker::checkIntersect(obj->getAABB(), transform->getWorldMatrix(), distance, 100.f))
             {
                 hit.first = obj;
                 hit.second = ray.first + ray.second * distance;
