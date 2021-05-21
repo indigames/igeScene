@@ -22,4 +22,9 @@ namespace ige::scene
     protected:
         std::string unique(const std::string& str);
     };
+
+    Vec3 ScreenToWorld(const Vec2& screenPos, const Vec2& windowSize, Camera* cam = nullptr, float wZ = 0.f);
+    Vec2 WorldToScreen(Vec3 world, const Vec2& windowSize, Camera* cam);
+    Vec4 AabbToScreenRect(const AABBox& aabb, const Vec2& windowSize, Camera* cam);
+    bool RectInside(const Vec4& r1, const Vec4& r2);
 }

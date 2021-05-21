@@ -46,12 +46,14 @@ void main()
 )";
 
     std::vector<DebugLine> m_lines;
+    std::vector<DebugLine> m_lines2D;
     GLuint m_lineProgramId;
     GLint m_viewProjectionLocation;
     GLuint m_vertexArrayID;
     GLuint m_positionBufferID;
     GLuint m_colorBufferID;
     Mat4 m_viewProjection;
+    Mat4 m_viewProjection2D;
 
     uint32_t ShapeDrawer::loadShaders(const char* vertexShaderCode, const char* fragmentShaderCode)
     {
@@ -137,6 +139,11 @@ void main()
     {
         m_viewProjection = viewProjection;
     }
+    
+    void ShapeDrawer::setViewProjectionMatrix2D(const Mat4 &viewProjection)
+    {
+        m_viewProjection2D = viewProjection;
+    }
 
     void ShapeDrawer::drawLine(const Vec3 &start, const Vec3 &end, const Vec3 &color)
     {
@@ -144,12 +151,93 @@ void main()
             m_lines.push_back(DebugLine(start, end, color));
     }
 
-    void ShapeDrawer::drawRect(const Vec2 &start, const Vec2 &end, const Vec3 &color)
-    {     
-        m_lines.push_back(DebugLine({ start.X(), start.Y(), 1.f }, {end.X(), start.Y(), 1.f}, color));
-        m_lines.push_back(DebugLine({ end.X(), start.Y(), 1.f }, {end.X(), end.Y(), 1.f}, color));
-        m_lines.push_back(DebugLine({ end.X(), end.Y(), 1.f }, { start.X(), end.Y(), 1.f}, color));
-        m_lines.push_back(DebugLine({ start.X(), end.Y(), 1.f }, { start.X(), start.Y(), 1.f}, color));
+    void ShapeDrawer::drawRect(const Vec3&start, const Vec3&end, const Vec3 &color)
+    {
+        auto z = (start.Z() + end.Z()) * 0.5f;
+        m_lines.push_back(DebugLine({ start.X(), start.Y(), z }, {end.X(), start.Y(), z}, color));
+        m_lines.push_back(DebugLine({ end.X(), start.Y(), z }, {end.X(), end.Y(), z}, color));
+        m_lines.push_back(DebugLine({ end.X(), end.Y(), z }, { start.X(), end.Y(), z}, color));
+        m_lines.push_back(DebugLine({ start.X(), end.Y(), z }, { start.X(), start.Y(), z}, color));
+    }
+    
+    void ShapeDrawer::drawLine2D(const Vec3 &start, const Vec3 &end, const Vec3 &color)
+    {
+        if(m_lines2D.size() < MAX_LINES)
+            m_lines2D.push_back(DebugLine(start, end, color));
+    }
+
+    void ShapeDrawer::drawRect2D(const Vec3&start, const Vec3&end, const Vec3 &color)
+    {
+        auto z = (start.Z() + end.Z()) * 0.5f;
+        m_lines2D.push_back(DebugLine({ start.X(), start.Y(), z }, {end.X(), start.Y(), z}, color));
+        m_lines2D.push_back(DebugLine({ end.X(), start.Y(), z }, {end.X(), end.Y(), z}, color));
+        m_lines2D.push_back(DebugLine({ end.X(), end.Y(), z }, { start.X(), end.Y(), z}, color));
+        m_lines2D.push_back(DebugLine({ start.X(), end.Y(), z }, { start.X(), start.Y(), z}, color));
+    }
+
+    void ShapeDrawer::flush2D()
+    {
+        auto numVertices = m_lines2D.size() * 2;
+        auto linePositions = new GLfloat[numVertices * 3];
+        auto lineColors = new GLfloat[numVertices * 3];
+
+        auto linePos = linePositions;
+        auto lineCol = lineColors;
+
+        for (unsigned i = 0; i < m_lines2D.size(); ++i)
+        {
+            const auto& line = m_lines2D[i];
+            linePos[0] = line.start[0];
+            linePos[1] = line.start[1];
+            linePos[2] = line.start[2];
+            linePos[3] = line.end[0];
+            linePos[4] = line.end[1];
+            linePos[5] = line.end[2];
+            linePos += 6;
+
+            lineCol[0] = line.color[0];
+            lineCol[1] = line.color[1];
+            lineCol[2] = line.color[2];
+            lineCol[3] = line.color[0];
+            lineCol[4] = line.color[1];
+            lineCol[5] = line.color[2];
+            lineCol += 6;
+        }
+
+        bool depthBackup = glIsEnabled(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
+        glUseProgram(m_lineProgramId);
+        glUniformMatrix4fv(m_viewProjectionLocation, 1, GL_FALSE, m_viewProjection2D.P());
+
+        glBindBuffer(GL_ARRAY_BUFFER, m_positionBufferID);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices * 3 * sizeof(GLfloat), linePositions);
+
+        glBindBuffer(GL_ARRAY_BUFFER, m_colorBufferID);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices * 3 * sizeof(GLfloat), lineColors);
+
+        glBindVertexArray(m_vertexArrayID);
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, m_positionBufferID);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, m_colorBufferID);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+        glLineWidth(1.f);
+        glDrawArrays(GL_LINES, 0, numVertices);
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        glBindVertexArray(0);
+
+        glUseProgram(0);
+        if (depthBackup)
+            glEnable(GL_DEPTH_TEST);
+
+        delete[] linePositions;
+        delete[] lineColors;
+        m_lines2D.clear();
     }
 
     void ShapeDrawer::flush()
@@ -201,14 +289,12 @@ void main()
         glBindBuffer(GL_ARRAY_BUFFER, m_colorBufferID);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glLineWidth(1.f);
         glDrawArrays(GL_LINES, 0, numVertices);
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glBindVertexArray(0);
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         glUseProgram(0);
         if (depthBackup)
@@ -217,6 +303,8 @@ void main()
         delete[] linePositions;
         delete[] lineColors;
         m_lines.clear();
+
+        ShapeDrawer::flush2D();
     }
 
 } // namespace ige::scene

@@ -186,6 +186,9 @@ namespace ige::scene
         //! Remove all target
         void clearTargets();
 
+        //! Return the first selected object
+        std::shared_ptr<SceneObject> getFirstTarget() { return findObjectById(m_firstTargetId); }
+
     protected:
         //! Create root Objects
         virtual std::shared_ptr<SceneObject> createRootObject(const std::string& name = "");
@@ -279,5 +282,6 @@ namespace ige::scene
 
         //! Targeted objects
         std::vector<SceneObject*> m_targets = {};
+        uint64_t m_firstTargetId = (uint64_t)-1;
     };
 }

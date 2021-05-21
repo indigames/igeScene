@@ -360,4 +360,107 @@ namespace ige::scene
             pyxie::PYXIE_FREE(bitmap2);
         }
     }
+
+    Vec3 ScreenToWorld(const Vec2& screenPos, const Vec2& windowSize, Camera* cam, float wZ)
+    {
+        if (cam == nullptr)
+            return Vec3(screenPos, wZ);
+
+        Mat4 proj, invView;
+        cam->GetProjectionMatrix(proj);
+        cam->GetViewInverseMatrix(invView);
+        auto invProj = proj.Inverse();
+
+        auto w = windowSize.X();
+        auto h = windowSize.Y();
+        auto x = screenPos.X() / w * 2;
+        auto y = screenPos.Y() / h * 2;
+
+        auto pos = Vec4(x, y, 0.f, 1.f);
+        auto npos = invProj * pos;
+        npos = invView * npos;
+        if (npos[3])
+        {
+            npos[0] /= npos[3];
+            npos[1] /= npos[3];
+            npos[2] /= npos[3];
+            npos[3] = 1.f;
+        }
+
+        pos = Vec4(x, y, 1.f, 1.f);
+        auto fpos = invProj * pos;
+        fpos = invView * fpos;
+        if (fpos[3])
+        {
+            fpos[0] /= fpos[3];
+            fpos[1] /= fpos[3];
+            fpos[2] /= fpos[3];
+            fpos[3] = 1.f;
+        }
+
+        auto dir = fpos - npos;
+        dir.Normalize();
+        auto pos4 = (npos + (dir * (npos[3] - wZ)));
+        return { pos4[0], pos4[1], pos4[2] };
+    }
+
+    Vec2 WorldToScreen(Vec3 world, const Vec2& windowSize, Camera* cam)
+    {
+        Mat4 projMat;
+        cam->GetProjectionMatrix(projMat);
+
+        Mat4 viewMat;
+        cam->GetViewInverseMatrix(viewMat);
+        viewMat = viewMat.Inverse();
+
+        auto pos = projMat * viewMat * Vec4(world, 1.f);
+        if (pos[3])
+        {
+            pos[0] /= pos[3];
+            pos[1] /= pos[3];
+            pos[2] /= pos[3];
+        }
+        auto w = windowSize.X();
+        auto h = windowSize.Y();
+        return Vec2(pos[0] * w * 0.5f, pos[1] * h * 0.5f);
+    }
+
+    Vec4 AabbToScreenRect(const AABBox& aabb, const Vec2& windowSize, Camera* cam)
+    {
+        auto cen = aabb.getCenter();
+        auto ext = aabb.getExtent() * 0.5f;
+        auto extentPoints = new Vec2[8]
+        {
+            WorldToScreen(Vec3(cen[0] - ext[0], cen[1] - ext[1], cen[2] - ext[2]), windowSize, cam),
+            WorldToScreen(Vec3(cen[0] + ext[0], cen[1] - ext[1], cen[2] - ext[2]), windowSize, cam),
+            WorldToScreen(Vec3(cen[0] - ext[0], cen[1] - ext[1], cen[2] + ext[2]), windowSize, cam),
+            WorldToScreen(Vec3(cen[0] + ext[0], cen[1] - ext[1], cen[2] + ext[2]), windowSize, cam),
+            WorldToScreen(Vec3(cen[0] - ext[0], cen[1] + ext[1], cen[2] - ext[2]), windowSize, cam),
+            WorldToScreen(Vec3(cen[0] + ext[0], cen[1] + ext[1], cen[2] - ext[2]), windowSize, cam),
+            WorldToScreen(Vec3(cen[0] - ext[0], cen[1] + ext[1], cen[2] + ext[2]), windowSize, cam),
+            WorldToScreen(Vec3(cen[0] + ext[0], cen[1] + ext[1], cen[2] + ext[2]), windowSize, cam)
+        };
+
+        auto minX = extentPoints[0][0];
+        auto minY = extentPoints[0][1];
+
+        auto maxX = extentPoints[0][0];
+        auto maxY = extentPoints[0][1];
+
+        for (int i = 0; i < 8; ++i)
+        {
+            auto v = extentPoints[i];
+            if (v[0] < minX) minX = v[0];
+            if (v[1] < minY) minY = v[1];
+            if (maxX < v[0]) maxX = v[0];
+            if (maxY < v[1]) maxY = v[1];
+        }
+
+        return Vec4(minX, minY, maxX, maxY);
+    }
+
+    bool RectInside(const Vec4& r1, const Vec4& r2)
+    {
+        return (r2[0] >= r1[0] && r2[2] <= r1[2] && r2[1] >= r1[1] && r2[3] <= r1[3]);
+    }
 }

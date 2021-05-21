@@ -603,6 +603,13 @@ namespace ige::scene
                 Vec3 aabbMin, aabbMax;
                 figureComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
                 m_aabb = { aabbMin, aabbMax };
+                if (m_aabb.getVolume() == 0)
+                {
+                    if ((aabbMax[0] - aabbMin[0]) == 0) aabbMax[0] = 0.01f;
+                    if ((aabbMax[1] - aabbMin[1]) == 0) aabbMax[1] = 0.01f;
+                    if ((aabbMax[2] - aabbMin[2]) == 0) aabbMax[2] = 0.01f;
+                    m_aabb = { aabbMin, aabbMax };
+                }
             }
         }
         else if (getComponent<SpriteComponent>() != nullptr && !isGUIObject())

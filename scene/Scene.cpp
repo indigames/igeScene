@@ -165,6 +165,8 @@ namespace ige::scene
         m_canvasCamera->SetWidthBase(false);
 
         setWindowSize({ -1.f, -1.f });
+
+        m_firstTargetId = (uint64_t)-1;
         return true;
     }
 
@@ -701,10 +703,10 @@ namespace ige::scene
     {
         auto wSize = getWindowSize();
         auto wPos = getWindowPosition();
-        auto x = pos.X() - wPos.X() / 2.f;
-        auto y = pos.Y() + wPos.Y() / 2.f;
-        x = x + (SystemInfo::Instance().GetGameW() - (wSize.X() + wPos.X())) / 2.f;
-        y = y - (SystemInfo::Instance().GetGameH() - (wSize.Y() + wPos.Y())) / 2.f;
+        auto x = pos.X() - wPos.X() * 0.5f;
+        auto y = pos.Y() + wPos.Y() * 0.5f;
+        x = x + (SystemInfo::Instance().GetGameW() - (wSize.X() + wPos.X())) * 0.5f;
+        y = y - (SystemInfo::Instance().GetGameH() - (wSize.Y() + wPos.Y())) * 0.5f;
         return Vec2(x, y);
     }
 
@@ -841,8 +843,11 @@ namespace ige::scene
 
         if (target)
         {
+            if (m_targets.empty()) 
+                m_firstTargetId = target->getId();
             target->setSelected(true);
-            m_targets.push_back(target);
+            auto itr = std::find(m_targets.begin(), m_targets.end(), target);
+            if (itr == m_targets.end()) m_targets.push_back(target);
             getTargetAddedEvent().invoke(target);
         }        
     }
@@ -853,7 +858,7 @@ namespace ige::scene
         auto itr = std::find(m_targets.begin(), m_targets.end(), target);
         if (itr != m_targets.end())
         {
-            (*itr)->setSelected(false);
+            target->setSelected(false);
             m_targets.erase(itr);
             getTargetRemovedEvent().invoke(target);
         }
