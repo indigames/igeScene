@@ -50,6 +50,9 @@ namespace ige::scene
         // Get parent
         virtual SceneObject *getParent() const;
 
+        // Check relative recursive
+        virtual bool isRelative(uint64_t id);
+
         //! Get children list
         virtual const std::vector<SceneObject*> &getChildren() const;
 
@@ -91,6 +94,10 @@ namespace ige::scene
 
         //! Get components count
         virtual size_t getComponentsCount();
+
+        //! Check component by type
+        template <typename T>
+        inline bool hasComponent();
 
         //! Get component by type
         template <typename T>
@@ -290,6 +297,20 @@ namespace ige::scene
 
     };
 
+    //! Check component by type
+    template <typename T>
+    inline bool SceneObject::hasComponent()
+    {
+        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
+
+        for (auto it = m_components.begin(); it != m_components.end(); ++it)
+        {
+            auto result = std::dynamic_pointer_cast<T>(*it);
+            if (result) return true;
+        }
+        return false;
+    }
+
     //! Get component by type
     template <typename T>
     inline std::shared_ptr<T> SceneObject::getComponent()
@@ -310,9 +331,6 @@ namespace ige::scene
     inline std::shared_ptr<T> SceneObject::addComponent(Args &&... args)
     {
         static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
-        auto found = getComponent<T>();
-        if (found)
-            return found;
         auto instance = std::make_shared<T>(*this, args...);
         addComponent(instance);
         return instance;

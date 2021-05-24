@@ -112,9 +112,9 @@ namespace ige::scene
     //! Generate UUID
     std::string SceneObject::generateUUID(unsigned int len)
     {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(0, 15);
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        static std::uniform_int_distribution<> dis(0, 15);
         std::stringstream ss;
         for (auto i = 0; i < len; i++)
             ss << std::hex << dis(gen);
@@ -160,6 +160,15 @@ namespace ige::scene
     SceneObject *SceneObject::getParent() const
     {
         return m_parent;
+    }
+
+    // Check relative recursive
+    bool SceneObject::isRelative(uint64_t id)
+    {
+        if (m_id == id) return true;
+        if (m_parent == nullptr) return false;
+        if (m_parent->getId() == id) return true;
+        return m_parent->isParent(id);
     }
 
     //! Get all children

@@ -15,7 +15,7 @@ namespace ige::scene
         : Component(owner)
     {
         // Ensure manager was added in the root node of the scene
-        if(!getOwner()->getRoot()->getComponent<AudioManager>())
+        if(!getOwner()->getRoot()->hasComponent<AudioManager>())
             getOwner()->getRoot()->addComponent<AudioManager>();
 
         // Invoke created event
