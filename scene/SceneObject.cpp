@@ -168,7 +168,7 @@ namespace ige::scene
         if (m_id == id) return true;
         if (m_parent == nullptr) return false;
         if (m_parent->getId() == id) return true;
-        return m_parent->isParent(id);
+        return m_parent->isRelative(id);
     }
 
     //! Get all children
