@@ -90,7 +90,7 @@ namespace ige::scene
         {NULL, NULL}};
 
     PyTypeObject PyTypeObject_SpriteComponent = {
-        PyVarObject_HEAD_INIT(NULL, 0) "igeScene.SpriteComponent", /* tp_name */
+        PyVarObject_HEAD_INIT(NULL, 0) "igeScene.Sprite",          /* tp_name */
         sizeof(PyObject_SpriteComponent),                          /* tp_basicsize */
         0,                                                         /* tp_itemsize */
         (destructor)SpriteComponent_dealloc,                       /* tp_dealloc */

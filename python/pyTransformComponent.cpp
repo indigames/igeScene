@@ -183,7 +183,7 @@ namespace ige::scene
     // Type definition
     PyTypeObject PyTypeObject_TransformComponent = {
         PyVarObject_HEAD_INIT(NULL, 0)
-        "igeScene.TransformComponent",               /* tp_name */
+        "igeScene.Transform",                        /* tp_name */
         sizeof(PyObject_TransformComponent),         /* tp_basicsize */
         0,                                           /* tp_itemsize */
         (destructor)TransformComponent_dealloc,      /* tp_dealloc */

@@ -62,7 +62,7 @@ namespace ige::scene
 
     PyTypeObject PyTypeObject_FigureComponent = {
         PyVarObject_HEAD_INIT(NULL, 0)
-        "igeScene.FigureComponent",                  /* tp_name */
+        "igeScene.Figure",                           /* tp_name */
         sizeof(PyObject_FigureComponent),            /* tp_basicsize */
         0,                                           /* tp_itemsize */
         (destructor)FigureComponent_dealloc,         /* tp_dealloc */

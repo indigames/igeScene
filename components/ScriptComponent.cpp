@@ -151,20 +151,11 @@ namespace ige::scene
                         {
                             m_members[key_str] = PyFloat_AsDouble(value);
                         }
-                        else if (value->ob_type == &PyTypeObject_SceneObject)
-                        {
-                            auto sceneObj = (PyObject_SceneObject*)(value);
-                            m_members[key_str] = sceneObj->sceneObject->getUUID();
-                        }
-                        else if (value == Py_None)
+                        else
                         {
                             m_members[key_str] = nullptr;
                         }
-                        else
-                        {
-                            // Just ignore non parsed types
-                        }
-                    }                    
+                    }
                 }
             }
 
@@ -322,6 +313,8 @@ namespace ige::scene
 
     void ScriptComponent::onFixedUpdate(float dt)
     {
+        if (SceneManager::getInstance()->isEditor())
+            return;
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onFixedUpdate"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onFixedUpdate", "f", dt);
@@ -331,6 +324,8 @@ namespace ige::scene
 
     void ScriptComponent::onLateUpdate(float dt)
     {
+        if (SceneManager::getInstance()->isEditor())
+            return;
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onLateUpdate"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onLateUpdate", "f", dt);
@@ -341,6 +336,8 @@ namespace ige::scene
     //! Render
     void ScriptComponent::onRender()
     {
+        if (SceneManager::getInstance()->isEditor())
+            return;
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onRender"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onRender", nullptr);
@@ -361,6 +358,8 @@ namespace ige::scene
     //! Click
     void ScriptComponent::onClick()
     {
+        if (SceneManager::getInstance()->isEditor())
+            return;
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onClick"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onClick", nullptr);
@@ -482,12 +481,22 @@ namespace ige::scene
 
                 case Value::Type::STRING:
                 {
-                    auto obj = getOwner()->getScene()->findObjectByUUID(value.asString());
+                    auto jVal = json::parse(value.asString(), 0, false);
+                    auto uuid = jVal.is_null() || jVal.is_discarded() ? "" : jVal.value("uuid", "");
+                    auto obj = getOwner()->getScene()->findObjectByUUID(uuid);
                     if (obj) 
                     {
-                        auto pyObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                        pyObj->sceneObject = obj.get();
-                        pyValue = (PyObject*)pyObj;
+                        auto compName = jVal.is_null() || jVal.is_discarded() ? "" : jVal.value("comp", "");
+                        if (compName.empty() || compName.compare("") == 0 || compName.compare("SceneObject") == 0)
+                        {
+                            auto pyObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+                            pyObj->sceneObject = obj.get();
+                            pyValue = (PyObject*)pyObj;
+                        }
+                        else
+                        {
+                            pyValue = pySceneObject_getComponent(obj.get(), compName);
+                        }
                     }
                     else
                     {

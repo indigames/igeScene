@@ -19,7 +19,7 @@ namespace ige::scene
         virtual ~FigureComponent();
 
         //! Get component name
-        virtual std::string getName() const override { return "FigureComponent"; }
+        virtual std::string getName() const override { return "Figure"; }
 
         //! Update
         void onUpdate(float dt) override;

@@ -168,7 +168,7 @@ namespace ige::scene
 
     PyTypeObject PyTypeObject_EnvironmentComponent = {
         PyVarObject_HEAD_INIT(NULL, 1)
-        "igeScene.EnvironmentComponent",             /* tp_name */
+        "igeScene.Environment",                      /* tp_name */
         sizeof(PyObject_EnvironmentComponent),       /* tp_basicsize */
         0,                                           /* tp_itemsize */
         (destructor)EnvironmentComponent_dealloc,    /* tp_dealloc */

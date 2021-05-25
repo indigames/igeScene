@@ -30,7 +30,7 @@ namespace ige::scene
         virtual ~TransformComponent();
 
         //! Get component name
-        virtual std::string getName() const override { return "TransformComponent"; }
+        virtual std::string getName() const override { return "Transform"; }
 
         //! Get parent transform component
         TransformComponent *getParent() const;

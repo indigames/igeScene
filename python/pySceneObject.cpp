@@ -217,7 +217,7 @@ namespace ige::scene
         if (PyArg_ParseTuple(value, "s", &typeName))
         {
             auto type = std::string(typeName);
-            if (type == "TransformComponent")
+            if (type == "Transform")
             {
                 auto comp = self->sceneObject->addComponent<TransformComponent>();
                 if (comp)
@@ -228,7 +228,7 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
-            else if (type == "CameraComponent")
+            else if (type == "Camera")
             {
                 auto comp = self->sceneObject->addComponent<CameraComponent>(std::string("camera##") + std::to_string(self->sceneObject->getId()));
                 if (comp)
@@ -239,7 +239,7 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
-            else if (type == "EnvironmentComponent")
+            else if (type == "Environment")
             {
                 auto comp = self->sceneObject->addComponent<EnvironmentComponent>();
                 if (comp)
@@ -294,7 +294,7 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
-            else if (type == "FigureComponent")
+            else if (type == "Figure")
             {
                 auto comp = self->sceneObject->addComponent<FigureComponent>();
                 if (comp)
@@ -305,7 +305,7 @@ namespace ige::scene
                     return (PyObject *)compObj;
                 }
             }
-            else if (type == "SpriteComponent")
+            else if (type == "Sprite")
             {
                 auto comp = self->sceneObject->addComponent<SpriteComponent>();
                 if (comp)
@@ -629,408 +629,416 @@ namespace ige::scene
     }
 
     // Get component by type
+    PyObject* pySceneObject_getComponent(SceneObject* sceneObject, const std::string& type)
+    {
+        if (sceneObject == nullptr) Py_RETURN_NONE;
+
+        if (type == "Transform")
+        {
+            auto comp = sceneObject->getTransform();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_TransformComponent, &PyTypeObject_TransformComponent);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "Camera")
+        {
+            auto comp = sceneObject->getComponent<CameraComponent>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "Environment")
+        {
+            auto comp = sceneObject->getComponent<EnvironmentComponent>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_EnvironmentComponent, &PyTypeObject_EnvironmentComponent);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "AmbientLight")
+        {
+            auto comp = sceneObject->getComponent<AmbientLight>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_AmbientLight, &PyTypeObject_AmbientLight);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "DirectionalLight")
+        {
+            auto comp = sceneObject->getComponent<DirectionalLight>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_DirectionalLight, &PyTypeObject_DirectionalLight);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "PointLight")
+        {
+            auto comp = sceneObject->getComponent<PointLight>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_PointLight, &PyTypeObject_PointLight);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "SpotLight")
+        {
+            auto comp = sceneObject->getComponent<SpotLight>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_SpotLight, &PyTypeObject_SpotLight);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "Figure")
+        {
+            auto comp = sceneObject->getComponent<FigureComponent>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_FigureComponent, &PyTypeObject_FigureComponent);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "Sprite")
+        {
+            auto comp = sceneObject->getComponent<SpriteComponent>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_SpriteComponent, &PyTypeObject_SpriteComponent);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "RectTransform")
+        {
+            auto comp = sceneObject->getComponent<RectTransform>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_RectTransform, &PyTypeObject_RectTransform);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "Canvas")
+        {
+            auto comp = sceneObject->getComponent<Canvas>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_Canvas, &PyTypeObject_Canvas);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "UIImage")
+        {
+            auto comp = sceneObject->getComponent<UIImage>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_UIImage, &PyTypeObject_UIImage);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "UIText")
+        {
+            auto comp = sceneObject->getComponent<UIText>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_UIText, &PyTypeObject_UIText);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "UITextField")
+        {
+            auto comp = sceneObject->getComponent<UITextField>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_UITextField, &PyTypeObject_UITextField);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "UIButton")
+        {
+            auto comp = sceneObject->getComponent<UIButton>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_UIButton, &PyTypeObject_UIButton);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "UISlider")
+        {
+            auto comp = sceneObject->getComponent<UISlider>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_UISlider, &PyTypeObject_UISlider);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "PhysicManager")
+        {
+            auto comp = sceneObject->getComponent<PhysicManager>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_PhysicManager, &PyTypeObject_PhysicManager);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "PhysicObject")
+        {
+            auto comp = sceneObject->getComponent<PhysicObject>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_PhysicObject, &PyTypeObject_PhysicObject);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "PhysicBox")
+        {
+            auto comp = sceneObject->getComponent<PhysicBox>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_PhysicBox, &PyTypeObject_PhysicBox);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "PhysicSphere")
+        {
+            auto comp = sceneObject->getComponent<PhysicSphere>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_PhysicSphere, &PyTypeObject_PhysicSphere);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "PhysicCapsule")
+        {
+            auto comp = sceneObject->getComponent<PhysicCapsule>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_PhysicCapsule, &PyTypeObject_PhysicCapsule);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "PhysicMesh")
+        {
+            auto comp = sceneObject->getComponent<PhysicMesh>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_PhysicMesh, &PyTypeObject_PhysicMesh);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "PhysicSoftBody")
+        {
+            auto comp = sceneObject->getComponent<PhysicSoftBody>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_PhysicSoftBody, &PyTypeObject_PhysicSoftBody);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "AudioManager")
+        {
+            auto comp = sceneObject->getComponent<AudioManager>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_AudioManager, &PyTypeObject_AudioManager);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "AudioListener")
+        {
+            auto comp = sceneObject->getComponent<AudioListener>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_AudioListener, &PyTypeObject_AudioListener);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "AudioSource")
+        {
+            auto comp = sceneObject->getComponent<AudioSource>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_AudioSource, &PyTypeObject_AudioSource);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "ParticleManager")
+        {
+            auto comp = sceneObject->getComponent<ParticleManager>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_ParticleManager, &PyTypeObject_ParticleManager);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "Particle")
+        {
+            auto comp = sceneObject->getComponent<Particle>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_Particle, &PyTypeObject_Particle);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "NavAgent")
+        {
+            auto comp = sceneObject->getComponent<NavAgent>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_NavAgent, &PyTypeObject_NavAgent);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "NavAgentManager")
+        {
+            auto comp = sceneObject->getComponent<NavAgentManager>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_NavAgentManager, &PyTypeObject_NavAgentManager);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "NavArea")
+        {
+            auto comp = sceneObject->getComponent<NavArea>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_NavArea, &PyTypeObject_NavArea);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "Navigable")
+        {
+            auto comp = sceneObject->getComponent<Navigable>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_Navigable, &PyTypeObject_Navigable);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "NavMesh")
+        {
+            auto comp = sceneObject->getComponent<NavMesh>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_NavMesh, &PyTypeObject_NavMesh);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "DynamicNavMesh")
+        {
+            auto comp = sceneObject->getComponent<DynamicNavMesh>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_DynamicNavMesh, &PyTypeObject_DynamicNavMesh);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "NavObstacle")
+        {
+            auto comp = sceneObject->getComponent<NavObstacle>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_NavObstacle, &PyTypeObject_NavObstacle);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "OffMeshLink")
+        {
+            auto comp = sceneObject->getComponent<OffMeshLink>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_OffMeshLink, &PyTypeObject_OffMeshLink);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        Py_RETURN_NONE;
+    }
+
     PyObject *SceneObject_getComponent(PyObject_SceneObject *self, PyObject *value)
     {
         char* typeName = nullptr;
         if (PyArg_ParseTuple(value, "s", &typeName))
         {
             auto type = std::string(typeName);
-            if (type == "TransformComponent")
-            {
-                auto comp = self->sceneObject->getTransform();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_TransformComponent, &PyTypeObject_TransformComponent);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "CameraComponent")
-            {
-                auto comp = self->sceneObject->getComponent<CameraComponent>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "EnvironmentComponent")
-            {
-                auto comp = self->sceneObject->getComponent<EnvironmentComponent>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_EnvironmentComponent, &PyTypeObject_EnvironmentComponent);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "AmbientLight")
-            {
-                auto comp = self->sceneObject->getComponent<AmbientLight>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_AmbientLight, &PyTypeObject_AmbientLight);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "DirectionalLight")
-            {
-                auto comp = self->sceneObject->getComponent<DirectionalLight>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_DirectionalLight, &PyTypeObject_DirectionalLight);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "PointLight")
-            {
-                auto comp = self->sceneObject->getComponent<PointLight>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_PointLight, &PyTypeObject_PointLight);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "SpotLight")
-            {
-                auto comp = self->sceneObject->getComponent<SpotLight>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_SpotLight, &PyTypeObject_SpotLight);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "FigureComponent")
-            {
-                auto comp = self->sceneObject->getComponent<FigureComponent>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_FigureComponent, &PyTypeObject_FigureComponent);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "SpriteComponent")
-            {
-                auto comp = self->sceneObject->getComponent<SpriteComponent>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_SpriteComponent, &PyTypeObject_SpriteComponent);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "RectTransform")
-            {
-                auto comp = self->sceneObject->getComponent<RectTransform>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_RectTransform, &PyTypeObject_RectTransform);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "Canvas")
-            {
-                auto comp = self->sceneObject->getComponent<Canvas>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_Canvas, &PyTypeObject_Canvas);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "UIImage")
-            {
-                auto comp = self->sceneObject->getComponent<UIImage>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_UIImage, &PyTypeObject_UIImage);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "UIText")
-            {
-                auto comp = self->sceneObject->getComponent<UIText>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_UIText, &PyTypeObject_UIText);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "UITextField")
-            {
-                auto comp = self->sceneObject->getComponent<UITextField>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_UITextField, &PyTypeObject_UITextField);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "UIButton")
-            {
-                auto comp = self->sceneObject->getComponent<UIButton>();
-                if (comp)
-                {
-                    auto* compObj = PyObject_New(PyObject_UIButton, &PyTypeObject_UIButton);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject*)compObj;
-                }
-            }
-            else if (type == "UISlider")
-            {
-                auto comp = self->sceneObject->getComponent<UISlider>();
-                if (comp)
-                {
-                    auto* compObj = PyObject_New(PyObject_UISlider, &PyTypeObject_UISlider);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject*)compObj;
-                }
-            }
-            else if (type == "PhysicManager")
-            {
-                auto comp = self->sceneObject->getComponent<PhysicManager>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_PhysicManager, &PyTypeObject_PhysicManager);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "PhysicObject")
-            {
-                auto comp = self->sceneObject->getComponent<PhysicObject>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_PhysicObject, &PyTypeObject_PhysicObject);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "PhysicBox")
-            {
-                auto comp = self->sceneObject->getComponent<PhysicBox>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_PhysicBox, &PyTypeObject_PhysicBox);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "PhysicSphere")
-            {
-                auto comp = self->sceneObject->getComponent<PhysicSphere>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_PhysicSphere, &PyTypeObject_PhysicSphere);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "PhysicCapsule")
-            {
-                auto comp = self->sceneObject->getComponent<PhysicCapsule>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_PhysicCapsule, &PyTypeObject_PhysicCapsule);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "PhysicMesh")
-            {
-                auto comp = self->sceneObject->getComponent<PhysicMesh>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_PhysicMesh, &PyTypeObject_PhysicMesh);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "PhysicSoftBody")
-            {
-                auto comp = self->sceneObject->getComponent<PhysicSoftBody>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_PhysicSoftBody, &PyTypeObject_PhysicSoftBody);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "AudioManager")
-            {
-                auto comp = self->sceneObject->getComponent<AudioManager>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_AudioManager, &PyTypeObject_AudioManager);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "AudioListener")
-            {
-                auto comp = self->sceneObject->getComponent<AudioListener>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_AudioListener, &PyTypeObject_AudioListener);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "AudioSource")
-            {
-                auto comp = self->sceneObject->getComponent<AudioSource>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_AudioSource, &PyTypeObject_AudioSource);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "ParticleManager")
-            {
-                auto comp = self->sceneObject->getComponent<ParticleManager>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_ParticleManager, &PyTypeObject_ParticleManager);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "Particle")
-            {
-                auto comp = self->sceneObject->getComponent<Particle>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_Particle, &PyTypeObject_Particle);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "NavAgent")
-            {
-                auto comp = self->sceneObject->getComponent<NavAgent>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_NavAgent, &PyTypeObject_NavAgent);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "NavAgentManager")
-            {
-                auto comp = self->sceneObject->getComponent<NavAgentManager>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_NavAgentManager, &PyTypeObject_NavAgentManager);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "NavArea")
-            {
-                auto comp = self->sceneObject->getComponent<NavArea>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_NavArea, &PyTypeObject_NavArea);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "Navigable")
-            {
-                auto comp = self->sceneObject->getComponent<Navigable>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_Navigable, &PyTypeObject_Navigable);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "NavMesh")
-            {
-                auto comp = self->sceneObject->getComponent<NavMesh>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_NavMesh, &PyTypeObject_NavMesh);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "DynamicNavMesh")
-            {
-                auto comp = self->sceneObject->getComponent<DynamicNavMesh>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_DynamicNavMesh, &PyTypeObject_DynamicNavMesh);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "NavObstacle")
-            {
-                auto comp = self->sceneObject->getComponent<NavObstacle>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_NavObstacle, &PyTypeObject_NavObstacle);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
-            else if (type == "OffMeshLink")
-            {
-                auto comp = self->sceneObject->getComponent<OffMeshLink>();
-                if (comp)
-                {
-                    auto *compObj = PyObject_New(PyObject_OffMeshLink, &PyTypeObject_OffMeshLink);
-                    compObj->component = comp.get();
-                    compObj->super.component = compObj->component;
-                    return (PyObject *)compObj;
-                }
-            }
+            return pySceneObject_getComponent(self->sceneObject, type);
         }
         Py_RETURN_NONE;
     }

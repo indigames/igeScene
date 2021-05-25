@@ -306,7 +306,7 @@ namespace ige::scene
             for (auto &comp : m_components)
             {
                 // Camera updated before other objects
-                if (comp->getName() != "CameraComponent")
+                if (comp->getName() != "Camera")
                     comp->onUpdate(dt);
             }
         }
@@ -344,7 +344,7 @@ namespace ige::scene
             for (auto &comp : m_components)
             {
                 // Camera rendered before other objects
-                if (comp->getName() != "CameraComponent")
+                if (comp->getName() != "Camera")
                     comp->onRender();
             }
         }
@@ -725,7 +725,7 @@ namespace ige::scene
             auto key = it.at(0);
             auto val = it.at(1);
             std::shared_ptr<Component> comp = nullptr;
-            if (key == "TransformComponent")
+            if (key == "Transform")
             {
                 if (getTransform())
                     comp = getTransform();
@@ -739,17 +739,17 @@ namespace ige::scene
                 else
                     comp = addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
             }
-            else if (key == "CameraComponent")
+            else if (key == "Camera")
                 comp = addComponent<CameraComponent>(val.at("name"));
-            else if (key == "EnvironmentComponent")
+            else if (key == "Environment")
                 comp = addComponent<EnvironmentComponent>();
             else if (key == "BoneTransform")
                 comp = addComponent<BoneTransform>();
-            else if (key == "FigureComponent")
+            else if (key == "Figure")
                 comp = addComponent<FigureComponent>(val.at("path"));
-            else if (key == "SpriteComponent")
+            else if (key == "Sprite")
                 comp = addComponent<SpriteComponent>(val.at("path"), val.at("size"));
-            else if (key == "ScriptComponent")
+            else if (key == "Script")
                 comp = addComponent<ScriptComponent>();
             else if (key == "PhysicManager")
                 comp = addComponent<PhysicManager>();

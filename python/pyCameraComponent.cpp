@@ -451,7 +451,7 @@ namespace ige::scene
 
     PyTypeObject PyTypeObject_CameraComponent = {
         PyVarObject_HEAD_INIT(NULL, 0)
-        "igeScene.CameraComponent",                  /* tp_name */
+        "igeScene.Camera",                           /* tp_name */
         sizeof(PyObject_CameraComponent),            /* tp_basicsize */
         0,                                           /* tp_itemsize */
         (destructor)CameraComponent_dealloc,         /* tp_dealloc */

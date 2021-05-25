@@ -18,7 +18,7 @@ namespace ige::scene
         virtual ~EnvironmentComponent();
 
         //! Get component name
-        virtual std::string getName() const override { return "EnvironmentComponent"; }
+        virtual std::string getName() const override { return "Environment"; }
 
         //! Fog near distance
         float getDistanceFogNear() const;

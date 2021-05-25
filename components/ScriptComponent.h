@@ -21,7 +21,7 @@ namespace ige::scene
         virtual ~ScriptComponent();
 
         //! Get component name
-        virtual std::string getName() const override { return "ScriptComponent"; }
+        virtual std::string getName() const override { return "Script"; }
 
         //! Awake
         virtual void onAwake();

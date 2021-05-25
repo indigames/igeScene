@@ -101,11 +101,11 @@ PyMODINIT_FUNC PyInit_igeScene()
 
     if (PyType_Ready(&PyTypeObject_TransformComponent) < 0) return NULL;
     Py_INCREF(&PyTypeObject_TransformComponent);
-    PyModule_AddObject(module, "TransformComponent", (PyObject*)&PyTypeObject_TransformComponent);
+    PyModule_AddObject(module, "Transform", (PyObject*)&PyTypeObject_TransformComponent);
 
     if (PyType_Ready(&PyTypeObject_CameraComponent) < 0) return NULL;
     Py_INCREF(&PyTypeObject_CameraComponent);
-    PyModule_AddObject(module, "CameraComponent", (PyObject*)&PyTypeObject_CameraComponent);
+    PyModule_AddObject(module, "Camera", (PyObject*)&PyTypeObject_CameraComponent);
 
     if (PyType_Ready(&PyTypeObject_Script) < 0) return NULL;
     Py_INCREF(&PyTypeObject_Script);
@@ -113,11 +113,11 @@ PyMODINIT_FUNC PyInit_igeScene()
 
     if (PyType_Ready(&PyTypeObject_FigureComponent) < 0) return NULL;
     Py_INCREF(&PyTypeObject_FigureComponent);
-    PyModule_AddObject(module, "FigureComponent", (PyObject*)&PyTypeObject_FigureComponent);
+    PyModule_AddObject(module, "Figure", (PyObject*)&PyTypeObject_FigureComponent);
     
     if (PyType_Ready(&PyTypeObject_EnvironmentComponent) < 0) return NULL;
     Py_INCREF(&PyTypeObject_EnvironmentComponent);
-    PyModule_AddObject(module, "EnvironmentComponent", (PyObject*)&PyTypeObject_EnvironmentComponent);
+    PyModule_AddObject(module, "Environment", (PyObject*)&PyTypeObject_EnvironmentComponent);
 
     if (PyType_Ready(&PyTypeObject_AmbientLight) < 0) return NULL;
     Py_INCREF(&PyTypeObject_AmbientLight);
@@ -137,7 +137,7 @@ PyMODINIT_FUNC PyInit_igeScene()
 
     if (PyType_Ready(&PyTypeObject_SpriteComponent) < 0) return NULL;
     Py_INCREF(&PyTypeObject_SpriteComponent);
-    PyModule_AddObject(module, "SpriteComponent", (PyObject*)&PyTypeObject_SpriteComponent);
+    PyModule_AddObject(module, "Sprite", (PyObject*)&PyTypeObject_SpriteComponent);
 
     if (PyType_Ready(&PyTypeObject_RectTransform) < 0) return NULL;
     Py_INCREF(&PyTypeObject_RectTransform);
