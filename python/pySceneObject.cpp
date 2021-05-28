@@ -20,6 +20,9 @@
 #include "python/pyUITextField.h"
 #include "python/pyUIButton.h"
 #include "python/pyUISlider.h"
+#include "python/pyUIMask.h"
+#include "python/pyUIScrollView.h"
+#include "python/pyUIScrollBar.h"
 #include "python/pyPhysicManager.h"
 #include "python/pyPhysicBox.h"
 #include "python/pyPhysicSphere.h"
@@ -376,6 +379,39 @@ namespace ige::scene
                 if (comp)
                 {
                     auto* compObj = PyObject_New(PyObject_UISlider, &PyTypeObject_UISlider);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if (type == "UIMask")
+            {
+                auto comp = self->sceneObject->addComponent<UIMask>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_UIMask, &PyTypeObject_UIMask);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if (type == "UIScrollView")
+            {
+                auto comp = self->sceneObject->addComponent<UIScrollView>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_UIScrollView, &PyTypeObject_UIScrollView);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if (type == "UIScrollBar")
+            {
+                auto comp = self->sceneObject->addComponent<UIScrollBar>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_UIScrollBar, &PyTypeObject_UIScrollBar);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject*)compObj;
@@ -783,6 +819,50 @@ namespace ige::scene
                 if (comp)
                 {
                     auto* compObj = PyObject_New(PyObject_UIButton, &PyTypeObject_UIButton);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if (type == "UISlider")
+            {
+                auto comp = self->sceneObject->getComponent<UISlider>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_UISlider, &PyTypeObject_UISlider);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if (type == "UIMask")
+                {
+                auto comp = self->sceneObject->getComponent<UIMask>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_UIMask, &PyTypeObject_UIMask);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if (type == "UIScrollView")
+            {
+                auto comp = self->sceneObject->getComponent<UIScrollView>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_UIScrollView, &PyTypeObject_UIScrollView);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if (type == "UIScrollBar")
+            {
+                auto comp = self->sceneObject->getComponent<UIScrollBar>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_UIScrollBar, &PyTypeObject_UIScrollBar);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject*)compObj;
