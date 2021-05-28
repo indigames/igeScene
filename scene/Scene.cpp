@@ -903,23 +903,28 @@ namespace ige::scene
         j.at("name").get_to(m_name);
         setPath(j.value("path", std::string()));
 
-        auto jRoot = j.at("root");
-        m_root = createRootObject(m_name);
-        m_rootUI = createRootObject("UI");
+        if (j.contains("root"))
+        {
+            auto jRoot = j.at("root");
+            m_root = createRootObject(m_name);
+            m_root->from_json(jRoot);
+        }
 
-        //m_nextObjectID = 2;
-        m_root->from_json(jRoot);
-        if(j.contains("ui")) {
+        if(j.contains("ui")) 
+        {
             auto jUI = j.at("ui");
+            m_rootUI = createRootObject("UI");
             m_rootUI->from_json(jUI);
         }
 
-        if (j.contains("objId")) {
+        if (j.contains("objId")) 
+        {
             uint64_t nextId = m_nextObjectID;
             j.at("objId").get_to(nextId);
             if (nextId > m_nextObjectID)
                 m_nextObjectID = nextId;
         }
+
         // Notify serialize finished
         getSerializeFinishedEvent().invoke(this);
 
