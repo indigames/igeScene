@@ -207,6 +207,8 @@ namespace ige::scene
 
     void RectTransform::worldTranslate(const Vec3 &trans)
     {
+        if (trans.Length() <= 0) return;
+
         // Reformat the delta pos to parent direction
         auto deltaPos4 = Vec4(trans[0], trans[1], trans[2], 1.f);
         auto parent = getOwner()->getParent();
