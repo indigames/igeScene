@@ -17,8 +17,8 @@ Vec2 RectTransformUtility::WorldToLocalPointInRectable(RectTransform* rect, Vec2
 	Vec2 outPoint(0,0);
 	if (rect == nullptr) return outPoint;
 	auto cpoint = rect->globalToLocal(Vec3(point[0], point[1], rect->getWorldPosition()[3]));
-	outPoint[0] = cpoint[0];
-	outPoint[1] = cpoint[1];
+	outPoint[0] = isnan(cpoint[0]) ? 0 : cpoint[0];
+	outPoint[1] = isnan(cpoint[1]) ? 0 : cpoint[1];
 	return outPoint;
 }
 
