@@ -767,11 +767,14 @@ void UIScrollView::to_json(json& j) const
     j["enablevertical"] = enableVertical();
     j["content"] = m_rectContent ? m_rectContent->getOwner()->getUUID() : "";
     j["viewport"] = m_rectViewport ? m_rectViewport->getOwner()->getUUID() : "";
+    j["horizontalscrollbar"] = m_horizontalScrollBar ? m_horizontalScrollBar->getOwner()->getUUID() : "";
+    j["verticalscrollbar"] = m_verticalScrollBar ? m_verticalScrollBar->getOwner()->getUUID() : "";
     j["movementtype"] = (int)getMovementType();
     j["elasticextra"] = getElasticExtra();
     j["elasticity"] = getElasticity();
     j["inertia"] = isInertia();
     j["decelerationrate"] = getDecelerationRate();
+
 
 }
 
@@ -781,6 +784,8 @@ void UIScrollView::from_json(const json& j)
     UIImage::from_json(j);
     m_contentUUID = j.value("content", "");
     m_viewportUUID = j.value("viewport", "");
+    m_horizontalUUID = j.value("horizontalscrollbar", "");
+    m_verticalUUID = j.value("verticalscrollbar", "");
     setEnableHorizontal(j.at("enablehorizontal"));
     setEnableVertical(j.at("enablevertical"));
     setMovementType((int)j.at("movementtype"));
@@ -808,6 +813,26 @@ void UIScrollView::onSerializeFinished(Scene* scene)
             auto obj = scene->findObjectByUUID(m_viewportUUID);
             if (obj) {
                 setViewport(obj);
+            }
+        }
+
+        if (!m_horizontalUUID.empty())
+        {
+            auto obj = scene->findObjectByUUID(m_horizontalUUID);
+            if (obj) {
+                auto uiHorizontalBar = obj->getComponent<UIScrollBar>();
+                if(uiHorizontalBar)
+                    setHorizontalScrollBar(uiHorizontalBar);
+            }
+        }
+
+        if (!m_verticalUUID.empty())
+        {
+            auto obj = scene->findObjectByUUID(m_verticalUUID);
+            if (obj) {
+                auto uiVerticalBar = obj->getComponent<UIScrollBar>();
+                if(uiVerticalBar)
+                    setVerticalScrollBar(uiVerticalBar);
             }
         }
     }
