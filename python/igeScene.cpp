@@ -21,6 +21,9 @@
 #include "python/pyUIText.h"
 #include "python/pyUIButton.h"
 #include "python/pyUISlider.h"
+#include "python/pyUIMask.h"
+#include "python/pyUIScrollView.h"
+#include "python/pyUIScrollBar.h"
 
 using namespace ige::scene;
 
@@ -113,6 +116,18 @@ PyMODINIT_FUNC PyInit_igeScene()
     if (PyType_Ready(&PyTypeObject_UISlider) < 0) return NULL;
     Py_INCREF(&PyTypeObject_UISlider);
     PyModule_AddObject(module, "UISlider", (PyObject*)&PyTypeObject_UISlider);
+
+    if (PyType_Ready(&PyTypeObject_UIMask) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_UIMask);
+    PyModule_AddObject(module, "UIMask", (PyObject*)&PyTypeObject_UIMask);
+
+    if (PyType_Ready(&PyTypeObject_UIScrollView) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_UIScrollView);
+    PyModule_AddObject(module, "UIScrollView", (PyObject*)&PyTypeObject_UIScrollView);
+
+    if (PyType_Ready(&PyTypeObject_UIScrollBar) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_UIScrollBar);
+    PyModule_AddObject(module, "UIScrollBar", (PyObject*)&PyTypeObject_UIScrollBar);
 
     if (PyType_Ready(&PyTypeObject_Script) < 0) return NULL;
     Py_INCREF(&PyTypeObject_Script);

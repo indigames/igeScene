@@ -32,18 +32,21 @@ enum class EventType {
 
 	KeyDown = 30,
 	KeyUp = 31,
+	PullDown = 32,
+	PullUp = 33,
+	PullDownRelease = 34,
+	PullUpRelease = 35,
+	DragStart = 36,
+	DragMove = 37,
+	DragEnd = 38,
+	Drop = 39,
 
-	PullDown = 40,
-	PullUp = 41,
-	PullDownRelease = 42,
-	PullUpRelease = 43,
+	SetParent		= 99,
+	AddChild		= 100,
+	RemoveChild		= 101,
+	RemoveChildren	= 102,
 
-	DragStart = 50,
-	DragMove = 51,
-	DragEnd = 52,
-	Drop = 53,
-
-	Delete = 999,
+	Delete	= 999,
 };
 
 class EventContext
@@ -54,12 +57,9 @@ public:
 
 	int getType() const { return m_type; }
 	SceneObject* getSender() const { return m_sender; }
-	InputEvent* getInput() const { return m_inputEvent; }
 	void stopPropagation() { m_bIsStopped = true; }
 	void preventDefault() { m_defaultPrevented = true; }
 	bool isDefaultPrevented() { return m_defaultPrevented; }
-	void captureTouch() { m_touchCapture = 1; }
-	void uncaptureTouch() { m_touchCapture = 2; }
 
 	const Value& getDataValue() const { return m_dataValue; }
 
@@ -67,10 +67,8 @@ protected:
 	SceneObject* m_sender;
 	Value m_dataValue;
 
-	InputEvent* m_inputEvent;
 	bool m_bIsStopped;
 	bool m_defaultPrevented;
-	int m_touchCapture;
 	int m_type;
 
 	friend class SceneObject;

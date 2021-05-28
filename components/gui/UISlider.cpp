@@ -13,7 +13,7 @@ UISlider::UISlider(SceneObject& owner) :
 	Component(owner),
 	m_min(0), m_max(1), m_value(0), m_wholeNumbers(false),
 	m_rectFill(nullptr), m_rectHandle(nullptr), m_imgHandle(nullptr),
-	m_normalColor(1.0f, 1.0f, 1.0f, 1.0f), m_pressedColor(0.78f, 0.78f, 0.78f, 1.0f), m_disableColor(0.78f, 0.78f, 0.78f, 0.5f), m_fadeDuration(0.1f),
+	m_normalColor(1.0f, 1.0f, 1.0f, 1.0f), m_pressedColor(0.78f, 0.78f, 0.78f, 1.0f), m_disableColor(0.78f, 0.78f, 0.78f, 1.0f), m_fadeDuration(0.1f),
 	m_dirtySetObj(false), m_bIsHorizontal(false), m_bIsRevert(false), m_direction(Direction::LEFT_TO_RIGHT), m_bIsInit(false)
 {
 	m_bIsInteractable = true;
@@ -179,17 +179,38 @@ void UISlider::setWholeNumbers(bool value)
 void UISlider::setFillObject(std::shared_ptr<SceneObject> obj)
 {
 	if (obj) {
+		if (m_rectFill) {
+			if (m_rectFill->getOwner() != nullptr)
+				m_rectFill->getOwner()->removeEventListener((int)EventType::Delete, m_instanceId);
+			m_rectFill = nullptr;
+		}
+
 		m_rectFill = obj->getComponent<RectTransform>();
 		obj->addEventListener((int)EventType::Delete, [this](auto val) {
 			m_rectFill = nullptr;
 			}, m_instanceId);
 		_update();
 	}
+	else
+	{
+		if (m_rectFill) {
+			if (m_rectFill->getOwner() != nullptr)
+				m_rectFill->getOwner()->removeEventListener((int)EventType::Delete, m_instanceId);
+			m_rectFill = nullptr;
+		}
+	}
 }
 
 void UISlider::setHandleObject(std::shared_ptr<SceneObject> obj)
 {
 	if (obj) {
+		if (m_rectHandle) {
+			if (m_rectHandle->getOwner() != nullptr)
+				m_rectHandle->getOwner()->removeEventListener((int)EventType::Delete, m_instanceId);
+			m_rectHandle = nullptr;
+			m_imgHandle = nullptr;
+		}
+
 		m_rectHandle = obj->getComponent<RectTransform>();
 		m_imgHandle = obj->getComponent<UIImage>();
 		obj->addEventListener((int)EventType::Delete, [this](auto val) {
@@ -198,13 +219,24 @@ void UISlider::setHandleObject(std::shared_ptr<SceneObject> obj)
 		}, m_instanceId);
 		_update();
 	}
+	else
+	{
+		if (m_rectHandle) {
+			if (m_rectHandle->getOwner() != nullptr)
+				m_rectHandle->getOwner()->removeEventListener((int)EventType::Delete, m_instanceId);
+			m_rectHandle = nullptr;
+			m_imgHandle = nullptr;
+		}
+	}
 }
 
 void UISlider::_onTouchPress(EventContext* context)
 {
 	if (!isInteractable()) return;
 	context->stopPropagation();
-	context->captureTouch();
+	auto inputContext = dynamic_cast<InputEventContext*>(context);
+	if (inputContext == nullptr) return;
+	inputContext->captureTouch();
 
 	changeState(1);
 	
@@ -216,7 +248,7 @@ void UISlider::_onTouchPress(EventContext* context)
 	if (parentRect == nullptr) return;
 	auto parentSize = parentRect->getSize();
 
-	auto clickPoint = context->getInput()->getPosition();
+	auto clickPoint = inputContext->getInput()->getPosition();
 	auto point = parentRect->globalToLocal(Vec3(clickPoint[0], clickPoint[1], parentRect->getWorldPosition()[3]));
 	float percent = MATH_CLAMP((m_value - m_min) / (m_max - m_min), 0, 1);
 	
@@ -240,7 +272,8 @@ void UISlider::_onTouchDrag(EventContext* context)
 {
 	if (!isInteractable()) return;
 	context->stopPropagation();
-
+	auto inputContext = dynamic_cast<InputEventContext*>(context);
+	if (inputContext == nullptr) return;
 	if (m_max == m_min) return;
 	if (m_rectHandle == nullptr) return;
 
@@ -249,8 +282,8 @@ void UISlider::_onTouchDrag(EventContext* context)
 	auto parentRect = handleParent->getRectTransform();
 	if (parentRect == nullptr) return;
 	auto parentSize = parentRect->getSize();
-	if (context->getInput() == nullptr) return;
-	auto clickPoint = context->getInput()->getPosition();
+	if (inputContext->getInput() == nullptr) return;
+	auto clickPoint = inputContext->getInput()->getPosition();
 	auto point = parentRect->globalToLocal(Vec3(clickPoint[0], clickPoint[1], parentRect->getWorldPosition()[3]));
 	float percent = MATH_CLAMP((m_value - m_min) / (m_max - m_min), 0, 1);
 

@@ -311,7 +311,7 @@ namespace ige::scene
         if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
             m_activeCamera->onRender();
         }
-
+        m_showcase->ZSort(m_activeCamera->getCamera());
         m_showcase->Render();
 
         for (auto& obj : m_objects)
@@ -320,6 +320,7 @@ namespace ige::scene
 
     void Scene::renderUI() {
         if (!SceneManager::getInstance()->isEditor() && m_canvasCamera) {
+            //m_uiShowcase->ZSort(m_canvasCamera);
             auto canvasObject = findObjectByName("Canvas");
             if (canvasObject) {
                 auto canvas = canvasObject->getComponent<ige::scene::Canvas>();
@@ -330,7 +331,6 @@ namespace ige::scene
                 }
             }
         }
-        
         m_uiShowcase->Render();
     }
 
@@ -358,7 +358,6 @@ namespace ige::scene
             if (parentObject->isGUIObject())
                 isGUI = true;//parentObject = m_root;
         }
-
         auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parentObject.get(), isGUI, size, isCanvas);
         m_objects.push_back(sceneObject);
         return sceneObject;
@@ -459,7 +458,8 @@ namespace ige::scene
             while (m_objects[r]->getId() != m_objects[l]->getId() 
                 && id >= m_objects[l]->getId() && id <= m_objects[r]->getId())
             {
-                uint64_t mid = l + (r - 1) * (id - m_objects[l]->getId()) / (m_objects[r]->getId() - m_objects[l]->getId());
+                //uint64_t mid = l + (r - 1) * (id - m_objects[l]->getId()) / (m_objects[r]->getId() - m_objects[l]->getId());
+                uint64_t mid = (l + r) / 2;
                 if (mid >= cnt || mid == o) {
                     break;
                 }
