@@ -309,11 +309,10 @@ namespace ige::scene
 
     void Scene::render()
     {
-
         if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
+            m_showcase->ZSort(m_activeCamera->getCamera());
             m_activeCamera->onRender();
         }
-
         m_showcase->Render();
 
         for (auto& obj : m_objects)
@@ -332,7 +331,6 @@ namespace ige::scene
                 }
             }
         }
-        
         m_uiShowcase->Render();
     }
 
@@ -360,7 +358,6 @@ namespace ige::scene
             if (parentObject->isGUIObject())
                 isGUI = true;//parentObject = m_root;
         }
-
         auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parentObject.get(), isGUI, size, isCanvas);
         m_objects.push_back(sceneObject);
         return sceneObject;

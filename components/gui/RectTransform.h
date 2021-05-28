@@ -112,7 +112,7 @@ namespace ige::scene
         Vec2 getPivotInCanvasSpace();
         Vec2 getAnchorCenterInCanvasSpace();
 
-
+        void onSceneObjectSelected(SceneObject& sceneObject);
         
         void updateLocalToRect();
         void updateAnchorOffset();
@@ -153,5 +153,7 @@ namespace ige::scene
         //! Cached transform to canvas space
         Mat4 m_canvasTransform;
         bool m_canvasTransformDirty = true;
+
+        uint64_t m_SelectedListenerID = 0;
     };
 } // namespace ige::scene

@@ -6,6 +6,7 @@
 
 #include "event/Event.h"
 #include "event/EventContext.h"
+#include "event/InputEventContext.h"
 
 #include "components/Component.h"
 #include "components/TransformComponent.h"
@@ -67,6 +68,9 @@ namespace ige::scene
 
         //! Find first child by name
         virtual SceneObject* findChildByName(const std::string& name);
+
+        //! Find child
+        virtual SceneObject* findChild(std::string uuid);
 
         //! Add a component
         virtual void addComponent(const std::shared_ptr<Component> &component);
@@ -185,6 +189,8 @@ namespace ige::scene
         bool hasEventListener(int eventType, const uint64_t tag = 0) const;
         bool dispatchEvent(int eventType, const Value& dataValue = Value::Null);
         bool bubbleEvent(int eventType, const Value& dataValue = Value::Null);
+        bool dispatchInputEvent(int eventType, const Value& dataValue = Value::Null);
+        bool bubbleInputEvent(int eventType, const Value& dataValue = Value::Null);
 
         //! Aabb
         const AABBox& getAABB() const { return m_aabb; }
@@ -200,6 +206,9 @@ namespace ige::scene
 
         //! Update AABB
         virtual void updateAabb();
+
+        bool isInMask() const { return m_bIsInMask; }
+        void setInMask(bool value);
 
     protected:
         //! Helper to generate UUID
@@ -294,7 +303,7 @@ namespace ige::scene
 
         std::vector<EventCallbackItem*> m_callbacks;
         int m_dispatching;
-
+        bool m_bIsInMask;
     };
 
     //! Check component by type

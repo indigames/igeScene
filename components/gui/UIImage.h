@@ -56,6 +56,7 @@ namespace ige::scene
         Event<>& getOnReleasedEvent() { return m_onReleasedEvent; }
         Event<>& getOnSelectedEvent() { return m_onSelectedEvent; }
 
+        void setStencilMask(int value = -1);
     protected:
         virtual void _onTouchPress(EventContext* context);
         virtual void _onTouchDrag(EventContext* context);
@@ -69,6 +70,8 @@ namespace ige::scene
 
         //! Deserialize
         virtual void from_json(const json &j) override;
+
+        virtual void onSetParent(EventContext* context);
 
     protected:
         bool m_bIsInteractable;

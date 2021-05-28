@@ -23,6 +23,9 @@
 #include "components/gui/UITextField.h"
 #include "components/gui/UIButton.h"
 #include "components/gui/UISlider.h"
+#include "components/gui/UIScrollView.h"
+#include "components/gui/UIScrollBar.h"
+#include "components/gui/UIMask.h"
 #include "components/physic/PhysicManager.h"
 #include "components/physic/PhysicBox.h"
 #include "components/physic/PhysicCapsule.h"
@@ -59,7 +62,7 @@ namespace ige::scene
     //! Constructor
     SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size, bool isCanvas)
         : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_bIsCanvas(isCanvas), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr),
-        m_dispatching(0), m_aabbDirty(2)
+        m_dispatching(0), m_aabbDirty(2), m_bIsInMask(false)
     {
         // Generate new UUID
         m_uuid = generateUUID();
@@ -84,6 +87,24 @@ namespace ige::scene
         m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
         m_frameAABB = AABBox({ -5.f, -5.f, -5.f }, { 5.f, 5.f, 5.f });
         getTransformChangedEvent().addListener(std::bind(&SceneObject::onTransformChanged, this, std::placeholders::_1));
+
+        if (isGui) {
+            auto parent = getParent();
+            if (parent)
+            {
+                if (parent->isInMask()) 
+                {
+                    setInMask(true);
+                }
+                else
+                {
+                    auto mask = parent->getComponent<UIMask>();
+                    if (mask) {
+                        setInMask(mask->isUseMask());
+                    }
+                }
+            }
+        }
     }
 
     //! Destructor
@@ -154,6 +175,7 @@ namespace ige::scene
             setCanvas(m_parent->getCanvas());
             getAttachedEvent().invoke(*this);
         }
+        dispatchEvent((int)EventType::SetParent);
     }
 
     // Get parent
@@ -183,6 +205,8 @@ namespace ige::scene
         auto found = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem == child; });
         if (found == m_children.end())
             m_children.push_back(child);
+        if (child != nullptr)
+            dispatchEvent((int)EventType::AddChild, Value(child->getUUID()));
     }
 
     //! Removes child
@@ -193,6 +217,8 @@ namespace ige::scene
         auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getId() == child->getId()); });
         if (itr != m_children.end())
             m_children.erase(itr);
+        if (child != nullptr)
+            dispatchEvent((int)EventType::RemoveChild, Value(child->getUUID()));
     }
 
     //! Remove children
@@ -201,6 +227,16 @@ namespace ige::scene
         for (auto &child : m_children)
             child = nullptr;
         m_children.clear();
+        dispatchEvent((int)EventType::RemoveChildren);
+    }
+
+    //! Find Child
+    SceneObject* SceneObject::findChild(std::string uuid)
+    {
+        auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getUUID() == uuid); });
+        if (itr != m_children.end()) 
+            return *itr;
+        return nullptr;
     }
 
     //! Add a component
@@ -495,8 +531,6 @@ namespace ige::scene
             return false;
 
         EventContext context;
-        if (InputProcessor::getInstance())
-            context.m_inputEvent = InputProcessor::getInstance()->getRecentInput();
         context.m_sender = this;
         context.m_type = eventType;
         context.m_dataValue = dataValue;
@@ -509,6 +543,34 @@ namespace ige::scene
     bool SceneObject::bubbleEvent(int eventType, const Value& dataValue)
     {
         EventContext context;
+        context.m_type = eventType;
+        context.m_dataValue = dataValue;
+
+        doBubble(eventType, &context);
+
+        return context.m_defaultPrevented;
+    }
+
+    bool SceneObject::dispatchInputEvent(int eventType, const Value& dataValue)
+    {
+        if (m_callbacks.size() == 0)
+            return false;
+
+        InputEventContext context;
+        if (InputProcessor::getInstance())
+            context.m_inputEvent = InputProcessor::getInstance()->getRecentInput();
+        context.m_sender = this;
+        context.m_type = eventType;
+        context.m_dataValue = dataValue;
+
+        doDispatch(eventType, &context);
+
+        return context.isDefaultPrevented();
+    }
+
+    bool SceneObject::bubbleInputEvent(int eventType, const Value& dataValue)
+    {
+        InputEventContext context;
         if (InputProcessor::getInstance())
             context.m_inputEvent = InputProcessor::getInstance()->getRecentInput();
         context.m_type = eventType;
@@ -537,16 +599,25 @@ namespace ige::scene
             }
             if (ci->eventType == eventType)
             {
-                ci->dispatching++;
-                context->m_touchCapture = 0;
-                ci->callback(context);
-                ci->dispatching--;
-                if (context->m_touchCapture != 0 && dynamic_cast<SceneObject*>(this))
+                auto inputContext = dynamic_cast<InputEventContext*>(context);
+                if (inputContext != nullptr) {
+                    ci->dispatching++;
+                    inputContext->m_touchCapture = 0;
+                    ci->callback(inputContext);
+                    ci->dispatching--;
+                    if (inputContext->m_touchCapture != 0 && dynamic_cast<SceneObject*>(this))
+                    {
+                        if (inputContext->isCaptureTouch() && eventType == (int)EventType::TouchBegin)
+                            inputContext->getInput()->getProcessor()->addTouchMonitor(inputContext->getInput()->getTouchId(), this);
+                        else if (inputContext->isUnCaptureTouch())
+                            inputContext->getInput()->getProcessor()->removeTouchMonitor(this);
+                    }
+                }
+                else
                 {
-                    if (context->m_touchCapture == 1 && eventType == (int)EventType::TouchBegin)
-                        context->getInput()->getProcessor()->addTouchMonitor(context->getInput()->getTouchId(), this);
-                    else if (context->m_touchCapture == 2)
-                        context->getInput()->getProcessor()->removeTouchMonitor(this);
+                    ci->dispatching++;
+                    ci->callback(context);
+                    ci->dispatching--;
                 }
             }
         }
@@ -660,6 +731,7 @@ namespace ige::scene
         m_frameAABB = m_bLockedFrameAABB ? m_frameAABB : m_aabbWorld;
     }
 
+
     //! Find first child by name
     SceneObject* SceneObject::findChildByName(const std::string& name)
     {
@@ -670,6 +742,14 @@ namespace ige::scene
         if (found != m_children.end())
             return (*found);
         return nullptr;
+    }
+
+    void SceneObject::setInMask(bool value) 
+    {
+        if (value != m_bIsInMask) 
+        {
+            m_bIsInMask = value;
+        }
     }
 
     //! Serialize
@@ -778,6 +858,12 @@ namespace ige::scene
                 comp = addComponent<UIButton>();
             else if (key == "UISlider")
                 comp = addComponent<UISlider>();
+            else if (key == "UIScrollView")
+                comp = addComponent<UIScrollView>();
+            else if (key == "UIScrollBar")
+                comp = addComponent<UIScrollBar>();
+            else if (key == "UIMask")
+                comp = addComponent<UIMask>();
             else if (key == "AudioManager")
                 comp = addComponent<AudioManager>();
             else if (key == "AudioSource")

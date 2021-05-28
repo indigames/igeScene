@@ -70,7 +70,9 @@ void UIButton::_onTouchPress(EventContext* context)
 {
     if (!isInteractable()) return;
     context->stopPropagation();
-    context->captureTouch();
+    auto inputContext = dynamic_cast<InputEventContext*>(context);
+    if (inputContext == nullptr) return;
+    inputContext->captureTouch();
     changeState(ButtonState::PRESSED);
     getOnPressedEvent().invoke();
 }
@@ -104,7 +106,7 @@ void UIButton::_onExit(EventContext* context)
 }
 
 void UIButton::onClick() {
-    pyxie_printf("call from UI Button\n");
+    
 }
 
 void UIButton::changeState(ButtonState state, bool forced)

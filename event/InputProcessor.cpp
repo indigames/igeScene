@@ -218,7 +218,7 @@ void InputProcessor::onTouchBegan(int touchId, float x, float y)
         m_captureCallback((int)EventType::TouchBegin);
 
     if(target->isInteractable())
-        target->bubbleEvent((int)EventType::TouchBegin);
+        target->bubbleInputEvent((int)EventType::TouchBegin);
 
     handleRollOver(ti, target);
 
@@ -243,7 +243,7 @@ void InputProcessor::onTouchMoved(int touchId, float x, float y)
     TouchInfo* ti = getTouch(touchId);
     ti->pos = Vec2(hit.second.X(), hit.second.Y());
     ti->touchId = touchId;
-
+    
     updateRecentInput(ti, target);
     m_activeProcessor = this;
     
@@ -265,13 +265,13 @@ void InputProcessor::onTouchMoved(int touchId, float x, float y)
                 if (!mm)
                     continue;
 
-                mm->dispatchEvent((int)EventType::TouchMove);
+                mm->dispatchInputEvent((int)EventType::TouchMove);
                 if (mm == scene->getRootUI())
                     done = true;
             }
         }
         if (!done)
-            scene->getRootUI()->dispatchEvent((int)EventType::TouchMove);
+            scene->getRootUI()->dispatchInputEvent((int)EventType::TouchMove);
     }
 
     m_activeProcessor = nullptr;
@@ -287,7 +287,7 @@ void InputProcessor::onTouchEnded(int touchId, float x, float y)
     }
     auto target = hit.first;
     if (target == nullptr) return;
-
+    
     TouchInfo * ti = getTouch(touchId);
     ti->pos = Vec2(hit.second.X(), hit.second.Y());
     ti->touchId = touchId;
@@ -308,20 +308,20 @@ void InputProcessor::onTouchEnded(int touchId, float x, float y)
                 continue;
 
             if (mm.get() != target)
-                mm->dispatchEvent((int)EventType::TouchEnd);
+                mm->dispatchInputEvent((int)EventType::TouchEnd);
         }
         ti->touchMonitors.clear();
     }
 
     if (target)
     {
-        target->bubbleEvent((int)EventType::TouchEnd);
+        target->bubbleInputEvent((int)EventType::TouchEnd);
     }
 
     target = clickTestUI(ti, target);
     if (target) {
         updateRecentInput(ti, target);
-        target->bubbleEvent((int)EventType::Click);
+        target->bubbleInputEvent((int)EventType::Click);
     }
 
     handleRollOver(ti, target);

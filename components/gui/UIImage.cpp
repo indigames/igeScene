@@ -1,5 +1,6 @@
 #include "components/gui/UIImage.h"
 #include "components/gui/RectTransform.h"
+#include "components/gui/UIMask.h"
 #include "scene/SceneObject.h"
 #include "event/EventContext.h"
 
@@ -16,11 +17,20 @@ namespace ige::scene
         if (isSliced)
             setSpriteType(1);
         setBorder(border);
+
+        if (getOwner()->isInMask())
+        {
+            setStencilMask(1);
+        }
+
+        getOwner()->addEventListener((int)EventType::SetParent, std::bind(&UIImage::onSetParent, this, std::placeholders::_1), m_instanceId);
     }
 
     //! Destructor
     UIImage::~UIImage()
     {
+        getOwner()->removeEventListener((int)EventType::SetParent, m_instanceId);
+
         m_onClickedEvent.removeAllListeners();
         m_onPressedEvent.removeAllListeners();
         m_onDragEvent.removeAllListeners();
@@ -116,6 +126,54 @@ namespace ige::scene
         
     }
 
+    void UIImage::onSetParent(EventContext* context)
+    {
+        context->stopPropagation();
+        auto parent = getOwner()->getParent();
+        if (parent)
+        {
+            auto mask = parent->getComponent<UIMask>();
+            if (mask) {
+                bool inMask = parent->isInMask() || (mask != nullptr && mask->isUseMask());
+                setStencilMask(inMask ? 1 : -1);
+            }
+            else 
+            {
+                bool inMask = parent->isInMask();
+                setStencilMask(inMask ? 1 : -1);
+            }
+        }
+    }
+
+
+    void UIImage::setStencilMask(int value)
+    {
+        auto figure = getFigure();
+        if (figure == nullptr) return;
+        //! If Value < 0 : Disable stencil
+        if (value < 0) 
+        {
+            int materialIdx = figure->GetMaterialIndex(GenerateNameHash("mate"));
+            const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("stencil_test_enable");
+            uint32_t stencilEnableVal[4] = { 0,0,0,0 };
+            figure->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, stencilEnableVal);
+            getOwner()->setInMask(false);
+        }
+        else
+        {
+            int materialIdx = figure->GetMaterialIndex(GenerateNameHash("mate"));
+            const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("stencil_test_enable");
+            uint32_t stencilEnableVal[4] = { 1,0,0,0 };
+            figure->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, stencilEnableVal);
+            const ShaderParameterInfo* maskInfo = RenderContext::Instance().GetShaderParameterInfoByName("stencil_mask");
+            uint32_t maskVal[4] = { 2,0,0,0 };
+            figure->SetMaterialState(materialIdx, (ShaderParameterKey)maskInfo->key, maskVal);
+            const ShaderParameterInfo* funcInfo = RenderContext::Instance().GetShaderParameterInfoByName("stencil_func");
+            uint32_t funcVal[4] = { GL_EQUAL,2,2,0 };
+            figure->SetMaterialState(materialIdx, (ShaderParameterKey)funcInfo->key, funcVal);
+            getOwner()->setInMask(true);
+        }        
+    }
 
     //! Serialize
     void UIImage::to_json(json &j) const
