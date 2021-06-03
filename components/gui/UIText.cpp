@@ -1,18 +1,31 @@
 #include "components/gui/UIText.h"
 #include "components/gui/RectTransform.h"
+#include "components/gui/UIMask.h"
 
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
+
+#include "event/EventContext.h"
 
 namespace ige::scene
 {
     //! Constructor
     UIText::UIText(SceneObject &owner, const std::string &text, const std::string &fontPath, int fontSize, const Vec4 &color)
-        : Component(owner)
+        : Component(owner), UIMaskable(), m_flagMask(false)
     {
         m_text = std::make_shared<Text>(text, fontPath, fontSize, color);
         if (m_text->getFigure())
             getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_text->getFigure());
+
+        getOwner()->addEventListener((int)EventType::SetParent, [this](auto vol) {
+            this->onSetParent(vol);
+            }, m_instanceId);
+
+        if (getOwner()->isInMask())
+        {
+            if (getFigure() == nullptr) m_flagMask = true;
+            setStencilMask(1);
+        }
     }
 
     //! Destructor
@@ -21,6 +34,9 @@ namespace ige::scene
         if (m_text->getFigure() && getOwner()->getScene())
             getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_text->getFigure());
         m_text = nullptr;
+        
+        getOwner()->removeEventListener((int)EventType::SetParent, m_instanceId);
+
         if(getOwner()->getTransform())
             getOwner()->getTransform()->makeDirty();
     }
@@ -31,6 +47,11 @@ namespace ige::scene
         if (getFigure() == nullptr)
             return;
 
+        if (m_flagMask) {
+            setStencilMask(1);
+            m_flagMask = false;
+        }
+        
         // Update transform from transform component
         auto transform = getOwner()->getRectTransform();
 
@@ -140,4 +161,8 @@ namespace ige::scene
     {
         m_text->setColor(color);
     }
+
+    EditableFigure* UIText::getCurrentFigure() { return getFigure(); }
+    SceneObject* UIText::getSceneObjectOwner() { return getOwner(); }
+
 } // namespace ige::scene

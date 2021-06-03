@@ -6,11 +6,15 @@ using namespace pyxie;
 #include "event/Event.h"
 #include "components/SpriteComponent.h"
 #include "core/Text.h"
+#include "components/gui/UIMaskable.h"
 
 namespace ige::scene
 {
+    class UIEventContext;
+    class EventContext;
+
     //! UIText
-    class UIText : public Component
+    class UIText : public Component, UIMaskable
     {
     public:
         //! Constructor
@@ -48,6 +52,10 @@ namespace ige::scene
         EditableFigure *getFigure() { return m_text->getFigure(); }
 
     protected:
+        //! Overide function UIMaskable
+        virtual EditableFigure* getCurrentFigure() override;
+        virtual SceneObject* getSceneObjectOwner() override;
+
         //! Serialize
         virtual void to_json(json& j) const override;
 
@@ -56,5 +64,7 @@ namespace ige::scene
 
         //! Text
         std::shared_ptr<Text> m_text;
+
+        bool m_flagMask = false;
     };
 } // namespace ige::scene
