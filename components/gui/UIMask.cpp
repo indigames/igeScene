@@ -1,4 +1,6 @@
 #include "components/gui/UIMask.h"
+#include "components/gui/UIMaskable.h"
+
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 
@@ -10,6 +12,8 @@
 
 #include "components/tween/Tween.h"
 #include "components/tween/Tweener.h"
+
+
 
 namespace fs = ghc::filesystem;
 
@@ -92,10 +96,13 @@ void UIMask::updateMask()
 void UIMask::updateChildMask(SceneObject* child)
 {
     if (child == nullptr) return;
-    auto image = child->getComponent<UIImage>();
-    if (image) 
+    
+    auto components = child->getComponents();
+    for (auto it = components.begin(); it != components.end(); ++it)
     {
-        image->setStencilMask(m_bUseMask ? 1 : -1);
+        auto markable = std::dynamic_pointer_cast<UIMaskable>(*it);
+        if (markable)
+            markable->setStencilMask(m_bUseMask ? 1 : -1);
     }
 
     auto children = child->getChildren();
