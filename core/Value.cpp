@@ -3,6 +3,14 @@
 #include <sstream>
 #include <iomanip>
 
+#ifndef FLT_EPSILON
+    #define FLT_EPSILON __FLT_EPSILON__
+#endif
+
+#ifndef DBL_EPSILON
+    #define DBL_EPSILON __DBL_EPSILON__
+#endif
+
 NS_IGE_SCENE_BEGIN
 
 const Value Value::Null;
