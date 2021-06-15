@@ -37,7 +37,7 @@ class build_ext(build_ext_orig):
         # any python sources to bundle, the dirs will be missing
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         build_temp =  os.path.abspath(os.path.dirname(self.build_temp))
-       
+
         # example of cmake args
         config = 'Debug' if self.debug else 'Release'
         cmake_args = [
@@ -56,16 +56,15 @@ class build_ext(build_ext_orig):
             os.makedirs(self.build_temp)
         os.chdir(str(build_temp))
 
-        igeBuilder = os.environ.get('IGE_BUILDER')
         conanProfile = None
         cmake_arch = None
 
         if sys.platform == 'win32':
             if sys.maxsize > 2 ** 32:
-                conanProfile = os.path.join(igeBuilder, 'profiles', 'windows_x86_64')
+                conanProfile = os.path.join(str(cwd), 'cmake', 'profiles', 'windows_x86_64')
                 cmake_arch = 'x64'
             else:
-                conanProfile = os.path.join(igeBuilder, 'profiles', 'windows_x86')
+                conanProfile = os.path.join(str(cwd), 'cmake', 'profiles', 'windows_x86')
                 cmake_arch = 'Win32'
 
         if conanProfile:
@@ -78,11 +77,10 @@ class build_ext(build_ext_orig):
         else:
             self.spawn(['cmake', str(cwd)] + cmake_args)
 
-        if not self.dry_run:
-            self.spawn(['cmake', '--build', '.'] + build_args)
-
         ext_name = str(ext.name).split('.')[-1]
-        pyd_path = os.path.join(build_temp, 'bin', f'{ext_name}.pyd')
+        if not self.dry_run:
+            self.spawn(['cmake', '--build', '.', '--target', ext_name] + build_args)
+        pyd_path = os.path.join(build_temp, config, f'{ext_name}.pyd')
         extension_path = os.path.join(cwd, self.get_ext_fullpath(ext.name))
         extension_dir = os.path.dirname(extension_path)
         if not os.path.exists(extension_dir):

@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, CMake
+from pathlib import Path
+from conans import ConanFile
 
 class IgeConan(ConanFile):
     name = 'igeScene'
@@ -12,10 +13,11 @@ class IgeConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake"
+    generators = "cmake_find_package"
     exports_sources = ""
     requires = []
     short_paths = True
+    revision_mode="scm"
 
     def requirements(self):
         self.requires("Python/3.7.6@ige/test")
@@ -26,39 +28,55 @@ class IgeConan(ConanFile):
         self.requires("igeSound/0.1.0@ige/test")
         self.requires("igeEffekseer/0.0.18@ige/test")
         self.requires("igeNavigation/0.0.1@ige/test")
-        if (self.settings.os == "Windows") and (self.name != "zlib"):
-            self.requires("zlib/1.2.11@ige/test")
+
+    def build(self):
+        self._generateCMakeProject()
+        self._buildCMakeProject()
 
     def package(self):
-        output_dir = os.path.normpath(os.path.relpath(os.environ['OUTPUT_DIR'], os.environ['PROJECT_DIR']))
-        self.copy("*", dst="include", src=os.path.join(output_dir, "include"))
-        if self.settings.os == "Windows":
-            if self.settings.arch == "x86":
-                self.copy("*", dst="lib", src=os.path.join(output_dir, "libs/windows/x86"))
-            else:
-                self.copy("*", dst="lib", src=os.path.join(output_dir, "libs/windows/x86_64"))
-        elif self.settings.os == "Android":
-            if self.settings.arch == "armv7":
-                self.copy("*", dst="lib", src=os.path.join(output_dir, "libs/android/armv7"))
-            elif self.settings.arch == "armv8":
-                self.copy("*", dst="lib", src=os.path.join(output_dir, "libs/android/armv8"))
-            elif self.settings.arch == "x86":
-                self.copy("*", dst="lib", src=os.path.join(output_dir, "libs/android/x86"))
-            elif self.settings.arch == "x86_64":
-                self.copy("*", dst="lib", src=os.path.join(output_dir, "libs/android/x86_64"))
-        elif self.settings.os == "Macos":
-            self.copy("*", dst="lib", src=os.path.join(output_dir, "libs/macos/x64"))
-        else:
-            self.copy("*", dst="lib", src=os.path.join(output_dir, "libs/ios/arm64"))
+        self.copy('*', src='build/install')
 
     def package_info(self):
-        self.cpp_info.libs = self.__collect_lib('lib')
-        self.cpp_info.includedirs  = self.__collect_include('include')
+        self.cpp_info.libs = self.__collect_lib()
+        self.cpp_info.includedirs  = self.__collect_include()
         self.cpp_info.defines = [f'USE_{self.name}'.upper()]
 
-    def __collect_lib(self, lib_dir):
+    def _generateCMakeProject(self):
+        cmake_cmd = f'cmake {self.source_folder}'
+        if self.settings.os == "Windows":
+            if self.settings.arch == "x86":
+                cmake_cmd += f' -A Win32'
+            else:
+                cmake_cmd += f' -A X64'
+        elif self.settings.os == "Android":
+            toolchain = Path(os.environ.get("ANDROID_NDK_ROOT")).absolute().as_posix() + '/build/cmake/android.toolchain.cmake'
+            if self.settings.arch == "armv7":
+                cmake_cmd += f' -G Ninja -DCMAKE_TOOLCHAIN_FILE={toolchain} -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-21 -DCMAKE_BUILD_TYPE=Release'
+            else:
+                cmake_cmd += f' -G Ninja -DCMAKE_TOOLCHAIN_FILE={toolchain} -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-21 -DCMAKE_BUILD_TYPE=Release'
+        elif self.settings.os == "iOS":
+            toolchain = Path(self.source_folder).absolute().as_posix() + '/cmake/ios.toolchain.cmake'
+            cmake_cmd += f' -G Xcode -DCMAKE_TOOLCHAIN_FILE={toolchain} -DIOS_DEPLOYMENT_TARGET=11.0 -DPLATFORM=OS64 -DCMAKE_BUILD_TYPE=Release'
+        elif self.settings.os == "Macos":
+            cmake_cmd += f' -G Xcode -DOSX=1 -DCMAKE_BUILD_TYPE=Release'
+        else:
+            print(f'Configuration not supported: platform = {self.settings.os}, arch = {self.settings.arch}')
+            exit(1)
+
+        error_code = self.run(cmake_cmd, ignore_errors=True)
+        if(error_code != 0):
+            print(f'CMake generation failed, error code: {error_code}')
+            exit(1)
+
+    def _buildCMakeProject(self):
+        error_code = self.run('cmake --build . --config Release --target install', ignore_errors=True)
+        if(error_code != 0):
+            print(f'CMake build failed, error code: {error_code}')
+            exit(1)
+
+    def __collect_lib(self):
         libs = []
-        for root, dirs, files in os.walk(lib_dir):
+        for root, dirs, files in os.walk('lib'):
             for file in files:
                 if file.endswith(".lib"):
                     fname = os.path.splitext(file)[0]
@@ -68,23 +86,17 @@ class IgeConan(ConanFile):
                     if fname.startswith('lib'):
                         fname = fname[fname.find('lib') + 3:]
                     libs.append(fname)
-        if (self.settings.os == "Windows") and (self.name != "zlib"):
-            libs.append('zlibstatic')
         return libs
 
-    def __collect_include(self, inc_dir):
+    def __collect_include(self):
         inc_dirs = ['include']
         platform_inc_dir = ['include', 'src', 'source']
         if self.settings.os == "Windows":
             platform_inc_dir += ['pc', 'windows', 'win32', 'msvc']
         elif self.settings.os == "Android":
-            platform_inc_dir += ['android']
+            platform_inc_dir += ['android', 'jni']
         elif self.settings.os == "Macos":
             platform_inc_dir += ['macos', 'mac', 'osx']
-        else:
-            platform_inc_dir += ['ios']
-        for root, dirs, files in os.walk(inc_dir):
-            for d in dirs:
-                if d.lower() in platform_inc_dir:
-                    inc_dirs.append(os.path.relpath(os.path.join('include', root, d), inc_dir).replace('\\', '/'))
+        elif self.settings.os == "iOS":
+            platform_inc_dir += ['ios', 'iphone', 'iphoneos']
         return inc_dirs
