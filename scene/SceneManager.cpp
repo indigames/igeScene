@@ -52,7 +52,7 @@ namespace ige::scene
         mbstowcs(pathw, path.c_str(), 1024);
         Py_SetPythonHome(pathw);
 
-        FileIO::Instance().SetRoot(m_projectPath.c_str());
+        FileIO::Instance().SetRoot(path.c_str());
         path.append(DELIMITER);
         path.append(root);
 
