@@ -161,6 +161,9 @@ namespace ige::scene
     //! Update
     void PhysicManager::onUpdate(float dt)
     {
+        if (m_world == nullptr)
+            initialize();
+
         preUpdate();
 
         // Run simulation if not in edit mode
