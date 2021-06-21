@@ -331,8 +331,8 @@ namespace ige::scene
         int posY = (maxH - cpyH) - startY;
 
         if (cpyW > 0 && cpyH > 0) {
-            int inBufW = ALIGN(texW, 4);
-            int outBufW = ALIGN(cpyW, 4);
+            int inBufW = PYXIE_ALIGN(texW, 4);
+            int outBufW = PYXIE_ALIGN(cpyW, 4);
 
             unsigned char* bitmap2 = (unsigned char*)pyxie::PYXIE_MALLOC(outBufW * cpyH);
             unsigned char* op = bitmap2;
