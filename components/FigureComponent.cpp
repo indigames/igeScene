@@ -34,7 +34,7 @@ namespace ige::scene
     //! Update
     void FigureComponent::onUpdate(float dt)
     {
-        if (m_figure == nullptr)
+        if (m_figure == nullptr || !m_figure->IsInitializeSuccess())
             return;
 
         // Update transform from transform component
