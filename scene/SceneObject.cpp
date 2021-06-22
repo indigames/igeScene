@@ -60,8 +60,8 @@ namespace ige::scene
     Event<SceneObject&> SceneObject::s_deselectedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size, bool isCanvas)
-        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_bIsCanvas(isCanvas), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr),
+    SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size)
+        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr),
         m_dispatching(0), m_aabbDirty(2), m_bIsInMask(false)
     {
         // Generate new UUID
@@ -760,7 +760,6 @@ namespace ige::scene
             {"name", m_name},
             {"active", m_isActive},
             {"gui", m_bIsGui},
-            {"cvs", m_bIsCanvas},
             {"raycast", m_bIsRaycastTarget},
             {"interactable", m_bIsInteractable}
         };
@@ -795,7 +794,6 @@ namespace ige::scene
         setUUID(j.value("uuid", getUUID()));
         setActive(j.value("active", false));
         m_bIsGui = j.value("gui", false);
-        m_bIsCanvas = j.value("cvs", false);
         m_bIsRaycastTarget = j.value("raycast", false);
         m_bIsInteractable = j.value("interactable", false);
 
@@ -924,7 +922,7 @@ namespace ige::scene
         auto thisObj = getScene()->findObjectById(getId());
         for (auto it : jChildren)
         {
-            auto child = getScene()->createObject(it.at("name"), thisObj, it.value("gui", false), {}, it.value("cvs", false));
+            auto child = getScene()->createObject(it.at("name"), thisObj, it.value("gui", false), {});
             child->from_json(it);
         }
     }

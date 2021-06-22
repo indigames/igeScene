@@ -36,6 +36,9 @@ namespace ige::scene
         //! Skip serialize
         bool isSkipSerialize() const { return m_bSkipSerialize; }
         void setSkipSerialize(bool skip = true) { m_bSkipSerialize = skip; }
+        
+        //! Can multiple edit
+        inline virtual bool canMultiEdit() { return true; }
 
         //! Enable
         virtual void onEnable();
