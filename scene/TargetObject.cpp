@@ -34,11 +34,11 @@ namespace ige::scene
     }
 
     //! Get Name
-    const std::string& TargetObject::getName() const 
+    std::string TargetObject::getName() const 
     {
         if(m_objects.size() == 1)
             return m_objects[0]->getName();
-        return "Multiple Objects";
+        return "Multiple Values";
     }
 
     // Get parent
@@ -76,7 +76,7 @@ namespace ige::scene
         {
             for(auto& object: m_objects)
             {
-                object->removeComponent(component);
+                object->removeComponent(component->getName());
             }
             m_components.erase(found);
             return true;
@@ -84,10 +84,23 @@ namespace ige::scene
         return false;
     }
 
-    //! Get components list
-    std::vector<std::shared_ptr<Component>>& TargetObject::getComponents()
+    //! Remove a component by name
+    bool TargetObject::removeComponent(const std::string& name)
     {
-        return m_components;
+        auto found = std::find_if(m_components.begin(), m_components.end(), [&name](auto element) {
+            return name.compare(element->getName()) == 0;
+        });
+
+        if (found != m_components.end())
+        {
+            for (auto& object : m_objects)
+            {
+                object->removeComponent(name);
+            }
+            m_components.erase(found);
+            return true;
+        }
+        return false;
     }
 
     //! Check active
@@ -114,9 +127,9 @@ namespace ige::scene
         if(m_objects.size() < 0)
             return;
 
-        for(const auto& comp: m_objects[0]->getComponents())
+        for(auto comp: m_objects[0]->getComponents())
         {
-            if(comp->canMultiEdit())
+            if(comp && comp->canMultiEdit())
             {
                 m_components.push_back(comp);
             }
@@ -124,15 +137,19 @@ namespace ige::scene
 
         for(int i = 1; i < m_objects.size(); ++i)
         {
-            for(const auto& comp: m_components)
+            for(auto comp: m_components)
             {
-                const auto& object = m_objects[i];
-                const auto& components = object->getComponents();
-                auto itr = std::find(components.begin(), components.end(), comp);
-                
-                if(itr == components.end())
+                if (comp != nullptr)
                 {
-                    m_components.erase(std::find(m_components.begin(), m_components.end(), comp));
+                    auto name = comp->getName();
+                    const auto& components = m_objects[i]->getComponents();
+                    const auto& itr = std::find_if(components.begin(), components.end(), [&name](auto elem) {
+                        return name.compare(elem->getName()) == 0;
+                    });
+                    if (itr == components.end()) {
+                        const auto& itr2 = std::find(m_components.begin(), m_components.end(), comp);
+                        if (itr2 != m_components.end()) m_components.erase(itr2);
+                    }
                 }
             }
         }
@@ -143,8 +160,13 @@ namespace ige::scene
     {
         if(object != nullptr)
         {
-            m_objects.push_back(object);
-            collectSharedComponents();
+            object->setSelected(true);
+            auto itr = std::find(m_objects.begin(), m_objects.end(), object);
+            if (itr == m_objects.end())
+            {
+                m_objects.push_back(object);
+                collectSharedComponents();
+            }
         }
     }
 
@@ -156,9 +178,39 @@ namespace ige::scene
             auto itr = std::find(m_objects.begin(), m_objects.end(), object);
             if(itr != m_objects.end())
             {
+                object->setSelected(false);
                 m_objects.erase(itr);
                 collectSharedComponents();
             }            
         }
     }
+
+    //! Clear object
+    void TargetObject::clear()
+    {
+        for (auto& object : m_objects)
+        {
+            if (object)
+            {
+                object->setSelected(false);
+            }
+        }
+        m_objects.clear();
+        m_components.clear();
+    }
+
+    //! Get first target
+    SceneObject* TargetObject::getFirstTarget()
+    {
+        if (m_objects.size() > 0)
+            return m_objects[0];
+        return nullptr;
+    }
+
+    //! Get all targets
+    std::vector<SceneObject*>& TargetObject::getAllTargets()
+    {
+        return m_objects;
+    }
+
 } // namespace ige::scene

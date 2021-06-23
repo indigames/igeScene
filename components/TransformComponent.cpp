@@ -397,9 +397,9 @@ namespace ige::scene
 
     void TransformComponent::notifyObservers(const ETransformMessage &message)
     {
-        for (const auto& observer : m_observers)
+        for (auto observer : m_observers)
         {
-            if(observer)
+            if(observer != nullptr)
                 observer->onNotified(message);
         }
     }

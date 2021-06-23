@@ -5,6 +5,7 @@
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
 #include "scene/SceneManager.h"
+#include "scene/TargetObject.h"
 
 #include "components/Component.h"
 #include "components/CameraComponent.h"
@@ -166,13 +167,14 @@ namespace ige::scene
 
         setWindowSize({ -1.f, -1.f });
 
-        m_firstTargetId = (uint64_t)-1;
+        m_target = std::make_shared<TargetObject>(this);
         return true;
     }
 
     void Scene::clear()
     {
         clearTargets();
+        m_target = nullptr;
 
         for (auto& obj : m_objects)
             obj = nullptr;
@@ -839,11 +841,7 @@ namespace ige::scene
 
         if (target)
         {
-            if (m_targets.empty()) 
-                m_firstTargetId = target->getId();
-            target->setSelected(true);
-            auto itr = std::find(m_targets.begin(), m_targets.end(), target);
-            if (itr == m_targets.end()) m_targets.push_back(target);
+            m_target->add(target);
             getTargetAddedEvent().invoke(target);
         }        
     }
@@ -851,22 +849,21 @@ namespace ige::scene
     //! Remove target
     void Scene::removeTarget(SceneObject* target)
     {
-        auto itr = std::find(m_targets.begin(), m_targets.end(), target);
-        if (itr != m_targets.end())
-        {
-            target->setSelected(false);
-            m_targets.erase(itr);
-            getTargetRemovedEvent().invoke(target);
-        }
+        m_target->remove(target);
+        getTargetRemovedEvent().invoke(target);
     }
 
     //! Remove all target
     void Scene::clearTargets()
     {
-        for (auto& target : m_targets)
-            if (target) target->setSelected(false);
-        m_targets.clear();
+        m_target->clear();
         getTargetClearedEvent().invoke();
+    }
+
+    //! Return the first selected object
+    SceneObject* Scene::getFirstTarget()
+    { 
+        return m_target ? m_target->getFirstTarget() : nullptr;
     }
 
     //! Serialize

@@ -40,7 +40,7 @@ namespace ige::scene
         inline void setUUID(const std::string& uuid) { m_uuid = uuid; }
 
         //! Get Name
-        inline virtual const std::string &getName() const { return m_name; }
+        inline virtual std::string getName() const { return m_name; }
 
         //! Set Name
         void setName(const std::string& name);

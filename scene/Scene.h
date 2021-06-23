@@ -18,6 +18,7 @@ namespace ige::scene
 {
     class SceneObject;
     class TweenManager;
+    class TargetObject;
 
     /**
      * Class Scene: Manage scene objects hierarchy
@@ -175,7 +176,7 @@ namespace ige::scene
         std::shared_ptr<TweenManager> getTweenManager() const;
 
         //! Get targeted objects
-        const std::vector<SceneObject*>& getTargets() const { return m_targets; }
+        std::shared_ptr<TargetObject>& getTarget() { return m_target; }
 
         //! Add target
         void addTarget(SceneObject* target, bool clear = false);
@@ -187,7 +188,7 @@ namespace ige::scene
         void clearTargets();
 
         //! Return the first selected object
-        std::shared_ptr<SceneObject> getFirstTarget() { return findObjectById(m_firstTargetId); }
+        SceneObject* getFirstTarget();
 
     protected:
         //! Create root Objects
@@ -205,8 +206,10 @@ namespace ige::scene
     protected:
         //! Scene root node
         std::shared_ptr<SceneObject> m_root;
+
         //! UI root node
         std::shared_ptr<SceneObject> m_rootUI;
+
         //! Canvas
         std::shared_ptr<SceneObject> m_canvas;
 
@@ -281,7 +284,6 @@ namespace ige::scene
         bool m_raycastCapture;
 
         //! Targeted objects
-        std::vector<SceneObject*> m_targets = {};
-        uint64_t m_firstTargetId = (uint64_t)-1;
+        std::shared_ptr<TargetObject> m_target;
     };
 }

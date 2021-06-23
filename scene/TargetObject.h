@@ -26,7 +26,7 @@ namespace ige::scene
         virtual std::string getUUID() const override;
 
         //! Get Name
-        virtual const std::string &getName() const override;
+        virtual std::string getName() const override;
 
         // Get parent
         virtual SceneObject *getParent() const override;
@@ -37,20 +37,8 @@ namespace ige::scene
         //! Remove a component
         virtual bool removeComponent(const std::shared_ptr<Component> &component) override;
 
-        //! Get components list
-        virtual std::vector<std::shared_ptr<Component>> &getComponents() override;
-
-        //! Check component by type
-        template <typename T>
-        inline bool hasComponent();
-
-        //! Get component by type
-        template <typename T>
-        inline std::shared_ptr<T> getComponent();
-
-        //! Add component by type
-        template <typename T, typename... Args>
-        std::shared_ptr<T> addComponent(Args &&... args);
+        //! Remove a component by name
+        virtual bool removeComponent(const std::string& name) override;
 
         //! Enable or disable the actor
         void setActive(bool isActive) override;
@@ -64,9 +52,22 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json &j) override {}
 
-        //! Add/remove object
+        //! Add/remove/clear object
         void add(SceneObject* object);
         void remove(SceneObject* object);
+        void clear();
+
+        //! Check if the targets is empty
+        inline bool empty() const { return m_objects.empty(); }
+
+        //! Get the number of targets
+        inline size_t size() const { return m_objects.size(); }
+        
+        //! Get first target
+        SceneObject* getFirstTarget();
+
+        //! Get all targets
+        std::vector<SceneObject*>& getAllTargets();
 
     protected:
         //! Utils to collect shared components
@@ -75,47 +76,5 @@ namespace ige::scene
     protected:
         //! List of objects
         std::vector<SceneObject*> m_objects;
-
-        //! List of components
-        std::vector<std::shared_ptr<Component>> m_components;
     };
-
-    //! Check component by type
-    template <typename T>
-    inline bool TargetObject::hasComponent()
-    {
-        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
-
-        for (auto it = m_components.begin(); it != m_components.end(); ++it)
-        {
-            auto result = std::dynamic_pointer_cast<T>(*it);
-            if (result) return true;
-        }
-        return false;
-    }
-
-    //! Get component by type
-    template <typename T>
-    inline std::shared_ptr<T> TargetObject::getComponent()
-    {
-        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
-
-        for (auto it = m_components.begin(); it != m_components.end(); ++it)
-        {
-            auto result = std::dynamic_pointer_cast<T>(*it);
-            if (result)
-                return result;
-        }
-        return nullptr;
-    }
-
-    //! Add component by type
-    template <typename T, typename... Args>
-    inline std::shared_ptr<T> TargetObject::addComponent(Args &&... args)
-    {
-        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
-        auto instance = std::make_shared<T>(*this, args...);
-        addComponent(instance);
-        return instance;
-    }
 } // namespace ige::scene
