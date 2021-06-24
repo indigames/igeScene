@@ -428,7 +428,7 @@ namespace ige::scene
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id)
     {
         // Perform binary search for best performance, 'cause m_objects sorted by id.
-        auto found = std::lower_bound(m_objects.begin(), m_objects.end(), id, [&](auto elem, int id)
+        auto found = std::lower_bound(m_objects.begin(), m_objects.end(), id, [&](auto elem, uint64_t id)
         {
             return elem->getId() < id;
         });

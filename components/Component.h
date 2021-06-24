@@ -30,7 +30,7 @@ namespace ige::scene
         virtual std::string getName() const = 0;
 
         //! Enable/Disable
-        bool isEnabled() const { return m_bIsEnabled; }
+        virtual bool isEnabled() const { return m_bIsEnabled; }
         virtual void setEnabled(bool enable = true);
 
         //! Skip serialize
