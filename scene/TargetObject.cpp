@@ -1,6 +1,7 @@
 
 #include "scene/TargetObject.h"
 #include "scene/Scene.h"
+#include "components/CompoundComponent.h"
 
 
 namespace ige::scene
@@ -129,27 +130,36 @@ namespace ige::scene
 
         for(auto comp: m_objects[0]->getComponents())
         {
+            if (comp == nullptr) continue;
+
             if(comp && comp->canMultiEdit())
             {
-                m_components.push_back(comp);
-            }
-        }
+                auto compoundComp = std::make_shared<CompoundComponent>(*this);
+                compoundComp->add(comp);
 
-        for(int i = 1; i < m_objects.size(); ++i)
-        {
-            for(auto comp: m_components)
-            {
-                if (comp != nullptr)
+                auto shoudAdd = true;
+                for (int i = 1; i < m_objects.size(); ++i)
                 {
                     auto name = comp->getName();
                     const auto& components = m_objects[i]->getComponents();
                     const auto& itr = std::find_if(components.begin(), components.end(), [&name](auto elem) {
                         return name.compare(elem->getName()) == 0;
                     });
-                    if (itr == components.end()) {
-                        const auto& itr2 = std::find(m_components.begin(), m_components.end(), comp);
-                        if (itr2 != m_components.end()) m_components.erase(itr2);
+
+                    if (itr != components.end())
+                    {
+                        compoundComp->add(*itr);
                     }
+                    else
+                    {
+                        shoudAdd = false;
+                        break;
+                    }
+                }
+
+                if (shoudAdd)
+                {
+                    m_components.push_back(compoundComp);
                 }
             }
         }
