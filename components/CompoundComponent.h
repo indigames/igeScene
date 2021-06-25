@@ -23,6 +23,9 @@ namespace ige::scene
         // Inherited via Component
         virtual std::string getName() const override;
 
+        //! Get containee name
+        std::string getContainName();
+
         std::vector<std::shared_ptr<Component>>& getComponents() { return m_components; }
 
         //! Enable/Disable

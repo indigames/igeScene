@@ -57,12 +57,23 @@ namespace ige::scene
 
         if (found == m_components.end())
         {
-            m_components.push_back(component);
+            auto compoundComp = std::make_shared<CompoundComponent>(*this);
+            compoundComp->add(component);
+            m_objects[0]->addComponent(component);
 
-            for(auto& object: m_objects)
+            json jComp;
+            component->to_json(jComp);
+            for(int i = 1; i < m_objects.size(); ++i)
             {
-                object->addComponent(component);
+                auto obj = m_objects[i];
+                if (obj != nullptr)
+                {
+                    auto comp = obj->createComponent(component->getName());
+                    comp->from_json(jComp);
+                    compoundComp->add(comp);
+                }
             }
+            m_components.push_back(compoundComp);
         }
     }
 
@@ -70,7 +81,8 @@ namespace ige::scene
     bool TargetObject::removeComponent(const std::shared_ptr<Component> &component) 
     {
         auto found = std::find_if(m_components.begin(), m_components.end(), [&component](auto element) {
-            return component->getName().compare(element->getName()) == 0;
+            auto compoundComponent = std::dynamic_pointer_cast<CompoundComponent>(element);
+            return compoundComponent && component->getName().compare(compoundComponent->getContainName()) == 0;
         });
 
         if (found != m_components.end())
@@ -89,7 +101,8 @@ namespace ige::scene
     bool TargetObject::removeComponent(const std::string& name)
     {
         auto found = std::find_if(m_components.begin(), m_components.end(), [&name](auto element) {
-            return name.compare(element->getName()) == 0;
+            auto compoundComponent = std::dynamic_pointer_cast<CompoundComponent>(element);
+            return compoundComponent && name.compare(compoundComponent->getContainName()) == 0;
         });
 
         if (found != m_components.end())

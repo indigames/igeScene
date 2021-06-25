@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        CameraComponent(SceneObject &owner, const std::string &name);
+        CameraComponent(SceneObject &owner, const std::string &name = "");
 
         //! Destructor
         virtual ~CameraComponent();

@@ -72,6 +72,9 @@ namespace ige::scene
         //! Find child
         virtual SceneObject* findChild(std::string uuid);
 
+        //! Create a component by name
+        virtual std::shared_ptr<Component> createComponent(const std::string& name);
+
         //! Add a component
         virtual void addComponent(const std::shared_ptr<Component> &component);
 

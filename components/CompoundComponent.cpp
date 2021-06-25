@@ -24,6 +24,14 @@ namespace ige::scene
         return "CompoundComponent";
     }
 
+    //! Get containee name
+    std::string CompoundComponent::getContainName()
+    {
+        if (m_components.size() > 0)
+            return m_components[0]->getName();
+        return "";
+    }
+
     //! Add/remove/clear components
     void CompoundComponent::add(const std::shared_ptr<Component>& comp)
     {

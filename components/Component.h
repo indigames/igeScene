@@ -74,13 +74,13 @@ namespace ige::scene
 
         uint64_t getInstanceId() { return m_instanceId; }
 
-    protected:
         //! Serialize
-        virtual void to_json(json &j) const;
+        virtual void to_json(json& j) const;
 
         //! Deserialize
-        virtual void from_json(const json &j);
+        virtual void from_json(const json& j);
 
+    protected:
         //! Serialize finished event
         virtual void onSerializeFinished(Scene* scene);
 
