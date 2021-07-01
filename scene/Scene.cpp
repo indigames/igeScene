@@ -837,13 +837,14 @@ namespace ige::scene
     //! Add target
     void Scene::addTarget(SceneObject* target, bool clear)
     {
-        if (clear) clearTargets();
+        if (clear) 
+            clearTargets();
 
         if (target)
         {
             m_target->add(target);
             getTargetAddedEvent().invoke(target);
-        }        
+        }
     }
 
     //! Remove target

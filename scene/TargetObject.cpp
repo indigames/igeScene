@@ -218,8 +218,8 @@ namespace ige::scene
                 object->setSelected(false);
             }
         }
-        m_objects.clear();
         m_components.clear();
+        m_objects.clear();
     }
 
     //! Get first target

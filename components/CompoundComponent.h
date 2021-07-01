@@ -34,7 +34,8 @@ namespace ige::scene
 
         //! Add/remove/clear components
         void add(const std::shared_ptr<Component>& comp);
-        void remove(const std::shared_ptr<Component>& comp);
+        bool remove(const std::shared_ptr<Component>& comp);
+        bool remove(uint64_t compId);
         void clear();
 
         //! Check if the targets is empty

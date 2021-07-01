@@ -45,7 +45,7 @@ namespace ige::scene
         }        
     }
 
-    void CompoundComponent::remove(const std::shared_ptr<Component>& comp)
+    bool CompoundComponent::remove(const std::shared_ptr<Component>& comp)
     {
         if (comp != nullptr)
         {
@@ -53,8 +53,23 @@ namespace ige::scene
             if (itr != m_components.end())
             {
                 m_components.erase(itr);
+                return true;
             }
         }
+        return false;
+    }
+
+    bool CompoundComponent::remove(uint64_t compId)
+    {
+        auto itr = std::find_if(m_components.begin(), m_components.end(), [&compId](auto elem) {
+            return compId == elem->getInstanceId();
+        });
+        if (itr != m_components.end())
+        {
+            m_components.erase(itr);
+            return true;
+        }
+        return false;
     }
 
     void CompoundComponent::clear()
