@@ -5,7 +5,6 @@
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
 #include "scene/SceneManager.h"
-#include "scene/TargetObject.h"
 
 #include "components/Component.h"
 #include "components/CameraComponent.h"
@@ -51,10 +50,6 @@ namespace ige::scene
         1,2,5, 5,2,6,
         7,6,2, 7,2,3
     };
-
-    Event<SceneObject*> Scene::m_targetAddedEvent;
-    Event<SceneObject*> Scene::m_targetRemovedEvent;
-    Event<> Scene::m_targetClearedEvent;
 
     Scene::Scene(const std::string& name)
         : m_name(name)
@@ -166,16 +161,11 @@ namespace ige::scene
         m_canvasCamera->SetWidthBase(false);
 
         setWindowSize({ -1.f, -1.f });
-
-        m_target = std::make_shared<TargetObject>(this);
         return true;
     }
 
     void Scene::clear()
     {
-        clearTargets();
-        m_target = nullptr;
-
         for (auto& obj : m_objects)
             obj = nullptr;
         m_objects.clear();
@@ -833,40 +823,7 @@ namespace ige::scene
     {
         return m_tweenManager;
     }
-
-    //! Add target
-    void Scene::addTarget(SceneObject* target, bool clear)
-    {
-        if (clear) 
-            clearTargets();
-
-        if (target)
-        {
-            m_target->add(target);
-            getTargetAddedEvent().invoke(target);
-        }
-    }
-
-    //! Remove target
-    void Scene::removeTarget(SceneObject* target)
-    {
-        m_target->remove(target);
-        getTargetRemovedEvent().invoke(target);
-    }
-
-    //! Remove all target
-    void Scene::clearTargets()
-    {
-        m_target->clear();
-        getTargetClearedEvent().invoke();
-    }
-
-    //! Return the first selected object
-    SceneObject* Scene::getFirstTarget()
-    { 
-        return m_target ? m_target->getFirstTarget() : nullptr;
-    }
-
+   
     //! Serialize
     void Scene::to_json(json& j) const
     {
@@ -942,8 +899,5 @@ namespace ige::scene
         if (m_canvas == nullptr) {
             m_canvas = findObjectByName("Canvas");
         }
-
-        // Default to select the root node
-        addTarget(m_root.get());
     }
 }

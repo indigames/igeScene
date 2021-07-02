@@ -121,10 +121,6 @@ namespace ige::scene
         Event<Resource*>& getUIResourceRemovedEvent() { return m_uiResourceRemovedEvent; }
         Event<Scene*>& getSerializeFinishedEvent() { return m_serializeFinishedEvent; }
 
-        static Event<SceneObject*>& getTargetAddedEvent() { return m_targetAddedEvent; }
-        static Event<SceneObject*>& getTargetRemovedEvent() { return m_targetRemovedEvent; }
-        static Event<>& getTargetClearedEvent() { return m_targetClearedEvent; }
-
         //! Resource added/removed event
         void onResourceAdded(Resource* resource);
         void onResourceRemoved(Resource* resource);
@@ -175,21 +171,6 @@ namespace ige::scene
         //! Get tween manager
         std::shared_ptr<TweenManager> getTweenManager() const;
 
-        //! Get targeted objects
-        std::shared_ptr<TargetObject>& getTarget() { return m_target; }
-
-        //! Add target
-        void addTarget(SceneObject* target, bool clear = false);
-
-        //! Remove target
-        void removeTarget(SceneObject* target);
-
-        //! Remove all target
-        void clearTargets();
-
-        //! Return the first selected object
-        SceneObject* getFirstTarget();
-
     protected:
         //! Create root Objects
         virtual std::shared_ptr<SceneObject> createRootObject(const std::string& name = "");
@@ -236,11 +217,6 @@ namespace ige::scene
         //! Serialize event
         Event<Scene*> m_serializeFinishedEvent;
 
-        //! Targeted event
-        static Event<SceneObject*> m_targetAddedEvent;
-        static Event<SceneObject*> m_targetRemovedEvent;
-        static Event<> m_targetClearedEvent;
-
         //! Cache active camera
         CameraComponent* m_activeCamera = nullptr;
 
@@ -282,8 +258,5 @@ namespace ige::scene
 
         //! Capture flag
         bool m_raycastCapture;
-
-        //! Targeted objects
-        std::shared_ptr<TargetObject> m_target;
     };
 }
