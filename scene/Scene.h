@@ -229,8 +229,8 @@ namespace ige::scene
         EditableFigure* m_shadowEdgeMask = nullptr;
         Vec2 m_shadowTextureSize = { 2048, 2048 };
 
-        //! Object ID counter
-        uint64_t m_nextObjectID = 0;
+        //! Object ID counter, reserver 0 for multiple object
+        uint64_t m_nextObjectID = 1;
 
         //! Scene name
         std::string m_name;
