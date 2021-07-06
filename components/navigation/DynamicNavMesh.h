@@ -132,6 +132,9 @@ namespace ige::scene
         //! Update
         virtual void onUpdate(float dt) override;
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Detour tile cache instance that works with the nav mesh.
         dtTileCache *m_tileCache = nullptr;

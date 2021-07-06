@@ -51,4 +51,17 @@ namespace ige::scene
         setAreaId(j.value("id", 0));
         Component::from_json(j);
     }
+
+    //! Update property by key value
+    void NavArea::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("id") == 0)
+        {
+            setAreaId(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

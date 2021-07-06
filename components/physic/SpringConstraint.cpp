@@ -129,4 +129,21 @@ namespace ige::scene
         // Serialization done, clear json
         PhysicConstraint::onSerializeFinished(scene);
     }
+
+    //! Update property by key value
+    void SpringConstraint::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("low") == 0)
+            setLowerLimit(PhysicHelper::to_btVector3(val));
+        else if (key.compare("up") == 0)
+            setUpperLimit(PhysicHelper::to_btVector3(val));
+        else if (key.compare("enableV") == 0)
+            setEnable(PhysicHelper::to_btVector3(val));
+        else if (key.compare("stiff") == 0)
+            setStiffness(PhysicHelper::to_btVector3(val));
+        else if (key.compare("damp") == 0)
+            setDamping(PhysicHelper::to_btVector3(val));
+        else
+            PhysicConstraint::setProperty(key, val);
+    }
 } // namespace ige::scene

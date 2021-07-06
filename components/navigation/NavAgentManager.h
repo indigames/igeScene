@@ -137,6 +137,9 @@ namespace ige::scene
         //! Reactivate all agents
         void reactivateAllAgents();
 
+        //! Update property by key value
+        virtual bool canMultiEdit() override { return false; }
+
     protected:
         //! NavAgent created/destroyed events
         void onCreated(NavAgent *agent);

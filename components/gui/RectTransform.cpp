@@ -731,7 +731,6 @@ namespace ige::scene
     
     void RectTransform::setAnchoredPosition(const Vec2& value)
     {
-
         //! Convert AnchoredPosition to Local Position
         auto parent = getOwner()->getParent();
         if (parent == nullptr)
@@ -827,5 +826,38 @@ namespace ige::scene
         Component::from_json(j);
         setRectDirty();
         //setTransformDirty();
+    }
+
+    //! Update property by key value
+    void RectTransform::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("offset") == 0)
+        {
+            setOffset(val);
+        }
+        else if (key.compare("anchor") == 0)
+        {
+            setAnchor(val);
+        }
+        else if (key.compare("pivot") == 0)
+        {
+            setPivot(val);
+        }
+        else if (key.compare("size") == 0)
+        {
+            setSize(val);
+        }
+        else if (key.compare("anchorposition") == 0)
+        {
+            setAnchoredPosition(val);
+        }
+        else if (key.compare("anchoroffset") == 0)
+        {
+            setAnchorOffset(val);
+        }
+        else
+        {
+            TransformComponent::setProperty(key, val);
+        }
     }
 } // namespace ige::scene

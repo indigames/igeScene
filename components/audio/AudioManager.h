@@ -41,6 +41,8 @@ namespace ige::scene
         //! Get active listener
         std::optional<std::reference_wrapper<AudioListener>> getActiveListener() const;;
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
     protected:
         //! AudioSource created/destroyed events
         void onCreated(AudioSource &source);

@@ -26,6 +26,9 @@ namespace ige::scene
         //! Set size
         void setSize(const Vec3 &size);
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Serialize
         virtual void to_json(json &j) const override;

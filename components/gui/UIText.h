@@ -51,6 +51,9 @@ namespace ige::scene
         //! Figure
         EditableFigure *getFigure() { return m_text->getFigure(); }
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Overide function UIMaskable
         virtual EditableFigure* getCurrentFigure() override;

@@ -55,4 +55,10 @@ namespace ige::scene
     {
         UIText::from_json(j);
     }
+
+    //! Update property by key value
+    void UITextField::setProperty(const std::string& key, const json& val)
+    {
+        UIText::setProperty(key, val);
+    }
 } // namespace ige::scene

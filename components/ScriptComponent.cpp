@@ -447,7 +447,7 @@ namespace ige::scene
     }
 
     //! Member value changed
-    void ScriptComponent::onMemberValueChanged(const std::string& key, Value value)
+    void ScriptComponent::onMemberValueChanged(const std::string& key, json value)
     {
         // Change saved value
         m_members[key] = value;
@@ -457,31 +457,30 @@ namespace ige::scene
         {
             PyObject* pyValue = Py_None;
 
-            switch (value.getType()) 
+            switch (value.type()) 
             {
-                case Value::Type::UNSIGNED:
-                case Value::Type::INTEGER:
+            case json::value_t::number_integer:
+            case json::value_t::number_unsigned:
                 {
-                    pyValue = PyLong_FromLong(value.asInt());
+                    pyValue = PyLong_FromLong(value.get<int>());
                 }
                 break;
 
-                case Value::Type::FLOAT:
-                case Value::Type::DOUBLE:
+            case json::value_t::number_float:
                 {
-                    pyValue = PyFloat_FromDouble(value.asDouble());
+                    pyValue = PyFloat_FromDouble(value.get<double>());
                 }
                 break;
 
-                case Value::Type::BOOLEAN:
+            case json::value_t::boolean:
                 {
-                    pyValue = PyBool_FromLong(value.asInt());
+                    pyValue = PyBool_FromLong(value.get<bool>());
                 }
                 break;
 
-                case Value::Type::STRING:
+            case json::value_t::string:
                 {
-                    auto jVal = json::parse(value.asString(), 0, false);
+                    auto jVal = json::parse(value.get<std::string>(), 0, false);
                     auto uuid = jVal.is_null() || jVal.is_discarded() ? "" : jVal.value("uuid", "");
                     auto obj = getOwner()->getScene()->findObjectByUUID(uuid);
                     if (obj) 
@@ -500,7 +499,7 @@ namespace ige::scene
                     }
                     else
                     {
-                        pyValue = PyUnicode_FromString(value.asString().c_str());
+                        pyValue = PyUnicode_FromString(value.get<std::string>().c_str());
                     }
                 }
                 break;
@@ -591,43 +590,7 @@ namespace ige::scene
     {
         Component::to_json(j);
         j["path"] = m_path;
-
-        auto jMembers = json::array();
-        for (const auto& pair : m_members)
-        {
-            auto key = pair.first;
-            auto value = pair.second;
-
-            switch (value.getType())
-            {
-                case Value::Type::STRING:
-                {
-                    jMembers.push_back({ key, value.asString() });
-                }
-                break;
-
-                case Value::Type::INTEGER:
-                case Value::Type::UNSIGNED:
-                {
-                    jMembers.push_back({ key, value.asInt() });
-                }
-                break;
-
-                case Value::Type::DOUBLE:
-                case Value::Type::FLOAT:
-                {
-                    jMembers.push_back({ key, value.asDouble() });
-                }
-                break;
-
-                case Value::Type::BOOLEAN:
-                {
-                    jMembers.push_back({ key, value.asBool() });
-                }
-                break;
-            }
-        }
-        j["members"] = jMembers;
+        j["members"] = m_members;
     }
 
     //! Deserialize
@@ -636,31 +599,7 @@ namespace ige::scene
         setPath(j.at("path"));
 
         auto jMembers = j.value("members", json::array());
-        for (auto it : jMembers)
-        {
-            auto key = it.at(0);
-            auto val = it.at(1);
-
-            if (m_members.find(key) != m_members.end())
-            {
-                if (val.is_boolean())
-                {
-                    onMemberValueChanged(key, Value(val.get<bool>()));
-                }
-                else if (val.is_number_integer() || val.is_number_unsigned())
-                {
-                    onMemberValueChanged(key, Value(val.get<int>()));
-                }
-                else if (val.is_number_float())
-                {
-                    onMemberValueChanged(key, Value(val.get<double>()));
-                }
-                else if (val.is_string())
-                {
-                    onMemberValueChanged(key, Value(val.get<std::string>()));
-                }
-            }
-        }
+        m_members = jMembers.get<std::unordered_map<std::string, json>>();
         Component::from_json(j);
     }
 
@@ -673,7 +612,7 @@ namespace ige::scene
             auto key = pair.first;
             auto value = pair.second;
 
-            if (value.getType() == Value::Type::STRING)
+            if (value.type() == json::value_t::string)
             {
                 onMemberValueChanged(key, value);
             }
@@ -694,5 +633,23 @@ namespace ige::scene
         }
     }
 
-    
+
+    //! Update property by key value
+    void ScriptComponent::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("path") == 0)
+        {
+            setPath(val, true);
+        }
+        else if (key.compare("members") == 0)
+        {
+            for (const auto& [key, val] : val.items())
+            {
+                if (m_members.find(key) != m_members.end())
+                {
+                    onMemberValueChanged(key, val);
+                }
+            }
+        }
+    }
 } // namespace ige::scene

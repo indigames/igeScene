@@ -89,4 +89,16 @@ namespace ige::scene
         setRadius(j.at("radius"));
         PhysicObject::from_json(j);
     }
+
+    //! Update property by key value
+    void PhysicCapsule::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("height") == 0)
+            setHeight(val);
+        else if (key.compare("radius") == 0)
+            setRadius(val);
+        else
+            PhysicObject::setProperty(key, val);
+    }
+
 } // namespace ige::scene

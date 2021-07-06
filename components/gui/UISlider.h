@@ -75,6 +75,9 @@ public:
 
 	virtual void onSerializeFinished(Scene* scene) override;
 
+	//! Update property by key value
+	virtual void setProperty(const std::string& key, const json& val) override;
+
 protected:
 	bool updateWithPercent(float percent, bool manual);
 

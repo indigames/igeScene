@@ -246,4 +246,41 @@ namespace ige::scene
         setAlphaBlendingOp(j.value("aBlendOp", 2));
         Component::from_json(j);
     }
+
+    //! Update property by key value
+    void FigureComponent::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("path") == 0)
+        {
+            setPath(val);
+        }
+        else if (key.compare("fog") == 0)
+        {
+            setFogEnabled(val);
+        }
+        else if (key.compare("cull") == 0)
+        {
+            setCullFaceEnable(val);
+        }
+        else if (key.compare("zTest") == 0)
+        {
+            setDepthTestEnable(val);
+        }
+        else if (key.compare("zWrite") == 0)
+        {
+            setDepthWriteEnable(val);
+        }
+        else if (key.compare("aBlend") == 0)
+        {
+            setAlphaBlendingEnable(val);
+        }
+        else if (key.compare("aBlendOp") == 0)
+        {
+            setAlphaBlendingOp(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

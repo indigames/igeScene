@@ -38,6 +38,9 @@ namespace ige::scene
         //! Trigger when select joint in the editor
         void onJointObjectSelected(const std::string& name, bool selected);
 
+        //! Can multiple edit
+        inline virtual bool canMultiEdit() override { return false; }
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

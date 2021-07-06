@@ -25,4 +25,17 @@ namespace ige::scene
         setRecursive(j.value("recursive", true));
         Component::from_json(j);
     }
+
+    //! Update property by key value
+    void Navigable::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("recursive") == 0)
+        {
+            setRecursive(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

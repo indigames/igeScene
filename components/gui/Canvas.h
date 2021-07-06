@@ -42,6 +42,9 @@ namespace ige::scene
         // Set target canvas size, based on device resolution
         void setTargetCanvasSize(const Vec2 &canvasSize);
 
+        //! Can multiple edit
+        inline virtual bool canMultiEdit() override { return false; }
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

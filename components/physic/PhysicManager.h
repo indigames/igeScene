@@ -130,6 +130,10 @@ namespace ige::scene
         bool isShowDebug() const { return m_bShowDebug; }
         void setShowDebug(bool debug = true) { m_bShowDebug = debug; }
 
+        //! Check if multiple edit allowed
+        virtual bool canMultiEdit() override { return false; }
+
+
     protected:
         //! Collision callback
         void setCollisionCallback();

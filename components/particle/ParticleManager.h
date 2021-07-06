@@ -78,6 +78,9 @@ namespace ige::scene
         int getNumberOfThreads() const { return m_numThreads; }
         void setNumberOfThreads(int num);
 
+        //! Check if multple edit allowed
+        virtual bool canMultiEdit() override { return false; }
+
     protected:
         //! Initialize manager instance
         void initializeManager();

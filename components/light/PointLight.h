@@ -4,12 +4,11 @@
 using namespace pyxie;
 
 #include "components/Component.h"
-#include "components/LightComponent.h"
 
 namespace ige::scene
 {
     //! PointLight
-    class PointLight : public LightComponent
+    class PointLight : public Component
     {
     public:
         //! Constructor
@@ -41,6 +40,9 @@ namespace ige::scene
 
         //! Update
         void onUpdate(float dt) override;
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize

@@ -158,4 +158,49 @@ namespace ige::scene
         setPath(j.at("path"));
         Component::from_json(j);
     }
+
+    //! Update property by key value
+    void UIImage::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("size") == 0)
+        {
+            setSize(val);
+        }
+        else if (key.compare("fillmethod") == 0)
+        {
+            setFillMethod(val);
+        }
+        else if (key.compare("fillorigin") == 0)
+        {
+            setFillOrigin(val);
+        }
+        else if (key.compare("fillamount") == 0)
+        {
+            setFillAmount(val);
+        }
+        else if (key.compare("color") == 0)
+        {
+            setColor(val);
+        }
+        else if (key.compare("interactable") == 0)
+        {
+            setInteractable(val);
+        }
+        else if (key.compare("spritetype") == 0)
+        {
+            setSpriteType(val);
+        }
+        else if (key.compare("border") == 0)
+        {
+            setBorder(val);
+        }
+        else if (key.compare("path") == 0)
+        {
+            setPath(val);
+        }
+        else
+        {
+            SpriteComponent::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

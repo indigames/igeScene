@@ -80,6 +80,13 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j);
 
+        //! Get property value by key via JSON, it's slow so don't overuse it
+        template <typename T>
+        T getProperty(const std::string& key, const T& defaultVal);
+
+        //! Update json value
+        virtual void setProperty(const std::string& key, const json& val);
+
     protected:
         //! Serialize finished event
         virtual void onSerializeFinished(Scene* scene);
@@ -105,4 +112,13 @@ namespace ige::scene
 
     //! Deserialize
     void from_json(const json &j, Component &obj);
+
+    //! Get property value by key
+    template <typename T>
+    T Component::getProperty(const std::string& key, const T& defaultVal)
+    {
+        auto jComp = json{};
+        to_json(jComp);
+        return (jComp.contains(key) && !jComp.at(key).is_null()) ? jComp.value(key, defaultVal) : defaultVal;
+    }
 } // namespace ige::scene

@@ -40,6 +40,9 @@ namespace ige::scene
         uint32_t getAreaId() const { return m_areaId; }
         void setAreaId(uint32_t id) { m_areaId = id; }
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

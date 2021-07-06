@@ -28,8 +28,7 @@ namespace ige::scene
 
             // Recompute viewport transform
             getOwner()->getRectTransform()->setRectDirty();
-            getOwner()->getRectTransform()->setTransformDirty();
-            
+            getOwner()->getRectTransform()->setTransformDirty();            
         }
     }
 

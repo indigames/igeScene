@@ -314,6 +314,9 @@ namespace ige::scene
         //! Detour navigation mesh
         dtNavMesh *getNavMesh() const { return m_navMesh; }
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Release the navigation mesh and the mesh query
         virtual void releaseNavMesh();

@@ -80,8 +80,11 @@ public:
 
 	void setFadeDuration(float value) { m_fadeDuration = value; }
 	const float getFadeDuration() const { return m_fadeDuration; }
-protected:
 
+	//! Update property by key value
+	virtual void setProperty(const std::string& key, const json& val) override;
+
+protected:
 	virtual void _onTouchPress(EventContext* context) override;
 	virtual void _onTouchRelease(EventContext* context) override;
 	virtual void _onSelected(EventContext* context) override;

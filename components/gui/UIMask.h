@@ -30,6 +30,9 @@ public:
 	void setUseMask(bool value);
 	bool isUseMask() const { return m_bUseMask; }
 
+	//! Update property by key value
+	virtual void setProperty(const std::string& key, const json& val) override;
+
 protected:
 	bool m_bUseMask;
 	bool m_maskDirty;

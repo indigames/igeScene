@@ -79,7 +79,6 @@ namespace ige::scene
         const int getAlphaBlendingOp() const { return m_sprite ? m_sprite->getAlphaBlendingOp() : 0; }
         void setAlphaBlendingOp(int op) { if (m_sprite) m_sprite->setAlphaBlendingOp(op); }
 
-
         //! Alpha
         void setAlpha(float value);
         const float getAlpha() const;
@@ -89,7 +88,8 @@ namespace ige::scene
         virtual void setColor(const Vec4& value);
         virtual const Vec4 getColor()  const { return m_sprite->getColor(); }
 
-
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
     protected:
         void onCreateFigure(EditableFigure* figure);
         void onRemoveFigure(EditableFigure* figure);

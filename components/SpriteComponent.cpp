@@ -231,25 +231,76 @@ namespace ige::scene
         Component::to_json(j);
         j["path"] = getPath();
         j["size"] = getSize();
+        j["billboard"] = isBillboard();
         j["tiling"] = getTiling();
         j["offset"] = getOffset();
         j["wrapmode"] = (int)getWrapMode();
         j["color"] = getColor();
         j["spritetype"] = (int)getSpriteType();
         j["border"] = getBorder();
+        j["aBlend"] = isAlphaBlendingEnable();
+        j["aBlendOp"] = getAlphaBlendingOp();
     }
 
     //! Deserialize
     void SpriteComponent::from_json(const json &j)
     {
-        setSize(j.at("size"));
-        setTiling(j.at("tiling"));
-        setOffset(j.at("offset"));
-        setWrapMode(j.at("wrapmode"));
-        setColor(j.at("color"));
-        setSpriteType(j.at("spritetype"));
-        setBorder(j.at("border"));
-        setPath(j.at("path"));
+        setSize(j.value("size", Vec2(0, 0)));
+        setBillboard(j.value("billboard", false));
+        setTiling(j.value("tiling", Vec2(0, 0)));
+        setOffset(j.value("offset", Vec2(0, 0)));
+        setWrapMode(j.value("wrapmode", 0));
+        setColor(j.value("color", Vec4(0, 0, 0, 0)));
+        setSpriteType(j.value("spritetype", 0));
+        setBorder(j.value("border", Vec4(0, 0, 0, 0)));
+        setPath(j.value("path", ""));
+        setAlphaBlendingEnable(j.value("aBlend", false));
+        setAlphaBlendingOp(j.value("aBlendOp", 0));
         Component::from_json(j);
+    }
+
+    //! Update property by key value
+    void SpriteComponent::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("size") == 0)
+        {
+            setSize(val);
+        }
+        else if (key.compare("billboard") == 0)
+        {
+            setBillboard(val);
+        }
+        else if (key.compare("tiling") == 0)
+        {
+            setTiling(val);
+        }
+        else if (key.compare("offset") == 0)
+        {
+            setOffset(val);
+        }
+        else if (key.compare("wrapmode") == 0)
+        {
+            setWrapMode(val);
+        }
+        else if (key.compare("color") == 0)
+        {
+            setColor(val);
+        }
+        else if (key.compare("spritetype") == 0)
+        {
+            setSpriteType(val);
+        }
+        else if (key.compare("border") == 0)
+        {
+            setBorder(val);
+        }
+        else if (key.compare("path") == 0)
+        {
+            setPath(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
     }
 } // namespace ige::scene

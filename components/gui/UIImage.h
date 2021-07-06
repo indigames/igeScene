@@ -57,6 +57,9 @@ namespace ige::scene
         Event<>& getOnReleasedEvent() { return m_onReleasedEvent; }
         Event<>& getOnSelectedEvent() { return m_onSelectedEvent; }
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         virtual void _onTouchPress(EventContext* context);
         virtual void _onTouchDrag(EventContext* context);

@@ -773,7 +773,7 @@ namespace ige::scene
     //! Deserialize
     void DynamicNavMesh::from_json(const json &j)
     {
-        setTileSize(j.value("maxObs", 1024));
+        setMaxObstacles(j.value("maxObs", 1024));
         setMaxLayers(j.value("maxLayers", 16));
         NavMesh::from_json(j);
     }
@@ -785,4 +785,20 @@ namespace ige::scene
         build();
     }
 
+    //! Update property by key value
+    void DynamicNavMesh::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("maxObs") == 0)
+        {
+            setMaxObstacles(val);
+        }
+        else if (key.compare("maxLayers") == 0)
+        {
+            setMaxLayers(val);
+        }
+        else
+        {
+            NavMesh::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

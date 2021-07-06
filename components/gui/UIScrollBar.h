@@ -50,6 +50,8 @@ public:
 
 	virtual void onSerializeFinished(Scene* scene) override;
 
+	//! Update property by key value
+	virtual void setProperty(const std::string& key, const json& val) override;
 public:
 
 	void setHandle(std::shared_ptr<SceneObject> obj);

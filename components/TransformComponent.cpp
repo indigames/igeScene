@@ -428,6 +428,9 @@ namespace ige::scene
         j["pos"] = m_localPosition;
         j["rot"] = m_localRotation;
         j["scale"] = m_localScale;
+        j["wpos"] = m_worldPosition;
+        j["wrot"] = m_worldRotation;
+        j["wscale"] = m_worldScale;
     }
 
     //! Deserialize
@@ -438,5 +441,38 @@ namespace ige::scene
         setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
         Component::from_json(j);
         onUpdate(0.f); // pre-warm
+    }
+
+    //! Update property by key value
+    void TransformComponent::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("pos") == 0)
+        {
+            setPosition(val);
+        }
+        else if (key.compare("rot") == 0)
+        {
+            setRotation((Quat)val);
+        }
+        else if (key.compare("scale") == 0)
+        {
+            setScale(val);
+        }
+        else if (key.compare("wpos") == 0)
+        {
+            setWorldPosition(val);
+        }
+        else if (key.compare("wrot") == 0)
+        {
+            setWorldRotation((Quat)val);
+        }
+        else if (key.compare("wscale") == 0)
+        {
+            setWorldScale(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
     }
 } // namespace ige::scene

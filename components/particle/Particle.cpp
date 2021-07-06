@@ -281,4 +281,49 @@ namespace ige::scene
         setColor(j.value("color", Vec4(1.f, 1.f, 1.f, 1.f)));
         Component::from_json(j);
     }
+
+    //! Update property by key value
+    void Particle::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("path") == 0)
+        {
+            setPath(val);
+        }
+        else if (key.compare("layer") == 0)
+        {
+            setLayer(val);
+        }
+        else if (key.compare("speed") == 0)
+        {
+            setSpeed(val);
+        }
+        else if (key.compare("timeScale") == 0)
+        {
+            setTimeScale(val);
+        }
+        else if (key.compare("autoDraw") == 0)
+        {
+            setAutoDrawing(val);
+        }
+        else if (key.compare("loop") == 0)
+        {
+            setLoop(val);
+        }
+        else if (key.compare("target") == 0)
+        {
+            setTargetLocation(val);
+        }
+        else if (key.compare("param") == 0)
+        {
+            setDynamicInputParameter(val);
+        }
+        else if (key.compare("color") == 0)
+        {
+            setColor(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

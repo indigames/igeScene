@@ -508,4 +508,39 @@ namespace ige::scene
                 val.get_to(*constraint);
         }
     }
+
+    //! Update property by key value
+    void PhysicObject::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("mass") == 0)
+            setMass(val);
+        else if (key.compare("restitution") == 0)
+            setRestitution(val);
+        else if (key.compare("friction") == 0)
+            setFriction(val);
+        else if (key.compare("linearVelocity") == 0)
+            setLinearVelocity(PhysicHelper::to_btVector3(val));
+        else if (key.compare("angularVelocity") == 0)
+            setAngularVelocity(PhysicHelper::to_btVector3(val));
+        else if (key.compare("linearFactor") == 0)
+            setLinearFactor(PhysicHelper::to_btVector3(val));
+        else if (key.compare("angularFactor") == 0)
+            setAngularFactor(PhysicHelper::to_btVector3(val));
+        else if (key.compare("isKinematic") == 0)
+            setIsKinematic(val);
+        else if (key.compare("isTrigger") == 0)
+            setIsTrigger(val);
+        else if (key.compare("scale") == 0)
+            setLocalScale(val);
+        else if (key.compare("group") == 0)
+            setCollisionFilterGroup(val);
+        else if (key.compare("mask") == 0)
+            setCollisionFilterMask(val);
+        else if (key.compare("ccd") == 0)
+            setCCD(val);
+        else if (key.compare("margin") == 0)
+            setCollisionMargin(val);
+        else
+            Component::setProperty(key, val);
+    }
 } // namespace ige::scene

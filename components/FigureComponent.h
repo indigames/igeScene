@@ -58,6 +58,9 @@ namespace ige::scene
         const int getAlphaBlendingOp() const { return m_alphaBlendingOp; }
         void setAlphaBlendingOp(int op);
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

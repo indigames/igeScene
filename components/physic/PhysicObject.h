@@ -140,6 +140,9 @@ namespace ige::scene
         template <typename T, typename... Args>
         std::shared_ptr<T> addConstraint(Args &&... args);
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     public:
         //! Apply torque
         virtual void applyTorque(const btVector3& torque) {

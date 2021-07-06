@@ -134,4 +134,19 @@ namespace ige::scene
         // Serialization done, clear json
         m_json.clear();
     }
+
+    //! Update property by key value
+    void PhysicConstraint::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("type") == 0)
+            setType((ConstraintType)val);
+        else if (key.compare("enableCol") == 0)
+            setEnableCollisionBetweenBodies(val);
+        else if (key.compare("otherId") == 0)
+            setOtherUUID(val);
+        else if (key.compare("enable") == 0)
+            setEnabled(val);
+        else if (key.compare("breakTs") == 0)
+            setBreakingImpulseThreshold(val);
+    }
 } // namespace ige::scene

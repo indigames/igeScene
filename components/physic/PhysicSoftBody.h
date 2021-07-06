@@ -126,6 +126,9 @@ namespace ige::scene
         virtual const btVector3& getWindVelocity() const { return m_windVelocity; }
         virtual void setWindVelocity(const btVector3& velocity);
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     public:
         //! Update Bullet transform
         virtual void updateBtTransform() override;

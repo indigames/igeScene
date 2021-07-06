@@ -11,7 +11,8 @@ namespace ige::scene {
 
 #if IGE_PLATFORM == IGE_PLATFORM_EDITOR
 
-	class igeInspectorDispatchSystem {
+	class igeInspectorDispatchSystem 
+	{
 	public:
 		static igeInspectorDispatchSystem* getInstance();
 		static void setInstance(std::shared_ptr<igeInspectorDispatchSystem> instance);

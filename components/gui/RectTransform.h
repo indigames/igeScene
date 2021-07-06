@@ -48,11 +48,11 @@ namespace ige::scene
 
         //! Anchor Offset
         const Vec4& getAnchorOffset() const { return m_anchorOffset; }
+        void setAnchorOffset(const Vec4& value) { m_anchorOffset = value; }
 
         //! Anchored Position
         const Vec2& getAnchoredPosition() const { return m_anchoredPosition; }
         void setAnchoredPosition(const Vec2& value);
-
 
         //! Size
         Vec2 getSize();
@@ -100,8 +100,13 @@ namespace ige::scene
         //! Handle notification from parent: just do nothing
         void onNotified(const ETransformMessage &message) override;
 
+        //! Update rect & size
         void updateRect(bool only = false);
         void updateSize();
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

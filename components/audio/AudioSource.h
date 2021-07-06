@@ -109,6 +109,8 @@ namespace ige::scene
         static Event<AudioSource&>& getCreatedEvent() { return m_onCreatedEvent; }
         static Event<AudioSource&>& getDestroyedEvent() { return m_onDestroyedEvent; }
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

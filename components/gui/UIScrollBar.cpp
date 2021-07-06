@@ -566,5 +566,48 @@ void UIScrollBar::onSerializeFinished(Scene* scene)
     }
 }
 
+//! Update property by key value
+void UIScrollBar::setProperty(const std::string& key, const json& val)
+{
+    if (key.compare("content") == 0)
+    {
+        m_contentUUID = val;
+    }
+    else if (key.compare("directionbar") == 0)
+    {
+        m_direction = val;
+    }
+    else if (key.compare("valuebar") == 0)
+    {
+        m_value = val;
+    }
+    else if (key.compare("sizebar") == 0)
+    {
+        m_size = val;
+    }
+    else if (key.compare("normalcolor") == 0)
+    {
+        setNormalColor(val);
+    }
+    else if (key.compare("pressedcolor") == 0)
+    {
+        setPressedColor(val);
+    }
+    else if (key.compare("disabledcolor") == 0)
+    {
+        setDisabledColor(val);
+    }
+    else if (key.compare("fadeduration") == 0)
+    {
+        setFadeDuration(val);
+    }
+    else
+    {
+        UIImage::setProperty(key, val);
+    }
+
+    m_dirtySetObj = true;
+    _update();
+}
 
 NS_IGE_SCENE_END

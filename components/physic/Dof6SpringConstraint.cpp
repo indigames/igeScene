@@ -445,4 +445,55 @@ namespace ige::scene
         // Serialization done
         PhysicConstraint::onSerializeFinished(scene);
     }
+
+    //! Update property by key value
+    void Dof6SpringConstraint::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("lLow") == 0)
+            setLinearLowerLimit(PhysicHelper::to_btVector3(val));
+        else if (key.compare("lUp") == 0)
+            setLinearUpperLimit(PhysicHelper::to_btVector3(val));
+        else if (key.compare("lVel") == 0)
+            setLinearTargetVelocity(PhysicHelper::to_btVector3(val));
+        else if (key.compare("aLow") == 0)
+            setAngularLowerLimit(PhysicHelper::to_btVector3(val));
+        else if (key.compare("aUp") == 0)
+            setAngularUpperLimit(PhysicHelper::to_btVector3(val));
+        else if (key.compare("aVel") == 0)
+            setAngularTargetVelocity(PhysicHelper::to_btVector3(val));
+        else if (key.compare("lBounce") == 0)
+            setLinearBounce(PhysicHelper::to_btVector3(val));
+        else if (key.compare("aBounce") == 0)
+            setAngularBounce(PhysicHelper::to_btVector3(val));
+        else if (key.compare("lSpring") == 0)
+            setLinearSpringEnabled(PhysicHelper::to_btVector3(val));
+        else if (key.compare("lStiff") == 0)
+            setLinearStiffness(PhysicHelper::to_btVector3(val));
+        else if (key.compare("lDamp") == 0)
+            setLinearDamping(PhysicHelper::to_btVector3(val));
+        else if (key.compare("aSpring") == 0)
+            setAngularSpringEnabled(PhysicHelper::to_btVector3(val));
+        else if (key.compare("aStiff") == 0)
+            setAngularStiffness(PhysicHelper::to_btVector3(val));
+        else if (key.compare("aDamp") == 0)
+            setAngularDamping(PhysicHelper::to_btVector3(val));
+        else if (key.compare("lMotor") == 0)
+            setLinearMotorEnabled(PhysicHelper::to_btVector3(val));
+        else if (key.compare("lMForce") == 0)
+            setLinearMaxMotorForce(PhysicHelper::to_btVector3(val));
+        else if (key.compare("lServo") == 0)
+            setLinearServoEnabled(PhysicHelper::to_btVector3(val));
+        else if (key.compare("lSTarget") == 0)
+            setLinearServoTarget(PhysicHelper::to_btVector3(val));
+        else if (key.compare("aMotor") == 0)
+            setAngularMotorEnabled(PhysicHelper::to_btVector3(val));
+        else if (key.compare("aMForce") == 0)
+            setAngularMaxMotorForce(PhysicHelper::to_btVector3(val));
+        else if (key.compare("aServo") == 0)
+            setAngularServoEnabled(PhysicHelper::to_btVector3(val));
+        else if (key.compare("aSTarget") == 0)
+            setAngularServoTarget(PhysicHelper::to_btVector3(val));
+        else
+            PhysicConstraint::setProperty(key, val);
+    }
 } // namespace ige::scene

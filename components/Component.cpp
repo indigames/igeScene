@@ -86,6 +86,15 @@ namespace ige::scene
         setEnabled(m_bIsEnabled);
     }
 
+    //! Update json value
+    void Component::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("enabled") == 0)
+        {
+            setEnabled(val);
+        }
+    }
+
     //! Serialize component
     void to_json(json &j, const Component &obj)
     {

@@ -356,4 +356,52 @@ namespace ige::scene
         Component::from_json(j);
     }
 
+    //! Update property by key value
+    void NavAgent::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("targetPos") == 0)
+        {
+            setTargetPosition(val);
+        }
+        else if (key.compare("syncPos") == 0)
+        {
+            setUpdateNodePosition(val);
+        }
+        else if (key.compare("maxAcc") == 0)
+        {
+            setMaxAcceleration(val);
+        }
+        else if (key.compare("maxSpeed") == 0)
+        {
+            setMaxSpeed(val);
+        }
+        else if (key.compare("radius") == 0)
+        {
+            setRadius(val);
+        }
+        else if (key.compare("height") == 0)
+        {
+            setHeight(val);
+        }
+        else if (key.compare("filter") == 0)
+        {
+            setQueryFilterType(val);
+        }
+        else if (key.compare("obsAvoid") == 0)
+        {
+            setObstacleAvoidanceType(val);
+        }
+        else if (key.compare("navQuality") == 0)
+        {
+            setNavigationQuality(val);
+        }
+        else if (key.compare("navPushiness") == 0)
+        {
+            setNavigationPushiness(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

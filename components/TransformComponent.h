@@ -121,6 +121,9 @@ namespace ige::scene
         virtual Vec3 globalToLocal(Vec3 point) const;
         virtual Vec3 localToGlobal(Vec3 point) const;
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

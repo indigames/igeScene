@@ -24,6 +24,9 @@ namespace ige::scene
         bool isRecursive() const { return m_bIsRecursive; }
         void setRecursive(bool recursive) { m_bIsRecursive = recursive; }
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;

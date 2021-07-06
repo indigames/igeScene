@@ -165,4 +165,28 @@ namespace ige::scene
     EditableFigure* UIText::getCurrentFigure() { return getFigure(); }
     SceneObject* UIText::getSceneObjectOwner() { return getOwner(); }
 
+    //! Update property by key value
+    void UIText::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("text") == 0)
+        {
+            setText(val);
+        }
+        else if (key.compare("font") == 0)
+        {
+            setFontPath(val);
+        }
+        else if (key.compare("size") == 0)
+        {
+            setFontSize(val);
+        }
+        else if (key.compare("color") == 0)
+        {
+            setColor(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

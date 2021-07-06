@@ -139,4 +139,17 @@ namespace ige::scene
         setGlobalVolume(j.value("gVol", 1.f));
         Component::from_json(j);
     }
+
+    //! Update property by key value
+    void AudioManager::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("gVol") == 0)
+        {
+            setGlobalVolume(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

@@ -72,8 +72,10 @@ public:
 
 	virtual void onSerializeFinished(Scene* scene) override;
 	
-protected:
+	//! Update property by key value
+	virtual void setProperty(const std::string& key, const json& val) override;
 
+protected:
 	virtual void _onTouchPress(EventContext* context) override;
 	virtual void _onTouchRelease(EventContext* context) override;
 	virtual void _onTouchDrag(EventContext* context) override;

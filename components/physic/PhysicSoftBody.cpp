@@ -673,4 +673,52 @@ namespace ige::scene
         setAnchorHardness(j.value("ahr", 1.f));
         PhysicObject::from_json(j);
     }
+
+    //! Update property by key value
+    void PhysicSoftBody::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("meshIdx") == 0)
+            setMeshIndex(val);
+        else if (key.compare("dampCoeff") == 0)
+            setDampingCoeff(val);
+        else if (key.compare("presCoeff") == 0)
+            setPressureCoeff(val);
+        else if (key.compare("volCoeff") == 0)
+            setVolumeConvCoeff(val);
+        else if (key.compare("friCoeff") == 0)
+            setDynamicFrictionCoeff(val);
+        else if (key.compare("poseCoeff") == 0)
+            setPoseMatchCoeff(val);
+        else if (key.compare("repStiff") == 0)
+            setRepulsionStiffness(val);
+        else if (key.compare("sleepThr") == 0)
+            setSleepingThreshold(val);
+        else if (key.compare("restLS") == 0)
+            setRestLengthScale(val);
+        else if (key.compare("graF") == 0)
+            setGravityFactor(val);
+        else if (key.compare("velF") == 0)
+            setVelocityFactor(val);
+        else if (key.compare("pItrNum") == 0)
+            setPosIterationNumber(val);
+        else if (key.compare("aero") == 0)
+            setAeroModel(val);
+        else if (key.compare("isSelfCol") == 0)
+            setSelfCollision(val);
+        else if (key.compare("isSoftCol") == 0)
+            setSoftSoftCollision(val);
+        else if (key.compare("windVel") == 0)
+            setWindVelocity(PhysicHelper::to_btVector3(val));
+        else if (key.compare("rch") == 0)
+            setRigidContactHardness(val);
+        else if (key.compare("kch") == 0)
+            setKineticContactHardness(val);
+        else if (key.compare("sch") == 0)
+            setSoftContactHardness(val);
+        else if (key.compare("ahr") == 0)
+            setAnchorHardness(val);
+        else
+            PhysicObject::setProperty(key, val);
+    }
+
 } // namespace ige::scene

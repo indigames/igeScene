@@ -167,6 +167,9 @@ namespace ige::scene
         static Event<NavAgent *> &getActivatedEvent() { return m_onActivatedEvent; }
         static Event<NavAgent *> &getDeactivatedEvent() { return m_onDeactivatedEvent; }
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Update Detour parameters.
         void updateParameters();
