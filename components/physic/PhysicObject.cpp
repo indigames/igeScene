@@ -25,14 +25,16 @@ namespace ige::scene
     {
         // Register manager
         auto manager = getOwner()->getRoot()->getComponent<PhysicManager>();
-        setManager(manager ? manager.get() : getOwner()->getRoot()->addComponent<PhysicManager>().get());
+        if (manager == nullptr)
+            manager = getOwner()->getRoot()->addComponent<PhysicManager>();
+        setManager(manager);
     }
 
     //! Destructor
     PhysicObject::~PhysicObject()
     {
         destroy();
-        m_manager = nullptr;
+        m_manager.reset();
     }
 
     //! Initialization

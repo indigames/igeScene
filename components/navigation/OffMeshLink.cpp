@@ -12,14 +12,14 @@ namespace ige::scene
 
     OffMeshLink::~OffMeshLink()
     {
-        m_endPoint = nullptr;
+        m_endPoint.reset();
     }
 
     //! Serialize
     void OffMeshLink::to_json(json &j) const
     {
         Component::to_json(j);
-        j["endUuid"] = getEndPoint() ? getEndPoint()->getUUID() : std::string();
+        j["endUuid"] = getEndPoint() ? getEndPoint()->getUUID() : "";
         j["radius"] = getRadius();
         j["2way"] = isBidirectional();
         j["mask"] = getMask();
@@ -30,7 +30,7 @@ namespace ige::scene
     void OffMeshLink::from_json(const json &j)
     {
         auto uuid = j.value("endUuid", std::string());
-        setEndPoint(getOwner()->getScene()->findObjectByUUID(uuid).get());
+        setEndPoint(getOwner()->getScene()->findObjectByUUID(uuid));
         setRadius(j.value("radius", 1.f));
         setBidirectional(j.value("2way", true));
         setMask(j.value("mask", 0));
@@ -43,8 +43,7 @@ namespace ige::scene
     {
         if (key.compare("endUuid") == 0)
         {
-            auto obj = getOwner()->getScene()->findObjectByUUID(val).get();
-            setEndPoint(obj);
+            setEndPoint(getOwner()->getScene()->findObjectByUUID(val));
         }
         else if (key.compare("radius") == 0)
         {

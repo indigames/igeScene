@@ -174,7 +174,7 @@ namespace ige::scene
         Scene* getScene() { return m_scene; }
 
         //! Get scene root
-        SceneObject* getRoot();
+        std::shared_ptr<SceneObject> getRoot();
 
         void setIsRaycastTarget(bool value) { m_bIsRaycastTarget = value; }
         bool isRaycastTarget() const { return m_bIsRaycastTarget; }

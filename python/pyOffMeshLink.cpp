@@ -83,7 +83,7 @@ namespace ige::scene
     PyObject *OffMeshLink_getEndPoint(PyObject_OffMeshLink *self)
     {
         auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        obj->sceneObject = self->component->getEndPoint();
+        obj->sceneObject = self->component->getEndPoint().get();
         return (PyObject*)obj;
     }
 
@@ -95,14 +95,15 @@ namespace ige::scene
             auto sceneObject = self->component->getOwner()->getScene()->findObjectByUUID(std::string(uuid));
             if (sceneObject)
             {
-                self->component->setEndPoint(sceneObject.get());
+                self->component->setEndPoint(sceneObject);
                 return 0;
             }
         }
         else if (value->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)value;
-            self->component->setEndPoint(sceneObj->sceneObject);
+            auto sceneObject = self->component->getOwner()->getScene()->findObjectByUUID(std::string(sceneObj->sceneObject->getUUID()));
+            self->component->setEndPoint(sceneObject);
             return 0;
         }
         return -1;

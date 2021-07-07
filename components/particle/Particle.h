@@ -22,8 +22,8 @@ namespace ige::scene
         virtual std::string getName() const override { return "Particle"; }
 
         //! Cache ParticleManager
-        ParticleManager* getManager() const { return m_manager; }
-        void setManager(ParticleManager* manager) { m_manager = manager; }
+        std::shared_ptr<ParticleManager> getManager() const { return m_manager.expired() ? nullptr : m_manager.lock(); }
+        void setManager(std::shared_ptr<ParticleManager> manager) { m_manager = manager; }
 
         //! Enable/disable
         void setEnabled(bool enable = true) override;
@@ -155,6 +155,6 @@ namespace ige::scene
         Vec3 m_lastScale = {};
 
         //! Cache ParticleManager
-        ParticleManager* m_manager = nullptr;
+        std::weak_ptr<ParticleManager> m_manager;
     };
 } // namespace ige::scene

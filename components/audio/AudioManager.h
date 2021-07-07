@@ -43,6 +43,10 @@ namespace ige::scene
 
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
+
+        //! Check if multple edit allowed
+        virtual bool canMultiEdit() override { return false; }
+
     protected:
         //! AudioSource created/destroyed events
         void onCreated(AudioSource &source);

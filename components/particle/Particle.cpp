@@ -18,7 +18,9 @@ namespace ige::scene
     {
         // Register manager
         auto manager = getOwner()->getRoot()->getComponent<ParticleManager>();
-        setManager(manager ? manager.get() : getOwner()->getRoot()->addComponent<ParticleManager>().get());
+        if(manager == nullptr)
+            getOwner()->getRoot()->addComponent<ParticleManager>();
+        setManager(manager);
 
         // Set path
         if (!path.empty())
@@ -39,7 +41,7 @@ namespace ige::scene
             m_effect->Release();
             m_effect = nullptr;
         }
-        m_manager = nullptr;
+        m_manager.reset();
     }
 
     //! Set enabled
@@ -258,6 +260,7 @@ namespace ige::scene
         Component::to_json(j);
         j["path"] = getPath();
         j["layer"] = getLayer();
+        j["mask"] = getGroupMask();
         j["speed"] = getSpeed();
         j["timeScale"] = getTimeScale();
         j["autoDraw"] = isAutoDrawing();
@@ -272,6 +275,7 @@ namespace ige::scene
     {
         setPath(j.value("path", std::string()));
         setLayer(j.value("layer", 0));
+        setGroupMask(j.value("mask", 0));
         setSpeed(j.value("speed", 1.f));
         setTimeScale(j.value("timeScale", 1.f));
         setAutoDrawing(j.value("autoDraw", true));
@@ -292,6 +296,10 @@ namespace ige::scene
         else if (key.compare("layer") == 0)
         {
             setLayer(val);
+        }
+        else if (key.compare("mask") == 0)
+        {
+            setGroupMask(val);
         }
         else if (key.compare("speed") == 0)
         {

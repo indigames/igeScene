@@ -204,6 +204,8 @@ namespace ige::scene
         {
             getOwner()->getScene()->setActiveCamera(this);
         }
+
+        if (getCamera()) getCamera()->SetResourceName(m_name.c_str());
     }
 
     //! Update property by key value
@@ -212,6 +214,14 @@ namespace ige::scene
         if (key.compare("wBase") == 0)
         {
             setWidthBase(val);
+        }
+        else if (key.compare("name") == 0)
+        {
+            if (m_name.compare(val) != 0)
+            {
+                m_name = val;
+                if (getCamera()) getCamera()->SetResourceName(m_name.c_str());
+            }
         }
         else if (key.compare("fov") == 0)
         {
@@ -272,6 +282,18 @@ namespace ige::scene
         else if (key.compare("scale") == 0)
         {
             setScale(val);
+        }
+        else if (key.compare("pan") == 0)
+        {
+            setPan(val);
+        }
+        else if (key.compare("tilt") == 0)
+        {
+            setTilt(val);
+        }
+        else if (key.compare("roll") == 0)
+        {
+            setRoll(val);
         }
         else
         {

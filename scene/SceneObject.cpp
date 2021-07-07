@@ -505,9 +505,9 @@ namespace ige::scene
     }
 
     //! Get scene root
-    SceneObject* SceneObject::getRoot()         
+    std::shared_ptr<SceneObject> SceneObject::getRoot()
     {
-        return m_scene ? m_scene->getRoot().get() : nullptr;
+        return m_scene ? m_scene->getRoot() : nullptr;
     }
 
     //! Event Dispatch System 

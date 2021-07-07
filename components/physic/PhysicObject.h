@@ -27,8 +27,8 @@ namespace ige::scene
         virtual ~PhysicObject();
 
         //! Cache PhysicManager
-        PhysicManager* getManager() const { return m_manager; }
-        void setManager(PhysicManager* manager) { m_manager = manager; }
+        std::shared_ptr<PhysicManager> getManager() const { return m_manager.expired() ? nullptr : m_manager.lock(); }
+        void setManager(std::shared_ptr<PhysicManager> manager) { m_manager = manager; }
 
         //! Initialization
         virtual bool init();
@@ -311,7 +311,7 @@ namespace ige::scene
         bool m_bIsDirty = false;
 
         //! Cache PhysicManager
-        PhysicManager* m_manager = nullptr;
+        std::weak_ptr<PhysicManager> m_manager;
     };
 
     //! Add constraint by type

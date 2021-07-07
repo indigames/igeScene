@@ -21,8 +21,8 @@ namespace ige::scene
         std::string getName() const override { return "OffMeshLink"; }
 
         //! Endpoint object
-        SceneObject* getEndPoint() const { return m_endPoint; }
-        void setEndPoint(SceneObject* endpoint) { m_endPoint = endpoint; }
+        std::shared_ptr<SceneObject> getEndPoint() const { return m_endPoint.expired() ? nullptr : m_endPoint.lock(); }
+        void setEndPoint(std::shared_ptr<SceneObject> endpoint) { m_endPoint = endpoint; }
 
         //! Radius
         float getRadius() const { return m_radius; }
@@ -52,7 +52,7 @@ namespace ige::scene
 
     protected:
         //! Endpoint object
-        SceneObject* m_endPoint = nullptr;
+        std::weak_ptr<SceneObject> m_endPoint;
 
         //! Radius
         float m_radius = 1.f;

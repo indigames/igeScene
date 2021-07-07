@@ -22,7 +22,9 @@ namespace ige::scene
     {
         // Register audio manager
         auto manager = getOwner()->getRoot()->getComponent<AudioManager>();
-        setManager(manager ? manager.get() : getOwner()->getRoot()->addComponent<AudioManager>().get());
+        if(manager == nullptr)
+            manager = getOwner()->getRoot()->addComponent<AudioManager>();
+        setManager(manager);
 
         // Set path
         if (!path.empty())
@@ -39,7 +41,7 @@ namespace ige::scene
     {
         m_onDestroyedEvent.invoke(*this);
         m_audioSource = nullptr;
-        m_manager = nullptr;
+        m_manager.reset();
     }
 
     //! Set enabled
