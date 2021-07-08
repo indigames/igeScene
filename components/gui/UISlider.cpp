@@ -14,7 +14,7 @@ UISlider::UISlider(SceneObject& owner) :
 	m_min(0), m_max(1), m_value(0), m_wholeNumbers(false),
 	m_rectFill(nullptr), m_rectHandle(nullptr), m_imgHandle(nullptr),
 	m_normalColor(1.0f, 1.0f, 1.0f, 1.0f), m_pressedColor(0.78f, 0.78f, 0.78f, 1.0f), m_disableColor(0.78f, 0.78f, 0.78f, 1.0f), m_fadeDuration(0.1f),
-	m_dirtySetObj(false), m_bIsHorizontal(false), m_bIsRevert(false), m_direction(Direction::LEFT_TO_RIGHT), m_bIsInit(false)
+	m_dirtySetObj(false), m_bIsHorizontal(false), m_bIsRevert(false), m_direction(Direction::LeftToRight), m_bIsInit(false)
 {
 	m_bIsInteractable = true;
 	init();
@@ -430,19 +430,19 @@ void UISlider::onChangeDirection()
 {
 	bool oldRot = m_bIsHorizontal;
 	switch (m_direction) {
-	case Direction::LEFT_TO_RIGHT:
+	case Direction::LeftToRight:
 		m_bIsHorizontal = false;
 		m_bIsRevert = false;
 		break;
-	case Direction::RIGHT_TO_LEFT:
+	case Direction::RightToLeft:
 		m_bIsHorizontal = false;
 		m_bIsRevert = true;
 		break;
-	case Direction::BOTTOM_TO_TOP:
+	case Direction::BottomToTop:
 		m_bIsHorizontal = true;
 		m_bIsRevert = false;
 		break;
-	case Direction::TOP_TO_BOTTOM:
+	case Direction::TopToBottom:
 		m_bIsHorizontal = true;
 		m_bIsRevert = true;
 		break;
@@ -610,7 +610,7 @@ void UISlider::setProperty(const std::string& key, const json& val)
 	{
 		setMax(val);
 	}
-	else if (key.compare("max") == 0)
+	else if (key.compare("value") == 0)
 	{
 		setValue(val);
 	}

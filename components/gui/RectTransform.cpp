@@ -804,7 +804,7 @@ namespace ige::scene
     //! Serialize
     void RectTransform::to_json(json &j) const
     {
-        Component::to_json(j);
+        TransformComponent::to_json(j);
         j["anchor"] = m_anchor;
         j["offset"] = m_offset;
         j["pivot"] = m_pivot;
@@ -823,7 +823,7 @@ namespace ige::scene
         m_anchoredPosition = j.value("anchorposition", Vec2(0.f, 0.f));
         m_anchorOffset = j.value("anchoroffset", Vec4(0.f, 0.f, 0.f, 0.f));
         m_bLocalToRectDirty = false;
-        Component::from_json(j);
+        TransformComponent::from_json(j);
         setRectDirty();
         //setTransformDirty();
     }

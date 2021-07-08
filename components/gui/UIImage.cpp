@@ -138,6 +138,7 @@ namespace ige::scene
         j["fillmethod"] = getFillMethod();
         j["fillorigin"] = getFillOrigin();
         j["fillamount"] = getFillAmount();
+        j["clockwise"] = getClockwise();
         j["color"] = getColor();
         j["interactable"] = isInteractable();
         j["spritetype"] = (int)getSpriteType();
@@ -151,6 +152,7 @@ namespace ige::scene
         setFillMethod(j.at("fillmethod"));
         setFillOrigin(j.at("fillorigin"));
         setFillAmount(j.at("fillamount"));
+        setClockwise(j.at("clockwise"));
         setColor(j.at("color"));
         setInteractable(j.at("interactable"));
         setSpriteType(j.at("spritetype"));
@@ -177,6 +179,10 @@ namespace ige::scene
         else if (key.compare("fillamount") == 0)
         {
             setFillAmount(val);
+        }
+        else if (key.compare("clockwise") == 0)
+        {
+            setClockwise(val);
         }
         else if (key.compare("color") == 0)
         {

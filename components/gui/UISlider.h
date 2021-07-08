@@ -21,10 +21,10 @@ class UISlider : public Component
 {
 public:
 	enum class Direction {
-		LEFT_TO_RIGHT = 0,
-		RIGHT_TO_LEFT = 1,
-		BOTTOM_TO_TOP = 2,
-		TOP_TO_BOTTOM = 3
+		LeftToRight,
+		RightToLeft,
+		BottomToTop,
+		TopToBottom,
 	};
 
 	UISlider(SceneObject& owner);
