@@ -20,6 +20,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "PhysicMesh"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::PhysicMesh; }
+
         //! Mesh Index
         int getMeshIndex() const { return m_meshIndex; };
         void setMeshIndex(int idx);

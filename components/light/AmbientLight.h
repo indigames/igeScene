@@ -20,6 +20,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "AmbientLight"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::AmbientLight; }
+
         //! Sky Color
         Vec3 getSkyColor() const;
         void setSkyColor(const Vec3 &col);

@@ -32,6 +32,9 @@ public:
 
 	virtual std::string getName() const override { return "UISlider"; }
 
+	//! Returns the type of the component
+	virtual Type getType() const override { return Type::UISlider; }
+
 	float getMin() const { return m_min; }
 	void setMin(float value);
 

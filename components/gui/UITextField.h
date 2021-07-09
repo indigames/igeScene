@@ -21,6 +21,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "UITextField"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::UITextField; }
+
         //! Update
         virtual void onUpdate(float dt) override;
 

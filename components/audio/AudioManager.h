@@ -26,6 +26,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "AudioManager"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::AudioManager; }
+
         //! Update
         void onUpdate(float dt) override;
 

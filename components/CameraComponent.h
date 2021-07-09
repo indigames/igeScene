@@ -20,6 +20,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "Camera"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Camera; }
+
         //! Position
         void setPosition(const Vec3 &pos);
         Vec3 getPosition() const;

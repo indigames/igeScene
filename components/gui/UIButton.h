@@ -44,6 +44,9 @@ public:
 	//! Get component name
 	virtual std::string getName() const override { return "UIButton"; }
 
+	//! Returns the type of the component
+	virtual Type getType() const override { return Type::UIButton; }
+
 	bool isSelected() const { return m_btnState == ButtonState::SELECTED; }
 	
 	TransitionMode getTransitionMode() const { return m_transitionMode; }

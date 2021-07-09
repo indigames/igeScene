@@ -21,6 +21,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "Figure"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Figure; }
+
         //! Update
         void onUpdate(float dt) override;
 

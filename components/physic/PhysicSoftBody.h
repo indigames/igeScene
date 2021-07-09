@@ -26,6 +26,9 @@ namespace ige::scene
         // Inherited via Component
         virtual std::string getName() const override { return "PhysicSoftBody"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::PhysicSoftBody; }
+
         //! Mesh Index
         int getMeshIndex() const { return m_meshIndex; };
         void setMeshIndex(int idx);

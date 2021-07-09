@@ -20,6 +20,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "Environment"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Environment; }
+
         //! Fog near distance
         float getDistanceFogNear() const;
         void setDistanceFogNear(float f_near);

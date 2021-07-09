@@ -20,6 +20,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "PhysicSphere"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::PhysicSphere; }
+
         //! Get radius
         float getRadius() const;
 

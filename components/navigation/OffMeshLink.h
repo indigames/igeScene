@@ -20,6 +20,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "OffMeshLink"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::OffMeshLink; }
+
         //! Endpoint object
         std::shared_ptr<SceneObject> getEndPoint() const { return m_endPoint.expired() ? nullptr : m_endPoint.lock(); }
         void setEndPoint(std::shared_ptr<SceneObject> endpoint) { m_endPoint = endpoint; }

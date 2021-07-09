@@ -169,6 +169,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "NavMesh"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::NavMesh; }
+
         //! Build the entire navigation mesh
         virtual bool build();
 

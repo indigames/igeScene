@@ -21,6 +21,9 @@ namespace ige::scene
         //! Get name
         virtual std::string getName() const override { return "Particle"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Particle; }
+
         //! Cache ParticleManager
         std::shared_ptr<ParticleManager> getManager() const { return m_manager.expired() ? nullptr : m_manager.lock(); }
         void setManager(std::shared_ptr<ParticleManager> manager) { m_manager = manager; }

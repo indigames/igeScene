@@ -42,6 +42,9 @@ public:
 	//! Get component name
 	virtual std::string getName() const override { return "UIScrollBar"; }
 
+	//! Returns the type of the component
+	virtual Type getType() const override { return Type::UIScrollBar; }
+
 	//! Update
 	virtual void onUpdate(float dt) override;
 

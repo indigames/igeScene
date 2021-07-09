@@ -20,6 +20,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "DirectionalLight"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::DirectionalLight; }
+
         //! Intensity
         float getIntensity() const;
         void setIntensity(float intensity);

@@ -20,6 +20,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "PointLight"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::PointLight; }
+
         //! Range
         float getRange() const;
         void setRange(float range);

@@ -21,6 +21,9 @@ public:
 	//! Get component name
 	virtual std::string getName() const override { return "UIMask"; }
 
+	//! Returns the type of the component
+	virtual Type getType() const override { return Type::UIMask; }
+
 	//! Update
 	virtual void onUpdate(float dt) override;
 

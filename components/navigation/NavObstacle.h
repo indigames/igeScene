@@ -23,6 +23,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "NavObstacle"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::NavObstacle; }
+
         //! Set enabled
         void setEnabled(bool enabled = true) override;
 

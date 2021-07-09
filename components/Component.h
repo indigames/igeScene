@@ -17,6 +17,52 @@ namespace ige::scene
     class Component
     {
     public:
+        enum class Type
+        {
+            Camera = 0,
+            Environment,
+            Figure,
+            Sprite,
+            BoneTransform,
+            Script,
+            AmbientLight,
+            DirectionalLight,
+            PointLight,
+            SpotLight,
+            Canvas,
+            UIImage,
+            UIText,
+            UITextField,
+            UIButton,
+            UISlider,
+            UIScrollView,
+            UIScrollBar,
+            UIMask,
+            PhysicManager,
+            PhysicBox,
+            PhysicSphere,
+            PhysicCapsule,
+            PhysicMesh,
+            PhysicSoftBody,
+            AudioManager,
+            AudioSource,
+            AudioListener,
+            ParticleManager,
+            Particle,
+            Navigable,
+            NavMesh,
+            NavAgent,
+            NavAgentManager,
+            DynamicNavMesh,
+            NavObstacle,
+            NavArea,
+            OffMeshLink,
+            Transform,
+            RectTransform,
+            Compound,
+        };
+
+    public:
         //! Constructor
         Component(SceneObject &owner);
 
@@ -28,6 +74,9 @@ namespace ige::scene
 
         //! Returns the name of the component
         virtual std::string getName() const = 0;
+
+        //! Returns the type of the component
+        virtual Type getType() const = 0;
 
         //! Enable/Disable
         virtual bool isEnabled() const { return m_bIsEnabled; }
