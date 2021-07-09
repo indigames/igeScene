@@ -78,4 +78,21 @@ namespace ige::scene
         setHeight(j.value("height", 1.f));
         Component::from_json(j);
     }
+
+    //! Update property by key value
+    void NavObstacle::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("radius") == 0)
+        {
+            setRadius(val);
+        }
+        else if(key.compare("height") == 0)
+        {
+            setHeight(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

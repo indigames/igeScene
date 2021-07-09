@@ -5,7 +5,6 @@
 #include "components/CameraComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/FigureComponent.h"
-#include "components/LightComponent.h"
 #include "components/ScriptComponent.h"
 #include "components/SpriteComponent.h"
 #include "components/TransformComponent.h"

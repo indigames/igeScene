@@ -156,4 +156,17 @@ void UIMask::from_json(const json& j)
     setUseMask(j.at("usemask"));
 }
 
+//! Update property by key value
+void UIMask::setProperty(const std::string& key, const json& val)
+{
+    if (key.compare("usemask") == 0)
+    {
+        setUseMask(val);
+    }
+    else
+    {
+        UIImage::setProperty(key, val);
+    }
+}
+
 NS_IGE_SCENE_END

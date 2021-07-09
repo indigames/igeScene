@@ -21,6 +21,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "Figure"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Figure; }
+
         //! Update
         void onUpdate(float dt) override;
 
@@ -57,6 +60,9 @@ namespace ige::scene
         //! Alpha blending operation
         const int getAlphaBlendingOp() const { return m_alphaBlendingOp; }
         void setAlphaBlendingOp(int op);
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize

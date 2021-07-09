@@ -23,6 +23,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "Script"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Script; }
+
         //! Awake
         virtual void onAwake();
 
@@ -76,10 +79,13 @@ namespace ige::scene
         Event<const std::string &> &getOnScriptChangedEvent() { return m_onScriptChangedEvent; }
 
         //! Access to members
-        const std::unordered_map<std::string, Value>& getMembers() { return m_members; }
+        const std::unordered_map<std::string, json>& getMembers() { return m_members; }
 
         //! Member value changed
-        virtual void onMemberValueChanged(const std::string& key, Value value);
+        virtual void onMemberValueChanged(const std::string& key, json value);
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize
@@ -121,6 +127,6 @@ namespace ige::scene
         _object *m_pyInstance;
 
         //! Python class members
-        std::unordered_map<std::string, Value> m_members;
+        std::unordered_map<std::string, json> m_members;
     };
 } // namespace ige::scene

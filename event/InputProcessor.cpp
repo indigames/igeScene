@@ -231,10 +231,7 @@ void InputProcessor::onTouchMoved(int touchId, float x, float y)
     if (hit.first == nullptr) {
         auto scene = SceneManager::getInstance()->getCurrentScene();
         if (scene) {
-            if (scene->getCanvas())
-                hit.first = scene->getCanvas().get();
-            else 
-                hit.first = scene->getRootUI().get();
+            hit.first = scene->getRootUI().get();
         }
     }
     auto target = hit.first;

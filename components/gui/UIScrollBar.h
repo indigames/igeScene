@@ -42,6 +42,9 @@ public:
 	//! Get component name
 	virtual std::string getName() const override { return "UIScrollBar"; }
 
+	//! Returns the type of the component
+	virtual Type getType() const override { return Type::UIScrollBar; }
+
 	//! Update
 	virtual void onUpdate(float dt) override;
 
@@ -50,6 +53,8 @@ public:
 
 	virtual void onSerializeFinished(Scene* scene) override;
 
+	//! Update property by key value
+	virtual void setProperty(const std::string& key, const json& val) override;
 public:
 
 	void setHandle(std::shared_ptr<SceneObject> obj);

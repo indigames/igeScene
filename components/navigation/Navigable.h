@@ -20,9 +20,15 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "Navigable"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Navigable; }
+
         //! Recursive
         bool isRecursive() const { return m_bIsRecursive; }
         void setRecursive(bool recursive) { m_bIsRecursive = recursive; }
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize

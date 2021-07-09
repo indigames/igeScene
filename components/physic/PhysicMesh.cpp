@@ -244,4 +244,16 @@ namespace ige::scene
         PhysicObject::from_json(j);
     }
 
+    //! Update property by key value
+    void PhysicMesh::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("meshIdx") == 0)
+            setMeshIndex(val);
+        else if (key.compare("convex") == 0)
+            setConvex(val);
+        else if (key.compare("path") == 0)
+            setPath(val);
+        else
+            PhysicObject::setProperty(key, val);
+    }
 } // namespace ige::scene

@@ -20,6 +20,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "PhysicCapsule"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::PhysicCapsule; }
+
         //! Get radius
         float getRadius() const;
 
@@ -31,6 +34,9 @@ namespace ige::scene
 
         //! Set height
         void setHeight(float radius);
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize

@@ -38,6 +38,7 @@
 #include "components/light/AmbientLight.h"
 #include "components/light/DirectionalLight.h"
 #include "components/light/PointLight.h"
+#include "components/light/SpotLight.h"
 #include "components/particle/ParticleManager.h"
 #include "components/particle/Particle.h"
 #include "components/navigation/DynamicNavMesh.h"
@@ -60,8 +61,8 @@ namespace ige::scene
     Event<SceneObject&> SceneObject::s_deselectedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size, bool isCanvas)
-        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_bIsCanvas(isCanvas), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr),
+    SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size)
+        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr),
         m_dispatching(0), m_aabbDirty(2), m_bIsInMask(false)
     {
         // Generate new UUID
@@ -236,6 +237,69 @@ namespace ige::scene
         auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getUUID() == uuid); });
         if (itr != m_children.end()) 
             return *itr;
+        return nullptr;
+    }
+
+    //! Create a component by name
+    std::shared_ptr<Component> SceneObject::createComponent(const std::string& name)
+    {
+        std::shared_ptr<Component> comp = nullptr;
+        if (name == "Transform")
+        {
+            if (getTransform())
+                return getTransform();
+            return addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+        }
+        if (name == "RectTransform")
+        {
+            if (getRectTransform())
+                return getRectTransform();
+            return addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
+        }
+        
+        if (name == "Canvas")
+        {
+            auto comp = addComponent<Canvas>();
+            setCanvas(getComponent<Canvas>());
+            return comp;
+        }
+
+        if (name == "Camera") return addComponent<CameraComponent>();
+        if (name == "Environment") return addComponent<EnvironmentComponent>();
+        if (name == "BoneTransform") return addComponent<BoneTransform>();
+        if (name == "Figure") return addComponent<FigureComponent>();
+        if (name == "Sprite") return addComponent<SpriteComponent>();
+        if (name == "Script") return addComponent<ScriptComponent>();
+        if (name == "PhysicManager") return addComponent<PhysicManager>();
+        if (name == "PhysicBox") return addComponent<PhysicBox>();
+        if (name == "PhysicSphere") return addComponent<PhysicSphere>();
+        if (name == "PhysicCapsule") return addComponent<PhysicCapsule>();
+        if (name == "PhysicMesh") return addComponent<PhysicMesh>();
+        if (name == "PhysicSoftBody") return addComponent<PhysicSoftBody>();
+        if (name == "UIImage") return addComponent<UIImage>();
+        if (name == "UIText") return addComponent<UIText>();
+        if (name == "UITextField") return addComponent<UITextField>();
+        if (name == "UIButton") return addComponent<UIButton>();
+        if (name == "UISlider") return addComponent<UISlider>();
+        if (name == "UIScrollView") return addComponent<UIScrollView>();
+        if (name == "UIScrollBar") return addComponent<UIScrollBar>();
+        if (name == "UIMask") return addComponent<UIMask>();
+        if (name == "AudioManager") return addComponent<AudioManager>();
+        if (name == "AudioSource") return addComponent<AudioSource>();
+        if (name == "AudioListener") return addComponent<AudioListener>();
+        if (name == "AmbientLight") return addComponent<AmbientLight>();
+        if (name == "DirectionalLight") return addComponent<DirectionalLight>();
+        if (name == "PointLight") return addComponent<PointLight>();
+        if (name == "SpotLight") return addComponent<SpotLight>();
+        if (name == "ParticleManager") return addComponent<ParticleManager>();
+        if (name == "Particle") return addComponent<Particle>();
+        if (name == "DynamicNavMesh") return addComponent<DynamicNavMesh>();
+        if (name == "NavAgent") return addComponent<NavAgent>();
+        if (name == "NavAgentManager") return addComponent<NavAgentManager>();
+        if (name == "Navigable") return addComponent<Navigable>();
+        if (name == "NavMesh") return addComponent<NavMesh>();
+        if (name == "NavObstacle") return addComponent<NavObstacle>();
+        if (name == "OffMeshLink") return addComponent<OffMeshLink>();
         return nullptr;
     }
 
@@ -441,9 +505,9 @@ namespace ige::scene
     }
 
     //! Get scene root
-    SceneObject* SceneObject::getRoot()         
+    std::shared_ptr<SceneObject> SceneObject::getRoot()
     {
-        return m_scene ? m_scene->getRoot().get() : nullptr;
+        return m_scene ? m_scene->getRoot() : nullptr;
     }
 
     //! Event Dispatch System 
@@ -760,7 +824,6 @@ namespace ige::scene
             {"name", m_name},
             {"active", m_isActive},
             {"gui", m_bIsGui},
-            {"cvs", m_bIsCanvas},
             {"raycast", m_bIsRaycastTarget},
             {"interactable", m_bIsInteractable}
         };
@@ -795,7 +858,6 @@ namespace ige::scene
         setUUID(j.value("uuid", getUUID()));
         setActive(j.value("active", false));
         m_bIsGui = j.value("gui", false);
-        m_bIsCanvas = j.value("cvs", false);
         m_bIsRaycastTarget = j.value("raycast", false);
         m_bIsInteractable = j.value("interactable", false);
 
@@ -804,96 +866,7 @@ namespace ige::scene
         {
             auto key = it.at(0);
             auto val = it.at(1);
-            std::shared_ptr<Component> comp = nullptr;
-            if (key == "Transform")
-            {
-                if (getTransform())
-                    comp = getTransform();
-                else
-                    comp = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
-            }
-            else if (key == "RectTransform")
-            {
-                if (getRectTransform())
-                    comp = getRectTransform();
-                else
-                    comp = addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
-            }
-            else if (key == "Camera")
-                comp = addComponent<CameraComponent>(val.at("name"));
-            else if (key == "Environment")
-                comp = addComponent<EnvironmentComponent>();
-            else if (key == "BoneTransform")
-                comp = addComponent<BoneTransform>();
-            else if (key == "Figure")
-                comp = addComponent<FigureComponent>(val.at("path"));
-            else if (key == "Sprite")
-                comp = addComponent<SpriteComponent>(val.at("path"), val.at("size"));
-            else if (key == "Script")
-                comp = addComponent<ScriptComponent>();
-            else if (key == "PhysicManager")
-                comp = addComponent<PhysicManager>();
-            else if (key == "PhysicBox")
-                comp = addComponent<PhysicBox>();
-            else if (key == "PhysicSphere")
-                comp = addComponent<PhysicSphere>();
-            else if (key == "PhysicCapsule")
-                comp = addComponent<PhysicCapsule>();
-            else if (key == "PhysicMesh")
-                comp = addComponent<PhysicMesh>();
-            else if (key == "PhysicSoftBody")
-                comp = addComponent<PhysicSoftBody>();
-            else if (key == "Canvas")
-            {
-                comp = addComponent<Canvas>();
-                setCanvas(getComponent<Canvas>());
-            }
-            else if (key == "UIImage")
-                comp = addComponent<UIImage>();
-            else if (key == "UIText")
-                comp = addComponent<UIText>();
-            else if (key == "UITextField")
-                comp = addComponent<UITextField>();
-            else if (key == "UIButton")
-                comp = addComponent<UIButton>();
-            else if (key == "UISlider")
-                comp = addComponent<UISlider>();
-            else if (key == "UIScrollView")
-                comp = addComponent<UIScrollView>();
-            else if (key == "UIScrollBar")
-                comp = addComponent<UIScrollBar>();
-            else if (key == "UIMask")
-                comp = addComponent<UIMask>();
-            else if (key == "AudioManager")
-                comp = addComponent<AudioManager>();
-            else if (key == "AudioSource")
-                comp = addComponent<AudioSource>();
-            else if (key == "AudioListener")
-                comp = addComponent<AudioListener>();
-            else if (key == "AmbientLight")
-                comp = addComponent<AmbientLight>();
-            else if (key == "DirectionalLight")
-                comp = addComponent<DirectionalLight>();
-            else if (key == "PointLight")
-                comp = addComponent<PointLight>();
-            else if (key == "ParticleManager")
-                comp = addComponent<ParticleManager>();
-            else if (key == "Particle")
-                comp = addComponent<Particle>();
-            else if (key == "DynamicNavMesh")
-                comp = addComponent<DynamicNavMesh>();
-            else if (key == "NavAgent")
-                comp = addComponent<NavAgent>();
-            else if (key == "NavAgentManager")
-                comp = addComponent<NavAgentManager>();
-            else if (key == "Navigable")
-                comp = addComponent<Navigable>();
-            else if (key == "NavMesh")
-                comp = addComponent<NavMesh>();
-            else if (key == "NavObstacle")
-                comp = addComponent<NavObstacle>();
-            else if (key == "OffMeshLink")
-                comp = addComponent<OffMeshLink>();
+            auto comp = createComponent(key);
             if (comp)
                 val.get_to(*comp);
         }
@@ -924,7 +897,7 @@ namespace ige::scene
         auto thisObj = getScene()->findObjectById(getId());
         for (auto it : jChildren)
         {
-            auto child = getScene()->createObject(it.at("name"), thisObj, it.value("gui", false), {}, it.value("cvs", false));
+            auto child = getScene()->createObject(it.at("name"), thisObj, it.value("gui", false), {});
             child->from_json(it);
         }
     }

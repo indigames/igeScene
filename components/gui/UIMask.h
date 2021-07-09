@@ -21,6 +21,9 @@ public:
 	//! Get component name
 	virtual std::string getName() const override { return "UIMask"; }
 
+	//! Returns the type of the component
+	virtual Type getType() const override { return Type::UIMask; }
+
 	//! Update
 	virtual void onUpdate(float dt) override;
 
@@ -29,6 +32,9 @@ public:
 
 	void setUseMask(bool value);
 	bool isUseMask() const { return m_bUseMask; }
+
+	//! Update property by key value
+	virtual void setProperty(const std::string& key, const json& val) override;
 
 protected:
 	bool m_bUseMask;

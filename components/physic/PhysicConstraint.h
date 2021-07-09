@@ -77,6 +77,9 @@ namespace ige::scene
         //! Deserialize
         friend void from_json(const json& j, PhysicConstraint& obj) { obj.from_json(j); }
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val);
+
     public:
         //! Get onCreatedEvent
         static Event<PhysicConstraint *> &getOnActivatedEvent() { return m_onActivatedEvent; }

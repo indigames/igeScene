@@ -18,19 +18,12 @@ namespace ige::scene
     //! Update
     void UITextField::onUpdate(float dt)
     {
-        if (!getOwner()->isSelected())
-        {
-            if (getOwner()->getParent() == nullptr || !getOwner()->getParent()->isSelected())
-            {
-                if (m_bIsInputing)
-                {
-                    StopTextInput();
-                    m_bIsInputing = false;
-                }
-            }
+        if (m_bIsInputing && !getOwner()->isSelected()) {
+            StopTextInput();
+            m_bIsInputing = false;
         }
-        if (m_bIsInputing)
-        {
+
+        if (m_bIsInputing) {
             int size;
             UIText::setText(std::string(GetInputText(&size)));
         }
@@ -38,21 +31,23 @@ namespace ige::scene
     }
 
     //! Click
-    void UITextField::onClick()
-    {
+    void UITextField::onClick() {
         StartTextInput(getText().c_str());
         m_bIsInputing = true;
     }
 
     //! Serialize
-    void UITextField::to_json(json &j) const
-    {
+    void UITextField::to_json(json &j) const {
         UIText::to_json(j);
     }
 
     //! Deserialize
-    void UITextField::from_json(const json &j)
-    {
+    void UITextField::from_json(const json &j) {
         UIText::from_json(j);
+    }
+
+    //! Update property by key value
+    void UITextField::setProperty(const std::string& key, const json& val) {
+        UIText::setProperty(key, val);
     }
 } // namespace ige::scene

@@ -354,4 +354,77 @@ void UIButton::from_json(const json& j)
     Component::from_json(j);
 }
 
+//! Update property by key value
+void UIButton::setProperty(const std::string& key, const json& val)
+{
+    if (key.compare("size") == 0)
+    {
+        setSize(val);
+    }
+    else if (key.compare("fillmethod") == 0)
+    {
+        setFillMethod(val);
+    }
+    else if (key.compare("fillorigin") == 0)
+    {
+        setFillOrigin(val);
+    }
+    else if (key.compare("fillamount") == 0)
+    {
+        setFillAmount(val);
+    }
+    else if (key.compare("color") == 0)
+    {
+        setColor(val);
+    }
+    else if (key.compare("pressedcolor") == 0)
+    {
+        setPressedColor(val);
+    }
+    else if (key.compare("selectedcolor") == 0)
+    {
+        setSelectedColor(val);
+    }
+    else if (key.compare("disabledcolor") == 0)
+    {
+        setDisabledColor(val);
+    }
+    else if (key.compare("pressedpath") == 0)
+    {
+        setTexturePath(val, ButtonState::PRESSED);
+    }
+    else if (key.compare("seletecpath") == 0)
+    {
+        setTexturePath(val, ButtonState::SELECTED);
+    }
+    else if (key.compare("disabledpath") == 0)
+    {
+        setTexturePath(val, ButtonState::DISABLE);
+    }
+    else if (key.compare("path") == 0)
+    {
+        setTexturePath(val, ButtonState::NORMAL);
+    }
+    else if (key.compare("transitionmode") == 0)
+    {
+        setTransitionMode((TransitionMode)val);
+    }
+    else if (key.compare("fadeduration") == 0)
+    {
+        setFadeDuration(val);
+    }
+    else if (key.compare("spritetype") == 0)
+    {
+        setSpriteType(val);
+    }
+    else if (key.compare("border") == 0)
+    {
+        setBorder(val);
+    }
+    else
+    {
+        UIImage::setProperty(key, val);
+    }
+}
+
 NS_IGE_SCENE_END

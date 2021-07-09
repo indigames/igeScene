@@ -1152,4 +1152,79 @@ namespace ige::scene
         // Build after load finish
         build();
     }
+
+    //! Update property by key value
+    void NavMesh::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("tileSize") == 0)
+        {
+            setTileSize(val);
+        }
+        else if (key.compare("cellSize") == 0)
+        {
+            setCellSize(val);
+        }
+        else if (key.compare("cellHeight") == 0)
+        {
+            setCellHeight(val);
+        }
+        else if (key.compare("agentHeight") == 0)
+        {
+            setAgentHeight(val);
+        }
+        else if (key.compare("agentRadius") == 0)
+        {
+            setAgentRadius(val);
+        }
+        else if (key.compare("agentMaxClimb") == 0)
+        {
+            setAgentMaxClimb(val);
+        }
+        else if (key.compare("agentMaxSlope") == 0)
+        {
+            setAgentMaxSlope(val);
+        }
+        else if (key.compare("regionMinSize") == 0)
+        {
+            setRegionMinSize(val);
+        }
+        else if (key.compare("regionMergeSize") == 0)
+        {
+            setRegionMergeSize(val);
+        }
+        else if (key.compare("edgeMaxLength") == 0)
+        {
+            setEdgeMaxLength(val);
+        }
+        else if (key.compare("edgeMaxError") == 0)
+        {
+            setEdgeMaxError(val);
+        }
+        else if (key.compare("sampleDist") == 0)
+        {
+            setDetailSampleDistance(val);
+        }
+        else if (key.compare("sampleError") == 0)
+        {
+            setDetailSampleMaxError(val);
+        }
+        else if (key.compare("padding") == 0)
+        {
+            setPadding(val);
+        }
+        else if (key.compare("partType") == 0)
+        {
+            setPartitionType(val);
+        }
+        else if (key.compare("debug") == 0)
+        {
+            setShowDebug(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
+    }
+
+
 } // namespace ige::scene

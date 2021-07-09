@@ -72,4 +72,13 @@ namespace ige::scene
         PhysicObject::from_json(j);
     }
 
+    //! Update property by key value
+    void PhysicBox::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("size") == 0)
+            setSize(val);       
+        else
+            PhysicObject::setProperty(key, val);
+    }
+
 } // namespace ige::scene

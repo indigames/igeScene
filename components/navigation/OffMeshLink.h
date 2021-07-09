@@ -20,9 +20,12 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "OffMeshLink"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::OffMeshLink; }
+
         //! Endpoint object
-        SceneObject* getEndPoint() const { return m_endPoint; }
-        void setEndPoint(SceneObject* endpoint) { m_endPoint = endpoint; }
+        std::shared_ptr<SceneObject> getEndPoint() const { return m_endPoint.expired() ? nullptr : m_endPoint.lock(); }
+        void setEndPoint(std::shared_ptr<SceneObject> endpoint) { m_endPoint = endpoint; }
 
         //! Radius
         float getRadius() const { return m_radius; }
@@ -40,6 +43,9 @@ namespace ige::scene
         uint32_t getAreaId() const { return m_areaId; }
         void setAreaId(uint32_t id) { m_areaId = id; }
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -49,7 +55,7 @@ namespace ige::scene
 
     protected:
         //! Endpoint object
-        SceneObject* m_endPoint = nullptr;
+        std::weak_ptr<SceneObject> m_endPoint;
 
         //! Radius
         float m_radius = 1.f;

@@ -21,16 +21,19 @@ class UISlider : public Component
 {
 public:
 	enum class Direction {
-		LEFT_TO_RIGHT = 0,
-		RIGHT_TO_LEFT = 1,
-		BOTTOM_TO_TOP = 2,
-		TOP_TO_BOTTOM = 3
+		LeftToRight,
+		RightToLeft,
+		BottomToTop,
+		TopToBottom,
 	};
 
 	UISlider(SceneObject& owner);
 	virtual ~UISlider();
 
 	virtual std::string getName() const override { return "UISlider"; }
+
+	//! Returns the type of the component
+	virtual Type getType() const override { return Type::UISlider; }
 
 	float getMin() const { return m_min; }
 	void setMin(float value);
@@ -74,6 +77,9 @@ public:
 	const Direction& getDirection() const { return m_direction; }
 
 	virtual void onSerializeFinished(Scene* scene) override;
+
+	//! Update property by key value
+	virtual void setProperty(const std::string& key, const json& val) override;
 
 protected:
 	bool updateWithPercent(float percent, bool manual);

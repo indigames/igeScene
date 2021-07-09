@@ -43,6 +43,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "ParticleManager"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::ParticleManager; }
+
         //! Update
         void onUpdate(float dt) override;
 
@@ -77,6 +80,9 @@ namespace ige::scene
         //! Threads number
         int getNumberOfThreads() const { return m_numThreads; }
         void setNumberOfThreads(int num);
+
+        //! Check if multple edit allowed
+        virtual bool canMultiEdit() override { return false; }
 
     protected:
         //! Initialize manager instance

@@ -20,11 +20,17 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "PhysicBox"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::PhysicBox; }
+
         //! Get size
         const Vec3 &getSize() const;
 
         //! Set size
         void setSize(const Vec3 &size);
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize

@@ -6,7 +6,7 @@ namespace ige::scene
 {
     //! Constructor
     AmbientLight::AmbientLight(SceneObject &owner)
-        : LightComponent(owner)
+        : Component(owner)
     {
     }
 
@@ -64,5 +64,26 @@ namespace ige::scene
         setGroundColor(j.value("gnd", Vec3()));
         setDirection(j.value("dir", Vec3()));
         Component::from_json(j);
+    }
+
+    //! Update property by key value
+    void AmbientLight::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("sky") == 0)
+        {
+            setSkyColor(val);
+        }
+        else if (key.compare("gnd") == 0)
+        {
+            setGroundColor(val);
+        }
+        else if (key.compare("dir") == 0)
+        {
+            setDirection(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
     }
 } // namespace ige::scene

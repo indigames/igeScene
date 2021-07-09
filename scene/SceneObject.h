@@ -27,20 +27,20 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SceneObject(Scene* scene, uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false, const Vec2& size = {64.f, 64.f}, bool isCanvas = false);
+        SceneObject(Scene* scene, uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false, const Vec2& size = {64.f, 64.f});
 
         //! Destructor
         virtual ~SceneObject();
 
         //! Get ID
-        inline uint64_t getId() const { return m_id; }
+        inline virtual uint64_t getId() const { return m_id; }
 
         //! Get UUID
-        inline std::string getUUID() const { return m_uuid; }
+        inline virtual std::string getUUID() const { return m_uuid; }
         inline void setUUID(const std::string& uuid) { m_uuid = uuid; }
 
         //! Get Name
-        inline const std::string &getName() const { return m_name; }
+        inline virtual std::string getName() const { return m_name; }
 
         //! Set Name
         void setName(const std::string& name);
@@ -71,6 +71,9 @@ namespace ige::scene
 
         //! Find child
         virtual SceneObject* findChild(std::string uuid);
+
+        //! Create a component by name
+        virtual std::shared_ptr<Component> createComponent(const std::string& name);
 
         //! Add a component
         virtual void addComponent(const std::shared_ptr<Component> &component);
@@ -120,10 +123,10 @@ namespace ige::scene
         virtual void onRender();
 
         //! Enable or disable the actor
-        void setActive(bool isActive);
+        virtual void setActive(bool isActive);
 
         //! Check active
-        bool isActive() const;
+        virtual bool isActive() const;
 
         // Set selected
         void setSelected(bool select);
@@ -144,16 +147,13 @@ namespace ige::scene
         static Event<SceneObject&>& getDeselectedEvent() { return s_deselectedEvent; }
 
         //! Serialize
-        void to_json(json &j);
+        virtual void to_json(json &j);
 
         //! Deserialize
-        void from_json(const json &j);
+        virtual void from_json(const json &j);
 
         //! Check whether it's a GUI object
         bool isGUIObject() const { return m_bIsGui; }
-
-        //! Check whether it's a Canvas object
-        bool isCanvasObject() const { return m_bIsCanvas; }
 
         //! Get transform component
         std::shared_ptr<TransformComponent> &getTransform() { return m_transform; }
@@ -174,7 +174,7 @@ namespace ige::scene
         Scene* getScene() { return m_scene; }
 
         //! Get scene root
-        SceneObject* getRoot();
+        std::shared_ptr<SceneObject> getRoot();
 
         void setIsRaycastTarget(bool value) { m_bIsRaycastTarget = value; }
         bool isRaycastTarget() const { return m_bIsRaycastTarget; }
@@ -270,9 +270,6 @@ namespace ige::scene
         //! Cache isGui
         bool m_bIsGui = false;
 
-        //! Cache isCanvas
-        bool m_bIsCanvas = false;
-
         //! Cached aabb
         AABBox m_aabb;
 
@@ -287,6 +284,7 @@ namespace ige::scene
 
         //! Define if object will cast with UI
         bool m_bIsRaycastTarget = false;
+
         //! Define if object is interactable
         bool m_bIsInteractable = false;
 

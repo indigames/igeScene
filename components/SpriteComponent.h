@@ -22,6 +22,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "Sprite"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Sprite; }
+
         //! Update
         virtual void onUpdate(float dt) override;
 
@@ -79,7 +82,6 @@ namespace ige::scene
         const int getAlphaBlendingOp() const { return m_sprite ? m_sprite->getAlphaBlendingOp() : 0; }
         void setAlphaBlendingOp(int op) { if (m_sprite) m_sprite->setAlphaBlendingOp(op); }
 
-
         //! Alpha
         void setAlpha(float value);
         const float getAlpha() const;
@@ -89,7 +91,8 @@ namespace ige::scene
         virtual void setColor(const Vec4& value);
         virtual const Vec4 getColor()  const { return m_sprite->getColor(); }
 
-
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
     protected:
         void onCreateFigure(EditableFigure* figure);
         void onRemoveFigure(EditableFigure* figure);

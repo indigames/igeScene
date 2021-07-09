@@ -110,4 +110,21 @@ namespace ige::scene
         setUpperLimit(m_json.value("up", SIMD_PI));
         PhysicConstraint::onSerializeFinished(scene);
     }
+
+    //! Update property by key value
+    void HingeConstraint::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("anchor") == 0)
+            setAnchor(PhysicHelper::to_btVector3(val));
+        else if (key.compare("axis1") == 0)
+            setAxis1(PhysicHelper::to_btVector3(val));
+        else if (key.compare("axis2") == 0)
+            setAxis2(PhysicHelper::to_btVector3(val));
+        else if (key.compare("low") == 0)
+            setLowerLimit(val);
+        else if (key.compare("up") == 0)
+            setUpperLimit(val);
+        else
+            PhysicConstraint::setProperty(key, val);
+    }
 } // namespace ige::scene

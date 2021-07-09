@@ -18,7 +18,9 @@ namespace ige::scene
     {
         // Register manager
         auto manager = getOwner()->getRoot()->getComponent<ParticleManager>();
-        setManager(manager ? manager.get() : getOwner()->getRoot()->addComponent<ParticleManager>().get());
+        if(manager == nullptr)
+            getOwner()->getRoot()->addComponent<ParticleManager>();
+        setManager(manager);
 
         // Set path
         if (!path.empty())
@@ -39,7 +41,7 @@ namespace ige::scene
             m_effect->Release();
             m_effect = nullptr;
         }
-        m_manager = nullptr;
+        m_manager.reset();
     }
 
     //! Set enabled
@@ -258,6 +260,7 @@ namespace ige::scene
         Component::to_json(j);
         j["path"] = getPath();
         j["layer"] = getLayer();
+        j["mask"] = getGroupMask();
         j["speed"] = getSpeed();
         j["timeScale"] = getTimeScale();
         j["autoDraw"] = isAutoDrawing();
@@ -272,6 +275,7 @@ namespace ige::scene
     {
         setPath(j.value("path", std::string()));
         setLayer(j.value("layer", 0));
+        setGroupMask(j.value("mask", 0));
         setSpeed(j.value("speed", 1.f));
         setTimeScale(j.value("timeScale", 1.f));
         setAutoDrawing(j.value("autoDraw", true));
@@ -280,5 +284,54 @@ namespace ige::scene
         setDynamicInputParameter(j.value("param", Vec4(0.f, 0.f, 0.f, 0.f)));
         setColor(j.value("color", Vec4(1.f, 1.f, 1.f, 1.f)));
         Component::from_json(j);
+    }
+
+    //! Update property by key value
+    void Particle::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("path") == 0)
+        {
+            setPath(val);
+        }
+        else if (key.compare("layer") == 0)
+        {
+            setLayer(val);
+        }
+        else if (key.compare("mask") == 0)
+        {
+            setGroupMask(val);
+        }
+        else if (key.compare("speed") == 0)
+        {
+            setSpeed(val);
+        }
+        else if (key.compare("timeScale") == 0)
+        {
+            setTimeScale(val);
+        }
+        else if (key.compare("autoDraw") == 0)
+        {
+            setAutoDrawing(val);
+        }
+        else if (key.compare("loop") == 0)
+        {
+            setLoop(val);
+        }
+        else if (key.compare("target") == 0)
+        {
+            setTargetLocation(val);
+        }
+        else if (key.compare("param") == 0)
+        {
+            setDynamicInputParameter(val);
+        }
+        else if (key.compare("color") == 0)
+        {
+            setColor(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
     }
 } // namespace ige::scene

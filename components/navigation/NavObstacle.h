@@ -23,6 +23,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "NavObstacle"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::NavObstacle; }
+
         //! Set enabled
         void setEnabled(bool enabled = true) override;
 
@@ -45,6 +48,9 @@ namespace ige::scene
         //! Activated/ Deactivated events
         static Event<NavObstacle *> &getActivatedEvent() { return m_onActivatedEvent; }
         static Event<NavObstacle *> &getDeactivatedEvent() { return m_onDeactivatedEvent; }
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize

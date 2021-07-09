@@ -14,7 +14,7 @@ UISlider::UISlider(SceneObject& owner) :
 	m_min(0), m_max(1), m_value(0), m_wholeNumbers(false),
 	m_rectFill(nullptr), m_rectHandle(nullptr), m_imgHandle(nullptr),
 	m_normalColor(1.0f, 1.0f, 1.0f, 1.0f), m_pressedColor(0.78f, 0.78f, 0.78f, 1.0f), m_disableColor(0.78f, 0.78f, 0.78f, 1.0f), m_fadeDuration(0.1f),
-	m_dirtySetObj(false), m_bIsHorizontal(false), m_bIsRevert(false), m_direction(Direction::LEFT_TO_RIGHT), m_bIsInit(false)
+	m_dirtySetObj(false), m_bIsHorizontal(false), m_bIsRevert(false), m_direction(Direction::LeftToRight), m_bIsInit(false)
 {
 	m_bIsInteractable = true;
 	init();
@@ -430,19 +430,19 @@ void UISlider::onChangeDirection()
 {
 	bool oldRot = m_bIsHorizontal;
 	switch (m_direction) {
-	case Direction::LEFT_TO_RIGHT:
+	case Direction::LeftToRight:
 		m_bIsHorizontal = false;
 		m_bIsRevert = false;
 		break;
-	case Direction::RIGHT_TO_LEFT:
+	case Direction::RightToLeft:
 		m_bIsHorizontal = false;
 		m_bIsRevert = true;
 		break;
-	case Direction::BOTTOM_TO_TOP:
+	case Direction::BottomToTop:
 		m_bIsHorizontal = true;
 		m_bIsRevert = false;
 		break;
-	case Direction::TOP_TO_BOTTOM:
+	case Direction::TopToBottom:
 		m_bIsHorizontal = true;
 		m_bIsRevert = true;
 		break;
@@ -555,6 +555,8 @@ void UISlider::to_json(json& j) const
 void UISlider::from_json(const json& j)
 {
 	m_bIsInit = false;
+	m_fillUUID = j.value("fill", "");
+	m_handleUUID = j.value("handle", "");
 	setColor(j.at("color"));
 	setPressedColor(j.at("pressedcolor"));
 	setDisabledColor(j.at("disabledcolor"));
@@ -563,12 +565,65 @@ void UISlider::from_json(const json& j)
 	setMin(j.value("min", 0));
 	setMax(j.value("max", 1));
 	setValue(j.value("value", 0));
-	m_dirtySetObj = true;
-	m_fillUUID = j.value("fill", "");
-	m_handleUUID = j.value("handle", "");
 	setDirection((int)j.at("direction"));
+	m_dirtySetObj = true;
 	Component::from_json(j);
 	init();
+}
+
+//! Update property by key value
+void UISlider::setProperty(const std::string& key, const json& val)
+{
+	if (key.compare("fill") == 0)
+	{
+		m_fillUUID = val;
+	}
+	else if (key.compare("handle") == 0)
+	{
+		m_handleUUID = val;
+	}
+	else if (key.compare("color") == 0)
+	{
+		setColor(val);
+	}
+	else if (key.compare("pressedcolor") == 0)
+	{
+		setPressedColor(val);
+	}
+	else if (key.compare("disabledcolor") == 0)
+	{
+		setDisabledColor(val);
+	}
+	else if (key.compare("fadeduration") == 0)
+	{
+		setFadeDuration(val);
+	}
+	else if (key.compare("wholenumbers") == 0)
+	{
+		setWholeNumbers(val);
+	}
+	else if (key.compare("min") == 0)
+	{
+		setMin(val);
+	}
+	else if (key.compare("max") == 0)
+	{
+		setMax(val);
+	}
+	else if (key.compare("value") == 0)
+	{
+		setValue(val);
+	}
+	else if (key.compare("direction") == 0)
+	{
+		setDirection((int)val);
+	}
+	else
+	{
+		Component::setProperty(key, val);
+	}
+
+	m_dirtySetObj = true;
 }
 
 NS_IGE_SCENE_END

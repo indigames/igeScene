@@ -26,6 +26,9 @@ namespace ige::scene
         // Inherited via Component
         virtual std::string getName() const override { return "PhysicSoftBody"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::PhysicSoftBody; }
+
         //! Mesh Index
         int getMeshIndex() const { return m_meshIndex; };
         void setMeshIndex(int idx);
@@ -125,6 +128,9 @@ namespace ige::scene
         //! Wind velocity
         virtual const btVector3& getWindVelocity() const { return m_windVelocity; }
         virtual void setWindVelocity(const btVector3& velocity);
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     public:
         //! Update Bullet transform

@@ -44,6 +44,9 @@ public:
 	//! Get component name
 	virtual std::string getName() const override { return "UIButton"; }
 
+	//! Returns the type of the component
+	virtual Type getType() const override { return Type::UIButton; }
+
 	bool isSelected() const { return m_btnState == ButtonState::SELECTED; }
 	
 	TransitionMode getTransitionMode() const { return m_transitionMode; }
@@ -80,8 +83,11 @@ public:
 
 	void setFadeDuration(float value) { m_fadeDuration = value; }
 	const float getFadeDuration() const { return m_fadeDuration; }
-protected:
 
+	//! Update property by key value
+	virtual void setProperty(const std::string& key, const json& val) override;
+
+protected:
 	virtual void _onTouchPress(EventContext* context) override;
 	virtual void _onTouchRelease(EventContext* context) override;
 	virtual void _onSelected(EventContext* context) override;

@@ -64,6 +64,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "DynamicNavMesh"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::DynamicNavMesh; }
+
         //! Max obstacles
         uint32_t getMaxObstacles() const { return m_maxObstacles; }
         void setMaxObstacles(uint32_t max) { m_maxObstacles = max; }
@@ -131,6 +134,9 @@ namespace ige::scene
 
         //! Update
         virtual void onUpdate(float dt) override;
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Detour tile cache instance that works with the nav mesh.

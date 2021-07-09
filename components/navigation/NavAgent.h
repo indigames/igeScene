@@ -70,6 +70,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "NavAgent"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::NavAgent; }
+
         //! Enable/disable
         void setEnabled(bool enable = true) override;
 
@@ -166,6 +169,9 @@ namespace ige::scene
         //! Activated/ Deactivated events
         static Event<NavAgent *> &getActivatedEvent() { return m_onActivatedEvent; }
         static Event<NavAgent *> &getDeactivatedEvent() { return m_onDeactivatedEvent; }
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Update Detour parameters.

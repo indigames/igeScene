@@ -23,6 +23,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "BoneTransform"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::BoneTransform; }
+
         //! Update
         void onUpdate(float dt) override;
 
@@ -37,6 +40,9 @@ namespace ige::scene
 
         //! Trigger when select joint in the editor
         void onJointObjectSelected(const std::string& name, bool selected);
+
+        //! Can multiple edit
+        inline virtual bool canMultiEdit() override { return false; }
 
     protected:
         //! Serialize

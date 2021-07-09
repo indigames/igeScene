@@ -18,6 +18,7 @@ namespace ige::scene
 {
     class SceneObject;
     class TweenManager;
+    class TargetObject;
 
     /**
      * Class Scene: Manage scene objects hierarchy
@@ -59,7 +60,7 @@ namespace ige::scene
         virtual void renderUI();
 
         //! Create scene object
-        virtual std::shared_ptr<SceneObject> createObject(const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 }, bool isCanvas = false);
+        virtual std::shared_ptr<SceneObject> createObject(const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 });
 
         //! Remove scene object
         virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);
@@ -120,10 +121,6 @@ namespace ige::scene
         Event<Resource*>& getUIResourceRemovedEvent() { return m_uiResourceRemovedEvent; }
         Event<Scene*>& getSerializeFinishedEvent() { return m_serializeFinishedEvent; }
 
-        static Event<SceneObject*>& getTargetAddedEvent() { return m_targetAddedEvent; }
-        static Event<SceneObject*>& getTargetRemovedEvent() { return m_targetRemovedEvent; }
-        static Event<>& getTargetClearedEvent() { return m_targetClearedEvent; }
-
         //! Resource added/removed event
         void onResourceAdded(Resource* resource);
         void onResourceRemoved(Resource* resource);
@@ -174,21 +171,6 @@ namespace ige::scene
         //! Get tween manager
         std::shared_ptr<TweenManager> getTweenManager() const;
 
-        //! Get targeted objects
-        const std::vector<SceneObject*>& getTargets() const { return m_targets; }
-
-        //! Add target
-        void addTarget(SceneObject* target, bool clear = false);
-
-        //! Remove target
-        void removeTarget(SceneObject* target);
-
-        //! Remove all target
-        void clearTargets();
-
-        //! Return the first selected object
-        std::shared_ptr<SceneObject> getFirstTarget() { return findObjectById(m_firstTargetId); }
-
     protected:
         //! Create root Objects
         virtual std::shared_ptr<SceneObject> createRootObject(const std::string& name = "");
@@ -205,8 +187,10 @@ namespace ige::scene
     protected:
         //! Scene root node
         std::shared_ptr<SceneObject> m_root;
+
         //! UI root node
         std::shared_ptr<SceneObject> m_rootUI;
+
         //! Canvas
         std::shared_ptr<SceneObject> m_canvas;
 
@@ -233,11 +217,6 @@ namespace ige::scene
         //! Serialize event
         Event<Scene*> m_serializeFinishedEvent;
 
-        //! Targeted event
-        static Event<SceneObject*> m_targetAddedEvent;
-        static Event<SceneObject*> m_targetRemovedEvent;
-        static Event<> m_targetClearedEvent;
-
         //! Cache active camera
         CameraComponent* m_activeCamera = nullptr;
 
@@ -250,8 +229,8 @@ namespace ige::scene
         EditableFigure* m_shadowEdgeMask = nullptr;
         Vec2 m_shadowTextureSize = { 2048, 2048 };
 
-        //! Object ID counter
-        uint64_t m_nextObjectID = 0;
+        //! Object ID counter, reserver 0 for multiple object
+        uint64_t m_nextObjectID = 1;
 
         //! Scene name
         std::string m_name;
@@ -279,9 +258,5 @@ namespace ige::scene
 
         //! Capture flag
         bool m_raycastCapture;
-
-        //! Targeted objects
-        std::vector<SceneObject*> m_targets = {};
-        uint64_t m_firstTargetId = (uint64_t)-1;
     };
 }

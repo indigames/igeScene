@@ -12,13 +12,16 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        CameraComponent(SceneObject &owner, const std::string &name);
+        CameraComponent(SceneObject &owner, const std::string &name = "");
 
         //! Destructor
         virtual ~CameraComponent();
 
         //! Get component name
         virtual std::string getName() const override { return "Camera"; }
+
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Camera; }
 
         //! Position
         void setPosition(const Vec3 &pos);
@@ -118,6 +121,9 @@ namespace ige::scene
 
         //! Get camera
         Camera *getCamera() { return m_camera; }
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize

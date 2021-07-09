@@ -26,6 +26,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "AudioManager"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::AudioManager; }
+
         //! Update
         void onUpdate(float dt) override;
 
@@ -40,6 +43,12 @@ namespace ige::scene
 
         //! Get active listener
         std::optional<std::reference_wrapper<AudioListener>> getActiveListener() const;;
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
+        //! Check if multple edit allowed
+        virtual bool canMultiEdit() override { return false; }
 
     protected:
         //! AudioSource created/destroyed events

@@ -20,6 +20,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "Environment"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Environment; }
+
         //! Fog near distance
         float getDistanceFogNear() const;
         void setDistanceFogNear(float f_near);
@@ -55,6 +58,9 @@ namespace ige::scene
         //! Shadow texture size
         const Vec2& getShadowTextureSize() const;
         void setShadowTextureSize(const Vec2& size);
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize

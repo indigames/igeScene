@@ -23,6 +23,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "Canvas"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Canvas; }
+
         //! Canvas to viewport matrix
         void setCanvasToViewportMatrix(const Mat4 &matrix);
         const Mat4 &getCanvasToViewportMatrix() const;
@@ -41,6 +44,9 @@ namespace ige::scene
 
         // Set target canvas size, based on device resolution
         void setTargetCanvasSize(const Vec2 &canvasSize);
+
+        //! Can multiple edit
+        inline virtual bool canMultiEdit() override { return false; }
 
     protected:
         //! Serialize

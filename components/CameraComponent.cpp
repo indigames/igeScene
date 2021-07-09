@@ -137,7 +137,6 @@ namespace ige::scene
         j["near"] = getNearPlane();
         j["far"] = getFarPlane();
         j["lock"] = getLockOn();
-        j["target"] = getTarget();
         j["ortho"] = isOrthoProjection();
         j["orthoW"] = getOrthoWidth();
         j["orthoH"] = getOrthoHeight();
@@ -148,17 +147,29 @@ namespace ige::scene
         j["pos"] = getPosition();
         j["rot"] = getRotation();
         j["scale"] = getScale();
+        j["aspect"] = getAspectRatio();
+
+        if (getLockOn())
+        {
+            j["target"] = getTarget();
+        }
+        else
+        {
+            j["pan"] = getPan();
+            j["tilt"] = getTilt();
+            j["roll"] = getRoll();
+        }
     }
 
     //! Deserialize
     void CameraComponent::from_json(const json &j)
     {
+        if(j.contains("name")) m_name = j.at("name");
         setWidthBase(j.at("wBase"));
         setFieldOfView(j.at("fov"));
         setNearPlane(j.at("near"));
         setFarPlane(j.at("far"));
-        lockOnTarget(j.at("lock"));
-        setTarget(j.at("target"));
+        lockOnTarget(j.at("lock"));        
         setOrthoProjection(j.at("ortho"));
         setOrthoWidth(j.at("orthoW"));
         setOrthoHeight(j.at("orthoH"));
@@ -166,6 +177,19 @@ namespace ige::scene
         setScreenOffset(j.at("scrOff"));
         setScreenRadian(j.at("scrRad"));
         setUpAxis(j.at("up"));
+        setAspectRatio(j.value("aspect", -1.f));
+
+        if (getLockOn())
+        {
+            setTarget(j.value("target", Vec3(0.f, 0.f, 0.f)));
+        }
+        else
+        {
+            setPan(j.value("pan", 0.f));
+            setTilt(j.value("tilt", 0.f));
+            setRoll(j.value("roll", 0.f));
+        }
+        
         Component::from_json(j);
 
         auto transCmp = getOwner()->getRectTransform();
@@ -179,6 +203,101 @@ namespace ige::scene
         if (getOwner()->isActive())
         {
             getOwner()->getScene()->setActiveCamera(this);
+        }
+
+        if (getCamera()) getCamera()->SetResourceName(m_name.c_str());
+    }
+
+    //! Update property by key value
+    void CameraComponent::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("wBase") == 0)
+        {
+            setWidthBase(val);
+        }
+        else if (key.compare("name") == 0)
+        {
+            if (m_name.compare(val) != 0)
+            {
+                m_name = val;
+                if (getCamera()) getCamera()->SetResourceName(m_name.c_str());
+            }
+        }
+        else if (key.compare("fov") == 0)
+        {
+            setFieldOfView(val);
+        }
+        else if (key.compare("near") == 0)
+        {
+            setNearPlane(val);
+        }
+        else if (key.compare("far") == 0)
+        {
+            setFarPlane(val);
+        }
+        else if (key.compare("lock") == 0)
+        {
+            lockOnTarget(val);
+        }
+        else if (key.compare("target") == 0)
+        {
+            setTarget(val);
+        }
+        else if (key.compare("ortho") == 0)
+        {
+            setOrthoProjection(val);
+        }
+        else if (key.compare("orthoW") == 0)
+        {
+            setOrthoWidth(val);
+        }
+        else if (key.compare("orthoH") == 0)
+        {
+            setOrthoHeight(val);
+        }
+        else if (key.compare("scrScale") == 0)
+        {
+            setScreenScale(val);
+        }
+        else if (key.compare("scrOff") == 0)
+        {
+            setScreenOffset(val);
+        }
+        else if (key.compare("scrRad") == 0)
+        {
+            setScreenRadian(val);
+        }
+        else if (key.compare("up") == 0)
+        {
+            setUpAxis(val);
+        }
+        else if (key.compare("pos") == 0)
+        {
+            setPosition(val);
+        }
+        else if (key.compare("rot") == 0)
+        {
+            setRotation(val);
+        }
+        else if (key.compare("scale") == 0)
+        {
+            setScale(val);
+        }
+        else if (key.compare("pan") == 0)
+        {
+            setPan(val);
+        }
+        else if (key.compare("tilt") == 0)
+        {
+            setTilt(val);
+        }
+        else if (key.compare("roll") == 0)
+        {
+            setRoll(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
         }
     }
 } // namespace ige::scene

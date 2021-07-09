@@ -838,5 +838,59 @@ void UIScrollView::onSerializeFinished(Scene* scene)
     }
 }
 
+//! Update property by key value
+void UIScrollView::setProperty(const std::string& key, const json& val)
+{
+    if (key.compare("content") == 0)
+    {
+        m_contentUUID = val;
+    }
+    else if (key.compare("viewport") == 0)
+    {
+        m_viewportUUID = val;
+    }
+    else if (key.compare("horizontalscrollbar") == 0)
+    {
+        m_horizontalUUID = val;
+    }
+    else if (key.compare("verticalscrollbar") == 0)
+    {
+        m_verticalUUID = val;
+    }
+    else if (key.compare("enablehorizontal") == 0)
+    {
+        setEnableHorizontal(val);
+    }
+    else if (key.compare("enablevertical") == 0)
+    {
+        setEnableVertical(val);
+    }
+    else if (key.compare("movementtype") == 0)
+    {
+        setMovementType((int)val);
+    }
+    else if (key.compare("elasticextra") == 0)
+    {
+        setElasticExtra(val);
+    }
+    else if (key.compare("elasticity") == 0)
+    {
+        setElasticity(val);
+    }
+    else if (key.compare("inertia") == 0)
+    {
+        setInertia(val);
+    }
+    else if (key.compare("decelerationrate") == 0)
+    {
+        setDecelerationRate(val);
+    }
+    else
+    {
+        UIImage::setProperty(key, val);
+    }
+
+    m_dirtySetObj = true;
+}
 
 NS_IGE_SCENE_END

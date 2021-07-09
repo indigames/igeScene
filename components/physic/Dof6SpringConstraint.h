@@ -111,6 +111,9 @@ namespace ige::scene
         const btVector3 &getAngularServoTarget() const { return m_angularServoTarget; }
         void setAngularServoTarget(const btVector3 &val);
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
         //! Serialize
         virtual void to_json(json &j) const override;

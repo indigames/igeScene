@@ -10,17 +10,11 @@ namespace ige::scene
     {
     public:
         using Callback = std::function<void(Args...)>;
-
         uint64_t addListener(Callback callback);
-
         bool removeListener(uint64_t id);
-
         void removeAllListeners();
-
         size_t getListenerCount();
-
         void invoke(Args... args);
-
     protected:
         std::unordered_map<uint64_t, Callback>	m_callbacks;
         static uint64_t s_idCounter;
@@ -28,6 +22,7 @@ namespace ige::scene
 
     template<class... Args>
     uint64_t Event<Args...>::s_idCounter = 0;
+
 
     template<class... Args>
     uint64_t Event<Args...>::addListener(Callback callback)
@@ -39,12 +34,14 @@ namespace ige::scene
     template<class... Args>
     bool Event<Args...>::removeListener(uint64_t id)
     {
-        return (m_callbacks.size() > 0 && m_callbacks.count(id) > 0 && m_callbacks.erase(id) > 0);
+        return m_callbacks.erase(id) > 0;
     }
 
     template<class... Args>
     void Event<Args...>::removeAllListeners()
     {
+        for (auto& [key, val] : m_callbacks)
+            val = nullptr;
         m_callbacks.clear();
     }
 
@@ -58,6 +55,6 @@ namespace ige::scene
     void Event<Args...>::invoke(Args... args)
     {
         for (auto const& [key, value] : m_callbacks)
-            value(args...);
+            value(std::forward<Args>(args)...);
     }
 }

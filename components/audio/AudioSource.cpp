@@ -22,7 +22,9 @@ namespace ige::scene
     {
         // Register audio manager
         auto manager = getOwner()->getRoot()->getComponent<AudioManager>();
-        setManager(manager ? manager.get() : getOwner()->getRoot()->addComponent<AudioManager>().get());
+        if(manager == nullptr)
+            manager = getOwner()->getRoot()->addComponent<AudioManager>();
+        setManager(manager);
 
         // Set path
         if (!path.empty())
@@ -39,7 +41,7 @@ namespace ige::scene
     {
         m_onDestroyedEvent.invoke(*this);
         m_audioSource = nullptr;
-        m_manager = nullptr;
+        m_manager.reset();
     }
 
     //! Set enabled
@@ -416,4 +418,64 @@ namespace ige::scene
         Component::from_json(j);
     }
 
+    //! Update property by key value
+    void AudioSource::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("stream") == 0)
+        {
+            setStream(val);
+        }
+        else if (key.compare("path") == 0)
+        {
+            setPath(val);
+        }
+        else if (key.compare("play") == 0)
+        {
+            setPlayOnEnabled(val);
+        }
+        else if (key.compare("loop") == 0)
+        {
+            setLoop(val);
+        }
+        else if (key.compare("single") == 0)
+        {
+            setSingleInstance(val);
+        }
+        else if (key.compare("volume") == 0)
+        {
+            setVolume(val);
+        }
+        else if (key.compare("pan") == 0)
+        {
+            setPan(val);
+        }
+        else if (key.compare("velocity") == 0)
+        {
+            setVelocity(val);
+        }
+        else if (key.compare("minDist") == 0)
+        {
+            setMinDistance(val);
+        }
+        else if (key.compare("maxDist") == 0)
+        {
+            setMaxDistance(val);
+        }
+        else if (key.compare("attModel") == 0)
+        {
+            setAttenuationModel(val);
+        }
+        else if (key.compare("attFactor") == 0)
+        {
+            setAttenuationRollOffFactor(val);
+        }
+        else if (key.compare("dopFactor") == 0)
+        {
+            setDopplerFactor(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

@@ -169,6 +169,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "NavMesh"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::NavMesh; }
+
         //! Build the entire navigation mesh
         virtual bool build();
 
@@ -313,6 +316,9 @@ namespace ige::scene
 
         //! Detour navigation mesh
         dtNavMesh *getNavMesh() const { return m_navMesh; }
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Release the navigation mesh and the mesh query

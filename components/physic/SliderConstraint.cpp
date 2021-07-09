@@ -78,4 +78,15 @@ namespace ige::scene
         // Serialization done, clear json
         PhysicConstraint::onSerializeFinished(scene);
     }
+
+    //! Update property by key value
+    void SliderConstraint::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("low") == 0)
+            setLowerLimit(PhysicHelper::to_btVector3(val));
+        else if (key.compare("up") == 0)
+            setUpperLimit(PhysicHelper::to_btVector3(val));
+        else
+            PhysicConstraint::setProperty(key, val);
+    }
 } // namespace ige::scene

@@ -6,7 +6,7 @@ namespace ige::scene
 {
     //! Constructor
     DirectionalLight::DirectionalLight(SceneObject &owner)
-        : LightComponent(owner)
+        : Component(owner)
     {
         m_index = getOwner()->getScene()->acquireDirectionalLight();
 
@@ -75,4 +75,20 @@ namespace ige::scene
         Component::from_json(j);
     }
 
+    //! Update property by key value
+    void DirectionalLight::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("its") == 0)
+        {
+            setIntensity(val);
+        }
+        else if (key.compare("col") == 0)
+        {
+            setColor(val);
+        }
+        else
+        {
+            Component::setProperty(key, val);
+        }
+    }
 } // namespace ige::scene

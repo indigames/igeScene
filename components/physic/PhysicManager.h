@@ -73,6 +73,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "PhysicManager"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::PhysicManager; }
+
         //! Initialize
         bool initialize();
 
@@ -129,6 +132,10 @@ namespace ige::scene
         //! Render debug
         bool isShowDebug() const { return m_bShowDebug; }
         void setShowDebug(bool debug = true) { m_bShowDebug = debug; }
+
+        //! Check if multiple edit allowed
+        virtual bool canMultiEdit() override { return false; }
+
 
     protected:
         //! Collision callback

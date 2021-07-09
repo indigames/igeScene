@@ -50,4 +50,10 @@ namespace ige::scene
     {
         PhysicConstraint::onSerializeFinished(scene);
     }
+
+    //! Update property by key value
+    void FixedConstraint::setProperty(const std::string& key, const json& val)
+    {
+        PhysicConstraint::setProperty(key, val);
+    }
 } // namespace ige::scene

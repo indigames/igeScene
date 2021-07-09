@@ -26,6 +26,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "UIImage"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::UIImage; }
+
         //! Update
         virtual void onUpdate(float dt) override;
 
@@ -56,6 +59,9 @@ namespace ige::scene
         Event<>& getOnDragEvent() { return m_onDragEvent; }
         Event<>& getOnReleasedEvent() { return m_onReleasedEvent; }
         Event<>& getOnSelectedEvent() { return m_onSelectedEvent; }
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         virtual void _onTouchPress(EventContext* context);

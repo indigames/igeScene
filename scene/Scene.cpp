@@ -51,10 +51,6 @@ namespace ige::scene
         7,6,2, 7,2,3
     };
 
-    Event<SceneObject*> Scene::m_targetAddedEvent;
-    Event<SceneObject*> Scene::m_targetRemovedEvent;
-    Event<> Scene::m_targetClearedEvent;
-
     Scene::Scene(const std::string& name)
         : m_name(name)
     {
@@ -165,15 +161,11 @@ namespace ige::scene
         m_canvasCamera->SetWidthBase(false);
 
         setWindowSize({ -1.f, -1.f });
-
-        m_firstTargetId = (uint64_t)-1;
         return true;
     }
 
     void Scene::clear()
     {
-        clearTargets();
-
         for (auto& obj : m_objects)
             obj = nullptr;
         m_objects.clear();
@@ -334,20 +326,19 @@ namespace ige::scene
         m_uiShowcase->Render();
     }
 
-    std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, bool isCanvas)
+    std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size)
     {
         auto parentObject = parent ? parent : m_root;
         if (isGUI) {
             parentObject = parentObject->isGUIObject() ? parentObject : m_canvas ? m_canvas : m_rootUI;
-            if (parentObject == m_rootUI && !isCanvas) {
-                auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", parentObject.get(), true, size, true);
+            if (parentObject == m_rootUI) {
+                auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", parentObject.get(), true, size);
                 auto canvas = canvasObject->addComponent<Canvas>();
                 canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
                 Vec2 canvasSize(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW());
                 canvas->setTargetCanvasSize(canvasSize);
                 canvasObject->setCanvas(canvas);
 
-        
                 parentObject = canvasObject;
                 m_objects.push_back(canvasObject);
 
@@ -358,7 +349,7 @@ namespace ige::scene
             if (parentObject->isGUIObject())
                 isGUI = true;//parentObject = m_root;
         }
-        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parentObject.get(), isGUI, size, isCanvas);
+        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parentObject.get(), isGUI, size);
         m_objects.push_back(sceneObject);
         return sceneObject;
     }
@@ -427,7 +418,7 @@ namespace ige::scene
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id)
     {
         // Perform binary search for best performance, 'cause m_objects sorted by id.
-        auto found = std::lower_bound(m_objects.begin(), m_objects.end(), id, [&](auto elem, int id)
+        auto found = std::lower_bound(m_objects.begin(), m_objects.end(), id, [&](auto elem, uint64_t id)
         {
             return elem->getId() < id;
         });
@@ -832,44 +823,7 @@ namespace ige::scene
     {
         return m_tweenManager;
     }
-
-    //! Add target
-    void Scene::addTarget(SceneObject* target, bool clear)
-    {
-        if (clear) clearTargets();
-
-        if (target)
-        {
-            if (m_targets.empty()) 
-                m_firstTargetId = target->getId();
-            target->setSelected(true);
-            auto itr = std::find(m_targets.begin(), m_targets.end(), target);
-            if (itr == m_targets.end()) m_targets.push_back(target);
-            getTargetAddedEvent().invoke(target);
-        }        
-    }
-
-    //! Remove target
-    void Scene::removeTarget(SceneObject* target)
-    {
-        auto itr = std::find(m_targets.begin(), m_targets.end(), target);
-        if (itr != m_targets.end())
-        {
-            target->setSelected(false);
-            m_targets.erase(itr);
-            getTargetRemovedEvent().invoke(target);
-        }
-    }
-
-    //! Remove all target
-    void Scene::clearTargets()
-    {
-        for (auto& target : m_targets)
-            if (target) target->setSelected(false);
-        m_targets.clear();
-        getTargetClearedEvent().invoke();
-    }
-
+   
     //! Serialize
     void Scene::to_json(json& j) const
     {
@@ -945,8 +899,5 @@ namespace ige::scene
         if (m_canvas == nullptr) {
             m_canvas = findObjectByName("Canvas");
         }
-
-        // Default to select the root node
-        addTarget(m_root.get());
     }
 }

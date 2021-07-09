@@ -122,7 +122,7 @@ set(INCLUDES
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourTileCache/Include"
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
 )
-
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC})
 add_library(${TARGET_NAME} ${APP_STYLE} ${SRC})
 target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDES})
 target_compile_definitions(${TARGET_NAME} PRIVATE ${DEFINES} ${pyxCore_DEFINES})

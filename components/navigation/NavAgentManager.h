@@ -44,6 +44,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "NavAgentManager"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::NavAgentManager; }
+
         //! Update
         void onUpdate(float dt) override;
 
@@ -136,6 +139,9 @@ namespace ige::scene
 
         //! Reactivate all agents
         void reactivateAllAgents();
+
+        //! Update property by key value
+        virtual bool canMultiEdit() override { return false; }
 
     protected:
         //! NavAgent created/destroyed events

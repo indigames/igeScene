@@ -20,6 +20,9 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "PhysicMesh"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::PhysicMesh; }
+
         //! Mesh Index
         int getMeshIndex() const { return m_meshIndex; };
         void setMeshIndex(int idx);
@@ -34,6 +37,9 @@ namespace ige::scene
 
         //! Override
         virtual void setIsKinematic(bool isKinematic = true) override;
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize

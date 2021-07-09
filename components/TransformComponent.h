@@ -32,6 +32,9 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "Transform"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Transform; }
+
         //! Get parent transform component
         TransformComponent *getParent() const;
 
@@ -120,6 +123,9 @@ namespace ige::scene
 
         virtual Vec3 globalToLocal(Vec3 point) const;
         virtual Vec3 localToGlobal(Vec3 point) const;
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize

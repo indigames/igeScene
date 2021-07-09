@@ -33,6 +33,9 @@ public:
 	//! Get component name
 	virtual std::string getName() const override { return "UIScrollView"; }
 
+	//! Returns the type of the component
+	virtual Type getType() const override { return Type::UIScrollView; }
+
 	//! Update
 	virtual void onUpdate(float dt) override;
 
@@ -72,8 +75,10 @@ public:
 
 	virtual void onSerializeFinished(Scene* scene) override;
 	
-protected:
+	//! Update property by key value
+	virtual void setProperty(const std::string& key, const json& val) override;
 
+protected:
 	virtual void _onTouchPress(EventContext* context) override;
 	virtual void _onTouchRelease(EventContext* context) override;
 	virtual void _onTouchDrag(EventContext* context) override;

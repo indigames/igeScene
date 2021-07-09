@@ -4,12 +4,11 @@
 using namespace pyxie;
 
 #include "components/Component.h"
-#include "components/LightComponent.h"
 
 namespace ige::scene
 {
     //! AmbientLight
-    class AmbientLight : public LightComponent
+    class AmbientLight : public Component
     {
     public:
         //! Constructor
@@ -20,6 +19,9 @@ namespace ige::scene
 
         //! Get component name
         virtual std::string getName() const override { return "AmbientLight"; }
+
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::AmbientLight; }
 
         //! Sky Color
         Vec3 getSkyColor() const;
@@ -32,6 +34,9 @@ namespace ige::scene
         //! Direction
         Vec3 getDirection() const;
         void setDirection(const Vec3 &direction);
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
         //! Serialize

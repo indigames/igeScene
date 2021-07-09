@@ -16,15 +16,14 @@ namespace ige::scene
     //! Destructor
     Component::~Component()
     {
-        if (getOwner())
+        if (m_owner.getScene())
         {
-            if (getOwner()->isActive())
+            if (m_owner.isActive())
             {
                 onDisable();
                 onDestroy();
             }
-            if(getOwner()->getScene())
-                getOwner()->getScene()->getSerializeFinishedEvent().removeListener(m_serializeEventId);
+            m_owner.getScene()->getSerializeFinishedEvent().removeListener(m_serializeEventId);
         }
     }
 
@@ -85,6 +84,15 @@ namespace ige::scene
     void Component::onSerializeFinished(Scene* scene)
     {
         setEnabled(m_bIsEnabled);
+    }
+
+    //! Update json value
+    void Component::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("enabled") == 0)
+        {
+            setEnabled(val);
+        }
     }
 
     //! Serialize component
