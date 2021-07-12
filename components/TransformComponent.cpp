@@ -157,6 +157,18 @@ namespace ige::scene
         return m_localRotation;
     }
 
+    void TransformComponent::setWorldRotation(const Vec3& rot)
+    {
+        Quat rotQuat;
+        vmath_eulerToQuat(rot.P(), rotQuat.P());
+
+        if (m_worldRotation != rotQuat)
+        {
+            m_worldRotation = rotQuat;
+            m_bWorldDirty = true;
+        }
+    }
+
     void TransformComponent::setWorldRotation(const Quat &rot)
     {
         if (m_worldRotation != rot)
@@ -424,12 +436,18 @@ namespace ige::scene
     //! Serialize
     void TransformComponent::to_json(json &j) const
     {
+        Vec3 lRotEuler;
+        vmath_quatToEuler(m_localRotation.P(), lRotEuler.P());
+
+        Vec3 wRotEuler;
+        vmath_quatToEuler(m_worldRotation.P(), wRotEuler.P());
+
         Component::to_json(j);
         j["pos"] = m_localPosition;
-        j["rot"] = m_localRotation;
+        j["rot"] = lRotEuler;
         j["scale"] = m_localScale;
         j["wpos"] = m_worldPosition;
-        j["wrot"] = m_worldRotation;
+        j["wrot"] = wRotEuler;
         j["wscale"] = m_worldScale;
     }
 
@@ -437,7 +455,7 @@ namespace ige::scene
     void TransformComponent::from_json(const json &j)
     {
         setPosition(j.value("pos", Vec3()));
-        setRotation(j.value("rot", Quat()));
+        setRotation(j.value("rot", Vec3(0.f, 0.f, 0.f)));
         setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
         Component::from_json(j);
         onUpdate(0.f); // pre-warm
@@ -448,31 +466,77 @@ namespace ige::scene
     {
         if (key.compare("pos") == 0)
         {
-            setPosition(val);
+            auto pos = m_localPosition;
+            Vec3 newPos;
+            val.get_to(newPos);
+
+            for (int i = 0; i < 3; ++i)
+                pos[i] = std::isnan(newPos[i]) ? pos[i] : newPos[i];
+
+            setPosition(pos);
         }
         else if (key.compare("rot") == 0)
         {
-            setRotation((Quat)val);
+            Vec3 lRot;
+            vmath_quatToEuler(m_localRotation.P(), lRot.P());
+            Vec3 newRot;
+            val.get_to(newRot);
+
+            for (int i = 0; i < 3; ++i)
+                lRot[i] = std::isnan(newRot[i]) ? lRot[i] : newRot[i];
+
+            setRotation(lRot);
         }
         else if (key.compare("scale") == 0)
         {
-            setScale(val);
+            auto scale = m_localScale;
+            Vec3 newScale;
+            val.get_to(newScale);
+
+            for (int i = 0; i < 3; ++i)
+                scale[i] = std::isnan(newScale[i]) ? scale[i] : newScale[i];
+
+            setScale(scale);
         }
         else if (key.compare("wpos") == 0)
         {
-            setWorldPosition(val);
+            auto pos = m_worldPosition;
+            Vec3 newPos;
+            val.get_to(newPos);
+
+            for (int i = 0; i < 3; ++i)
+                pos[i] = std::isnan(newPos[i]) ? pos[i] : newPos[i];
+
+            setWorldPosition(pos);
         }
         else if (key.compare("wrot") == 0)
         {
-            setWorldRotation((Quat)val);
+            Vec3 wRot;
+            vmath_quatToEuler(m_worldRotation.P(), wRot.P());
+
+            Vec3 newRot;
+            val.get_to(newRot);
+
+            for (int i = 0; i < 3; ++i)
+                wRot[i] = std::isnan(newRot[i]) ? wRot[i] : newRot[i];
+
+            setWorldRotation(wRot);
         }
         else if (key.compare("wscale") == 0)
         {
-            setWorldScale(val);
+            auto scale = m_worldScale;
+            Vec3 newScale;
+            val.get_to(newScale);
+
+            for (int i = 0; i < 3; ++i)
+                scale[i] = std::isnan(newScale[i]) ? scale[i] : newScale[i];
+
+            setWorldScale(scale);
         }
         else
         {
             Component::setProperty(key, val);
         }
+        onUpdate(0.f);
     }
 } // namespace ige::scene

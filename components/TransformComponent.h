@@ -77,6 +77,9 @@ namespace ige::scene
         //! Set world rotation
         virtual void setWorldRotation(const Quat &rot);
 
+        //! Set world rotation by xyz
+        virtual void setWorldRotation(const Vec3& rot);
+
         //! get world rotation
         virtual const Quat &getWorldRotation() const;
 
