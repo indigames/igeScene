@@ -7,8 +7,8 @@ using namespace pyxie;
 namespace ige::scene
 {
     //! Constructor
-    Text::Text(const std::string& text, const std::string& font, int fontSize, const Vec4& color)
-        : m_text(text), m_fontPath(font), m_fontSize(fontSize), m_color(color), m_figure(nullptr)
+    Text::Text(const std::string& text, const std::string& font, int fontSize, const Vec4& color, int fonttype)
+        : m_text(text), m_fontPath(font), m_fontSize(fontSize), m_color(color), m_figure(nullptr), m_fontType(fonttype)
     {
         updateFigure();
     }
@@ -87,11 +87,21 @@ namespace ige::scene
                 m_figure = nullptr;
             }
 
-            int w, h;
-            calcTextSize(m_text.c_str(), m_fontPath.c_str(), m_fontSize, w, h, 1.f);
-            m_size = Vec2(w, h);
+            
 
-            m_figure = GraphicsHelper::getInstance()->createText(m_text, m_fontPath, m_fontSize, m_color);
+            if (m_fontType == 1)
+            {
+                m_figure = GraphicsHelper::getInstance()->createBitmapText(m_text, m_fontPath, m_fontSize, m_color);
+            }
+            else
+            {
+                int w, h;
+                calcTextSize(m_text.c_str(), m_fontPath.c_str(), m_fontSize, w, h, 1.f);
+                m_size = Vec2(w, h);
+                m_figure = GraphicsHelper::getInstance()->createText(m_text, m_fontPath, m_fontSize, m_color);
+            }
+            if (m_figure == nullptr) return;
+
             m_figure->SetPosition(pos);
             m_figure->SetRotation(rot);
             m_figure->SetScale(scale);
