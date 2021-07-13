@@ -38,4 +38,5 @@
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
 #include "components/gui/UIText.h"
+#include "components/gui/UITextBitmap.h"
 #endif

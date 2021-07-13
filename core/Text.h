@@ -5,10 +5,13 @@ using namespace pyxie;
 
 namespace ige::scene
 {
+#define TEXT_TRUETYPE   0
+#define TEXT_BITMAP     1
+
     class Text
     {
     public:
-        Text(const std::string& text = "", const std::string& font = "", int fontSize = 11, const Vec4& color = {1.f, 1.f, 1.f, 1.f});
+        Text(const std::string& text = "", const std::string& font = "", int fontSize = 11, const Vec4& color = {1.f, 1.f, 1.f, 1.f}, int fonttype = TEXT_TRUETYPE);
         virtual ~Text();
 
         //! Text
@@ -30,6 +33,8 @@ namespace ige::scene
         //! Get size
         const Vec2& getSize() const;
 
+        //! Font Type
+        int getFontType() const { return m_fontType; }
         //! Figure
         EditableFigure* getFigure() { return m_figure; }
 
@@ -50,6 +55,8 @@ namespace ige::scene
 
         //! Cached Size
         Vec2 m_size;
+
+        int m_fontType; 
 
         //! Internal figure
         EditableFigure* m_figure;

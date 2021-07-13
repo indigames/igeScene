@@ -14,11 +14,11 @@ namespace ige::scene
     class EventContext;
 
     //! UIText
-    class UIText : public Component, UIMaskable
+    class UIText : public Component, protected UIMaskable
     {
     public:
         //! Constructor
-        UIText(SceneObject &owner, const std::string &text = "", const std::string &fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4 &color = {1.f, 1.f, 1.f, 1.f});
+        UIText(SceneObject &owner, const std::string &text = "", const std::string &fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4 &color = {1.f, 1.f, 1.f, 1.f}, int fontType = 0);
 
         //! Destructor
         virtual ~UIText();

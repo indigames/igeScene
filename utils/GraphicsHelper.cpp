@@ -5,6 +5,8 @@
 
 #include <algorithm>
 
+#include "core/BitmapFontHelper.h"
+
 namespace ige::scene
 {
     EditableFigure* GraphicsHelper::createSprite(const Vec2& size, const std::string& texture, const Vec2& uv_top_left, const Vec2& uv_bottom_right, Vec3* normal, uint32_t pivot, ShaderDescriptor* shader)
@@ -280,6 +282,35 @@ namespace ige::scene
         const ShaderParameterInfo* blendEqParam = RenderContext::Instance().GetShaderParameterInfoByName("blend_equation");
         uint32_t blendEq[4] = { GL_FUNC_ADD, 0,0,0 };
         efig->SetMaterialState(materialIdx, (ShaderParameterKey)blendEqParam->key, blendEq);
+        
+        return efig;
+    }
+
+    EditableFigure* GraphicsHelper::createBitmapText(const std::string& words, const std::string& fontPath, int fontSize, const Vec4& color, uint32_t pivot, float scale)
+    {
+        //int w = 0, h = 0;
+
+        /*auto id = BitmapFontHelper::getInstance()->createBitmapFont(fontPath, 0, 0, 0);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "T", 18, 14, 363, 331, 10, 11, 0, 3, 10);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "h", 18, 14, 225, 382, 8, 11, 1, 3, 10);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "i", 18, 14, 478, 377, 2, 11, 1, 3, 4);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "s", 18, 14, 199, 455, 7, 8, 1, 6, 9);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, " ", 18, 14, 66, 185, 1, 1, 0, 14, 5);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "a", 18, 14, 18, 459, 8, 8, 1, 6, 10);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "b", 18, 14, 198, 383, 8, 11, 1, 3, 10);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "t", 18, 14, 436, 377, 5, 11, 1, 3, 6);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "m", 18, 14, 494, 429, 12, 8, 2, 6, 16);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "p", 18, 14, 436, 353, 8, 11, 1, 6, 10);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "f", 18, 14, 442, 377, 5, 11, 1, 3, 7);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "o", 18, 14, 483, 438, 8, 8, 1, 6, 10);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, "n", 18, 14, 0, 459, 8, 8, 1, 6, 10);
+        BitmapFontHelper::getInstance()->addGlyphForChar(id, ".", 18, 14, 285, 476, 2, 3, 1, 11, 6);
+
+        auto efig = BitmapFontHelper::getInstance()->createText("This is a bitmap font.", fontPath, fontSize);*/
+
+        auto id = BitmapFontHelper::getInstance()->createBitmapFont(fontPath);
+
+        auto efig = BitmapFontHelper::getInstance()->createText(words.c_str(), fontPath, fontSize);
 
         return efig;
     }

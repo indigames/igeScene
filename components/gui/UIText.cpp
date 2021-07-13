@@ -10,10 +10,10 @@
 namespace ige::scene
 {
     //! Constructor
-    UIText::UIText(SceneObject &owner, const std::string &text, const std::string &fontPath, int fontSize, const Vec4 &color)
+    UIText::UIText(SceneObject &owner, const std::string &text, const std::string &fontPath, int fontSize, const Vec4 &color, int fontType)
         : Component(owner), UIMaskable(), m_flagMask(false)
     {
-        m_text = std::make_shared<Text>(text, fontPath, fontSize, color);
+        m_text = std::make_shared<Text>(text, fontPath, fontSize, color, fontType);
         if (m_text->getFigure())
             getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_text->getFigure());
 
