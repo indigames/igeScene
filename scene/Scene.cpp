@@ -91,7 +91,7 @@ namespace ige::scene
         m_shadowEdgeMask->AddMaterial("mate", desc);
 
         float diffuse[4] = { 1,1,1,1 };
-        m_shadowEdgeMask->SetMaterialParam(0, "DiffuseColor", diffuse, ParamTypeFloat4);
+        m_shadowEdgeMask->SetMaterialParam(0, GenerateNameHash("DiffuseColor"), diffuse, ParamTypeFloat4);
 
         float dt = 0;
         m_shadowEdgeMask->SetMaterialState(0, Key_depth_test_enable, &dt);

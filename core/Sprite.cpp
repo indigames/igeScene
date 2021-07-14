@@ -132,7 +132,7 @@ namespace ige::scene
                 FigureMaterialParam*& param = const_cast<FigureMaterialParam*&>(paramS);
                 param->sampler.samplerState.wrap_s = m_wrapMode;
                 param->sampler.samplerState.wrap_t = m_wrapMode;
-                m_figure->SetMaterialParam(materialIdx, "ColorSampler", &param->sampler);
+                m_figure->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &param->sampler);
             }
         }
     }
@@ -485,7 +485,7 @@ namespace ige::scene
             FigureMaterialParam*& param = const_cast<FigureMaterialParam*&>(paramS);
             param->sampler.samplerState.wrap_s = SamplerState::WrapMode::CLAMP;
             param->sampler.samplerState.wrap_t = SamplerState::WrapMode::CLAMP;
-            m_figure->SetMaterialParam(materialIdx, "ColorSampler", &param->sampler);
+            m_figure->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &param->sampler);
         }
     }
 
@@ -1320,7 +1320,7 @@ namespace ige::scene
 
             int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
             float color[4] = { m_color[0], m_color[1], m_color[2], m_color[3] };
-            m_figure->SetMaterialParam(materialIdx, "DiffuseColor", color, ParamTypeFloat4);
+            m_figure->SetMaterialParam(materialIdx, GenerateNameHash("DiffuseColor"), color, ParamTypeFloat4);
         }
     }
 
@@ -1346,7 +1346,7 @@ namespace ige::scene
         }
 
         int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
-        m_figure->SetMaterialParam(materialIdx, "ColorSampler", &sampler);
+        m_figure->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &sampler);
         const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
         uint32_t blendVal[4] = { 1,0,0,0 };
         m_figure->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, blendVal);

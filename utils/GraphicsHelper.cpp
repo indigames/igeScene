@@ -86,7 +86,7 @@ namespace ige::scene
         //efig->SetMaterialParam("mate", "DiffuseColor", Vec4(1.f, 1.f, 1.f, 1.f));
         int materialIdx = efig->GetMaterialIndex(GenerateNameHash("mate"));
         float _color[4] = { color[0], color[1], color[2], color[3] };
-        efig->SetMaterialParam(materialIdx, "DiffuseColor", _color, ParamTypeFloat4);
+        efig->SetMaterialParam(materialIdx, GenerateNameHash("DiffuseColor"), _color, ParamTypeFloat4);
 
         // efig->SetMaterialRenderState("mate", "cull_face_enable", false);
 
@@ -107,7 +107,7 @@ namespace ige::scene
             texSrc.normal = false;
             texSrc.wrap = false;
             sampler.textureNameIndex = efig->SetTextureSource(texSrc);
-            efig->SetMaterialParam(materialIdx, "ColorSampler", &sampler);
+            efig->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &sampler);
 
             // efig->SetMaterialRenderState("mate", "blend_enable", true);
             const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
@@ -156,7 +156,7 @@ namespace ige::scene
         //efig->SetMaterialParam("mate", "DiffuseColor", Vec4(1.f, 1.f, 1.f, 1.f));
         int materialIdx = efig->GetMaterialIndex(GenerateNameHash("mate"));
         float _color[4] = { color[0], color[1], color[2], color[3] };
-        efig->SetMaterialParam(materialIdx, "DiffuseColor", _color, ParamTypeFloat4);
+        efig->SetMaterialParam(materialIdx, GenerateNameHash("DiffuseColor"), _color, ParamTypeFloat4);
 
         // efig->SetMaterialRenderState("mate", "cull_face_enable", false);
 
@@ -178,7 +178,7 @@ namespace ige::scene
             texSrc.normal = false;
             texSrc.wrap = false;
             sampler.textureNameIndex = efig->SetTextureSource(texSrc);
-            efig->SetMaterialParam(materialIdx, "ColorSampler", &sampler);
+            efig->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &sampler);
 
             // efig->SetMaterialRenderState("mate", "blend_enable", true);
             const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
@@ -223,7 +223,7 @@ namespace ige::scene
         texSrc.normal = false;
         texSrc.wrap = true;
         sampler.textureNameIndex = efig->SetTextureSource(texSrc);
-        efig->SetMaterialParam(materialIdx, "ColorSampler", &sampler);
+        efig->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &sampler);
         return efig;
     }
 
@@ -254,7 +254,7 @@ namespace ige::scene
         auto efig = createMesh(points, _tris, "", uvs, shader);
         auto meshIdx = efig->GetMeshIndex(GenerateNameHash("mesh"));
         int materialIdx = efig->GetMaterialIndex(GenerateNameHash("mate"));
-        efig->SetMaterialParam(materialIdx, "DiffuseColor", color.P(), ParamTypeFloat4);
+        efig->SetMaterialParam(materialIdx, GenerateNameHash("DiffuseColor"), color.P(), ParamTypeFloat4);
 
         Sampler sampler;
         sampler.samplerSlotNo = 0;
@@ -269,7 +269,7 @@ namespace ige::scene
         texSrc.normal = false;
         texSrc.wrap = false;
         sampler.textureNameIndex = efig->SetTextureSource(texSrc);
-        efig->SetMaterialParam(materialIdx, "ColorSampler", &sampler);
+        efig->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &sampler);
 
         const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
         uint32_t blendVal[4] = { 1,0,0,0 };

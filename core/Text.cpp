@@ -62,7 +62,7 @@ namespace ige::scene
             if(m_figure)
             {
                 int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
-                m_figure->SetMaterialParam(materialIdx, "DiffuseColor", color.P(), ParamTypeFloat4);
+                m_figure->SetMaterialParam(materialIdx, GenerateNameHash("DiffuseColor"), color.P(), ParamTypeFloat4);
             }
         }
     }

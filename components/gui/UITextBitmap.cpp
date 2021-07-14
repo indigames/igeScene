@@ -35,6 +35,4 @@ namespace ige::scene
 
     EditableFigure* UITextBitmap::getCurrentFigure() { return getFigure(); }
     SceneObject* UITextBitmap::getSceneObjectOwner() { return getOwner(); }
-
-
 } // namespace ige::scene

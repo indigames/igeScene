@@ -21,8 +21,8 @@ class IgeConan(ConanFile):
 
     def requirements(self):
         self.requires("Python/3.9.1@ige/test")
-        self.requires("pyxCore/0.4.91@ige/test")
-        self.requires("igeCore/0.4.91@ige/test")
+        self.requires("pyxCore/0.5.39@ige/test")
+        self.requires("igeCore/0.5.39@ige/test")
         self.requires("json/3.9.1@ige/test")
         self.requires("bullet/3.0.8@ige/test")
         self.requires("igeSound/0.1.0@ige/test")
