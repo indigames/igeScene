@@ -1,6 +1,5 @@
 #include "core/BitmapFontHelper.h"
 #include "utils/GraphicsHelper.h"
-#include <atlbase.h>
 
 #include "utils/filesystem.h"
 namespace fs = ghc::filesystem;
