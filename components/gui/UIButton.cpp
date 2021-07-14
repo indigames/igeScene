@@ -180,6 +180,7 @@ Vec4 UIButton::getColorByState(ButtonState state) const
     case ButtonState::DISABLE:
         return m_disableColor;
     }
+	return m_normalColor;
 }
 
 void UIButton::setTransitionMode(TransitionMode value)
