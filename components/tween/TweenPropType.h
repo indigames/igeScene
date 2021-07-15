@@ -37,4 +37,4 @@ namespace ige::scene {
 
 }
 
-#endif __TWEEN_PROP_TYPE_H__
+#endif //__TWEEN_PROP_TYPE_H__

@@ -11,12 +11,16 @@ NS_IGE_SCENE_BEGIN
 #define BMFONT      3
 
 #define STH_ESUCCESS 0
+
 // error opening file
 #define STH_EFILEIO -1
+
 // error initializing truetype font
 #define STH_ETTFINIT -2
+
 // invalid argument
 #define STH_EINVAL -3
+
 // not enough memory
 #define STH_ENOMEM -4
 
@@ -67,34 +71,52 @@ static unsigned int hashint(unsigned int a)
 	return a;
 }
 
-static std::string utf16toUtf8(const std::wstring& wstr)
+inline int32_t ConvertUtf16ToUtf8(int8_t* dst, int32_t dst_size, const int16_t* src)
 {
-	std::string retStr;
-	if (!wstr.empty())
-	{
-		int sizeRequired = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
+	int32_t cnt = 0;
+	const int16_t* wp = src;
+	int8_t* cp = dst;
 
-		if (sizeRequired > 0)
+	if (dst_size == 0)
+		return 0;
+
+	dst_size -= 3;
+
+	for (cnt = 0; cnt < dst_size;)
+	{
+		int16_t wc = *wp++;
+		if (wc == 0)
 		{
-			std::vector<char> utf8String(sizeRequired);
-			int bytesConverted = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(),
-				-1, &utf8String[0], utf8String.size(), NULL,
-				NULL);
-			if (bytesConverted != 0)
-			{
-				retStr = &utf8String[0];
-			}
-			else
-			{
-				std::stringstream err;
-				err << __FUNCTION__
-					<< " std::string WstrToUtf8Str failed to convert wstring '"
-					<< wstr.c_str() << L"'";
-				throw std::runtime_error(err.str());
-			}
+			break;
+		}
+		if ((wc & ~0x7f) == 0)
+		{
+			*cp++ = wc & 0x7f;
+			cnt += 1;
+		}
+		else if ((wc & ~0x7ff) == 0)
+		{
+			*cp++ = ((wc >> 6) & 0x1f) | 0xc0;
+			*cp++ = ((wc)&0x3f) | 0x80;
+			cnt += 2;
+		}
+		else
+		{
+			*cp++ = ((wc >> 12) & 0xf) | 0xe0;
+			*cp++ = ((wc >> 6) & 0x3f) | 0x80;
+			*cp++ = ((wc)&0x3f) | 0x80;
+			cnt += 3;
 		}
 	}
-	return retStr;
+	*cp = '\0';
+	return cnt;
+}
+
+static std::string utf16toUtf8(const std::wstring& wstr)
+{
+    char utf8_str[2048] = {0};
+    ConvertUtf16ToUtf8((int8_t*)utf8_str, 2048, (const int16_t*)wstr.c_str());
+    return std::string(utf8_str);
 }
 
 static float* setv(float* v, float x, float y, float s, float t)
@@ -509,7 +531,7 @@ uint32_t BitmapFontHelper::createBitmapFont(std::shared_ptr<BitmapFont>& font)
 		for (int i = 0; i < size; i++)
 		{
 			auto glyph = font->getGlyph(i);
-			const WCHAR* wc = &glyph->Unicode;
+			const auto* wc = &glyph->Unicode;
 			auto c = utf16toUtf8(wc);
 			addGlyphForChar(id, c.c_str(), font->getSize(), font->getBaseSize(), (int)glyph->x, (int)glyph->y, (int)glyph->w, (int)glyph->h,
 				glyph->xoffset, glyph->yoffset, glyph->xadvance);
