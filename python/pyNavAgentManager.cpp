@@ -185,10 +185,10 @@ namespace ige::scene
     //! findNearestPoint
     PyObject *NavAgentManager_findNearestPoint(PyObject_NavAgentManager *self, PyObject *value)
     {
-        PyObject* posObj;
+        PyObject* posObj = nullptr;
         int type;
         Vec3 nearestPos;
-        if (PyArg_ParseTuple(value, "Oi", posObj, &type))
+        if (PyArg_ParseTuple(value, "Oi", &posObj, &type))
         {
             int d;
             float buff[4];
@@ -204,12 +204,12 @@ namespace ige::scene
     //! moveAlongSurface
     PyObject *NavAgentManager_moveAlongSurface(PyObject_NavAgentManager *self, PyObject *value)
     {
-        PyObject* startObj;
-        PyObject* endObj;
+        PyObject* startObj = nullptr;
+        PyObject* endObj = nullptr;
         int type;
         int maxVisit = 3;
         auto newPos = self->component->getOwner()->getTransform()->getWorldPosition();
-        if (PyArg_ParseTuple(value, "OOi|i", startObj, endObj, &type), maxVisit)
+        if (PyArg_ParseTuple(value, "OOi|i", &startObj, &endObj, &type), maxVisit)
         {
             int d;
             float buff[4];
@@ -226,11 +226,11 @@ namespace ige::scene
     //! findPath
     PyObject *NavAgentManager_findPath(PyObject_NavAgentManager *self, PyObject *value)
     {
-        PyObject* startObj;
-        PyObject* endObj;
+        PyObject* startObj = nullptr;
+        PyObject* endObj = nullptr;
         int type;
         std::vector<Vec3> points;
-        if (PyArg_ParseTuple(value, "OOi|i", startObj, endObj, &type))
+        if (PyArg_ParseTuple(value, "OOi|i", &startObj, &endObj, &type))
         {
             int d;
             float buff[4];
@@ -268,11 +268,11 @@ namespace ige::scene
     //! getRandomPointInCircle
     PyObject *NavAgentManager_getRandomPointInCircle(PyObject_NavAgentManager *self, PyObject *value)
     {
-        PyObject* centerObj;
+        PyObject* centerObj = nullptr;
         float radius;
         int type;
         Vec3 point;
-        if (PyArg_ParseTuple(value, "Ofi", centerObj, &radius, &type) && type >= 0)
+        if (PyArg_ParseTuple(value, "Ofi", &centerObj, &radius, &type) && type >= 0)
         {
             int d;
             float buff[4];
@@ -288,11 +288,11 @@ namespace ige::scene
     //! getDistanceToWall
     PyObject *NavAgentManager_getDistanceToWall(PyObject_NavAgentManager *self, PyObject *value)
     {
-        PyObject* pointObj;
+        PyObject* pointObj = nullptr;
         float radius;
         int type;
         float distance = 10000.f;
-        if (PyArg_ParseTuple(value, "Ofi", pointObj, &radius, &type) && type >= 0)
+        if (PyArg_ParseTuple(value, "Ofi", &pointObj, &radius, &type) && type >= 0)
         {
             int d;
             float buff[4];
@@ -305,12 +305,12 @@ namespace ige::scene
     //! raycast
     PyObject *NavAgentManager_raycast(PyObject_NavAgentManager *self, PyObject *value)
     {
-        PyObject* startObj;
-        PyObject* endObj;
+        PyObject* startObj = nullptr;
+        PyObject* endObj = nullptr;
         int type;
         float distance = 1000000.f;
         Vec3 hitPos;
-        if (PyArg_ParseTuple(value, "OOi", startObj, &endObj, &type) && type >= 0)
+        if (PyArg_ParseTuple(value, "OOi", &startObj, &endObj, &type) && type >= 0)
         {
             int d;
             float buff[4];
