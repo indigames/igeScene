@@ -68,7 +68,7 @@ namespace ige::scene
     }
 
     //! Convex
-    float PhysicMesh::isConvex() const
+    bool PhysicMesh::isConvex() const
     {
         return m_bIsConvex;
     }

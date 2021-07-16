@@ -114,7 +114,8 @@ namespace ige::scene
 
         if (!empty)
         {
-            m_nextObjectID = 2;
+            m_nextObjectID = 3;
+
             // Create root object
             m_root = createRootObject(m_name);
 
@@ -176,7 +177,7 @@ namespace ige::scene
         getUIResourceRemovedEvent().removeAllListeners();
         getSerializeFinishedEvent().removeAllListeners();
 
-        m_nextObjectID = 0;
+        m_nextObjectID = 1;
         m_activeCamera = nullptr;
         m_root = nullptr;
         m_rootUI = nullptr;
@@ -329,25 +330,27 @@ namespace ige::scene
     std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size)
     {
         auto parentObject = parent ? parent : m_root;
-        if (isGUI) {
-            parentObject = parentObject->isGUIObject() ? parentObject : m_canvas ? m_canvas : m_rootUI;
-            if (parentObject == m_rootUI) {
-                auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", parentObject.get(), true, size);
-                auto canvas = canvasObject->addComponent<Canvas>();
-                canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
-                Vec2 canvasSize(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW());
-                canvas->setTargetCanvasSize(canvasSize);
-                canvasObject->setCanvas(canvas);
+        if (name.compare("Canvas") != 0) {
+            if (isGUI) {
+                parentObject = parentObject->isGUIObject() ? parentObject : m_canvas ? m_canvas : m_rootUI;
+                if (parentObject == m_rootUI) {
+                    auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", parentObject.get(), true, size);
+                    auto canvas = canvasObject->addComponent<Canvas>();
+                    canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
+                    Vec2 canvasSize(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW());
+                    canvas->setTargetCanvasSize(canvasSize);
+                    canvasObject->setCanvas(canvas);
 
-                parentObject = canvasObject;
-                m_objects.push_back(canvasObject);
+                    parentObject = canvasObject;
+                    m_objects.push_back(canvasObject);
 
-                m_canvas = canvasObject;
+                    m_canvas = canvasObject;
+                }
             }
-        }
-        else if (parentObject) {
-            if (parentObject->isGUIObject())
-                isGUI = true;//parentObject = m_root;
+            else if (parentObject) {
+                if (parentObject->isGUIObject())
+                    isGUI = true;
+            }
         }
         auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parentObject.get(), isGUI, size);
         m_objects.push_back(sceneObject);

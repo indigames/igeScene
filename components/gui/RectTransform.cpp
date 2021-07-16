@@ -855,9 +855,6 @@ namespace ige::scene
         {
             setAnchorOffset(val);
         }
-        else
-        {
-            TransformComponent::setProperty(key, val);
-        }
+        TransformComponent::setProperty(key, val);
     }
 } // namespace ige::scene

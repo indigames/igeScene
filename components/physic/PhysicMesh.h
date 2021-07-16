@@ -32,7 +32,7 @@ namespace ige::scene
         void setPath(const std::string& path);
 
         //! Convex
-        float isConvex() const;
+        bool isConvex() const;
         void setConvex(bool convex = true);
 
         //! Override

@@ -466,72 +466,27 @@ namespace ige::scene
     {
         if (key.compare("pos") == 0)
         {
-            auto pos = m_localPosition;
-            Vec3 newPos;
-            val.get_to(newPos);
-
-            for (int i = 0; i < 3; ++i)
-                pos[i] = std::isnan(newPos[i]) ? pos[i] : newPos[i];
-
-            setPosition(pos);
+            setPosition(val);
         }
         else if (key.compare("rot") == 0)
         {
-            Vec3 lRot;
-            vmath_quatToEuler(m_localRotation.P(), lRot.P());
-            Vec3 newRot;
-            val.get_to(newRot);
-
-            for (int i = 0; i < 3; ++i)
-                lRot[i] = std::isnan(newRot[i]) ? lRot[i] : newRot[i];
-
-            setRotation(lRot);
+            setRotation((Vec3)val);
         }
         else if (key.compare("scale") == 0)
         {
-            auto scale = m_localScale;
-            Vec3 newScale;
-            val.get_to(newScale);
-
-            for (int i = 0; i < 3; ++i)
-                scale[i] = std::isnan(newScale[i]) ? scale[i] : newScale[i];
-
-            setScale(scale);
+            setScale(val);
         }
         else if (key.compare("wpos") == 0)
         {
-            auto pos = m_worldPosition;
-            Vec3 newPos;
-            val.get_to(newPos);
-
-            for (int i = 0; i < 3; ++i)
-                pos[i] = std::isnan(newPos[i]) ? pos[i] : newPos[i];
-
-            setWorldPosition(pos);
+            setWorldPosition(val);
         }
         else if (key.compare("wrot") == 0)
         {
-            Vec3 wRot;
-            vmath_quatToEuler(m_worldRotation.P(), wRot.P());
-
-            Vec3 newRot;
-            val.get_to(newRot);
-
-            for (int i = 0; i < 3; ++i)
-                wRot[i] = std::isnan(newRot[i]) ? wRot[i] : newRot[i];
-
-            setWorldRotation(wRot);
+            setWorldRotation((Vec3)val);
         }
         else if (key.compare("wscale") == 0)
         {
-            auto scale = m_worldScale;
-            Vec3 newScale;
-            val.get_to(newScale);
-
-            for (int i = 0; i < 3; ++i)
-                scale[i] = std::isnan(newScale[i]) ? scale[i] : newScale[i];
-
-            setWorldScale(scale);
+            setWorldScale(val);
         }
         else
         {
