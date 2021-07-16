@@ -604,6 +604,21 @@ namespace ige::scene
         return context.isDefaultPrevented();
     }
 
+    bool SceneObject::dispatchEventIncludeChild(int eventType, const Value& dataValue)
+    {
+        /*if (m_callbacks.size() == 0)
+            return false;*/
+
+        EventContext context;
+        context.m_sender = this;
+        context.m_type = eventType;
+        context.m_dataValue = dataValue;
+
+        doDispatch(eventType, &context, true);
+
+        return context.isDefaultPrevented();
+    }
+
     bool SceneObject::bubbleEvent(int eventType, const Value& dataValue)
     {
         EventContext context;
@@ -646,8 +661,22 @@ namespace ige::scene
     }
 
 
-    void SceneObject::doDispatch(int eventType, EventContext* context)
+    void SceneObject::doDispatch(int eventType, EventContext* context, bool includeChild)
     {
+        if (includeChild) {
+            int childCount = m_children.size();
+            if (childCount > 0)
+            {
+                for (int i = 0; i < childCount; i++) {
+                    if (m_children[i]) {
+                        m_children[i]->doDispatch(eventType, context, includeChild);
+                    }
+                }
+            }
+        }
+
+        if (m_callbacks.empty()) return;
+
         m_dispatching++;
         context->m_sender = this;
         bool hasDeletedItems = false;
@@ -700,6 +729,8 @@ namespace ige::scene
                     it++;
             }
         }
+
+        
     }
     
     void SceneObject::doBubble(int eventType, EventContext* context)

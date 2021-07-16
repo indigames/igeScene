@@ -23,15 +23,29 @@ namespace ige::scene
 {
     //! Constructor
     ScriptComponent::ScriptComponent(SceneObject &owner, const std::string &path)
-        : Component(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
+        : RuntimeComponent(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
     {
-        getOwner()->addEventListener((int)EventType::Click, std::bind(&ScriptComponent::onClickEvent, this, std::placeholders::_1), m_instanceId);
-        getOwner()->addEventListener((int)EventType::Changed, std::bind(&ScriptComponent::onChangedValueEvent, this, std::placeholders::_1), m_instanceId);
+        
     }
 
     //! Destructor
     ScriptComponent::~ScriptComponent()
     {
+        
+    }
+
+    void ScriptComponent::Initialize()
+    {
+        RuntimeComponent::Initialize();
+        getOwner()->addEventListener((int)EventType::Click, std::bind(&ScriptComponent::onClickEvent, this, std::placeholders::_1), m_instanceId);
+        getOwner()->addEventListener((int)EventType::Changed, std::bind(&ScriptComponent::onChangedValueEvent, this, std::placeholders::_1), m_instanceId);
+
+        loadPyModule();
+    }
+
+    void ScriptComponent::Clear()
+    {
+        RuntimeComponent::Clear();
         unloadPyModule();
         m_members.clear();
         getOwner()->removeEventListener((int)EventType::Click, m_instanceId);
@@ -246,6 +260,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onAwake", nullptr);
             Py_XDECREF(ret);
         }
+        pyxie_printf("get Awake %d \n", PyObject_HasAttrString(m_pyInstance, "onAwake"));
     }
 
     //! Start
@@ -281,7 +296,7 @@ namespace ige::scene
     //! Update functions
     void ScriptComponent::onUpdate(float dt)
     {
-        if (SceneManager::getInstance()->isEditor())
+        if (SceneManager::getInstance()->isEditor() || !isRunning())
             return;
 
         if (!m_bOnAwakeCalled)
@@ -629,7 +644,6 @@ namespace ige::scene
         if (forceReload || strcmp(m_path.c_str(), scriptName.c_str()) != 0)
         {
             m_path = scriptName;
-            loadPyModule();
         }
     }
 

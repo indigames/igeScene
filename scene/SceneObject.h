@@ -188,6 +188,8 @@ namespace ige::scene
         void removeEventListeners();
         bool hasEventListener(int eventType, const uint64_t tag = 0) const;
         bool dispatchEvent(int eventType, const Value& dataValue = Value::Null);
+        bool dispatchEventIncludeChild(int eventType, const Value& dataValue = Value::Null);
+
         bool bubbleEvent(int eventType, const Value& dataValue = Value::Null);
         bool dispatchInputEvent(int eventType, const Value& dataValue = Value::Null);
         bool bubbleInputEvent(int eventType, const Value& dataValue = Value::Null);
@@ -215,7 +217,7 @@ namespace ige::scene
         std::string generateUUID(unsigned int len = 16);
 
         //! Event
-        void doDispatch(int eventType, EventContext* context);
+        void doDispatch(int eventType, EventContext* context, bool includeChild = false);
         void doBubble(int eventType, EventContext* context);
 
         //! Transform changed event

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/Component.h"
+#include "components/RuntimeComponent.h"
 #include "event/Event.h"
 #include "core/Value.h"
 
@@ -11,7 +11,7 @@ namespace ige::scene
 {
     class EventContext;
     //! ScriptComponent
-    class ScriptComponent : public Component
+    class ScriptComponent : public RuntimeComponent
     {
     public:
         //! Constructor
@@ -25,6 +25,12 @@ namespace ige::scene
 
         //! Returns the type of the component
         virtual Type getType() const override { return Type::Script; }
+
+        //! Active when start runtime
+        virtual void Initialize() override;
+
+        //! Active when stop runtime
+        virtual void Clear() override;
 
         //! Awake
         virtual void onAwake();

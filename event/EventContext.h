@@ -46,6 +46,10 @@ enum class EventType {
 	RemoveChild		= 101,
 	RemoveChildren	= 102,
 
+	RunEditor		= 990,
+	PauseEditor		= 991,
+	StopEditor		= 992,
+
 	Delete	= 999,
 };
 

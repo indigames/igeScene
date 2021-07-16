@@ -277,4 +277,13 @@ namespace ige::scene
         std::replace(retPath.begin(), retPath.end(), '\\', '/');
         return retPath;
     }
+
+    void SceneManager::dispathEvent(int eventType)
+    {
+        auto scene = getCurrentScene();
+        if (scene) {
+            auto node = scene->getRoot();
+            if (node) node->dispatchEventIncludeChild(eventType);
+        }
+    }
 }

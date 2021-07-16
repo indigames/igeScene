@@ -80,6 +80,8 @@ namespace ige::scene
         const std::string& getEditorPath() const { return m_editorPath; }
         void setEditorPath(const std::string& path);
 
+        void dispathEvent(int eventType);
+
     protected:
 
         //! Initialize
