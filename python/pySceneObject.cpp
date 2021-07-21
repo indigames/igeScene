@@ -17,6 +17,7 @@
 #include "python/pyCanvas.h"
 #include "python/pyUIImage.h"
 #include "python/pyUIText.h"
+#include "python/pyUITextBitmap.h"
 #include "python/pyUITextField.h"
 #include "python/pyUIButton.h"
 #include "python/pyUISlider.h"
@@ -362,6 +363,17 @@ namespace ige::scene
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;
                 }
+            }
+            else if (type == "UITextBitmap")
+            {
+            auto comp = self->sceneObject->addComponent<UITextBitmap>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_UITextBitmap, &PyTypeObject_UITextBitmap);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
             }
             else if (type == "UITextField")
             {
@@ -811,6 +823,17 @@ namespace ige::scene
                 compObj->super.component = compObj->component;
                 return (PyObject*)compObj;
             }
+        }
+        else if (type == "UITextBitmap")
+        {
+        auto comp = sceneObject->getComponent<UITextBitmap>();
+        if (comp)
+        {
+            auto* compObj = PyObject_New(PyObject_UITextBitmap, &PyTypeObject_UITextBitmap);
+            compObj->component = comp.get();
+            compObj->super.component = compObj->component;
+            return (PyObject*)compObj;
+        }
         }
         else if (type == "UITextField")
         {
