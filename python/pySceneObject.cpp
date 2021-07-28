@@ -1164,6 +1164,26 @@ namespace ige::scene
         Py_RETURN_TRUE;
     }
 
+    int SceneObject_invoke(PyObject_SceneObject* self, PyObject* args)
+    {
+        char* scriptName = nullptr;
+        char* functName = nullptr;
+        PyObject* value = nullptr;
+
+        if (PyArg_ParseTuple(args, "s|s|O", &scriptName, &functName, &value))
+        {
+            auto _scriptName = std::string(scriptName);
+            auto _funcName = std::string(functName);
+            auto script = self->sceneObject->getScript(_scriptName);
+            if (script)
+            {
+                script->Invoke(_funcName, value);
+                return 0;
+            }
+        }
+        return -1;
+    }
+
     // Compare function
     static PyObject* SceneObject_richcompare(PyObject* self, PyObject* other, int op)
     {
@@ -1207,6 +1227,7 @@ namespace ige::scene
         {"getComponent", (PyCFunction)SceneObject_getComponent, METH_VARARGS, SceneObject_getComponent_doc},
         {"getComponents", (PyCFunction)SceneObject_getComponents, METH_VARARGS, SceneObject_getComponents_doc},
         {"removeComponents", (PyCFunction)SceneObject_removeComponents, METH_VARARGS, SceneObject_removeComponents_doc},
+        {"invoke", (PyCFunction)SceneObject_invoke, METH_VARARGS, SceneObject_invoke_doc},
         {NULL, NULL}};
 
     // Get/Set

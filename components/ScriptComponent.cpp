@@ -21,6 +21,69 @@ extern std::shared_ptr<Application> gApp;
 
 namespace ige::scene
 {
+    static PyObject* parseObject(const Value& value)
+    {
+        switch (value.getType()) {
+        case Value::Type::NONE:
+        default:
+        {
+        }
+        break;
+        case Value::Type::BYTE:
+        {
+            return Py_BuildValue("(b)", value.asByte());
+        }
+        break;
+        case Value::Type::INTEGER:
+        {
+            return Py_BuildValue("(i)", value.asInt());
+        }
+        break;
+        case Value::Type::UNSIGNED:
+        {
+            return Py_BuildValue("(I)", value.asUnsignedInt());
+        }
+        break;
+        case Value::Type::FLOAT:
+        {
+            return Py_BuildValue("(f)", value.asFloat());
+        }
+        break;
+        case Value::Type::DOUBLE:
+        {
+            return Py_BuildValue("(d)", value.asDouble());
+        }
+        break;
+        case Value::Type::BOOLEAN:
+        {
+            return Py_BuildValue("(O)", value.asBool() ? Py_True : Py_False);
+        }
+        break;
+        case Value::Type::STRING:
+        {
+            return Py_BuildValue("(s)", value.asString().c_str());
+        }
+        break;
+        case Value::Type::VECTOR:
+        {
+
+            auto valueArray = value.asValueVector();
+            int listSize = valueArray.size();
+            if (listSize > 0)
+            {
+                PyObject* list = PyList_New(listSize);
+                for (int i = 0; i < listSize; i++)
+                {
+                    PyList_SetItem(list, i, parseObject(valueArray[i]));
+                }
+                return Py_BuildValue("O", list);
+            }
+        }
+        break;
+        }
+        return nullptr;
+    }
+
     //! Constructor
     ScriptComponent::ScriptComponent(SceneObject &owner, const std::string &path)
         : RuntimeComponent(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
@@ -260,7 +323,6 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onAwake", nullptr);
             Py_XDECREF(ret);
         }
-        pyxie_printf("get Awake %d \n", PyObject_HasAttrString(m_pyInstance, "onAwake"));
     }
 
     //! Start
@@ -405,7 +467,7 @@ namespace ige::scene
     //! Change Value
     void ScriptComponent::onChangedValue(Value value)
     {
-        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onChangedValue"))
+        /*if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onChangedValue"))
         {
             switch (value.getType()) {
             case Value::Type::NONE:
@@ -458,7 +520,9 @@ namespace ige::scene
                 }
                 break;
             }
-        }
+        }*/
+
+        Invoke("onChangedValue", value);
     }
 
     //! Member value changed
@@ -524,7 +588,6 @@ namespace ige::scene
             Py_XDECREF(pyValue);
         }
     }
-
 
     //! Trigger events
     void ScriptComponent::onTriggerStart(SceneObject &other)
@@ -596,6 +659,93 @@ namespace ige::scene
             obj->sceneObject = &other;
 
             auto ret = PyObject_CallMethod(m_pyInstance, "onCollisionStop", "(O)", obj);
+            Py_XDECREF(ret);
+        }
+    }
+
+    void ScriptComponent::Invoke(const std::string& functionName, const Value& value)
+    {
+        auto m_fncName = functionName.c_str();
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, m_fncName))
+        {
+            switch (value.getType()) {
+            case Value::Type::NONE:
+            default:
+            {
+                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, nullptr);
+                Py_XDECREF(ret);
+            }
+            break;
+            case Value::Type::BYTE:
+            {
+                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(b)", value.asByte());
+                Py_XDECREF(ret);
+            }
+            break;
+            case Value::Type::INTEGER:
+            {
+                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(i)", value.asInt());
+                Py_XDECREF(ret);
+            }
+            break;
+            case Value::Type::UNSIGNED:
+            {
+                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(I)", value.asUnsignedInt());
+                Py_XDECREF(ret);
+            }
+            break;
+            case Value::Type::FLOAT:
+            {
+                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(f)", value.asFloat());
+                Py_XDECREF(ret);
+            }
+            break;
+            case Value::Type::DOUBLE:
+            {
+                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(d)", value.asDouble());
+                Py_XDECREF(ret);
+            }
+            break;
+            case Value::Type::BOOLEAN:
+            {
+                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(i)", value.asBool());
+                Py_XDECREF(ret);
+            }
+            break;
+            case Value::Type::STRING:
+            {
+                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(s)", value.asString().c_str());
+                Py_XDECREF(ret);
+            }
+            break;
+            case Value::Type::VECTOR:
+            {
+                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(O)", parseObject(value));
+                Py_XDECREF(ret);
+            }
+            break;
+            }
+        }
+    }
+
+    void ScriptComponent::Invoke(const std::string& functionName, void* pyObj)
+    {
+        auto m_fncName = functionName.c_str();
+        PyObject* m_pyObj = static_cast<PyObject*>(pyObj);
+        PyTypeObject* type = m_pyObj->ob_type;
+        std::string m_type(type->tp_name);
+        if (m_type.compare("int") == 0) {
+            Invoke(functionName, Value((int)PyLong_AsLong(m_pyObj)));
+        }
+        else if (m_type.compare("float") == 0) {
+            Invoke(functionName, Value((float)PyFloat_AsDouble(m_pyObj)));
+        }
+        else if (m_type.compare("string") == 0) {
+            Invoke(functionName, Value(PyUnicode_AsUTF8(m_pyObj)));
+        }
+        else {
+            //pyxie_printf("Recv Type %s\n", type->tp_name);
+            auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(O)", m_pyObj);
             Py_XDECREF(ret);
         }
     }

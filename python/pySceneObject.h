@@ -75,4 +75,7 @@ namespace ige::scene
 
     // Remove components
     PyObject* SceneObject_removeComponents(PyObject_SceneObject* self);
+
+    // Invoke Scripts
+    int SceneObject_invoke(PyObject_SceneObject* self, PyObject* args);
 }
