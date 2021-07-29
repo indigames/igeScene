@@ -719,7 +719,7 @@ namespace ige::scene
 
         Mat4 viewInv;
         camera->GetViewInverseMatrix(viewInv);
-
+        
         float distance, minDistance = maxDistance;
         auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
         for (const auto& obj : m_objects)

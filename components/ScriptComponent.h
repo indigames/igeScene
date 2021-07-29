@@ -6,7 +6,6 @@
 
 //! PyObject declaration
 struct _object;
-
 namespace ige::scene
 {
     class EventContext;
@@ -92,6 +91,10 @@ namespace ige::scene
 
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
+
+        //! Invoke Function 
+        virtual void Invoke(const std::string &functionName, const Value& value);
+        virtual void Invoke(const std::string& functionName, void* pyObj);
 
     protected:
         //! Serialize

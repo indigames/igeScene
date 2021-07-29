@@ -10,6 +10,7 @@
 
 #include "components/Component.h"
 #include "components/TransformComponent.h"
+#include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
 
@@ -19,7 +20,6 @@ using namespace pyxie;
 namespace ige::scene
 {
     class Scene;
-
     /**
     * SceneObject represents an object in scene hierarchy
     */
@@ -43,7 +43,7 @@ namespace ige::scene
         inline virtual std::string getName() const { return m_name; }
 
         //! Set Name
-        void setName(const std::string& name);
+        virtual void setName(const std::string& name);
 
         //! Set parent
         virtual void setParent(SceneObject *parent);
@@ -113,6 +113,8 @@ namespace ige::scene
         //! Add component by type
         template <typename T, typename... Args>
         std::shared_ptr<T> addComponent(Args &&... args);
+
+        
 
         //! Update functions
         virtual void onUpdate(float dt);
@@ -212,6 +214,8 @@ namespace ige::scene
         bool isInMask() const { return m_bIsInMask; }
         void setInMask(bool value);
 
+        std::shared_ptr<ScriptComponent> getScript(const std::string& path) const;
+
     protected:
         //! Helper to generate UUID
         std::string generateUUID(unsigned int len = 16);
@@ -222,6 +226,8 @@ namespace ige::scene
 
         //! Transform changed event
         void onTransformChanged(SceneObject& sceneObject);
+
+        
 
     protected:
         //! Node ID

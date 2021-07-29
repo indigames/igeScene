@@ -15,7 +15,7 @@
 #include "components/FigureComponent.h"
 #include "components/BoneTransform.h"
 #include "components/SpriteComponent.h"
-#include "components/ScriptComponent.h"
+//#include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
@@ -391,6 +391,19 @@ namespace ige::scene
             if (child)
                 child->getComponentsRecursive(components, type);
         }
+    }
+
+    std::shared_ptr<ScriptComponent> SceneObject::getScript(const std::string& path) const
+    {
+        for (int i = 0; i < m_components.size(); ++i)
+        {
+            if (m_components[i]->getName().compare("Script") == 0) {
+                auto script = std::dynamic_pointer_cast<ScriptComponent>(m_components[i]);
+                if(script->getPath().compare(path) == 0)
+                    return script;
+            }
+        }
+        return nullptr;
     }
 
     //! Update function
