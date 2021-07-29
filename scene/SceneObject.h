@@ -23,7 +23,7 @@ namespace ige::scene
     /**
     * SceneObject represents an object in scene hierarchy
     */
-    class SceneObject : std::enable_shared_from_this<SceneObject>
+    class SceneObject
     {
     public:
         //! Constructor

@@ -1,10 +1,8 @@
-#include <vmath.h>
-
-#include <bitmapHelper.h>
-#include "utils/GraphicsHelper.h"
-
 #include <algorithm>
+#include <vmath.h>
+#include <bitmapHelper.h>
 
+#include "utils/GraphicsHelper.h"
 #include "core/BitmapFontHelper.h"
 
 namespace ige::scene
@@ -47,7 +45,7 @@ namespace ige::scene
         return createMesh(_points, _tris, texture, uvs, shader);
     }
     
-    EditableFigure* GraphicsHelper::createMesh(const std::vector<float>& points, const std::vector<uint32_t>& trianglesIndices, pyxieTexture* texture, const std::vector<float>& uvs, ShaderDescriptor* shader, Vec3* normals, const Vec4& color)
+    EditableFigure* GraphicsHelper::createMesh(const std::vector<float>& points, const std::vector<uint32_t>& trianglesIndices, Texture* texture, const std::vector<float>& uvs, ShaderDescriptor* shader, Vec3* normals, const Vec4& color)
     {
         if (shader == nullptr)
         {

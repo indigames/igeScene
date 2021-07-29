@@ -144,7 +144,7 @@ namespace ige::scene
             // Add editor debug
             if (SceneManager::getInstance()->isEditor())
             {
-                camObj->addComponent<FigureComponent>(GetEditorResource("figures/camera.pyxf"))->setSkipSerialize(true);
+                camObj->addComponent<FigureComponent>(GetEditorResource("figures/camera"))->setSkipSerialize(true);
                 directionalLight->addComponent<SpriteComponent>(GetEditorResource("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
             }
         }        

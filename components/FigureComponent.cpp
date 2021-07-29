@@ -65,6 +65,7 @@ namespace ige::scene
     {
         auto fsPath = fs::path(path);
         auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        if(relPath.size() == 0) relPath = fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
 
         if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
@@ -78,7 +79,12 @@ namespace ige::scene
                 m_figure = nullptr;
             }
 
-            m_figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
+            auto fsPath = fs::path(m_path);
+            auto fPath = fsPath.extension().compare(".pyxf") == 0 ? m_path : fsPath.parent_path().append(fsPath.stem().string() + ".pyxf");
+            if (fPath.size() == 0) fPath = fsPath.string();
+            std::replace(fPath.begin(), fPath.end(), '\\', '/');
+
+            m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str());
             m_figure->WaitInitialize();
 
             // Setup lights shader

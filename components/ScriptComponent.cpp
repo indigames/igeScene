@@ -494,27 +494,25 @@ namespace ige::scene
                 break;
 
             case json::value_t::string:
+            case json::value_t::object:
                 {
-                    auto jVal = json::parse(value.get<std::string>(), 0, false);
-                    auto uuid = jVal.is_null() || jVal.is_discarded() ? "" : jVal.value("uuid", "");
-                    auto obj = getOwner()->getScene()->findObjectByUUID(uuid);
-                    if (obj) 
-                    {
-                        auto compName = jVal.is_null() || jVal.is_discarded() ? "" : jVal.value("comp", "");
-                        if (compName.empty() || compName.compare("") == 0 || compName.compare("SceneObject") == 0)
-                        {
-                            auto pyObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                            pyObj->sceneObject = obj.get();
-                            pyValue = (PyObject*)pyObj;
-                        }
-                        else
-                        {
-                            pyValue = pySceneObject_getComponent(obj.get(), compName);
-                        }
-                    }
-                    else
-                    {
+                    if (value.type() == json::value_t::string) {
                         pyValue = PyUnicode_FromString(value.get<std::string>().c_str());
+                    }
+                    else {
+                        auto uuid = value.value("uuid", "");
+                        auto obj = getOwner()->getScene()->findObjectByUUID(uuid);
+                        if (obj) {
+                            auto compName = value.value("comp", "");
+                            if (compName.empty() || compName.compare("") == 0 || compName.compare("SceneObject") == 0) {
+                                auto pyObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+                                pyObj->sceneObject = obj.get();
+                                pyValue = (PyObject*)pyObj;
+                            }
+                            else {
+                                pyValue = pySceneObject_getComponent(obj.get(), compName);
+                            }
+                        }
                     }
                 }
                 break;
@@ -626,11 +624,7 @@ namespace ige::scene
         {
             auto key = pair.first;
             auto value = pair.second;
-
-            if (value.type() == json::value_t::string)
-            {
-                onMemberValueChanged(key, value);
-            }
+            onMemberValueChanged(key, value);
         }
         Component::onSerializeFinished(scene);
     }
@@ -644,6 +638,8 @@ namespace ige::scene
         if (forceReload || strcmp(m_path.c_str(), scriptName.c_str()) != 0)
         {
             m_path = scriptName;
+
+            loadPyModule();
         }
     }
 

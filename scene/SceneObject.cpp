@@ -908,7 +908,7 @@ namespace ige::scene
             if (auto camera = getComponent<CameraComponent>())
             {
                 if (!getComponent<FigureComponent>())
-                    addComponent<FigureComponent>(GetEditorResource("figures/camera.pyxf"))->setSkipSerialize(true);
+                    addComponent<FigureComponent>(GetEditorResource("figures/camera"))->setSkipSerialize(true);
             }
 
             if (auto directionalLight = getComponent<DirectionalLight>())
