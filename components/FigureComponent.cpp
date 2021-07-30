@@ -80,7 +80,7 @@ namespace ige::scene
             }
 
             auto fsPath = fs::path(m_path);
-            auto fPath = fsPath.extension().compare(".pyxf") == 0 ? m_path : fsPath.parent_path().append(fsPath.stem().string() + ".pyxf");
+            auto fPath = fsPath.extension().compare(".pyxf") == 0 ? m_path : fsPath.parent_path().append(fsPath.stem().string() + ".pyxf").string();
             if (fPath.size() == 0) fPath = fsPath.string();
             std::replace(fPath.begin(), fPath.end(), '\\', '/');
 
