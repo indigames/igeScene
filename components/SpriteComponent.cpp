@@ -89,36 +89,42 @@ namespace ige::scene
             m_texture = nullptr;
         }
 
-        if (!path.empty()) {
-            auto fsPath = fs::path(path);
-            auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
-            std::replace(relPath.begin(), relPath.end(), '\\', '/');
+        auto fsPath = fs::path(path);
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        if (relPath.size() == 0) relPath = fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+
+        if (strcmp(m_path.c_str(), relPath.c_str()) != 0) {
             m_path = relPath;
-            m_texture = ResourceCreator::Instance().NewTexture(m_path.c_str());
-        }
-        else 
-            m_path = path;
 
-        auto oldFigure = m_sprite->getFigure();
-        m_sprite->setTexture(m_texture);
-        auto newFigure = m_sprite->getFigure();
+            auto fsPath = fs::path(m_path);
+            auto fPath = fsPath.extension().compare(".pyxi") == 0 ? m_path : fsPath.parent_path().append(fsPath.stem().string() + ".pyxi").string();
+            if (fPath.size() == 0) fPath = fsPath.string();
+            std::replace(fPath.begin(), fPath.end(), '\\', '/');
+            
+            m_texture = ResourceCreator::Instance().NewTexture(fPath.c_str());
 
-        if (oldFigure == nullptr && newFigure) {
-            onCreateFigure(newFigure);
-        }
-        if (oldFigure != nullptr && newFigure == nullptr) {
-            onRemoveFigure(oldFigure);
-        }
+            auto oldFigure = m_sprite->getFigure();
+            m_sprite->setTexture(m_texture);
+            auto newFigure = m_sprite->getFigure();
 
-        if (newFigure)
-        {
-            auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-            shaderDesc->SetValue(newFigure->GetShaderName(0));
-            shaderDesc->SetBillboard(m_bIsBillboard);
-            newFigure->SetShaderName(0, shaderDesc->GetValue());
+            if (oldFigure == nullptr && newFigure) {
+                onCreateFigure(newFigure);
+            }
+            if (oldFigure != nullptr && newFigure == nullptr) {
+                onRemoveFigure(oldFigure);
+            }
+
+            if (newFigure)
+            {
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(newFigure->GetShaderName(0));
+                shaderDesc->SetBillboard(m_bIsBillboard);
+                newFigure->SetShaderName(0, shaderDesc->GetValue());
+            }
+
+            getOwner()->getTransform()->makeDirty();
         }
-        
-        getOwner()->getTransform()->makeDirty();
     }
 
     void SpriteComponent::onCreateFigure(EditableFigure* fig) {

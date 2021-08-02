@@ -123,6 +123,26 @@ namespace ige::scene
         }
     }
 
+    //! Enable double side
+    void FigureComponent::setDoubleSideEnable(bool enable)
+    {
+        if (m_bIsDoubleSideEnable != enable)
+        {
+            m_bIsDoubleSideEnable = enable;
+            if (m_figure)
+            {
+                // Setup point lights shader
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetDoubleside(m_bIsDoubleSideEnable);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
+            }
+        }
+    }
+
     //! Enable cull face
     void FigureComponent::setCullFaceEnable(bool enable)
     {
@@ -157,6 +177,26 @@ namespace ige::scene
                     auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
                     shaderDesc->SetValue(m_figure->GetShaderName(i));
                     shaderDesc->SetZTest(m_bIsDepthTestEnable);
+                    m_figure->SetShaderName(i, shaderDesc->GetValue());
+                }
+            }
+        }
+    }
+
+    //! Enable alpha test
+    void FigureComponent::setAlphaTestEnable(bool enable)
+    {
+        if (m_bIsAlphaTestEnable != enable)
+        {
+            m_bIsAlphaTestEnable = enable;
+            if (m_figure)
+            {
+                // Setup point lights shader
+                for (int i = 0; i < m_figure->NumMaterials(); ++i)
+                {
+                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                    shaderDesc->SetValue(m_figure->GetShaderName(i));
+                    shaderDesc->SetAlphaTest(m_bIsAlphaTestEnable);
                     m_figure->SetShaderName(i, shaderDesc->GetValue());
                 }
             }
@@ -227,6 +267,77 @@ namespace ige::scene
         }
     }
 
+    //! Enable alpha blending
+    void FigureComponent::setSpecularEnable(bool enable)
+    {
+        m_bIsSpecularEnable = enable;
+        if (m_figure)
+        {
+            // Setup point lights shader
+            for (int i = 0; i < m_figure->NumMaterials(); ++i)
+            {
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(m_figure->GetShaderName(i));
+                shaderDesc->SetSpecular(m_bIsSpecularEnable, (ShaderDescriptor::ReferenceMapChannel)m_specularTextId);
+                m_figure->SetShaderName(i, shaderDesc->GetValue());
+            }
+        }        
+    }
+
+    //! Alpha blending operation
+    void FigureComponent::setSpecularTexId(int id)
+    {
+        // Only 4 operations supported now
+        if (id < ShaderDescriptor::NoMapChannel || id> ShaderDescriptor::OverlayNormalMapRedChannel)
+            return;
+        m_specularTextId = id;
+        if (m_figure)
+        {
+            // Setup point lights shader
+            for (int i = 0; i < m_figure->NumMaterials(); ++i)
+            {
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(m_figure->GetShaderName(i));
+                shaderDesc->SetSpecular(m_bIsSpecularEnable, (ShaderDescriptor::ReferenceMapChannel)m_specularTextId);
+                m_figure->SetShaderName(i, shaderDesc->GetValue());
+            }
+        }
+    }
+
+    //! Enable color mask
+    void FigureComponent::setColorMaskEnable(bool enable)
+    {
+        m_bIsColorMaskEnable = enable;
+        if (m_figure)
+        {
+            // Setup point lights shader
+            for (int i = 0; i < m_figure->NumMaterials(); ++i)
+            {
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(m_figure->GetShaderName(i));
+                shaderDesc->SetColorMask(m_bIsColorMaskEnable);
+                m_figure->SetShaderName(i, shaderDesc->GetValue());
+            }
+        }
+    }
+
+    //! Enable Scissor Test
+    void FigureComponent::setScissorTestEnable(bool enable)
+    {
+        m_bIsScissorTestEnable = enable;
+        if (m_figure)
+        {
+            // Setup point lights shader
+            for (int i = 0; i < m_figure->NumMaterials(); ++i)
+            {
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(m_figure->GetShaderName(i));
+                shaderDesc->SetScissorTest(m_bIsScissorTestEnable);
+                m_figure->SetShaderName(i, shaderDesc->GetValue());
+            }
+        }
+    }
+
     //! Serialize
     void FigureComponent::to_json(json &j) const
     {
@@ -238,6 +349,12 @@ namespace ige::scene
         j["zWrite"] = isDepthWriteEnable();
         j["aBlend"] = isAlphaBlendingEnable();
         j["aBlendOp"] = getAlphaBlendingOp();
+        j["spec"] = isSpecularEnable();
+        j["specTexId"] = getSpecularTexId();
+        j["aTest"] = isAlphaTestEnable();
+        j["colorMask"] = isColorMaskEnable();
+        j["doubleSide"] = isDoubleSideEnable();
+        j["scissor"] = isScissorTestEnable();
     }
 
     //! Deserialize
@@ -250,6 +367,12 @@ namespace ige::scene
         setDepthWriteEnable(j.value("zWrite", true));
         setAlphaBlendingEnable(j.value("aBlend", true));
         setAlphaBlendingOp(j.value("aBlendOp", 2));
+        setSpecularEnable(j.value("spec", false));
+        setSpecularTexId(j.value("specTexId", 0));
+        setAlphaTestEnable(j.value("aTest", false));
+        setColorMaskEnable(j.value("colorMask", false));
+        setDoubleSideEnable(j.value("doubleSide", false));
+        setScissorTestEnable(j.value("scissor", false));
         Component::from_json(j);
     }
 
@@ -283,6 +406,30 @@ namespace ige::scene
         else if (key.compare("aBlendOp") == 0)
         {
             setAlphaBlendingOp(val);
+        }
+        else if (key.compare("spec") == 0)
+        {
+            setSpecularEnable(val);
+        }
+        else if (key.compare("specTexId") == 0)
+        {
+            setSpecularTexId(val);
+        }
+        else if (key.compare("aTest") == 0)
+        {
+            setAlphaTestEnable(val);
+        }
+        else if (key.compare("colorMask") == 0)
+        {
+            setColorMaskEnable(val);
+        }
+        else if (key.compare("doubleSide") == 0)
+        {
+            setDoubleSideEnable(val);
+        }
+        else if (key.compare("scissor") == 0)
+        {
+            setScissorTestEnable(val);
         }
         else
         {

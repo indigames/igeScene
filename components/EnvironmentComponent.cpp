@@ -143,49 +143,4 @@ namespace ige::scene
         setShadowBias(j.value("shadowBias", 0.005f));
         Component::from_json(j);
     }
-
-    //! Update property by key value
-    void EnvironmentComponent::setProperty(const std::string& key, const json& val)
-    {
-        if (key.compare("fogNear") == 0)
-        {
-            setDistanceFogNear(val);
-        }
-        else if (key.compare("fogFar") == 0)
-        {
-            setDistanceFogFar(val);
-        }
-        else if (key.compare("fogAlpha") == 0)
-        {
-            setDistanceFogAlpha(val);
-        }
-        else if (key.compare("fogCol") == 0)
-        {
-            setDistanceFogColor(val);
-        }
-        else if (key.compare("shadowCol") == 0)
-        {
-            setShadowColor(val);
-        }
-        else if (key.compare("shadowSize") == 0)
-        {
-            setShadowTextureSize(val);
-        }
-        else if (key.compare("shadowDensity") == 0)
-        {
-            setShadowDensity(val);
-        }
-        else if (key.compare("shadowWideness") == 0)
-        {
-            setShadowWideness(val);
-        }
-        else if (key.compare("shadowBias") == 0)
-        {
-            setShadowBias(val);
-        }
-        else
-        {
-            Component::setProperty(key, val);
-        }
-    }
 } // namespace ige::scene

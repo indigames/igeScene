@@ -41,6 +41,10 @@ namespace ige::scene
         const bool isFogEnabled() const { return m_bIsFogEnabled; }
         void setFogEnabled(bool enable = true);
 
+        //! Enable double side
+        const bool isDoubleSideEnable() const { return m_bIsDoubleSideEnable; }
+        void setDoubleSideEnable(bool enable = true);
+
         //! Enable cull face
         const bool isCullFaceEnable() const { return m_bIsCullFaceEnable; }
         void setCullFaceEnable(bool enable = true);
@@ -53,6 +57,10 @@ namespace ige::scene
         const bool isDepthWriteEnable() const { return m_bIsDepthWriteEnable; }
         void setDepthWriteEnable(bool enable = true);
 
+        //! Enable alpha test
+        const bool isAlphaTestEnable() const { return m_bIsAlphaTestEnable; }
+        void setAlphaTestEnable(bool enable = true);
+
         //! Enable alpha blending
         const bool isAlphaBlendingEnable() const { return m_bIsAlphaBlendingEnable; }
         void setAlphaBlendingEnable(bool enable = true);
@@ -60,6 +68,22 @@ namespace ige::scene
         //! Alpha blending operation
         const int getAlphaBlendingOp() const { return m_alphaBlendingOp; }
         void setAlphaBlendingOp(int op);
+
+        //! Enable specular
+        const bool isSpecularEnable() const { return m_bIsSpecularEnable; }
+        void setSpecularEnable(bool enable = true);
+
+        //! Alpha specular texture idd
+        const int getSpecularTexId() const { return m_specularTextId; }
+        void setSpecularTexId(int id);
+
+        //! Enable color mask
+        const bool isColorMaskEnable() const { return m_bIsColorMaskEnable; }
+        void setColorMaskEnable(bool enable = true);
+
+        //! Enable Scissor Test
+        const bool isScissorTestEnable() const { return m_bIsScissorTestEnable; }
+        void setScissorTestEnable(bool enable = true);
 
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
@@ -83,16 +107,34 @@ namespace ige::scene
         //! Cache culling state
         bool m_bIsCullFaceEnable = true;
 
+        //! Cache double side state
+        bool m_bIsDoubleSideEnable = true;
+
         //! Cache z-testing state
         bool m_bIsDepthTestEnable = true;
 
         //! Cache z-write state
         bool m_bIsDepthWriteEnable = true;
 
+        //! Cache alpha test state
+        bool m_bIsAlphaTestEnable = true;
+
         //! Cache alpha blending state
         bool m_bIsAlphaBlendingEnable = true;
 
         //! Cache alpha blending operation (COL = 0, ADD = 1, SUB = 2, MUL = 3)
         int m_alphaBlendingOp = 2;
+
+        //! Cache specular state
+        bool m_bIsSpecularEnable = false;
+
+        //! Cache specular texture id
+        int m_specularTextId = 0;
+
+        //! Cache color mask state
+        bool m_bIsColorMaskEnable = false;
+
+        //! Cache Scissor Test state
+        bool m_bIsScissorTestEnable = false;
     };
 } // namespace ige::scene
