@@ -93,8 +93,8 @@ namespace ige::scene
         virtual void setProperty(const std::string& key, const json& val) override;
 
         //! Invoke Function 
-        virtual void Invoke(const std::string &functionName, const Value& value);
-        virtual void Invoke(const std::string& functionName, void* pyObj);
+        virtual _object* Invoke(const std::string &functionName, const Value& value);
+        virtual _object* Invoke(const std::string& functionName, void* pyObj);
 
     protected:
         //! Serialize

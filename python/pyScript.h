@@ -5,6 +5,8 @@
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 #include "scene/SceneManager.h"
+#include "components/ScriptComponent.h"
+#include "python/pyComponent.h"
 
 namespace ige::scene
 {
@@ -12,6 +14,8 @@ namespace ige::scene
     {
         PyObject_HEAD
         SceneObject* owner;
+        PyObject_Component super;
+        ScriptComponent* component;
     };
 
     // Type declaration
@@ -29,4 +33,6 @@ namespace ige::scene
 
     // Get get owner
     PyObject* Script_getOwner(PyObject_Script* self);
+
+    PyObject* Script_invoke(PyObject_Script* self, PyObject * args);
 }
