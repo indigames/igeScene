@@ -1121,6 +1121,19 @@ namespace ige::scene
                 return (PyObject*)compObj;
             }
         }
+        else if (type == "Script")
+        {
+            auto comp = sceneObject->getComponent<ScriptComponent>();
+            if (comp)
+            {
+                auto pyObj = comp->getPyInstance();
+                if(pyObj) 
+                {
+                    Py_XINCREF(pyObj);
+                    return pyObj;
+                }
+            }
+        }
         Py_RETURN_NONE;
     }
 

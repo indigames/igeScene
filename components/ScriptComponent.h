@@ -96,6 +96,9 @@ namespace ige::scene
         virtual void Invoke(const std::string &functionName, const Value& value);
         virtual void Invoke(const std::string& functionName, void* pyObj);
 
+        //! PyObject: instance of Python class
+        _object* getPyInstance() { return m_pyInstance; }
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
