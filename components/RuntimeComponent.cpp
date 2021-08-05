@@ -1,4 +1,5 @@
 #include "components/RuntimeComponent.h"
+#include "scene/SceneManager.h"
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 #include "event/EventContext.h"
@@ -39,11 +40,23 @@ namespace ige::scene
     void RuntimeComponent::onDisable() {}
 
     //! Update functions
-    void RuntimeComponent::onUpdate(float dt) {}
+    void RuntimeComponent::onUpdate(float dt) {
+        if (SceneManager::getInstance()->isEditor() || !isRunning())
+            return;
+        onRuntimeUpdate(dt);
+    }
 
-    void RuntimeComponent::onFixedUpdate(float dt) {}
+    void RuntimeComponent::onFixedUpdate(float dt) {
+        if (SceneManager::getInstance()->isEditor() || !isRunning())
+            return;
+        onRuntimeFixedUpdate(dt);
+    }
 
-    void RuntimeComponent::onLateUpdate(float dt) {}
+    void RuntimeComponent::onLateUpdate(float dt) {
+        if (SceneManager::getInstance()->isEditor() || !isRunning())
+            return;
+        onRuntimeLateUpdate(dt);
+    }
 
     //! Render
     void RuntimeComponent::onRender() {}

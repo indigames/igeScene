@@ -9,7 +9,6 @@
 
 #include "scene/SceneManager.h"
 #include "scene/Scene.h"
-#include "scene/SceneObject.h"
 
 #include "event/EventContext.h"
 
@@ -88,13 +87,26 @@ namespace ige::scene
     ScriptComponent::ScriptComponent(SceneObject &owner, const std::string &path)
         : RuntimeComponent(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
     {
-        
+        loadPyModule();
     }
 
     //! Destructor
     ScriptComponent::~ScriptComponent()
     {
         Clear();
+        unloadPyModule();
+        m_members.clear();
+    }
+
+    void ScriptComponent::Reload()
+    {
+        bool isLoad = isRunning();
+        Clear();
+        unloadPyModule();
+        m_members.clear();
+        loadPyModule();
+        if (isLoad)
+            Initialize();
     }
 
     void ScriptComponent::Initialize()
@@ -102,15 +114,12 @@ namespace ige::scene
         RuntimeComponent::Initialize();
         getOwner()->addEventListener((int)EventType::Click, std::bind(&ScriptComponent::onClickEvent, this, std::placeholders::_1), m_instanceId);
         getOwner()->addEventListener((int)EventType::Changed, std::bind(&ScriptComponent::onChangedValueEvent, this, std::placeholders::_1), m_instanceId);
-
-        loadPyModule();
     }
 
     void ScriptComponent::Clear()
     {
         RuntimeComponent::Clear();
-        unloadPyModule();
-        m_members.clear();
+        
         getOwner()->removeEventListener((int)EventType::Click, m_instanceId);
         getOwner()->removeEventListener((int)EventType::Changed, m_instanceId);
     }
@@ -356,11 +365,8 @@ namespace ige::scene
     }
 
     //! Update functions
-    void ScriptComponent::onUpdate(float dt)
+    void ScriptComponent::onRuntimeUpdate(float dt)
     {
-        if (SceneManager::getInstance()->isEditor() || !isRunning())
-            return;
-
         if (!m_bOnAwakeCalled)
         {
             // Register physic events
@@ -388,7 +394,7 @@ namespace ige::scene
         }
     }
 
-    void ScriptComponent::onFixedUpdate(float dt)
+    void ScriptComponent::onRuntimeFixedUpdate(float dt)
     {
         if (SceneManager::getInstance()->isEditor())
             return;
@@ -399,7 +405,7 @@ namespace ige::scene
         }
     }
 
-    void ScriptComponent::onLateUpdate(float dt)
+    void ScriptComponent::onRuntimeLateUpdate(float dt)
     {
         if (SceneManager::getInstance()->isEditor())
             return;
@@ -467,61 +473,6 @@ namespace ige::scene
     //! Change Value
     void ScriptComponent::onChangedValue(Value value)
     {
-        /*if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onChangedValue"))
-        {
-            switch (value.getType()) {
-            case Value::Type::NONE:
-            default:
-                {
-                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", nullptr);
-                    Py_XDECREF(ret);
-                }
-                break;
-            case Value::Type::BYTE:
-                {
-                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(b)", value.asByte());
-                    Py_XDECREF(ret);
-                }
-                break;
-            case Value::Type::INTEGER:
-                {
-                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(i)", value.asInt());
-                    Py_XDECREF(ret);
-                }
-                break;
-            case Value::Type::UNSIGNED:
-                {
-                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(I)", value.asUnsignedInt());
-                    Py_XDECREF(ret);
-                }
-                break;
-            case Value::Type::FLOAT:
-                {
-                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(f)", value.asFloat());
-                    Py_XDECREF(ret);
-                }
-                break;
-            case Value::Type::DOUBLE:
-                {
-                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(d)", value.asDouble());
-                    Py_XDECREF(ret);
-                }
-                break;
-            case Value::Type::BOOLEAN:
-                {
-                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(i)", value.asBool());
-                    Py_XDECREF(ret);
-                }
-                break;
-            case Value::Type::STRING:
-                {
-                    auto ret = PyObject_CallMethod(m_pyInstance, "onChangedValue", "(s)", value.asString().c_str());
-                    Py_XDECREF(ret);
-                }
-                break;
-            }
-        }*/
-
         Invoke("onChangedValue", value);
     }
 
@@ -672,10 +623,6 @@ namespace ige::scene
             {
                 auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, nullptr);
                 Py_XDECREF(ret);
-                if (ret != nullptr) {
-                    PyTypeObject* type = ret->ob_type;
-                    pyxie_printf("Return Type %s\n", type->tp_name);
-                }
                 return Py_BuildValue("O", ret);
             }
             break;
@@ -749,11 +696,6 @@ namespace ige::scene
             //return Invoke(functionName, Value());
             auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, nullptr);
             Py_XDECREF(ret);
-            //return ret;
-            if (ret) {
-                PyTypeObject* type = ret->ob_type;
-                pyxie_printf("Recv Type %s\n", type->tp_name);
-            }
             return Py_BuildValue("O", ret);
         }
         else
@@ -770,7 +712,6 @@ namespace ige::scene
                 return Invoke(functionName, Value(PyUnicode_AsUTF8(m_pyObj)));
             }
             else {
-                pyxie_printf("Recv Type %s\n", type->tp_name);
                 auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(O)", m_pyObj);
                 Py_XDECREF(ret);
                 //return ret;

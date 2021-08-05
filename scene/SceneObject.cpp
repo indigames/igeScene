@@ -860,6 +860,29 @@ namespace ige::scene
         }
     }
 
+    void SceneObject::reloadScripts(bool includeChild)
+    {
+        if (includeChild) {
+            int size = m_children.size();
+            for (int i = 0; i < size; i++) {
+                if (m_children[i] != nullptr) {
+                    m_children[i]->reloadScripts(includeChild);
+                }
+            }
+        }
+
+        int c_size = getComponentsCount();
+        for (int i = 0; i < c_size; i++) {
+            if (m_components[i]->getType() == Component::Type::Script) {
+                std::shared_ptr<ScriptComponent> Script = std::dynamic_pointer_cast<ScriptComponent>(m_components[i]);
+                if (Script != nullptr) {
+                    Script->Reload();
+                }
+            }
+        }
+
+    }
+
     //! Serialize
     void SceneObject::to_json(json &j)
     {
