@@ -57,10 +57,6 @@ namespace ige::scene
         const bool isDepthWriteEnable() const { return m_bIsDepthWriteEnable; }
         void setDepthWriteEnable(bool enable = true);
 
-        //! Enable alpha test
-        const bool isAlphaTestEnable() const { return m_bIsAlphaTestEnable; }
-        void setAlphaTestEnable(bool enable = true);
-
         //! Enable alpha blending
         const bool isAlphaBlendingEnable() const { return m_bIsAlphaBlendingEnable; }
         void setAlphaBlendingEnable(bool enable = true);
@@ -68,18 +64,6 @@ namespace ige::scene
         //! Alpha blending operation
         const int getAlphaBlendingOp() const { return m_alphaBlendingOp; }
         void setAlphaBlendingOp(int op);
-
-        //! Enable specular
-        const bool isSpecularEnable() const { return m_bIsSpecularEnable; }
-        void setSpecularEnable(bool enable = true);
-
-        //! Alpha specular texture idd
-        const int getSpecularTexId() const { return m_specularTextId; }
-        void setSpecularTexId(int id);
-
-        //! Enable color mask
-        const bool isColorMaskEnable() const { return m_bIsColorMaskEnable; }
-        void setColorMaskEnable(bool enable = true);
 
         //! Enable Scissor Test
         const bool isScissorTestEnable() const { return m_bIsScissorTestEnable; }
@@ -116,23 +100,11 @@ namespace ige::scene
         //! Cache z-write state
         bool m_bIsDepthWriteEnable = true;
 
-        //! Cache alpha test state
-        bool m_bIsAlphaTestEnable = true;
-
         //! Cache alpha blending state
         bool m_bIsAlphaBlendingEnable = true;
 
         //! Cache alpha blending operation (COL = 0, ADD = 1, SUB = 2, MUL = 3)
         int m_alphaBlendingOp = 2;
-
-        //! Cache specular state
-        bool m_bIsSpecularEnable = false;
-
-        //! Cache specular texture id
-        int m_specularTextId = 0;
-
-        //! Cache color mask state
-        bool m_bIsColorMaskEnable = false;
 
         //! Cache Scissor Test state
         bool m_bIsScissorTestEnable = false;
