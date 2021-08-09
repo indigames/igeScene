@@ -617,105 +617,81 @@ namespace ige::scene
         auto m_fncName = functionName.c_str();
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, m_fncName))
         {
-            switch (value.getType()) {
-            case Value::Type::NONE:
-            default:
+            switch (value.getType()) 
             {
-                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, nullptr);
-                Py_XDECREF(ret);
-                return Py_BuildValue("O", ret);
-            }
-            break;
-            case Value::Type::BYTE:
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(b)", value.asByte());
-                Py_XDECREF(ret);
-                return Py_BuildValue("O", ret);
-            }
-            break;
-            case Value::Type::INTEGER:
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(i)", value.asInt());
-                Py_XDECREF(ret);
-                return Py_BuildValue("O", ret);
-            }
-            break;
-            case Value::Type::UNSIGNED:
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(I)", value.asUnsignedInt());
-                Py_XDECREF(ret);
-                return Py_BuildValue("O", ret);
-            }
-            break;
-            case Value::Type::FLOAT:
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(f)", value.asFloat());
-                Py_XDECREF(ret);
-                return Py_BuildValue("O", ret);
-            }
-            break;
-            case Value::Type::DOUBLE:
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(d)", value.asDouble());
-                Py_XDECREF(ret);
-                return Py_BuildValue("O", ret);
-            }
-            break;
-            case Value::Type::BOOLEAN:
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(i)", value.asBool());
-                Py_XDECREF(ret);
-                return Py_BuildValue("O", ret);
-            }
-            break;
-            case Value::Type::STRING:
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(s)", value.asString().c_str());
-                Py_XDECREF(ret);
-                return Py_BuildValue("O", ret);
-            }
-            break;
-            case Value::Type::VECTOR:
-            {
-                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(O)", parseObject(value));
-                Py_XDECREF(ret);
-                return Py_BuildValue("O", ret);
-            }
-            break;
+                case Value::Type::NONE:
+                default:
+                {
+                    return PyObject_CallMethod(m_pyInstance, m_fncName, nullptr);
+                }
+                break;
+                case Value::Type::BYTE:
+                {
+                    return PyObject_CallMethod(m_pyInstance, m_fncName, "(b)", value.asByte());
+                }
+                break;
+                case Value::Type::INTEGER:
+                {
+                    return PyObject_CallMethod(m_pyInstance, m_fncName, "(i)", value.asInt());
+                }
+                break;
+                case Value::Type::UNSIGNED:
+                {
+                    return PyObject_CallMethod(m_pyInstance, m_fncName, "(I)", value.asUnsignedInt());
+                }
+                break;
+                case Value::Type::FLOAT:
+                {
+                    return PyObject_CallMethod(m_pyInstance, m_fncName, "(f)", value.asFloat());
+                }
+                break;
+                case Value::Type::DOUBLE:
+                {
+                    return PyObject_CallMethod(m_pyInstance, m_fncName, "(d)", value.asDouble());
+                }
+                break;
+                case Value::Type::BOOLEAN:
+                {
+                    return PyObject_CallMethod(m_pyInstance, m_fncName, "(i)", value.asBool());
+                }
+                break;
+                case Value::Type::STRING:
+                {
+                    return PyObject_CallMethod(m_pyInstance, m_fncName, "(s)", value.asString().c_str());
+                }
+                break;
+                case Value::Type::VECTOR:
+                {
+                    return PyObject_CallMethod(m_pyInstance, m_fncName, "(O)", parseObject(value));
+                }
+                break;
             }
         }
         return nullptr;
     }
 
-    _object* ScriptComponent::Invoke(const std::string& functionName, void* pyObj)
+    _object* ScriptComponent::Invoke(const std::string& functionName, _object* pyObj)
     {
         auto m_fncName = functionName.c_str();
-        PyObject* m_pyObj = static_cast<PyObject*>(pyObj);
-        if (m_pyObj == nullptr) 
+        if (pyObj == nullptr) 
         {
-            //return Invoke(functionName, Value());
-            auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, nullptr);
-            Py_XDECREF(ret);
-            return Py_BuildValue("O", ret);
+            return PyObject_CallMethod(m_pyInstance, m_fncName, nullptr);
         }
         else
         {
-            PyTypeObject* type = m_pyObj->ob_type;
+            PyTypeObject* type = pyObj->ob_type;
             std::string m_type(type->tp_name);
             if (m_type.compare("int") == 0) {
-                return Invoke(functionName, Value((int)PyLong_AsLong(m_pyObj)));
+                return Invoke(functionName, Value((int)PyLong_AsLong(pyObj)));
             }
             else if (m_type.compare("float") == 0) {
-                return Invoke(functionName, Value((float)PyFloat_AsDouble(m_pyObj)));
+                return Invoke(functionName, Value((float)PyFloat_AsDouble(pyObj)));
             }
             else if (m_type.compare("string") == 0) {
-                return Invoke(functionName, Value(PyUnicode_AsUTF8(m_pyObj)));
+                return Invoke(functionName, Value(PyUnicode_AsUTF8(pyObj)));
             }
             else {
-                auto ret = PyObject_CallMethod(m_pyInstance, m_fncName, "(O)", m_pyObj);
-                Py_XDECREF(ret);
-                //return ret;
-                return Py_BuildValue("O", ret);
+                return PyObject_CallMethod(m_pyInstance, m_fncName, "(O)", pyObj);
             }
         }
         return nullptr;

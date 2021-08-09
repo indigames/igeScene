@@ -782,7 +782,6 @@ namespace ige::scene
     void DynamicNavMesh::onSerializeFinished(Scene* scene)
     {
         NavMesh::onSerializeFinished(scene);
-        build();
     }
 
     //! Update property by key value
