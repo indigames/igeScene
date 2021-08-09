@@ -1,5 +1,6 @@
 #pragma once
 #include "components/Component.h"
+#include "components/RuntimeComponent.h"
 #include "event/Event.h"
 
 #include "utils/PyxieHeaders.h"
@@ -12,7 +13,7 @@ namespace ige::scene
     class NavAgentManager;
 
     //! NavAgent
-    class NavAgent : public Component
+    class NavAgent : public RuntimeComponent
     {
     public:
         //! RequestedTarget
@@ -160,7 +161,7 @@ namespace ige::scene
         const dtCrowdAgent *getDetourCrowdAgent() const;
 
         //! Update
-        virtual void onUpdate(float dt) override;
+        virtual void onRuntimeUpdate(float dt) override;
 
         //! Created/Destroyed events
         static Event<NavAgent *> &getCreatedEvent() { return m_onCreatedEvent; }

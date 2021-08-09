@@ -25,6 +25,8 @@ namespace ige::scene
         //! Returns the type of the component
         virtual Type getType() const override { return Type::Script; }
 
+        void Reload();
+
         //! Active when start runtime
         virtual void Initialize() override;
 
@@ -44,9 +46,9 @@ namespace ige::scene
         virtual void onDisable() override;
 
         //! Update functions
-        virtual void onUpdate(float dt) override;
-        virtual void onFixedUpdate(float dt) override;
-        virtual void onLateUpdate(float dt) override;
+        virtual void onRuntimeUpdate(float dt) override;
+        virtual void onRuntimeFixedUpdate(float dt) override;
+        virtual void onRuntimeLateUpdate(float dt) override;
 
         //! Render
         virtual void onRender() override;
@@ -93,8 +95,8 @@ namespace ige::scene
         virtual void setProperty(const std::string& key, const json& val) override;
 
         //! Invoke Function 
-        virtual void Invoke(const std::string &functionName, const Value& value);
-        virtual void Invoke(const std::string& functionName, void* pyObj);
+        virtual _object* Invoke(const std::string &functionName, const Value& value);
+        virtual _object* Invoke(const std::string& functionName, void* pyObj);
 
         //! PyObject: instance of Python class
         _object* getPyInstance() { return m_pyInstance; }

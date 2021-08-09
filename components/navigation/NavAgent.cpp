@@ -16,7 +16,7 @@ namespace ige::scene
 
     //! Constructor
     NavAgent::NavAgent(SceneObject &owner)
-        : Component(owner)
+        : RuntimeComponent(owner)
     {
         getCreatedEvent().invoke(this);
     }
@@ -29,7 +29,7 @@ namespace ige::scene
     }
 
     //! Update
-    void NavAgent::onUpdate(float dt)
+    void NavAgent::onRuntimeUpdate(float dt)
     {
         const auto *agent = getDetourCrowdAgent();
         if (!agent)

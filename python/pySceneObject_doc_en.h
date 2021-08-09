@@ -102,12 +102,21 @@ PyDoc_STRVAR(SceneObject_removeComponents_doc,
 PyDoc_STRVAR(SceneObject_invoke_doc,
 	"Invoke scripts\'s method from current scene object.\n"\
 	"\n"\
-	"SceneObject().Invoke(param: string|ScriptPath, param: string|FunctionName, param: Object|PyObject)\n"\
+	"SceneObject().invoke(param: string|ScriptPath, param: string|FunctionName, param: Object|PyObject)\n"\
 	"\n"\
 	"Return:\n"\
 	"----------\n"\
 	"    0: if worked\n"\
 	"    -1: if not worked\n"\
+);
+
+PyDoc_STRVAR(SceneObject_getScript_doc,
+	"gget script from current scene object.\n"\
+	"\n"\
+	"SceneObject().getScript(param: string|ScriptPath)\n"\
+	"\n"\
+	"Return:\n"\
+	"----------\n"\
 );
 
 // id

@@ -397,7 +397,7 @@ namespace ige::scene
     {
         for (int i = 0; i < m_components.size(); ++i)
         {
-            if (m_components[i]->getName().compare("Script") == 0) {
+            if (m_components[i]->getType() == Component::Type::Script) {
                 auto script = std::dynamic_pointer_cast<ScriptComponent>(m_components[i]);
                 if(script->getPath().compare(path) == 0)
                     return script;
@@ -858,6 +858,29 @@ namespace ige::scene
         {
             m_bIsInMask = value;
         }
+    }
+
+    void SceneObject::reloadScripts(bool includeChild)
+    {
+        if (includeChild) {
+            int size = m_children.size();
+            for (int i = 0; i < size; i++) {
+                if (m_children[i] != nullptr) {
+                    m_children[i]->reloadScripts(includeChild);
+                }
+            }
+        }
+
+        int c_size = getComponentsCount();
+        for (int i = 0; i < c_size; i++) {
+            if (m_components[i]->getType() == Component::Type::Script) {
+                std::shared_ptr<ScriptComponent> Script = std::dynamic_pointer_cast<ScriptComponent>(m_components[i]);
+                if (Script != nullptr) {
+                    Script->Reload();
+                }
+            }
+        }
+
     }
 
     //! Serialize

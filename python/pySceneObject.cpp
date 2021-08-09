@@ -2,6 +2,7 @@
 #include "python/pySceneObject_doc_en.h"
 
 #include "python/pyScene.h"
+#include "python/pyScript.h"
 
 #include "python/pyComponent.h"
 #include "python/pyTransformComponent.h"
@@ -230,6 +231,16 @@ namespace ige::scene
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;
+                }
+            }
+            else if (type == "Script") {
+                auto comp = self->sceneObject->addComponent<ScriptComponent>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_Script, &PyTypeObject_Script);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
                 }
             }
             else if (type == "Camera")
@@ -687,6 +698,17 @@ namespace ige::scene
             if (comp)
             {
                 auto* compObj = PyObject_New(PyObject_TransformComponent, &PyTypeObject_TransformComponent);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        if (type == "Script")
+        {
+            auto comp = sceneObject->getComponent<ScriptComponent>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_Script, &PyTypeObject_Script);
                 compObj->component = comp.get();
                 compObj->super.component = compObj->component;
                 return (PyObject*)compObj;
@@ -1177,7 +1199,7 @@ namespace ige::scene
         Py_RETURN_TRUE;
     }
 
-    int SceneObject_invoke(PyObject_SceneObject* self, PyObject* args)
+    PyObject* SceneObject_invoke(PyObject_SceneObject* self, PyObject* args)
     {
         char* scriptName = nullptr;
         char* functName = nullptr;
@@ -1190,11 +1212,28 @@ namespace ige::scene
             auto script = self->sceneObject->getScript(_scriptName);
             if (script)
             {
-                script->Invoke(_funcName, value);
-                return 0;
+                return script->Invoke(_funcName, value);
             }
         }
-        return -1;
+        Py_RETURN_NONE;
+    }
+
+    PyObject* SceneObject_getScript(PyObject_SceneObject* self, PyObject* args)
+    {
+        char* scriptName = nullptr;
+        if (PyArg_ParseTuple(args, "s", &scriptName))
+        {
+            auto _scriptName = std::string(scriptName);
+            auto script = self->sceneObject->getScript(_scriptName);
+            if (script)
+            {
+                auto* compObj = PyObject_New(PyObject_Script, &PyTypeObject_Script);
+                compObj->component = script.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        Py_RETURN_NONE;
     }
 
     // Compare function
@@ -1241,6 +1280,7 @@ namespace ige::scene
         {"getComponents", (PyCFunction)SceneObject_getComponents, METH_VARARGS, SceneObject_getComponents_doc},
         {"removeComponents", (PyCFunction)SceneObject_removeComponents, METH_VARARGS, SceneObject_removeComponents_doc},
         {"invoke", (PyCFunction)SceneObject_invoke, METH_VARARGS, SceneObject_invoke_doc},
+        {"getScript", (PyCFunction)SceneObject_getScript, METH_VARARGS, SceneObject_getScript_doc}, 
         {NULL, NULL}};
 
     // Get/Set

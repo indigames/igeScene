@@ -136,6 +136,9 @@ namespace ige::scene
         //! Check selected
         bool isSelected() const;
 
+        //!ReloadScript
+        void reloadScripts(bool includeChild = true);
+
         //! Internal event
         Event<SceneObject &> &getNameChangedEvent() { return m_nameChangedEvent; }
         Event<SceneObject &> &getTransformChangedEvent() { return m_transformChangedEvent; }

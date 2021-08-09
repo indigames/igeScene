@@ -53,6 +53,10 @@ namespace ige::scene
         //! Resume
         virtual void onResume() override;
 
+        virtual void onRuntimeUpdate(float dt) {};
+        virtual void onRuntimeFixedUpdate(float dt) {};
+        virtual void onRuntimeLateUpdate(float dt) {};
+
     private:
         void onRunEditor(EventContext* context);
         void onPauseEditor(EventContext* context);
