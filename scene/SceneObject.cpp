@@ -1,243 +1,352 @@
 #include <algorithm>
+#include <sstream>
+#include <random>
 
 #include "scene/SceneObject.h"
+#include "scene/Scene.h"
+#include "scene/SceneManager.h"
+
+#include "event/InputProcessor.h"
 
 #include "components/Component.h"
 #include "components/TransformComponent.h"
 #include "components/CameraComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/FigureComponent.h"
+#include "components/BoneTransform.h"
 #include "components/SpriteComponent.h"
-#include "components/ScriptComponent.h"
+//#include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
+#include "components/gui/UIText.h"
+#include "components/gui/UITextField.h"
+#include "components/gui/UIButton.h"
+#include "components/gui/UISlider.h"
+#include "components/gui/UIScrollView.h"
+#include "components/gui/UIScrollBar.h"
+#include "components/gui/UIMask.h"
+#include "components/physic/PhysicManager.h"
 #include "components/physic/PhysicBox.h"
 #include "components/physic/PhysicCapsule.h"
 #include "components/physic/PhysicSphere.h"
+#include "components/physic/PhysicMesh.h"
+#include "components/physic/PhysicSoftBody.h"
+#include "components/audio/AudioManager.h"
+#include "components/audio/AudioSource.h"
+#include "components/audio/AudioListener.h"
+#include "components/light/AmbientLight.h"
+#include "components/light/DirectionalLight.h"
+#include "components/light/PointLight.h"
+#include "components/light/SpotLight.h"
+#include "components/particle/ParticleManager.h"
+#include "components/particle/Particle.h"
+#include "components/navigation/DynamicNavMesh.h"
+#include "components/navigation/NavAgent.h"
+#include "components/navigation/NavAgentManager.h"
+#include "components/navigation/Navigable.h"
+#include "components/navigation/NavMesh.h"
+#include "components/navigation/NavObstacle.h"
+#include "components/navigation/OffMeshLink.h"
+
 
 namespace ige::scene
 {
-    //! Static member initialization
-    Event<SceneObject&, const std::shared_ptr<Component>&> SceneObject::m_componentAddedEvent;
-    Event<SceneObject&, const std::shared_ptr<Component>&> SceneObject::m_componentRemovedEvent;
-
     //! Events
-    Event<SceneObject&> SceneObject::s_destroyedEvent;
-    Event<SceneObject&> SceneObject::s_createdEvent;
-    Event<SceneObject&> SceneObject::s_attachedEvent;
-    Event<SceneObject&> SceneObject::s_detachedEvent;
-    Event<SceneObject&> SceneObject::s_nameChangedEvent;
-    Event<SceneObject&> SceneObject::s_selectedEvent;
+    Event<SceneObject &> SceneObject::s_destroyedEvent;
+    Event<SceneObject &> SceneObject::s_createdEvent;
+    Event<SceneObject &> SceneObject::s_attachedEvent;
+    Event<SceneObject &> SceneObject::s_detachedEvent;
+    Event<SceneObject &> SceneObject::s_selectedEvent;
+    Event<SceneObject&> SceneObject::s_deselectedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(uint64_t id, std::string name, SceneObject* parent, bool isGui)
-        : m_id(id), m_name(name), m_parent(parent), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_showcase(nullptr)
+    SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size)
+        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr),
+        m_dispatching(0), m_aabbDirty(2), m_bIsInMask(false)
     {
-        // Cache root item
-        m_root = (parent == nullptr) ? this : parent->getRoot();
-
-        // Only create showcase for root objects
-        if (parent == nullptr)
-        {
-            m_showcase = ResourceCreator::Instance().NewShowcase((m_name + "_" + std::to_string(m_id) + "_showcase").c_str());
-            getResourceAddedEvent().addListener(std::bind(&SceneObject::onResourceAdded, this, std::placeholders::_1));
-            getResourceRemovedEvent().addListener(std::bind(&SceneObject::onResourceRemoved, this, std::placeholders::_1));
-        }
+        // Generate new UUID
+        m_uuid = generateUUID();
 
         // Invoke created event
         getCreatedEvent().invoke(*this);
+
+        // Update parent
+        setParent(parent);
+
+        // Create and add transform component
+        if (isGui)
+            m_transform = addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f), size);
+        else
+            m_transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+
+        // Update parent transform
+        if (getParent())
+            m_transform->setParent(getParent()->getTransform().get());
+
+        // Set AABB to default
+        m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
+        m_frameAABB = AABBox({ -5.f, -5.f, -5.f }, { 5.f, 5.f, 5.f });
+        getTransformChangedEvent().addListener(std::bind(&SceneObject::onTransformChanged, this, std::placeholders::_1));
+
+        if (isGui) {
+            auto parent = getParent();
+            if (parent)
+            {
+                if (parent->isInMask()) 
+                {
+                    setInMask(true);
+                }
+                else
+                {
+                    auto mask = parent->getComponent<UIMask>();
+                    if (mask) {
+                        setInMask(mask->isUseMask());
+                    }
+                }
+            }
+        }
     }
 
     //! Destructor
     SceneObject::~SceneObject()
     {
-        for (auto& comp : m_components)
-            comp->onDestroy();
-
         removeChildren();
+
+        dispatchEvent((int)EventType::Delete);
+        getTransformChangedEvent().removeAllListeners();
+
         setParent(nullptr);
-
-        removeAllComponents();
-        m_transform = nullptr;
-
-        if (m_showcase)
-        {
-            getResourceAddedEvent().removeAllListeners();
-            getResourceRemovedEvent().removeAllListeners();
-
-            m_showcase->Clear();
-            m_showcase->DecReference();
-            m_showcase = nullptr;
-        }
+        setCanvas(nullptr);
 
         getDestroyedEvent().invoke(*this);
-        ResourceManager::Instance().DeleteDaemon();
+
+        m_dispatching = 0;
+        removeEventListeners();
+
+        getTransform()->setParent(nullptr);
+        m_transform = nullptr;
+
+        removeAllComponents();
+        m_scene = nullptr;
+    }
+
+    //! Generate UUID
+    std::string SceneObject::generateUUID(unsigned int len)
+    {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        static std::uniform_int_distribution<> dis(0, 15);
+        std::stringstream ss;
+        for (auto i = 0; i < len; i++)
+            ss << std::hex << dis(gen);
+        return ss.str();
+    }
+
+    //! Set Name
+    void SceneObject::setName(const std::string &name)
+    {
+        if (m_name != name)
+        {
+            m_name = name;
+            getNameChangedEvent().invoke(*this);
+        }
     }
 
     //! Set parent
-    void SceneObject::setParent(SceneObject* parent)
+    void SceneObject::setParent(SceneObject *parent)
     {
+        if (m_parent)
+        {
+            m_parent->removeChild(this);
+
+            if (getTransform())
+                getTransform()->setParent(nullptr);
+            getDetachedEvent().invoke(*this);
+            setCanvas(nullptr);
+            m_parent = nullptr;
+        }
+
         if (parent)
         {
             m_parent = parent;
+            m_parent->addChild(this);
+            if (getTransform())
+                getTransform()->setParent(m_parent->getTransform().get());
+            setCanvas(m_parent->getCanvas());
             getAttachedEvent().invoke(*this);
         }
-        else
-        {
-            getDetachedEvent().invoke(*this);
-            m_parent = nullptr;
-        }
+        dispatchEvent((int)EventType::SetParent);
     }
 
     // Get parent
-    SceneObject* SceneObject::getParent() const
+    SceneObject *SceneObject::getParent() const
     {
         return m_parent;
     }
 
-    //! Adds a child.
-    void SceneObject::addChild(const std::shared_ptr<SceneObject>& child)
+    // Check relative recursive
+    bool SceneObject::isRelative(uint64_t id)
     {
-        child->setParent(this);
-
-        // Insert to the first available slot.
-        for (auto& currObject : m_children)
-        {
-            if (!currObject)
-            {
-                currObject = child;
-                return;
-            }
-        }
-
-        // Add at back of vector.
-        m_children.push_back(child);
-    }
-
-    //! Remove a childs.
-    bool SceneObject::removeChild(const std::shared_ptr<SceneObject>& child)
-    {
-        if (!child)
-            return false;
-
-        // Remove from vector by nullptr assignment
-        for (auto& currObject : m_children)
-        {
-            if (currObject != nullptr && currObject == child)
-            {
-                currObject = nullptr;
-                return true;
-            }
-        }
-
-        // Recursive remove child
-        for (auto& currObject : m_children)
-        {
-            if (currObject && currObject->removeChild(child))
-                return true;
-        }
-
-        // Not found, return false
-        return false;
+        if (m_id == id) return true;
+        if (m_parent == nullptr) return false;
+        if (m_parent->getId() == id) return true;
+        return m_parent->isRelative(id);
     }
 
     //! Get all children
-    std::vector<std::shared_ptr<SceneObject>>& SceneObject::getChildren()
+    const std::vector<SceneObject *> &SceneObject::getChildren() const
     {
         return m_children;
     }
 
-    //! Count children
-    size_t SceneObject::getChildrenCount() const
+    //! Add child
+    void SceneObject::addChild(SceneObject *child)
     {
-        return m_children.size();
+        auto found = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem == child; });
+        if (found == m_children.end())
+            m_children.push_back(child);
+        if (child != nullptr)
+            dispatchEvent((int)EventType::AddChild, Value(child->getUUID()));
+    }
+
+    //! Removes child
+    void SceneObject::removeChild(SceneObject *child)
+    {
+        if (child == nullptr)
+            return;
+        auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getId() == child->getId()); });
+        if (itr != m_children.end())
+            m_children.erase(itr);
+        if (child != nullptr)
+            dispatchEvent((int)EventType::RemoveChild, Value(child->getUUID()));
     }
 
     //! Remove children
     void SceneObject::removeChildren()
     {
-        for(auto& child: m_children)
-        {
-            if(child != nullptr) child->setParent(nullptr);
+        for (auto &child : m_children)
             child = nullptr;
-        }
         m_children.clear();
+        dispatchEvent((int)EventType::RemoveChildren);
+    }
+
+    //! Find Child
+    SceneObject* SceneObject::findChild(std::string uuid)
+    {
+        auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getUUID() == uuid); });
+        if (itr != m_children.end()) 
+            return *itr;
+        return nullptr;
+    }
+
+    //! Create a component by name
+    std::shared_ptr<Component> SceneObject::createComponent(const std::string& name)
+    {
+        std::shared_ptr<Component> comp = nullptr;
+        if (name == "Transform")
+        {
+            if (getTransform())
+                return getTransform();
+            return addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+        }
+        if (name == "RectTransform")
+        {
+            if (getRectTransform())
+                return getRectTransform();
+            return addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f));
+        }
+        
+        if (name == "Canvas")
+        {
+            auto comp = addComponent<Canvas>();
+            setCanvas(getComponent<Canvas>());
+            return comp;
+        }
+
+        if (name == "Camera") return addComponent<CameraComponent>();
+        if (name == "Environment") return addComponent<EnvironmentComponent>();
+        if (name == "BoneTransform") return addComponent<BoneTransform>();
+        if (name == "Figure") return addComponent<FigureComponent>();
+        if (name == "Sprite") return addComponent<SpriteComponent>();
+        if (name == "Script") return addComponent<ScriptComponent>();
+        if (name == "PhysicManager") return addComponent<PhysicManager>();
+        if (name == "PhysicBox") return addComponent<PhysicBox>();
+        if (name == "PhysicSphere") return addComponent<PhysicSphere>();
+        if (name == "PhysicCapsule") return addComponent<PhysicCapsule>();
+        if (name == "PhysicMesh") return addComponent<PhysicMesh>();
+        if (name == "PhysicSoftBody") return addComponent<PhysicSoftBody>();
+        if (name == "UIImage") return addComponent<UIImage>();
+        if (name == "UIText") return addComponent<UIText>();
+        if (name == "UITextField") return addComponent<UITextField>();
+        if (name == "UIButton") return addComponent<UIButton>();
+        if (name == "UISlider") return addComponent<UISlider>();
+        if (name == "UIScrollView") return addComponent<UIScrollView>();
+        if (name == "UIScrollBar") return addComponent<UIScrollBar>();
+        if (name == "UIMask") return addComponent<UIMask>();
+        if (name == "AudioManager") return addComponent<AudioManager>();
+        if (name == "AudioSource") return addComponent<AudioSource>();
+        if (name == "AudioListener") return addComponent<AudioListener>();
+        if (name == "AmbientLight") return addComponent<AmbientLight>();
+        if (name == "DirectionalLight") return addComponent<DirectionalLight>();
+        if (name == "PointLight") return addComponent<PointLight>();
+        if (name == "SpotLight") return addComponent<SpotLight>();
+        if (name == "ParticleManager") return addComponent<ParticleManager>();
+        if (name == "Particle") return addComponent<Particle>();
+        if (name == "DynamicNavMesh") return addComponent<DynamicNavMesh>();
+        if (name == "NavAgent") return addComponent<NavAgent>();
+        if (name == "NavAgentManager") return addComponent<NavAgentManager>();
+        if (name == "Navigable") return addComponent<Navigable>();
+        if (name == "NavMesh") return addComponent<NavMesh>();
+        if (name == "NavObstacle") return addComponent<NavObstacle>();
+        if (name == "OffMeshLink") return addComponent<OffMeshLink>();
+        return nullptr;
     }
 
     //! Add a component
-    void SceneObject::addComponent(const std::shared_ptr<Component>& component)
+    void SceneObject::addComponent(const std::shared_ptr<Component> &component)
     {
         m_components.push_back(component);
     }
 
     //! Remove a component
-    bool SceneObject::removeComponent(const std::shared_ptr<Component>& component)
+    bool SceneObject::removeComponent(const std::shared_ptr<Component> &component)
     {
         auto it = std::find(m_components.begin(), m_components.end(), component);
-        if(it != m_components.end())
+        if (it != m_components.end())
         {
-            auto result = std::dynamic_pointer_cast<Component>(*it);
-            m_componentRemovedEvent.invoke(*this, result);
             m_components.erase(it);
             return true;
         }
         return false;
     }
 
-    //! Add a component by raw pointer
-    void SceneObject::addComponent(Component* component)
+    //! Remove a component by name
+    bool SceneObject::removeComponent(const std::string &name)
     {
-        m_components.push_back(std::shared_ptr<Component>(component));
-    }
-
-    //! Remove a component by raw pointer
-    bool SceneObject::removeComponent(Component* component)
-    {
-        auto it = std::find_if(m_components.begin(), m_components.end(), [&](const auto& comp) {
-            return comp.get() == component;
+        auto found = std::find_if(m_components.begin(), m_components.end(), [&name](auto element) {
+            return name.compare(element->getName()) == 0;
         });
-        if(it != m_components.end())
+
+        if (found != m_components.end())
         {
-            auto result = std::dynamic_pointer_cast<Component>(*it);
-            m_componentRemovedEvent.invoke(*this, result);
-            m_components.erase(it);
+            m_components.erase(found);
             return true;
         }
         return false;
-    }
-
-    //! Resource added event
-    void SceneObject::onResourceAdded(Resource* resource)
-    {
-        if(m_showcase != nullptr)
-        {
-            if(resource) m_showcase->Add(resource);
-        }
-    }
-
-    //! Resource removed event
-    void SceneObject::onResourceRemoved(Resource* resource)
-    {
-        if(m_showcase != nullptr)
-        {
-            if(resource) m_showcase->Remove(resource);
-        }
     }
 
     //! Remove all component
     bool SceneObject::removeAllComponents()
     {
-        for (auto it = m_components.begin(); it != m_components.end();)
-        {
-            auto result = std::dynamic_pointer_cast<Component>(*it);
-            m_componentRemovedEvent.invoke(*this, result);
-            it = m_components.erase(it);
-        }
+        for (auto &comp : m_components)
+            comp = nullptr;
+        m_components.clear();
         return true;
     }
 
     //! Get components list
-    std::vector<std::shared_ptr<Component>>& SceneObject::getComponents()
+    std::vector<std::shared_ptr<Component>> &SceneObject::getComponents()
     {
         return m_components;
     }
@@ -248,32 +357,51 @@ namespace ige::scene
         return m_components.size();
     }
 
-    //! Find object by id
-    std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const
+    //! Get component by name
+    std::shared_ptr<Component> SceneObject::getComponent(const std::string& name) const
     {
-        for(int i = 0; i < m_children.size(); ++i)
+        for (int i = 0; i < m_components.size(); ++i)
         {
-            if(m_children[i] == nullptr)
-                continue;
-            if (m_children[i]->getId() == id)
-                return m_children[i];
-            auto ret = m_children[i]->findObjectById(id);
-            if (ret) return ret;
+            if (m_components[i]->getName().compare(name) == 0)
+                return m_components[i];
         }
         return nullptr;
     }
 
-    //! Find object by name
-    std::shared_ptr<SceneObject> SceneObject::findObjectByName(std::string name) const
+    //! Get component by id
+    std::shared_ptr<Component> SceneObject::getComponent(const uint64_t id) const
     {
-        for(int i = 0; i < m_children.size(); ++i)
+        for (int i = 0; i < m_components.size(); ++i)
         {
-            if(m_children[i] == nullptr)
-                continue;
-            if (m_children[i]->getName() == name)
-                return m_children[i];
-            auto ret = m_children[i]->findObjectByName(name);
-            if (ret) return ret;
+            if (m_components[i]->getInstanceId() == id)
+                return m_components[i];
+        }
+        return nullptr;
+    }
+
+    //! Get components by type recursively
+    void SceneObject::getComponentsRecursive(std::vector<Component*>& components, const std::string& type) const
+    {
+        auto comp = getComponent(type);
+        if(comp != nullptr)
+            components.push_back(comp.get());
+
+        for (const auto &child : m_children)
+        {
+            if (child)
+                child->getComponentsRecursive(components, type);
+        }
+    }
+
+    std::shared_ptr<ScriptComponent> SceneObject::getScript(const std::string& path) const
+    {
+        for (int i = 0; i < m_components.size(); ++i)
+        {
+            if (m_components[i]->getType() == Component::Type::Script) {
+                auto script = std::dynamic_pointer_cast<ScriptComponent>(m_components[i]);
+                if(script->getPath().compare(path) == 0)
+                    return script;
+            }
         }
         return nullptr;
     }
@@ -281,18 +409,18 @@ namespace ige::scene
     //! Update function
     void SceneObject::onUpdate(float dt)
     {
+        if (m_aabbDirty > 0) {
+            updateAabb();
+            m_aabbDirty--;
+        }
+
         if (isActive())
         {
-            for (auto& comp : m_components)
+            for (auto &comp : m_components)
             {
                 // Camera updated before other objects
-                if(comp->getName() != "CameraComponent")
+                if (comp->getName() != "Camera")
                     comp->onUpdate(dt);
-            }
-
-            for (auto& obj : m_children)
-            {
-                if(obj != nullptr) obj->onUpdate(dt);
             }
         }
     }
@@ -302,14 +430,9 @@ namespace ige::scene
     {
         if (isActive())
         {
-            for (auto& comp : m_components)
+            for (auto &comp : m_components)
             {
                 comp->onFixedUpdate(dt);
-            }
-
-            for (auto& obj : m_children)
-            {
-                if (obj != nullptr) obj->onFixedUpdate(dt);
             }
         }
     }
@@ -319,14 +442,9 @@ namespace ige::scene
     {
         if (isActive())
         {
-            for (auto& comp : m_components)
+            for (auto &comp : m_components)
             {
                 comp->onLateUpdate(dt);
-            }
-
-            for (auto& obj : m_children)
-            {
-                if (obj != nullptr) obj->onLateUpdate(dt);
             }
         }
     }
@@ -336,16 +454,11 @@ namespace ige::scene
     {
         if (isActive())
         {
-            for (auto& comp : m_components)
+            for (auto &comp : m_components)
             {
                 // Camera rendered before other objects
-                if (comp->getName() != "CameraComponent")
+                if (comp->getName() != "Camera")
                     comp->onRender();
-            }
-
-            for (auto& obj : m_children)
-            {
-                if (obj != nullptr) obj->onRender();
             }
         }
     }
@@ -353,17 +466,17 @@ namespace ige::scene
     //! Enable or disable the actor
     void SceneObject::setActive(bool isActive)
     {
-        if(m_isActive != isActive)
+        if (m_isActive != isActive)
         {
             m_isActive = isActive;
             if (m_isActive)
             {
-                for (auto& comp : m_components)
+                for (auto &comp : m_components)
                     comp->onEnable();
             }
             else
             {
-                for (auto& comp : m_components)
+                for (auto &comp : m_components)
                     comp->onDisable();
             }
         }
@@ -378,15 +491,22 @@ namespace ige::scene
     //! Enable or disable the actor
     void SceneObject::setSelected(bool select)
     {
-        if(m_isSelected != select)
+        if (m_isSelected != select)
         {
             m_isSelected = select;
-            if(m_isSelected) getSelectedEvent().invoke(*this);
+            if (m_isSelected)
+            {
+                getSelectedEvent().invoke(*this);
+            }
+            else
+            {
+                getDeselectedEvent().invoke(*this);
+            }
         }
 
         if (m_isSelected)
         {
-            for (auto& comp : m_components)
+            for (auto &comp : m_components)
                 comp->onClick();
         }
     }
@@ -397,30 +517,396 @@ namespace ige::scene
         return m_isSelected;
     }
 
-    //! Serialize
-    void SceneObject::to_json(json& j)
+    //! Get scene root
+    std::shared_ptr<SceneObject> SceneObject::getRoot()
     {
-        j = json {
-            {"id", m_id},
+        return m_scene ? m_scene->getRoot() : nullptr;
+    }
+
+    //! Event Dispatch System 
+    void SceneObject::addEventListener(int eventType, const EventCallback& callback, const uint64_t tag)
+    {
+        if (tag != 0)
+        {
+            for (auto it = m_callbacks.begin(); it != m_callbacks.end(); it++)
+            {
+                if ((*it)->eventType == eventType && (*it)->tag == tag)
+                {
+                    (*it)->callback = callback;
+                    return;
+                }
+            }
+        }
+
+        EventCallbackItem* item = new EventCallbackItem();
+        item->callback = callback;
+        item->eventType = eventType;
+        item->dispatching = 0;
+        item->tag = tag;
+        m_callbacks.push_back(item);
+    }
+
+    void SceneObject::removeEventListener(int eventType, const uint64_t tag)
+    {
+        if (m_callbacks.empty())
+            return;
+
+        for (auto it = m_callbacks.begin(); it != m_callbacks.end(); )
+        {
+            if ((*it)->eventType == eventType && (((*it)->tag == tag || tag == 0)))
+            {
+                if (m_dispatching > 0)
+                {
+                    (*it)->callback = nullptr;
+                    it++;
+                }
+                else
+                {
+                    delete (*it);
+                    it = m_callbacks.erase(it);
+                }
+            }
+            else
+                it++;
+        }
+    }
+
+    void SceneObject::removeEventListeners()
+    {
+        if (m_callbacks.empty())
+            return;
+
+        if (m_dispatching > 0)
+        {
+            for (auto it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+                (*it)->callback = nullptr;
+        }
+        else
+        {
+            for (auto it = m_callbacks.begin(); it != m_callbacks.end(); it++)
+                delete (*it);
+            m_callbacks.clear();
+        }
+    }
+
+    bool SceneObject::hasEventListener(int eventType, const uint64_t tag) const
+    {
+        if (m_callbacks.empty())
+            return false;
+
+        for (auto it = m_callbacks.cbegin(); it != m_callbacks.cend(); ++it)
+        {
+            if ((*it)->eventType == eventType && (((*it)->tag == tag || tag == 0)) && (*it)->callback != nullptr)
+                return true;
+        }
+        return false;
+    }
+
+    bool SceneObject::dispatchEvent(int eventType, const Value& dataValue)
+    {
+        if (m_callbacks.size() == 0)
+            return false;
+
+        EventContext context;
+        context.m_sender = this;
+        context.m_type = eventType;
+        context.m_dataValue = dataValue;
+
+        doDispatch(eventType, &context);
+
+        return context.isDefaultPrevented();
+    }
+
+    bool SceneObject::dispatchEventIncludeChild(int eventType, const Value& dataValue)
+    {
+        /*if (m_callbacks.size() == 0)
+            return false;*/
+
+        EventContext context;
+        context.m_sender = this;
+        context.m_type = eventType;
+        context.m_dataValue = dataValue;
+
+        doDispatch(eventType, &context, true);
+
+        return context.isDefaultPrevented();
+    }
+
+    bool SceneObject::bubbleEvent(int eventType, const Value& dataValue)
+    {
+        EventContext context;
+        context.m_type = eventType;
+        context.m_dataValue = dataValue;
+
+        doBubble(eventType, &context);
+
+        return context.m_defaultPrevented;
+    }
+
+    bool SceneObject::dispatchInputEvent(int eventType, const Value& dataValue)
+    {
+        if (m_callbacks.size() == 0)
+            return false;
+
+        InputEventContext context;
+        if (InputProcessor::getInstance())
+            context.m_inputEvent = InputProcessor::getInstance()->getRecentInput();
+        context.m_sender = this;
+        context.m_type = eventType;
+        context.m_dataValue = dataValue;
+
+        doDispatch(eventType, &context);
+
+        return context.isDefaultPrevented();
+    }
+
+    bool SceneObject::bubbleInputEvent(int eventType, const Value& dataValue)
+    {
+        InputEventContext context;
+        if (InputProcessor::getInstance())
+            context.m_inputEvent = InputProcessor::getInstance()->getRecentInput();
+        context.m_type = eventType;
+        context.m_dataValue = dataValue;
+
+        doBubble(eventType, &context);
+
+        return context.m_defaultPrevented;
+    }
+
+
+    void SceneObject::doDispatch(int eventType, EventContext* context, bool includeChild)
+    {
+        if (includeChild) {
+            int childCount = m_children.size();
+            if (childCount > 0)
+            {
+                for (int i = 0; i < childCount; i++) {
+                    if (m_children[i]) {
+                        m_children[i]->doDispatch(eventType, context, includeChild);
+                    }
+                }
+            }
+        }
+
+        if (m_callbacks.empty()) return;
+
+        m_dispatching++;
+        context->m_sender = this;
+        bool hasDeletedItems = false;
+
+        size_t cnt = m_callbacks.size(); //dont use iterator, because new item would be added in callback.
+        for (size_t i = 0; i < cnt; i++)
+        {
+            EventCallbackItem* ci = m_callbacks[i];
+            if (ci->callback == nullptr)
+            {
+                hasDeletedItems = true;
+                continue;
+            }
+            if (ci->eventType == eventType)
+            {
+                auto inputContext = dynamic_cast<InputEventContext*>(context);
+                if (inputContext != nullptr) {
+                    ci->dispatching++;
+                    inputContext->m_touchCapture = 0;
+                    ci->callback(inputContext);
+                    ci->dispatching--;
+                    if (inputContext->m_touchCapture != 0 && dynamic_cast<SceneObject*>(this))
+                    {
+                        if (inputContext->isCaptureTouch() && eventType == (int)EventType::TouchBegin)
+                            inputContext->getInput()->getProcessor()->addTouchMonitor(inputContext->getInput()->getTouchId(), this);
+                        else if (inputContext->isUnCaptureTouch())
+                            inputContext->getInput()->getProcessor()->removeTouchMonitor(this);
+                    }
+                }
+                else
+                {
+                    ci->dispatching++;
+                    ci->callback(context);
+                    ci->dispatching--;
+                }
+            }
+        }
+
+        m_dispatching--;
+        if (hasDeletedItems && m_dispatching == 0)
+        {
+            for (auto it = m_callbacks.begin(); it != m_callbacks.end(); )
+            {
+                if ((*it)->callback == nullptr)
+                {
+                    delete (*it);
+                    it = m_callbacks.erase(it);
+                }
+                else
+                    it++;
+            }
+        }
+
+        
+    }
+    
+    void SceneObject::doBubble(int eventType, EventContext* context)
+    {
+        //parent maybe disposed in callbacks
+        auto p = this->getParent();
+
+        if (!m_callbacks.empty())
+        {
+            context->m_bIsStopped = false;
+            doDispatch(eventType, context);
+            if (context->m_bIsStopped)
+                return;
+        }
+        if (p != nullptr) {
+            p->doBubble(eventType, context);
+        }
+    }
+
+    //! Transform changed event
+    void SceneObject::onTransformChanged(SceneObject& sceneObject)
+    {
+        if (m_aabbDirty != 0) return;
+        //updateAabb();
+        m_aabbDirty = 2;
+    }
+
+    //! Update AABB
+    void SceneObject::updateAabb()
+    {
+        // Ignore Canvas and root object
+        if (getComponent<Canvas>() != nullptr || getParent() == nullptr)
+        {
+            m_frameAABB = m_aabbWorld = m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
+            return;
+        }
+
+        m_aabb = AABBox({ -0.5f, -0.5f, -0.5f }, { 0.5f, 0.5f, 0.5f });
+
+        if (getComponent<FigureComponent>() != nullptr)
+        {
+            auto figureComp = getComponent<FigureComponent>();
+            if (figureComp->getFigure())
+            {
+                Vec3 aabbMin, aabbMax;
+                figureComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
+                m_aabb = { aabbMin, aabbMax };
+                if (m_aabb.getVolume() == 0)
+                {
+                    if ((aabbMax[0] - aabbMin[0]) == 0) aabbMax[0] = 0.01f;
+                    if ((aabbMax[1] - aabbMin[1]) == 0) aabbMax[1] = 0.01f;
+                    if ((aabbMax[2] - aabbMin[2]) == 0) aabbMax[2] = 0.01f;
+                    m_aabb = { aabbMin, aabbMax };
+                }
+            }
+        }
+        else if (getComponent<SpriteComponent>() != nullptr && !isGUIObject())
+        {
+            auto spriteComp = getComponent<SpriteComponent>();
+            if (spriteComp->getFigure())
+            {
+                Vec3 aabbMin, aabbMax;
+                spriteComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                m_aabb = { aabbMin, aabbMax };
+            }
+        }
+        else if (isGUIObject()) {
+            if (getComponent<UIText>() != nullptr)
+            {
+                auto uiText = getComponent<UIText>();
+                if (uiText->getFigure())
+                {
+                    Vec3 aabbMin, aabbMax;
+                    uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                    m_aabb = { aabbMin, aabbMax };
+                }
+            }
+            else if (getComponent<RectTransform>() != nullptr) {
+                auto rect = getComponent<RectTransform>();
+                if (rect) {
+                    auto size = rect->getSize();
+                    auto scale = rect->getScale();
+                    auto rot = rect->getRotation();
+                    Vec3 min(-size[0] * 0.5f, -size[1] * 0.5f, -0.5f);
+                    Vec3 max(size[0] * 0.5f, size[1] * 0.5f, 0.5f);
+                    m_aabb = { min, max };
+                }
+            }
+        }
+
+        // Update world AABB
+        m_aabbWorld = m_aabb.Transform(m_transform->getWorldMatrix());
+        m_frameAABB = m_bLockedFrameAABB ? m_frameAABB : m_aabbWorld;
+    }
+
+
+    //! Find first child by name
+    SceneObject* SceneObject::findChildByName(const std::string& name)
+    {
+        auto found = std::find_if(m_children.begin(), m_children.end(), [&](auto elem)
+        {
+            return elem->getName() == name;
+        });
+        if (found != m_children.end())
+            return (*found);
+        return nullptr;
+    }
+
+    void SceneObject::setInMask(bool value) 
+    {
+        if (value != m_bIsInMask) 
+        {
+            m_bIsInMask = value;
+        }
+    }
+
+    void SceneObject::reloadScripts(bool includeChild)
+    {
+        if (includeChild) {
+            int size = m_children.size();
+            for (int i = 0; i < size; i++) {
+                if (m_children[i] != nullptr) {
+                    m_children[i]->reloadScripts(includeChild);
+                }
+            }
+        }
+
+        int c_size = getComponentsCount();
+        for (int i = 0; i < c_size; i++) {
+            if (m_components[i]->getType() == Component::Type::Script) {
+                std::shared_ptr<ScriptComponent> Script = std::dynamic_pointer_cast<ScriptComponent>(m_components[i]);
+                if (Script != nullptr) {
+                    Script->Reload();
+                }
+            }
+        }
+
+    }
+
+    //! Serialize
+    void SceneObject::to_json(json &j)
+    {
+        j = json{
+            {"uuid", m_uuid},
             {"name", m_name},
             {"active", m_isActive},
-            {"select", m_isSelected},
+            {"gui", m_bIsGui},
+            {"raycast", m_bIsRaycastTarget},
+            {"interactable", m_bIsInteractable}
         };
 
         auto jComponents = json::array();
-        for (const auto& comp : m_components)
+        for (const auto &comp : m_components)
         {
-            json jCmp;
-            comp->to_json(jCmp);
-
-            json jPairCmp = {comp->getName(), jCmp};
-
-            jComponents.push_back(jPairCmp);
+            if (!comp->isSkipSerialize())
+            {
+                jComponents.push_back({comp->getName(), json(*comp.get())});
+            }
         }
         j["comps"] = jComponents;
 
         auto jChildren = json::array();
-        for (const auto& child : m_children)
+        for (const auto &child : m_children)
         {
             if (child)
             {
@@ -429,46 +915,58 @@ namespace ige::scene
                 jChildren.push_back(jChild);
             }
         }
-        j["children"] = jChildren;
+        j["childs"] = jChildren;
     }
 
     //! Deserialize
-    void SceneObject::from_json(const json& j)
+    void SceneObject::from_json(const json &j)
     {
-        j.at("id").get_to(m_id);
-        j.at("name").get_to(m_name);
-        j.at("active").get_to(m_isActive);
-        j.at("select").get_to(m_isSelected);
+        setName(j.value("name", ""));
+        setUUID(j.value("uuid", getUUID()));
+        setActive(j.value("active", false));
+        m_bIsGui = j.value("gui", false);
+        m_bIsRaycastTarget = j.value("raycast", false);
+        m_bIsInteractable = j.value("interactable", false);
 
         auto jComps = j.at("comps");
         for (auto it : jComps)
         {
             auto key = it.at(0);
             auto val = it.at(1);
-            std::shared_ptr<Component> comp = nullptr;
-            if (key == "TransformComponent") 
-            { 
-                auto transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
-                setTransform(transform);
-                comp = transform;
-            }
-            else if (key == "CameraComponent") comp = addComponent<CameraComponent>(val.at("name"));
-            else if (key == "EnvironmentComponent") comp = addComponent<EnvironmentComponent>(val.at("name"));
-            else if (key == "FigureComponent") comp = addComponent<FigureComponent>(val.at("path"));
-            else if (key == "SpriteComponent") comp = addComponent<SpriteComponent>(val.at("size"), val.at("path"));
-            else if (key == "ScriptComponent") comp = addComponent<ScriptComponent>(val.at("path"));
-            else if (key == "PhysicBox") comp = addComponent<PhysicBox>();
-            else if (key == "PhysicSphere") comp = addComponent<PhysicSphere>();
-            else if (key == "PhysicCapsule") comp = addComponent<PhysicCapsule>();
-            if (comp) comp->from_json(val);
+            auto comp = createComponent(key);
+            if (comp)
+                val.get_to(*comp);
         }
 
-        auto jChildren = j.at("children");
+        // Add editor camera figure debug
+        if (SceneManager::getInstance()->isEditor())
+        {
+            if (auto camera = getComponent<CameraComponent>())
+            {
+                if (!getComponent<FigureComponent>())
+                    addComponent<FigureComponent>(GetEditorResource("figures/camera"))->setSkipSerialize(true);
+            }
+
+            if (auto directionalLight = getComponent<DirectionalLight>())
+            {
+                if (!getComponent<FigureComponent>() && !getComponent<SpriteComponent>())
+                    addComponent<SpriteComponent>(GetEditorResource("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+            }
+
+            if (auto pointLight = getComponent<PointLight>())
+            {
+                if (!getComponent<FigureComponent>() && !getComponent<SpriteComponent>())
+                    addComponent<SpriteComponent>(GetEditorResource("sprites/point-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+            }
+        }
+
+        auto jChildren = j.at("childs");
+        auto thisObj = getScene()->findObjectById(getId());
         for (auto it : jChildren)
         {
-            auto child = std::make_shared<SceneObject>(it.at("id"), it.at("name"), this);
+            auto child = getScene()->createObject(it.at("name"), thisObj, it.value("gui", false), {});
             child->from_json(it);
-            addChild(child);
         }
     }
-}
+
+} // namespace ige::scene

@@ -13,6 +13,7 @@
 #include <pyxieResourceManager.h>
 #include <input/pyxieInputHandler.h>
 #include <input/pyxieTouch.h>
+#include <input/pyxieKeyboard.h>
 #include <pyxieFios.h>
 #include <pyxieSystemInfo.h>
 #include <pyxieApplication.h>
@@ -37,5 +38,6 @@ using FileIO = pyxie::pyxieFios;
 using Time = pyxie::pyxieTime;
 using ShaderDescriptor = pyxie::pyxieShaderDescriptor;
 using Drawable = pyxie::pyxieDrawable;
+using AABBox = pyxie::pyxieAABBox;
 
 using namespace pyxie;

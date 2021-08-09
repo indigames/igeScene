@@ -1,5 +1,5 @@
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "components/physic/PhysicBox.h"
 #include "utils/PhysicHelper.h"
@@ -7,8 +7,8 @@
 namespace ige::scene
 {
     //! Constructor
-    PhysicBox::PhysicBox(const std::shared_ptr<SceneObject> &owner, const Vec3 &size)
-        : PhysicBase(owner)
+    PhysicBox::PhysicBox(SceneObject &owner, const Vec3 &size)
+        : PhysicObject(owner)
     {
         createCollisionShape(size);
         init();
@@ -42,7 +42,10 @@ namespace ige::scene
             m_shape.reset();
         m_shape = std::make_unique<btBoxShape>(PhysicHelper::to_btVector3(size));
         m_size = size;
+
+        m_bIsDirty = true;
         setLocalScale(m_previousScale);
+        m_bIsDirty = false;
     }
 
     //! Recreate collision shape
@@ -55,27 +58,27 @@ namespace ige::scene
         recreateBody();
     }
 
-    //! Set local scale of the box
-    void PhysicBox::setLocalScale(const Vec3 &scale)
-    {
-        if (m_shape)
-        {
-            m_shape->setLocalScaling(PhysicHelper::to_btVector3(scale));
-        }
-    }
-
     //! Serialize
     void PhysicBox::to_json(json &j) const
     {
-        PhysicBase::to_json(j);
+        PhysicObject::to_json(j);
         j["size"] = getSize();
     }
 
     //! Deserialize
     void PhysicBox::from_json(const json &j)
     {
-        PhysicBase::from_json(j);
         setSize(j.value("size", Vec3(1.f, 1.f, 1.f)));
+        PhysicObject::from_json(j);
+    }
+
+    //! Update property by key value
+    void PhysicBox::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("size") == 0)
+            setSize(val);       
+        else
+            PhysicObject::setProperty(key, val);
     }
 
 } // namespace ige::scene

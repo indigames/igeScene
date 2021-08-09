@@ -37,7 +37,7 @@ namespace ige::scene
         virtual void render();
 
         //! Create empty scene
-        std::shared_ptr<Scene> createScene(const std::string& name);
+        std::shared_ptr<Scene> createScene(const std::string& name = "Untitled");
 
         //! Load scene
         std::shared_ptr<Scene> loadScene(const std::string& scenePath);
@@ -48,8 +48,11 @@ namespace ige::scene
         //! Unload scene by name
         void unloadScene(const std::string& sceneName);
 
+        //! Reload scene
+        void reloadScene();
+
         //! Save scene
-        bool saveScene(const std::string& scenePath);
+        bool saveScene(const std::string& scenePath = std::string());
 
         //! Get current scene
         const std::shared_ptr<Scene>& getCurrentScene() const { return m_currScene; }
@@ -69,17 +72,39 @@ namespace ige::scene
         //! Set editor mode
         void setIsEditor(bool isEditor) { m_bIsEditor = isEditor; }
 
+        //! Project path
+        const std::string& getProjectPath() const { return m_projectPath; }
+        void setProjectPath(const std::string& path);
+
+        //! Editor path
+        const std::string& getEditorPath() const { return m_editorPath; }
+        void setEditorPath(const std::string& path);
+
+        void dispathEvent(int eventType);
+
     protected:
+
+        //! Initialize
+        void init();
+
+        //! Deinit
+        void deinit();
+
+        //! Project path
+        std::string m_projectPath = {};
+
+        //! Editor path
+        std::string m_editorPath = {};
+
         //! Scene root node
         std::shared_ptr<Scene> m_currScene;
 
         //! List of all Scenes
         std::vector<std::shared_ptr<Scene>> m_scenes;
 
-        //! Init in main thread
-        bool m_bInitialized = false;
-
         //! Editor mode
         bool m_bIsEditor = false;
     };
+
+    std::string GetEditorResource(const std::string& path);
 }

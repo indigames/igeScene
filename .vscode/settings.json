@@ -74,6 +74,15 @@
         "valarray": "cpp",
         "filesystem": "cpp",
         "iomanip": "cpp",
-        "condition_variable": "cpp"
+        "condition_variable": "cpp",
+        "compare": "cpp",
+        "stack": "cpp",
+        "optional": "cpp",
+        "__functional_base": "cpp",
+        "random": "cpp",
+        "charconv": "cpp",
+        "bit": "cpp",
+        "format": "cpp",
+        "stop_token": "cpp"
     }
 }

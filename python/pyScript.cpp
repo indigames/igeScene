@@ -23,13 +23,13 @@ namespace ige::scene
         if(self)
         {
             self->owner = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        Py_TYPE(self)->tp_free(self);
     }
 
     // Init
     int Script_init(PyObject_Script* self, PyObject* args, PyObject* kw)
-    {       
+    {
         return 0;
     }
 

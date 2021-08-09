@@ -43,9 +43,21 @@ namespace ige::scene
     // Find object
     PyObject* Scene_findObject(PyObject_Scene *self, PyObject* args);
 
-    // Get ass root objects
-    PyObject* Scene_getRoots(PyObject_Scene *self);
+    // Get all objects
+    PyObject* Scene_getObjects(PyObject_Scene *self);
 
-    // Get all cameras
-    PyObject* Scene_getCameras(PyObject_Scene *self);
+    // Get root object
+    PyObject* Scene_getRoot(PyObject_Scene *self);
+
+    // Get path
+    PyObject* Scene_getPath(PyObject_Scene *self);
+
+    // Get showcase
+    PyObject* Scene_getShowcase(PyObject_Scene *self);
+
+    // Get environment
+    PyObject* Scene_getEnvironment(PyObject_Scene *self);
+
+    // Raycast
+    PyObject* Scene_raycast(PyObject_Scene *self, PyObject* args);
 }

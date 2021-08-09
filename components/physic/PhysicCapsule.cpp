@@ -1,5 +1,5 @@
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "components/physic/PhysicCapsule.h"
 #include "utils/PhysicHelper.h"
@@ -7,8 +7,8 @@
 namespace ige::scene
 {
     //! Constructor
-    PhysicCapsule::PhysicCapsule(const std::shared_ptr<SceneObject> &owner, float radius, float height)
-        : PhysicBase(owner)
+    PhysicCapsule::PhysicCapsule(SceneObject &owner, float radius, float height)
+        : PhysicObject(owner)
     {
         createCollisionShape(radius, height);
         init();
@@ -56,7 +56,10 @@ namespace ige::scene
         m_shape = std::make_unique<btCapsuleShape>(radius, height);
         m_radius = radius;
         m_height = height;
+
+        m_bIsDirty = true;
         setLocalScale(m_previousScale);
+        m_bIsDirty = false;
     }
 
     //! Recreate collision shape
@@ -71,17 +74,10 @@ namespace ige::scene
         recreateBody();
     }
 
-    //! Set local scale of the box
-    void PhysicCapsule::setLocalScale(const Vec3 &scale)
-    {
-        if (m_shape)
-            m_shape->setLocalScaling(PhysicHelper::to_btVector3(scale));
-    }
-
     //! Serialize
     void PhysicCapsule::to_json(json &j) const
     {
-        PhysicBase::to_json(j);
+        PhysicObject::to_json(j);
        j["height"] = getHeight();
        j["radius"] = getRadius();
     }
@@ -89,8 +85,20 @@ namespace ige::scene
     //! Deserialize
     void PhysicCapsule::from_json(const json &j)
     {
-        PhysicBase::from_json(j);
         setHeight(j.at("height"));
         setRadius(j.at("radius"));
+        PhysicObject::from_json(j);
     }
+
+    //! Update property by key value
+    void PhysicCapsule::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("height") == 0)
+            setHeight(val);
+        else if (key.compare("radius") == 0)
+            setRadius(val);
+        else
+            PhysicObject::setProperty(key, val);
+    }
+
 } // namespace ige::scene

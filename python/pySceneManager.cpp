@@ -13,8 +13,8 @@ namespace ige::scene
         if(self)
         {
             self->sceneManager = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        PyObject_Del(self);
     }
 
     // String representation
@@ -107,17 +107,17 @@ namespace ige::scene
     }
 
     // Set current scene
-    PyObject* SceneManager_setCurrentScene(PyObject_SceneManager* self, PyObject* value)
+    int SceneManager_setCurrentScene(PyObject_SceneManager* self, PyObject* value)
     {
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             if(obj && obj->ob_type == &PyTypeObject_Scene) {
                 auto sceneObj = (PyObject_Scene*)obj;
                 self->sceneManager->setCurrentScene(sceneObj->scene->getName());
-                Py_RETURN_TRUE;
+                return 0;
             }
         }
-        Py_RETURN_FALSE;
+        return -1;
     }
 
     // Methods

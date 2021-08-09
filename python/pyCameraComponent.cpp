@@ -16,8 +16,8 @@ namespace ige::scene
         if(self && self->component)
         {
             self->component = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        PyObject_Del(self);
     }
 
     PyObject* CameraComponent_str(PyObject_CameraComponent *self)
@@ -451,7 +451,7 @@ namespace ige::scene
 
     PyTypeObject PyTypeObject_CameraComponent = {
         PyVarObject_HEAD_INIT(NULL, 0)
-        "igeScene.CameraComponent",                  /* tp_name */
+        "igeScene.Camera",                           /* tp_name */
         sizeof(PyObject_CameraComponent),            /* tp_basicsize */
         0,                                           /* tp_itemsize */
         (destructor)CameraComponent_dealloc,         /* tp_dealloc */

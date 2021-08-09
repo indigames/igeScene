@@ -3,16 +3,16 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "components/physic/PhysicBase.h"
+#include "components/physic/PhysicObject.h"
 
 namespace ige::scene
 {
     //! PhysicSphere
-    class PhysicSphere : public PhysicBase
+    class PhysicSphere : public PhysicObject
     {
     public:
         //! Constructor
-        PhysicSphere(const std::shared_ptr<SceneObject> &owner, float radius = 1.f);
+        PhysicSphere(SceneObject &owner, float radius = 1.f);
 
         //! Destructor
         virtual ~PhysicSphere();
@@ -20,11 +20,8 @@ namespace ige::scene
         //! Get name
         std::string getName() const override { return "PhysicSphere"; }
 
-        //! Serialize
-        virtual void to_json(json &j) const;
-
-        //! Deserialize
-        virtual void from_json(const json &j);
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::PhysicSphere; }
 
         //! Get radius
         float getRadius() const;
@@ -32,7 +29,16 @@ namespace ige::scene
         //! Set radius
         void setRadius(float radius);
 
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! Create collision shape
         void createCollisionShape(float radius);
 
@@ -40,9 +46,9 @@ namespace ige::scene
         void recreateCollisionShape(float radius);
 
         //! Set local scale of the box
-        virtual void setLocalScale(const Vec3& scale) override;
+        virtual void setLocalScale(const Vec3 &scale) override;
 
     protected:
         float m_radius;
     };
-}
+} // namespace ige::scene

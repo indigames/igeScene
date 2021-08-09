@@ -16,8 +16,8 @@ namespace ige::scene
         if(self && self->component)
         {
             self->component = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        PyObject_Del(self);
     }
 
     PyObject* TransformComponent_str(PyObject_TransformComponent *self)
@@ -183,7 +183,7 @@ namespace ige::scene
     // Type definition
     PyTypeObject PyTypeObject_TransformComponent = {
         PyVarObject_HEAD_INIT(NULL, 0)
-        "igeScene.TransformComponent",               /* tp_name */
+        "igeScene.Transform",                        /* tp_name */
         sizeof(PyObject_TransformComponent),         /* tp_basicsize */
         0,                                           /* tp_itemsize */
         (destructor)TransformComponent_dealloc,      /* tp_dealloc */

@@ -13,3 +13,9 @@ PyDoc_STRVAR(SpriteComponent_size_doc,
     "Size of sprite.\n"\
     "Type: Vec2\n"
 );
+
+// isBillboard
+PyDoc_STRVAR(SpriteComponent_isBillboard_doc,
+    "Render as billboard.\n"\
+    "Type: bool\n"
+);

@@ -1,5 +1,5 @@
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "components/physic/PhysicSphere.h"
 #include "utils/PhysicHelper.h"
@@ -7,8 +7,8 @@
 namespace ige::scene
 {
     //! Constructor
-    PhysicSphere::PhysicSphere(const std::shared_ptr<SceneObject> &owner, float radius)
-        : PhysicBase(owner)
+    PhysicSphere::PhysicSphere(SceneObject &owner, float radius)
+        : PhysicObject(owner)
     {
         createCollisionShape(radius);
         init();
@@ -42,7 +42,10 @@ namespace ige::scene
             m_shape.reset();
         m_shape = std::make_unique<btSphereShape>(radius);
         m_radius = radius;
+
+        m_bIsDirty = true;
         setLocalScale(m_previousScale);
+        m_bIsDirty = false;
     }
 
     //! Recreate collision shape
@@ -60,25 +63,34 @@ namespace ige::scene
     //! Set local scale of the box
     void PhysicSphere::setLocalScale(const Vec3 &scale)
     {
-        if (m_shape)
+        if (m_shape && (m_bIsDirty || m_previousScale != scale))
         {
             float radiusScale = std::max(std::max(scale[0], scale[1]), scale[2]);
             m_shape->setLocalScaling({radiusScale, radiusScale, radiusScale});
+            m_previousScale = scale;
         }
     }
 
     //! Serialize
     void PhysicSphere::to_json(json &j) const
     {
-        PhysicBase::to_json(j);
+        PhysicObject::to_json(j);
         j["radius"] = getRadius();
     }
 
     //! Deserialize
     void PhysicSphere::from_json(const json &j)
     {
-        PhysicBase::from_json(j);
         setRadius(j.at("radius"));
+        PhysicObject::from_json(j);
     }
 
+    //! Update property by key value
+    void PhysicSphere::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("radius") == 0)
+            setRadius(val);
+        else
+            PhysicObject::setProperty(key, val);
+    }
 } // namespace ige::scene

@@ -8,6 +8,11 @@ namespace ige::scene
         return btTransform(to_btQuaternion(transform.getWorldRotation()), to_btVector3(transform.getWorldPosition()));
     }
 
+    btTransform PhysicHelper::to_btTransform(const Quat& rot, const Vec3& pos)
+    {
+        return btTransform(to_btQuaternion(rot), to_btVector3(pos));
+    }
+
     btVector3 PhysicHelper::to_btVector3(const Vec3& vec)
     {
         return btVector3(vec[0], vec[1], vec[2]);

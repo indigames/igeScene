@@ -17,7 +17,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        RectTransform(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Vec2& size = Vec2{ 128.f, 128.f });
+        RectTransform(SceneObject &owner, const Vec3 &pos = Vec3(), const Vec2 &size = Vec2{64.f, 64.f});
 
         //! Destructor
         virtual ~RectTransform();
@@ -25,103 +25,134 @@ namespace ige::scene
         //! Get component name
         virtual std::string getName() const override { return "RectTransform"; }
 
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::RectTransform; }
+
         //! Get local transform
-        const Mat4& getLocalTransform();
+        const Mat4 &getLocalTransform();
 
         //! Get canvas space transform
-        const Mat4& getCanvasSpaceTransform();
+        const Mat4 &getCanvasSpaceTransform();
 
         //! Get viewport transform
-        const Mat4& getViewportTransform();
+        const Mat4 &getViewportTransform();
 
         //! Anchor
-        const Vec4& getAnchor() const { return m_anchor; }
-        void setAnchor(const Vec4& anchor);
+        const Vec4 &getAnchor() const { return m_anchor; }
+        void setAnchor(const Vec4 &anchor);
 
         //! Pivot
-        const Vec2& getPivot() const { return m_pivot; }
-        void setPivot(const Vec2& pivot);
+        const Vec2 &getPivot() const { return m_pivot; }
+        void setPivot(const Vec2 &pivot);
 
         //! Offset
-        const Vec4& getOffset() const { return m_offset; }
-        void setOffset(const Vec4& offset);
+        const Vec4 &getOffset() const { return m_offset; }
+        void setOffset(const Vec4 &offset);
+
+        //! Anchor Offset
+        const Vec4& getAnchorOffset() const { return m_anchorOffset; }
+        void setAnchorOffset(const Vec4& value) { m_anchorOffset = value; }
+
+        //! Anchored Position
+        const Vec2& getAnchoredPosition() const { return m_anchoredPosition; }
+        void setAnchoredPosition(const Vec2& value);
 
         //! Size
         Vec2 getSize();
-        void setSize(const Vec2& size);
+        void setSize(const Vec2 &size);
 
-        //! Position
-        void setPosition(const Vec3& pos) override;
-        void setWorldPosition(const Vec3& pos) override;
+        //! Set Parent
+        virtual void setParent(TransformComponent* comp) override;
 
-        //! Rotation
-        void setRotation(const Quat& rot) override;
-        void setWorldRotation(const Quat& rot) override;
+        //! Translate
+        void worldTranslate(const Vec3 &trans) override;
+
+        //! Rotate
+        void worldRotate(const Quat &rot) override { rotate(rot); }
 
         //! Scale
-        void setScale(const Vec3& scale) override;
-        void setWorldScale(const Vec3& scale) override;
+        void worldScale(const Vec3 &scl) override { scale(scl); }
+
+        //! Position
+        void setPosition(const Vec3 &pos) override;
+        void setWorldPosition(const Vec3 &pos) override {}
+
+        //! Rotation
+        void setRotation(const Quat &rot) override;
+        void setWorldRotation(const Quat &rot) override {}
+
+        //! Scale
+        void setScale(const Vec3 &scale) override;
+        void setWorldScale(const Vec3 &scale) override {}
 
         //! Get rect in canvas space (no scale, no rotate)
-        const Vec4& getRect();
-
-        //! Get rect in viewport space
-        const Vec4& getRectInViewportSpace() { return m_rectViewport; }
+        const Vec4 &getRect();
 
         //! Dirty flag
-        void setDirty();
+        void setRectDirty();
+
+        //! Set transform dirty
+        void setTransformDirty();
+
+        //! Set local & Size dirty
+        void setLocalToRectDirty();
 
         //! OnUpdate
         void onUpdate(float dt) override;
 
-        //! Serialize
-        void to_json(json& j) const override { }
-
-        //! Deserialize
-        void from_json(const json& j) override { }
-
-        //! Add observer: just do nothing
-        void addObserver(TransformComponent* observer) override { }
-
-        //! Remove observer: just do nothing
-        void removeObserver(TransformComponent* observer) override { }
-
-        //! Notify to all observers: just do nothing
-        void notifyObservers(const ETransformMessage& message) override { }
-
         //! Handle notification from parent: just do nothing
-        void onNotified(const ETransformMessage& message) override { }
+        void onNotified(const ETransformMessage &message) override;
 
-        //! Check point inside rect
-        bool isPointInside(const Vec2& point) const;
+        //! Update rect & size
+        void updateRect(bool only = false);
+        void updateSize();
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
-        bool hasScale() const;
-        bool hasRotation() const;
-        bool hasScaleOrRotation() const;
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
 
         Vec2 getPivotInCanvasSpace();
-        Vec2 getPivotInViewportSpace();
-
         Vec2 getAnchorCenterInCanvasSpace();
 
+        void onSceneObjectSelected(SceneObject& sceneObject);
+        
+        void updateLocalToRect();
+        void updateAnchorOffset();
     protected:
         //! Anchor
         Vec4 m_anchor;
 
+        //! Anchored Position
+        Vec2 m_anchoredPosition;
+
         // Offset
         Vec4 m_offset;
+
+        //! Anchor Offset 
+        //! L,R,T,B base on anchor vs parent
+        Vec4 m_anchorOffset;
 
         //! Pivot: center of the content
         Vec2 m_pivot;
 
-        //! Position Z
-        float m_posZ;
+        //! Size of Rect 
+        Vec2 m_size;
 
         //! Cached rect in canvas space (no scale, no rotate)
         Vec4 m_rect;
-        Vec4 m_rectViewport;
         bool m_rectDirty = true;
+        
+        //! Update when Parent change 
+        bool m_parentDirty = false;
+
+        //! Flag update rect from localPosition
+        bool m_bLocalToRectDirty = true;
 
         //! Cached transform to viewport space
         Mat4 m_viewportTransform;
@@ -131,12 +162,6 @@ namespace ige::scene
         Mat4 m_canvasTransform;
         bool m_canvasTransformDirty = true;
 
-        //! Associated EditableFigure object
-        EditableFigure* m_figure;
-
-        //! Events
-        Event<EditableFigure*> m_onFigureCreatedEvent;
-        Event<EditableFigure*> m_onFigureDestroyedEvent;
-
+        uint64_t m_SelectedListenerID = 0;
     };
-}
+} // namespace ige::scene

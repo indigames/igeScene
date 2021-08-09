@@ -5,107 +5,116 @@
 #include <string>
 
 #include "event/Event.h"
+#include "event/EventContext.h"
+#include "event/InputEventContext.h"
+
 #include "components/Component.h"
 #include "components/TransformComponent.h"
+#include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
 namespace ige::scene
 {
+    class Scene;
     /**
     * SceneObject represents an object in scene hierarchy
     */
-    class SceneObject: public std::enable_shared_from_this<SceneObject>
+    class SceneObject
     {
     public:
         //! Constructor
-        SceneObject(uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false);
+        SceneObject(Scene* scene, uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false, const Vec2& size = {64.f, 64.f});
 
         //! Destructor
         virtual ~SceneObject();
 
         //! Get ID
-        inline uint64_t getId() const { return m_id; }
+        inline virtual uint64_t getId() const { return m_id; }
+
+        //! Get UUID
+        inline virtual std::string getUUID() const { return m_uuid; }
+        inline void setUUID(const std::string& uuid) { m_uuid = uuid; }
 
         //! Get Name
-        inline const std::string& getName() const { return m_name; }
+        inline virtual std::string getName() const { return m_name; }
 
         //! Set Name
-        inline void setName(const std::string& name)
-        {
-            if (m_name != name)
-            {
-                m_name = name;
-                s_nameChangedEvent.invoke(*this);
-            }
-        }
+        virtual void setName(const std::string& name);
 
         //! Set parent
-        virtual void setParent(SceneObject* parent);
-
-        // Has parent
-        virtual bool hasParent() const { return getParent() != nullptr; };
+        virtual void setParent(SceneObject *parent);
 
         // Get parent
-        virtual SceneObject* getParent() const;
+        virtual SceneObject *getParent() const;
 
-        //! Adds a child.
-        virtual void addChild(const std::shared_ptr<SceneObject>& child);
-
-        //! Remove a childs.
-        virtual bool removeChild(const std::shared_ptr<SceneObject>& child);
+        // Check relative recursive
+        virtual bool isRelative(uint64_t id);
 
         //! Get children list
-        virtual std::vector<std::shared_ptr<SceneObject>>& getChildren();
+        virtual const std::vector<SceneObject*> &getChildren() const;
 
-        //! Get children count
-        virtual size_t getChildrenCount() const;
+        //! Add child
+        virtual void addChild(SceneObject* child);
+
+        //! Removes child
+        virtual void removeChild(SceneObject* child);
 
         //! Removes all children
         virtual void removeChildren();
 
+        //! Find first child by name
+        virtual SceneObject* findChildByName(const std::string& name);
+
+        //! Find child
+        virtual SceneObject* findChild(std::string uuid);
+
+        //! Create a component by name
+        virtual std::shared_ptr<Component> createComponent(const std::string& name);
+
         //! Add a component
-        virtual void addComponent(const std::shared_ptr<Component>& component);
+        virtual void addComponent(const std::shared_ptr<Component> &component);
 
         //! Remove a component
-        virtual bool removeComponent(const std::shared_ptr<Component>& component);
+        virtual bool removeComponent(const std::shared_ptr<Component> &component);
 
-        //! Add a component by raw pointer
-        virtual void addComponent(Component* component);
-
-        //! Remove a component by raw pointer
-        virtual bool removeComponent(Component* component);
+        //! Remove a component by name
+        virtual bool removeComponent(const std::string &name);
 
         //! Remove all components
         virtual bool removeAllComponents();
 
         //! Get components list
-        virtual std::vector<std::shared_ptr<Component>>& getComponents();
+        virtual std::vector<std::shared_ptr<Component>> &getComponents();
+
+        //! Get component by name
+        std::shared_ptr<Component> getComponent(const std::string& name) const;
+
+        //! Get component by id
+        std::shared_ptr<Component> getComponent(const uint64_t id) const;
+
+        //! Get components by type recursively
+        void getComponentsRecursive(std::vector<Component*>& components, const std::string& type) const;
 
         //! Get components count
         virtual size_t getComponentsCount();
 
+        //! Check component by type
+        template <typename T>
+        inline bool hasComponent();
+
         //! Get component by type
-        template<typename T>
+        template <typename T>
         inline std::shared_ptr<T> getComponent();
 
         //! Add component by type
-        template<typename T, typename ... Args>
-        std::shared_ptr<T> addComponent(Args&&... args);
+        template <typename T, typename... Args>
+        std::shared_ptr<T> addComponent(Args &&... args);
 
-        //! Resource added event
-        void onResourceAdded(Resource* resource);
-
-        //! Resource removed event
-        void onResourceRemoved(Resource* resource);
-
-        //! Find object by id
-        std::shared_ptr<SceneObject> SceneObject::findObjectById(uint64_t id) const;
-
-        //! Find object by name
-        std::shared_ptr<SceneObject> SceneObject::findObjectByName(std::string name) const;
+        
 
         //! Update functions
         virtual void onUpdate(float dt);
@@ -116,10 +125,10 @@ namespace ige::scene
         virtual void onRender();
 
         //! Enable or disable the actor
-        void setActive(bool isActive);
+        virtual void setActive(bool isActive);
 
         //! Check active
-        bool isActive() const;
+        virtual bool isActive() const;
 
         // Set selected
         void setSelected(bool select);
@@ -127,49 +136,108 @@ namespace ige::scene
         //! Check selected
         bool isSelected() const;
 
+        //!ReloadScript
+        void reloadScripts(bool includeChild = true);
+
         //! Internal event
-        Event<Resource*>& getResourceAddedEvent() { return m_resourceAddedEvent; }
-        Event<Resource*>& getResourceRemovedEvent() { return m_resourceRemovedEvent; }
+        Event<SceneObject &> &getNameChangedEvent() { return m_nameChangedEvent; }
+        Event<SceneObject &> &getTransformChangedEvent() { return m_transformChangedEvent; }
 
         //! Public events: Created, Destroyed, Attached, Detached
-        static Event<SceneObject&>& getCreatedEvent() { return s_createdEvent; }
-        static Event<SceneObject&>& getDestroyedEvent() { return s_destroyedEvent; }
-        static Event<SceneObject&>& getAttachedEvent() { return s_attachedEvent; }
-        static Event<SceneObject&>& getDetachedEvent() { return s_detachedEvent; }
-        static Event<SceneObject&>& getNameChangedEvent() { return s_nameChangedEvent; }
-        static Event<SceneObject&>& getSelectedEvent() { return s_selectedEvent; }
-
-        // Component related events
-        static Event<SceneObject&, const std::shared_ptr<Component>&>& getComponentAddedEvent() { return m_componentAddedEvent; }
-        static Event<SceneObject&, const std::shared_ptr<Component>&>& getComponentRemovedEvent() { return m_componentRemovedEvent; }
+        static Event<SceneObject &> &getCreatedEvent() { return s_createdEvent; }
+        static Event<SceneObject &> &getDestroyedEvent() { return s_destroyedEvent; }
+        static Event<SceneObject &> &getAttachedEvent() { return s_attachedEvent; }
+        static Event<SceneObject &> &getDetachedEvent() { return s_detachedEvent; }
+        static Event<SceneObject &> &getSelectedEvent() { return s_selectedEvent; }
+        static Event<SceneObject&>& getDeselectedEvent() { return s_deselectedEvent; }
 
         //! Serialize
-        void to_json(json& j);
+        virtual void to_json(json &j);
 
         //! Deserialize
-        void from_json(const json& j);
-
-        //! Get showcase
-        Showcase* getShowcase() { return m_showcase; }
+        virtual void from_json(const json &j);
 
         //! Check whether it's a GUI object
         bool isGUIObject() const { return m_bIsGui; }
 
         //! Get transform component
-        std::shared_ptr<TransformComponent>& getTransform() { return m_transform; }
+        std::shared_ptr<TransformComponent> &getTransform() { return m_transform; }
 
-        //! Get RectRransform component (GUI only)
+        //! Get RectTransform component (GUI only)
         std::shared_ptr<RectTransform> getRectTransform() { return std::dynamic_pointer_cast<RectTransform>(m_transform); }
 
         //! Set transform component
-        void setTransform(const std::shared_ptr<TransformComponent>& transform) { m_transform = transform; }
+        void setTransform(const std::shared_ptr<TransformComponent> &transform) { m_transform = transform; }
 
-        //! Get root object
-        SceneObject* getRoot() { return m_root; }
+        //! Get canvas
+        std::shared_ptr<Canvas>& getCanvas() { return m_canvas; }
+
+        //! Set canvas
+        void setCanvas(const std::shared_ptr<Canvas>& canvas) { m_canvas = canvas; }
+
+        //! Get scene
+        Scene* getScene() { return m_scene; }
+
+        //! Get scene root
+        std::shared_ptr<SceneObject> getRoot();
+
+        void setIsRaycastTarget(bool value) { m_bIsRaycastTarget = value; }
+        bool isRaycastTarget() const { return m_bIsRaycastTarget; }
+
+        void setIsInteractable(bool value) { m_bIsInteractable = value; }
+        bool isInteractable() const { return m_bIsInteractable; }
+
+        //! Event 
+        void addEventListener(int eventType, const EventCallback& callback, const uint64_t tag = 0);
+        void removeEventListener(int eventType, const uint64_t tag = 0);
+        void removeEventListeners();
+        bool hasEventListener(int eventType, const uint64_t tag = 0) const;
+        bool dispatchEvent(int eventType, const Value& dataValue = Value::Null);
+        bool dispatchEventIncludeChild(int eventType, const Value& dataValue = Value::Null);
+
+        bool bubbleEvent(int eventType, const Value& dataValue = Value::Null);
+        bool dispatchInputEvent(int eventType, const Value& dataValue = Value::Null);
+        bool bubbleInputEvent(int eventType, const Value& dataValue = Value::Null);
+
+        //! Aabb
+        const AABBox& getAABB() const { return m_aabb; }
+
+        //! AABB in world space
+        const AABBox& getWorldAABB() const { return m_aabbWorld; }
+
+        //! Get Frame AABB in world space (use for )
+        const AABBox& getFrameAABB() const { return m_frameAABB; }
+
+        //! Set locked frame AABB
+        void setLockedFrameAABB(bool locked = true) { m_bLockedFrameAABB = locked; }
+
+        //! Update AABB
+        virtual void updateAabb();
+
+        bool isInMask() const { return m_bIsInMask; }
+        void setInMask(bool value);
+
+        std::shared_ptr<ScriptComponent> getScript(const std::string& path) const;
+
+    protected:
+        //! Helper to generate UUID
+        std::string generateUUID(unsigned int len = 16);
+
+        //! Event
+        void doDispatch(int eventType, EventContext* context, bool includeChild = false);
+        void doBubble(int eventType, EventContext* context);
+
+        //! Transform changed event
+        void onTransformChanged(SceneObject& sceneObject);
+
+        
 
     protected:
         //! Node ID
         uint64_t m_id;
+
+        //! Node UUID
+        std::string m_uuid;
 
         //! Node Name
         std::string m_name;
@@ -180,46 +248,89 @@ namespace ige::scene
         //! Selected/Unselected
         bool m_isSelected;
 
+        //! Cache pointer to current scene
+        Scene* m_scene = nullptr;
+
         //! Pointer to parent, use weak_ptr avoid dangling issue
-        SceneObject* m_parent;
+        SceneObject *m_parent = nullptr;
 
-        //! Showcase which contains self and children render components
-        Showcase* m_showcase;
-
-        //! Children vector
-        std::vector<std::shared_ptr<SceneObject>> m_children;
+        //! Cached children vector
+        std::vector<SceneObject*> m_children;
 
         //! Components vector
         std::vector<std::shared_ptr<Component>> m_components;
 
         //! Internal events
-        Event<Resource*> m_resourceAddedEvent;
-        Event<Resource*> m_resourceRemovedEvent;
+        Event<SceneObject &> m_nameChangedEvent;
+        Event<SceneObject &> m_transformChangedEvent;
 
         //! Public events
         static Event<SceneObject&> s_destroyedEvent;
         static Event<SceneObject&> s_createdEvent;
         static Event<SceneObject&> s_attachedEvent;
         static Event<SceneObject&> s_detachedEvent;
-        static Event<SceneObject&> s_nameChangedEvent;
         static Event<SceneObject&> s_selectedEvent;
-
-        //! Component related event
-        static Event<SceneObject&, const std::shared_ptr<Component>&> m_componentAddedEvent;
-        static Event<SceneObject&, const std::shared_ptr<Component>&> m_componentRemovedEvent;
+        static Event<SceneObject&> s_deselectedEvent;
 
         //! Cache transform component
         std::shared_ptr<TransformComponent> m_transform = nullptr;
 
-        //! Cache root object
-        SceneObject* m_root = nullptr;
+        //! Cache Canvas component (GUI)
+        std::shared_ptr<Canvas> m_canvas = nullptr;
 
         //! Cache isGui
         bool m_bIsGui = false;
+
+        //! Cached aabb
+        AABBox m_aabb;
+
+        //! Cached world aabb
+        AABBox m_aabbWorld;
+
+        //! Cached frame aabb
+        AABBox m_frameAABB;
+
+        //! Obj will not update frame AABB
+        bool m_bLockedFrameAABB = false;
+
+        //! Define if object will cast with UI
+        bool m_bIsRaycastTarget = false;
+
+        //! Define if object is interactable
+        bool m_bIsInteractable = false;
+
+        int m_aabbDirty = 2;
+
+        //Event Dispatch
+        struct EventCallbackItem
+        {
+            EventCallback callback;
+            int eventType;
+            uint64_t tag; //! Component Ref ID
+            int dispatching;
+        };
+
+        std::vector<EventCallbackItem*> m_callbacks;
+        int m_dispatching;
+        bool m_bIsInMask;
     };
 
+    //! Check component by type
+    template <typename T>
+    inline bool SceneObject::hasComponent()
+    {
+        static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
+
+        for (auto it = m_components.begin(); it != m_components.end(); ++it)
+        {
+            auto result = std::dynamic_pointer_cast<T>(*it);
+            if (result) return true;
+        }
+        return false;
+    }
+
     //! Get component by type
-    template<typename T>
+    template <typename T>
     inline std::shared_ptr<T> SceneObject::getComponent()
     {
         static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
@@ -234,15 +345,12 @@ namespace ige::scene
     }
 
     //! Add component by type
-    template<typename T, typename ...Args>
-    inline std::shared_ptr<T> SceneObject::addComponent(Args&& ...args)
+    template <typename T, typename... Args>
+    inline std::shared_ptr<T> SceneObject::addComponent(Args &&... args)
     {
         static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
-        auto found = getComponent<T>();
-        if (found) return found;
-        auto instance = std::make_shared<T>(shared_from_this(), args...);
-        m_components.push_back(instance);
-        m_componentAddedEvent.invoke(*this, instance);
+        auto instance = std::make_shared<T>(*this, args...);
+        addComponent(instance);
         return instance;
     }
-}
+} // namespace ige::scene

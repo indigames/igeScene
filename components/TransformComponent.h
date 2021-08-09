@@ -7,7 +7,10 @@ using namespace pyxie;
 
 #include "components/Component.h"
 
-namespace ige::scene {
+#include "core/igeSceneMacros.h"
+
+namespace ige::scene
+{
 
     //! Transform messages to childrens
     enum class ETransformMessage
@@ -17,74 +20,86 @@ namespace ige::scene {
     };
 
     //! Transform observable(as parent) and also observer(as child)
-    class TransformComponent: public Component
+    class TransformComponent : public Component
     {
     public:
         //! Constructor
-        TransformComponent(const std::shared_ptr<SceneObject>& owner, const Vec3& pos = Vec3(), const Quat& rot = Quat(), const Vec3& scale = Vec3(1.f, 1.f, 1.f));
+        TransformComponent(SceneObject &owner, const Vec3 &pos = Vec3(), const Quat &rot = Quat(), const Vec3 &scale = Vec3(1.f, 1.f, 1.f));
 
         //! Destructor
         virtual ~TransformComponent();
-        
+
         //! Get component name
-        virtual std::string getName() const override { return "TransformComponent"; }
+        virtual std::string getName() const override { return "Transform"; }
+
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Transform; }
 
         //! Get parent transform component
-        TransformComponent* getParent() const;
+        TransformComponent *getParent() const;
 
-        //! Check if has parent transform component
-        bool hasParent() const { return  getParent() != nullptr; }
+        //! Set parent transform
+        virtual void setParent(TransformComponent *comp);
 
         //! Translate
-        virtual void translate(const Vec3& trans);
+        virtual void translate(const Vec3 &trans);
+        virtual void worldTranslate(const Vec3 &trans);
 
         //! Rotate
-        virtual void rotate(const Quat& rot);
+        virtual void rotate(const Quat &rot);
+        virtual void worldRotate(const Quat &rot);
 
         //! Scale
-        virtual void scale(const Vec3& scale);
+        virtual void scale(const Vec3 &scale);
+        virtual void worldScale(const Vec3 &scale);
 
         //! Set local position
-        virtual void setPosition(const Vec3& pos);
+        virtual void setPosition(const Vec3 &pos);
 
         //! Get local position
-        virtual const Vec3& getPosition() const;
+        virtual const Vec3 &getPosition() const;
 
         //! Set world position
-        virtual void setWorldPosition(const Vec3& pos);
+        virtual void setWorldPosition(const Vec3 &pos);
 
         //! Get world position
-        virtual const Vec3& getWorldPosition() const;
+        virtual const Vec3 &getWorldPosition() const;
 
         //! Set local rotation
-        virtual void setRotation(const Quat& rot);
+        virtual void setRotation(const Quat &rot);
+
+        //! Set local rotation by xyz
+        virtual void setRotation(const Vec3 &rot);
 
         //! Get local rotation
-        virtual const Quat& getRotation() const;
+        virtual const Quat &getRotation() const;
 
         //! Set world rotation
-        virtual void setWorldRotation(const Quat& rot);
+        virtual void setWorldRotation(const Quat &rot);
+
+        //! Set world rotation by xyz
+        virtual void setWorldRotation(const Vec3& rot);
 
         //! get world rotation
-        virtual const Quat& getWorldRotation() const;
+        virtual const Quat &getWorldRotation() const;
 
         //! Set local scale
-        virtual void setScale(const Vec3& scale);
+        virtual void setScale(const Vec3 &scale);
 
         //! Get local scale
-        virtual const Vec3& getScale() const;
+        virtual const Vec3 &getScale() const;
 
         //! Set world scale
-        virtual void setWorldScale(const Vec3& scale);
+        virtual void setWorldScale(const Vec3 &scale);
 
         //! Get world scale
-        virtual const Vec3& getWorldScale() const;
+        virtual const Vec3 &getWorldScale() const;
 
         //! Get local transform matrix
-        virtual const Mat4& getLocalMatrix() const;
+        virtual const Mat4 &getLocalMatrix() const;
 
         //! Get world transform matrix
-        virtual const Mat4& getWorldMatrix() const;
+        virtual const Mat4 &getWorldMatrix() const;
 
         //! Get local right vector
         virtual Vec3 getLocalRight() const;
@@ -94,7 +109,7 @@ namespace ige::scene {
 
         //! Get local forward vector
         virtual Vec3 getLocalForward() const;
-        
+
         //! Get world right vector
         virtual Vec3 getWorldRight() const;
 
@@ -107,31 +122,36 @@ namespace ige::scene {
         //! Update
         virtual void onUpdate(float dt) override;
 
+        virtual void makeDirty();
+
+        virtual Vec3 globalToLocal(Vec3 point) const;
+        virtual Vec3 localToGlobal(Vec3 point) const;
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
+
+    protected:
         //! Serialize
         virtual void to_json(json& j) const override;
 
-        //! Deserialize 
-        virtual void from_json(const json& j);
-
-    protected:
-        //! Update local transform matrix
-        virtual void updateLocalMatrix();
+        //! Deserialize
+        virtual void from_json(const json& j) override;
 
         //! Update world transform matrix
-        virtual void updateWorldMatrix();
+        virtual void updateLocalToWorld();
 
         //! Update world transform, then adjust local transfrom based on world transform
         virtual void updateWorldToLocal();
 
         //! Add observer
-        virtual void addObserver(TransformComponent* observer);
+        virtual void addObserver(TransformComponent *observer);
 
         //! Remove observer
-        virtual void removeObserver(TransformComponent* observer);
+        virtual void removeObserver(TransformComponent *observer);
 
         //! Notify to all observers
         virtual void notifyObservers(const ETransformMessage &message);
-        
+
         //! Handle notification from parent
         virtual void onNotified(const ETransformMessage &message);
 
@@ -149,14 +169,13 @@ namespace ige::scene {
         Mat4 m_worldMatrix;
 
         //! Transform observers
-        std::set<TransformComponent*> m_observers;
+        std::set<TransformComponent *> m_observers;
 
         //! Cached parent transform
-        TransformComponent* m_parent = nullptr;
+        TransformComponent *m_parent = nullptr;
 
         //! Dirty flag
         bool m_bLocalDirty = false;
         bool m_bWorldDirty = false;
     };
-}
-
+} // namespace ige::scene

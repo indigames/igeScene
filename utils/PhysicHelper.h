@@ -1,5 +1,5 @@
 #pragma once
-#include <bullet/btBulletCollisionCommon.h>
+#include <btBulletCollisionCommon.h>
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
@@ -15,6 +15,7 @@ namespace ige::scene
 
         // Convert igeVMath to bullet
         static btTransform to_btTransform(const TransformComponent& transform);
+        static btTransform to_btTransform(const Quat& rot, const Vec3& pos);
         static btVector3 to_btVector3(const Vec3& vec);
         static btQuaternion to_btQuaternion(const Quat& quat);
 

@@ -10,13 +10,15 @@
 #include "components/TransformComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/FigureComponent.h"
+#include "utils/ShapeDrawer.h"
 
 #include <Python.h>
 
-#include <filesystem>
-namespace fs = std::filesystem;
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
 
 #include "utils/PyxieHeaders.h"
+#include <iomanip>
 using namespace pyxie;
 
 #ifdef _WIN32
@@ -25,16 +27,55 @@ using namespace pyxie;
 #  define DELIMITER ":"
 #endif
 
-#define SERIALIZE_VERSION "0.0.1"
-
 namespace ige::scene
 {
-    SceneManager::SceneManager() 
+    SceneManager::SceneManager()
     {
         m_currScene = nullptr;
+
+        // Initialize shape drawer
+        ShapeDrawer::initialize();
     }
 
     SceneManager::~SceneManager()
+    {
+        deinit();
+    }
+
+    void SceneManager::init()
+    {
+        // Initialize python runtime
+        auto root = m_projectPath;
+        std::replace(root.begin(), root.end(), '\\', '/');
+        std::string path = root;
+        wchar_t pathw[1024];
+        mbstowcs(pathw, path.c_str(), 1024);
+        Py_SetPythonHome(pathw);
+
+        FileIO::Instance().SetRoot(path.c_str());
+        path.append(DELIMITER);
+        path.append(root);
+
+#if EDITOR_MODE
+        root = m_editorPath;
+        std::replace(root.begin(), root.end(), '\\', '/');
+#endif
+
+        path.append(DELIMITER);
+        path.append(root);
+        path.append("/PyLib");
+
+        path.append(DELIMITER);
+        path.append(root);
+        path.append("/PyLib/site-packages");
+
+        mbstowcs(pathw, path.c_str(), 1024);
+        Py_SetPath(pathw);
+
+        Py_Initialize();
+    }
+
+    void SceneManager::deinit()
     {
         m_currScene = nullptr;
 
@@ -45,37 +86,12 @@ namespace ige::scene
         // Destroy python runtime
         Py_Finalize();
     }
-    
+
     void SceneManager::update(float dt)
     {
-        if (!m_bInitialized)
-        {
-            // Initialize python runtime
-            std::string root = pyxieFios::Instance().GetRoot();
-            std::string path = root;
-
-            wchar_t pathw[1024];
-            mbstowcs(pathw, path.c_str(), 1024);
-            Py_SetPythonHome(pathw);
-
-            path.append(DELIMITER);
-            path.append("scripts");
-
-            path.append(DELIMITER);
-            path.append(root);
-            path.append("PyLib");
-
-            path.append(DELIMITER);
-            path.append(root);
-            path.append("PyLib/site-packages");
-            mbstowcs(pathw, path.c_str(), 1024);
-            Py_SetPath(pathw);
-
-            Py_Initialize();
-
-            m_bInitialized = true;
+        if (m_currScene) {
+            m_currScene->update(dt);
         }
-        if(m_currScene) m_currScene->update(dt);
     }
 
     void SceneManager::fixedUpdate(float dt)
@@ -90,13 +106,36 @@ namespace ige::scene
 
     void SceneManager::render()
     {
-        if (m_currScene) m_currScene->render();
+        if (m_currScene)
+        {
+            ShapeDrawer::setViewProjectionMatrix(RenderContext::InstancePtr()->GetRenderViewProjectionMatrix());
+            m_currScene->render();
+            m_currScene->renderUI();
+            ShapeDrawer::flush();
+        }
+    }
+
+    void SceneManager::setProjectPath(const std::string& path)
+    {
+        if (m_projectPath.compare(path) != 0)
+        {
+            m_projectPath = path;
+            deinit();
+            init();
+        }
+    }
+
+    void SceneManager::setEditorPath(const std::string& path)
+    {
+        if (m_editorPath.compare(path) != 0)
+        {
+            m_editorPath = path;
+        }
     }
 
     std::shared_ptr<Scene> SceneManager::createScene(const std::string& name)
     {
         auto scene = std::make_shared<Scene>(name);
-        scene->initialize();
         m_scenes.push_back(scene);
         return scene;
     }
@@ -128,14 +167,32 @@ namespace ige::scene
     std::shared_ptr<Scene> SceneManager::loadScene(const std::string& path)
     {
         json jScene;
-        std::ifstream file(path);
+
+        auto fsPath = fs::path(path);
+        auto ext = fsPath.extension();
+
+        std::ifstream file(fsPath);
+        if (!file.is_open())
+            return nullptr;
+
         file >> jScene;
-        auto s = jScene.dump();
+        file.close();
 
         auto scene = std::make_shared<Scene>(jScene.at("name"));
         scene->from_json(jScene);
+
+        if (ext.string() != ".tmp")
+        {
+            auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+            std::replace(relPath.begin(), relPath.end(), '\\', '/');
+            scene->setPath(relPath);
+        }
+
         m_scenes.push_back(scene);
-        setCurrentScene(scene);
+
+        if (m_currScene == nullptr)
+            m_currScene = scene;
+
         return scene;
     }
 
@@ -143,18 +200,32 @@ namespace ige::scene
     {
         if (m_currScene)
         {
-            json jScene;
-            m_currScene->to_json(jScene);
-
-            auto fsPath = fs::path(path);
+            auto fsPath = path.empty() ? fs::path(m_currScene->getPath()) : fs::path(path);
             auto ext = fsPath.extension();
-            if (ext.string() != ".json")
+
+            if (ext.string() != ".scene" && ext.string() != ".tmp")
             {
-                fsPath = fsPath.replace_extension(".json");
+                fsPath = fsPath.replace_extension(".scene");
             }
 
+            if (path.find(".tmp") == std::string::npos)
+            {
+                if (m_currScene->getName() == "Untitled")
+                {
+                    m_currScene->setName(fsPath.filename().stem());
+                }
+
+                auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()).string() : fsPath.string();
+                std::replace(relPath.begin(), relPath.end(), '\\', '/');
+                m_currScene->setPath(relPath);
+            }
+
+            json jScene;
+            m_currScene->to_json(jScene);
+            fs::create_directories(fsPath.parent_path());
             std::ofstream file(fsPath.string());
-            file << jScene;
+            file << std::setw(2) << jScene << std::endl;
+            file.close();
             return true;
         }
         return false;
@@ -174,7 +245,7 @@ namespace ige::scene
 
     void SceneManager::unloadScene(const std::string& name)
     {
-        if (m_currScene->getName() == name)
+        if (m_currScene && m_currScene->getName() == name)
             m_currScene = nullptr;
 
         auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](const auto& itr)
@@ -185,6 +256,34 @@ namespace ige::scene
         if (found != m_scenes.end())
         {
             m_scenes.erase(found);
+        }
+    }
+
+    //! Reload scene
+    void SceneManager::reloadScene()
+    {
+        auto path = m_currScene->getPath();
+        auto name = m_currScene->getName();
+        m_currScene = nullptr;
+        unloadScene(name);
+        loadScene(path);
+    }
+
+    std::string GetEditorResource(const std::string& path)
+    {
+        if (SceneManager::getInstance()->getEditorPath().compare(SceneManager::getInstance()->getProjectPath()) == 0)
+            return path;
+        auto retPath = (fs::path(SceneManager::getInstance()->getEditorPath()).append(path)).string();
+        std::replace(retPath.begin(), retPath.end(), '\\', '/');
+        return retPath;
+    }
+
+    void SceneManager::dispathEvent(int eventType)
+    {
+        auto scene = getCurrentScene();
+        if (scene) {
+            auto node = scene->getRoot();
+            if (node) node->dispatchEventIncludeChild(eventType);
         }
     }
 }

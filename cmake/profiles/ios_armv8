@@ -1,0 +1,6 @@
+include(default)
+
+[settings]
+os=iOS
+os.version=10.0
+arch=armv8

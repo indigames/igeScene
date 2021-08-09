@@ -1,19 +1,41 @@
 #include "components/Component.h"
 #include "scene/SceneObject.h"
+#include "scene/Scene.h"
 
 namespace ige::scene
 {
+    std::atomic<uint64_t> Component::s_instanceID;
+
     //! Constructor
-    Component::Component(const std::shared_ptr<SceneObject>& owner): m_owner(owner.get()) {}
-    
-    //! Destructor
-    Component::~Component() 
+    Component::Component(SceneObject &owner)
+        : m_owner(owner) , m_instanceId(++s_instanceID)
     {
-        if (m_owner && m_owner->isActive())
+        m_serializeEventId = getOwner()->getScene()->getSerializeFinishedEvent().addListener(std::bind(&Component::onSerializeFinished, this, std::placeholders::_1));
+    }
+
+    //! Destructor
+    Component::~Component()
+    {
+        if (m_owner.getScene())
         {
-            onDisable();
-            onDestroy();
+            if (m_owner.isActive())
+            {
+                onDisable();
+                onDestroy();
+            }
+            m_owner.getScene()->getSerializeFinishedEvent().removeListener(m_serializeEventId);
         }
+    }
+
+    void Component::setEnabled(bool enable)
+    {
+        m_bIsEnabled = enable;
+
+        // Invoke enable/disable events
+        if(m_bIsEnabled)
+            onEnable();
+        else
+            onDisable();
     }
 
     //! Enable
@@ -45,14 +67,44 @@ namespace ige::scene
     void Component::onResume() {}
 
     //! Serialize
-    void to_json(json& j, const Component& obj)
+    void Component::to_json(json &j) const
     {
-        obj.to_json(j);
+        j = json{
+            {"enabled", isEnabled()},
+        };
     }
 
-    //! Deserialize 
-    void from_json(const json& j, Component& obj)
+    //! Deserialize
+    void Component::from_json(const json &j)
+    {
+        m_bIsEnabled = j.value("enabled", true);
+    }
+
+    //! Serialize finished event
+    void Component::onSerializeFinished(Scene* scene)
+    {
+        setEnabled(m_bIsEnabled);
+    }
+
+    //! Update json value
+    void Component::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("enabled") == 0)
+        {
+            setEnabled(val);
+        }
+    }
+
+    //! Serialize component
+    void to_json(json &j, const Component &obj)
+    {
+        if (!obj.isSkipSerialize())
+            obj.to_json(j);
+    }
+
+    //! Deserialize component
+    void from_json(const json &j, Component &obj)
     {
         obj.from_json(j);
     }
-}
+} // namespace ige::scene

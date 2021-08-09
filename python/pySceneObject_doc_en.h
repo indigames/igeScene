@@ -1,46 +1,6 @@
 #pragma once
 #include <Python.h>
 
-// addChild
-PyDoc_STRVAR(SceneObject_addChild_doc,
-	"Add child to current scene object.\n"\
-	"\n"\
-	"SceneObject().addChild(param: string|number|SceneObject)\n"\
-	"\n"\
-	"Parameters\n"\
-	"----------\n"\
-	"    param : string\n"\
-	"        Name of the scene object to add\n"\
-	"    param : number (unsigned long long)\n"\
-	"        ID of the scene object to add\n"\
-	"    param : SceneObject\n"\
-	"        Instance of the scene object to add\n"\
-	"Return:\n"\
-	"----------\n"\
-	"    True: if added\n"\
-	"    False: if not added\n"
-);
-
-// removeChild
-PyDoc_STRVAR(SceneObject_removeChild_doc,
-	"Remove a child from current scene object.\n"\
-	"\n"\
-	"SceneObject().removeChild(param: string|number|SceneObject)\n"\
-	"\n"\
-	"Parameters\n"\
-	"----------\n"\
-	"    param : string\n"\
-	"        Name of the scene object to remove\n"\
-	"    param : number (unsigned long long)\n"\
-	"        ID of the scene object to remove\n"\
-	"    param : SceneObject\n"\
-	"        Instance of the scene object to remove\n"\
-	"Return:\n"\
-	"----------\n"\
-	"    True: if removed\n"\
-	"    False: if not removed\n"
-);
-
 // getChildren
 PyDoc_STRVAR(SceneObject_getChildren_doc,
 	"Get the list of all child objects from current scene object.\n"\
@@ -139,10 +99,36 @@ PyDoc_STRVAR(SceneObject_removeComponents_doc,
     "    False: if not removed\n"\
 );
 
+PyDoc_STRVAR(SceneObject_invoke_doc,
+	"Invoke scripts\'s method from current scene object.\n"\
+	"\n"\
+	"SceneObject().invoke(param: string|ScriptPath, param: string|FunctionName, param: Object|PyObject)\n"\
+	"\n"\
+	"Return:\n"\
+	"----------\n"\
+	"    0: if worked\n"\
+	"    -1: if not worked\n"\
+);
+
+PyDoc_STRVAR(SceneObject_getScript_doc,
+	"gget script from current scene object.\n"\
+	"\n"\
+	"SceneObject().getScript(param: string|ScriptPath)\n"\
+	"\n"\
+	"Return:\n"\
+	"----------\n"\
+);
+
 // id
 PyDoc_STRVAR(SceneObject_id_doc,
     "The ID of the scene object.\n"\
     "Type: number (unsigned long long).\n"
+);
+
+// uuid
+PyDoc_STRVAR(SceneObject_uuid_doc,
+    "The UUID of the scene object.\n"\
+    "Type: string.\n"
 );
 
 // name
@@ -166,12 +152,6 @@ PyDoc_STRVAR(SceneObject_selected_doc,
 // parent
 PyDoc_STRVAR(SceneObject_parent_doc,
     "The parent object of the object.\n"\
-    "Type: SceneObject.\n"
-);
-
-// root
-PyDoc_STRVAR(SceneObject_root_doc,
-    "The root object of the scene contains this object.\n"\
     "Type: SceneObject.\n"
 );
 

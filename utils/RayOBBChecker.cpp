@@ -6,9 +6,8 @@ namespace ige::scene
 {
     Vec3 RayOBBChecker::g_origin = Vec3();
     Vec3 RayOBBChecker::g_direction= Vec3();
-    bool RayOBBChecker::g_isChecking = false;
 
-    void RayOBBChecker::screenPosToWorldRay(int mouseX, int mouseY, int screenWidth, int screenHeight,
+    std::pair<Vec3, Vec3> RayOBBChecker::screenPosToWorldRay(int mouseX, int mouseY, int screenWidth, int screenHeight,
             const Mat4& viewInversedMatrix, const Mat4& projectionMatrix)
     {
         Vec4 lRayStart_NDC(
@@ -37,28 +36,39 @@ namespace ige::scene
         auto lRayDir_world = lRayEnd_world - lRayStart_world;
         g_direction = Vec3(lRayDir_world.X(), lRayDir_world.Y(), lRayDir_world.Z());
         g_direction.Normalize();
+
+        return { g_origin, g_direction };
     }
 
-    bool RayOBBChecker::checkIntersect(const Vec3& aabb_min, const Vec3& aabb_max, const Mat4& modelMatrix, float& intersection_distance)
+    bool RayOBBChecker::checkIntersect(const AABBox& aabb, const Mat4& modelMatrix, float& intersection_distance, float max_distance)
     {
         float tMin = 0.0f;
-        float tMax = 100000.0f;
+        float tMax = max_distance;
 
         Vec3 OBBposition_worldspace(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
         Vec3 delta = OBBposition_worldspace - g_origin;
 
+        Vec3 columns[3] =
+        {
+            { modelMatrix[0][0], modelMatrix[0][1], modelMatrix[0][2]},
+            { modelMatrix[1][0], modelMatrix[1][1], modelMatrix[1][2]},
+            { modelMatrix[2][0], modelMatrix[2][1], modelMatrix[2][2]},
+        };
+
+        Vec3 scale(columns[0].Length(), columns[1].Length(), columns[2].Length());
+
         // for each axis X, Y and Z
-        for(int i = 0; i < 3; i++)
+        for(int i = 0; i < 3; ++i)
         {
             Vec3 axis(modelMatrix[i][0], modelMatrix[i][1], modelMatrix[i][2]);
             float e = Vec3::Dot(axis, delta);
             float f = Vec3::Dot(g_direction, axis);
 
-            if ( fabs(f) > 0.001f )
+            if (fabs(f) > 0.001f)
             { 
                 // Standard case
-                float t1 = (e + aabb_min[i]) / f; // Intersection with the "min" plane
-                float t2 = (e + aabb_max[i]) / f; // Intersection with the "max" plane
+                float t1 = (e + aabb.MinEdge[i] * scale[i]) / f; // Intersection with the "min" plane
+                float t2 = (e + aabb.MaxEdge[i] * scale[i]) / f; // Intersection with the "max" plane
                 // t1 and t2 now contain distances betwen ray origin and ray-plane intersections
 
                 // We want t1 to represent the nearest intersection, 
@@ -77,12 +87,13 @@ namespace ige::scene
                 // And here's the trick :
                 // If "far" is closer than "near", then there is NO intersection.
                 // See the images in the tutorials for the visual explanation.
-                if (tMax < tMin ) return false;
+                if (tMax < tMin )
+                    return false;
             }
             else
             {
                 // Rare case : the ray is almost parallel to the planes, so they don't have any "intersection"
-                if (-e + aabb_min[i] > 0.0f || -e + aabb_max[i] < 0.0f)
+                if (-e + aabb.MinEdge[i] > 0.0f || -e + aabb.MaxEdge[i] < 0.0f)
                     return false;
             }
         }

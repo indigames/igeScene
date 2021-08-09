@@ -13,42 +13,48 @@ using namespace pyxie;
 namespace ige::scene
 {
     //! Canvas: the playground of UI elements
-    class Canvas: public Component
+    class Canvas : public Component
     {
     public:
         //! Constructor/destructor
-        Canvas(const std::shared_ptr<SceneObject>& owner);
+        Canvas(SceneObject &owner);
         virtual ~Canvas();
 
         //! Get component name
         virtual std::string getName() const override { return "Canvas"; }
 
-        //! Serialize
-        void to_json(json& j) const override;
-
-        //! Deserialize
-        void from_json(const json& j) override;
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Canvas; }
 
         //! Canvas to viewport matrix
-        void setCanvasToViewportMatrix(const Mat4& matrix);
-        const Mat4& getCanvasToViewportMatrix() const;
+        void setCanvasToViewportMatrix(const Mat4 &matrix);
+        const Mat4 &getCanvasToViewportMatrix() const;
 
         //! Viewport to canvas matrix
-        const Mat4& getViewportToCanvasMatrix() const;
+        const Mat4 &getViewportToCanvasMatrix() const;
 
         //! Design canvas size
-        const Vec2& getDesignCanvasSize() const { return m_canvasSize; }
+        const Vec2 &getDesignCanvasSize() const { return m_canvasSize; }
 
         // Set design canvas size
-        void setDesignCanvasSize(const Vec2& canvasSize);
+        void setDesignCanvasSize(const Vec2 &canvasSize);
 
         //! Target canvas size
         Vec2 getTargetCanvasSize() const { return m_targetCanvasSize; }
 
         // Set target canvas size, based on device resolution
-        void setTargetCanvasSize(const Vec2& canvasSize);
+        void setTargetCanvasSize(const Vec2 &canvasSize);
 
-    public:
+        //! Can multiple edit
+        inline virtual bool canMultiEdit() override { return false; }
+
+    protected:
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
         //! Default canvas size
         static Vec2 s_defaultCanvasSize;
 
@@ -68,4 +74,4 @@ namespace ige::scene
         //! Device scale
         Vec2 m_deviceScale;
     };
-}
+} // namespace ige::scene

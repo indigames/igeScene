@@ -16,8 +16,8 @@ namespace ige::scene
         if(self && self->component)
         {
             self->component = nullptr;
-            Py_TYPE(self)->tp_free(self);
         }
+        PyObject_Del(self);
     }
 
     PyObject* FigureComponent_str(PyObject_FigureComponent *self)
@@ -34,10 +34,157 @@ namespace ige::scene
     // Set path
     int FigureComponent_setPath(PyObject_FigureComponent* self, PyObject* value)
     {
-        char* val;
-        if (PyArg_ParseTuple(value, "s", &val))
+        PyObject* val;
+        if (PyArg_ParseTuple(value, "O", &val) && val != nullptr && PyUnicode_Check(val))
         {
-            self->component->setPath(std::string(val));
+            const char* path = PyUnicode_AsUTF8(val);
+            self->component->setPath(std::string(path));
+            return 0;
+        }
+        return -1;
+    }
+
+    // Get figure
+    PyObject* FigureComponent_getFigure(PyObject_FigureComponent* self)
+    {
+        auto figureObj = (figure_obj*)(&FigureType)->tp_alloc(&FigureType, 0);
+        // auto figureObj = PyObject_New(figure_obj, &FigureType);
+        figureObj->figure = self->component->getFigure();        
+        return (PyObject*)figureObj;
+        
+    }
+
+    // Fog
+    PyObject* FigureComponent_isFogEnabled(PyObject_FigureComponent* self)
+    {
+        return PyBool_FromLong(self->component->isFogEnabled());
+    }
+
+    int FigureComponent_setFogEnabled(PyObject_FigureComponent* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto enable = (uint32_t)PyLong_AsLong(value) != 0;
+            self->component->setFogEnabled(enable);
+            return 0;
+        }
+        return -1;
+    }
+
+    // Front face culling
+    PyObject* FigureComponent_isCullFaceEnable(PyObject_FigureComponent* self)
+    {
+        return PyBool_FromLong(self->component->isCullFaceEnable());
+    }
+
+    int FigureComponent_setCullFaceEnable(PyObject_FigureComponent* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto enable = (uint32_t)PyLong_AsLong(value) != 0;
+            self->component->setCullFaceEnable(enable);
+            return 0;
+        }
+        return -1;
+    }
+
+    // Double Side
+    PyObject* FigureComponent_isDoubleSideEnable(PyObject_FigureComponent* self)
+    {
+        return PyBool_FromLong(self->component->isDoubleSideEnable());
+    }
+
+    int FigureComponent_setDoubleSideEnable(PyObject_FigureComponent* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto enable = (uint32_t)PyLong_AsLong(value) != 0;
+            self->component->setDoubleSideEnable(enable);
+            return 0;
+        }
+        return -1;
+    }
+
+    // Depth test
+    PyObject* FigureComponent_isDepthTestEnable(PyObject_FigureComponent* self)
+    {
+        return PyBool_FromLong(self->component->isDepthTestEnable());
+    }
+
+    int FigureComponent_setDepthTestEnable(PyObject_FigureComponent* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto enable = (uint32_t)PyLong_AsLong(value) != 0;
+            self->component->setDepthTestEnable(enable);
+            return 0;
+        }
+        return -1;
+    }
+
+    // Depth write
+    PyObject* FigureComponent_isDepthWriteEnable(PyObject_FigureComponent* self)
+    {
+        return PyBool_FromLong(self->component->isDepthWriteEnable());
+    }
+
+    int FigureComponent_setDepthWriteEnable(PyObject_FigureComponent* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto enable = (uint32_t)PyLong_AsLong(value) != 0;
+            self->component->setDepthWriteEnable(enable);
+            return 0;
+        }
+        return -1;
+    }
+
+    // Alpha blend
+    PyObject* FigureComponent_isAlphaBlendingEnable(PyObject_FigureComponent* self)
+    {
+        return PyBool_FromLong(self->component->isAlphaBlendingEnable());
+    }
+
+    int FigureComponent_setAlphaBlendingEnable(PyObject_FigureComponent* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto enable = (uint32_t)PyLong_AsLong(value) != 0;
+            self->component->setAlphaBlendingEnable(enable);
+            return 0;
+        }
+        return -1;
+    }
+
+    // Alpha blend Operation
+    PyObject* FigureComponent_getAlphaBlendingOp(PyObject_FigureComponent* self)
+    {
+        return PyLong_FromLong(self->component->getAlphaBlendingOp());
+    }
+
+    int FigureComponent_setAlphaBlendingOp(PyObject_FigureComponent* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto val = (uint32_t)PyLong_AsLong(value);
+            self->component->setAlphaBlendingOp(val);
+            return 0;
+        }
+        return -1;
+    }
+
+    // Scissor Test
+    PyObject* FigureComponent_isScissorTestEnable(PyObject_FigureComponent* self)
+    {
+        return PyBool_FromLong(self->component->isScissorTestEnable());
+    }
+
+    int FigureComponent_setScissorTestEnable(PyObject_FigureComponent* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto enable = (uint32_t)PyLong_AsLong(value) != 0;
+            self->component->setScissorTestEnable(enable);
             return 0;
         }
         return -1;
@@ -45,12 +192,21 @@ namespace ige::scene
 
     PyGetSetDef FigureComponent_getsets[] = {
         { "path", (getter)FigureComponent_getPath, (setter)FigureComponent_setPath, FigureComponent_path_doc, NULL },
+        { "fogEnabled", (getter)FigureComponent_isFogEnabled, (setter)FigureComponent_setFogEnabled, FigureComponent_fogEnabled_doc, NULL },
+        { "frontFaceCullingEnabled", (getter)FigureComponent_isCullFaceEnable, (setter)FigureComponent_setCullFaceEnable, FigureComponent_frontFaceCullingEnabled_doc, NULL },
+        { "doubleSideEnabled", (getter)FigureComponent_isDoubleSideEnable, (setter)FigureComponent_setDoubleSideEnable, FigureComponent_doubleSideEnabled_doc, NULL },
+        { "depthTestEnabled", (getter)FigureComponent_isDepthTestEnable, (setter)FigureComponent_setDepthTestEnable, FigureComponent_depthTestEnabled_doc, NULL },
+        { "depthWriteEnabled", (getter)FigureComponent_isDepthWriteEnable, (setter)FigureComponent_setDepthWriteEnable, FigureComponent_depthWriteEnabled_doc, NULL },        
+        { "alphaBlendEnabled", (getter)FigureComponent_isAlphaBlendingEnable , (setter)FigureComponent_setAlphaBlendingEnable, FigureComponent_alphaBlendEnabled_doc, NULL },
+        { "alphaBlendOp", (getter)FigureComponent_getAlphaBlendingOp , (setter)FigureComponent_setAlphaBlendingOp, FigureComponent_alphaBlendOp_doc, NULL },
+        { "scissorTestEnabled", (getter)FigureComponent_isScissorTestEnable , (setter)FigureComponent_setScissorTestEnable, FigureComponent_scissorTestEnabled_doc, NULL },
+        { "figure", (getter)FigureComponent_getFigure, NULL, FigureComponent_figure_doc, NULL },
         { NULL, NULL }
     };
 
     PyTypeObject PyTypeObject_FigureComponent = {
         PyVarObject_HEAD_INIT(NULL, 0)
-        "igeScene.FigureComponent",                  /* tp_name */
+        "igeScene.Figure",                           /* tp_name */
         sizeof(PyObject_FigureComponent),            /* tp_basicsize */
         0,                                           /* tp_itemsize */
         (destructor)FigureComponent_dealloc,         /* tp_dealloc */
