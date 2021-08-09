@@ -22,10 +22,6 @@ namespace ige::scene
     {
         if(self)
         {
-            if (self->component)
-            {
-                self->component = nullptr;
-            }
             self->owner = nullptr;
         }
         Py_TYPE(self)->tp_free(self);
@@ -33,14 +29,7 @@ namespace ige::scene
 
     // Init
     int Script_init(PyObject_Script* self, PyObject* args, PyObject* kw)
-    {   
-        return 0;
-    }
-
-    int Script_register(PyObject_Script* self, PyObject* args)
     {
-        auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        obj->sceneObject = self->owner;
         return 0;
     }
 
@@ -58,29 +47,11 @@ namespace ige::scene
         return (PyObject*)obj;
     }
 
-    PyObject* Script_invoke(PyObject_Script* self, PyObject* args)
-    {
-        char* functName = nullptr;
-        PyObject* value = nullptr;
-        if (PyArg_ParseTuple(args, "s|O", &functName, &value))
-        {
-            auto _funcName = std::string(functName);
-            return self->component->Invoke(_funcName, value);
-        }
-        Py_RETURN_NONE;
-    }
-
-
     // Get/Set
     PyGetSetDef Script_getsets[] = {
         { "owner", (getter)Script_getOwner, NULL, Script_owner_doc, NULL },
         { NULL, NULL }
     };
-
-    // Methods
-    PyMethodDef Script_methods[] = {
-        {"invoke", (PyCFunction)Script_invoke, METH_VARARGS, Script_invoke_doc},
-        {NULL, NULL} };
 
     // Type declaration
     PyTypeObject PyTypeObject_Script = {
@@ -111,7 +82,7 @@ namespace ige::scene
         0,                                  /* tp_weaklistoffset */
         0,                                  /* tp_iter */
         0,                                  /* tp_iternext */
-        Script_methods,                     /* tp_methods */
+        0,                                  /* tp_methods */
         0,                                  /* tp_members */
         Script_getsets,                     /* tp_getset */
         0,                                  /* tp_base */

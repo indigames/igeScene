@@ -96,7 +96,7 @@ namespace ige::scene
 
         //! Invoke Function 
         virtual _object* Invoke(const std::string &functionName, const Value& value);
-        virtual _object* Invoke(const std::string& functionName, void* pyObj);
+        virtual _object* Invoke(const std::string& functionName, _object* pyObj);
 
         //! PyObject: instance of Python class
         _object* getPyInstance() { return m_pyInstance; }

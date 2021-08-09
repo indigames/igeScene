@@ -107,8 +107,10 @@ namespace ige::scene
     {
         m_pathData = std::make_unique<FindPathData>();
 
-        // Build the navigation mesh
-        build();
+        // Create navigation agent manager for this mesh
+        auto navAgentManager = getOwner()->getComponent<NavAgentManager>();
+        if (!navAgentManager)
+            navAgentManager = getOwner()->addComponent<NavAgentManager>();
     }
 
     NavMesh::~NavMesh()
