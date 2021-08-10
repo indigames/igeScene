@@ -37,13 +37,13 @@ namespace ige::scene
         virtual void render();
 
         //! Create empty scene
-        std::shared_ptr<Scene> createScene(const std::string& name = "Untitled");
+        std::shared_ptr<Scene> createScene(const std::string& name = "Untitled", bool empty = false);
 
         //! Load scene
-        std::shared_ptr<Scene> loadScene(const std::string& scenePath);
+        bool loadScene(std::shared_ptr<Scene> scene, const std::string& scenePath);
 
         //! Unload scene
-        void unloadScene(const std::shared_ptr<Scene>& scene);
+        void unloadScene(std::shared_ptr<Scene>& scene);
 
         //! Unload scene by name
         void unloadScene(const std::string& sceneName);

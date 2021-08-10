@@ -133,9 +133,10 @@ namespace ige::scene
         }
     }
 
-    std::shared_ptr<Scene> SceneManager::createScene(const std::string& name)
+    std::shared_ptr<Scene> SceneManager::createScene(const std::string& name, bool empty)
     {
         auto scene = std::make_shared<Scene>(name);
+        scene->initialize(empty);
         m_scenes.push_back(scene);
         return scene;
     }
@@ -164,7 +165,7 @@ namespace ige::scene
         }
     }
 
-    std::shared_ptr<Scene> SceneManager::loadScene(const std::string& path)
+    bool SceneManager::loadScene(std::shared_ptr<Scene> scene, const std::string& path)
     {
         json jScene;
 
@@ -178,7 +179,16 @@ namespace ige::scene
         file >> jScene;
         file.close();
 
-        auto scene = std::make_shared<Scene>(jScene.at("name"));
+        if (scene == nullptr)
+        {
+            scene = std::make_shared<Scene>(jScene.at("name"));
+            scene->initialize(true);
+        }
+        else
+        {
+            scene->removeAllObjects();
+        }
+
         scene->from_json(jScene);
 
         if (ext.string() != ".tmp")
@@ -190,10 +200,7 @@ namespace ige::scene
 
         m_scenes.push_back(scene);
 
-        if (m_currScene == nullptr)
-            m_currScene = scene;
-
-        return scene;
+        return true;
     }
 
     bool SceneManager::saveScene(const std::string& path)
@@ -231,7 +238,7 @@ namespace ige::scene
         return false;
     }
 
-    void SceneManager::unloadScene(const std::shared_ptr<Scene>& scene)
+    void SceneManager::unloadScene(std::shared_ptr<Scene>& scene)
     {
         if (m_currScene == scene)
             m_currScene = nullptr;
@@ -240,7 +247,9 @@ namespace ige::scene
         if (it != m_scenes.end())
         {
             m_scenes.erase(it);
+            *it = nullptr;
         }
+        scene = nullptr;
     }
 
     void SceneManager::unloadScene(const std::string& name)
@@ -256,17 +265,14 @@ namespace ige::scene
         if (found != m_scenes.end())
         {
             m_scenes.erase(found);
+            *found = nullptr;
         }
     }
 
     //! Reload scene
     void SceneManager::reloadScene()
     {
-        auto path = m_currScene->getPath();
-        auto name = m_currScene->getName();
-        m_currScene = nullptr;
-        unloadScene(name);
-        loadScene(path);
+        loadScene(m_currScene, m_currScene->getPath());
     }
 
     std::string GetEditorResource(const std::string& path)

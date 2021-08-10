@@ -1,6 +1,7 @@
 ﻿#include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <iomanip>
 
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
@@ -54,7 +55,6 @@ namespace ige::scene
     Scene::Scene(const std::string& name)
         : m_name(name)
     {
-        initialize();
     }
 
     Scene::~Scene()
@@ -167,9 +167,7 @@ namespace ige::scene
 
     void Scene::clear()
     {
-        for (auto& obj : m_objects)
-            obj = nullptr;
-        m_objects.clear();
+        removeAllObjects();
 
         getResourceAddedEvent().removeAllListeners();
         getResourceRemovedEvent().removeAllListeners();
@@ -363,6 +361,14 @@ namespace ige::scene
         return sceneObject;
     }
 
+    bool Scene::removeAllObjects()
+    {
+        for (auto& obj : m_objects)
+            obj = nullptr;
+        m_objects.clear();
+        return true;
+    }
+
     bool Scene::removeObject(const std::shared_ptr<SceneObject>& obj)
     {
         if (!obj) return false;
@@ -522,11 +528,9 @@ namespace ige::scene
             auto fsPath = path.empty() ? fs::path(object->getName()) : fs::path(path + "/" + object->getName());
             auto ext = fsPath.extension();
             if (ext.string() != ".prefab")
-            {
                 fsPath = fsPath.replace_extension(".prefab");
-            }
             std::ofstream file(fsPath.string());
-            file << jObj;
+            file << std::setw(2) << jObj << std::endl;
             return true;
         }
         return true;

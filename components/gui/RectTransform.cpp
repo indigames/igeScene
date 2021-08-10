@@ -76,7 +76,7 @@ namespace ige::scene
         setAnchor(m_anchor);
         setRectDirty();
         setTransformDirty();
-        m_SelectedListenerID = getOwner()->getSelectedEvent().addListener(std::bind(&RectTransform::onSceneObjectSelected, this, std::placeholders::_1));
+        m_SelectedListenerID = SceneObject::getSelectedEvent().addListener(std::bind(&RectTransform::onSceneObjectSelected, this, std::placeholders::_1));
     }
 
     RectTransform::~RectTransform()

@@ -890,6 +890,7 @@ namespace ige::scene
             {"uuid", m_uuid},
             {"name", m_name},
             {"active", m_isActive},
+            {"selected", m_isSelected},
             {"gui", m_bIsGui},
             {"raycast", m_bIsRaycastTarget},
             {"interactable", m_bIsInteractable}
@@ -924,6 +925,7 @@ namespace ige::scene
         setName(j.value("name", ""));
         setUUID(j.value("uuid", getUUID()));
         setActive(j.value("active", false));
+        setSelected(j.value("selected", false));
         m_bIsGui = j.value("gui", false);
         m_bIsRaycastTarget = j.value("raycast", false);
         m_bIsInteractable = j.value("interactable", false);

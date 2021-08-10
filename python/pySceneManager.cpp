@@ -51,9 +51,13 @@ namespace ige::scene
         char* path;
         if (PyArg_ParseTuple(value, "s", &path)) {
             if(path) {
-                auto *obj = PyObject_New(PyObject_Scene, &PyTypeObject_Scene);
-                obj->scene = self->sceneManager->loadScene(std::string(path)).get();
-                return (PyObject*)obj;
+                auto scene = self->sceneManager->createScene();
+                auto success = self->sceneManager->loadScene(scene, std::string(path));
+                if (success) {
+                    auto* obj = PyObject_New(PyObject_Scene, &PyTypeObject_Scene);
+                    obj->scene = scene.get();
+                    return (PyObject*)obj;
+                }
             }
         }
         Py_RETURN_NONE;
