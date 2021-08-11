@@ -524,7 +524,7 @@ namespace ige::scene
         {
             json jObj;
             object->to_json(jObj);
-
+            jObj["prefabId"] = SceneObject::generateUUID();
             auto fsPath = path.empty() ? fs::path(object->getName()) : fs::path(path + "/" + object->getName());
             auto ext = fsPath.extension();
             if (ext.string() != ".prefab")
@@ -553,8 +553,10 @@ namespace ige::scene
         file >> jObj;
 
         auto parent = findObjectById(parentId);
+        auto prefabId = jObj.value("prefabId", std::string());
         auto obj = createObject(jObj.at("name"), parent, jObj.value("gui", false));
         obj->from_json(jObj);
+        obj->setPrefabId(prefabId);
 
         return true;
     }

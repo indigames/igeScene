@@ -151,6 +151,9 @@ namespace ige::scene
         static Event<SceneObject &> &getSelectedEvent() { return s_selectedEvent; }
         static Event<SceneObject&>& getDeselectedEvent() { return s_deselectedEvent; }
 
+        //! Helper to generate UUID
+        static std::string generateUUID(unsigned int len = 16);
+
         //! Serialize
         virtual void to_json(json &j);
 
@@ -214,23 +217,24 @@ namespace ige::scene
         //! Update AABB
         virtual void updateAabb();
 
+        //! Set prefab Id
+        virtual bool isPrefab() const { return (m_prefabId.length() > 0); }
+        virtual std::string getPrefabId() { return m_prefabId; }
+        void setPrefabId(const std::string& id);
+        
+        //! Mask state
         bool isInMask() const { return m_bIsInMask; }
         void setInMask(bool value);
 
         std::shared_ptr<ScriptComponent> getScript(const std::string& path) const;
 
     protected:
-        //! Helper to generate UUID
-        std::string generateUUID(unsigned int len = 16);
-
         //! Event
         void doDispatch(int eventType, EventContext* context, bool includeChild = false);
         void doBubble(int eventType, EventContext* context);
 
         //! Transform changed event
         void onTransformChanged(SceneObject& sceneObject);
-
-        
 
     protected:
         //! Node ID
@@ -298,6 +302,9 @@ namespace ige::scene
 
         //! Define if object is interactable
         bool m_bIsInteractable = false;
+
+        //! Prefab ID
+        std::string m_prefabId;
 
         int m_aabbDirty = 2;
 

@@ -852,6 +852,14 @@ namespace ige::scene
         return nullptr;
     }
 
+    void SceneObject::setPrefabId(const std::string& id)
+    {
+        if (m_prefabId.compare(id) != 0)
+        {
+            m_prefabId = id;
+        }
+    }
+
     void SceneObject::setInMask(bool value) 
     {
         if (value != m_bIsInMask) 
