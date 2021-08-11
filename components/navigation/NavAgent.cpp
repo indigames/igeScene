@@ -19,6 +19,7 @@ namespace ige::scene
         : RuntimeComponent(owner)
     {
         getCreatedEvent().invoke(this);
+        this->Initialize();
     }
 
     NavAgent::~NavAgent()
@@ -26,6 +27,13 @@ namespace ige::scene
         setEnabled(false);
         getDestroyedEvent().invoke(this);
         m_manager = nullptr;
+    }
+
+    void NavAgent::Initialize() {
+        RuntimeComponent::Initialize();
+        if (m_bIsEnabled) {
+            requestMove();
+        }
     }
 
     //! Update
@@ -70,28 +78,31 @@ namespace ige::scene
         {
             getActivatedEvent().invoke(this);
             m_bIsActivated = true;
-            m_previousPosition = getOwner()->getTransform()->getWorldPosition();
-
-            if (isInCrowd())
-            {
-                auto* agent = const_cast<dtCrowdAgent*>(getDetourCrowdAgent());
-                if (!agent)
-                    return;
-
-                auto& agentPos = reinterpret_cast<Vec3&>(agent->npos);
-                if (agentPos != m_previousPosition)
-                    agentPos = m_previousPosition;
-
-                dtPolyRef nearestRef;
-                auto nearestPos = m_manager->findNearestPoint(m_targetPosition, m_queryFilterType, &nearestRef);
-                m_manager->getCrowd()->requestMoveTarget(getAgentId(), nearestRef, nearestPos.P());
-            }
+            requestMove();
         }
 
         if (!isEnabled() && m_bIsActivated)
         {
             getDeactivatedEvent().invoke(this);
             m_bIsActivated = false;
+        }
+    }
+
+    void NavAgent::requestMove() {
+        m_previousPosition = getOwner()->getTransform()->getWorldPosition();
+        if (isInCrowd())
+        {
+            auto* agent = const_cast<dtCrowdAgent*>(getDetourCrowdAgent());
+            if (!agent)
+                return;
+
+            auto& agentPos = reinterpret_cast<Vec3&>(agent->npos);
+            if (agentPos != m_previousPosition)
+                agentPos = m_previousPosition;
+
+            dtPolyRef nearestRef;
+            auto nearestPos = m_manager->findNearestPoint(m_targetPosition, m_queryFilterType, &nearestRef);
+            m_manager->getCrowd()->requestMoveTarget(getAgentId(), nearestRef, nearestPos.P());
         }
     }
 

@@ -74,6 +74,8 @@ namespace ige::scene
         //! Returns the type of the component
         virtual Type getType() const override { return Type::NavAgent; }
 
+        virtual void Initialize() override;
+
         //! Enable/disable
         void setEnabled(bool enable = true) override;
 
@@ -177,6 +179,8 @@ namespace ige::scene
     protected:
         //! Update Detour parameters.
         void updateParameters();
+
+        void requestMove();
 
         //! Serialize
         virtual void to_json(json& j) const override;
