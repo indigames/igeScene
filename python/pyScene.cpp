@@ -181,6 +181,7 @@ namespace ige::scene
             auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
             obj->sceneObject = roots[i].get();
             PyList_Append(pyList, (PyObject*)obj);
+            Py_XDECREF(obj);
         }
         return (PyObject*)pyList;
     }

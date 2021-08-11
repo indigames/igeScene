@@ -178,6 +178,7 @@ namespace ige::scene
             auto obj = PyObject_New(PyObject_NavAgent, &PyTypeObject_NavAgent);
             obj->component = agents[i];
             PyList_Append(pyList, (PyObject*)obj);
+            Py_XDECREF(obj);
         }
         return (PyObject*)pyList;
     }
@@ -246,6 +247,7 @@ namespace ige::scene
             vmath_cpy(points[i].P(), 3, vec3Obj->v);
             vec3Obj->d = 3;
             PyList_Append(pyList, (PyObject*)vec3Obj);
+            Py_XDECREF(vec3Obj);
         }
         return (PyObject*)pyList;
     }
