@@ -16,6 +16,11 @@ namespace ige::scene
             const Mat4& projectionMatrix        // Projection matrix
         );
 
+        static std::pair<Vec3, Vec3> RayOBB(
+            Vec3 origin,
+            Vec3 direction
+        );
+
         static bool checkIntersect(
             const AABBox& aabb,                 // AABB box
             const Mat4& modelMatrix,            // World transformation matrix

@@ -65,4 +65,15 @@ namespace ige::scene
 
     // Get world transform matrix
     PyObject* TransformComponent_getWorldMatrix(PyObject_TransformComponent* self);
+
+
+    //! Get world forward, up, right
+    PyObject* TransformComponent_getWorldForward(PyObject_TransformComponent* self);
+    PyObject* TransformComponent_getWorldUp(PyObject_TransformComponent* self);
+    PyObject* TransformComponent_getWorldRight(PyObject_TransformComponent* self);
+
+    //! Get Local forward, up, right
+    PyObject* TransformComponent_getForward(PyObject_TransformComponent* self);
+    PyObject* TransformComponent_getUp(PyObject_TransformComponent* self);
+    PyObject* TransformComponent_getRight(PyObject_TransformComponent* self);
 }

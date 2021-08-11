@@ -167,6 +167,62 @@ namespace ige::scene
         return (PyObject*)m4obj;
     }
 
+    // Get world foward
+    PyObject* TransformComponent_getWorldForward(PyObject_TransformComponent* self)
+    {
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(self->component->getWorldForward().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
+    }
+
+    // Get world up
+    PyObject* TransformComponent_getWorldUp(PyObject_TransformComponent* self)
+    {
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(self->component->getWorldUp().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
+    }
+
+    // Get world right
+    PyObject* TransformComponent_getWorldRight(PyObject_TransformComponent* self)
+    {
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(self->component->getWorldRight().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
+    }
+
+    // Get local foward
+    PyObject* TransformComponent_getForward(PyObject_TransformComponent* self)
+    {
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(self->component->getLocalForward().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
+    }
+
+    // Get local up
+    PyObject* TransformComponent_getUp(PyObject_TransformComponent* self)
+    {
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(self->component->getLocalUp().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
+    }
+
+    // Get local right
+    PyObject* TransformComponent_getRight(PyObject_TransformComponent* self)
+    {
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(self->component->getLocalRight().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
+    }
+
+
+
     // Variable definition
     PyGetSetDef TransformComponent_getsets[] = {
         { "position", (getter)TransformComponent_getPosition, (setter)TransformComponent_setPosition, TransformComponent_position_doc, NULL },
@@ -177,6 +233,12 @@ namespace ige::scene
         { "worldRotation", (getter)TransformComponent_getWorldRotation, (setter)TransformComponent_setWorldRotation, TransformComponent_worldRotation_doc, NULL },
         { "worldScale", (getter)TransformComponent_getWorldScale, (setter)TransformComponent_setWorldScale, TransformComponent_worldScale_doc, NULL },
         { "worldMatrix", (getter)TransformComponent_getWorldMatrix, NULL, TransformComponent_worldMatrix_doc, NULL },
+        { "worldForward", (getter)TransformComponent_getWorldForward, NULL, NULL, NULL },
+        { "worldUp", (getter)TransformComponent_getWorldUp, NULL, NULL, NULL },
+        { "worldRight", (getter)TransformComponent_getWorldRight, NULL, NULL, NULL },
+        { "forward", (getter)TransformComponent_getForward, NULL, NULL, NULL },
+        { "up", (getter)TransformComponent_getUp, NULL, NULL, NULL },
+        { "right", (getter)TransformComponent_getRight, NULL, NULL, NULL },
         { NULL, NULL }
     };
 

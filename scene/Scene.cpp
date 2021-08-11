@@ -743,6 +743,30 @@ namespace ige::scene
         return hit;
     }
 
+    std::pair<SceneObject*, Vec3> Scene::raycast(const Vec3& position, Vec3& direction, float maxDistance, bool forceRaycast)
+    {
+        std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());
+
+        /*if (m_raycastCapture && !forceRaycast)
+            return hit;*/
+
+        float distance, minDistance = maxDistance;
+        std::pair<Vec3, Vec3> ray = RayOBBChecker::RayOBB(position, direction);
+        for (const auto& obj : m_objects)
+        {
+            if (obj && RayOBBChecker::checkIntersect(obj->getAABB(), obj->getTransform()->getWorldMatrix(), distance, maxDistance))
+            {
+                if (minDistance > distance)
+                {
+                    minDistance = distance;
+                    hit.first = obj.get();
+                    hit.second = ray.first + ray.second * distance;
+                }
+            }
+        }
+        return hit;
+    }
+
     std::pair<SceneObject*, Vec3> Scene::raycastUI(const Vec2& screenPos)
     {
         std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());

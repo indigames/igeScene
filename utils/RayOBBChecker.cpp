@@ -40,6 +40,15 @@ namespace ige::scene
         return { g_origin, g_direction };
     }
 
+
+    std::pair<Vec3, Vec3> RayOBBChecker::RayOBB(Vec3 origin, Vec3 direction) {
+        g_origin = origin;
+        g_direction = direction;
+        g_direction.Normalize();
+
+        return { g_origin, g_direction };
+    }
+
     bool RayOBBChecker::checkIntersect(const AABBox& aabb, const Mat4& modelMatrix, float& intersection_distance, float max_distance)
     {
         float tMin = 0.0f;

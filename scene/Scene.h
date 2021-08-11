@@ -157,6 +157,8 @@ namespace ige::scene
         //! forceRaycast : can ignore raycastCapture
         std::pair<SceneObject*, Vec3> raycast(const Vec2& screenPos, Camera* camera, float maxDistance = 10000.f, bool forceRaycast = false);
 
+        std::pair<SceneObject*, Vec3> raycast(const Vec3& position, Vec3& direction, float maxDistance = 10000.f, bool forceRaycast = false);
+
         //! Raycast UI 
         std::pair<SceneObject*, Vec3> raycastUI(const Vec2& screenPos);
 

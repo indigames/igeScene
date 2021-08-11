@@ -217,7 +217,48 @@ namespace ige::scene
     }
 
     // Raycast
-    PyObject* Scene_raycast(PyObject_Scene *self, PyObject* args)
+    PyObject* Scene_raycast(PyObject_Scene* self, PyObject* args)
+    {
+        PyObject* position;
+        PyObject* direction;
+        float distance = 10000.f;
+
+        if (!PyArg_ParseTuple(args, "OO|i", &position, &direction, &distance))
+            return NULL;
+
+        int d;
+        float buff[4];
+        auto v1 = pyObjToFloat(position, buff, d);
+        if (!v1)
+            return NULL;
+
+        auto v2 = pyObjToFloat(direction, buff, d);
+        if (!v2)
+            return NULL;
+
+        Vec3 pPosition = Vec3(v1[0], v1[1], v1[2]);
+        Vec3 pDirection = Vec3(v2[0], v2[1], v2[2]);
+        
+        auto hit = self->scene->raycast(pPosition, pDirection, distance);
+        if (hit.first == nullptr)
+            Py_RETURN_NONE;
+
+        auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+        hitObj->sceneObject = hit.first;
+
+        auto hitPos = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(hit.second.P(), 3, hitPos->v);
+        hitPos->d = 3;
+
+        PyObject* res = Py_BuildValue("{s:O,s:O}",
+            "hitObject", hitObj,
+            "hitPosition", hitPos);
+        Py_XDECREF(hitObj);
+        Py_XDECREF(hitPos);
+        return res;
+    }
+
+    PyObject* Scene_raycastFromCamera(PyObject_Scene *self, PyObject* args)
     {
         PyObject *screenPosObj;
         PyObject *cameraObj;
@@ -321,6 +362,7 @@ namespace ige::scene
         { "getShowcase", (PyCFunction)Scene_getShowcase, METH_NOARGS, Scene_getShowcase_doc },
         { "getEnvironment", (PyCFunction)Scene_getEnvironment, METH_NOARGS, Scene_getEnvironment_doc },
         { "raycast", (PyCFunction)Scene_raycast, METH_VARARGS, Scene_raycast_doc },
+        { "raycastFromCamera", (PyCFunction)Scene_raycastFromCamera, METH_VARARGS, Scene_raycastFromCamera_doc },
         { NULL, NULL }
     };
 
