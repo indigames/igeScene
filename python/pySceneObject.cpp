@@ -197,7 +197,6 @@ namespace ige::scene
                 auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
                 obj->sceneObject = children[i];
                 PyTuple_SetItem(childrenTuple, i, (PyObject *)obj);
-                Py_XDECREF(obj);
             }
             return (PyObject *)childrenTuple;
         }
@@ -1164,7 +1163,6 @@ namespace ige::scene
                 auto type = PyUnicode_FromString(components[i]->getName().c_str());
                 auto obj = SceneObject_getComponent(self, type);
                 PyTuple_SetItem(compTuple, i, (PyObject *)obj);
-                Py_XDECREF(obj);
             }
             return (PyObject *)compTuple;
         }

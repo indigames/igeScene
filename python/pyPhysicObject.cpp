@@ -170,7 +170,6 @@ namespace ige::scene
                             pyConst->constraint = (FixedConstraint*)constraint.get();
                             pyConst->super.constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
-                            Py_XDECREF(pyConst);
                         }
                         break;
                         case (int)PhysicConstraint::ConstraintType::Hinge:
@@ -179,7 +178,6 @@ namespace ige::scene
                             pyConst->constraint = (HingeConstraint*)constraint.get();
                             pyConst->super.constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
-                            Py_XDECREF(pyConst);
                         }
                         break;
                         case (int)PhysicConstraint::ConstraintType::Slider:
@@ -188,7 +186,6 @@ namespace ige::scene
                             pyConst->constraint = (SliderConstraint*)constraint.get();
                             pyConst->super.constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
-                            Py_XDECREF(pyConst);
                         }
                         break;
                         case (int)PhysicConstraint::ConstraintType::Spring:
@@ -197,7 +194,6 @@ namespace ige::scene
                             pyConst->constraint = (SpringConstraint*)constraint.get();
                             pyConst->super.constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
-                            Py_XDECREF(pyConst);
                         }
                         break;
                         case (int)PhysicConstraint::ConstraintType::Dof6Spring:
@@ -206,7 +202,6 @@ namespace ige::scene
                             pyConst->constraint = (Dof6SpringConstraint*)constraint.get();
                             pyConst->super.constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
-                            Py_XDECREF(pyConst);
                         }
                         break;
                         default:
@@ -214,7 +209,6 @@ namespace ige::scene
                             auto pyConst = PyObject_New(PyObject_PhysicConstraint, &PyTypeObject_PhysicConstraint);
                             pyConst->constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
-                            Py_XDECREF(pyConst);
                         }
                         break;
                     }
