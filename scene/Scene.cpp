@@ -355,6 +355,32 @@ namespace ige::scene
         return sceneObject;
     }
 
+    std::shared_ptr<SceneObject> Scene::createObjectFromPrefab(const std::string& path, const std::string& name, const std::shared_ptr<SceneObject>& parent)
+    {
+        if (path.empty())
+            return false;
+
+        auto fsPath = fs::path(path);
+        if (fsPath.extension().string() != ".prefab")
+            return false;
+
+        std::ifstream file(fsPath);
+        if (!file.is_open())
+            return false;
+
+        json jObj;
+        file >> jObj;
+
+        auto prefabId = jObj.value("prefabId", std::string());
+        auto sceneObject = createObject(name, parent, jObj.value("gui", false));
+        sceneObject->from_json(jObj);
+        sceneObject->setPrefabId(prefabId);
+        m_objects.push_back(sceneObject);
+
+        file.close();
+        return sceneObject;
+    }
+
     std::shared_ptr<SceneObject> Scene::createRootObject(const std::string& name) {
         auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name);
         m_objects.push_back(sceneObject);

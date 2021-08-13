@@ -95,6 +95,21 @@ namespace ige::scene
         Py_RETURN_NONE;
     }
 
+    // Create object from Prefab
+    PyObject* Scene_cloneObject(PyObject_Scene* self, PyObject* args) {
+        char* path;
+        char* name;
+        PyObject* parentObj;
+
+        if (PyArg_ParseTuple(args, "ssO", &path, &name, &parentObj)) {
+            auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            auto parent = parentObj ? SceneManager::getInstance()->getCurrentScene()->findObjectById(((PyObject_SceneObject*)parentObj)->sceneObject->getId()) : nullptr;
+            obj->sceneObject = self->scene->createObjectFromPrefab(path, name, parent).get();
+            return (PyObject*)obj;
+        }
+        Py_RETURN_NONE;
+    }
+
     // Remove object
     PyObject* Scene_removeObject(PyObject_Scene *self, PyObject* args)
     {
@@ -354,6 +369,7 @@ namespace ige::scene
     // Methods definition
     PyMethodDef Scene_methods[] = {
         { "createObject", (PyCFunction)Scene_createObject, METH_VARARGS, Scene_createObject_doc },
+        { "cloneObject", (PyCFunction)Scene_cloneObject, METH_VARARGS, Scene_cloneObject_doc },
         { "removeObject", (PyCFunction)Scene_removeObject, METH_VARARGS, Scene_removeObject_doc },
         { "findObject", (PyCFunction)Scene_findObject, METH_VARARGS, Scene_findObject_doc },
         { "getObjects", (PyCFunction)Scene_getObjects, METH_NOARGS, Scene_getObjects_doc },
