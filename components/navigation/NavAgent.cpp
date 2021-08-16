@@ -19,7 +19,7 @@ namespace ige::scene
         : RuntimeComponent(owner)
     {
         getCreatedEvent().invoke(this);
-        this->Initialize();
+        //this->Initialize();
     }
 
     NavAgent::~NavAgent()

@@ -708,7 +708,7 @@ namespace ige::scene
     //! Deserialize
     void ScriptComponent::from_json(const json &j)
     {
-        setPath(j.at("path"));
+        setPath(j.at("path"), true);
 
         auto jMembers = j.value("members", json::array());
         m_members = jMembers.get<std::unordered_map<std::string, json>>();

@@ -8,7 +8,7 @@
 namespace ige::scene
 {
     NavAgentManager::NavAgentManager(SceneObject &owner)
-        : Component(owner), m_navMesh(nullptr)
+        : RuntimeComponent(owner), m_navMesh(nullptr)
     {
         // Register event listeners
         NavAgent::getCreatedEvent().addListener(std::bind(static_cast<void (NavAgentManager::*)(NavAgent *)>(&NavAgentManager::onCreated), this, std::placeholders::_1));
@@ -42,6 +42,9 @@ namespace ige::scene
     void NavAgentManager::onCreated(NavAgent *agent)
     {
         m_agents.push_back(agent);
+        if (agent->isEnabled() && isRunning()) {
+            onActivated(agent);
+        }
     }
 
     void NavAgentManager::onDestroyed(NavAgent *agent)
@@ -91,8 +94,24 @@ namespace ige::scene
         agent->setManager(nullptr);
     }
 
+    void NavAgentManager::Initialize() {
+        RuntimeComponent::Initialize();
+        reactivateAllAgents();
+    }
+
+    void NavAgentManager::Clear() {
+        int size = m_agents.size();
+        for(int i = size - 1; i >= 0; i--)
+        {
+            if (m_agents[i] != nullptr)
+                onDeactivated(m_agents[i]);
+            else
+                m_agents.erase(m_agents.begin() + i);
+        }
+    }
+
     //! Update
-    void NavAgentManager::onUpdate(float dt)
+    void NavAgentManager::onRuntimeUpdate(float dt)
     {
         if (!m_bInitialized)
             return;

@@ -16,7 +16,7 @@ namespace ige::scene
         getOwner()->addEventListener((int)EventType::PauseEditor, std::bind(&RuntimeComponent::onPauseEditor, this, std::placeholders::_1), m_instanceId);
         getOwner()->addEventListener((int)EventType::StopEditor, std::bind(&RuntimeComponent::onStopEditor, this, std::placeholders::_1), m_instanceId);
 #else
-        Initialize();
+        //Initialize();
 #endif
     }
 
@@ -41,8 +41,11 @@ namespace ige::scene
 
     //! Update functions
     void RuntimeComponent::onUpdate(float dt) {
-        if (SceneManager::getInstance()->isEditor() || !isRunning())
+        if (SceneManager::getInstance()->isEditor() || !isRunning()) {
+            if (!SceneManager::getInstance()->isEditor())
+                Initialize();
             return;
+        }
         onRuntimeUpdate(dt);
     }
 

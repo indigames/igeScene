@@ -342,11 +342,16 @@ namespace ige::scene
     {
         static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
 
-        for (auto it = m_components.begin(); it != m_components.end(); ++it)
-        {
-            auto result = std::dynamic_pointer_cast<T>(*it);
-            if (result)
-                return result;
+        int size = m_components.size();
+        for (int i = size - 1; i >= 0; i--) {
+            if (m_components[i] != nullptr) {
+                auto result = std::dynamic_pointer_cast<T>(m_components[i]);
+                if (result)
+                    return result;
+            }
+            else {
+                m_components.erase(m_components.begin() + i);
+            }
         }
         return nullptr;
     }

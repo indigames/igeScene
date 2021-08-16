@@ -373,7 +373,10 @@ namespace ige::scene
 
         auto prefabId = jObj.value("prefabId", std::string());
         auto sceneObject = createObject(name, parent, jObj.value("gui", false));
+        auto cparent = sceneObject->getParent();
         sceneObject->from_json(jObj);
+        sceneObject->setName(name);
+        sceneObject->setParent(cparent);
         sceneObject->setPrefabId(prefabId);
         m_objects.push_back(sceneObject);
 
