@@ -174,7 +174,7 @@ namespace ige::scene
 
         std::ifstream file(fsPath);
         if (!file.is_open())
-            return nullptr;
+            return false;
 
         file >> jScene;
         file.close();

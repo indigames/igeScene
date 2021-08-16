@@ -358,15 +358,15 @@ namespace ige::scene
     std::shared_ptr<SceneObject> Scene::createObjectFromPrefab(const std::string& path, const std::string& name, const std::shared_ptr<SceneObject>& parent)
     {
         if (path.empty())
-            return false;
+            return nullptr;
 
         auto fsPath = fs::path(path);
         if (fsPath.extension().string() != ".prefab")
-            return false;
+            return nullptr;
 
         std::ifstream file(fsPath);
         if (!file.is_open())
-            return false;
+            return nullptr;
 
         json jObj;
         file >> jObj;
