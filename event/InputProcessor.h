@@ -25,8 +25,8 @@ public :
 
 	Vec2 getTouchPosition(int touchId);
 
-	void addTouchMonitor(int touchId, SceneObject* target);
-	void removeTouchMonitor(SceneObject* target);
+	void addTouchMonitor(int touchId, std::shared_ptr<SceneObject> target);
+	void removeTouchMonitor(std::shared_ptr<SceneObject> target);
 
 	void cancelClick(int touchId);
 
@@ -43,20 +43,19 @@ private:
 
 
 	TouchInfo* getTouch(int touchId, bool createIfNotExists = true);
-	void updateRecentInput(TouchInfo* touch, SceneObject* target);
-	void handleRollOver(TouchInfo* touch, SceneObject* target);
-	void setBegin(TouchInfo* touch, SceneObject* target);
-	void setEnd(TouchInfo* touch, SceneObject* target);
+	void updateRecentInput(TouchInfo* touch, std::shared_ptr<SceneObject> target);
+	void handleRollOver(TouchInfo* touch, std::shared_ptr<SceneObject> target);
+	void setBegin(TouchInfo* touch, std::shared_ptr<SceneObject> target);
+	void setEnd(TouchInfo* touch, std::shared_ptr<SceneObject> target);
 
 	//! use to check which UI SceneObject will be hit by raycast
-	std::pair<SceneObject*, Vec3> hitTestUI(float touchX, float touchY);
+	std::pair<std::shared_ptr<SceneObject>, Vec3> hitTestUI(float touchX, float touchY);
 
 	//! use to get which UI SceneObject will active click 
 	//! (** example: cast UIText but UIButton will be clicked)
-	SceneObject* clickTestUI(TouchInfo* touch, SceneObject* target);
+	std::shared_ptr<SceneObject> clickTestUI(TouchInfo* touch, std::shared_ptr<SceneObject> target);
 
 private:
-
 	CaptureEventCallback m_captureCallback;
 	InputEvent m_recentInput;
 	std::vector<TouchInfo*> m_touches;

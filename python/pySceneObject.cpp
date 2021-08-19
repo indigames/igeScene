@@ -144,7 +144,7 @@ namespace ige::scene
         if (self->sceneObject->getParent())
         {
             auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = self->sceneObject->getParent();
+            obj->sceneObject = self->sceneObject->getParent().get();
             return (PyObject *)obj;
         }
         Py_RETURN_NONE;
@@ -158,9 +158,12 @@ namespace ige::scene
         {
             if (obj && obj->ob_type == &PyTypeObject_SceneObject)
             {
-                auto sceneObj = (PyObject_SceneObject *)obj;
-                self->sceneObject->setParent(sceneObj->sceneObject);
-                return 0;
+                auto parent = ((PyObject_SceneObject *)obj)->sceneObject;
+                if (parent != nullptr)
+                {
+                    self->sceneObject->setParent(parent->getSharedPtr());
+                    return 0;
+                }
             }
         }
         return -1;
@@ -195,7 +198,7 @@ namespace ige::scene
             for (int i = 0; i < len; ++i)
             {
                 auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                obj->sceneObject = children[i];
+                obj->sceneObject = children[i].get();
                 PyTuple_SetItem(childrenTuple, i, (PyObject *)obj);
             }
             return (PyObject *)childrenTuple;

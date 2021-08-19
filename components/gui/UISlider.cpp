@@ -489,7 +489,7 @@ void UISlider::onChangeDirection()
 	}
 }
 
-void UISlider::onRotateDirection(SceneObject* obj)
+void UISlider::onRotateDirection(std::shared_ptr<SceneObject> obj)
 {
 	if (obj)
 	{

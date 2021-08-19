@@ -207,7 +207,7 @@ namespace ige::scene
         onUpdate(0.f);
     }
 
-    void RectTransform::setParent(TransformComponent* comp)
+    void RectTransform::setParent(std::shared_ptr<TransformComponent> comp)
     {
         bool flag = false;
         if (comp != nullptr) {

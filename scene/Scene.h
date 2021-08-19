@@ -68,7 +68,7 @@ namespace ige::scene
         virtual bool removeAllObjects();
 
         //! Remove scene object
-        virtual bool removeObject(const std::shared_ptr<SceneObject>& obj);
+        virtual bool removeObject(std::shared_ptr<SceneObject> obj);
 
         //! Remove scene object by its name
         virtual bool removeObjectById(uint64_t id);
@@ -133,8 +133,11 @@ namespace ige::scene
         void onUIResourceRemoved(Resource* resource);
 
         //! Prefab save/load
+        bool isSavingPrefab() { return m_bIsSavingPrefab; }
         bool savePrefab(uint64_t objectId, const std::string& file);
         bool loadPrefab(uint64_t parentId, const std::string& file);
+        bool reloadAllPrefabs();
+        bool reloadPrefabs(const std::string& prefabId);
 
         //! Acquire directional light
         bool isDirectionalLightAvailable();
@@ -157,12 +160,12 @@ namespace ige::scene
 
         //! Raycast: return first hit point from single ray
         //! forceRaycast : can ignore raycastCapture
-        std::pair<SceneObject*, Vec3> raycast(const Vec2& screenPos, Camera* camera, float maxDistance = 10000.f, bool forceRaycast = false);
+        std::pair< std::shared_ptr<SceneObject>, Vec3> raycast(const Vec2& screenPos, Camera* camera, float maxDistance = 10000.f, bool forceRaycast = false);
 
-        std::pair<SceneObject*, Vec3> raycast(const Vec3& position, Vec3& direction, float maxDistance = 10000.f, bool forceRaycast = false);
+        std::pair< std::shared_ptr<SceneObject>, Vec3> raycast(const Vec3& position, Vec3& direction, float maxDistance = 10000.f, bool forceRaycast = false);
 
         //! Raycast UI 
-        std::pair<SceneObject*, Vec3> raycastUI(const Vec2& screenPos);
+        std::pair< std::shared_ptr<SceneObject>, Vec3> raycastUI(const Vec2& screenPos);
 
         //! Window position
         const Vec2& getWindowPosition() const { return m_windowPosition; }
@@ -183,7 +186,7 @@ namespace ige::scene
         virtual std::shared_ptr<SceneObject> createRootObject(const std::string& name = "");
 
         //! find intersect in hierarchy
-        std::pair<SceneObject*, Vec3> findIntersectInHierachy(const SceneObject* target, std::pair<Vec3, Vec3> ray);
+        std::pair< std::shared_ptr<SceneObject>, Vec3> findIntersectInHierachy(std::shared_ptr<SceneObject> target, std::pair<Vec3, Vec3> ray);
 
         //! Raycast UI 
         Vec3 raycastCanvas(const Vec2& screenPos);
@@ -265,5 +268,8 @@ namespace ige::scene
 
         //! Capture flag
         bool m_raycastCapture;
+
+        //! Saving prefab state
+        bool m_bIsSavingPrefab = false;
     };
 }

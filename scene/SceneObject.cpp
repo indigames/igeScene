@@ -61,18 +61,17 @@ namespace ige::scene
     Event<SceneObject&> SceneObject::s_deselectedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, SceneObject *parent, bool isGui, const Vec2 &size)
-        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr), m_parent(nullptr),
+    SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, bool isGui, const Vec2 &size)
+        : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr),
         m_dispatching(0), m_aabbDirty(2), m_bIsInMask(false)
     {
+        m_parent.reset();
+
         // Generate new UUID
         m_uuid = generateUUID();
 
         // Invoke created event
         getCreatedEvent().invoke(*this);
-
-        // Update parent
-        setParent(parent);
 
         // Create and add transform component
         if (isGui)
@@ -80,32 +79,10 @@ namespace ige::scene
         else
             m_transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
 
-        // Update parent transform
-        if (getParent())
-            m_transform->setParent(getParent()->getTransform().get());
-
         // Set AABB to default
         m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
         m_frameAABB = AABBox({ -5.f, -5.f, -5.f }, { 5.f, 5.f, 5.f });
         getTransformChangedEvent().addListener(std::bind(&SceneObject::onTransformChanged, this, std::placeholders::_1));
-
-        if (isGui) {
-            auto parent = getParent();
-            if (parent)
-            {
-                if (parent->isInMask()) 
-                {
-                    setInMask(true);
-                }
-                else
-                {
-                    auto mask = parent->getComponent<UIMask>();
-                    if (mask) {
-                        setInMask(mask->isUseMask());
-                    }
-                }
-            }
-        }
     }
 
     //! Destructor
@@ -154,72 +131,104 @@ namespace ige::scene
     }
 
     //! Set parent
-    void SceneObject::setParent(SceneObject *parent)
+    void SceneObject::setParent(std::shared_ptr<SceneObject> parent)
     {
-        if (m_parent)
+        if (!m_parent.expired())
         {
-            m_parent->removeChild(this);
-
-            if (getTransform())
-                getTransform()->setParent(nullptr);
+            getParent()->removeChildById(getId());
             getDetachedEvent().invoke(*this);
+
+            if (getTransform()) getTransform()->setParent(nullptr);
             setCanvas(nullptr);
-            m_parent = nullptr;
+            m_parent.reset();
         }
 
         if (parent)
         {
             m_parent = parent;
-            m_parent->addChild(this);
+            getParent()->addChildById(getId());
             if (getTransform())
-                getTransform()->setParent(m_parent->getTransform().get());
-            setCanvas(m_parent->getCanvas());
+                getTransform()->setParent(getParent()->getTransform());
+            setCanvas(getParent()->getCanvas());
+            m_transform->setParent(getParent()->getTransform());
+            if (isGUIObject()) {
+                if (parent->isInMask()) {
+                    setInMask(true);
+                } else {
+                    auto mask = parent->getComponent<UIMask>();
+                    if (mask) setInMask(mask->isUseMask());
+                }
+            }
             getAttachedEvent().invoke(*this);
         }
+
         dispatchEvent((int)EventType::SetParent);
     }
 
-    // Get parent
-    SceneObject *SceneObject::getParent() const
+    // Get thj
+    std::shared_ptr<SceneObject> SceneObject::getSharedPtr() const
     {
-        return m_parent;
+        return getScene() ? getScene()->findObjectById(getId()) : nullptr;
+    }
+
+    // Get parent
+    std::shared_ptr<SceneObject> SceneObject::getParent() const
+    {
+        return m_parent.expired() ? nullptr : m_parent.lock();
     }
 
     // Check relative recursive
     bool SceneObject::isRelative(uint64_t id)
     {
         if (m_id == id) return true;
-        if (m_parent == nullptr) return false;
-        if (m_parent->getId() == id) return true;
-        return m_parent->isRelative(id);
+        if (getParent() == nullptr) return false;
+        if (getParent()->getId() == id) return true;
+        return getParent()->isRelative(id);
     }
 
     //! Get all children
-    const std::vector<SceneObject *> &SceneObject::getChildren() const
+    const std::vector<std::shared_ptr<SceneObject>>& SceneObject::getChildren() const
     {
         return m_children;
     }
 
     //! Add child
-    void SceneObject::addChild(SceneObject *child)
+    void SceneObject::addChild(std::shared_ptr<SceneObject> child)
     {
         auto found = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem == child; });
         if (found == m_children.end())
+        {
             m_children.push_back(child);
-        if (child != nullptr)
             dispatchEvent((int)EventType::AddChild, Value(child->getUUID()));
+        }            
+    }
+
+    //! Add child by id
+    void SceneObject::addChildById(uint64_t id)
+    {
+        return addChild(getScene()->findObjectById(id));
     }
 
     //! Removes child
-    void SceneObject::removeChild(SceneObject *child)
+    void SceneObject::removeChild(std::shared_ptr<SceneObject> child)
     {
-        if (child == nullptr)
-            return;
         auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getId() == child->getId()); });
         if (itr != m_children.end())
+        {
             m_children.erase(itr);
-        if (child != nullptr)
             dispatchEvent((int)EventType::RemoveChild, Value(child->getUUID()));
+        }   
+    }
+
+    //! Removes child
+    void SceneObject::removeChildById(uint64_t id)
+    {
+        auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getId() == id); });
+        if (itr != m_children.end())
+        {
+            m_children.erase(itr);
+            dispatchEvent((int)EventType::RemoveChild, Value((*itr)->getUUID()));
+        }            
     }
 
     //! Remove children
@@ -232,9 +241,18 @@ namespace ige::scene
     }
 
     //! Find Child
-    SceneObject* SceneObject::findChild(std::string uuid)
+    std::shared_ptr<SceneObject> SceneObject::findChild(const std::string& uuid)
     {
-        auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getUUID() == uuid); });
+        auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getUUID().compare(uuid) == 0); });
+        if (itr != m_children.end()) 
+            return *itr;
+        return nullptr;
+    }
+
+    //! Find Child
+    std::shared_ptr<SceneObject> SceneObject::findChildById(uint64_t id)
+    {
+        auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return elem && (elem->getId() == id); });
         if (itr != m_children.end()) 
             return *itr;
         return nullptr;
@@ -489,7 +507,7 @@ namespace ige::scene
     }
 
     //! Enable or disable the actor
-    void SceneObject::setSelected(bool select)
+    void SceneObject::setSelected(bool select, bool recursive)
     {
         if (m_isSelected != select)
         {
@@ -508,6 +526,13 @@ namespace ige::scene
         {
             for (auto &comp : m_components)
                 comp->onClick();
+        }
+
+        if (recursive)
+        {
+            for (auto& child : m_children) {
+                child->setSelected(select, recursive);
+            }
         }
     }
 
@@ -711,12 +736,13 @@ namespace ige::scene
                     inputContext->m_touchCapture = 0;
                     ci->callback(inputContext);
                     ci->dispatching--;
-                    if (inputContext->m_touchCapture != 0 && dynamic_cast<SceneObject*>(this))
+                    if (inputContext->m_touchCapture != 0)
                     {
+                        auto thisPtr = getSharedPtr();
                         if (inputContext->isCaptureTouch() && eventType == (int)EventType::TouchBegin)
-                            inputContext->getInput()->getProcessor()->addTouchMonitor(inputContext->getInput()->getTouchId(), this);
+                            inputContext->getInput()->getProcessor()->addTouchMonitor(inputContext->getInput()->getTouchId(), thisPtr);
                         else if (inputContext->isUnCaptureTouch())
-                            inputContext->getInput()->getProcessor()->removeTouchMonitor(this);
+                            inputContext->getInput()->getProcessor()->removeTouchMonitor(thisPtr);
                     }
                 }
                 else
@@ -841,11 +867,11 @@ namespace ige::scene
 
 
     //! Find first child by name
-    SceneObject* SceneObject::findChildByName(const std::string& name)
+    std::shared_ptr<SceneObject> SceneObject::findChildByName(const std::string & name)
     {
         auto found = std::find_if(m_children.begin(), m_children.end(), [&](auto elem)
         {
-            return elem->getName() == name;
+            return elem->getName().compare(name) == 0;
         });
         if (found != m_children.end())
             return (*found);
@@ -857,6 +883,23 @@ namespace ige::scene
         if (m_prefabId.compare(id) != 0)
         {
             m_prefabId = id;
+        }
+    }
+
+    void SceneObject::addPrefabIdsLinked(const std::string& id)
+    {
+        if (std::find(m_prefabIdsLinked.begin(), m_prefabIdsLinked.end(), id) == m_prefabIdsLinked.end())
+        {
+            m_prefabIdsLinked.push_back(id);
+        }
+    }
+
+    void SceneObject::removePrefabIdsLinked(const std::string& id)
+    {
+        auto found = std::find(m_prefabIdsLinked.begin(), m_prefabIdsLinked.end(), id);
+        if (found != m_prefabIdsLinked.end())
+        {
+            m_prefabIdsLinked.erase(found);
         }
     }
 
@@ -891,6 +934,15 @@ namespace ige::scene
 
     }
 
+    // Check if this object belong to a prefab
+    bool SceneObject::isInPrefab() const
+    {
+        if (isPrefab()) return true;
+        if (getParent() == nullptr) return false;
+        if (getParent()->isPrefab()) return true;
+        return getParent()->isInPrefab();
+    }
+
     //! Serialize
     void SceneObject::to_json(json &j)
     {
@@ -901,8 +953,11 @@ namespace ige::scene
             {"selected", m_isSelected},
             {"gui", m_bIsGui},
             {"raycast", m_bIsRaycastTarget},
-            {"interactable", m_bIsInteractable}
+            {"interactable", m_bIsInteractable},
         };
+
+        if (!m_prefabId.empty()) j["prefabId"] = m_prefabId;
+        if (!m_prefabIdsLinked.empty()) j["prefabIdsLinked"] = m_prefabIdsLinked;
 
         auto jComponents = json::array();
         for (const auto &comp : m_components)
@@ -917,7 +972,7 @@ namespace ige::scene
         auto jChildren = json::array();
         for (const auto &child : m_children)
         {
-            if (child)
+            if (child && (getScene()->isSavingPrefab() || !child->isInPrefab()))
             {
                 json jChild;
                 child->to_json(jChild);
@@ -931,9 +986,15 @@ namespace ige::scene
     void SceneObject::from_json(const json &j)
     {
         setName(j.value("name", ""));
-        setUUID(j.value("uuid", getUUID()));
         setActive(j.value("active", false));
+        setPrefabId(j.value("prefabId", getPrefabId()));
         setSelected(j.value("selected", false));
+
+        if (!isInPrefab()) {
+            setUUID(j.value("uuid", getUUID()));
+        }
+
+        m_prefabIdsLinked = (j.value("prefabIdsLinked", std::vector<std::string>()));
         m_bIsGui = j.value("gui", false);
         m_bIsRaycastTarget = j.value("raycast", false);
         m_bIsInteractable = j.value("interactable", false);
@@ -971,7 +1032,7 @@ namespace ige::scene
         }
 
         auto jChildren = j.at("childs");
-        auto thisObj = getScene()->findObjectById(getId());
+        auto thisObj = getSharedPtr();
         for (auto it : jChildren)
         {
             auto child = getScene()->createObject(it.at("name"), thisObj, it.value("gui", false), {});

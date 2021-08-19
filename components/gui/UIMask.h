@@ -41,7 +41,7 @@ protected:
 	bool m_maskDirty;
 
 	void updateMask();
-	void updateChildMask(SceneObject* child);
+	void updateChildMask(std::shared_ptr<SceneObject> child);
 	void onAddChild(EventContext* context);
 	
 protected:

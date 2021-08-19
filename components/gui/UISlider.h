@@ -97,7 +97,7 @@ protected:
 	void changeState(int state, bool forced = false);
 
 	void onChangeDirection();
-	void onRotateDirection(SceneObject* obj);
+	void onRotateDirection(std::shared_ptr<SceneObject> obj);
 
 	//! Serialize
 	virtual void to_json(json& j) const override;

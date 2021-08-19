@@ -338,7 +338,7 @@ namespace ige::scene
         {
             const auto &children = node->getChildren();
             for (size_t i = 0; i < children.size(); ++i)
-                collectGeometries(geometryList, children[i], processedNodes, recursive);
+                collectGeometries(geometryList, children[i].get(), processedNodes, recursive);
         }
     }
 

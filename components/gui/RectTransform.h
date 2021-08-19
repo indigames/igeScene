@@ -62,7 +62,7 @@ namespace ige::scene
         void setSize(const Vec2 &size);
 
         //! Set Parent
-        virtual void setParent(TransformComponent* comp) override;
+        virtual void setParent(std::shared_ptr<TransformComponent> comp) override;
 
         //! Translate
         void worldTranslate(const Vec3 &trans) override;

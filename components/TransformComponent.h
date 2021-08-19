@@ -36,10 +36,10 @@ namespace ige::scene
         virtual Type getType() const override { return Type::Transform; }
 
         //! Get parent transform component
-        TransformComponent *getParent() const;
+        std::shared_ptr<TransformComponent> getParent() const;
 
         //! Set parent transform
-        virtual void setParent(TransformComponent *comp);
+        virtual void setParent(std::shared_ptr<TransformComponent> comp);
 
         //! Translate
         virtual void translate(const Vec3 &trans);
@@ -169,10 +169,10 @@ namespace ige::scene
         Mat4 m_worldMatrix;
 
         //! Transform observers
-        std::set<TransformComponent *> m_observers;
+        std::set<TransformComponent*> m_observers;
 
         //! Cached parent transform
-        TransformComponent *m_parent = nullptr;
+        std::weak_ptr<TransformComponent> m_parent;
 
         //! Dirty flag
         bool m_bLocalDirty = false;

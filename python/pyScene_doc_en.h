@@ -58,7 +58,7 @@ PyDoc_STRVAR(Scene_findObject_doc,
 			 "Parameters\n"
 			 "----------\n"
 			 "    param : string\n"
-			 "        Name of the scene object to find\n"
+			 "        UUID of the scene object to find\n"
 			 "    param : number (unsigned long long)\n"
 			 "        ID of the scene object to find\n"
 			 "Return:\n"

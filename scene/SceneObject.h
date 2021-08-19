@@ -27,7 +27,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SceneObject(Scene* scene, uint64_t id, std::string name = "", SceneObject* parent = nullptr, bool isGui = false, const Vec2& size = {64.f, 64.f});
+        SceneObject(Scene* scene, uint64_t id, std::string name = "", bool isGui = false, const Vec2& size = {64.f, 64.f});
 
         //! Destructor
         virtual ~SceneObject();
@@ -46,31 +46,43 @@ namespace ige::scene
         virtual void setName(const std::string& name);
 
         //! Set parent
-        virtual void setParent(SceneObject *parent);
+        virtual void setParent(std::shared_ptr<SceneObject> parent);
+
+        // Get shared_ptr
+        virtual std::shared_ptr<SceneObject> getSharedPtr() const;
 
         // Get parent
-        virtual SceneObject *getParent() const;
+        virtual std::shared_ptr<SceneObject> getParent() const;
 
         // Check relative recursive
         virtual bool isRelative(uint64_t id);
 
         //! Get children list
-        virtual const std::vector<SceneObject*> &getChildren() const;
+        virtual const std::vector<std::shared_ptr<SceneObject>>& getChildren() const;
 
         //! Add child
-        virtual void addChild(SceneObject* child);
+        virtual void addChild(std::shared_ptr<SceneObject> child);
+
+        //! Add child by id
+        virtual void addChildById(uint64_t id);
 
         //! Removes child
-        virtual void removeChild(SceneObject* child);
+        virtual void removeChild(std::shared_ptr<SceneObject> child);
+
+        //! Removes child by id
+        virtual void removeChildById(uint64_t id);
 
         //! Removes all children
         virtual void removeChildren();
 
         //! Find first child by name
-        virtual SceneObject* findChildByName(const std::string& name);
+        virtual std::shared_ptr<SceneObject> findChildByName(const std::string& name);
 
         //! Find child
-        virtual SceneObject* findChild(std::string uuid);
+        virtual std::shared_ptr<SceneObject> findChild(const std::string& uuid);
+
+        //! Find child by id
+        virtual std::shared_ptr<SceneObject> findChildById(uint64_t id);
 
         //! Create a component by name
         virtual std::shared_ptr<Component> createComponent(const std::string& name);
@@ -114,8 +126,6 @@ namespace ige::scene
         template <typename T, typename... Args>
         std::shared_ptr<T> addComponent(Args &&... args);
 
-        
-
         //! Update functions
         virtual void onUpdate(float dt);
         virtual void onFixedUpdate(float dt);
@@ -131,7 +141,7 @@ namespace ige::scene
         virtual bool isActive() const;
 
         // Set selected
-        void setSelected(bool select);
+        void setSelected(bool select, bool recursive = false);
 
         //! Check selected
         bool isSelected() const;
@@ -179,7 +189,7 @@ namespace ige::scene
         void setCanvas(const std::shared_ptr<Canvas>& canvas) { m_canvas = canvas; }
 
         //! Get scene
-        Scene* getScene() { return m_scene; }
+        Scene* getScene() const { return m_scene; }
 
         //! Get scene root
         std::shared_ptr<SceneObject> getRoot();
@@ -218,10 +228,19 @@ namespace ige::scene
         virtual void updateAabb();
 
         //! Set prefab Id
-        virtual bool isPrefab() const { return (m_prefabId.length() > 0); }
+        virtual bool hasPrefab() const { return (!m_prefabIdsLinked.empty()); }
+        virtual bool isPrefab() const { return (!m_prefabId.empty()); }
+        virtual bool isInPrefab() const;
+
+        //! PrefabID
         virtual std::string getPrefabId() { return m_prefabId; }
         void setPrefabId(const std::string& id);
         
+        //! Linked PrefabId
+        virtual std::vector<std::string>& getPrefabIdsLinked() { return m_prefabIdsLinked; }
+        void addPrefabIdsLinked(const std::string& id);
+        void removePrefabIdsLinked(const std::string& id);
+
         //! Mask state
         bool isInMask() const { return m_bIsInMask; }
         void setInMask(bool value);
@@ -256,10 +275,10 @@ namespace ige::scene
         Scene* m_scene = nullptr;
 
         //! Pointer to parent, use weak_ptr avoid dangling issue
-        SceneObject *m_parent = nullptr;
+        std::weak_ptr<SceneObject> m_parent;
 
         //! Cached children vector
-        std::vector<SceneObject*> m_children;
+        std::vector<std::shared_ptr<SceneObject>> m_children;
 
         //! Components vector
         std::vector<std::shared_ptr<Component>> m_components;
@@ -303,7 +322,10 @@ namespace ige::scene
         //! Define if object is interactable
         bool m_bIsInteractable = false;
 
-        //! Prefab ID
+        //! Linked Prefab IDs (in the last non-prefab node)
+        std::vector<std::string> m_prefabIdsLinked;
+
+        //! Prefab ID (In the root node of prefab)
         std::string m_prefabId;
 
         int m_aabbDirty = 2;

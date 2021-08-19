@@ -93,7 +93,7 @@ void UIMask::updateMask()
     m_maskDirty = false;
 }
 
-void UIMask::updateChildMask(SceneObject* child)
+void UIMask::updateChildMask(std::shared_ptr<SceneObject> child)
 {
     if (child == nullptr) return;
     

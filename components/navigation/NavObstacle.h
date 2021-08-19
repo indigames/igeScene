@@ -59,6 +59,9 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j) override;
 
+        //! Serialize finished event
+        virtual void onSerializeFinished(Scene* scene) override;
+
     protected:
         //! Radius of this obstacle.
         float m_radius = 1.f;

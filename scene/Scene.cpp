@@ -332,16 +332,15 @@ namespace ige::scene
             if (isGUI) {
                 parentObject = parentObject->isGUIObject() ? parentObject : m_canvas ? m_canvas : m_rootUI;
                 if (parentObject == m_rootUI) {
-                    auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", parentObject.get(), true, size);
+                    auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", true, size);
+                    m_objects.push_back(canvasObject);
                     auto canvas = canvasObject->addComponent<Canvas>();
                     canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
                     Vec2 canvasSize(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW());
                     canvas->setTargetCanvasSize(canvasSize);
                     canvasObject->setCanvas(canvas);
-
+                    canvasObject->setParent(parentObject);
                     parentObject = canvasObject;
-                    m_objects.push_back(canvasObject);
-
                     m_canvas = canvasObject;
                 }
             }
@@ -350,8 +349,9 @@ namespace ige::scene
                     isGUI = true;
             }
         }
-        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, parentObject.get(), isGUI, size);
+        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, isGUI, size);
         m_objects.push_back(sceneObject);
+        sceneObject->setParent(parentObject);
         return sceneObject;
     }
 
@@ -375,8 +375,7 @@ namespace ige::scene
         auto sceneObject = createObject(name, parent, jObj.value("gui", false));
         sceneObject->from_json(jObj);
         sceneObject->setPrefabId(prefabId);
-        m_objects.push_back(sceneObject);
-
+        sceneObject->setParent(parent);
         file.close();
         return sceneObject;
     }
@@ -395,7 +394,7 @@ namespace ige::scene
         return true;
     }
 
-    bool Scene::removeObject(const std::shared_ptr<SceneObject>& obj)
+    bool Scene::removeObject(std::shared_ptr<SceneObject> obj)
     {
         if (!obj) return false;
 
@@ -426,8 +425,7 @@ namespace ige::scene
         for (int i = 0; i < children.size(); ++i)
         {
             auto elem = children[i];
-            auto itr = std::find_if(m_objects.begin(), m_objects.end(), [&](auto el)
-            {
+            auto itr = std::find_if(m_objects.begin(), m_objects.end(), [&](auto el) {
                 return el && elem && (el->getId() == elem->getId());
             });
             if (itr != m_objects.end())
@@ -438,9 +436,10 @@ namespace ige::scene
         auto itr = std::find(m_objects.begin(), m_objects.end(), obj);
         if (itr != m_objects.end())
         {
+            (*itr)->setParent(nullptr);
+            (*itr)->removeChildren();
             m_objects.erase(itr);
         }
-
         return true;
     }
 
@@ -548,18 +547,22 @@ namespace ige::scene
         auto object = findObjectById(objectId);
         if (object != nullptr)
         {
+            m_bIsSavingPrefab = true;
             json jObj;
             object->to_json(jObj);
-            jObj["prefabId"] = SceneObject::generateUUID();
+            auto prefabId = object->getPrefabId().empty() ? SceneObject::generateUUID() : object->getPrefabId();
+            jObj["prefabId"] = prefabId;
             auto fsPath = path.empty() ? fs::path(object->getName()) : fs::path(path + "/" + object->getName());
             auto ext = fsPath.extension();
             if (ext.string() != ".prefab")
                 fsPath = fsPath.replace_extension(".prefab");
             std::ofstream file(fsPath.string());
             file << std::setw(2) << jObj << std::endl;
+            SceneManager::getInstance()->setPrefabPath(prefabId, fsPath.string());
+            m_bIsSavingPrefab = false;
             return true;
         }
-        return true;
+        return false;
     }
 
     bool Scene::loadPrefab(uint64_t parentId, const std::string& path)
@@ -581,9 +584,55 @@ namespace ige::scene
         auto parent = findObjectById(parentId);
         auto prefabId = jObj.value("prefabId", std::string());
         auto obj = createObject(jObj.at("name"), parent, jObj.value("gui", false));
-        obj->from_json(jObj);
+        obj->setParent(nullptr);
         obj->setPrefabId(prefabId);
+        obj->from_json(jObj);
+        parent->addPrefabIdsLinked(prefabId);
+        obj->setParent(parent);
+        return true;
+    }
 
+    bool  Scene::reloadPrefabs(const std::string& prefabId) {
+        auto itr = m_objects.begin();
+        while (itr != m_objects.end()) {
+            auto object = *itr++;
+            if (object) {
+                for (const auto& id : object->getPrefabIdsLinked()) {
+                    if (prefabId.compare(id) == 0) {
+                        auto children = object->getChildren();
+                        auto it = children.begin();
+                        while (it != children.end()) {
+                            auto child = *it++;
+                            if (child->isPrefab() && child->getPrefabId().compare(prefabId) == 0) {
+                                object->removeChild(child);
+                                removeObject(child);
+                                child = nullptr;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < m_objects.size(); ++i) {
+            auto object = m_objects[i];
+            if (object) {
+                for (const auto& id : object->getPrefabIdsLinked()) {
+                    if (prefabId.compare(id) == 0) {
+                        auto prefabPath = SceneManager::getInstance()->getPrefabPath(prefabId);
+                        loadPrefab(object->getId(), prefabPath);
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+
+    bool Scene::reloadAllPrefabs()
+    {
+        for (const auto& [id, path] : SceneManager::getInstance()->getPrefabPaths()) {
+            reloadPrefabs(id);
+        }
         return true;
     }
 
@@ -734,9 +783,9 @@ namespace ige::scene
     }
 
     //! Raycast
-    std::pair<SceneObject*, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance, bool forceRaycast)
+    std::pair<std::shared_ptr<SceneObject>, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance, bool forceRaycast)
     {
-        std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());
+        auto hit = std::pair<std::shared_ptr<SceneObject>, Vec3>(nullptr, Vec3());
         if(!camera)
             return hit;
 
@@ -761,7 +810,7 @@ namespace ige::scene
                 if (minDistance > distance)
                 {
                     minDistance = distance;
-                    hit.first = obj.get();
+                    hit.first = obj;
                     hit.second = ray.first + ray.second * distance;
                 }
             }
@@ -769,9 +818,9 @@ namespace ige::scene
         return hit;
     }
 
-    std::pair<SceneObject*, Vec3> Scene::raycast(const Vec3& position, Vec3& direction, float maxDistance, bool forceRaycast)
+    std::pair<std::shared_ptr<SceneObject>, Vec3> Scene::raycast(const Vec3& position, Vec3& direction, float maxDistance, bool forceRaycast)
     {
-        std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());
+        auto hit = std::pair<std::shared_ptr<SceneObject>, Vec3>(nullptr, Vec3());
 
         /*if (m_raycastCapture && !forceRaycast)
             return hit;*/
@@ -785,7 +834,7 @@ namespace ige::scene
                 if (minDistance > distance)
                 {
                     minDistance = distance;
-                    hit.first = obj.get();
+                    hit.first = obj;
                     hit.second = ray.first + ray.second * distance;
                 }
             }
@@ -793,9 +842,9 @@ namespace ige::scene
         return hit;
     }
 
-    std::pair<SceneObject*, Vec3> Scene::raycastUI(const Vec2& screenPos)
+    std::pair<std::shared_ptr<SceneObject>, Vec3> Scene::raycastUI(const Vec2& screenPos)
     {
-        std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());
+        auto hit = std::pair<std::shared_ptr<SceneObject>, Vec3>(nullptr, Vec3());
         if (!m_canvasCamera)
             return hit;
 
@@ -813,12 +862,11 @@ namespace ige::scene
 
         bool m_isEnd = false;
         std::shared_ptr<SceneObject> m_node = m_canvas;
-
-        hit = findIntersectInHierachy(m_node.get(), ray);
+        hit = findIntersectInHierachy(m_node, ray);
         if(hit.first != nullptr && hit.first->isInteractable()) m_raycastCapture = true;
         else if (hit.first == nullptr) {
             if (m_canvas) {
-                hit.first = m_canvas.get();
+                hit.first = m_canvas;
                 hit.second = raycastCanvas(screenPos);
             }
         }
@@ -849,18 +897,17 @@ namespace ige::scene
         return hit;
     }
 
-    std::pair<SceneObject*, Vec3> Scene::findIntersectInHierachy(const SceneObject* target, std::pair<Vec3, Vec3> ray)
+    std::pair<std::shared_ptr<SceneObject>, Vec3> Scene::findIntersectInHierachy(std::shared_ptr<SceneObject> target, std::pair<Vec3, Vec3> ray)
     {
-        std::pair<SceneObject*, Vec3> hit(nullptr, Vec3());
+        auto hit = std::pair<std::shared_ptr<SceneObject>, Vec3>(nullptr, Vec3());
         if (target == nullptr) return hit;
-        SceneObject* obj = const_cast<SceneObject*>(target);
-        const auto& transform = obj->getTransform();
+        const auto& transform = target->getTransform();
         float distance = 100.f;
         if (target->isRaycastTarget()) 
         {
-            if (RayOBBChecker::checkIntersect(obj->getAABB(), transform->getWorldMatrix(), distance, 100.f))
+            if (RayOBBChecker::checkIntersect(target->getAABB(), transform->getWorldMatrix(), distance, 100.f))
             {
-                hit.first = obj;
+                hit.first = target;
                 hit.second = ray.first + ray.second * distance;
             }
         }
@@ -937,6 +984,9 @@ namespace ige::scene
             if (nextId > m_nextObjectID)
                 m_nextObjectID = nextId;
         }
+
+        // Load prefabs
+        reloadAllPrefabs();
 
         // Notify serialize finished
         getSerializeFinishedEvent().invoke(this);

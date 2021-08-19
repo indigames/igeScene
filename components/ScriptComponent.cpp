@@ -103,7 +103,6 @@ namespace ige::scene
         bool isLoad = isRunning();
         Clear();
         unloadPyModule();
-        m_members.clear();
         loadPyModule();
         if (isLoad)
             Initialize();
@@ -210,6 +209,7 @@ namespace ige::scene
             value = nullptr;
             pos = 0;
             dict = PyObject_GenericGetDict(m_pyInstance, nullptr);
+            std::unordered_map<std::string, json> members;
             while (PyDict_Next(dict, &pos, &key, &value))
             {
                 auto key_str = std::string(PyUnicode_AsUTF8(key));
@@ -217,33 +217,35 @@ namespace ige::scene
                 {
                     if (m_members.count(key_str) > 0)
                     {
-                        onMemberValueChanged(key_str, m_members[key_str]);
+                        members[key_str] = m_members[key_str];
                     }
                     else
                     {
                         if (PyUnicode_Check(value))
                         {
-                            m_members[key_str] = std::string(PyUnicode_AsUTF8(value));
+                            members[key_str] = std::string(PyUnicode_AsUTF8(value));
                         }
                         else if (PyBool_Check(value))
                         {
-                            m_members[key_str] = (bool)(PyLong_AsLong(value));
+                            members[key_str] = (bool)(PyLong_AsLong(value));
                         }
                         else if (PyLong_Check(value))
                         {
-                            m_members[key_str] = (int)PyLong_AsLong(value);
+                            members[key_str] = (int)PyLong_AsLong(value);
                         }
                         else if (PyFloat_Check(value))
                         {
-                            m_members[key_str] = PyFloat_AsDouble(value);
+                            members[key_str] = PyFloat_AsDouble(value);
                         }
                         else
                         {
-                            m_members[key_str] = nullptr;
+                            members[key_str] = std::string();
                         }
                     }
                 }
             }
+            m_members.clear();
+            m_members = members;
 
             // Enable call onAwake() next frame
             m_bOnAwakeCalled = false;
@@ -708,10 +710,10 @@ namespace ige::scene
     //! Deserialize
     void ScriptComponent::from_json(const json &j)
     {
-        setPath(j.at("path"));
-
         auto jMembers = j.value("members", json::array());
         m_members = jMembers.get<std::unordered_map<std::string, json>>();
+
+        setPath(j.at("path"));
         Component::from_json(j);
     }
 
