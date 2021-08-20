@@ -233,7 +233,7 @@ namespace ige::scene
         virtual bool isInPrefab() const;
 
         //! PrefabID
-        virtual std::string getPrefabId() { return m_prefabId; }
+        virtual std::string getPrefabId();
         void setPrefabId(const std::string& id);
         
         //! Linked PrefabId

@@ -878,6 +878,14 @@ namespace ige::scene
         return nullptr;
     }
 
+    //! Get prefabId recursive
+    std::string SceneObject::getPrefabId()
+    {
+        if (!m_prefabId.empty()) return m_prefabId;
+        if (getParent()) return getParent()->getPrefabId();
+        return {};
+    }
+
     void SceneObject::setPrefabId(const std::string& id)
     {
         if (m_prefabId.compare(id) != 0)
