@@ -233,7 +233,8 @@ namespace ige::scene
         virtual bool isInPrefab() const;
 
         //! PrefabID
-        virtual std::string getPrefabIdRecursive();
+        virtual std::string getPrefabRootId();
+        virtual std::shared_ptr<SceneObject> getPrefabRoot();
         virtual std::string getPrefabId();
         void setPrefabId(const std::string& id);
 

@@ -879,14 +879,25 @@ namespace ige::scene
         return m_prefabId;
     }
 
-    std::string SceneObject::getPrefabIdRecursive()
+    std::string SceneObject::getPrefabRootId()
     {
-        if (getParent() && !getParent()->getPrefabIdRecursive().empty()
-            && getParent()->getPrefabIdRecursive().compare(getScene()->getPrefabId()) != 0) {
-            return getParent()->getPrefabIdRecursive();
+        if (getParent() && !getParent()->getPrefabRootId().empty()
+            && getParent()->getPrefabRootId().compare(getScene()->getPrefabId()) != 0) {
+            return getParent()->getPrefabRootId();
         }
         if (!getPrefabId().empty()) return getPrefabId();
         return std::string();
+    }
+
+    std::shared_ptr<SceneObject> SceneObject::getPrefabRoot()
+    {
+        if (getParent() && getParent()->getPrefabRoot()
+            && getParent()->getPrefabRoot()->getPrefabId().compare(getScene()->getPrefabId()) != 0) {
+            return getParent()->getPrefabRoot();
+        }
+        if (!getPrefabId().empty())
+            return getSharedPtr();
+        return nullptr;
     }
 
     void SceneObject::setPrefabId(const std::string& id)
@@ -980,10 +991,9 @@ namespace ige::scene
         setName(j.value("name", ""));
         setActive(j.value("active", false));
         setPrefabId(j.value("prefabId", std::string()));
-        setSelected(j.value("selected", false));
-
         if (!isInPrefab()) {
             setUUID(j.value("uuid", getUUID()));
+            setSelected(j.value("selected", false));
         }
         m_bIsGui = j.value("gui", false);
         m_bIsRaycastTarget = j.value("raycast", false);
