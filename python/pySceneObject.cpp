@@ -197,9 +197,11 @@ namespace ige::scene
             auto childrenTuple = PyTuple_New(len);
             for (int i = 0; i < len; ++i)
             {
-                auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                obj->sceneObject = children[i].get();
-                PyTuple_SetItem(childrenTuple, i, (PyObject *)obj);
+                if (!children[i].expired()) {
+                    auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+                    obj->sceneObject = children[i].lock().get();
+                    PyTuple_SetItem(childrenTuple, i, (PyObject*)obj);
+                }
             }
             return (PyObject *)childrenTuple;
         }

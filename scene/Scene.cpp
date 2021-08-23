@@ -325,14 +325,14 @@ namespace ige::scene
         m_uiShowcase->Render();
     }
 
-    std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size)
+    std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, const std::string& prefabId)
     {
         auto parentObject = parent ? parent : m_root;
         if (name.compare("Canvas") != 0) {
             if (isGUI) {
                 parentObject = parentObject->isGUIObject() ? parentObject : m_canvas ? m_canvas : m_rootUI;
                 if (parentObject == m_rootUI) {
-                    auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", true, size);
+                    auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", true, size, prefabId);
                     m_objects.push_back(canvasObject);
                     auto canvas = canvasObject->addComponent<Canvas>();
                     canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
@@ -349,7 +349,7 @@ namespace ige::scene
                     isGUI = true;
             }
         }
-        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, isGUI, size);
+        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, isGUI, size, prefabId);
         m_objects.push_back(sceneObject);
         sceneObject->setParent(parentObject);
         return sceneObject;
@@ -394,7 +394,7 @@ namespace ige::scene
         return true;
     }
 
-    bool Scene::removeObject(std::shared_ptr<SceneObject> obj)
+    bool Scene::removeObject(std::shared_ptr<SceneObject>& obj)
     {
         if (!obj) return false;
 
@@ -420,45 +420,35 @@ namespace ige::scene
             m_canvas = nullptr;
         }
 
-        // Remove all children
-        auto children = obj->getChildren();
-        for (int i = 0; i < children.size(); ++i)
-        {
-            auto elem = children[i];
-            auto itr = std::find_if(m_objects.begin(), m_objects.end(), [&](auto el) {
-                return el && elem && (el->getId() == elem->getId());
-            });
-            if (itr != m_objects.end())
-                removeObject(*itr);
-        }
-
         // Remove from objects list
         auto itr = std::find(m_objects.begin(), m_objects.end(), obj);
-        if (itr != m_objects.end())
-        {
-            (*itr)->setParent(nullptr);
-            (*itr)->removeChildren();
+        if (itr != m_objects.end()) {
+            for (auto& child : obj->getChildren())
+                if(!child.expired()) removeObject(child.lock());
             m_objects.erase(itr);
+            obj = nullptr;
+            return true;
         }
-        return true;
+        return false;
     }
 
     //! Remove scene object by its id
     bool Scene::removeObjectById(uint64_t id)
     {
-        return removeObject(findObjectById(id));
+        auto object = findObjectById(id);
+        auto removed = removeObject(object);
+        object = nullptr;
+        return removed;
     }
 
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id)
     {
         // Perform binary search for best performance, 'cause m_objects sorted by id.
-        auto found = std::lower_bound(m_objects.begin(), m_objects.end(), id, [&](auto elem, uint64_t id)
+        auto found = std::lower_bound(m_objects.begin(), m_objects.end(), id, [](auto elem, uint64_t id)
         {
-            return elem->getId() < id;
+            return elem && elem->getId() < id;
         });
-        if (found != m_objects.end())
-            return std::dynamic_pointer_cast<SceneObject>(*found);
-        return nullptr;
+        return (found != m_objects.end() && (*found)->getId() == id) ? *found : nullptr;
     }
 
     std::shared_ptr<SceneObject> Scene::findObjectByUUID(const std::string& uuid)
@@ -583,50 +573,34 @@ namespace ige::scene
 
         auto parent = findObjectById(parentId);
         auto prefabId = jObj.value("prefabId", std::string());
-        auto obj = createObject(jObj.at("name"), parent, jObj.value("gui", false));
-        obj->setParent(nullptr);
-        obj->setPrefabId(prefabId);
+        auto obj = createObject(jObj.at("name"), parent, jObj.value("gui", false), jObj.value("size", Vec2{ 64.f, 64.f }), prefabId);
         obj->from_json(jObj);
-        parent->addPrefabIdsLinked(prefabId);
-        obj->setParent(parent);
         return true;
     }
 
     bool  Scene::reloadPrefabs(const std::string& prefabId) {
-        auto itr = m_objects.begin();
-        while (itr != m_objects.end()) {
-            auto object = *itr++;
-            if (object) {
-                for (const auto& id : object->getPrefabIdsLinked()) {
-                    if (prefabId.compare(id) == 0) {
-                        auto children = object->getChildren();
-                        auto it = children.begin();
-                        while (it != children.end()) {
-                            auto child = *it++;
-                            if (child->isPrefab() && child->getPrefabId().compare(prefabId) == 0) {
-                                object->removeChild(child);
-                                removeObject(child);
-                                child = nullptr;
-                            }
-                        }
-                    }
-                }
+        std::vector<uint64_t> objectsToRemove = {};
+        std::vector<uint64_t> objectsToLoad = {};
+        for (const auto& object: m_objects) {
+            if (object->getPrefabId().compare(prefabId) == 0) {
+                objectsToRemove.push_back(object->getId());
+                if(object->getParent()) objectsToLoad.push_back(object->getParent()->getId());
             }
         }
-        for (int i = 0; i < m_objects.size(); ++i) {
-            auto object = m_objects[i];
-            if (object) {
-                for (const auto& id : object->getPrefabIdsLinked()) {
-                    if (prefabId.compare(id) == 0) {
-                        auto prefabPath = SceneManager::getInstance()->getPrefabPath(prefabId);
-                        loadPrefab(object->getId(), prefabPath);
-                    }
-                }
-            }
+        for (auto id : objectsToRemove) {
+            removeObjectById(id);
+            auto itr = std::find(objectsToLoad.begin(), objectsToLoad.end(), id);
+            if(itr != objectsToLoad.end()) objectsToLoad.erase(itr);
         }
+        auto prefabPath = SceneManager::getInstance()->getPrefabPath(prefabId);
+        for (auto id : objectsToLoad) {
+            auto object = findObjectById(id);
+            if(object) loadPrefab(object->getId(), prefabPath);
+        }
+        objectsToRemove.clear();
+        objectsToLoad.clear();
         return true;
     }
-
 
     bool Scene::reloadAllPrefabs()
     {
@@ -915,10 +889,12 @@ namespace ige::scene
             const auto& children = target->getChildren();
             int cnt = children.size();
             for (int i = cnt-1; i >= 0; i--) {
-                auto temp_hit = findIntersectInHierachy(children[i], ray);
-                if (temp_hit.first != nullptr) {
-                    hit = temp_hit;
-                    break;
+                if (!children[i].expired()) {
+                    auto temp_hit = findIntersectInHierachy(children[i].lock(), ray);
+                    if (temp_hit.first != nullptr) {
+                        hit = temp_hit;
+                        break;
+                    }
                 }
             }
         }
@@ -928,6 +904,16 @@ namespace ige::scene
     std::shared_ptr<TweenManager> Scene::getTweenManager() const
     {
         return m_tweenManager;
+    }
+
+    bool Scene::isPrefab()
+    {
+        return m_objects.size() > 0 && !m_objects[0]->getPrefabId().empty();
+    }
+
+    std::string Scene::getPrefabId()
+    {
+        return isPrefab() ? m_objects[0]->getPrefabId() : std::string();
     }
    
     //! Serialize
@@ -984,9 +970,6 @@ namespace ige::scene
             if (nextId > m_nextObjectID)
                 m_nextObjectID = nextId;
         }
-
-        // Load prefabs
-        reloadAllPrefabs();
 
         // Notify serialize finished
         getSerializeFinishedEvent().invoke(this);

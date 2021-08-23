@@ -60,7 +60,7 @@ namespace ige::scene
         virtual void renderUI();
 
         //! Create scene object
-        virtual std::shared_ptr<SceneObject> createObject(const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 });
+        virtual std::shared_ptr<SceneObject> createObject(const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 }, const std::string& prefabId = std::string());
 
         virtual std::shared_ptr<SceneObject> createObjectFromPrefab(const std::string& file, const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr);
 
@@ -68,7 +68,7 @@ namespace ige::scene
         virtual bool removeAllObjects();
 
         //! Remove scene object
-        virtual bool removeObject(std::shared_ptr<SceneObject> obj);
+        virtual bool removeObject(std::shared_ptr<SceneObject>& obj);
 
         //! Remove scene object by its name
         virtual bool removeObjectById(uint64_t id);
@@ -180,6 +180,12 @@ namespace ige::scene
 
         //! Get tween manager
         std::shared_ptr<TweenManager> getTweenManager() const;
+
+        //! Check if this is prefab scene
+        bool isPrefab();
+
+        //! Return the prefabId of the prefab scene
+        std::string getPrefabId();
 
     protected:
         //! Create root Objects

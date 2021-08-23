@@ -86,7 +86,8 @@ void UIMask::updateMask()
     {
         for (int i = 0; i < childrenSize; i++)
         {
-            updateChildMask(children[i]);
+            if(!children[i].expired())
+                updateChildMask(children[i].lock());
         }
     }
 
@@ -111,7 +112,8 @@ void UIMask::updateChildMask(std::shared_ptr<SceneObject> child)
     {
         for (int i = 0; i < childrenSize; i++)
         {
-            updateChildMask(children[i]);
+            if(!children[i].expired())
+                updateChildMask(children[i].lock());
         }
     }
 

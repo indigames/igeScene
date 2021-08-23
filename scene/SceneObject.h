@@ -27,7 +27,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SceneObject(Scene* scene, uint64_t id, std::string name = "", bool isGui = false, const Vec2& size = {64.f, 64.f});
+        SceneObject(Scene* scene, uint64_t id, std::string name = "", bool isGui = false, const Vec2& size = { 64.f, 64.f }, const std::string& prefabId = std::string());
 
         //! Destructor
         virtual ~SceneObject();
@@ -58,7 +58,7 @@ namespace ige::scene
         virtual bool isRelative(uint64_t id);
 
         //! Get children list
-        virtual const std::vector<std::shared_ptr<SceneObject>>& getChildren() const;
+        virtual std::vector<std::weak_ptr<SceneObject>>& getChildren();
 
         //! Add child
         virtual void addChild(std::shared_ptr<SceneObject> child);
@@ -229,17 +229,13 @@ namespace ige::scene
 
         //! Set prefab Id
         virtual bool hasPrefab() const { return (!m_prefabIdsLinked.empty()); }
-        virtual bool isPrefab() const { return (!m_prefabId.empty()); }
+        virtual bool isPrefab() const;
         virtual bool isInPrefab() const;
 
         //! PrefabID
+        virtual std::string getPrefabIdRecursive();
         virtual std::string getPrefabId();
         void setPrefabId(const std::string& id);
-        
-        //! Linked PrefabId
-        virtual std::vector<std::string>& getPrefabIdsLinked() { return m_prefabIdsLinked; }
-        void addPrefabIdsLinked(const std::string& id);
-        void removePrefabIdsLinked(const std::string& id);
 
         //! Mask state
         bool isInMask() const { return m_bIsInMask; }
@@ -278,7 +274,7 @@ namespace ige::scene
         std::weak_ptr<SceneObject> m_parent;
 
         //! Cached children vector
-        std::vector<std::shared_ptr<SceneObject>> m_children;
+        std::vector<std::weak_ptr<SceneObject>> m_children;
 
         //! Components vector
         std::vector<std::shared_ptr<Component>> m_components;
