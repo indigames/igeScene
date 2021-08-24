@@ -39,7 +39,7 @@ namespace ige::scene
         void setGlobalVolume(float volume);
 
         //! Get sound engine
-        SoLoud::Soloud* getEngine() const { return m_engine.get(); }
+        std::shared_ptr<SoLoud::Soloud>& getEngine() { return m_engine; }
 
         //! Get active listener
         std::optional<std::reference_wrapper<AudioListener>> getActiveListener() const;;
@@ -73,6 +73,6 @@ namespace ige::scene
         std::vector<std::reference_wrapper<AudioListener>> m_audioListeners;
 
         //! SoLoud engine instance
-        std::unique_ptr<SoLoud::Soloud> m_engine = nullptr;
+        std::shared_ptr<SoLoud::Soloud> m_engine = nullptr;
     };
 } // namespace ige::scene

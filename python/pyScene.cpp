@@ -83,12 +83,12 @@ namespace ige::scene
     // Create object
     PyObject* Scene_createObject(PyObject_Scene *self, PyObject* args)
     {
-        char* name;
+        char* name = "";
         PyObject* parentObj;
 
         if (PyArg_ParseTuple(args, "sO", &name, &parentObj)) {
             auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            auto parent = parentObj ? SceneManager::getInstance()->getCurrentScene()->findObjectById(((PyObject_SceneObject*)parentObj)->sceneObject->getId()) : nullptr;
+            auto parent = ((PyObject_SceneObject*)parentObj)->sceneObject->getSharedPtr();
             obj->sceneObject = self->scene->createObject(name, parent).get();
             return (PyObject*)obj;
         }
@@ -97,13 +97,13 @@ namespace ige::scene
 
     // Create object from Prefab
     PyObject* Scene_cloneObject(PyObject_Scene* self, PyObject* args) {
-        char* path;
-        char* name;
+        char* path = "";
+        char* name = "";
         PyObject* parentObj;
 
         if (PyArg_ParseTuple(args, "ssO", &path, &name, &parentObj)) {
             auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            auto parent = parentObj ? SceneManager::getInstance()->getCurrentScene()->findObjectById(((PyObject_SceneObject*)parentObj)->sceneObject->getId()) : nullptr;
+            auto parent = ((PyObject_SceneObject*)parentObj)->sceneObject->getSharedPtr();
             obj->sceneObject = self->scene->createObjectFromPrefab(path, name, parent).get();
             return (PyObject*)obj;
         }
@@ -161,8 +161,8 @@ namespace ige::scene
             {
                 if (PyUnicode_Check(obj))
                 {
-                    const char* name = PyUnicode_AsUTF8(obj);
-                    auto sceneObject = self->scene->findObjectByName(std::string(name));
+                    const char* uuid = PyUnicode_AsUTF8(obj);
+                    auto sceneObject = self->scene->findObjectByUUID(std::string(uuid));
                     if (sceneObject)
                     {
                         auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
@@ -259,7 +259,7 @@ namespace ige::scene
             Py_RETURN_NONE;
 
         auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        hitObj->sceneObject = hit.first;
+        hitObj->sceneObject = hit.first.get();
 
         auto hitPos = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(hit.second.P(), 3, hitPos->v);
@@ -318,7 +318,7 @@ namespace ige::scene
             Py_RETURN_NONE;
 
         auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        hitObj->sceneObject = hit.first;
+        hitObj->sceneObject = hit.first.get();
 
         auto hitPos = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(hit.second.P(), 3, hitPos->v);

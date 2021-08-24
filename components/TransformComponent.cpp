@@ -13,7 +13,7 @@
 namespace ige::scene
 {
     TransformComponent::TransformComponent(SceneObject &owner, const Vec3 &pos, const Quat &rot, const Vec3 &scale)
-        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale), m_parent(nullptr)
+        : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale)
     {
         m_bLocalDirty = true;
 
@@ -23,39 +23,35 @@ namespace ige::scene
 
         if (getOwner()->getParent())
         {
-            m_parent = getOwner()->getParent()->getTransform().get();
-            if (m_parent)
-                m_parent->addObserver(this);
+            m_parent = getOwner()->getParent()->getTransform();
+            if (getParent()) getParent()->addObserver(this);
         }
     }
 
     TransformComponent::~TransformComponent()
     {
-        if (m_parent)
-            m_parent->removeObserver(this);
-        m_parent = nullptr;
+        if (getParent()) getParent()->removeObserver(this);
+        m_parent.reset();
         m_observers.clear();
         notifyObservers(ETransformMessage::TRANSFORM_DESTROYED);
     }
 
-    TransformComponent *TransformComponent::getParent() const
+    std::shared_ptr<TransformComponent> TransformComponent::getParent() const
     {
-        return m_parent;
+        return m_parent.expired() ? nullptr : m_parent.lock();
     }
 
     //! Set parent transform
-    void TransformComponent::setParent(TransformComponent *comp)
+    void TransformComponent::setParent(std::shared_ptr<TransformComponent> comp)
     {
-        if (comp != nullptr)
-        {
-            if (m_parent)
-                m_parent->removeObserver(this);
+        if (getParent())
+            getParent()->removeObserver(this);
+        m_parent.reset();
+
+        if (comp != nullptr) {
             m_parent = comp;
-            if (m_parent)
-                m_parent->addObserver(this);
+            if (getParent()) getParent()->addObserver(this);
         }
-        else
-            m_parent = nullptr;
     }
 
     void TransformComponent::onUpdate(float dt)
@@ -259,7 +255,7 @@ namespace ige::scene
         vmath_mat_appendScale(m_localMatrix.P(), m_localScale.P(), 4, 4, m_localMatrix.P());
 
         // Update world matrix
-        m_worldMatrix = (m_parent) ? m_parent->getWorldMatrix() * m_localMatrix : m_localMatrix;
+        m_worldMatrix = (getParent()) ? getParent()->getWorldMatrix() * m_localMatrix : m_localMatrix;
 
         // Update world position
         m_worldPosition.X(m_worldMatrix[3][0]);
@@ -312,7 +308,7 @@ namespace ige::scene
         vmath_mat_appendScale(m_worldMatrix.P(), m_worldScale.P(), 4, 4, m_worldMatrix.P());
 
         // Update local matrix
-        m_localMatrix = m_parent ? m_parent->getWorldMatrix().Inverse() * m_worldMatrix : m_worldMatrix;
+        m_localMatrix = getParent() ? getParent()->getWorldMatrix().Inverse() * m_worldMatrix : m_worldMatrix;
 
         // Update local position
         m_localPosition.X(m_localMatrix[3][0]);
@@ -364,7 +360,7 @@ namespace ige::scene
         vmath_mat4_from_rottrans(m_localRotation.P(), point.P(), localMatrix.P());
         vmath_mat_appendScale(localMatrix.P(), m_localScale.P(), 4, 4, localMatrix.P());
 
-        auto worldMatrix = (m_parent) ? m_parent->getWorldMatrix() * localMatrix : localMatrix;
+        auto worldMatrix = (getParent()) ? getParent()->getWorldMatrix() * localMatrix : localMatrix;
         Vec3 lpoint;
         lpoint.X(worldMatrix[3][0]);
         lpoint.Y(worldMatrix[3][1]);
@@ -380,7 +376,7 @@ namespace ige::scene
         vmath_mat4_from_rottrans(m_worldRotation.P(), point.P(), worldMatrix.P());
         vmath_mat_appendScale(worldMatrix.P(), m_worldScale.P(), 4, 4, worldMatrix.P());
 
-        auto localMatrix = m_parent ? m_parent->getWorldMatrix().Inverse() * worldMatrix : worldMatrix;
+        auto localMatrix = getParent() ? getParent()->getWorldMatrix().Inverse() * worldMatrix : worldMatrix;
         Vec3 lpoint;
         lpoint.X(localMatrix[3][0]);
         lpoint.Y(localMatrix[3][1]);

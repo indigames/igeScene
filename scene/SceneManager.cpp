@@ -10,6 +10,8 @@
 #include "components/TransformComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/FigureComponent.h"
+#include "components/light/AmbientLight.h"
+#include "components/light/DirectionalLight.h"
 #include "utils/ShapeDrawer.h"
 
 #include <Python.h>
@@ -73,6 +75,27 @@ namespace ige::scene
         Py_SetPath(pathw);
 
         Py_Initialize();
+
+        m_prefabPaths.clear();
+        auto fsPath = fs::path(m_projectPath).append("prefabs");
+        for (const auto& entry : fs::directory_iterator(fsPath))
+        {
+            if (entry.is_regular_file())
+            {
+                json jFile;
+                std::ifstream file(entry.path().string());
+                if (file.is_open())
+                {
+                    file >> jFile;
+                    file.close();
+                    auto prefabId = jFile.value("prefabId", std::string());
+                    if (!prefabId.empty())
+                    {
+                        m_prefabPaths[prefabId] = entry.path().string();
+                    }
+                }
+            }
+        }
     }
 
     void SceneManager::deinit()
@@ -133,11 +156,50 @@ namespace ige::scene
         }
     }
 
+    //! Get/Set prefab path by id
+    std::string SceneManager::getPrefabPath(const std::string& prefabId)
+    {
+        if (m_prefabPaths.count(prefabId) > 0)
+            return m_prefabPaths[prefabId];
+        return std::string();
+    }
+
+    void SceneManager::setPrefabPath(const std::string& id, const std::string& path)
+    {
+        if (!id.empty())
+            m_prefabPaths[id] = path;
+    }
+
     std::shared_ptr<Scene> SceneManager::createScene(const std::string& name, bool empty)
     {
         auto scene = std::make_shared<Scene>(name);
         scene->initialize(empty);
         m_scenes.push_back(scene);
+        return scene;
+    }
+
+    std::shared_ptr<Scene> SceneManager::createSceneFromPrefab(const std::string& path)
+    {
+        auto fsPath = fs::path(path);
+        if (fsPath.extension().string() != ".prefab")
+            return nullptr;
+
+        std::ifstream file(fsPath);
+        if (!file.is_open()) return nullptr;
+        json jObj;
+        file >> jObj;
+        file.close();
+
+        auto scene = createScene(jObj.value("name", "Prefab"), true);
+        auto prefabId = jObj.value("prefabId", std::string());
+        auto obj = scene->createObject(jObj.at("name"), nullptr, jObj.value("gui", false), {64.f, 64.f}, prefabId);
+        obj->from_json(jObj);
+
+        // Just to display
+        obj->addComponent<EnvironmentComponent>()->setSkipSerialize(true);
+        auto ambientLight = obj->addComponent<AmbientLight>();
+        ambientLight->setSkyColor({0.8f, 0.8f, 0.8f});
+        ambientLight->setSkipSerialize(true);
         return scene;
     }
 

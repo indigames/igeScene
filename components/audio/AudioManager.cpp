@@ -25,8 +25,8 @@ namespace ige::scene
     AudioManager::~AudioManager()
     {
         // Clear audio sources
-        for (auto& audioSrc : m_audioSources)
-            audioSrc.get().stop();
+        for (AudioSource& audioSrc : m_audioSources)
+            audioSrc.stop();
         m_audioSources.clear();
 
         // Unregister AudioListener events
@@ -90,8 +90,8 @@ namespace ige::scene
 
     void AudioManager::onDestroyed(AudioSource &source)
     {
-        auto found = std::find_if(m_audioSources.begin(), m_audioSources.end(), [&source](std::reference_wrapper<AudioSource> element) {
-            return std::addressof(source) == std::addressof(element.get());
+        auto found = std::find_if(m_audioSources.begin(), m_audioSources.end(), [&source](AudioSource& element) {
+            return std::addressof(source) == std::addressof(element);
         });
 
         if (found != m_audioSources.end())
@@ -106,8 +106,8 @@ namespace ige::scene
 
     void AudioManager::onDestroyed(AudioListener &listener)
     {
-        auto found = std::find_if(m_audioListeners.begin(), m_audioListeners.end(), [&listener](std::reference_wrapper<AudioListener> element) {
-            return std::addressof(listener) == std::addressof(element.get());
+        auto found = std::find_if(m_audioListeners.begin(), m_audioListeners.end(), [&listener](AudioListener& element) {
+            return std::addressof(listener) == std::addressof(element);
         });
 
         if (found != m_audioListeners.end())
@@ -117,8 +117,8 @@ namespace ige::scene
     //! Get active listener
     std::optional<std::reference_wrapper<AudioListener>> AudioManager::getActiveListener() const
     {
-        auto found = std::find_if(m_audioListeners.begin(), m_audioListeners.end(), [](std::reference_wrapper<AudioListener> element) {
-            return element.get().isEnabled();
+        auto found = std::find_if(m_audioListeners.begin(), m_audioListeners.end(), [](AudioListener& element) {
+            return element.isEnabled();
         });
         if (found != m_audioListeners.end())
             return { *found };

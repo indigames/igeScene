@@ -36,7 +36,7 @@ namespace ige::scene
         bool initialize();
 
         //! Get list of joint objects
-        const std::unordered_map<std::string, SceneObject*>& getJointObjects() const { return m_jointObjects; }
+        const std::unordered_map<std::string, std::shared_ptr<SceneObject>>& getJointObjects() const { return m_jointObjects; }
 
         //! Trigger when select joint in the editor
         void onJointObjectSelected(const std::string& name, bool selected);
@@ -59,7 +59,7 @@ namespace ige::scene
 
     protected:
         //! Store all object created by BoneTransform
-        std::unordered_map<std::string, SceneObject*> m_jointObjects = {};
+        std::unordered_map<std::string, std::shared_ptr<SceneObject>> m_jointObjects = {};
 
         //! Cache the figure object
         Figure* m_figure = nullptr;

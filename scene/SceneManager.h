@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <map>
 
 #include "utils/Singleton.h"
 #include "event/Event.h"
@@ -38,6 +39,9 @@ namespace ige::scene
 
         //! Create empty scene
         std::shared_ptr<Scene> createScene(const std::string& name = "Untitled", bool empty = false);
+
+        //! Creator function: create a scene from prefab file
+        std::shared_ptr<Scene> createSceneFromPrefab(const std::string& file);
 
         //! Load scene
         bool loadScene(std::shared_ptr<Scene> scene, const std::string& scenePath);
@@ -80,6 +84,14 @@ namespace ige::scene
         const std::string& getEditorPath() const { return m_editorPath; }
         void setEditorPath(const std::string& path);
 
+        //! Get/Set prefab path by id
+        std::string getPrefabPath(const std::string& prefabId);
+        void setPrefabPath(const std::string& id, const std::string& path);
+
+        //! Get prefab paths map
+        const std::map<std::string, std::string>& getPrefabPaths() const { return m_prefabPaths; }
+
+        //! Dispatch event
         void dispathEvent(int eventType);
 
     protected:
@@ -101,6 +113,9 @@ namespace ige::scene
 
         //! List of all Scenes
         std::vector<std::shared_ptr<Scene>> m_scenes;
+
+        //! Map of prefabId and it paths
+        std::map<std::string, std::string> m_prefabPaths;
 
         //! Editor mode
         bool m_bIsEditor = false;

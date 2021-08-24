@@ -207,7 +207,7 @@ namespace ige::scene
         onUpdate(0.f);
     }
 
-    void RectTransform::setParent(TransformComponent* comp)
+    void RectTransform::setParent(std::shared_ptr<TransformComponent> comp)
     {
         bool flag = false;
         if (comp != nullptr) {
@@ -297,16 +297,15 @@ namespace ige::scene
         // Recursive update flag of all child object
         for (auto& child : getOwner()->getChildren())
         {
-            if (child)
+            if (!child.expired())
             {
-                auto childTransform = child->getComponent<RectTransform>();
+                auto childTransform = child.lock()->getComponent<RectTransform>();
                 if (childTransform)
                 {
                     childTransform->setRectDirty();
                 }
             }
         }
-
     }
 
     void RectTransform::setTransformDirty()
@@ -319,9 +318,9 @@ namespace ige::scene
         // Recursive update flag of all child object
         for (auto &child : getOwner()->getChildren())
         {
-            if (child)
+            if (!child.expired())
             {
-                auto childTransform = child->getComponent<RectTransform>();
+                auto childTransform = child.lock()->getComponent<RectTransform>();
                 if (childTransform)
                 {
                     childTransform->setTransformDirty();
@@ -338,9 +337,9 @@ namespace ige::scene
         // Recursive update flag of all child object
         for (auto& child : getOwner()->getChildren())
         {
-            if (child)
+            if (!child.expired())
             {
-                auto childTransform = child->getComponent<RectTransform>();
+                auto childTransform = child.lock()->getComponent<RectTransform>();
                 if (childTransform)
                 {
                     childTransform->setLocalToRectDirty();
@@ -425,9 +424,9 @@ namespace ige::scene
 
             for (auto& child : getOwner()->getChildren())
             {
-                if (child)
+                if (!child.expired())
                 {
-                    auto childTransform = child->getComponent<RectTransform>();
+                    auto childTransform = child.lock()->getComponent<RectTransform>();
                     if (childTransform)
                     {
                         childTransform->updateSize();
@@ -457,9 +456,9 @@ namespace ige::scene
 
             for (auto& child : getOwner()->getChildren())
             {
-                if (child)
+                if (!child.expired())
                 {
-                    auto childTransform = child->getComponent<RectTransform>();
+                    auto childTransform = child.lock()->getComponent<RectTransform>();
                     if (childTransform)
                     {
                         childTransform->updateSize();
@@ -533,9 +532,9 @@ namespace ige::scene
 
         for (auto& child : getOwner()->getChildren())
         {
-            if (child)
+            if (!child.expired())
             {
-                auto childTransform = child->getComponent<RectTransform>();
+                auto childTransform = child.lock()->getComponent<RectTransform>();
                 if (childTransform)
                 {
                     childTransform->updateSize();
@@ -578,9 +577,9 @@ namespace ige::scene
         if (!only) {
             for (auto& child : getOwner()->getChildren())
             {
-                if (child)
+                if (!child.expired())
                 {
-                    auto childTransform = child->getComponent<RectTransform>();
+                    auto childTransform = child.lock()->getComponent<RectTransform>();
                     if (childTransform)
                     {
                         childTransform->updateRect();

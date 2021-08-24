@@ -62,12 +62,7 @@ namespace ige::scene
                         if (jointObj == nullptr)
                         {
                             auto scene = getOwner()->getScene();
-                            if (scene)
-                            {
-                                auto owner = scene->findObjectById(getOwner()->getId());
-                                jointObjTmp = getOwner()->getScene()->createObject(jointName, owner);
-                                jointObj = jointObjTmp.get();
-                            }
+                            if (scene) jointObj = getOwner()->getScene()->createObject(jointName, getOwner()->getSharedPtr());
                         }
                         m_jointObjects[jointName] = jointObj;
                     }

@@ -79,6 +79,15 @@ namespace ige::scene
         Component::from_json(j);
     }
 
+    //! Serialize finished event
+    void NavObstacle::onSerializeFinished(Scene* scene)
+    {
+        if (isEnabled()) {
+            getActivatedEvent().invoke(this);
+            m_bIsActivated = true;
+        }
+    }
+
     //! Update property by key value
     void NavObstacle::setProperty(const std::string& key, const json& val)
     {

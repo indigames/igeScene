@@ -463,9 +463,9 @@ void UISlider::onChangeDirection()
 		//! Change Anchor, offset
 		for (auto& child : getOwner()->getChildren())
 		{
-			if (child)
+			if (!child.expired())
 			{
-				onRotateDirection(child);
+				onRotateDirection(child.lock());
 			}
 		}
 
@@ -477,9 +477,9 @@ void UISlider::onChangeDirection()
 		//! Raise flag to update rect value
 		for (auto& child : getOwner()->getChildren())
 		{
-			if (child)
+			if (!child.expired())
 			{
-				auto childTransform = child->getComponent<RectTransform>();
+				auto childTransform = child.lock()->getComponent<RectTransform>();
 				if (childTransform)
 				{
 					childTransform->setLocalToRectDirty();
@@ -489,7 +489,7 @@ void UISlider::onChangeDirection()
 	}
 }
 
-void UISlider::onRotateDirection(SceneObject* obj)
+void UISlider::onRotateDirection(std::shared_ptr<SceneObject> obj)
 {
 	if (obj)
 	{
@@ -507,9 +507,9 @@ void UISlider::onRotateDirection(SceneObject* obj)
 
 		for (auto& child : obj->getChildren())
 		{
-			if (child)
+			if (!child.expired())
 			{
-				onRotateDirection(child);
+				onRotateDirection(child.lock());
 			}
 		}
 	}

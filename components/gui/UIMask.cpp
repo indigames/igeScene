@@ -86,14 +86,15 @@ void UIMask::updateMask()
     {
         for (int i = 0; i < childrenSize; i++)
         {
-            updateChildMask(children[i]);
+            if(!children[i].expired())
+                updateChildMask(children[i].lock());
         }
     }
 
     m_maskDirty = false;
 }
 
-void UIMask::updateChildMask(SceneObject* child)
+void UIMask::updateChildMask(std::shared_ptr<SceneObject> child)
 {
     if (child == nullptr) return;
     
@@ -111,7 +112,8 @@ void UIMask::updateChildMask(SceneObject* child)
     {
         for (int i = 0; i < childrenSize; i++)
         {
-            updateChildMask(children[i]);
+            if(!children[i].expired())
+                updateChildMask(children[i].lock());
         }
     }
 

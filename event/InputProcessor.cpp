@@ -81,21 +81,18 @@ Vec2 InputProcessor::getTouchPosition(int touchId)
     return m_recentInput.getPosition();
 }
 
-void InputProcessor::addTouchMonitor(int touchId, SceneObject* target)
+void InputProcessor::addTouchMonitor(int touchId, std::shared_ptr<SceneObject> target)
 {
     TouchInfo* ti = getTouch(touchId, false);
-    if (!ti)
-        return;
-
+    if (!ti) return;
     auto it = std::find(ti->touchMonitors.cbegin(), ti->touchMonitors.cend(), target->getId());
     if (it == ti->touchMonitors.cend())
         ti->touchMonitors.push_back(target->getId());
 }
 
-void InputProcessor::removeTouchMonitor(SceneObject* target)
+void InputProcessor::removeTouchMonitor(std::shared_ptr<SceneObject> target)
 {
-    for (auto it = m_touches.cbegin(); it != m_touches.cend(); ++it)
-    {
+    for (auto it = m_touches.cbegin(); it != m_touches.cend(); ++it) {
         auto it2 = std::find((*it)->touchMonitors.begin(), (*it)->touchMonitors.end(), target->getId());
         if (it2 != (*it)->touchMonitors.end())
             *it2 = 0;
@@ -132,7 +129,7 @@ TouchInfo* InputProcessor::getTouch(int touchId, bool createIfNotExists)
     return ret;
 }
 
-void InputProcessor::updateRecentInput(TouchInfo* ti, SceneObject* target)
+void InputProcessor::updateRecentInput(TouchInfo* ti, std::shared_ptr<SceneObject> target)
 {
     //Cast int to get round
     m_recentInput.m_position.X((int)ti->pos.X());
@@ -142,19 +139,19 @@ void InputProcessor::updateRecentInput(TouchInfo* ti, SceneObject* target)
     m_recentInput.m_touchId = ti->touchId;
 }
 
-void InputProcessor::handleRollOver(TouchInfo* touch, SceneObject* target)
+void InputProcessor::handleRollOver(TouchInfo* touch, std::shared_ptr<SceneObject> target)
 {
     
 }
 
-void InputProcessor::setBegin(TouchInfo* touch, SceneObject* target)
+void InputProcessor::setBegin(TouchInfo* touch, std::shared_ptr<SceneObject> target)
 {
     touch->began = true;
     touch->clickCancelled = false;
     touch->downPos = touch->pos;
 
     touch->downTargets.clear();
-    SceneObject* obj = target;
+    auto obj = target;
     while (obj != nullptr)
     {
         touch->downTargets.push_back(obj->getId());
@@ -162,7 +159,7 @@ void InputProcessor::setBegin(TouchInfo* touch, SceneObject* target)
     }
 }
 
-void InputProcessor::setEnd(TouchInfo* touch, SceneObject* target)
+void InputProcessor::setEnd(TouchInfo* touch, std::shared_ptr<SceneObject> target)
 {
     touch->began = false;
 
@@ -202,7 +199,7 @@ void InputProcessor::onTouchBegan(int touchId, float x, float y)
     if (hit.first == nullptr) {
         auto scene = SceneManager::getInstance()->getCurrentScene();
         if (scene)
-            hit.first = scene->getRootUI().get();
+            hit.first = scene->getRootUI();
     }
     auto target = hit.first;
     if (target == nullptr) return;
@@ -231,7 +228,7 @@ void InputProcessor::onTouchMoved(int touchId, float x, float y)
     if (hit.first == nullptr) {
         auto scene = SceneManager::getInstance()->getCurrentScene();
         if (scene) {
-            hit.first = scene->getRootUI().get();
+            hit.first = scene->getRootUI();
         }
     }
     auto target = hit.first;
@@ -280,7 +277,7 @@ void InputProcessor::onTouchEnded(int touchId, float x, float y)
     auto scene = SceneManager::getInstance()->getCurrentScene();
     if (hit.first == nullptr) {
         if(scene)
-            hit.first = scene->getRootUI().get();
+            hit.first = scene->getRootUI();
     }
     auto target = hit.first;
     if (target == nullptr) return;
@@ -304,7 +301,7 @@ void InputProcessor::onTouchEnded(int touchId, float x, float y)
             if (!mm)
                 continue;
 
-            if (mm.get() != target)
+            if (mm != target)
                 mm->dispatchInputEvent((int)EventType::TouchEnd);
         }
         ti->touchMonitors.clear();
@@ -328,17 +325,16 @@ void InputProcessor::onTouchEnded(int touchId, float x, float y)
     m_activeProcessor = nullptr;
 }
 
-std::pair<SceneObject*, Vec3> InputProcessor::hitTestUI(float touchX, float touchY) {
+std::pair<std::shared_ptr<SceneObject>, Vec3> InputProcessor::hitTestUI(float touchX, float touchY) {
     auto scene = SceneManager::getInstance()->getCurrentScene();
     if (scene) {
         auto hit = scene->raycastUI(Vec2(touchX, touchY));
         return hit;
     }
-    std::pair<SceneObject*, Vec3> hitNull(nullptr, Vec3());
-    return hitNull;
+    return { nullptr, Vec3() };
 }
 
-SceneObject* InputProcessor::clickTestUI(TouchInfo* touch, SceneObject* target) {
+std::shared_ptr<SceneObject> InputProcessor::clickTestUI(TouchInfo* touch, std::shared_ptr<SceneObject> target) {
     if (touch->downTargets.empty()
         || touch->clickCancelled
         || std::abs(touch->pos.X() - touch->downPos.X()) > 50 || std::abs(touch->pos.Y() - touch->downPos.Y()) > 50)
@@ -348,7 +344,7 @@ SceneObject* InputProcessor::clickTestUI(TouchInfo* touch, SceneObject* target) 
 
     auto obj = scene->findObjectById(touch->downTargets[0]);
     if (obj && obj->isActive())
-        return obj.get();
+        return obj;
 
     auto current = target;
     while (current != nullptr)
@@ -358,11 +354,10 @@ SceneObject* InputProcessor::clickTestUI(TouchInfo* touch, SceneObject* target) 
         {
             auto itObj = scene->findObjectById(*it);
             if (itObj->isActive()) {
-                current = itObj.get();
+                current = itObj;
                 break;
             }
         }
-
         current = current->getParent();
     }
     return current;

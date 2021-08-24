@@ -269,10 +269,12 @@ void UIScrollBar::_flipLayoutAxes(std::shared_ptr<RectTransform> rect, bool keep
         {
             for (int i = 0; i < childCount; i++)
             {
-                auto childRect = children[i]->getRectTransform();
-                if (childRect)
-                {
-                    _flipLayoutAxes(childRect, false, true);
+                if (!children[i].expired()) {
+                    auto childRect = children[i].lock()->getRectTransform();
+                    if (childRect)
+                    {
+                        _flipLayoutAxes(childRect, false, true);
+                    }
                 }
             }
         }
@@ -300,10 +302,12 @@ void UIScrollBar::_flipLayoutOnAxis(std::shared_ptr<RectTransform> rect, int axi
         {
             for (int i = 0; i < childCount; i++)
             {
-                auto childRect = children[i]->getRectTransform();
-                if (childRect)
-                {
-                    _flipLayoutOnAxis(childRect, axis, false, true);
+                if (!children[i].expired()) {
+                    auto childRect = children[i].lock()->getRectTransform();
+                    if (childRect)
+                    {
+                        _flipLayoutOnAxis(childRect, axis, false, true);
+                    }
                 }
             }
         }
