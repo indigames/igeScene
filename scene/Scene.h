@@ -135,7 +135,7 @@ namespace ige::scene
         //! Prefab save/load
         bool isSavingPrefab() { return m_bIsSavingPrefab; }
         bool savePrefab(uint64_t objectId, const std::string& file);
-        bool loadPrefab(uint64_t parentId, const std::string& file);
+        std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file);
         bool reloadAllPrefabs();
         bool reloadPrefabs(const std::string& prefabId);
 

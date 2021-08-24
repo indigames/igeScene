@@ -357,27 +357,9 @@ namespace ige::scene
 
     std::shared_ptr<SceneObject> Scene::createObjectFromPrefab(const std::string& path, const std::string& name, const std::shared_ptr<SceneObject>& parent)
     {
-        if (path.empty())
-            return nullptr;
-
-        auto fsPath = fs::path(path);
-        if (fsPath.extension().string() != ".prefab")
-            return nullptr;
-
-        std::ifstream file(fsPath);
-        if (!file.is_open())
-            return nullptr;
-
-        json jObj;
-        file >> jObj;
-
-        auto prefabId = jObj.value("prefabId", std::string());
-        auto sceneObject = createObject(name, parent, jObj.value("gui", false));
-        sceneObject->from_json(jObj);
-        sceneObject->setPrefabId(prefabId);
-        sceneObject->setParent(parent);
-        file.close();
-        return sceneObject;
+        auto object = loadPrefab(parent ? parent->getId() : -1, path);
+        if (object) object->setName(name);
+        return object;
     }
 
     std::shared_ptr<SceneObject> Scene::createRootObject(const std::string& name) {
@@ -570,7 +552,7 @@ namespace ige::scene
         return false;
     }
 
-    bool Scene::loadPrefab(uint64_t parentId, const std::string& path)
+    std::shared_ptr<SceneObject> Scene::loadPrefab(uint64_t parentId, const std::string& path)
     {
         if (path.empty())
             return false;
@@ -590,7 +572,7 @@ namespace ige::scene
         auto prefabId = jObj.value("prefabId", std::string());
         auto obj = createObject(jObj.at("name"), parent, jObj.value("gui", false), jObj.value("size", Vec2{ 64.f, 64.f }), prefabId);
         obj->from_json(jObj);
-        return true;
+        return obj;
     }
 
     bool  Scene::reloadPrefabs(const std::string& prefabId) {
