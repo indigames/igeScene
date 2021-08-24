@@ -879,6 +879,20 @@ namespace ige::scene
         return m_prefabId;
     }
 
+    //! Unpack prefab
+    bool SceneObject::unpackPrefab() {
+        if (isInPrefab()) {
+            for (auto& child : m_children) {
+                if (!child.expired()) {
+                    child.lock()->unpackPrefab();
+                }
+            }
+            if(isPrefab()) setPrefabId(std::string());
+            return true;
+        }
+        return false;
+    }
+
     std::string SceneObject::getPrefabRootId()
     {
         if (getParent() && !getParent()->getPrefabRootId().empty()

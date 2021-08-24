@@ -236,6 +236,7 @@ namespace ige::scene
         virtual std::string getPrefabRootId();
         virtual std::shared_ptr<SceneObject> getPrefabRoot();
         virtual std::string getPrefabId();
+        virtual bool unpackPrefab();
         void setPrefabId(const std::string& id);
 
         //! Mask state
