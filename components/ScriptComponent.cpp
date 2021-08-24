@@ -713,7 +713,7 @@ namespace ige::scene
         auto jMembers = j.value("members", json::array());
         m_members = jMembers.get<std::unordered_map<std::string, json>>();
 
-        setPath(j.at("path"));
+        setPath(j.at("path"), true);
         Component::from_json(j);
     }
 

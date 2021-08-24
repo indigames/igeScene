@@ -8,6 +8,7 @@
 #include "event/Event.h"
 
 #include "components/Component.h"
+#include "components/RuntimeComponent.h"
 #include "components/navigation/NavAgent.h"
 #include "components/navigation/NavMesh.h"
 
@@ -19,7 +20,7 @@ namespace ige::scene
     /**
      * Class NavAgentManager: manage navigation system. Should be added to the root node.
      */
-    class NavAgentManager : public Component
+    class NavAgentManager : public RuntimeComponent
     {
     public:
         //! Obstacle avoidance params
@@ -47,8 +48,12 @@ namespace ige::scene
         //! Returns the type of the component
         virtual Type getType() const override { return Type::NavAgentManager; }
 
+        void Initialize() override;
+
+        void Clear() override;
+
         //! Update
-        void onUpdate(float dt) override;
+        void onRuntimeUpdate(float dt) override;
 
         //! NavMesh for which the crowd was created.
         NavMesh *getNavMesh() const { return m_navMesh; }
