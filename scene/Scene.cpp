@@ -540,12 +540,27 @@ namespace ige::scene
             m_bIsSavingPrefab = true;
             json jObj;
             object->to_json(jObj);
-            auto prefabId = object->getPrefabId().empty() ? SceneObject::generateUUID() : object->getPrefabId();
-            jObj["prefabId"] = prefabId;
-            auto fsPath = path.empty() ? fs::path(object->getName()) : fs::path(path + "/" + object->getName());
+
+            auto fsPath = path.empty() ? fs::path(object->getName()) : fs::path(path);
             auto ext = fsPath.extension();
             if (ext.string() != ".prefab")
                 fsPath = fsPath.replace_extension(".prefab");
+
+            auto prefabId = std::string();
+            if (fs::exists(fsPath)) {
+                std::ifstream file(fsPath);
+                if (!file.is_open())
+                    return false;
+                json jObj;
+                file >> jObj;
+                file.close();
+                prefabId = jObj.value("prefabId", std::string());
+            }
+
+            if(prefabId.empty())
+                prefabId = SceneObject::generateUUID();
+
+            jObj["prefabId"] = prefabId;
             std::ofstream file(fsPath.string());
             file << std::setw(2) << jObj << std::endl;
             SceneManager::getInstance()->setPrefabPath(prefabId, fsPath.string());
