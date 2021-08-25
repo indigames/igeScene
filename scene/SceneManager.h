@@ -43,6 +43,9 @@ namespace ige::scene
         //! Creator function: create a scene from prefab file
         std::shared_ptr<Scene> createSceneFromPrefab(const std::string& file);
 
+        //! Find prefab scene from prefabId
+        std::shared_ptr<Scene> findPrefabSceneById(const std::string& prefabId);
+
         //! Load scene
         bool loadScene(std::shared_ptr<Scene> scene, const std::string& scenePath);
 

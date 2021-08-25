@@ -177,7 +177,15 @@ namespace ige::scene
         m_scenes.push_back(scene);
         return scene;
     }
-
+    //! Find prefab scene from prefabId
+    std::shared_ptr<Scene> SceneManager::findPrefabSceneById(const std::string& prefabId)
+    {
+        auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](const auto& scene) {
+            return scene && scene->getPrefabId().compare(prefabId) == 0;
+        });
+        return (found != m_scenes.end()) ? *found : nullptr;
+    }
+    
     std::shared_ptr<Scene> SceneManager::createSceneFromPrefab(const std::string& path)
     {
         auto fsPath = fs::path(path);
@@ -190,8 +198,11 @@ namespace ige::scene
         file >> jObj;
         file.close();
 
-        auto scene = createScene(jObj.value("name", "Prefab"), true);
         auto prefabId = jObj.value("prefabId", std::string());
+        auto scene = findPrefabSceneById(prefabId);
+        if (scene != nullptr) return scene;
+
+        scene = createScene(jObj.value("name", "Prefab"), true);        
         auto obj = scene->createObject(jObj.at("name"), nullptr, jObj.value("gui", false), {64.f, 64.f}, prefabId);
         obj->from_json(jObj);
 
