@@ -432,14 +432,13 @@ namespace ige::scene
             m_aabbDirty--;
         }
 
-        if (isActive())
-        {
-            for (auto &comp : m_components)
-            {
-                // Camera updated before other objects
-                if (comp->getName() != "Camera")
-                    comp->onUpdate(dt);
-            }
+        auto itr = m_components.begin();
+        while (itr != m_components.end()) {
+            if (*itr == nullptr) { itr = m_components.erase(itr); continue; }
+            auto comp = *itr;
+            if (isActive() && comp->getName() != "Camera")
+                comp->onUpdate(dt);
+            ++itr;
         }
     }
 

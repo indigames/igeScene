@@ -78,20 +78,22 @@ namespace ige::scene
 
         m_prefabPaths.clear();
         auto fsPath = fs::path(m_projectPath).append("prefabs");
-        for (const auto& entry : fs::directory_iterator(fsPath))
-        {
-            if (entry.is_regular_file())
+        if (fs::exists(fsPath) && fs::is_directory(fsPath)) {
+            for (const auto& entry : fs::directory_iterator(fsPath))
             {
-                json jFile;
-                std::ifstream file(entry.path().string());
-                if (file.is_open())
+                if (entry.is_regular_file())
                 {
-                    file >> jFile;
-                    file.close();
-                    auto prefabId = jFile.value("prefabId", std::string());
-                    if (!prefabId.empty())
+                    json jFile;
+                    std::ifstream file(entry.path().string());
+                    if (file.is_open())
                     {
-                        m_prefabPaths[prefabId] = entry.path().string();
+                        file >> jFile;
+                        file.close();
+                        auto prefabId = jFile.value("prefabId", std::string());
+                        if (!prefabId.empty())
+                        {
+                            m_prefabPaths[prefabId] = entry.path().string();
+                        }
                     }
                 }
             }
