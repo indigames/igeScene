@@ -405,8 +405,11 @@ namespace ige::scene
         // Remove from objects list
         auto itr = std::find(m_objects.begin(), m_objects.end(), obj);
         if (itr != m_objects.end()) {
-            for (auto& child : obj->getChildren())
-                if(!child.expired()) removeObject(child.lock());
+            for (auto& child : obj->getChildren()) {
+                if (!child.expired()) {
+                    removeObjectById(child.lock()->getId());
+                }
+            }
             m_objects.erase(itr);
             obj = nullptr;
             return true;
@@ -555,15 +558,15 @@ namespace ige::scene
     std::shared_ptr<SceneObject> Scene::loadPrefab(uint64_t parentId, const std::string& path)
     {
         if (path.empty())
-            return false;
+            return nullptr;
 
         auto fsPath = fs::path(path);
         if (fsPath.extension().string() != ".prefab")
-            return false;
+            return nullptr;
 
         std::ifstream file(fsPath);
         if (!file.is_open())
-            return false;
+            return nullptr;
 
         json jObj;
         file >> jObj;

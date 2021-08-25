@@ -1,6 +1,5 @@
 #include "components/tween/Tweener.h"
 #include "scene/SceneObject.h"
-#include <math.h>
 
 NS_IGE_SCENE_BEGIN
 
