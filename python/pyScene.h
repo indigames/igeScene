@@ -46,6 +46,9 @@ namespace ige::scene
     // Find object
     PyObject* Scene_findObject(PyObject_Scene *self, PyObject* args);
 
+    // Find object by Name
+    PyObject* Scene_findObjectByName(PyObject_Scene* self, PyObject* args);
+
     // Get all objects
     PyObject* Scene_getObjects(PyObject_Scene *self);
 

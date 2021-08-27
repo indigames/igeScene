@@ -186,6 +186,30 @@ namespace ige::scene
         Py_RETURN_NONE;
     }
 
+    // Find object by name
+    PyObject* Scene_findObjectByName(PyObject_Scene* self, PyObject* args)
+    {
+        PyObject* obj = nullptr;
+        if (PyArg_ParseTuple(args, "O", &obj))
+        {
+            if (obj)
+            {
+                if (PyUnicode_Check(obj))
+                {
+                    const char* name = PyUnicode_AsUTF8(obj);
+                    auto sceneObject = self->scene->findObjectByName(std::string(name));
+                    if (sceneObject)
+                    {
+                        auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+                        obj->sceneObject = sceneObject.get();
+                        return (PyObject*)obj;
+                    }
+                }
+            }
+        }
+        Py_RETURN_NONE;
+    }
+
     // Get roots
     PyObject* Scene_getObjects(PyObject_Scene *self)
     {
@@ -372,6 +396,7 @@ namespace ige::scene
         { "cloneObject", (PyCFunction)Scene_cloneObject, METH_VARARGS, Scene_cloneObject_doc },
         { "removeObject", (PyCFunction)Scene_removeObject, METH_VARARGS, Scene_removeObject_doc },
         { "findObject", (PyCFunction)Scene_findObject, METH_VARARGS, Scene_findObject_doc },
+        { "findObjectByName", (PyCFunction)Scene_findObjectByName, METH_VARARGS, Scene_findObject_doc },
         { "getObjects", (PyCFunction)Scene_getObjects, METH_NOARGS, Scene_getObjects_doc },
         { "getRoot", (PyCFunction)Scene_getRoot, METH_NOARGS, Scene_getRoot_doc },
         { "getPath", (PyCFunction)Scene_getPath, METH_NOARGS, Scene_getPath_doc },
