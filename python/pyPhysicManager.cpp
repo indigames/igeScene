@@ -99,10 +99,11 @@ namespace ige::scene
         vmath_cpy(PhysicHelper::from_btVector3(hit.normal).P(), 3, hitNorm->v);
         hitNorm->d = 3;
 
-        PyObject *res = Py_BuildValue("{s:O,s:O,s:O,s:i}",
+        PyObject *res = Py_BuildValue("{s:O,s:O,s:O}",
                                       "hitObject", hitObj,
                                       "hitPosition", hitPos,
                                       "hitNormal", hitNorm);
+        
         Py_XDECREF(hitObj);
         Py_XDECREF(hitPos);
         Py_XDECREF(hitNorm);
@@ -151,7 +152,7 @@ namespace ige::scene
             vmath_cpy(PhysicHelper::from_btVector3(hits[i].normal).P(), 3, hitNorm->v);
             hitNorm->d = 3;
 
-            PyObject *hitTuple = Py_BuildValue("{s:O,s:O,s:O,s:i}",
+            PyObject *hitTuple = Py_BuildValue("{s:O,s:O,s:O}",
                                                "hitObject", hitObj,
                                                "hitPosition", hitPos,
                                                "hitNormal", hitNorm);

@@ -301,6 +301,7 @@ namespace ige::scene
     RaycastHit PhysicManager::rayTestClosest(const btVector3 &rayFromWorld, const btVector3 &rayToWorld, int group, int mask)
     {
         RaycastHit result;
+        result.object = nullptr;
         btCollisionWorld::ClosestRayResultCallback closestRayCallback(rayFromWorld, rayToWorld);
         closestRayCallback.m_collisionFilterMask = mask;
         closestRayCallback.m_collisionFilterGroup = group;
