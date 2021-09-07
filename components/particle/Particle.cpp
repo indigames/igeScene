@@ -36,7 +36,7 @@ namespace ige::scene
     Particle::~Particle()
     {
         m_onDestroyedEvent.invoke(this);
-        if (m_effect)
+        if (m_effect.Get())
         {
             m_effect->Release();
             m_effect = nullptr;
@@ -66,7 +66,7 @@ namespace ige::scene
         {
             m_path = relPath;
 
-            if (m_effect)
+            if (m_effect.Get())
             {
                 stop();
                 m_effect->Release();
@@ -176,7 +176,7 @@ namespace ige::scene
     //! Play
     void Particle::play()
     {
-        if (m_effect)
+        if (m_effect.Get())
         {
             // Stop playing effect
             stop();

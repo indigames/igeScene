@@ -1,9 +1,10 @@
 @echo off
 setlocal enabledelayedexpansion
+
 set CONAN_REVISIONS_ENABLED=1
 set CURR_DIR=%CD%
-
 set PYPIRC="%USERPROFILE%\.pypirc"
+set DEPLOY_TARGET=%1
 
 if not exist "!PYPIRC!" (
     echo Ensure to have '.pypirc' in HOME dir, or you will need to enter password manually!
@@ -25,7 +26,12 @@ REM Build wheel package
 if %ERRORLEVEL% NEQ 0 goto ERROR
 
 REM Upload to Pypi
-!PYTHON! -m twine upload -r testpypi --config-file !PYPIRC! --non-interactive --skip-existing dist/*
+if [%DEPLOY_TARGET%]==[testpypi] (
+    !PYTHON! -m twine upload -r testpypi --config-file !PYPIRC! --non-interactive --skip-existing dist/*
+) else (
+    !PYTHON! -m twine upload --config-file !PYPIRC! --non-interactive --skip-existing dist/*
+)
+
 if %ERRORLEVEL% NEQ 0 goto ERROR
 
 cd %CURR_DIR%

@@ -11,7 +11,7 @@
 #include <Effekseer.h>
 #define __EFFEKSEER_RENDERER_INTERNAL_LOADER__
 #include <EffekseerRendererGL/EffekseerRendererGL.h>
-#include <EffekseerRendererGL/EffekseerRenderer/EffekseerRendererGL.TextureLoader.h>
+#include <Effekseer/Effekseer.TextureLoader.h>
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
@@ -21,14 +21,14 @@ namespace ige::scene
     class Particle;
 
     //! Class ParticleTextureLoader: load IGE texture to Effekseer
-    class ParticleTextureLoader : public EffekseerRendererGL::TextureLoader
+    class ParticleTextureLoader : public Effekseer::TextureLoader
     {
     public:
         //! Constructor
         ParticleTextureLoader();
 
         //! Load
-        Effekseer::TextureData *Load(const EFK_CHAR *path, Effekseer::TextureType textureType) override;
+        Effekseer::TextureRef Load(const char16_t* path, Effekseer::TextureType textureType) override;       
     };
 
     /**
@@ -53,7 +53,7 @@ namespace ige::scene
         void onRender() override;
 
         //! Get manager
-        Effekseer::Manager *getEffekseerManager() { return m_manager; }
+        Effekseer::ManagerRef getEffekseerManager() { return m_manager; }
 
         //! Set projection matrix
         void setProjectionMatrix(const Mat4 &matrix);
@@ -121,13 +121,10 @@ namespace ige::scene
         std::vector<Particle *> m_particles;
 
         //! Manager instance
-        Effekseer::Manager *m_manager = nullptr;
+        Effekseer::ManagerRef m_manager = nullptr;
 
         //! Renderer instance
-        EffekseerRenderer::Renderer *m_renderer = nullptr;
-
-        //! Particle texture loader
-        ParticleTextureLoader *m_textureLoader = nullptr;
+        EffekseerRenderer::RendererRef m_renderer = nullptr;
 
         //! Projection matrix
         Mat4 m_projectionMatrix = {};

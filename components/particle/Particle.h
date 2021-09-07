@@ -113,7 +113,7 @@ namespace ige::scene
 
     protected:
         //! Effect
-        Effekseer::Effect* m_effect = nullptr;
+        Effekseer::EffectRef m_effect = nullptr;
 
         //! Particle handle
         int m_handle = -1;

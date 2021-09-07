@@ -6,20 +6,24 @@
 #include "utils/filesystem.h"
 namespace fs = ghc::filesystem;
 
+#include <Effekseer.h>
+#include "EffekseerRendererGL/EffekseerRendererGL.h"
+#include "EffekseerRendererGL/EffekseerRenderer/GraphicsDevice.h"
+
 namespace ige::scene
 {
     ParticleTextureLoader::ParticleTextureLoader()
-        : EffekseerRendererGL::TextureLoader()
+        : Effekseer::TextureLoader()
     {
     }
 
-    Effekseer::TextureData* ParticleTextureLoader::Load(const EFK_CHAR* path, Effekseer::TextureType textureType)
+    Effekseer::TextureRef ParticleTextureLoader::Load(const char16_t* path, Effekseer::TextureType textureType)
     {
-        Effekseer::TextureData* data = EffekseerRendererGL::TextureLoader::Load(path, textureType);
+        auto data = Effekseer::TextureLoader::Load(path, textureType);
         if(data == nullptr)
         {
             char utf8Path[512];
-            Effekseer::ConvertUtf16ToUtf8((int8_t*)utf8Path, 512, (const int16_t*)path);
+            Effekseer::ConvertUtf16ToUtf8(utf8Path, 512, path);
 
             auto fsPath = fs::path(utf8Path);
             fsPath = fsPath.replace_extension(".pyxi");
@@ -28,11 +32,10 @@ namespace ige::scene
             if(texture != nullptr)
             {
                 texture->WaitBuild();
-                data = new Effekseer::TextureData();
-                data->Width = texture->GetTextureWidth();
-                data->Height = texture->GetTextureHeight();
-                data->UserID = texture->GetTextureHandle();
-                data->HasMipmap = (texture->GetNumMips() > 0);
+                data = Effekseer::MakeRefPtr <Effekseer::Texture>();
+                auto ret = ::Effekseer::MakeRefPtr <::EffekseerRendererGL::Backend::Texture>(nullptr);
+                ret->Init(texture->GetTextureHandle(), texture->GetNumMips() > 0, nullptr);
+                data->SetBackend(ret);
             }
         }
         return data;
@@ -47,7 +50,7 @@ namespace ige::scene
         m_renderer = EffekseerRendererGL::Renderer::Create(maxParticlesNumber, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
     #endif
 
-        // Create renderer instance
+        // Create renderer instance        
         m_renderer->SetTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
 
         // Create manager instance
@@ -71,11 +74,7 @@ namespace ige::scene
         destroyManager();
 
         // Destroy renderer
-        m_renderer->Destroy();
         m_renderer = nullptr;
-
-        // Delete texture loader
-        m_textureLoader = nullptr;
     }
 
     //! Initialize
@@ -92,8 +91,8 @@ namespace ige::scene
         m_manager->SetModelRenderer(m_renderer->CreateModelRenderer());
 
         // Set loaders
-        m_textureLoader = new ParticleTextureLoader();
-        m_manager->SetTextureLoader(m_textureLoader);
+        auto textureLoader = Effekseer::MakeRefPtr<ParticleTextureLoader>();
+        m_manager->SetTextureLoader(textureLoader);
         m_manager->SetModelLoader(m_renderer->CreateModelLoader());
         m_manager->SetMaterialLoader(m_renderer->CreateMaterialLoader());
 
@@ -123,7 +122,7 @@ namespace ige::scene
     void ParticleManager::destroyManager()
     {
         // Destroy manager
-        if (m_manager)
+        if (m_manager.Get())
         {
             // Stop particles
             for (auto& particle : m_particles)
@@ -133,8 +132,6 @@ namespace ige::scene
                     particle->stop();
                 }
             }
-
-            m_manager->Destroy();
             m_manager = nullptr;
         }
     }
@@ -181,7 +178,7 @@ namespace ige::scene
         if(m_projectionMatrix != matrix)
         {
             m_projectionMatrix = matrix;
-            if (m_renderer)
+            if (m_renderer.Get())
             {
                 Effekseer::Matrix44 projectionMatrix;
                 memcpy(projectionMatrix.Values, m_projectionMatrix.P(), sizeof(float) * 16);
@@ -196,7 +193,7 @@ namespace ige::scene
         if (m_cameraMatrix != matrix)
         {
             m_cameraMatrix = matrix;
-            if (m_renderer)
+            if (m_renderer.Get())
             {
                 Effekseer::Matrix44 projectionMatrix;
                 memcpy(projectionMatrix.Values, m_cameraMatrix.P(), sizeof(float) * 16);
