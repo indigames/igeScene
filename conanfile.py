@@ -20,7 +20,7 @@ class IgeConan(ConanFile):
     revision_mode="scm"
 
     def requirements(self):
-        self.requires("igeCore/[>=0.5.53]@ige/test")
+        self.requires("igeCore/[>=0.5.54]@ige/test")
         self.requires("json/[>=3.9.1]@ige/test")
         self.requires("bullet/[>=3.0.8]@ige/test")
         self.requires("igeSound/[>=0.1.0]@ige/test")
