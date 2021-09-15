@@ -8,7 +8,7 @@ static std::wstring utf8toUtf16(const std::string& str)
 	if (str.empty())
 		return std::wstring();
 
-	size_t charsNeeded = ::MultiByteToWideChar(CP_UTF8, 0,
+	/*size_t charsNeeded = ::MultiByteToWideChar(CP_UTF8, 0,
 		str.data(), (int)str.size(), NULL, 0);
 	if (charsNeeded == 0)
 		return std::wstring();
@@ -19,7 +19,9 @@ static std::wstring utf8toUtf16(const std::string& str)
 	if (charsConverted == 0)
 		return std::wstring();
 
-	return std::wstring(&buffer[0], charsConverted);
+	return std::wstring(&buffer[0], charsConverted);*/
+	std::wstring wsTmp(str.begin(), str.end());
+	return wsTmp;
 }
 
 static std::string utf16toUtf8(const std::wstring& wstr)
@@ -27,7 +29,7 @@ static std::string utf16toUtf8(const std::wstring& wstr)
 	std::string retStr;
 	if (!wstr.empty())
 	{
-		int sizeRequired = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
+		/*int sizeRequired = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
 
 		if (sizeRequired > 0)
 		{
@@ -47,7 +49,11 @@ static std::string utf16toUtf8(const std::wstring& wstr)
 					<< wstr.c_str() << L"'";
 				throw std::runtime_error(err.str());
 			}
-		}
+		}*/
+
+		std::transform(wstr.begin(), wstr.end(), std::back_inserter(retStr), [](wchar_t c) {
+			return (char)c;
+			});
 	}
 	return retStr;
 }
