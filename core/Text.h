@@ -16,7 +16,7 @@ namespace ige::scene
 
         //! Text
         const std::string getText() const { return m_text; }
-        void setText(const std::string& text);
+        void setText(const std::string& text, int type = TEXT_TRUETYPE);
 
         //! Font Path
         const std::string& getFontPath() const { return m_fontPath; }

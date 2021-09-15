@@ -50,13 +50,12 @@ namespace ige::scene
 
     int Particle_setEnabled(PyObject_Particle *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
-        {
-            self->component->setEnabled(val);
-            return 0;
+        if (value == NULL || !PyBool_Check(value)) {
+            return -1;
         }
-        return -1;
+        int val = PyObject_IsTrue(value);
+        self->component->setEnabled((bool)val);
+        return 0;
     }
 
     //! isLooped
@@ -67,13 +66,12 @@ namespace ige::scene
 
     int Particle_setLooped(PyObject_Particle *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
-        {
-            self->component->setLoop(val);
-            return 0;
+        if (value == NULL || !PyBool_Check(value)) {
+            return -1;
         }
-        return -1;
+        int val = PyObject_IsTrue(value);
+        self->component->setLoop((bool)val);
+        return 0;
     }
 
     //! isAutoDrawing

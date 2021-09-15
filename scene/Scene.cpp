@@ -97,7 +97,7 @@ namespace ige::scene
         m_shadowEdgeMask->SetMaterialState(0, Key_depth_test_enable, &dt);
         m_shadowEdgeMask->AddMesh("mesh", "mate");
         m_shadowEdgeMask->SetMeshVertices(0, verts, 8);
-        m_shadowEdgeMask->SetMeshIndices(0, 0, tris, 8, 4);
+        m_shadowEdgeMask->SetMeshIndices(0, 0, tris, 24, 4);
 
         Joint pose;
         m_shadowEdgeMask->AddJoint(-1, pose, false, "j01");
@@ -799,7 +799,7 @@ namespace ige::scene
         /*if (m_raycastCapture && !forceRaycast)
             return hit;*/
 
-        float distance, minDistance = maxDistance;
+        float distance = 0, minDistance = maxDistance;
         std::pair<Vec3, Vec3> ray = RayOBBChecker::RayOBB(position, direction);
         for (const auto& obj : m_objects)
         {

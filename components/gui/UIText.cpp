@@ -13,9 +13,16 @@ namespace ige::scene
     UIText::UIText(SceneObject &owner, const std::string &text, const std::string &fontPath, int fontSize, const Vec4 &color, int fontType)
         : Component(owner), UIMaskable(), m_flagMask(false)
     {
-        m_text = std::make_shared<Text>(text, fontPath, fontSize, color, fontType);
-        if (m_text->getFigure())
-            getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_text->getFigure());
+        /*m_text = std::make_shared<Text>(text, fontPath, fontSize, color, fontType);
+        if (m_text != nullptr && m_text->getFigure())
+            getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_text->getFigure());*/
+        m_textData = text;
+        m_fontPath = fontPath;
+        m_color = color;
+        m_fontSize = fontSize;
+        m_fontType = fontType;
+
+        generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
 
         getOwner()->addEventListener((int)EventType::SetParent, [this](auto vol) {
             this->onSetParent(vol);
@@ -31,7 +38,7 @@ namespace ige::scene
     //! Destructor
     UIText::~UIText()
     {
-        if (m_text->getFigure() && getOwner()->getScene())
+        if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene())
             getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_text->getFigure());
         m_text = nullptr;
         
@@ -88,6 +95,20 @@ namespace ige::scene
         getFigure()->Render();
     }
 
+    void UIText::generateText(const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color, int fontType) {
+        if (m_text != nullptr)
+        {
+            //!Release old
+            auto oldFigure = m_text->getFigure();
+            getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
+        }
+        m_text = std::make_shared<Text>(text, fontPath, fontSize, color, fontType);
+        if (m_text != nullptr) {
+            auto newFigure = m_text->getFigure();
+            getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+        }
+    }
+    
     //! Serialize
     void UIText::to_json(json &j) const
     {
@@ -111,15 +132,21 @@ namespace ige::scene
     //! Text
     void UIText::setText(const std::string &text)
     {
-        auto oldFigure = m_text->getFigure();
-        m_text->setText(text);
-        auto newFigure = m_text->getFigure();
-        if (oldFigure != newFigure)
-        {
-            if (oldFigure)
-                getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
-            if (newFigure)
-                getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+        m_textData = text;
+        if (m_text == nullptr) {
+            generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
+        }
+        else {
+            auto oldFigure = m_text->getFigure();
+            m_text->setText(text);
+            auto newFigure = m_text->getFigure();
+            if (oldFigure != newFigure)
+            {
+                if (oldFigure)
+                    getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
+                if (newFigure)
+                    getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+            }
         }
         getOwner()->getTransform()->makeDirty();
     }
@@ -127,15 +154,22 @@ namespace ige::scene
     //! Font Path
     void UIText::setFontPath(const std::string &path)
     {
-        auto oldFigure = m_text->getFigure();
-        m_text->setFontPath(path);
-        auto newFigure = m_text->getFigure();
-        if (oldFigure != newFigure)
+        m_fontPath = path;
+        if (m_text == nullptr) {
+            generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
+        }
+        else
         {
-            if (oldFigure)
-                getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
-            if (newFigure)
-                getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+            auto oldFigure = m_text->getFigure();
+            m_text->setFontPath(path);
+            auto newFigure = m_text->getFigure();
+            if (oldFigure != newFigure)
+            {
+                if (oldFigure)
+                    getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
+                if (newFigure)
+                    getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+            }
         }
         getOwner()->getTransform()->makeDirty();
     }
@@ -143,15 +177,22 @@ namespace ige::scene
     //! Font Size
     void UIText::setFontSize(int size)
     {
-        auto oldFigure = m_text->getFigure();
-        m_text->setFontSize(size);
-        auto newFigure = m_text->getFigure();
-        if (oldFigure != newFigure)
+        m_fontSize = size;
+        if (m_text == nullptr) {
+            generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
+        }
+        else
         {
-            if (oldFigure)
-                getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
-            if (newFigure)
-                getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+            auto oldFigure = m_text->getFigure();
+            m_text->setFontSize(size);
+            auto newFigure = m_text->getFigure();
+            if (oldFigure != newFigure)
+            {
+                if (oldFigure)
+                    getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
+                if (newFigure)
+                    getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+            }
         }
         getOwner()->getTransform()->makeDirty();
     }
@@ -159,7 +200,12 @@ namespace ige::scene
     //! Color
     void UIText::setColor(const Vec4 &color)
     {
-        m_text->setColor(color);
+        m_color = color;
+        if (m_text == nullptr) {
+            generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
+        }
+        else 
+            m_text->setColor(color);
     }
 
     EditableFigure* UIText::getCurrentFigure() { return getFigure(); }

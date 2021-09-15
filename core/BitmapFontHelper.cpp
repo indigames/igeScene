@@ -148,7 +148,7 @@ std::string BitmapFontHelper::unique(const std::string& str)
 	return str + std::to_string(uniqueNumber);
 }
 
-uint32_t BitmapFontHelper::createBitmapFont(const std::string& path, int ascent, int descent, int line_gap)
+uint32_t BitmapFontHelper::createBitmapFont(const std::string& path, int width, int height, int ascent, int descent, int line_gap)
 {
 	int ret, i, fh;
 	struct ige_bitmap_font* fnt = NULL;
@@ -190,14 +190,13 @@ uint32_t BitmapFontHelper::createBitmapFont(const std::string& path, int ascent,
 		fonts[hash] = fnt;
 		textures[hash] = texture;
 
-		auto cachew = m_texture->GetTextureWidth();
-		auto cacheh = m_texture->GetTextureHeight();
-
+		auto cachew = width;
+		auto cacheh = height;
+		
 		fnt->tw = cachew;
 		fnt->th = cacheh;
 		fnt->itw = 1.0f / cachew;
 		fnt->ith = 1.0f / cacheh;
-
 		fnt->idx = hash;
 		fnt->type = BMFONT;
 	}
@@ -305,7 +304,7 @@ struct ige_glyph* BitmapFontHelper::getGlyph(struct ige_bitmap_font* fnt, unsign
 		i = fnt->glyphs[i].next;
 	}
 	// Could not find glyph.
-
+	pyxie_printf("Cound not find glyph\n");
 	// For bitmap fonts: ignore this glyph.
 	if (fnt->type == BMFONT)
 		return 0;
@@ -323,7 +322,7 @@ int BitmapFontHelper::getQuad(struct ige_bitmap_font* fnt, struct ige_glyph* gly
 	float scale = 1.0f;
 
 	if (fnt->type == BMFONT) scale = isize / (glyph->size * 10.0f);
-
+	
 	rx = floorf(*x + scale * glyph->xoff);
 	ry = floorf(*y - scale * glyph->yoff);
 
@@ -331,13 +330,16 @@ int BitmapFontHelper::getQuad(struct ige_bitmap_font* fnt, struct ige_glyph* gly
 	q->y0 = ry;
 	q->x1 = rx + scale * (glyph->x1 - glyph->x0);
 	q->y1 = ry - scale * (glyph->y1 - glyph->y0);
-
+	
 	q->s0 = (glyph->x0) * fnt->itw;
 	q->t0 = (glyph->y0) * fnt->ith;
 	q->s1 = (glyph->x1) * fnt->itw;
 	q->t1 = (glyph->y1) * fnt->ith;
-
-	*x += scale * glyph->xadv;
+	
+	if(glyph->xadv != 0)
+		*x += scale * glyph->xadv;
+	else 
+		*x += scale * (glyph->x1 - glyph->x0);
 
 	return 1;
 }
@@ -451,22 +453,24 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 		uvs.push_back(q.s1);
 		uvs.push_back(1 - q.t1);
 
-		w += std::abs(q.x1 - q.x0);
-		if ( std::abs(q.y1 - q.y0) > h)
-			h = std::abs(q.y1 - q.y0);
+		//w += std::abs(q.x1 - q.x0);
+		w = std::abs(x);
+		h = std::abs(y);
+		/*if ( std::abs(q.y1 - q.y0) > h)
+			h = std::abs(q.y1 - q.y0);*/
 		len++;
 	}
 
 	if (texture == nullptr) return nullptr;
 
-	float hw = w * 0.5f;
-	float hh = h * 0.5f;
-
+	float hw = (float)w * 0.5f;
+	float hh = (float)h * 0.5f;
+	
 	fOffset = 0;
-
+	int pointSize = points.size();
 	for (int i = 0; i < len; i++)
 	{
-		if (fOffset >= points.size()) continue;
+		if (fOffset >= pointSize) break;
 
 		points[fOffset] -= hw;
 		points[fOffset + 1] -= hh;
@@ -524,7 +528,7 @@ uint32_t BitmapFontHelper::createBitmapFont(std::shared_ptr<BitmapFont>& font)
 {
 	if (font == nullptr) return 0;
 	auto name = font->getName();
-	uint32_t id = createBitmapFont(name, 0, 0, 0);
+	uint32_t id = createBitmapFont(name, font->getWidth(), font->getHeigth(), 0, 0, 0);
 	int size = font->getGlyphCount();
 	if (size > 0)
 	{

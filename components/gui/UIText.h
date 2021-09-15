@@ -37,7 +37,7 @@ namespace ige::scene
 
         //! Text
         const std::string getText() const { return m_text->getText(); }
-        void setText(const std::string &text);
+        virtual void setText(const std::string &text);
 
         //! Font Path
         const std::string &getFontPath() const { return m_text->getFontPath(); }
@@ -62,6 +62,8 @@ namespace ige::scene
         virtual EditableFigure* getCurrentFigure() override;
         virtual SceneObject* getSceneObjectOwner() override;
 
+        virtual void generateText(const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color, int fontType);
+
         //! Serialize
         virtual void to_json(json& j) const override;
 
@@ -72,5 +74,13 @@ namespace ige::scene
         std::shared_ptr<Text> m_text;
 
         bool m_flagMask = false;
+        std::string m_textData = "";
+        std::string m_fontPath = "";
+        int m_fontSize = 11;
+        int m_fontType = 0;
+        Vec4 m_color = { 1.f, 1.f, 1.f, 1.f };
+
+
+
     };
 } // namespace ige::scene

@@ -24,11 +24,12 @@ namespace ige::scene
     }
 
     //! Text
-    void Text::setText(const std::string& text)
+    void Text::setText(const std::string& text, int type)
     {
         if(m_text != text)
         {
             m_text = text;
+            m_fontType = type;
             updateFigure();
         }
     }

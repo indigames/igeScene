@@ -402,7 +402,7 @@ namespace ige::scene
             return;
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onFixedUpdate"))
         {
-            auto ret = PyObject_CallMethod(m_pyInstance, "onFixedUpdate", "f", dt);
+            auto ret = PyObject_CallMethod(m_pyInstance, "onFixedUpdate", "(f)", dt);
             Py_XDECREF(ret);
         }
     }
@@ -413,7 +413,7 @@ namespace ige::scene
             return;
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onLateUpdate"))
         {
-            auto ret = PyObject_CallMethod(m_pyInstance, "onLateUpdate", "f", dt);
+            auto ret = PyObject_CallMethod(m_pyInstance, "onLateUpdate", "(f)", dt);
             Py_XDECREF(ret);
         }
     }

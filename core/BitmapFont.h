@@ -13,7 +13,7 @@ namespace ige::scene
 	struct BitmapGlyph
 	{
 		uint32_t ID;
-		const char* Name;
+		std::string Name;
 		wchar_t Unicode;
 		float x;
 		float y;
@@ -46,6 +46,11 @@ namespace ige::scene
 		int getBaseSize() { return m_base; }
 		void setBaseSize(int value) { m_base = value; }
 
+		int getWidth() { return m_width; }
+		void setWidth(int value) { m_width = value; }
+		int getHeigth() { return m_height; }
+		void setHeight(int value) { m_height = value; }
+
 	protected:
 		void clear();
 		void Glyph_To_json(json& j, const std::shared_ptr<struct BitmapGlyph>& glyph);
@@ -57,6 +62,8 @@ namespace ige::scene
 
 		int m_size = 0;
 		int m_base = 0;
+		int m_width = 0;
+		int m_height = 0;
 	};
 }
 

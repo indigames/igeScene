@@ -20,6 +20,7 @@
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
 #include "components/gui/UIText.h"
+#include "components/gui/UITextBitmap.h"
 #include "components/gui/UITextField.h"
 #include "components/gui/UIButton.h"
 #include "components/gui/UISlider.h"
@@ -296,6 +297,7 @@ namespace ige::scene
         if (name == "PhysicSoftBody") return addComponent<PhysicSoftBody>();
         if (name == "UIImage") return addComponent<UIImage>();
         if (name == "UIText") return addComponent<UIText>();
+        if (name == "UITextBitmap") return addComponent<UITextBitmap>();
         if (name == "UITextField") return addComponent<UITextField>();
         if (name == "UIButton") return addComponent<UIButton>();
         if (name == "UISlider") return addComponent<UISlider>();
@@ -835,6 +837,16 @@ namespace ige::scene
             if (getComponent<UIText>() != nullptr)
             {
                 auto uiText = getComponent<UIText>();
+                if (uiText->getFigure())
+                {
+                    Vec3 aabbMin, aabbMax;
+                    uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                    m_aabb = { aabbMin, aabbMax };
+                }
+            }
+            else if (getComponent<UITextBitmap>() != nullptr)
+            {
+                auto uiText = getComponent<UITextBitmap>();
                 if (uiText->getFigure())
                 {
                     Vec3 aabbMin, aabbMax;

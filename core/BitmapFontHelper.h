@@ -77,7 +77,7 @@ namespace ige::scene
 
 		uint32_t createBitmapFont(std::shared_ptr<BitmapFont>& font);
 
-		uint32_t createBitmapFont(const std::string& path, int ascent, int descent, int line_gap);
+		uint32_t createBitmapFont(const std::string& path, int width, int height,int ascent, int descent, int line_gap);
 
 		uint32_t addGlyphForCodepoint(uint32_t idx, unsigned int codepoint,
 			short size, short base, int x, int y, int w, int h,

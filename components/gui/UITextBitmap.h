@@ -30,6 +30,8 @@ namespace ige::scene
         //! Returns the type of the component
         virtual Type getType() const override { return Type::UITextBitmap; }
 
+        virtual void setText(const std::string& text) override;
+
     protected:
         //! Overide function UIMaskable
         virtual EditableFigure* getCurrentFigure() override;
