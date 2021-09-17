@@ -468,6 +468,18 @@ namespace ige::scene
         }
     }
 
+    //! Physic Update function
+    void SceneObject::onPhysicUpdate(float dt)
+    {
+        if (isActive())
+        {
+            for (auto& comp : m_components)
+            {
+                comp->onPhysicUpdate(dt);
+            }
+        }
+    }
+
     //! Render
     void SceneObject::onRender()
     {

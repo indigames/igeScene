@@ -84,6 +84,7 @@ namespace ige::scene
 
         //! Update
         void onUpdate(float dt) override;
+        void onPhysicUpdate(float dt) override;
         void preUpdate();
         void postUpdate();
 

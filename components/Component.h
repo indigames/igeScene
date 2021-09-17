@@ -100,6 +100,7 @@ namespace ige::scene
         virtual void onUpdate(float dt);
         virtual void onFixedUpdate(float dt);
         virtual void onLateUpdate(float dt);
+        virtual void onPhysicUpdate(float dt);
 
         //! Render
         virtual void onRender();

@@ -163,6 +163,12 @@ namespace ige::scene
     {
         if (m_world == nullptr)
             initialize();
+    }
+
+    void PhysicManager::onPhysicUpdate(float dt)
+    {
+        if (m_world == nullptr)
+            initialize();
 
         preUpdate();
 

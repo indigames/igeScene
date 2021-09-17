@@ -32,6 +32,9 @@ namespace ige::scene
         virtual void fixedUpdate(float dt);
 
         //! Late update
+        virtual void physicUpdate(float dt);
+
+        //! Late update
         virtual void lateUpdate(float dt);
 
         //! render

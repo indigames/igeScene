@@ -51,6 +51,8 @@ namespace ige::scene
 
     void Component::onLateUpdate(float dt) {}
 
+    void Component::onPhysicUpdate(float dt) {}
+
     //! Render
     void Component::onRender() {}
 

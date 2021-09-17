@@ -293,6 +293,12 @@ namespace ige::scene
             if (obj) obj->onLateUpdate(dt);
     }
 
+    void Scene::physicUpdate(float dt)
+    {
+        for (auto& obj : m_objects)
+            if (obj) obj->onPhysicUpdate(dt);
+    }
+
     void Scene::resetFlag()
     {
         m_raycastCapture = false;

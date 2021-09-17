@@ -124,9 +124,14 @@ namespace ige::scene
         if(m_currScene) m_currScene->fixedUpdate(dt);
     }
 
+    void SceneManager::physicUpdate(float dt)
+    {
+        if (m_currScene) m_currScene->physicUpdate(dt);
+    }
+
     void SceneManager::lateUpdate(float dt)
     {
-         if(m_currScene) m_currScene->lateUpdate(dt);
+        if (m_currScene) m_currScene->lateUpdate(dt);
     }
 
     void SceneManager::render()
