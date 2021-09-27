@@ -13,7 +13,6 @@ namespace ige::scene
     UITextBitmap::UITextBitmap(SceneObject &owner, const std::string &text, const std::string &fontPath, int fontSize, const Vec4 &color)
         : UIText(owner, text, fontPath, fontSize, color, 1)
     {
-        pyxie_printf("Create Bitmap Font");
     }
 
     //! Destructor

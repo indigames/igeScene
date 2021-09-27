@@ -136,7 +136,7 @@ namespace ige::scene
         virtual void onRender();
 
         //! Enable or disable the actor
-        virtual void setActive(bool isActive);
+        virtual void setActive(bool isActive, bool recursive = false);
 
         //! Check active
         virtual bool isActive() const;

@@ -34,10 +34,33 @@ namespace ige::scene
     // Set font path
     int UITextBitmap_setFontPath(PyObject_UITextBitmap *self, PyObject *value)
     {
-        char *val;
-        if (PyArg_ParseTuple(value, "s", &val))
+        char *val = NULL;
+        if (PyUnicode_Check(value))
         {
+            PyObject* temp_bytes = PyUnicode_AsEncodedString(value, "UTF-8", "strict");
+            val = PyBytes_AS_STRING(temp_bytes);
+            val = strdup(val);
             self->component->setFontPath(std::string(val));
+            return 1;
+        }
+        return 0;
+    }
+
+    // Get text
+    PyObject* UITextBitmap_getText(PyObject_UIText* self)
+    {
+        return PyUnicode_FromString(self->component->getText().c_str());
+    }
+
+    // Set text
+    int UITextBitmap_setText(PyObject_UIText* self, PyObject* value)
+    {
+        char* val = NULL;
+        if (PyUnicode_Check(value)) {
+            PyObject* temp_bytes = PyUnicode_AsEncodedString(value, "UTF-8", "strict");
+            val = PyBytes_AS_STRING(temp_bytes);
+            val = strdup(val);
+            self->component->setText(std::string(val));
             return 0;
         }
         return -1;
@@ -45,7 +68,10 @@ namespace ige::scene
 
     // Get/set
     PyGetSetDef UITextBitmap_getsets[] = {
-        {"fontPath", (getter)UIText_getFontPath, (setter)UIText_setFontPath, UIText_fontPath_doc, NULL},
+        {"fontPath", (getter)UITextBitmap_getFontPath, (setter)UITextBitmap_setFontPath, UIText_fontPath_doc, NULL},
+        {"text", (getter)UITextBitmap_getText, (setter)UITextBitmap_setText, UIText_text_doc, NULL},
+        {"fontSize", (getter)UIText_getFontSize, (setter)UIText_setFontSize, UIText_fontSize_doc, NULL},
+        {"color", (getter)UIText_getColor, (setter)UIText_setColor, UIText_color_doc, NULL},
         {NULL, NULL}};
 
     PyTypeObject PyTypeObject_UITextBitmap = {
@@ -77,7 +103,7 @@ namespace ige::scene
         0,                                                /* tp_iternext */
         0,                                                /* tp_methods */
         0,                                                /* tp_members */
-        UITextBitmap_getsets,                                   /* tp_getset */
+        UITextBitmap_getsets,                             /* tp_getset */
         &PyTypeObject_Component,                          /* tp_base */
         0,                                                /* tp_dict */
         0,                                                /* tp_descr_get */

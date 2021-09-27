@@ -76,9 +76,9 @@ namespace ige::scene
     //! Update
     void SpriteComponent::onRender()
     {
-        if (getFigure() == nullptr)
+        /*if (getFigure() == nullptr)
             return;
-        getFigure()->Render();
+        getFigure()->Render();*/
     }
 
     //! Set path

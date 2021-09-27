@@ -120,6 +120,8 @@ namespace ige::scene
         { "offset", (getter)RectTransform_getOffset, (setter)RectTransform_setOffset, RectTransform_offset_doc, NULL },
         { "pivot", (getter)RectTransform_getPivot, (setter)RectTransform_setPivot, RectTransform_pivot_doc, NULL },
         { "rect", (getter)RectTransform_getRect, nullptr, RectTransform_rect_doc, NULL },
+        { "size", (getter)RectTransform_getSize, (setter)RectTransform_setSize, RectTransform_offset_doc, NULL },
+        { "position", (getter)TransformComponent_getPosition, (setter)TransformComponent_setPosition, NULL, NULL },
         { NULL, NULL }
     };
 

@@ -12,6 +12,13 @@ using namespace pyxie;
 
 namespace ige::scene
 {
+    enum class ScreenMatchMode
+    {
+        MatchWidthOrHeight = 0,
+        Expand,
+        Shrink,
+    };
+
     //! Canvas: the playground of UI elements
     class Canvas : public Component
     {
@@ -33,6 +40,8 @@ namespace ige::scene
         //! Viewport to canvas matrix
         const Mat4 &getViewportToCanvasMatrix() const;
 
+        const Vec2& getCanvasSize() const { return m_canvasTrueSize; }
+
         //! Design canvas size
         const Vec2 &getDesignCanvasSize() const { return m_canvasSize; }
 
@@ -49,6 +58,8 @@ namespace ige::scene
         inline virtual bool canMultiEdit() override { return false; }
 
     protected:
+        virtual void updateCanvas();
+
         //! Serialize
         virtual void to_json(json& j) const override;
 
@@ -68,10 +79,15 @@ namespace ige::scene
         //! Canvas size
         Vec2 m_canvasSize;
 
+        //! Canvas Scaled size
+        Vec2 m_canvasTrueSize;
+
         //! Target canvas size
         Vec2 m_targetCanvasSize;
 
         //! Device scale
         Vec2 m_deviceScale;
+
+        float m_scaleFactor = 1.0;
     };
 } // namespace ige::scene

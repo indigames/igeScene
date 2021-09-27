@@ -154,11 +154,11 @@ namespace ige::scene
         if (m_viewportTransformDirty)
         {
             m_viewportTransform.Identity();
-            auto canvas = getOwner()->getCanvas();
+            /*auto canvas = getOwner()->getCanvas();
             if (canvas)
             {
                 m_viewportTransform = canvas->getCanvasToViewportMatrix() * getCanvasSpaceTransform();
-            }
+            }*/
 
             // Update world matrix
             m_worldMatrix = m_viewportTransform;
@@ -597,23 +597,30 @@ namespace ige::scene
             Vec4 rect;
             rect[0] = rect[1] = 0.f;
             bool is_Canvas = false;
-            auto canvas = getOwner()->getCanvas();
+            //auto canvas = getOwner()->getCanvas();
             auto parent = getOwner()->getParent();
             std::shared_ptr<RectTransform> parentRectTransform = nullptr;
             Vec2 parentSize;
+            
             if (parent)
             {
                 parentRectTransform = parent->getRectTransform();
                 is_Canvas = parentRectTransform == nullptr;
             }
+            else
+            {
+                rect[2] = m_size[0];
+                rect[3] = m_size[1];
+            }
 
-            if (canvas && is_Canvas)
+            /*if (canvas && is_Canvas)
             {
                 auto size = canvas->getDesignCanvasSize();
                 rect[2] = size.X();
                 rect[3] = size.Y();
                 m_size = size;
-            }
+            }*/
+
             if (parentRectTransform)
             {
                 parentSize = parentRectTransform->getSize();
@@ -628,7 +635,8 @@ namespace ige::scene
             {
                 auto centerPoint = getRectCenter(rect);
                 m_rect = rect;
-                posVec2 = centerPoint - getAnchorCenterInCanvasSpace();
+                //posVec2 = centerPoint - getAnchorCenterInCanvasSpace();
+                posVec2 = Vec2(m_localPosition[0], m_localPosition[1]);
             }
             else
             {
@@ -677,17 +685,16 @@ namespace ige::scene
 
             m_bLocalToRectDirty = false; 
             //! change m_offset, m_anchoredPosition, m_rect
-            auto canvas = getOwner()->getCanvas();
             auto parent = getOwner()->getParent();
             std::shared_ptr<RectTransform> parentRectTransform = nullptr;
-            bool is_Canvas = false;
+            //bool is_Canvas = false;
             if (parent)
             {
                 parentRectTransform = parent->getRectTransform();
-                is_Canvas = parentRectTransform == nullptr;
+                //is_Canvas = parentRectTransform == nullptr;
             }
 
-            if (!is_Canvas)
+            if (parentRectTransform)
             {
                 auto parentSize = parentRectTransform->getSize();
                 m_offset[0] = m_localPosition[0] - m_size[0] * 0.5f - (m_anchor[0] - 0.5f) * parentSize[0];

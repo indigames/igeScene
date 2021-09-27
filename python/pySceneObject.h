@@ -54,6 +54,9 @@ namespace ige::scene
     // Get rect transform
     PyObject* SceneObject_getRectTransform(PyObject_SceneObject* self);
 
+    // Get child
+    PyObject* SceneObject_findChildByName(PyObject_SceneObject* self, PyObject* value);
+
     // Get children
     PyObject* SceneObject_getChildren(PyObject_SceneObject* self);
 

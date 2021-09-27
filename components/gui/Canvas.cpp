@@ -46,21 +46,28 @@ namespace ige::scene
     void Canvas::setDesignCanvasSize(const Vec2 &canvasSize)
     {
         m_canvasSize = canvasSize;
-
+        m_canvasTrueSize = canvasSize * m_scaleFactor;
         // Recompute transform
         auto transform = getOwner()->getRectTransform();
+        Vec3 worldPosition = Vec3(m_canvasSize[0] / 2, m_canvasSize[1] / 2, 0);
+        transform->setPosition(worldPosition);
+        transform->setSize(m_canvasSize);
         transform->setTransformDirty();
+        //updateCanvas();
     }
 
     void Canvas::setTargetCanvasSize(const Vec2 &canvasSize)
     {
         auto oldTargetCanvasSize = m_targetCanvasSize;
         auto oldDeviceScale = m_deviceScale;
-
+        bool updated = false;
         if (SceneManager::getInstance()->isEditor())
         {
             // Editor use predefined canvas size
-            m_targetCanvasSize = m_canvasSize;
+            m_targetCanvasSize = canvasSize;
+            m_deviceScale.X(m_targetCanvasSize.X() / m_canvasSize.X());
+            m_deviceScale.Y(m_targetCanvasSize.Y() / m_canvasSize.Y());
+            updated = true;
         }
         else
         {
@@ -70,11 +77,23 @@ namespace ige::scene
             m_deviceScale.Y(m_targetCanvasSize.Y() / m_canvasSize.Y());
         }
 
-        if (oldTargetCanvasSize != m_targetCanvasSize || oldDeviceScale != m_deviceScale)
-        {
-            // Recompute transform
-            getOwner()->getRectTransform()->setTransformDirty();
+        if (oldTargetCanvasSize != m_targetCanvasSize || oldDeviceScale != m_deviceScale || updated)
+        {   
+            updateCanvas();
         }
+    }
+
+    void Canvas::updateCanvas() {
+        auto transform = getOwner()->getRectTransform();
+        m_scaleFactor = std::max(m_deviceScale[0], m_deviceScale[1]);
+        Vec2 resize = Vec2(m_scaleFactor * m_canvasSize[0], m_scaleFactor * m_canvasSize[1]);
+        Vec3 worldPosition = Vec3(resize[0] / 2, resize[1] / 2, 0);
+        transform->setPosition(worldPosition);
+        Vec3 worldScale = Vec3(m_scaleFactor, m_scaleFactor, m_scaleFactor);
+        transform->setScale(worldScale);
+        transform->setSize(m_canvasSize);
+        m_canvasTrueSize = m_canvasSize * m_scaleFactor;
+        getOwner()->getRectTransform()->setTransformDirty();
     }
 
     //! Serialize

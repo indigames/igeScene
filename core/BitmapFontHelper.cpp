@@ -304,7 +304,7 @@ struct ige_glyph* BitmapFontHelper::getGlyph(struct ige_bitmap_font* fnt, unsign
 		i = fnt->glyphs[i].next;
 	}
 	// Could not find glyph.
-	pyxie_printf("Cound not find glyph\n");
+	//pyxie_printf("Cound not find glyph\n");
 	// For bitmap fonts: ignore this glyph.
 	if (fnt->type == BMFONT)
 		return 0;

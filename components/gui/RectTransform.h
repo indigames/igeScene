@@ -142,7 +142,7 @@ namespace ige::scene
         Vec2 m_pivot;
 
         //! Size of Rect 
-        Vec2 m_size;
+        Vec2 m_size = Vec2(0,0);
 
         //! Cached rect in canvas space (no scale, no rotate)
         Vec4 m_rect;

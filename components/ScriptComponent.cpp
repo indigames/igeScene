@@ -200,6 +200,10 @@ namespace ige::scene
             auto arglist = Py_BuildValue("(O)", obj);
             PyObject *pyConstruct = PyInstanceMethod_New(pyClass);
             m_pyInstance = PyObject_CallObject(pyConstruct, arglist);
+            if (m_pyInstance == nullptr) {
+                PyErr_Clear();
+                return;
+            }
             Py_DECREF(arglist);
             Py_DECREF(pyConstruct);
 

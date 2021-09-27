@@ -356,6 +356,39 @@ namespace ige::scene
         return res;
     }
 
+    PyObject* Scene_raycastUI(PyObject_Scene* self, PyObject* args)
+    {
+        PyObject* screenPosObj;
+
+        if (!PyArg_ParseTuple(args, "O", &screenPosObj))
+            return NULL;
+
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat(screenPosObj, buff, d);
+        if (!v)
+            return NULL;
+
+        Vec2 screenPos = Vec2(v[0], v[1]);
+
+        auto hit = self->scene->raycastUI(screenPos);
+        if (hit.first == nullptr)
+            Py_RETURN_NONE;
+
+        auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+        hitObj->sceneObject = hit.first.get();
+
+        auto hitPos = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(hit.second.P(), 3, hitPos->v);
+        hitPos->d = 3;
+
+        PyObject* res = Py_BuildValue("{s:O,s:O}",
+            "hitObject", hitObj,
+            "hitPosition", hitPos);
+        Py_XDECREF(hitObj);
+        Py_XDECREF(hitPos);
+        return res;
+    }
     // Compare function
     static PyObject* Scene_richcompare(PyObject* self, PyObject* other, int op)
     {
@@ -404,6 +437,7 @@ namespace ige::scene
         { "getEnvironment", (PyCFunction)Scene_getEnvironment, METH_NOARGS, Scene_getEnvironment_doc },
         { "raycast", (PyCFunction)Scene_raycast, METH_VARARGS, Scene_raycast_doc },
         { "raycastFromCamera", (PyCFunction)Scene_raycastFromCamera, METH_VARARGS, Scene_raycastFromCamera_doc },
+        { "raycastUI", (PyCFunction)Scene_raycastUI, METH_VARARGS, Scene_raycastFromCamera_doc },
         { NULL, NULL }
     };
 

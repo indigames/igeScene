@@ -495,7 +495,7 @@ namespace ige::scene
     }
 
     //! Enable or disable the actor
-    void SceneObject::setActive(bool isActive)
+    void SceneObject::setActive(bool isActive, bool recursive)
     {
         if (m_isActive != isActive)
         {
@@ -509,6 +509,13 @@ namespace ige::scene
             {
                 for (auto &comp : m_components)
                     comp->onDisable();
+            }
+
+            if (recursive) {
+                for (auto child : m_children) {
+                    if (!child.expired())
+                        child.lock()->setActive(isActive, recursive);
+                }
             }
         }
     }
@@ -892,7 +899,9 @@ namespace ige::scene
         {
             return !elem.expired() && elem.lock()->getName().compare(name) == 0;
         });
-        if (found != m_children.end() && found->expired())
+        auto va = m_children.end();
+        //pyxie_printf("")
+        if (found != m_children.end() && !found->expired())
             return (*found).lock();
         return nullptr;
     }

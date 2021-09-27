@@ -94,9 +94,11 @@ namespace ige::scene
     // Set name
     int SceneObject_setName(PyObject_SceneObject *self, PyObject *value)
     {
-        char *name = nullptr;
-        if (PyArg_ParseTuple(value, "s", &name))
+        //char *name = nullptr;
+        //if (PyArg_ParseTuple(value, "s", &name))
+        if(PyUnicode_Check(value))
         {
+            const char* name = PyUnicode_AsUTF8(value);
             self->sceneObject->setName(std::string(name));
         }
         return 0;
@@ -185,6 +187,28 @@ namespace ige::scene
         obj->component = (RectTransform *)(self->sceneObject->getTransform().get());
         obj->super.component = obj->component;
         return (PyObject *)obj;
+    }
+
+    PyObject* SceneObject_findChildByName(PyObject_SceneObject* self, PyObject* value)
+    {
+        PyObject* obj = nullptr;
+        if (PyArg_ParseTuple(value, "O", &obj))
+        {
+            if (obj)
+            {
+                if (PyUnicode_Check(obj)) {
+                    const char* val = PyUnicode_AsUTF8(obj);
+                    auto sceneObject = self->sceneObject->findChildByName(std::string(val));
+                    if (sceneObject)
+                    {
+                        auto* sobj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+                        sobj->sceneObject = sceneObject.get();
+                        return (PyObject*)sobj;
+                    }
+                }
+            }
+        }
+        Py_RETURN_NONE;
     }
 
     // Get children
@@ -1240,6 +1264,7 @@ namespace ige::scene
         {"getComponents", (PyCFunction)SceneObject_getComponents, METH_VARARGS, SceneObject_getComponents_doc},
         {"removeComponents", (PyCFunction)SceneObject_removeComponents, METH_VARARGS, SceneObject_removeComponents_doc},
         {"getScript", (PyCFunction)SceneObject_getScript, METH_VARARGS, SceneObject_getScript_doc},
+        {"findChildByName", (PyCFunction)SceneObject_findChildByName, METH_VARARGS, SceneObject_getChildren_doc},
         {NULL, NULL}};
 
     // Get/Set

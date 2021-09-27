@@ -13,9 +13,6 @@ namespace ige::scene
     UIText::UIText(SceneObject &owner, const std::string &text, const std::string &fontPath, int fontSize, const Vec4 &color, int fontType)
         : Component(owner), UIMaskable(), m_flagMask(false)
     {
-        /*m_text = std::make_shared<Text>(text, fontPath, fontSize, color, fontType);
-        if (m_text != nullptr && m_text->getFigure())
-            getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_text->getFigure());*/
         m_textData = text;
         m_fontPath = fontPath;
         m_color = color;
@@ -38,8 +35,9 @@ namespace ige::scene
     //! Destructor
     UIText::~UIText()
     {
-        if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene())
+        if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene()) {
             getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_text->getFigure());
+        }
         m_text = nullptr;
         
         getOwner()->removeEventListener((int)EventType::SetParent, m_instanceId);
@@ -90,9 +88,9 @@ namespace ige::scene
     //! Render
     void UIText::onRender()
     {
-        if (getFigure() == nullptr)
+        /*if (getFigure() == nullptr)
             return;
-        getFigure()->Render();
+        getFigure()->Render();*/
     }
 
     void UIText::generateText(const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color, int fontType) {
@@ -142,8 +140,9 @@ namespace ige::scene
             auto newFigure = m_text->getFigure();
             if (oldFigure != newFigure)
             {
-                if (oldFigure)
+                if (oldFigure) {
                     getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
+                }
                 if (newFigure)
                     getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
             }

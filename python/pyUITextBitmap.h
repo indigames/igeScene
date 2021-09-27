@@ -30,4 +30,11 @@ namespace ige::scene
 
     // Set font path
     int UITextBitmap_setFontPath(PyObject_UITextBitmap* self, PyObject* value);
+
+    // Get text
+    PyObject* UITextBitmap_getText(PyObject_UIText* self);
+
+    // Set text
+    int UITextBitmap_setText(PyObject_UIText* self, PyObject* value);
+
 }
