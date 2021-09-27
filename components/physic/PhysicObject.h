@@ -78,6 +78,16 @@ namespace ige::scene
         virtual const btVector3 &getAngularFactor() const { return m_angularFactor; }
         virtual void setAngularFactor(const btVector3& factor);
 
+        //! Linear Sleeping Threshold
+        virtual float getLinearSleepingThreshold() const { return m_linearSleepingThreshold; }
+        virtual void setLinearSleepingThreshold(float value);
+
+        //! Angular Sleeping Threshold
+        virtual float getAngularSleepingThreshold() const { return m_angularSleepingThreshold; }
+        virtual void setAngularSleepingThreshold(float value);
+
+        virtual void setActivationState(int state);
+
         //! Indicate object is a trigger object
         virtual bool isTrigger() const { return m_bIsTrigger; }
         virtual void setIsTrigger(bool isTrigger = true);
@@ -276,6 +286,12 @@ namespace ige::scene
 
         //! Angular factor
         btVector3 m_angularFactor = { 1.f, 1.f, 1.f };
+
+        //! Linear sleeping threshold
+        float m_linearSleepingThreshold = 0.8f;
+
+        //! Angular sleeping threshold
+        float m_angularSleepingThreshold = 1.0f;
 
         //! isKinematic
         bool m_bIsKinematic = false;

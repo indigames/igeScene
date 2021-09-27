@@ -76,6 +76,17 @@ namespace ige::scene
     PyObject *PhysicObject_getAngularFactor(PyObject_PhysicObject *self);
     int PhysicObject_setAngularFactor(PyObject_PhysicObject *self, PyObject *value);
 
+    //! Linear Sleeping Threshold
+    PyObject* PhysicObject_getLinearSleepingThreshold(PyObject_PhysicObject* self);
+    int PhysicObject_setLinearSleepingThreshold(PyObject_PhysicObject* self, PyObject* value);
+
+    //! Angular Sleeping Threshold
+    PyObject* PhysicObject_getAngularSleepingThreshold(PyObject_PhysicObject* self);
+    int PhysicObject_setAngularSleepingThreshold(PyObject_PhysicObject* self, PyObject* value);
+
+    //! Set Activation State
+    int PhysicObject_setActivationState(PyObject_PhysicObject* self, PyObject* value);
+
     //! Indicate object is a trigger object
     PyObject *PhysicObject_isTrigger(PyObject_PhysicObject *self);
     int PhysicObject_setIsTrigger(PyObject_PhysicObject *self, PyObject *value);

@@ -357,6 +357,47 @@ namespace ige::scene
         return 0;
     }
 
+    PyObject* PhysicObject_getLinearSleepingThreshold(PyObject_PhysicObject* self)
+    {
+        return PyFloat_FromDouble(self->component->getLinearSleepingThreshold());
+    }
+
+    int PhysicObject_setLinearSleepingThreshold(PyObject_PhysicObject* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            self->component->setLinearSleepingThreshold((uint32_t)PyLong_AsLong(value));
+            return 0;
+        }
+        return -1;
+    }
+
+    PyObject* PhysicObject_getAngularSleepingThreshold(PyObject_PhysicObject* self)
+    {
+        return PyFloat_FromDouble(self->component->getAngularSleepingThreshold());
+    }
+
+    int PhysicObject_setAngularSleepingThreshold(PyObject_PhysicObject* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            self->component->setAngularSleepingThreshold((uint32_t)PyLong_AsLong(value));
+            return 0;
+        }
+        return -1;
+    }
+
+    int PhysicObject_setActivationState(PyObject_PhysicObject* self, PyObject* value)
+    {
+        int state;
+        if (PyArg_ParseTuple(value, "i", &state))
+        {
+            self->component->setActivationState(state);
+            return 0;
+        }
+        return -1;
+    }
+
     //! Indicate object is a trigger object
     PyObject *PhysicObject_isTrigger(PyObject_PhysicObject *self)
     {
@@ -492,6 +533,7 @@ namespace ige::scene
         {"removeConstraint", (PyCFunction)PhysicObject_removeConstraint, METH_VARARGS, PhysicObject_removeConstraint_doc},
         {"getConstraints", (PyCFunction)PhysicObject_getConstraints, METH_NOARGS, PhysicObject_getConstraints_doc},
         {"removeConstraints", (PyCFunction)PhysicObject_removeConstraints, METH_NOARGS, PhysicObject_removeConstraints_doc},
+        {"setActivationState", (PyCFunction)PhysicObject_setActivationState, METH_VARARGS, NULL},
         {NULL, NULL},
     };
 
@@ -504,6 +546,8 @@ namespace ige::scene
         {"angularVelocity", (getter)PhysicObject_getAngularVelocity, (setter)PhysicObject_setAngularVelocity, PhysicObject_angularVelocity_doc, NULL},
         {"linearFactor", (getter)PhysicObject_getLinearFactor, (setter)PhysicObject_setLinearFactor, PhysicObject_linearFactor_doc, NULL},
         {"angularFactor", (getter)PhysicObject_getAngularFactor, (setter)PhysicObject_setAngularFactor, PhysicObject_angularFactor_doc, NULL},
+        {"linearSleepingThreshold", (getter)PhysicObject_getLinearSleepingThreshold, (setter)PhysicObject_setLinearSleepingThreshold, NULL, NULL},
+        {"angularSleepingThreshold", (getter)PhysicObject_getAngularSleepingThreshold, (setter)PhysicObject_setAngularSleepingThreshold, NULL, NULL},
         {"isTrigger", (getter)PhysicObject_isTrigger, (setter)PhysicObject_setIsTrigger, PhysicObject_isTrigger_doc, NULL},
         {"isKinematic", (getter)PhysicObject_isKinematic, (setter)PhysicObject_setIsKinematic, PhysicObject_isKinematic_doc, NULL},
         {"isEnabled", (getter)PhysicObject_isEnabled, (setter)PhysicObject_setEnabled, PhysicObject_isEnabled_doc, NULL},

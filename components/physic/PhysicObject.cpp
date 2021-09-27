@@ -220,6 +220,30 @@ namespace ige::scene
         }
     }
 
+    void PhysicObject::setLinearSleepingThreshold(float value) {
+        if (m_bIsDirty || m_linearSleepingThreshold != value)
+        {
+            m_linearSleepingThreshold = value;
+            if (getBody())
+                getBody()->setSleepingThresholds(m_linearSleepingThreshold, m_angularSleepingThreshold);
+        }
+    }
+
+    void PhysicObject::setAngularSleepingThreshold(float value) {
+        if (m_bIsDirty || m_angularSleepingThreshold != value)
+        {
+            m_angularSleepingThreshold = value;
+            if (getBody())
+                getBody()->setSleepingThresholds(m_linearSleepingThreshold, m_angularSleepingThreshold);
+        }
+    }
+
+    void PhysicObject::setActivationState(int state) {
+        int _state = MATH_CLAMP(0, 5 , state);
+        if (getBody())
+            getBody()->setActivationState(state);
+    }
+
     void PhysicObject::setCollisionMargin(float margin)
     {
         if (m_bIsDirty || m_collisionMargin != margin)
@@ -456,6 +480,8 @@ namespace ige::scene
         j["mask"] = getCollisionFilterMask();
         j["ccd"] = isCCD();
         j["margin"] = getCollisionMargin();
+        j["linearSleepingThreshold"] = getLinearSleepingThreshold();
+        j["angularSleepingThreshold"] = getAngularSleepingThreshold();
 
         auto jConstraints = json::array();
         for (const auto &constraint : m_constraints)
@@ -480,6 +506,8 @@ namespace ige::scene
         setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
         setCCD(j.value("ccd", false));
         setCollisionMargin(j.value("margin", 0.025f));
+        setLinearSleepingThreshold(j.value("linearSleepingThreshold", 0.8f));
+        setAngularSleepingThreshold(j.value("angularSleepingThreshold", 1.0f));
         Component::from_json(j);
 
         auto jConstraints = j.value("consts", json());
@@ -542,6 +570,10 @@ namespace ige::scene
             setCCD(val);
         else if (key.compare("margin") == 0)
             setCollisionMargin(val);
+        else if (key.compare("linearSleepingThreshold") == 0)
+            setLinearSleepingThreshold(val);
+        else if (key.compare("angularSleepingThreshold") == 0)
+            setAngularSleepingThreshold(val);
         else
             Component::setProperty(key, val);
     }
