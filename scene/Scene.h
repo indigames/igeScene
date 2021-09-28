@@ -19,6 +19,7 @@ namespace ige::scene
     class SceneObject;
     class TweenManager;
     class TargetObject;
+    class Canvas;
 
     /**
      * Class Scene: Manage scene objects hierarchy
@@ -98,7 +99,7 @@ namespace ige::scene
         std::shared_ptr<SceneObject>& getRootUI() { return m_rootUI; };
 
         //! Get Canvas
-        std::shared_ptr<SceneObject>& getCanvas() { return m_canvas; };
+        std::shared_ptr<Canvas>& getCanvas() { return m_canvas; };
 
         //! Get objects list
         std::vector<std::shared_ptr<SceneObject>>& getObjects() { return m_objects; };
@@ -211,7 +212,7 @@ namespace ige::scene
         std::shared_ptr<SceneObject> m_rootUI;
 
         //! Canvas
-        std::shared_ptr<SceneObject> m_canvas;
+        std::shared_ptr<Canvas> m_canvas;
 
         //! Cache all objects
         std::vector<std::shared_ptr<SceneObject>> m_objects;
@@ -238,9 +239,6 @@ namespace ige::scene
 
         //! Cache active camera
         CameraComponent* m_activeCamera = nullptr;
-
-        //! Canvas Camera 
-        Camera* m_canvasCamera = nullptr;
 
         //! Shadow render target
         Texture* m_shadowTexture = nullptr;

@@ -33,13 +33,7 @@ namespace ige::scene
         //! Returns the type of the component
         virtual Type getType() const override { return Type::Canvas; }
 
-        //! Canvas to viewport matrix
-        void setCanvasToViewportMatrix(const Mat4 &matrix);
-        const Mat4 &getCanvasToViewportMatrix() const;
-
-        //! Viewport to canvas matrix
-        const Mat4 &getViewportToCanvasMatrix() const;
-
+        //! Canvas size
         const Vec2& getCanvasSize() const { return m_canvasTrueSize; }
 
         //! Design canvas size
@@ -57,6 +51,9 @@ namespace ige::scene
         //! Can multiple edit
         inline virtual bool canMultiEdit() override { return false; }
 
+        //! Get camera
+        Camera* getCamera() { return m_camera; }
+
     protected:
         virtual void updateCanvas();
 
@@ -65,6 +62,9 @@ namespace ige::scene
 
         //! Deserialize
         virtual void from_json(const json& j) override;
+
+        //! Serialize finished event
+        virtual void onSerializeFinished(Scene* scene) override;
 
         //! Default canvas size
         static Vec2 s_defaultCanvasSize;
@@ -85,9 +85,15 @@ namespace ige::scene
         //! Target canvas size
         Vec2 m_targetCanvasSize;
 
+        //! Canvas Camera 
+        Camera* m_camera = nullptr;
+
         //! Device scale
         Vec2 m_deviceScale;
 
         float m_scaleFactor = 1.0;
+
+        //! Cache temp json
+        json m_json;
     };
 } // namespace ige::scene

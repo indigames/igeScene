@@ -3,6 +3,7 @@
 #include "components/gui/RectTransform.h"
 
 #include "scene/SceneObject.h"
+#include "scene/Scene.h"
 #include "scene/SceneManager.h"
 
 namespace ige::scene
@@ -11,89 +12,54 @@ namespace ige::scene
     Canvas::Canvas(SceneObject &owner)
         : Component(owner)
     {
-        setCanvasToViewportMatrix(Mat4::IdentityMat());
+        // Canvas camera
+        m_camera = ResourceCreator::Instance().NewCamera("canvas_camera", nullptr);
+        m_camera->SetPosition({ 0.f, 0.f, 10.f });
+        m_camera->LockonTarget(false);
+        m_camera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+        m_camera->SetOrthographicProjection(true);
+        m_camera->SetWidthBase(false);
+
+        // This is raycat target
         getOwner()->setIsRaycastTarget(true);
     }
 
     //! Destructor
-    Canvas::~Canvas() {}
-
-    //! Canvas to viewport matrix
-    void Canvas::setCanvasToViewportMatrix(const Mat4 &matrix)
-    {
-        if (m_canvasToViewportMatrix != matrix)
-        {
-            m_canvasToViewportMatrix = matrix;
-            m_viewportToCanvasMatrix = m_canvasToViewportMatrix.Inverse();
-
-            // Recompute viewport transform
-            getOwner()->getRectTransform()->setRectDirty();
-            getOwner()->getRectTransform()->setTransformDirty();            
+    Canvas::~Canvas() {
+        if (m_camera) {
+            m_camera->DecReference();
+            m_camera = nullptr;
         }
     }
-
-    const Mat4 &Canvas::getCanvasToViewportMatrix() const
-    {
-        return m_canvasToViewportMatrix;
-    }
-
-    //! Viewport to canvas matrix
-    const Mat4 &Canvas::getViewportToCanvasMatrix() const
-    {
-        return m_viewportToCanvasMatrix;
-    }
-
+   
     void Canvas::setDesignCanvasSize(const Vec2 &canvasSize)
     {
         m_canvasSize = canvasSize;
-        m_canvasTrueSize = canvasSize * m_scaleFactor;
-        // Recompute transform
-        auto transform = getOwner()->getRectTransform();
-        Vec3 worldPosition = Vec3(m_canvasSize[0] / 2, m_canvasSize[1] / 2, 0);
-        transform->setPosition(worldPosition);
-        transform->setSize(m_canvasSize);
-        transform->setTransformDirty();
-        //updateCanvas();
+        updateCanvas();
     }
 
     void Canvas::setTargetCanvasSize(const Vec2 &canvasSize)
     {
-        auto oldTargetCanvasSize = m_targetCanvasSize;
-        auto oldDeviceScale = m_deviceScale;
-        bool updated = false;
-        if (SceneManager::getInstance()->isEditor())
-        {
-            // Editor use predefined canvas size
-            m_targetCanvasSize = canvasSize;
-            m_deviceScale.X(m_targetCanvasSize.X() / m_canvasSize.X());
-            m_deviceScale.Y(m_targetCanvasSize.Y() / m_canvasSize.Y());
-            updated = true;
-        }
-        else
-        {
-            // Runtime use target canvas size with device scale
-            m_targetCanvasSize = canvasSize;
-            m_deviceScale.X(m_targetCanvasSize.X() / m_canvasSize.X());
-            m_deviceScale.Y(m_targetCanvasSize.Y() / m_canvasSize.Y());
-        }
-
-        if (oldTargetCanvasSize != m_targetCanvasSize || oldDeviceScale != m_deviceScale || updated)
-        {   
-            updateCanvas();
-        }
+        if (m_canvasSize[0] == 0.f || m_canvasSize[1] == 0.f)
+            m_canvasSize = canvasSize;
+        m_targetCanvasSize = SceneManager::getInstance()->isEditor() ? canvasSize : getOwner()->getScene()->getWindowSize();
+        m_deviceScale.X(m_targetCanvasSize.X() / m_canvasSize.X());
+        m_deviceScale.Y(m_targetCanvasSize.Y() / m_canvasSize.Y());
+        updateCanvas();
     }
 
     void Canvas::updateCanvas() {
         auto transform = getOwner()->getRectTransform();
-        m_scaleFactor = std::max(m_deviceScale[0], m_deviceScale[1]);
+        m_scaleFactor = std::min(m_deviceScale[0], m_deviceScale[1]);
         Vec2 resize = Vec2(m_scaleFactor * m_canvasSize[0], m_scaleFactor * m_canvasSize[1]);
-        Vec3 worldPosition = Vec3(resize[0] / 2, resize[1] / 2, 0);
+        Vec3 worldPosition = Vec3(resize[0] * 0.5f, resize[1] * 0.5f, 0);
         transform->setPosition(worldPosition);
         Vec3 worldScale = Vec3(m_scaleFactor, m_scaleFactor, m_scaleFactor);
         transform->setScale(worldScale);
         transform->setSize(m_canvasSize);
         m_canvasTrueSize = m_canvasSize * m_scaleFactor;
         getOwner()->getRectTransform()->setTransformDirty();
+        m_camera->SetPosition({ worldPosition.X(), worldPosition.Y(), worldPosition.Z() + 10.0f });
     }
 
     //! Serialize
@@ -102,17 +68,22 @@ namespace ige::scene
         Component::to_json(j);
         j["size"] = m_canvasSize;
         j["targetSize"] =  m_targetCanvasSize;
-        j["scale"] =  m_deviceScale;
-        j["viewport"] =  m_canvasToViewportMatrix;
     }
 
     //! Deserialize
     void Canvas::from_json(const json &j)
     {
-        setDesignCanvasSize(j.value("size", Vec2(560.f, 940.f)));
-        setTargetCanvasSize(j.value("targetSize", Vec2(560.f, 940.f)));
-        m_deviceScale = (j.value("targetSize", Vec2(560.f, 940.f)));
-        setCanvasToViewportMatrix(j.value("viewport", Mat4::IdentityMat()));
+        m_json = j;
         Component::from_json(j);
     }
+
+    //! Serialize finished event
+    void Canvas::onSerializeFinished(Scene* scene)
+    {
+        setDesignCanvasSize(m_json.value("size", Vec2(560.f, 940.f)));
+        setTargetCanvasSize(m_json.value("targetSize", Vec2(560.f, 940.f)));
+        Component::onSerializeFinished(scene);
+        m_json.clear();
+    }
+
 } // namespace ige::scene

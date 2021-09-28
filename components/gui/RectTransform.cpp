@@ -154,11 +154,6 @@ namespace ige::scene
         if (m_viewportTransformDirty)
         {
             m_viewportTransform.Identity();
-            /*auto canvas = getOwner()->getCanvas();
-            if (canvas)
-            {
-                m_viewportTransform = canvas->getCanvasToViewportMatrix() * getCanvasSpaceTransform();
-            }*/
 
             // Update world matrix
             m_worldMatrix = m_viewportTransform;
@@ -589,7 +584,6 @@ namespace ige::scene
         }
     }
 
-
     const Vec4 &RectTransform::getRect()
     {
         if (m_rectDirty && !m_bLocalToRectDirty)
@@ -597,7 +591,7 @@ namespace ige::scene
             Vec4 rect;
             rect[0] = rect[1] = 0.f;
             bool is_Canvas = false;
-            //auto canvas = getOwner()->getCanvas();
+
             auto parent = getOwner()->getParent();
             std::shared_ptr<RectTransform> parentRectTransform = nullptr;
             Vec2 parentSize;
@@ -613,14 +607,6 @@ namespace ige::scene
                 rect[3] = m_size[1];
             }
 
-            /*if (canvas && is_Canvas)
-            {
-                auto size = canvas->getDesignCanvasSize();
-                rect[2] = size.X();
-                rect[3] = size.Y();
-                m_size = size;
-            }*/
-
             if (parentRectTransform)
             {
                 parentSize = parentRectTransform->getSize();
@@ -635,7 +621,6 @@ namespace ige::scene
             {
                 auto centerPoint = getRectCenter(rect);
                 m_rect = rect;
-                //posVec2 = centerPoint - getAnchorCenterInCanvasSpace();
                 posVec2 = Vec2(m_localPosition[0], m_localPosition[1]);
             }
             else
@@ -687,11 +672,9 @@ namespace ige::scene
             //! change m_offset, m_anchoredPosition, m_rect
             auto parent = getOwner()->getParent();
             std::shared_ptr<RectTransform> parentRectTransform = nullptr;
-            //bool is_Canvas = false;
             if (parent)
             {
                 parentRectTransform = parent->getRectTransform();
-                //is_Canvas = parentRectTransform == nullptr;
             }
 
             if (parentRectTransform)

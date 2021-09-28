@@ -153,14 +153,6 @@ namespace ige::scene
         m_tweenManager = std::make_shared<TweenManager>();
         m_tweenManager->init();
 
-        // Canvas camera
-        m_canvasCamera = ResourceCreator::Instance().NewCamera("canvas_camera", nullptr);
-        m_canvasCamera->SetPosition({ 0.f, 0.f, 10.f });
-        m_canvasCamera->LockonTarget(false);
-        m_canvasCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
-        m_canvasCamera->SetOrthographicProjection(true);
-        m_canvasCamera->SetWidthBase(false);
-
         setWindowSize({ -1.f, -1.f });
         return true;
     }
@@ -217,11 +209,6 @@ namespace ige::scene
         if (m_tweenManager) {
             m_tweenManager->clean();
             m_tweenManager = nullptr;
-        }
-
-        if (m_canvasCamera) {
-            m_canvasCamera->DecReference();
-            m_canvasCamera = nullptr;
         }
 
         if (m_uiShowcase)
@@ -317,15 +304,9 @@ namespace ige::scene
     }
 
     void Scene::renderUI() {
-        if (!SceneManager::getInstance()->isEditor() && m_canvasCamera) {
-            auto canvasObject = findObjectByName("Canvas");
-            if (canvasObject) {
-                auto canvas = canvasObject->getComponent<ige::scene::Canvas>();
-                if (canvas) {
-                    auto position = canvasObject->getTransform()->getWorldPosition();
-                    m_canvasCamera->SetPosition({ position.X(), position.Y(), position.Z() + 10.0f});
-                    m_canvasCamera->Render();
-                }
+        if (!SceneManager::getInstance()->isEditor()) {
+            if (getCanvas() && getCanvas()->getCamera()) {
+                getCanvas()->getCamera()->Render();
             }
         }
         m_uiShowcase->Render();
@@ -336,18 +317,16 @@ namespace ige::scene
         auto parentObject = parent ? parent : m_root;
         if (name.compare("Canvas") != 0) {
             if (isGUI) {
-                parentObject = parentObject->isGUIObject() ? parentObject : m_canvas ? m_canvas : m_rootUI;
+                parentObject = parentObject->isGUIObject() ? parentObject : m_canvas ? m_canvas->getOwner()->getSharedPtr() : m_rootUI;
                 if (parentObject == m_rootUI) {
                     auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", true, size, prefabId);
                     m_objects.push_back(canvasObject);
-                    auto canvas = canvasObject->addComponent<Canvas>();
-                    canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
-                    Vec2 canvasSize(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameW());
-                    canvas->setTargetCanvasSize(canvasSize);
-                    canvasObject->setCanvas(canvas);
+                    m_canvas = canvasObject->addComponent<Canvas>();
+                    m_canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
+                    m_canvas->setTargetCanvasSize(Vec2(540.f, 960.f));
+                    canvasObject->setCanvas(m_canvas);
                     canvasObject->setParent(parentObject);
                     parentObject = canvasObject;
-                    m_canvas = canvasObject;
                 }
             }
             else if (parentObject) {
@@ -404,7 +383,7 @@ namespace ige::scene
             m_rootUI = nullptr;
         }
 
-        if (obj == m_canvas) {
+        if (obj->getName().compare("Canvas") == 0) {
             m_canvas = nullptr;
         }
 
@@ -825,28 +804,28 @@ namespace ige::scene
     std::pair<std::shared_ptr<SceneObject>, Vec3> Scene::raycastUI(const Vec2& screenPos)
     {
         auto hit = std::pair<std::shared_ptr<SceneObject>, Vec3>(nullptr, Vec3());
-        if (!m_canvasCamera)
+        if (!getCanvas() || !getCanvas()->getCamera())
             return hit;
 
         auto wSize = getWindowSize();
         auto pos = screenToClient(screenPos);
 
         Mat4 proj;
-        m_canvasCamera->GetProjectionMatrix(proj);
+        getCanvas()->getCamera()->GetProjectionMatrix(proj);
 
         Mat4 viewInv;
-        m_canvasCamera->GetViewInverseMatrix(viewInv);
+        getCanvas()->getCamera()->GetViewInverseMatrix(viewInv);
 
         auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
         float distance, minDistance = 100.0f;
 
         bool m_isEnd = false;
-        std::shared_ptr<SceneObject> m_node = m_canvas;
+        std::shared_ptr<SceneObject> m_node = m_canvas->getOwner()->getSharedPtr();
         hit = findIntersectInHierachy(m_node, ray);
         if(hit.first != nullptr && hit.first->isInteractable()) m_raycastCapture = true;
         else if (hit.first == nullptr) {
             if (m_canvas) {
-                hit.first = m_canvas;
+                hit.first = m_canvas->getOwner()->getSharedPtr();
                 hit.second = raycastCanvas(screenPos);
             }
         }
@@ -856,23 +835,18 @@ namespace ige::scene
     Vec3 Scene::raycastCanvas(const Vec2& screenPos)
     {
         Vec3 hit;
-        if (!m_canvasCamera)
+        if (!getCanvas() || !getCanvas()->getCamera())
             return hit;
         auto wSize = getWindowSize();
         auto pos = screenToClient(screenPos);
 
         Mat4 proj;
-        m_canvasCamera->GetProjectionMatrix(proj);
+        getCanvas()->getCamera()->GetProjectionMatrix(proj);
 
         Mat4 viewInv;
-        m_canvasCamera->GetViewInverseMatrix(viewInv);
+        getCanvas()->getCamera()->GetViewInverseMatrix(viewInv);
 
         auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
-        float distance, minDistance = 100.0f;
-
-        bool m_isEnd = false;
-        std::shared_ptr<SceneObject> m_node = m_canvas;
-        auto worldPos = m_canvas->getTransform()->getWorldPosition();
         hit = ray.first;
         return hit;
     }
@@ -993,9 +967,8 @@ namespace ige::scene
                 }
             }
         }
-
         if (m_canvas == nullptr) {
-            m_canvas = findObjectByName("Canvas");
+            m_canvas = findObjectByName("Canvas")->getComponent<Canvas>();
         }
     }
 }
