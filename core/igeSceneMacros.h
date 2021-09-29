@@ -36,5 +36,6 @@
 #define MATH_MIN(a,b)					(((a) < (b)) ? (a) : (b))
 #define MATH_MAX(a,b)					(((a) > (b)) ? (a) : (b))
 #define MATH_CLAMP(x, l, h)				(MATH_MIN((h), MATH_MAX((x), (l))))
+#define MATH_LERP(a,b,i)				(a * (1 - i) + b * i)
 
 #endif // __MACROS_SCENE_H__

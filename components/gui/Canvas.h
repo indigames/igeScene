@@ -54,6 +54,13 @@ namespace ige::scene
         //! Get camera
         Camera* getCamera() { return m_camera; }
 
+        ScreenMatchMode getScreenMatchMode() const { return m_ScreenMatchMode; }
+        void setScreenMatchMode(ScreenMatchMode mode);
+        void setScreenMatchMode(int mode);
+
+        float getMatchWidthOrHeight() const { return m_MatchWidthOrHeight; }
+        void setMatchWidthOrHeight(float value);
+
     protected:
         virtual void updateCanvas();
 
@@ -92,6 +99,9 @@ namespace ige::scene
         Vec2 m_deviceScale;
 
         float m_scaleFactor = 1.0;
+
+        ScreenMatchMode m_ScreenMatchMode = ScreenMatchMode::MatchWidthOrHeight;
+        float m_MatchWidthOrHeight = 0.5f;
 
         //! Cache temp json
         json m_json;
