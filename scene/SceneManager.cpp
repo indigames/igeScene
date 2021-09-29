@@ -65,11 +65,11 @@ namespace ige::scene
 
         path.append(DELIMITER);
         path.append(root);
-        path.append("/PyLib");
+        path.append("PyLib");
 
         path.append(DELIMITER);
         path.append(root);
-        path.append("/PyLib/site-packages");
+        path.append("PyLib/site-packages");
 
         mbstowcs(pathw, path.c_str(), 1024);
         Py_SetPath(pathw);
