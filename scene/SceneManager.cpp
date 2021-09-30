@@ -65,11 +65,11 @@ namespace ige::scene
 
         path.append(DELIMITER);
         path.append(root);
-        path.append("PyLib");
+        path.append("/PyLib");
 
         path.append(DELIMITER);
         path.append(root);
-        path.append("PyLib/site-packages");
+        path.append("/PyLib/site-packages");
 
         mbstowcs(pathw, path.c_str(), 1024);
         Py_SetPath(pathw);
@@ -147,9 +147,12 @@ namespace ige::scene
 
     void SceneManager::setProjectPath(const std::string& path)
     {
-        if (m_projectPath.compare(path) != 0)
-        {
-            m_projectPath = path;
+        auto _path = path;
+        if (path[_path.size() - 1] == '/' || path[_path.size() - 1] == '\\') {
+            _path.erase(_path.end() - 1);
+        }
+        if (m_projectPath.compare(_path) != 0) {
+            m_projectPath = _path;
             deinit();
             init();
         }
@@ -157,9 +160,12 @@ namespace ige::scene
 
     void SceneManager::setEditorPath(const std::string& path)
     {
-        if (m_editorPath.compare(path) != 0)
-        {
-            m_editorPath = path;
+        auto _path = path;
+        if (_path[_path.size() - 1] == '/' || path[_path.size() - 1] == '\\') {
+            _path.erase(_path.end() - 1);
+        }
+        if (m_editorPath.compare(_path) != 0) {
+            m_editorPath = _path;
         }
     }
 
