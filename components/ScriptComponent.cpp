@@ -222,6 +222,7 @@ namespace ige::scene
                     if (m_members.count(key_str) > 0)
                     {
                         members[key_str] = m_members[key_str];
+                        onMemberValueChanged(key_str, m_members[key_str]);
                     }
                     else
                     {
