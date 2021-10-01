@@ -69,6 +69,10 @@ namespace ige::scene
         const bool isScissorTestEnable() const { return m_bIsScissorTestEnable; }
         void setScissorTestEnable(bool enable = true);
 
+        //! Set mesh alpha (use to disable rendering of mesh)
+        const bool isMeshEnable(int idx) const;
+        void setMeshEnable(int idx, bool enable = true);
+
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 
@@ -108,5 +112,9 @@ namespace ige::scene
 
         //! Cache Scissor Test state
         bool m_bIsScissorTestEnable = false;
+
+        //! Cache mesh alpha state for visibility
+        std::vector<float> m_meshAlphaValues;
+        std::set<int> m_disableMeshes;
     };
 } // namespace ige::scene
