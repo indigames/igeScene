@@ -764,9 +764,15 @@ namespace ige::scene
         auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
         for (const auto& obj : m_objects)
         {
-            if (obj && RayOBBChecker::checkIntersect(obj->getAABB(), obj->getTransform()->getWorldMatrix(), distance, maxDistance))
+            const auto& transform = obj->getTransform();
+            auto aabbTransform = Mat4::IdentityMat();
+            vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
+            vmath_mat_appendScale(aabbTransform.P(), (transform->getWorldScale() * 0.9f).P(), 4, 4, aabbTransform.P()); // [IGE] 90% of the AABB
+            auto& m_aabb = obj->getAABB();
+            auto aabb = m_aabb.Transform(aabbTransform);
+            if (obj && RayOBBChecker::checkIntersect(aabb, obj->getTransform()->getWorldMatrix(), distance, maxDistance))
             {
-                if (minDistance > distance)
+                if (minDistance > distance && distance > 0.f)
                 {
                     minDistance = distance;
                     hit.first = obj;
@@ -781,16 +787,20 @@ namespace ige::scene
     {
         auto hit = std::pair<std::shared_ptr<SceneObject>, Vec3>(nullptr, Vec3());
 
-        /*if (m_raycastCapture && !forceRaycast)
-            return hit;*/
-
         float distance = 0, minDistance = maxDistance;
         std::pair<Vec3, Vec3> ray = RayOBBChecker::RayOBB(position, direction);
         for (const auto& obj : m_objects)
         {
-            if (obj && RayOBBChecker::checkIntersect(obj->getAABB(), obj->getTransform()->getWorldMatrix(), distance, maxDistance))
+            const auto& transform = obj->getTransform();
+            auto aabbTransform = Mat4::IdentityMat();
+            vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
+            vmath_mat_appendScale(aabbTransform.P(), (transform->getWorldScale() * 0.9f).P(), 4, 4, aabbTransform.P()); // [IGE] 90% of the AABB
+            auto& m_aabb = obj->getAABB();
+            auto aabb = m_aabb.Transform(aabbTransform);
+
+            if (obj && RayOBBChecker::checkIntersect(aabb, obj->getTransform()->getWorldMatrix(), distance, maxDistance))
             {
-                if (minDistance > distance)
+                if (minDistance > distance && distance > 0.f)
                 {
                     minDistance = distance;
                     hit.first = obj;
