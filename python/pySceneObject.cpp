@@ -155,18 +155,20 @@ namespace ige::scene
     // Set parent
     int SceneObject_setParent(PyObject_SceneObject *self, PyObject *value)
     {
-        PyObject *obj;
-        if (PyArg_ParseTuple(value, "O", &obj))
+        PyObject *obj = value;
+        if (obj && obj->ob_type == &PyTypeObject_SceneObject)
         {
-            if (obj && obj->ob_type == &PyTypeObject_SceneObject)
+            auto parent = ((PyObject_SceneObject*)obj)->sceneObject;
+            if (parent != nullptr)
             {
-                auto parent = ((PyObject_SceneObject *)obj)->sceneObject;
-                if (parent != nullptr)
-                {
-                    self->sceneObject->setParent(parent->getSharedPtr());
-                    return 0;
-                }
+                self->sceneObject->setParent(parent->getSharedPtr());
+                return 0;
             }
+        }
+        else
+        {
+            self->sceneObject->setParent(nullptr);
+            return 0;
         }
         return -1;
     }

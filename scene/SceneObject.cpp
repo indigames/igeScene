@@ -147,6 +147,8 @@ namespace ige::scene
             m_parent.reset();
         }
 
+        //auto parent_temp = (parent == nullptr) ? getRoot() : parent;
+
         if (parent)
         {
             m_parent = parent;
@@ -199,6 +201,7 @@ namespace ige::scene
     //! Add child
     void SceneObject::addChild(std::shared_ptr<SceneObject> child)
     {
+        if (child == nullptr) return;
         auto found = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return !elem.expired() && elem.lock()->getId() == child->getId(); });
         if (found == m_children.end())
         {
@@ -210,6 +213,7 @@ namespace ige::scene
     //! Add child by id
     void SceneObject::addChildById(uint64_t id)
     {
+        if (getScene() == nullptr) return;
         return addChild(getScene()->findObjectById(id));
     }
 
