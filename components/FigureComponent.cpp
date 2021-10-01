@@ -85,20 +85,36 @@ namespace ige::scene
             std::replace(fPath.begin(), fPath.end(), '\\', '/');
 
             m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str());
-            m_figure->WaitInitialize();
+            m_figure->WaitBuild();
 
-            // Setup lights shader
-            for (int i = 0; i < m_figure->NumMaterials(); ++i)
-            {
-                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                shaderDesc->SetValue(m_figure->GetShaderName(i));
-                shaderDesc->SetNumPointLamp(MAX_POINT_LIGHT_NUMBER);
-                shaderDesc->SetNumSpotLamp(MAX_SPOT_LIGHT_NUMBER);
-                m_figure->SetShaderName(i, shaderDesc->GetValue());
+            // Cache mesh alpha for visibility setting
+            m_meshAlphaValues.clear();
+            m_disableMeshes.clear();
+            for (int i = 0; i < m_figure->NumMeshes(); ++i) {
+                m_meshAlphaValues.push_back(m_figure->GetMeshAlpha(i));
             }
 
             getOwner()->getScene()->getResourceAddedEvent().invoke(m_figure);
             getOwner()->getTransform()->makeDirty();
+        }
+    }
+
+    //! Set mesh alpha (use to disable rendering of mesh)
+    const bool FigureComponent::isMeshEnable(int idx) const {
+        return std::find(m_disableMeshes.begin(), m_disableMeshes.end(), idx) == m_disableMeshes.end();
+    }
+
+    void FigureComponent::setMeshEnable(int idx, bool enable) {
+        auto itr = std::find(m_disableMeshes.begin(), m_disableMeshes.end(), idx);
+        if (enable && itr != m_disableMeshes.end()) {
+            m_disableMeshes.erase(itr);
+            m_figure->SetMeshAlpha(idx, m_meshAlphaValues[idx]);
+        }
+        else {
+            if (itr == m_disableMeshes.end()) {
+                m_disableMeshes.insert(idx);
+            }
+            m_figure->SetMeshAlpha(idx, 0.001f);
         }
     }
 
@@ -276,6 +292,7 @@ namespace ige::scene
         j["aBlendOp"] = getAlphaBlendingOp();
         j["doubleSide"] = isDoubleSideEnable();
         j["scissor"] = isScissorTestEnable();
+        j["disableMeshes"] = m_disableMeshes;
     }
 
     //! Deserialize
@@ -290,6 +307,10 @@ namespace ige::scene
         setAlphaBlendingOp(j.value("aBlendOp", 2));
         setDoubleSideEnable(j.value("doubleSide", false));
         setScissorTestEnable(j.value("scissor", false));
+        auto disableMeshes = j.value("disableMeshes", std::set<int>());
+        for (auto idx: disableMeshes) {
+            setMeshEnable(idx, false);
+        }
         Component::from_json(j);
     }
 
