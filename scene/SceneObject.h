@@ -348,7 +348,7 @@ namespace ige::scene
     inline bool SceneObject::hasComponent()
     {
         static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
-
+        if (m_components.size() == 0) return false;
         for (auto it = m_components.begin(); it != m_components.end(); ++it)
         {
             auto result = std::dynamic_pointer_cast<T>(*it);

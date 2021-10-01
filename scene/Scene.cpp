@@ -305,7 +305,7 @@ namespace ige::scene
 
     void Scene::renderUI() {
         if (!SceneManager::getInstance()->isEditor()) {
-            if (getCanvas() && getCanvas()->getCamera()) {
+            if (getCanvas() != nullptr && getCanvas()->getCamera() != nullptr) {
                 getCanvas()->getCamera()->Render();
             }
         }
@@ -811,10 +811,11 @@ namespace ige::scene
         auto pos = screenToClient(screenPos);
 
         Mat4 proj;
-        getCanvas()->getCamera()->GetProjectionMatrix(proj);
+        auto camera = getCanvas()->getCamera();
+        camera->GetProjectionMatrix(proj);
 
         Mat4 viewInv;
-        getCanvas()->getCamera()->GetViewInverseMatrix(viewInv);
+        camera->GetViewInverseMatrix(viewInv);
 
         auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
         float distance, minDistance = 100.0f;
@@ -835,16 +836,17 @@ namespace ige::scene
     Vec3 Scene::raycastCanvas(const Vec2& screenPos)
     {
         Vec3 hit;
-        if (!getCanvas() || !getCanvas()->getCamera())
+        if (getCanvas() == nullptr || getCanvas()->getCamera() == nullptr)
             return hit;
         auto wSize = getWindowSize();
         auto pos = screenToClient(screenPos);
+        auto camera = getCanvas()->getCamera();
 
         Mat4 proj;
-        getCanvas()->getCamera()->GetProjectionMatrix(proj);
+        camera->GetProjectionMatrix(proj);
 
         Mat4 viewInv;
-        getCanvas()->getCamera()->GetViewInverseMatrix(viewInv);
+        camera->GetViewInverseMatrix(viewInv);
 
         auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
         hit = ray.first;
@@ -967,8 +969,12 @@ namespace ige::scene
                 }
             }
         }
+
         if (m_canvas == nullptr) {
-            m_canvas = findObjectByName("Canvas")->getComponent<Canvas>();
+            auto canvas = findObjectByName("Canvas");
+            if (canvas != nullptr) {
+                m_canvas = canvas->getComponent<Canvas>();
+            }
         }
     }
 }
