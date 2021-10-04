@@ -369,7 +369,7 @@ namespace ige::scene
 
         for (auto& child : obj->getChildren()) {
             if (!child.expired()) {
-                removeObject(child.lock());
+                removeObjectById(child.lock()->getId());
             }
         }
 
