@@ -25,6 +25,10 @@ namespace ige::scene
         //! Returns the type of the component
         virtual Type getType() const override { return Type::Script; }
 
+        //! Check and clear error
+        void PyErr_CheckAndClear();
+
+        //! Reload script
         void Reload();
 
         //! Active when start runtime

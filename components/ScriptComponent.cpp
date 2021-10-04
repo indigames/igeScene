@@ -98,6 +98,18 @@ namespace ige::scene
         m_members.clear();
     }
 
+    void ScriptComponent::PyErr_CheckAndClear() {
+        if (PyErr_Occurred()) {
+            PyObject* ptype, *pvalue, *ptraceback;
+            PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+            auto pStrErrorMessage = PyUnicode_AsUTF8(PyObject_Str(pvalue));
+            auto ptrace = (PyTracebackObject*)ptraceback;
+            if (pStrErrorMessage != nullptr)
+                pyxie_printf("[PYTHON] ERROR in '%s', line %d : %s", getPath().c_str(), ptrace ? ptrace->tb_lineno : -1, pStrErrorMessage);
+            PyErr_Clear();
+        }
+    }
+
     void ScriptComponent::Reload()
     {
         bool isLoad = isRunning();
@@ -159,12 +171,15 @@ namespace ige::scene
             // Return if the module was not loaded
             if (m_pyModule == nullptr)
             {
-                PyObject* ptype, * pvalue, * ptraceback;
-                PyErr_Fetch(&ptype, &pvalue, &ptraceback);
-                auto pStrErrorMessage = PyUnicode_AsUTF8(PyObject_Str(pvalue));
-                if (pStrErrorMessage != nullptr)
-                    pyxie_printf(pStrErrorMessage);
-                PyErr_Clear();
+                // Check for script error.
+                if (PyErr_Occurred()) {
+                    PyObject* ptype, *pvalue, *ptraceback;
+                    PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+                    auto pStrErrorMessage = PyUnicode_AsUTF8(PyObject_Str(pvalue));
+                    if (pStrErrorMessage != nullptr)
+                        pyxie_printf("[PYTHON] ERROR in '%s': %s", getPath().c_str(), pStrErrorMessage);
+                    PyErr_Clear();
+                }
                 return;
             }
 
@@ -172,7 +187,7 @@ namespace ige::scene
             auto dict = PyModule_GetDict(m_pyModule);
             if (dict == nullptr)
             {
-                PyErr_Clear();
+                PyErr_CheckAndClear();
                 return;
             }
 
@@ -190,7 +205,7 @@ namespace ige::scene
 
             if (pyClass == nullptr)
             {
-                PyErr_Clear();
+                PyErr_CheckAndClear();
                 return;
             }
 
@@ -201,13 +216,11 @@ namespace ige::scene
             PyObject *pyConstruct = PyInstanceMethod_New(pyClass);
             m_pyInstance = PyObject_CallObject(pyConstruct, arglist);
             if (m_pyInstance == nullptr) {
-                PyErr_Clear();
+                PyErr_CheckAndClear();
                 return;
             }
             Py_DECREF(arglist);
             Py_DECREF(pyConstruct);
-
-            PyErr_Clear();
 
             key = nullptr;
             value = nullptr;
@@ -254,8 +267,7 @@ namespace ige::scene
 
             // Enable call onAwake() next frame
             m_bOnAwakeCalled = false;
-        }
-        PyErr_Clear();
+        }        
     }
 
     //! Unload PyModule
@@ -270,7 +282,6 @@ namespace ige::scene
         }
 
         unregisterPhysicEvents();
-        PyErr_Clear();
     }
 
     //! Register physic events
@@ -341,6 +352,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onAwake", NULL);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     //! Start
@@ -351,6 +363,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onStart", NULL);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     //! Enable
@@ -361,6 +374,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onEnable", NULL);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     //! Disable
@@ -371,11 +385,15 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onDisable", NULL);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     //! Update functions
     void ScriptComponent::onRuntimeUpdate(float dt)
     {
+        // Check for script error.
+        PyErr_CheckAndClear();
+
         if (!m_bOnAwakeCalled)
         {
             // Register physic events
@@ -386,7 +404,6 @@ namespace ige::scene
 
             m_bOnAwakeCalled = true;
             m_bOnStartCalled = false;
-            PyErr_Clear();
             return;
         }
 
@@ -395,7 +412,6 @@ namespace ige::scene
         {
             onStart();
             m_bOnStartCalled = true;
-            PyErr_Clear();
             return;
         }
 
@@ -404,8 +420,8 @@ namespace ige::scene
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onUpdate", "(f)", dt);
             Py_XDECREF(ret);
-            PyErr_Clear();
         }
+        PyErr_CheckAndClear();
     }
 
     void ScriptComponent::onRuntimeFixedUpdate(float dt)
@@ -417,6 +433,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onFixedUpdate", "(f)", dt);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     void ScriptComponent::onRuntimeLateUpdate(float dt)
@@ -428,6 +445,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onLateUpdate", "(f)", dt);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     //! Render
@@ -440,6 +458,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onRender", NULL);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     //! Destroyed
@@ -450,6 +469,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onDestroy", NULL);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     //! Click
@@ -462,6 +482,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onClick", NULL);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     //! Suspend
@@ -472,6 +493,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onSuspend", NULL);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     //! Resume
@@ -482,6 +504,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onResume", NULL);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     //! Change Value
@@ -526,7 +549,8 @@ namespace ige::scene
             case json::value_t::object:
                 {
                     if (value.type() == json::value_t::string) {
-                        pyValue = PyUnicode_FromString(value.get<std::string>().c_str());
+                        auto str = value.get<std::string>();
+                        if(!str.empty()) pyValue = PyUnicode_FromString(str.c_str());
                     }
                     else {
                         auto uuid = value.value("uuid", "");
@@ -563,6 +587,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onTriggerStart", "(O)", obj);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     void ScriptComponent::onTriggerStay(SceneObject &other)
@@ -575,6 +600,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onTriggerStay", "(O)", obj);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     void ScriptComponent::onTriggerStop(SceneObject &other)
@@ -587,6 +613,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onTriggerStop", "(O)", obj);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     //! Collision events
@@ -600,6 +627,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onCollisionStart", "(O)", obj);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     void ScriptComponent::onCollisionStay(SceneObject &other)
@@ -612,6 +640,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onCollisionStay", "(O)", obj);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     void ScriptComponent::onCollisionStop(SceneObject &other)
@@ -624,6 +653,7 @@ namespace ige::scene
             auto ret = PyObject_CallMethod(m_pyInstance, "onCollisionStop", "(O)", obj);
             Py_XDECREF(ret);
         }
+        PyErr_CheckAndClear();
     }
 
     _object* ScriptComponent::Invoke(const std::string& functionName, const Value& value)
