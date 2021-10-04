@@ -5,7 +5,6 @@
 NS_IGE_SCENE_BEGIN
 
 InputEvent::InputEvent() :
-    m_target(nullptr),
     m_inputProcessor(nullptr),
     m_touchId(-1),
     m_clickCount(0),
@@ -15,7 +14,7 @@ InputEvent::InputEvent() :
 
 InputEvent::~InputEvent()
 {
-
+    m_target.reset();
 }
 
 NS_IGE_SCENE_END

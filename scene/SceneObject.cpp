@@ -137,7 +137,7 @@ namespace ige::scene
     //! Set parent
     void SceneObject::setParent(std::shared_ptr<SceneObject> parent)
     {
-        if (!m_parent.expired())
+        if (getParent())
         {
             getParent()->removeChildById(getId());
             getDetachedEvent().invoke(*this);

@@ -15,14 +15,14 @@ public:
 	InputEvent();
 	~InputEvent();
 
-	std::shared_ptr<SceneObject> getTarget() const { return m_target; }
+	std::shared_ptr<SceneObject> getTarget() const { return m_target.expired() ? nullptr : m_target.lock(); }
 	const Vec2 getPosition() const { return m_position; }
 	int getTouchId() const { return m_touchId; }
 	KeyCode getKeyCode() const { return m_keyCode; }
 	InputProcessor* getProcessor() const { return m_inputProcessor; }
 
 private:
-	std::shared_ptr<SceneObject> m_target;
+	std::weak_ptr<SceneObject> m_target;
 	Vec2 m_position;
 	int m_touchId;
 	int m_clickCount;
