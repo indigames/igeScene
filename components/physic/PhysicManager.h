@@ -88,6 +88,9 @@ namespace ige::scene
         void preUpdate();
         void postUpdate();
 
+        //! Draw debug
+        void onRender() override;
+
         //! Ray test closest
         RaycastHit rayTestClosest(const btVector3 &rayFromWorld, const btVector3 &rayToWorld, int group = btBroadphaseProxy::DefaultFilter, int mask = btBroadphaseProxy::AllFilter);
 

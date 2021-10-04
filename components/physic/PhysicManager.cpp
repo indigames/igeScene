@@ -163,23 +163,27 @@ namespace ige::scene
     {
         if (m_world == nullptr)
             initialize();
+
+        preUpdate();
     }
+
+    //! Draw debug
+    void PhysicManager::onRender()
+    {
+        // Show debug
+        if (isShowDebug())
+            getWorld()->debugDrawWorld();
+    }    
 
     void PhysicManager::onPhysicUpdate(float dt)
     {
         if (m_world == nullptr)
             initialize();
 
-        preUpdate();
-
         // Run simulation if not in edit mode
         if (!SceneManager::getInstance()->isEditor())
             if (m_world->stepSimulation(dt * m_frameUpdateRatio, m_frameMaxSubStep, m_fixedTimeStep))
                 postUpdate();
-
-        // Show debug
-        if(isShowDebug())
-            getWorld()->debugDrawWorld();
 
         // Do GC
         if(isDeformable() && getDeformableWorld())
