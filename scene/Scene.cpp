@@ -399,7 +399,8 @@ namespace ige::scene
     //! Remove scene object by its id
     bool Scene::removeObjectById(uint64_t id)
     {
-        return removeObject(findObjectById(id));
+        auto obj = findObjectById(id);
+        return removeObject(obj);
     }
 
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id)
