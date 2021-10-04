@@ -41,7 +41,7 @@ namespace ige::scene
     PyObject* Scene_removeObject(PyObject_Scene *self, PyObject* args);
 
     // Create object from Prefab
-    PyObject* Scene_cloneObject(PyObject_Scene* self, PyObject* args);
+    PyObject* Scene_createObjectFromPrefab(PyObject_Scene* self, PyObject* args);
 
     // Find object
     PyObject* Scene_findObject(PyObject_Scene *self, PyObject* args);

@@ -111,11 +111,22 @@ PyDoc_STRVAR(SceneObject_invoke_doc,
 );
 
 PyDoc_STRVAR(SceneObject_getScript_doc,
-	"gget script from current scene object.\n"\
+	"Get script from current scene object.\n"\
 	"\n"\
-	"SceneObject().getScript(param: string|ScriptPath)\n"\
+	"SceneObject().getScript()\n"\
 	"\n"\
 	"Return:\n"\
+	"    script: Script\n"\
+	"----------\n"\
+);
+
+PyDoc_STRVAR(SceneObject_getScene_doc,
+	"Get scene which contain the current object.\n"\
+	"\n"\
+	"SceneObject().getScene()\n"\
+	"\n"\
+	"Return:\n"\
+	"    scene: Scene\n"\
 	"----------\n"\
 );
 
@@ -165,4 +176,10 @@ PyDoc_STRVAR(SceneObject_transform_doc,
 PyDoc_STRVAR(SceneObject_rectTransform_doc,
 	"The transform component as RectTransform for UI elements.\n"\
 	"Type: RectTransform.\n"
+);
+
+// scene
+PyDoc_STRVAR(SceneObject_scene_doc,
+	"The scene the owner belong to.\n"\
+	"Type: Scene.\n"
 );

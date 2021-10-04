@@ -96,7 +96,7 @@ namespace ige::scene
     }
 
     // Create object from Prefab
-    PyObject* Scene_cloneObject(PyObject_Scene* self, PyObject* args) {
+    PyObject* Scene_createObjectFromPrefab(PyObject_Scene* self, PyObject* args) {
         char* path = "";
         char* name = "";
         PyObject* parentObj;
@@ -426,7 +426,7 @@ namespace ige::scene
     // Methods definition
     PyMethodDef Scene_methods[] = {
         { "createObject", (PyCFunction)Scene_createObject, METH_VARARGS, Scene_createObject_doc },
-        { "cloneObject", (PyCFunction)Scene_cloneObject, METH_VARARGS, Scene_cloneObject_doc },
+        { "createObjectFromPrefab", (PyCFunction)Scene_createObjectFromPrefab, METH_VARARGS, Scene_createObjectFromPrefab_doc },
         { "removeObject", (PyCFunction)Scene_removeObject, METH_VARARGS, Scene_removeObject_doc },
         { "findObject", (PyCFunction)Scene_findObject, METH_VARARGS, Scene_findObject_doc },
         { "findObjectByName", (PyCFunction)Scene_findObjectByName, METH_VARARGS, Scene_findObject_doc },

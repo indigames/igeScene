@@ -15,11 +15,11 @@ PyDoc_STRVAR(Scene_createObject_doc,
 			 "    parent : SceneObject\n"
 			 "        Parent object\n");
 
-// createObject from Prefab
-PyDoc_STRVAR(Scene_cloneObject_doc,
+// createObjectFromPrefab
+PyDoc_STRVAR(Scene_createObjectFromPrefab_doc,
 	"Create new scene object from prefab.\n"
 	"\n"
-	"Scene().cloneObject(path: string, name: string, parent: SceneObject = None)\n"
+	"Scene().createObjectFromPrefab(path: string, name: string, parent: SceneObject = None)\n"
 	"\n"
 	"Parameters\n"
 	"----------\n"

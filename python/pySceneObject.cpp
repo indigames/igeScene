@@ -191,6 +191,14 @@ namespace ige::scene
         return (PyObject *)obj;
     }
 
+    // Get SceneObject_getScene
+    PyObject * SceneObject_getScene(PyObject_SceneObject *self)
+    {
+        auto *obj = PyObject_New(PyObject_Scene, &PyTypeObject_Scene);
+        obj->scene = (Scene*)(self->sceneObject->getScene());
+        return (PyObject *)obj;
+    }
+
     PyObject* SceneObject_findChildByName(PyObject_SceneObject* self, PyObject* value)
     {
         PyObject* obj = nullptr;
@@ -1258,14 +1266,15 @@ namespace ige::scene
 
     // Methods
     PyMethodDef SceneObject_methods[] = {
-        {"getChildren", (PyCFunction)SceneObject_getChildren, METH_VARARGS, SceneObject_getChildren_doc},
-        {"removeChildren", (PyCFunction)SceneObject_removeChildren, METH_VARARGS, SceneObject_removeChildren_doc},
+        {"getChildren", (PyCFunction)SceneObject_getChildren, METH_NOARGS, SceneObject_getChildren_doc},
+        {"removeChildren", (PyCFunction)SceneObject_removeChildren, METH_NOARGS, SceneObject_removeChildren_doc},
         {"addComponent", (PyCFunction)SceneObject_addComponent, METH_VARARGS, SceneObject_addComponent_doc},
         {"removeComponent", (PyCFunction)SceneObject_removeComponent, METH_VARARGS, SceneObject_removeComponent_doc},
-        {"getComponent", (PyCFunction)SceneObject_getComponent, METH_VARARGS, SceneObject_getComponent_doc},
-        {"getComponents", (PyCFunction)SceneObject_getComponents, METH_VARARGS, SceneObject_getComponents_doc},
+        {"getComponent", (PyCFunction)SceneObject_getComponent, METH_NOARGS, SceneObject_getComponent_doc},
+        {"getComponents", (PyCFunction)SceneObject_getComponents, METH_NOARGS, SceneObject_getComponents_doc},
         {"removeComponents", (PyCFunction)SceneObject_removeComponents, METH_VARARGS, SceneObject_removeComponents_doc},
-        {"getScript", (PyCFunction)SceneObject_getScript, METH_VARARGS, SceneObject_getScript_doc},
+        {"getScript", (PyCFunction)SceneObject_getScript, METH_NOARGS, SceneObject_getScript_doc},
+        {"getScene", (PyCFunction)SceneObject_getScene, METH_NOARGS, SceneObject_getScene_doc},
         {"findChildByName", (PyCFunction)SceneObject_findChildByName, METH_VARARGS, SceneObject_getChildren_doc},
         {NULL, NULL}};
 
@@ -1279,6 +1288,7 @@ namespace ige::scene
         {"parent", (getter)SceneObject_getParent, (setter)SceneObject_setParent, SceneObject_parent_doc, NULL},
         {"transform", (getter)SceneObject_getTransform, NULL, SceneObject_transform_doc, NULL},
         {"rectTransform", (getter)SceneObject_getRectTransform, NULL, SceneObject_rectTransform_doc, NULL},
+        {"scene", (getter)SceneObject_getScene, NULL, SceneObject_scene_doc, NULL},
         {NULL, NULL}};
 
     // Type declaration
