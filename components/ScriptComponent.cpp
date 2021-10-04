@@ -181,7 +181,7 @@ namespace ige::scene
             Py_ssize_t pos = 0;
             while (PyDict_Next(dict, &pos, &key, &value))
             {
-                if (PyObject_HasAttrString(value, "onStart") && PyObject_IsSubclass(value, (PyObject *)&PyTypeObject_Script))
+                if (PyObject_HasAttrString(value, "onUpdate") && PyObject_IsSubclass(value, (PyObject *)&PyTypeObject_Script))
                 {
                     pyClass = value;
                     break;
