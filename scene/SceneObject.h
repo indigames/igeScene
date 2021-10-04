@@ -92,6 +92,7 @@ namespace ige::scene
 
         //! Remove a component
         virtual bool removeComponent(const std::shared_ptr<Component> &component);
+        virtual bool removeComponent(uint64_t id);
 
         //! Remove a component by name
         virtual bool removeComponent(const std::string &name);

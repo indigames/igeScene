@@ -367,51 +367,39 @@ namespace ige::scene
     {
         if (!obj) return false;
 
+        for (auto& child : obj->getChildren()) {
+            if (!child.expired()) {
+                removeObject(child.lock());
+            }
+        }
+
         // Remove active camera
-        if (auto camera = obj->getComponent<CameraComponent>())
-        {
-            if (getActiveCamera() == camera.get())
-                setActiveCamera(nullptr);
+        if (auto camera = obj->getComponent<CameraComponent>()) {
+            if (getActiveCamera() == camera.get()) setActiveCamera(nullptr);
         }
 
         // Remove root object
-        if (obj == m_root)
-        {
+        if (obj == m_root) {
             m_root = nullptr;
         }
 
-        if (obj == m_rootUI)
-        {
+        if (obj == m_rootUI) {
             m_rootUI = nullptr;
-        }
-
-        if (obj->getName().compare("Canvas") == 0) {
-            m_canvas = nullptr;
         }
 
         // Remove from objects list
         auto itr = std::find(m_objects.begin(), m_objects.end(), obj);
         if (itr != m_objects.end()) {
-            for (auto& child : obj->getChildren()) {
-                if (!child.expired()) {
-                    removeObjectById(child.lock()->getId());
-                }
-            }
-            (*itr)->setParent(nullptr);
             m_objects.erase(itr);
-            obj = nullptr;
-            return true;
         }
-        return false;
+        obj = nullptr;
+        return true;
     }
 
     //! Remove scene object by its id
     bool Scene::removeObjectById(uint64_t id)
     {
-        auto object = findObjectById(id);
-        auto removed = removeObject(object);
-        object = nullptr;
-        return removed;
+        return removeObject(findObjectById(id));
     }
 
     std::shared_ptr<SceneObject> Scene::findObjectById(uint64_t id)

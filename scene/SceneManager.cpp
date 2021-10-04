@@ -77,23 +77,20 @@ namespace ige::scene
         Py_Initialize();
 
         m_prefabPaths.clear();
-        auto fsPath = fs::path(m_projectPath).append("prefabs");
-        if (fs::exists(fsPath) && fs::is_directory(fsPath)) {
-            for (const auto& entry : fs::directory_iterator(fsPath))
+        for (const auto& entry : fs::recursive_directory_iterator(m_projectPath))
+        {
+            if (entry.is_regular_file() && entry.path().extension().string().compare(".prefab") == 0)
             {
-                if (entry.is_regular_file())
+                json jFile;
+                std::ifstream file(entry.path().string());
+                if (file.is_open())
                 {
-                    json jFile;
-                    std::ifstream file(entry.path().string());
-                    if (file.is_open())
+                    file >> jFile;
+                    file.close();
+                    auto prefabId = jFile.value("prefabId", std::string());
+                    if (!prefabId.empty())
                     {
-                        file >> jFile;
-                        file.close();
-                        auto prefabId = jFile.value("prefabId", std::string());
-                        if (!prefabId.empty())
-                        {
-                            m_prefabPaths[prefabId] = entry.path().string();
-                        }
+                        m_prefabPaths[prefabId] = entry.path().string();
                     }
                 }
             }

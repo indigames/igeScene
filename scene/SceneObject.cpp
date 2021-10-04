@@ -224,7 +224,12 @@ namespace ige::scene
         if (itr != m_children.end()) {
             m_children.erase(itr);
             dispatchEvent((int)EventType::RemoveChild, Value(child->getUUID()));
-        }   
+        }
+        itr = m_children.begin();
+        while (itr != m_children.end()) {
+            if (itr->expired()) { itr = m_children.erase(itr); continue; }
+            ++itr;
+        }
     }
 
     //! Removes child
@@ -235,6 +240,11 @@ namespace ige::scene
             m_children.erase(itr);
             if(!itr->expired())
                 dispatchEvent((int)EventType::RemoveChild, Value((*itr).lock()->getUUID()));
+        }
+        itr = m_children.begin();
+        while (itr != m_children.end()) {
+            if (itr->expired()) { itr = m_children.erase(itr); continue; }
+            ++itr;
         }
     }
 
@@ -337,6 +347,21 @@ namespace ige::scene
     bool SceneObject::removeComponent(const std::shared_ptr<Component> &component)
     {
         auto it = std::find(m_components.begin(), m_components.end(), component);
+        if (it != m_components.end())
+        {
+            m_components.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+
+    //! Remove a component
+    bool SceneObject::removeComponent(uint64_t id)
+    {
+        auto it = std::find_if(m_components.begin(), m_components.end(), [&](auto& elem) {
+            return elem->getInstanceId() == id;
+        });
         if (it != m_components.end())
         {
             m_components.erase(it);
