@@ -366,12 +366,16 @@ namespace ige::scene
     bool Scene::removeObject(std::shared_ptr<SceneObject>& obj)
     {
         if (!obj) return false;
+        obj->setParent(nullptr);
 
-        for (auto& child : obj->getChildren()) {
+        auto children = obj->getChildren();
+        for (auto child : children) {
             if (!child.expired()) {
-                removeObjectById(child.lock()->getId());
+                auto obj = child.lock();
+                removeObject(obj);
             }
         }
+        obj->removeChildren();
 
         // Remove active camera
         if (auto camera = obj->getComponent<CameraComponent>()) {

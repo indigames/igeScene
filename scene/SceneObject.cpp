@@ -225,11 +225,6 @@ namespace ige::scene
             m_children.erase(itr);
             dispatchEvent((int)EventType::RemoveChild, Value(child->getUUID()));
         }
-        itr = m_children.begin();
-        while (itr != m_children.end()) {
-            if (itr->expired()) { itr = m_children.erase(itr); continue; }
-            ++itr;
-        }
     }
 
     //! Removes child
@@ -237,14 +232,9 @@ namespace ige::scene
     {
         auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return !elem.expired() && (elem.lock()->getId() == id); });
         if (itr != m_children.end()) {
-            m_children.erase(itr);
-            if(!itr->expired())
+            if (!itr->expired())
                 dispatchEvent((int)EventType::RemoveChild, Value((*itr).lock()->getUUID()));
-        }
-        itr = m_children.begin();
-        while (itr != m_children.end()) {
-            if (itr->expired()) { itr = m_children.erase(itr); continue; }
-            ++itr;
+            m_children.erase(itr);
         }
     }
 
