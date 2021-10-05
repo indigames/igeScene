@@ -1194,16 +1194,16 @@ namespace ige::scene
         if (len > 0)
         {
             auto components = self->sceneObject->getComponents();
-            auto compTuple = PyTuple_New(len);
-            for (int i = 0; i < len; ++i)
+            PyObject* pyList = PyList_New(0);
+            for(int i = 0; i < len; ++i)
             {
-                if (components[i] == nullptr)
-                    continue;
                 auto type = PyUnicode_FromString(components[i]->getName().c_str());
                 auto obj = SceneObject_getComponent(self, type);
-                PyTuple_SetItem(compTuple, i, (PyObject *)obj);
+                
+                PyList_Append(pyList, (PyObject*)obj);
+                Py_XDECREF(obj);
             }
-            return (PyObject *)compTuple;
+            return (PyObject*)pyList;
         }
         Py_RETURN_NONE;
     }
