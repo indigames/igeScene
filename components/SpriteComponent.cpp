@@ -59,6 +59,7 @@ namespace ige::scene
     //! Enable
     void SpriteComponent::onEnable()
     {
+        if (!getOwner()->isActive() || !isEnabled()) return;
         Component::onEnable();
         if (m_sprite && m_sprite->getFigure()) {
             if (getOwner()->getScene()) {

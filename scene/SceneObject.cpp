@@ -539,6 +539,28 @@ namespace ige::scene
                         child.lock()->setActive(isActive, recursive);
                 }
             }
+            else {
+                activeChildren(isActive);
+            }
+        }
+    }
+
+    void SceneObject::activeChildren(bool active)
+    {
+        for (auto& child : m_children) {
+            if (!child.expired()) {
+                auto childPtr = child.lock();
+                if (childPtr) {
+                    auto comps = childPtr->getComponents();
+                    for (auto& comp : comps) {
+                        if (isActive() && active)
+                            comp->onEnable();
+                        else
+                            comp->onDisable();
+                    }
+                    childPtr->activeChildren(active);
+                }
+            }
         }
     }
 

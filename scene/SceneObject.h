@@ -255,6 +255,9 @@ namespace ige::scene
         //! Transform changed event
         void onTransformChanged(SceneObject& sceneObject);
 
+        //! Active children components
+        void activeChildren(bool active);
+
     protected:
         //! Node ID
         uint64_t m_id;

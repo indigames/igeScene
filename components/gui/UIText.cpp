@@ -49,6 +49,7 @@ namespace ige::scene
     //! Enable
     void UIText::onEnable()
     {
+        if (!getOwner()->isActive() || !isEnabled()) return;
         Component::onEnable();
         if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene()) {
             getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_text->getFigure());
