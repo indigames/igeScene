@@ -1270,7 +1270,7 @@ namespace ige::scene
         {"removeChildren", (PyCFunction)SceneObject_removeChildren, METH_NOARGS, SceneObject_removeChildren_doc},
         {"addComponent", (PyCFunction)SceneObject_addComponent, METH_VARARGS, SceneObject_addComponent_doc},
         {"removeComponent", (PyCFunction)SceneObject_removeComponent, METH_VARARGS, SceneObject_removeComponent_doc},
-        {"getComponent", (PyCFunction)SceneObject_getComponent, METH_NOARGS, SceneObject_getComponent_doc},
+        {"getComponent", (PyCFunction)SceneObject_getComponent, METH_VARARGS, SceneObject_getComponent_doc},
         {"getComponents", (PyCFunction)SceneObject_getComponents, METH_NOARGS, SceneObject_getComponents_doc},
         {"removeComponents", (PyCFunction)SceneObject_removeComponents, METH_VARARGS, SceneObject_removeComponents_doc},
         {"getScript", (PyCFunction)SceneObject_getScript, METH_NOARGS, SceneObject_getScript_doc},

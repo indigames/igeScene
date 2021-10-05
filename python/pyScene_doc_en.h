@@ -15,20 +15,23 @@ PyDoc_STRVAR(Scene_createObject_doc,
 			 "    parent : SceneObject\n"
 			 "        Parent object\n");
 
-// createObjectFromPrefab
-PyDoc_STRVAR(Scene_createObjectFromPrefab_doc,
-	"Create new scene object from prefab.\n"
-	"\n"
-	"Scene().createObjectFromPrefab(path: string, name: string, parent: SceneObject = None)\n"
-	"\n"
-	"Parameters\n"
-	"----------\n"
-	"    path : string\n"
-	"        Path to the prefab\n"
-	"    name : string\n"
-	"        Name of the new scene object\n"
-	"    parent : SceneObject\n"
-	"        Parent object\n");
+// loadPrefab
+PyDoc_STRVAR(Scene_loadPrefab_doc,
+			 "Create new scene object from prefab.\n"
+			 "\n"
+			 "Scene().loadPrefab(path: string, name: string, parent: SceneObject = None)\n"
+			 "\n"
+			 "Parameters\n"
+			 "----------\n"
+			 "    path : string\n"
+			 "        Path to the prefab\n"
+			 "    name : string\n"
+			 "        Name of the new scene object\n"
+			 "    parent : SceneObject\n"
+			 "        Parent object\n"
+			 "Return:\n"
+			 "----------\n"
+			 "    obj: SceneObject\n");
 
 // removeObject
 PyDoc_STRVAR(Scene_removeObject_doc,
