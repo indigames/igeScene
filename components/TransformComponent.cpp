@@ -52,6 +52,8 @@ namespace ige::scene
             m_parent = comp;
             if (getParent()) getParent()->addObserver(this);
         }
+
+        updateWorldToLocal();
     }
 
     void TransformComponent::onUpdate(float dt)
