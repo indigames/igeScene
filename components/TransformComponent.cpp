@@ -17,6 +17,9 @@ namespace ige::scene
     {
         m_bLocalDirty = true;
 
+        m_localMatrix.Identity();
+        m_worldMatrix.Identity();
+
         m_worldPosition = pos;
         m_worldRotation = rot;
         m_worldScale = scale;
