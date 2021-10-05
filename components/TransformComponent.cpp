@@ -12,6 +12,16 @@
 
 namespace ige::scene
 {
+    static bool checkNanMatrixTransform(Mat4 matrix) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (isnan(matrix[i][j]))
+                    return true;
+            }
+        }
+        return false;
+    }
+
     TransformComponent::TransformComponent(SceneObject &owner, const Vec3 &pos, const Quat &rot, const Vec3 &scale)
         : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale)
     {
@@ -277,17 +287,17 @@ namespace ige::scene
         m_worldScale.Y(columns[1].Length());
         m_worldScale.Z(columns[2].Length());
 
-        if (m_worldScale.X())
+        if (m_worldScale.X() != 0)
         {
             columns[0] /= m_worldScale.X();
         }
 
-        if (m_worldScale.Y())
+        if (m_worldScale.Y() != 0)
         {
             columns[1] /= m_worldScale.Y();
         }
 
-        if (m_worldScale.Z())
+        if (m_worldScale.Z() != 0)
         {
             columns[2] /= m_worldScale.Z();
         }
@@ -312,7 +322,9 @@ namespace ige::scene
 
         // Update local matrix
         m_localMatrix = getParent() ? getParent()->getWorldMatrix().Inverse() * m_worldMatrix : m_worldMatrix;
-
+        if (checkNanMatrixTransform(m_localMatrix)) {
+            m_localMatrix = m_worldMatrix;
+        }
         // Update local position
         m_localPosition.X(m_localMatrix[3][0]);
         m_localPosition.Y(m_localMatrix[3][1]);
@@ -453,7 +465,7 @@ namespace ige::scene
     //! Deserialize
     void TransformComponent::from_json(const json &j)
     {
-        setPosition(j.value("pos", Vec3()));
+        setPosition(j.value("pos", Vec3(0.f, 0.f, 0.f)));
         setRotation(j.value("rot", Vec3(0.f, 0.f, 0.f)));
         setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
         Component::from_json(j);
