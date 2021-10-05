@@ -457,7 +457,7 @@ namespace ige::scene
         while (itr != m_components.end()) {
             if (*itr == nullptr) { itr = m_components.erase(itr); continue; }
             auto comp = *itr;
-            if (isActive() && comp->getName() != "Camera")
+            if (isActive() && comp->getName() != "Camera" && comp->isEnabled())
                 comp->onUpdate(dt);
             ++itr;
         }
@@ -470,7 +470,8 @@ namespace ige::scene
         {
             for (auto &comp : m_components)
             {
-                comp->onFixedUpdate(dt);
+                if(comp->isEnabled())
+                    comp->onFixedUpdate(dt);
             }
         }
     }
@@ -482,7 +483,8 @@ namespace ige::scene
         {
             for (auto &comp : m_components)
             {
-                comp->onLateUpdate(dt);
+                if(comp->isEnabled())
+                    comp->onLateUpdate(dt);
             }
         }
     }
@@ -494,7 +496,8 @@ namespace ige::scene
         {
             for (auto& comp : m_components)
             {
-                comp->onPhysicUpdate(dt);
+                if(comp->isEnabled())
+                    comp->onPhysicUpdate(dt);
             }
         }
     }
@@ -507,7 +510,7 @@ namespace ige::scene
             for (auto &comp : m_components)
             {
                 // Camera rendered before other objects
-                if (comp->getName() != "Camera")
+                if (comp->getName() != "Camera" && comp->isEnabled())
                     comp->onRender();
             }
         }

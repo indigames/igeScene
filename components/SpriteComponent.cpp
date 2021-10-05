@@ -56,6 +56,33 @@ namespace ige::scene
             getOwner()->getTransform()->makeDirty();
     }
 
+    //! Enable
+    void SpriteComponent::onEnable()
+    {
+        Component::onEnable();
+        if (m_sprite && m_sprite->getFigure()) {
+            if (getOwner()->getScene()) {
+                if (m_bIsGUI)
+                    getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_sprite->getFigure());
+                else
+                    getOwner()->getScene()->getResourceAddedEvent().invoke(m_sprite->getFigure());
+            }
+        }
+    }
+
+    //! Disable
+    void SpriteComponent::onDisable()
+    {
+        if (m_sprite && m_sprite->getFigure()) {
+            if (getOwner()->getScene()) {
+                if (m_bIsGUI)
+                    getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_sprite->getFigure());
+                else
+                    getOwner()->getScene()->getResourceRemovedEvent().invoke(m_sprite->getFigure());
+            }
+        }
+        Component::onDisable();
+    }
 
     //! Update
     void SpriteComponent::onUpdate(float dt)

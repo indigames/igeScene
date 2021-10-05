@@ -53,7 +53,8 @@ namespace ige::scene
             if (getParent()) getParent()->addObserver(this);
         }
 
-        updateWorldToLocal();
+        if(!getOwner()->isGUIObject())
+            updateWorldToLocal();
     }
 
     void TransformComponent::onUpdate(float dt)

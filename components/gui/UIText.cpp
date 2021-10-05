@@ -46,6 +46,24 @@ namespace ige::scene
             getOwner()->getTransform()->makeDirty();
     }
 
+    //! Enable
+    void UIText::onEnable()
+    {
+        Component::onEnable();
+        if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene()) {
+            getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_text->getFigure());
+        }
+    }
+
+    //! Disable
+    void UIText::onDisable()
+    {
+        if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene()) {
+            getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_text->getFigure());
+        }
+        Component::onDisable();
+    }
+
     //! Update
     void UIText::onUpdate(float dt)
     {

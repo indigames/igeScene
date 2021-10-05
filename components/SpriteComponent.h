@@ -25,6 +25,12 @@ namespace ige::scene
         //! Returns the type of the component
         virtual Type getType() const override { return Type::Sprite; }
 
+        //! Enable
+        virtual void onEnable() override;
+
+        //! Disable
+        virtual void onDisable() override;
+
         //! Update
         virtual void onUpdate(float dt) override;
 
