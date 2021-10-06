@@ -15,7 +15,7 @@
 #include "components/FigureComponent.h"
 #include "components/BoneTransform.h"
 #include "components/SpriteComponent.h"
-//#include "components/ScriptComponent.h"
+#include "components/TextComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
@@ -292,6 +292,7 @@ namespace ige::scene
         if (name == "BoneTransform") return addComponent<BoneTransform>();
         if (name == "Figure") return addComponent<FigureComponent>();
         if (name == "Sprite") return addComponent<SpriteComponent>();
+        if (name == "Text") return addComponent<TextComponent>();
         if (name == "Script") return addComponent<ScriptComponent>();
         if (name == "PhysicManager") return addComponent<PhysicManager>();
         if (name == "PhysicBox") return addComponent<PhysicBox>();
@@ -893,6 +894,16 @@ namespace ige::scene
             {
                 Vec3 aabbMin, aabbMax;
                 spriteComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                m_aabb = { aabbMin, aabbMax };
+            }
+        }
+        else if (getComponent<TextComponent>() != nullptr && !isGUIObject())
+        {
+            auto comp = getComponent<TextComponent>();
+            if (comp->getFigure())
+            {
+                Vec3 aabbMin, aabbMax;
+                comp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
                 m_aabb = { aabbMin, aabbMax };
             }
         }

@@ -14,6 +14,7 @@
 #include "python/pyPointLight.h"
 #include "python/pySpotLight.h"
 #include "python/pySpriteComponent.h"
+#include "python/pyTextComponent.h"
 #include "python/pyRectTransform.h"
 #include "python/pyCanvas.h"
 #include "python/pyUIImage.h"
@@ -357,6 +358,17 @@ namespace ige::scene
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;
+                }
+            }
+            else if (type == "Text")
+            {
+                auto comp = self->sceneObject->addComponent<TextComponent>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_TextComponent, &PyTypeObject_TextComponent);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
                 }
             }
             else if (type == "RectTransform")
@@ -814,6 +826,17 @@ namespace ige::scene
             if (comp)
             {
                 auto* compObj = PyObject_New(PyObject_SpriteComponent, &PyTypeObject_SpriteComponent);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "Text")
+        {
+            auto comp = sceneObject->getComponent<TextComponent>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_TextComponent, &PyTypeObject_TextComponent);
                 compObj->component = comp.get();
                 compObj->super.component = compObj->component;
                 return (PyObject*)compObj;
