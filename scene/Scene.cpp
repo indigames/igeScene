@@ -555,8 +555,9 @@ namespace ige::scene
 
         auto parent = findObjectById(parentId);
         auto prefabId = jObj.value("prefabId", std::string());
-        auto obj = createObject(jObj.at("name"), parent, jObj.value("gui", false), jObj.value("size", Vec2{ 64.f, 64.f }), prefabId);
+        auto obj = createObject(jObj.at("name"), nullptr, jObj.value("gui", false), jObj.value("size", Vec2{ 64.f, 64.f }), prefabId);
         obj->from_json(jObj);
+        obj->setParent(parent);
         return obj;
     }
 
