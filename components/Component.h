@@ -23,6 +23,8 @@ namespace ige::scene
             Environment,
             Figure,
             Sprite,
+            Text,
+            TextBitmap,
             BoneTransform,
             Script,
             AmbientLight,

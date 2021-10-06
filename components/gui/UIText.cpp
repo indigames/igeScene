@@ -218,12 +218,14 @@ namespace ige::scene
     //! Color
     void UIText::setColor(const Vec4 &color)
     {
-        m_color = color;
-        if (m_text == nullptr) {
-            generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
+        if (m_color != color) {
+            m_color = color;
+            if (m_text == nullptr) {
+                generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
+            }
+            else
+                m_text->setColor(color);
         }
-        else 
-            m_text->setColor(color);
     }
 
     EditableFigure* UIText::getCurrentFigure() { return getFigure(); }
