@@ -67,12 +67,6 @@ namespace ige::scene
             updateLocalToWorld();
             m_bLocalDirty = false;
         }
-
-        if (m_bWorldDirty)
-        {
-            updateWorldToLocal();
-            m_bWorldDirty = false;
-        }
     }
 
     void TransformComponent::translate(const Vec3 &trans)
@@ -124,7 +118,7 @@ namespace ige::scene
         if (m_worldPosition != pos)
         {
             m_worldPosition = pos;
-            m_bWorldDirty = true;
+            updateWorldToLocal();
         }
     }
 
@@ -167,7 +161,7 @@ namespace ige::scene
         if (m_worldRotation != rotQuat)
         {
             m_worldRotation = rotQuat;
-            m_bWorldDirty = true;
+            updateWorldToLocal();
         }
     }
 
@@ -176,7 +170,7 @@ namespace ige::scene
         if (m_worldRotation != rot)
         {
             m_worldRotation = rot;
-            m_bWorldDirty = true;
+            updateWorldToLocal();
         }
     }
 
@@ -204,7 +198,7 @@ namespace ige::scene
         if (m_worldScale != scale)
         {
             m_worldScale = scale;
-            m_bWorldDirty = true;
+            updateWorldToLocal();
         }
     }
 
@@ -392,7 +386,6 @@ namespace ige::scene
 
     void TransformComponent::makeDirty() 
     {
-        m_bWorldDirty = true;
         m_bLocalDirty = true;
     }
 

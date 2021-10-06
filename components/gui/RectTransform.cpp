@@ -306,7 +306,6 @@ namespace ige::scene
     void RectTransform::setTransformDirty()
     {
         m_bLocalDirty = true;
-        //m_bWorldDirty = true;
         m_viewportTransformDirty = true;
         m_canvasTransformDirty = true;
         

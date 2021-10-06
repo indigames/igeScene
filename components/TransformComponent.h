@@ -176,6 +176,5 @@ namespace ige::scene
 
         //! Dirty flag
         bool m_bLocalDirty = false;
-        bool m_bWorldDirty = false;
     };
 } // namespace ige::scene
