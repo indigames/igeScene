@@ -24,7 +24,8 @@ namespace ige::scene
         {
             if (getOwner()->getScene())
                 getOwner()->getScene()->getResourceRemovedEvent().invoke(m_figure);
-            m_figure->DecReference();
+            if(m_figure->ReferenceCount() > 0)
+                m_figure->DecReference();
             m_figure = nullptr;
         }
         if (getOwner() && getOwner()->getTransform())
