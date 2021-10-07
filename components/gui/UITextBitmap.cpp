@@ -50,7 +50,7 @@ namespace ige::scene
         }
         else {
             auto oldFigure = m_text->getFigure();
-            m_text->setText(text, 1);
+            m_text->setText(text, m_fontType);
             auto newFigure = m_text->getFigure();
             if (oldFigure != newFigure)
             {

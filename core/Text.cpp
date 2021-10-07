@@ -87,7 +87,6 @@ namespace ige::scene
                 m_figure->DecReference();
                 m_figure = nullptr;
             }
-
             
 
             if (m_fontType == 1)
@@ -96,7 +95,7 @@ namespace ige::scene
             }
             else
             {
-                int w, h;
+                int w = 0, h = 0;
                 calcTextSize(m_text.c_str(), m_fontPath.c_str(), m_fontSize, w, h, 1.f);
                 m_size = Vec2(w, h);
                 m_figure = GraphicsHelper::getInstance()->createText(m_text, m_fontPath, m_fontSize, m_color);

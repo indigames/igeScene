@@ -18,7 +18,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        UIText(SceneObject &owner, const std::string &text = "", const std::string &fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4 &color = {1.f, 1.f, 1.f, 1.f}, int fontType = 0);
+        UIText(SceneObject &owner, const std::string &text = "", const std::string &fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4 &color = {1.f, 1.f, 1.f, 1.f});
 
         //! Destructor
         virtual ~UIText();
@@ -64,6 +64,8 @@ namespace ige::scene
         virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
+        UIText(SceneObject& owner, const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color, int fontType);
+
         //! Overide function UIMaskable
         virtual EditableFigure* getCurrentFigure() override;
         virtual SceneObject* getSceneObjectOwner() override;

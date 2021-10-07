@@ -67,6 +67,8 @@ namespace ige::scene
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
     protected:
+        TextComponent(SceneObject& owner, const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color, bool isBillboard, bool isGUI, int fontType);
+
         void onCreateFigure(EditableFigure* figure);
         void onRemoveFigure(EditableFigure* figure);
 
@@ -82,6 +84,8 @@ namespace ige::scene
 
         //! Text
         std::shared_ptr<Text> m_text;
+
+        bool m_added = false;
 
         //! Billboard setting
         bool m_bIsBillboard = false;

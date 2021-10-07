@@ -20,6 +20,7 @@
 #include "python/pySpotLight.h"
 #include "python/pySpriteComponent.h"
 #include "python/pyTextComponent.h"
+#include "python/pyTextBitmapComponent.h"
 #include "python/pyRectTransform.h"
 #include "python/pyCanvas.h"
 #include "python/pyUIImage.h"
@@ -147,6 +148,10 @@ PyMODINIT_FUNC PyInit_igeScene()
     if (PyType_Ready(&PyTypeObject_TextComponent) < 0) return NULL;
     Py_INCREF(&PyTypeObject_TextComponent);
     PyModule_AddObject(module, "Text", (PyObject*)&PyTypeObject_TextComponent);
+
+    if (PyType_Ready(&PyTypeObject_TextBitmapComponent) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_TextBitmapComponent);
+    PyModule_AddObject(module, "TextBitmap", (PyObject*)&PyTypeObject_TextBitmapComponent);
 
     if (PyType_Ready(&PyTypeObject_RectTransform) < 0) return NULL;
     Py_INCREF(&PyTypeObject_RectTransform);

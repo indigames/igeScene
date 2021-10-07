@@ -15,6 +15,7 @@
 #include "python/pySpotLight.h"
 #include "python/pySpriteComponent.h"
 #include "python/pyTextComponent.h"
+#include "python/pyTextBitmapComponent.h"
 #include "python/pyRectTransform.h"
 #include "python/pyCanvas.h"
 #include "python/pyUIImage.h"
@@ -366,6 +367,17 @@ namespace ige::scene
                 if (comp)
                 {
                     auto* compObj = PyObject_New(PyObject_TextComponent, &PyTypeObject_TextComponent);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject*)compObj;
+                }
+            }
+            else if (type == "TextBitmap")
+            {
+                auto comp = self->sceneObject->addComponent<TextBitmapComponent>();
+                if (comp)
+                {
+                    auto* compObj = PyObject_New(PyObject_TextBitmapComponent, &PyTypeObject_TextBitmapComponent);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject*)compObj;
@@ -837,6 +849,17 @@ namespace ige::scene
             if (comp)
             {
                 auto* compObj = PyObject_New(PyObject_TextComponent, &PyTypeObject_TextComponent);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "TextBitmap")
+        {
+            auto comp = sceneObject->getComponent<TextBitmapComponent>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_TextBitmapComponent, &PyTypeObject_TextBitmapComponent);
                 compObj->component = comp.get();
                 compObj->super.component = compObj->component;
                 return (PyObject*)compObj;

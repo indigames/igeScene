@@ -26,6 +26,20 @@ namespace ige::scene
         setBillboard(isBillboard);
     }
 
+    TextComponent::TextComponent(SceneObject& owner, const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color, bool isBillboard, bool isGUI, int fontType)
+        : Component(owner), m_bIsGUI(isGUI)
+    {
+        m_textData = text;
+        m_fontPath = fontPath;
+        m_color = color;
+        m_fontSize = fontSize;
+        m_fontType = fontType;
+
+        generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
+
+        setBillboard(isBillboard);
+    }
+
     //! Destructor
     TextComponent::~TextComponent()
     {
@@ -101,7 +115,7 @@ namespace ige::scene
         }
         else {
             auto oldFigure = m_text->getFigure();
-            m_text->setText(m_textData);
+            m_text->setText(m_textData, m_fontType);
             auto newFigure = m_text->getFigure();
             if (oldFigure != newFigure)
             {
@@ -149,8 +163,7 @@ namespace ige::scene
             auto oldFigure = m_text->getFigure();
             m_text->setFontSize(size);
             auto newFigure = m_text->getFigure();
-            if (oldFigure != newFigure)
-            {
+            if (oldFigure != newFigure) {
                 if (oldFigure)
                     onRemoveFigure(oldFigure);
                 if (newFigure)
@@ -205,22 +218,37 @@ namespace ige::scene
                 generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
             }
             else
+            {
+                auto oldFigure = m_text->getFigure();
                 m_text->setColor(m_color);
+                auto newFigure = m_text->getFigure();
+                if (oldFigure != newFigure)
+                {
+                    if (oldFigure)
+                        onRemoveFigure(oldFigure);
+                    if (newFigure)
+                        onCreateFigure(newFigure);
+                }
+            }
         }
     }
 
     void TextComponent::onCreateFigure(EditableFigure* fig) {
+        if (m_added) return;
         if (m_bIsGUI)
             getOwner()->getScene()->getUIResourceAddedEvent().invoke(fig);
         else
             getOwner()->getScene()->getResourceAddedEvent().invoke(fig);
+        m_added = true;
     }
 
     void TextComponent::onRemoveFigure(EditableFigure* fig) {
+        if (!m_added) return;
         if (m_bIsGUI)
             getOwner()->getScene()->getUIResourceRemovedEvent().invoke(fig);
         else
             getOwner()->getScene()->getResourceRemovedEvent().invoke(fig);
+        m_added = false;
     }
 
     //! Serialize
@@ -237,10 +265,12 @@ namespace ige::scene
     //! Deserialize
     void TextComponent::from_json(const json &j)
     {
-        setText(j.at("text"));
-        setFontPath(j.at("font"));
-        setFontSize(j.at("size"));
-        setColor(j.at("color"));
+        m_fontType = 0;
+        m_textData = j.value("text", "");
+        m_fontPath = j.value("font", "fonts/Manjari-Regular.ttf");
+        m_fontSize = j.value("size", 12);
+        m_color = j.value("color", Vec4(1.f, 1.f, 1.f, 1.f));
+        generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
         setBillboard(j.value("billboard", false));
         Component::from_json(j);
     }

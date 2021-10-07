@@ -10,6 +10,29 @@
 namespace ige::scene
 {
     //! Constructor
+
+    UIText::UIText(SceneObject& owner, const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color)
+        : Component(owner), UIMaskable(), m_flagMask(false)
+    {
+        m_textData = text;
+        m_fontPath = fontPath;
+        m_color = color;
+        m_fontSize = fontSize;
+        m_fontType = 0;
+
+        generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
+
+        getOwner()->addEventListener((int)EventType::SetParent, [this](auto vol) {
+            this->onSetParent(vol);
+            }, m_instanceId);
+
+        if (getOwner()->isInMask())
+        {
+            if (getFigure() == nullptr) m_flagMask = true;
+            setStencilMask(1);
+        }
+    }
+
     UIText::UIText(SceneObject &owner, const std::string &text, const std::string &fontPath, int fontSize, const Vec4 &color, int fontType)
         : Component(owner), UIMaskable(), m_flagMask(false)
     {
