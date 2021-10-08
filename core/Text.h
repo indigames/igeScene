@@ -11,7 +11,7 @@ namespace ige::scene
     class Text
     {
     public:
-        Text(const std::string& text = "", const std::string& font = "", int fontSize = 11, const Vec4& color = {1.f, 1.f, 1.f, 1.f}, int fonttype = TEXT_TRUETYPE);
+        Text(const std::string& text = "", const std::string& font = "", int fontSize = 11, const Vec4& color = {1.f, 1.f, 1.f, 1.f}, int fonttype = TEXT_TRUETYPE, bool worldSpace = false);
         virtual ~Text();
 
         //! Text
@@ -57,6 +57,8 @@ namespace ige::scene
         Vec2 m_size;
 
         int m_fontType; 
+        
+        bool m_worldSpace;
 
         //! Internal figure
         EditableFigure* m_figure;

@@ -99,7 +99,7 @@ namespace ige::scene
             auto oldFigure = m_text->getFigure();
             onRemoveFigure(oldFigure);
         }
-        m_text = std::make_shared<Text>(text, fontPath, fontSize, color, fontType);
+        m_text = std::make_shared<Text>(text, fontPath, fontSize, color, fontType, true);
         if (m_text != nullptr) {
             auto newFigure = m_text->getFigure();
             onCreateFigure(newFigure);

@@ -233,7 +233,7 @@ namespace ige::scene
         return efig;
     }
 
-    EditableFigure* GraphicsHelper::createText(const std::string& words, const std::string& fontPath, int fontSize, const Vec4& color, uint32_t pivot, float scale)
+    EditableFigure* GraphicsHelper::createText(const std::string& words, const std::string& fontPath, int fontSize, const Vec4& color, float scale, uint32_t pivot)
     {
         int w, h;
         calcTextSize(words.c_str(), fontPath.c_str(), fontSize, w, h, 1.f);
