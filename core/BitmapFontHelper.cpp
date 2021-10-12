@@ -304,7 +304,6 @@ struct ige_glyph* BitmapFontHelper::getGlyph(struct ige_bitmap_font* fnt, unsign
 		i = fnt->glyphs[i].next;
 	}
 	// Could not find glyph.
-	//pyxie_printf("Cound not find glyph\n");
 	// For bitmap fonts: ignore this glyph.
 	if (fnt->type == BMFONT)
 		return 0;
@@ -318,18 +317,20 @@ error:
 
 int BitmapFontHelper::getQuad(struct ige_bitmap_font* fnt, struct ige_glyph* glyph, short isize, float* x, float* y, struct ige_quad* q)
 {
-	int rx, ry;
+	float rx, ry;
 	float scale = 1.0f;
 
-	if (fnt->type == BMFONT) scale = isize / (glyph->size * 10.0f);
+	if (fnt->type == BMFONT) scale = (float)isize / (glyph->size * 10.0f);
 	
-	rx = floorf(*x + scale * glyph->xoff);
-	ry = floorf(*y - scale * glyph->yoff);
+	/*rx = floorf(*x + scale * glyph->xoff);
+	ry = floorf(*y - scale * glyph->yoff);*/
+	rx = (*x + scale * glyph->xoff);
+	ry = (*y - scale * glyph->yoff);
 
 	q->x0 = rx;
 	q->y0 = ry;
-	q->x1 = rx + scale * (glyph->x1 - glyph->x0);
-	q->y1 = ry - scale * (glyph->y1 - glyph->y0);
+	q->x1 = rx + scale * (float)(glyph->x1 - glyph->x0);
+	q->y1 = ry - scale * (float)(glyph->y1 - glyph->y0);
 	
 	q->s0 = (glyph->x0) * fnt->itw;
 	q->t0 = (glyph->y0) * fnt->ith;
@@ -380,7 +381,7 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 		return nullptr;
 	uint32_t s_len = strlen(s);
 	uint32_t nverts = s_len * 4;
-	uint32_t indiceCount = nverts * 1.5;
+	uint32_t indiceCount = nverts * 3 / 2;
 	
 	std::vector<float> points;
 	std::vector<uint32_t> trianglesIndices;
@@ -388,7 +389,7 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 
 	int fOffset = 0;
 
-	float w = 0, h = 0;
+	//float w = 0, h = 0;
 	int len = 0;
 
 	for (int i = 0; i < indiceCount;) {
@@ -405,6 +406,7 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 		fOffset += 4;
 	}
 
+	float ix = 0, ax = 0, iy = 0, ay = 0;
 	for (; *s; ++s) 
 	{
 		if (decutf8(&state, &codepoint, *(unsigned char*)s))
@@ -453,18 +455,37 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 		uvs.push_back(q.s1);
 		uvs.push_back(1 - q.t1);
 
-		//w += std::abs(q.x1 - q.x0);
-		w = std::abs(x);
-		h = std::abs(y);
-		/*if ( std::abs(q.y1 - q.y0) > h)
-			h = std::abs(q.y1 - q.y0);*/
+		if (len == 0) {
+			if (q.x0 < q.x1) { ix = q.x0; ax = q.x1; }
+			else { ix = q.x1; ax = q.x0; }
+			if (q.y0 < q.y1) { iy = q.y0; ay = q.y1; }
+			else { iy = q.y1; ay = q.y0; }
+		}
+		else {
+			if (q.x0 < q.x1) {
+				ix = ix > q.x0 ? q.x0 : ix;
+				ax = ax < q.x1 ? q.x1 : ax;
+			}
+			else {
+				ix = ix > q.x1 ? q.x1 : ix;
+				ax = ax < q.x0 ? q.x0 : ax;
+			}
+			if (q.y0 < q.y1) {
+				iy = iy > q.x0 ? q.y0 : iy;
+				ax = ay < q.y1 ? q.y1 : ay;
+			}
+			else {
+				iy = iy > q.y1 ? q.y1 : iy;
+				ay = ay < q.y0 ? q.y0 : ay;
+			}
+		}
 		len++;
 	}
 
 	if (texture == nullptr) return nullptr;
 
-	float hw = (float)w * 0.5f;
-	float hh = (float)h * 0.5f;
+	float hw = std::abs(ax - ix) * 0.5f;
+	float hh = std::abs(ay - iy) * 0.5f;
 	
 	fOffset = 0;
 	int pointSize = points.size();
@@ -483,7 +504,7 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 
 		points[fOffset + 9] -= hw;
 		points[fOffset + 10] -= hh;
-
+		
 		fOffset += 12;
 	}
 
