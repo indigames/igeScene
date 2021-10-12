@@ -878,7 +878,7 @@ namespace ige::scene
             if (figureComp->getFigure())
             {
                 Vec3 aabbMin, aabbMax;
-                figureComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P(), LocalSpace);
+                figureComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P(), LocalSpace);
                 m_aabb = { aabbMin, aabbMax };
                 if (m_aabb.getVolume() == 0)
                 {
@@ -895,7 +895,7 @@ namespace ige::scene
             if (spriteComp->getFigure())
             {
                 Vec3 aabbMin, aabbMax;
-                spriteComp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                spriteComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
                 m_aabb = { aabbMin, aabbMax };
             }
         }
@@ -905,7 +905,7 @@ namespace ige::scene
             if (comp->getFigure())
             {
                 Vec3 aabbMin, aabbMax;
-                comp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                comp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
                 m_aabb = { aabbMin, aabbMax };
             }
         }
@@ -915,7 +915,7 @@ namespace ige::scene
             if (comp->getFigure())
             {
                 Vec3 aabbMin, aabbMax;
-                comp->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                comp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
                 m_aabb = { aabbMin, aabbMax };
             }
         }
@@ -926,7 +926,7 @@ namespace ige::scene
                 if (uiText->getFigure())
                 {
                     Vec3 aabbMin, aabbMax;
-                    uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                    uiText->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
                     m_aabb = { aabbMin, aabbMax };
                 }
             }
@@ -936,7 +936,7 @@ namespace ige::scene
                 if (uiText->getFigure())
                 {
                     Vec3 aabbMin, aabbMax;
-                    uiText->getFigure()->CalcAABBox(0, aabbMin.P(), aabbMax.P());
+                    uiText->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
                     m_aabb = { aabbMin, aabbMax };
                 }
             }
