@@ -767,12 +767,16 @@ namespace ige::scene
         for (const auto& obj : m_objects)
         {
             const auto& transform = obj->getTransform();
-            auto aabbTransform = Mat4::IdentityMat();
-            vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
-            vmath_mat_appendScale(aabbTransform.P(), (transform->getWorldScale() * 0.9f).P(), 4, 4, aabbTransform.P()); // [IGE] 90% of the AABB
-            auto& m_aabb = obj->getAABB();
-            auto aabb = m_aabb.Transform(aabbTransform);
-            if (obj && RayOBBChecker::checkIntersect(aabb, obj->getTransform()->getWorldMatrix(), distance, maxDistance))
+            auto tranMat = Mat4::IdentityMat();
+            vmath_mat4_translation(transform->getWorldPosition().P(), tranMat.P());
+
+            auto rotMat = Mat4::IdentityMat();
+            vmath_mat_from_quat(transform->getWorldRotation().P(), 4, rotMat.P());
+
+            auto modelMat = tranMat * rotMat;
+            vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getWorldScale().X(), 1.f / transform->getWorldScale().Y(), 1.f / transform->getWorldScale().Z()).P(), 4, 4, modelMat.P());
+
+            if (RayOBBChecker::checkIntersect(obj->getAABB(), modelMat, distance, maxDistance))
             {
                 if (minDistance > distance && distance > 0.f)
                 {
@@ -794,13 +798,16 @@ namespace ige::scene
         for (const auto& obj : m_objects)
         {
             const auto& transform = obj->getTransform();
-            auto aabbTransform = Mat4::IdentityMat();
-            vmath_mat4_from_rottrans(transform->getWorldRotation().P(), Vec3().P(), aabbTransform.P());
-            vmath_mat_appendScale(aabbTransform.P(), (transform->getWorldScale() * 0.9f).P(), 4, 4, aabbTransform.P()); // [IGE] 90% of the AABB
-            auto& m_aabb = obj->getAABB();
-            auto aabb = m_aabb.Transform(aabbTransform);
+            auto tranMat = Mat4::IdentityMat();
+            vmath_mat4_translation(transform->getWorldPosition().P(), tranMat.P());
 
-            if (obj && RayOBBChecker::checkIntersect(aabb, obj->getTransform()->getWorldMatrix(), distance, maxDistance))
+            auto rotMat = Mat4::IdentityMat();
+            vmath_mat_from_quat(transform->getWorldRotation().P(), 4, rotMat.P());
+
+            auto modelMat = tranMat * rotMat;
+            vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getWorldScale().X(), 1.f / transform->getWorldScale().Y(), 1.f / transform->getWorldScale().Z()).P(), 4, 4, modelMat.P());
+
+            if (RayOBBChecker::checkIntersect(obj->getAABB(), modelMat, distance, maxDistance))
             {
                 if (minDistance > distance && distance > 0.f)
                 {

@@ -57,15 +57,6 @@ namespace ige::scene
         Vec3 OBBposition_worldspace(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
         Vec3 delta = OBBposition_worldspace - g_origin;
 
-        Vec3 columns[3] =
-        {
-            { modelMatrix[0][0], modelMatrix[0][1], modelMatrix[0][2]},
-            { modelMatrix[1][0], modelMatrix[1][1], modelMatrix[1][2]},
-            { modelMatrix[2][0], modelMatrix[2][1], modelMatrix[2][2]},
-        };
-
-        Vec3 scale(columns[0].Length(), columns[1].Length(), columns[2].Length());
-
         // for each axis X, Y and Z
         for(int i = 0; i < 3; ++i)
         {
@@ -73,11 +64,11 @@ namespace ige::scene
             float e = Vec3::Dot(axis, delta);
             float f = Vec3::Dot(g_direction, axis);
 
-            if (fabs(f) > 0.001f)
+            if (fabs(f) > 0.0001f)
             { 
                 // Standard case
-                float t1 = (e + aabb.MinEdge[i] * scale[i]) / f; // Intersection with the "min" plane
-                float t2 = (e + aabb.MaxEdge[i] * scale[i]) / f; // Intersection with the "max" plane
+                float t1 = (e + aabb.MinEdge[i]) / f; // Intersection with the "min" plane
+                float t2 = (e + aabb.MaxEdge[i]) / f; // Intersection with the "max" plane
                 // t1 and t2 now contain distances betwen ray origin and ray-plane intersections
 
                 // We want t1 to represent the nearest intersection, 
