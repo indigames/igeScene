@@ -35,10 +35,10 @@ namespace ige::scene
 
     int PhysicSphere_setRadius(PyObject_PhysicSphere *self, PyObject *value)
     {
-        float radius;
-        if (PyArg_ParseTuple(value, "f", &radius))
+        if (PyFloat_Check(value))
         {
-            self->component->setRadius(radius);
+            float val = (float)PyFloat_AsDouble(value);
+            self->component->setRadius(val);
             return 0;
         }
         return -1;

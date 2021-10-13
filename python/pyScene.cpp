@@ -48,10 +48,11 @@ namespace ige::scene
     // Set name
     int Scene_setName(PyObject_Scene* self, PyObject* value)
     {
-        char* name = NULL;
-        if (PyArg_ParseTuple(value, "s", &name)) {
-            if(name != NULL)
-                self->scene->setName(std::string(name));
+        if (PyUnicode_Check(value))
+        {
+            const char* val = PyUnicode_AsUTF8(value);
+            if(val != NULL)
+                self->scene->setName(std::string(val));
         }
         return 0;
     }

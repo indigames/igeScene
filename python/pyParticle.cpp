@@ -33,9 +33,9 @@ namespace ige::scene
 
     int Particle_setPath(PyObject_Particle *self, PyObject *value)
     {
-        char* val;
-        if (PyArg_ParseTuple(value, "s", &val))
+        if (PyUnicode_Check(value))
         {
+            const char* val = PyUnicode_AsUTF8(value);
             self->component->setPath(std::string(val));
             return 0;
         }
@@ -82,9 +82,9 @@ namespace ige::scene
 
     int Particle_setAutoDrawing(PyObject_Particle *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setAutoDrawing(val);
             return 0;
         }
@@ -99,9 +99,9 @@ namespace ige::scene
 
     int Particle_setLayer(PyObject_Particle *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setLayer(val);
             return 0;
         }
@@ -116,9 +116,9 @@ namespace ige::scene
 
     int Particle_setGroupMask(PyObject_Particle *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setGroupMask(val);
             return 0;
         }
@@ -133,9 +133,9 @@ namespace ige::scene
 
     int Particle_setSpeed(PyObject_Particle *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setSpeed(val);
             return 0;
         }
@@ -150,9 +150,9 @@ namespace ige::scene
 
     int Particle_setTimeScale(PyObject_Particle *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setTimeScale(val);
             return 0;
         }

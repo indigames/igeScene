@@ -33,9 +33,9 @@ namespace ige::scene
 
     int NavArea_setAreaId(PyObject_NavArea *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setAreaId(val);
             return 0;
         }
@@ -50,9 +50,9 @@ namespace ige::scene
 
     int NavArea_setAreaCost(PyObject_NavArea *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setAreaCost(val);
             return 0;
         }

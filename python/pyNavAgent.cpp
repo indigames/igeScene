@@ -33,9 +33,9 @@ namespace ige::scene
 
     int NavAgent_setAgentId(PyObject_NavAgent *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setAgentId(val);
             return 0;
         }
@@ -50,9 +50,9 @@ namespace ige::scene
 
     int NavAgent_setRadius(PyObject_NavAgent *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setRadius(val);
             return 0;
         }
@@ -67,9 +67,9 @@ namespace ige::scene
 
     int NavAgent_setHeight(PyObject_NavAgent *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setHeight(val);
             return 0;
         }
@@ -84,9 +84,9 @@ namespace ige::scene
 
     int NavAgent_setMaxSpeed(PyObject_NavAgent *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setMaxSpeed(val);
             return 0;
         }
@@ -101,9 +101,9 @@ namespace ige::scene
 
     int NavAgent_setMaxAcceleration(PyObject_NavAgent *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setMaxAcceleration(val);
             return 0;
         }
@@ -138,9 +138,9 @@ namespace ige::scene
 
     int NavAgent_setUpdateNodePosition(PyObject_NavAgent *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setUpdateNodePosition(val);
             return 0;
         }
@@ -155,9 +155,9 @@ namespace ige::scene
 
     int NavAgent_setQueryFilterType(PyObject_NavAgent *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setQueryFilterType(val);
             return 0;
         }
@@ -172,9 +172,9 @@ namespace ige::scene
 
     int NavAgent_setObstacleAvoidanceType(PyObject_NavAgent *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setObstacleAvoidanceType(val);
             return 0;
         }
@@ -189,9 +189,9 @@ namespace ige::scene
 
     int NavAgent_setNavigationQuality(PyObject_NavAgent *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setObstacleAvoidanceType(val);
             return 0;
         }
@@ -206,9 +206,9 @@ namespace ige::scene
 
     int NavAgent_setNavigationPushiness(PyObject_NavAgent *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setObstacleAvoidanceType(val);
             return 0;
         }

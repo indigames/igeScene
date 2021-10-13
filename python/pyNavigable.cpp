@@ -33,9 +33,9 @@ namespace ige::scene
 
     int Navigable_setRecursive(PyObject_Navigable *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setRecursive(val);
             return 0;
         }

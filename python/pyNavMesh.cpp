@@ -33,9 +33,9 @@ namespace ige::scene
 
     int NavMesh_setTileSize(PyObject_NavMesh *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setTileSize(val);
             return 0;
         }
@@ -50,9 +50,9 @@ namespace ige::scene
 
     int NavMesh_setCellSize(PyObject_NavMesh *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setCellSize(val);
             return 0;
         }
@@ -67,9 +67,9 @@ namespace ige::scene
 
     int NavMesh_setCellHeight(PyObject_NavMesh *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setCellHeight(val);
             return 0;
         }
@@ -84,9 +84,9 @@ namespace ige::scene
 
     int NavMesh_setAgentHeight(PyObject_NavMesh *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setAgentHeight(val);
             return 0;
         }
@@ -101,9 +101,9 @@ namespace ige::scene
 
     int NavMesh_setAgentRadius(PyObject_NavMesh *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setAgentRadius(val);
             return 0;
         }
@@ -118,9 +118,9 @@ namespace ige::scene
 
     int NavMesh_setAgentMaxClimb(PyObject_NavMesh *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setAgentMaxClimb(val);
             return 0;
         }
@@ -135,9 +135,9 @@ namespace ige::scene
 
     int NavMesh_setAgentMaxSlope(PyObject_NavMesh *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setAgentMaxSlope(val);
             return 0;
         }
@@ -152,9 +152,9 @@ namespace ige::scene
 
     int NavMesh_setRegionMinSize(PyObject_NavMesh *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setRegionMinSize(val);
             return 0;
         }
@@ -169,9 +169,9 @@ namespace ige::scene
 
     int NavMesh_setRegionMergeSize(PyObject_NavMesh *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setRegionMergeSize(val);
             return 0;
         }
@@ -186,9 +186,9 @@ namespace ige::scene
 
     int NavMesh_setEdgeMaxLength(PyObject_NavMesh *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setEdgeMaxLength(val);
             return 0;
         }
@@ -203,9 +203,9 @@ namespace ige::scene
 
     int NavMesh_setEdgeMaxError(PyObject_NavMesh *self, PyObject *value)
     {
-                float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setEdgeMaxError(val);
             return 0;
         }
@@ -220,9 +220,9 @@ namespace ige::scene
 
     int NavMesh_setDetailSampleDistance(PyObject_NavMesh *self, PyObject *value)
     {
-                float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setDetailSampleDistance(val);
             return 0;
         }
@@ -237,9 +237,9 @@ namespace ige::scene
 
     int NavMesh_setDetailSampleMaxError(PyObject_NavMesh *self, PyObject *value)
     {
-                        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setDetailSampleMaxError(val);
             return 0;
         }
@@ -254,9 +254,9 @@ namespace ige::scene
 
     int NavMesh_setPartitionType(PyObject_NavMesh *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setPartitionType((NavMesh::EPartitionType)val);
             return 0;
         }

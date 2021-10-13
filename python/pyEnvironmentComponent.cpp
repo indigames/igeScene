@@ -54,9 +54,9 @@ namespace ige::scene
     // Set Distance Fog Alpha
     int EnvironmentComponent_setDistanceFogAlpha(PyObject_EnvironmentComponent* self, PyObject* value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setDistanceFogAlpha(val);
             return 0;
         }
@@ -72,9 +72,9 @@ namespace ige::scene
     // Set Distance Fog Near
     int EnvironmentComponent_setDistanceFogNear(PyObject_EnvironmentComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setDistanceFogNear(val);
             return 0;
         }
@@ -90,9 +90,9 @@ namespace ige::scene
     // Set Distance Fog Far
     int EnvironmentComponent_setDistanceFogFar(PyObject_EnvironmentComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setDistanceFogFar(val);
             return 0;
         }
@@ -128,9 +128,9 @@ namespace ige::scene
     // Set Shadow Density
     int EnvironmentComponent_setShadowDensity(PyObject_EnvironmentComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setShadowDensity(val);
             return 0;
         }
@@ -146,9 +146,9 @@ namespace ige::scene
     // Set Shadow Wideness
     int EnvironmentComponent_setShadowWideness(PyObject_EnvironmentComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setShadowWideness(val);
             return 0;
         }

@@ -393,9 +393,9 @@ namespace ige::scene
     // Set number of iteration
     int PhysicManager_setNumIteration(PyObject_PhysicManager *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setNumIteration(val);
             return 0;
         }
@@ -411,9 +411,9 @@ namespace ige::scene
     // Set frame update ratio
     int PhysicManager_setFrameUpdateRatio(PyObject_PhysicManager *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setFrameUpdateRatio(val);
             return 0;
         }
@@ -429,9 +429,9 @@ namespace ige::scene
     // Set frame max simulation sub step
     int PhysicManager_setFrameMaxSubStep(PyObject_PhysicManager *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setFrameMaxSubStep(val);
             return 0;
         }
@@ -447,9 +447,9 @@ namespace ige::scene
     // Set fixed time steps
     int PhysicManager_setFixedTimeStep(PyObject_PhysicManager *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setFixedTimeStep(val);
             return 0;
         }

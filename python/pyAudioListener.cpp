@@ -33,10 +33,10 @@ namespace ige::scene
 
     int AudioListener_setEnabled(PyObject_AudioListener *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
-            self->component->setEnabled(val);
+            auto isActive = (uint32_t)PyLong_AsLong(value) != 0;
+            self->component->setEnabled(isActive);
             return 0;
         }
         return -1;

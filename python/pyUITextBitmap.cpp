@@ -34,12 +34,9 @@ namespace ige::scene
     // Set font path
     int UITextBitmap_setFontPath(PyObject_UITextBitmap *self, PyObject *value)
     {
-        char *val = NULL;
         if (PyUnicode_Check(value))
         {
-            PyObject* temp_bytes = PyUnicode_AsEncodedString(value, "UTF-8", "strict");
-            val = PyBytes_AS_STRING(temp_bytes);
-            val = strdup(val);
+            const char* val = PyUnicode_AsUTF8(value);
             self->component->setFontPath(std::string(val));
             return 1;
         }
@@ -47,31 +44,68 @@ namespace ige::scene
     }
 
     // Get text
-    PyObject* UITextBitmap_getText(PyObject_UIText* self)
+    PyObject* UITextBitmap_getText(PyObject_UITextBitmap* self)
     {
         return PyUnicode_FromString(self->component->getText().c_str());
     }
 
     // Set text
-    int UITextBitmap_setText(PyObject_UIText* self, PyObject* value)
+    int UITextBitmap_setText(PyObject_UITextBitmap* self, PyObject* value)
     {
-        char* val = NULL;
-        if (PyUnicode_Check(value)) {
-            PyObject* temp_bytes = PyUnicode_AsEncodedString(value, "UTF-8", "strict");
-            val = PyBytes_AS_STRING(temp_bytes);
-            val = strdup(val);
+        if (PyUnicode_Check(value))
+        {
+            const char* val = PyUnicode_AsUTF8(value);
             self->component->setText(std::string(val));
             return 0;
         }
         return -1;
     }
 
+    // Get font size
+    PyObject* UITextBitmap_getFontSize(PyObject_UITextBitmap* self)
+    {
+        return PyLong_FromLong(self->component->getFontSize());
+    }
+
+    // Set font size
+    int UITextBitmap_setFontSize(PyObject_UITextBitmap* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto val = (uint32_t)PyLong_AsLong(value);
+            self->component->setFontSize(val);
+            return 0;
+        }
+        return -1;
+    }
+
+    // Get color
+    PyObject* UITextBitmap_getColor(PyObject_UITextBitmap* self)
+    {
+        auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
+        vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
+        vec4Obj->d = 4;
+        return (PyObject*)vec4Obj;
+    }
+
+    // Set color
+    int UITextBitmap_setColor(PyObject_UITextBitmap* self, PyObject* value)
+    {
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v)
+            return -1;
+        self->component->setColor(*((Vec4*)v));
+        return 0;
+    }
+
     // Get/set
     PyGetSetDef UITextBitmap_getsets[] = {
         {"fontPath", (getter)UITextBitmap_getFontPath, (setter)UITextBitmap_setFontPath, UIText_fontPath_doc, NULL},
         {"text", (getter)UITextBitmap_getText, (setter)UITextBitmap_setText, UIText_text_doc, NULL},
-        {"fontSize", (getter)UIText_getFontSize, (setter)UIText_setFontSize, UIText_fontSize_doc, NULL},
-        {"color", (getter)UIText_getColor, (setter)UIText_setColor, UIText_color_doc, NULL},
+        {"fontSize", (getter)UITextBitmap_getFontSize, (setter)UITextBitmap_setFontSize, UIText_fontSize_doc, NULL},
+        {"color", (getter)UITextBitmap_getColor, (setter)UITextBitmap_setColor, UIText_color_doc, NULL},
         {NULL, NULL}};
 
     PyTypeObject PyTypeObject_UITextBitmap = {

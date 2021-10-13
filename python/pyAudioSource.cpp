@@ -33,9 +33,9 @@ namespace ige::scene
 
     int AudioSource_setEnabled(PyObject_AudioSource *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setEnabled(val);
             return 0;
         }
@@ -50,9 +50,9 @@ namespace ige::scene
 
     int AudioSource_setPlayOnEnabled(PyObject_AudioSource *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setPlayOnEnabled(val);
             return 0;
         }
@@ -67,9 +67,9 @@ namespace ige::scene
 
     int AudioSource_setStream(PyObject_AudioSource *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setStream(val);
             return 0;
         }
@@ -84,9 +84,9 @@ namespace ige::scene
 
     int AudioSource_setLoop(PyObject_AudioSource *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setLoop(val);
             return 0;
         }
@@ -101,9 +101,9 @@ namespace ige::scene
 
     int AudioSource_setSingleInstance(PyObject_AudioSource *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setSingleInstance(val);
             return 0;
         }
@@ -118,9 +118,9 @@ namespace ige::scene
 
     int AudioSource_setPath(PyObject_AudioSource *self, PyObject *value)
     {
-        char* val;
-        if (PyArg_ParseTuple(value, "s", &val))
+        if (PyUnicode_Check(value))
         {
+            const char* val = PyUnicode_AsUTF8(value);
             self->component->setPath(std::string(val));
             return 0;
         }
@@ -135,9 +135,9 @@ namespace ige::scene
 
     int AudioSource_setVolume(PyObject_AudioSource *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setVolume(val);
             return 0;
         }
@@ -152,9 +152,9 @@ namespace ige::scene
 
     int AudioSource_setPan(PyObject_AudioSource *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setPan(val);
             return 0;
         }
@@ -169,9 +169,9 @@ namespace ige::scene
 
     int AudioSource_setMinDistance(PyObject_AudioSource *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setMinDistance(val);
             return 0;
         }
@@ -186,9 +186,9 @@ namespace ige::scene
 
     int AudioSource_setMaxDistance(PyObject_AudioSource *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setMaxDistance(val);
             return 0;
         }
@@ -203,9 +203,9 @@ namespace ige::scene
 
     int AudioSource_setAttenuationModel(PyObject_AudioSource *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setAttenuationModel(val);
             return 0;
         }
@@ -220,9 +220,9 @@ namespace ige::scene
 
     int AudioSource_setAttenuationRollOffFactor(PyObject_AudioSource *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setAttenuationRollOffFactor(val);
             return 0;
         }
@@ -237,9 +237,9 @@ namespace ige::scene
 
     int AudioSource_setDopplerFactor(PyObject_AudioSource *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setDopplerFactor(val);
             return 0;
         }
