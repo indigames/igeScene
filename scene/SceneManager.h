@@ -8,6 +8,9 @@
 #include "utils/Singleton.h"
 #include "event/Event.h"
 
+#include "utils/PyxieHeaders.h"
+using namespace pyxie;
+
 namespace ige::scene
 {
     class SceneObject;
@@ -36,6 +39,9 @@ namespace ige::scene
 
         //! Late update
         virtual void lateUpdate(float dt);
+
+        //! Pre-Render
+        virtual void preRender(Camera* camera = nullptr);
 
         //! render
         virtual void render();

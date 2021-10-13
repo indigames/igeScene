@@ -39,23 +39,23 @@ namespace ige::scene
 
     //! Update functions
     void RuntimeComponent::onUpdate(float dt) {
-        if (SceneManager::getInstance()->isEditor() || !isRunning()) {
-            if (!SceneManager::getInstance()->isEditor())
-                Initialize();
-            return;
+    #ifndef EDITOR_MODE
+        if(!m_bIsInit) {
+            Initialize();
         }
+    #endif
+
+        if (!isRunning()) return;
         onRuntimeUpdate(dt);
     }
 
     void RuntimeComponent::onFixedUpdate(float dt) {
-        if (SceneManager::getInstance()->isEditor() || !isRunning())
-            return;
+        if (!isRunning()) return;
         onRuntimeFixedUpdate(dt);
     }
 
     void RuntimeComponent::onLateUpdate(float dt) {
-        if (SceneManager::getInstance()->isEditor() || !isRunning())
-            return;
+        if (!isRunning()) return;
         onRuntimeLateUpdate(dt);
     }
 

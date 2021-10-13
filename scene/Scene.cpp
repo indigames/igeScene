@@ -238,31 +238,6 @@ namespace ige::scene
         for (auto& obj : m_objects)
             if (obj) obj->onUpdate(dt);
 
-        if (!SceneManager::getInstance()->isEditor() && m_activeCamera)
-            m_activeCamera->onUpdate(dt);
-
-        m_showcase->Update(dt);
-
-        // Render shadow before actually render objects
-        auto renderContext = RenderContext::InstancePtr();
-        if (renderContext)
-        {
-            renderContext->BeginScene(m_shadowFBO, Vec4(1.f, 1.f, 1.f, 1.f), true, true);
-
-            if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
-                m_activeCamera->onRender();
-            }
-
-            m_showcase->Render(RenderPassFilter::ShadowPass);
-
-            renderContext->BeginPass(TransparentPass);
-            m_shadowEdgeMask->Pose();
-            m_shadowEdgeMask->Render();
-            renderContext->EndScene();
-        }
-
-        m_uiShowcase->Update(dt);
-
         if(m_tweenManager) m_tweenManager->update(dt);
 
         resetFlag();
@@ -289,6 +264,35 @@ namespace ige::scene
     void Scene::resetFlag()
     {
         m_raycastCapture = false;
+    }
+
+    void Scene::preRender(Camera* camera)
+    {
+        float dt = Time::Instance().GetElapsedTime();
+
+        if (!SceneManager::getInstance()->isEditor() && m_activeCamera)
+            m_activeCamera->onUpdate(dt);
+
+        m_showcase->Update(dt);
+
+        // Render shadow before actually render objects
+        auto renderContext = RenderContext::InstancePtr();
+        if (renderContext) {
+            renderContext->BeginScene(m_shadowFBO, Vec4(1.f, 1.f, 1.f, 1.f), true, true);
+            if (camera) {
+                camera->Render();
+            } else if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
+                m_activeCamera->onRender();
+            }
+            m_showcase->Render(RenderPassFilter::ShadowPass);
+
+            renderContext->BeginPass(TransparentPass);
+            m_shadowEdgeMask->Pose();
+            m_shadowEdgeMask->Render();
+            renderContext->EndScene();
+        }
+
+        m_uiShowcase->Update(dt);
     }
 
     void Scene::render()

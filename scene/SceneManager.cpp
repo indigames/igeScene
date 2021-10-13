@@ -131,6 +131,12 @@ namespace ige::scene
         if (m_currScene) m_currScene->lateUpdate(dt);
     }
 
+    void SceneManager::preRender(Camera* camera)
+    {
+        if (m_currScene)
+            m_currScene->preRender(camera);
+    }
+
     void SceneManager::render()
     {
         if (m_currScene)

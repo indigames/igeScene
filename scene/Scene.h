@@ -57,6 +57,9 @@ namespace ige::scene
         //! Physics Update
         virtual void physicUpdate(float dt);
 
+        //! Pre-Render
+        virtual void preRender(Camera* camera = nullptr);
+
         //! Render
         virtual void render();
 
@@ -104,7 +107,7 @@ namespace ige::scene
         //! Get objects list
         std::vector<std::shared_ptr<SceneObject>>& getObjects() { return m_objects; };
 
-        //! Set active camera
+        //! Set active camera component
         void setActiveCamera(CameraComponent* camera);
 
         //! Get active camera
@@ -239,6 +242,9 @@ namespace ige::scene
 
         //! Cache active camera
         CameraComponent* m_activeCamera = nullptr;
+
+        //! Cache active camera
+        Camera* m_camera = nullptr;
 
         //! Shadow render target
         Texture* m_shadowTexture = nullptr;
