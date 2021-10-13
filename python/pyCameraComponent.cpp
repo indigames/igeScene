@@ -74,10 +74,10 @@ namespace ige::scene
     // Set aspect ratio
     int CameraComponent_setAspectRatio(PyObject_CameraComponent* self, PyObject* value)
     {
-        float aspect;
-        if (PyArg_ParseTuple(value, "f", &aspect))
+        if (PyFloat_Check(value))
         {
-            self->component->setAspectRatio(aspect);
+            float val = (float)PyFloat_AsDouble(value);
+            self->component->setAspectRatio(val);
             return 0;
         }
         return -1;
@@ -92,9 +92,9 @@ namespace ige::scene
     // Set width based
     int CameraComponent_setWidthBased(PyObject_CameraComponent* self, PyObject* value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setWidthBase(val);
             return 0;
         }
@@ -110,9 +110,9 @@ namespace ige::scene
     // Set FOV
     int CameraComponent_setFieldOfView(PyObject_CameraComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setFieldOfView(val);
             return 0;
         }
@@ -128,9 +128,9 @@ namespace ige::scene
     // Set Near Plane
     int CameraComponent_setNearPlane(PyObject_CameraComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setNearPlane(val);
             return 0;
         }
@@ -146,9 +146,9 @@ namespace ige::scene
     // Set Far Plane
     int CameraComponent_setFarPlane(PyObject_CameraComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setFarPlane(val);
             return 0;
         }
@@ -164,9 +164,9 @@ namespace ige::scene
     // Set Pan
     int CameraComponent_setPan(PyObject_CameraComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setPan(val);
             return 0;
         }
@@ -182,9 +182,9 @@ namespace ige::scene
     // Set Tilt
     int CameraComponent_setTilt(PyObject_CameraComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setTilt(val);
             return 0;
         }
@@ -200,9 +200,9 @@ namespace ige::scene
     // Set Roll
     int CameraComponent_setRoll(PyObject_CameraComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setRoll(val);
             return 0;
         }
@@ -218,9 +218,9 @@ namespace ige::scene
     // Set Lock On Target
     int CameraComponent_setLockOnTarget(PyObject_CameraComponent* self, PyObject* value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->lockOnTarget(val);
             return 0;
         }
@@ -265,9 +265,9 @@ namespace ige::scene
     // Set Ortho Projection
     int CameraComponent_setOrthoProjection(PyObject_CameraComponent* self, PyObject* value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setOrthoProjection(val);
             return 0;
         }
@@ -283,9 +283,9 @@ namespace ige::scene
     // Set Ortho Width
     int CameraComponent_setOrthoWidth(PyObject_CameraComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setOrthoWidth(val);
             return 0;
         }
@@ -301,9 +301,9 @@ namespace ige::scene
     // Set Ortho Height
     int CameraComponent_setOrthoHeight(PyObject_CameraComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setOrthoHeight(val);
             return 0;
         }
@@ -359,9 +359,9 @@ namespace ige::scene
     // Set Screen Radian
     int CameraComponent_setScreenRadian(PyObject_CameraComponent* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setScreenRadian(val);
             return 0;
         }
@@ -377,9 +377,9 @@ namespace ige::scene
     // Set Up Axis
     int CameraComponent_setUpAxis(PyObject_CameraComponent* self, PyObject* value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setUpAxis(val);
             return 0;
         }

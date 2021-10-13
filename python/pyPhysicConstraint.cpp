@@ -98,9 +98,9 @@ namespace ige::scene
 
     int PhysicConstraint_setEnabled(PyObject_PhysicConstraint* self, PyObject* value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->constraint->setEnabled(val);
             return 0;
         }
@@ -115,9 +115,9 @@ namespace ige::scene
 
     int PhysicConstraint_setBodiesCollisionEnabled(PyObject_PhysicConstraint* self, PyObject* value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->constraint->setEnableCollisionBetweenBodies(val);
             return 0;
         }
@@ -132,9 +132,9 @@ namespace ige::scene
 
     int PhysicConstraint_setBreakingImpulse(PyObject_PhysicConstraint* self, PyObject* value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->constraint->setBreakingImpulseThreshold(val);
             return 0;
         }

@@ -101,9 +101,9 @@ namespace ige::scene
 
     int TextComponent_setBillboard(PyObject_TextComponent* self, PyObject* value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setBillboard(val);
             return 0;
         }

@@ -33,9 +33,9 @@ namespace ige::scene
 
     int NavObstacle_setRadius(PyObject_NavObstacle *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setRadius(val);
             return 0;
         }
@@ -50,9 +50,9 @@ namespace ige::scene
 
     int NavObstacle_setHeight(PyObject_NavObstacle *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setHeight(val);
             return 0;
         }

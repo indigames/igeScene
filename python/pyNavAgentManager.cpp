@@ -61,9 +61,9 @@ namespace ige::scene
 
     int NavAgentManager_setMaxAgentNumber(PyObject_NavAgentManager *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setMaxAgentNumber(val);
             return 0;
         }
@@ -78,9 +78,9 @@ namespace ige::scene
 
     int NavAgentManager_setMaxAgentRadius(PyObject_NavAgentManager *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setMaxAgentRadius(val);
             return 0;
         }

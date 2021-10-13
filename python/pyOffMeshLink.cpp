@@ -36,9 +36,9 @@ namespace ige::scene
 
     int OffMeshLink_setRadius(PyObject_OffMeshLink *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setRadius(val);
             return 0;
         }
@@ -53,9 +53,9 @@ namespace ige::scene
 
     int OffMeshLink_setMask(PyObject_OffMeshLink *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setMask(val);
             return 0;
         }
@@ -70,9 +70,9 @@ namespace ige::scene
 
     int OffMeshLink_setAreaId(PyObject_OffMeshLink *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setAreaId(val);
             return 0;
         }
@@ -117,9 +117,9 @@ namespace ige::scene
 
     int OffMeshLink_setBidirectional(PyObject_OffMeshLink *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setBidirectional(val);
             return 0;
         }

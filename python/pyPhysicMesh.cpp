@@ -33,9 +33,9 @@ namespace ige::scene
 
     int PhysicMesh_setPath(PyObject_PhysicMesh *self, PyObject *value)
     {
-        char *val = NULL;
-        if (PyArg_ParseTuple(value, "s", &val))
+        if (PyUnicode_Check(value))
         {
+            const char* val = PyUnicode_AsUTF8(value);
             if (val != NULL)
             {
                 self->component->setPath(std::string(val));
@@ -53,9 +53,9 @@ namespace ige::scene
 
     int PhysicMesh_setConvex(PyObject_PhysicMesh *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setConvex(val);
             return 0;
         }

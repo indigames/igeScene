@@ -34,10 +34,10 @@ namespace ige::scene
 
     int PhysicCapsule_setRadius(PyObject_PhysicCapsule *self, PyObject *value)
     {
-        float radius;
-        if (PyArg_ParseTuple(value, "f", &radius))
+        if (PyFloat_Check(value))
         {
-            self->component->setRadius(radius);
+            float val = (float)PyFloat_AsDouble(value);
+            self->component->setRadius(val);
             return 0;
         }
         return -1;
@@ -52,10 +52,10 @@ namespace ige::scene
     int PhysicCapsule_setHeight(PyObject_PhysicCapsule *self, PyObject *value)
     {
 
-        float height;
-        if (PyArg_ParseTuple(value, "f", &height))
+        if (PyFloat_Check(value))
         {
-            self->component->setHeight(height);
+            float val = (float)PyFloat_AsDouble(value);
+            self->component->setHeight(val);
             return 0;
         }
         return -1;

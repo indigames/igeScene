@@ -69,8 +69,13 @@ namespace ige::scene
     // Set font size
     int TextBitmapComponent_setFontSize(PyObject_TextBitmapComponent* self, PyObject* value)
     {
-        self->component->setFontSize(PyLong_AsLong(value));
-        return 0;
+        if (PyLong_Check(value))
+        {
+            auto val = (uint32_t)PyLong_AsLong(value);
+            self->component->setFontSize(val);
+            return 0;
+        }
+        return -1;
     }
 
     // Get color
@@ -101,9 +106,9 @@ namespace ige::scene
 
     int TextBitmapComponent_setBillboard(PyObject_TextBitmapComponent* self, PyObject* value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setBillboard(val);
             return 0;
         }

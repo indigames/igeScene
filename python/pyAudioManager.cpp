@@ -63,9 +63,9 @@ namespace ige::scene
 
     int AudioManager_setGlobalVolume(PyObject_AudioManager *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setGlobalVolume(val);
             return 0;
         }

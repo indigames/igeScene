@@ -94,9 +94,9 @@ namespace ige::scene
 
     int HingeConstraint_setLowerLimit(PyObject_HingeConstraint *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->constraint->setLowerLimit(val);
             return 0;
         }
@@ -111,9 +111,9 @@ namespace ige::scene
 
     int HingeConstraint_setUpperLimit(PyObject_HingeConstraint *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->constraint->setUpperLimit(val);
             return 0;
         }

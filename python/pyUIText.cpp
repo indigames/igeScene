@@ -34,9 +34,9 @@ namespace ige::scene
     // Set text
     int UIText_setText(PyObject_UIText *self, PyObject *value)
     {
-        char *val;
-        if (PyArg_ParseTuple(value, "s", &val))
+        if (PyUnicode_Check(value))
         {
+            const char* val = PyUnicode_AsUTF8(value);
             self->component->setText(std::string(val));
             return 0;
         }
@@ -52,9 +52,9 @@ namespace ige::scene
     // Set font path
     int UIText_setFontPath(PyObject_UIText *self, PyObject *value)
     {
-        char *val;
-        if (PyArg_ParseTuple(value, "s", &val))
+        if (PyUnicode_Check(value))
         {
+            const char* val = PyUnicode_AsUTF8(value);
             self->component->setFontPath(std::string(val));
             return 0;
         }
@@ -70,8 +70,13 @@ namespace ige::scene
     // Set font size
     int UIText_setFontSize(PyObject_UIText *self, PyObject *value)
     {
-        self->component->setFontSize(PyLong_AsLong(value));
-        return 0;
+        if (PyLong_Check(value))
+        {
+            auto val = (uint32_t)PyLong_AsLong(value);
+            self->component->setFontSize(val);
+            return 0;
+        }
+        return -1;
     }
 
     // Get color

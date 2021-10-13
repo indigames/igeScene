@@ -32,9 +32,21 @@ namespace ige::scene
     int UITextBitmap_setFontPath(PyObject_UITextBitmap* self, PyObject* value);
 
     // Get text
-    PyObject* UITextBitmap_getText(PyObject_UIText* self);
+    PyObject* UITextBitmap_getText(PyObject_UITextBitmap* self);
 
     // Set text
-    int UITextBitmap_setText(PyObject_UIText* self, PyObject* value);
+    int UITextBitmap_setText(PyObject_UITextBitmap* self, PyObject* value);
+
+    // Get font size
+    PyObject* UITextBitmap_getFontSize(PyObject_UITextBitmap* self);
+
+    // Set font size
+    int UITextBitmap_setFontSize(PyObject_UITextBitmap* self, PyObject* value);
+
+    // Get color
+    PyObject* UITextBitmap_getColor(PyObject_UITextBitmap* self);
+
+    // Set color
+    int UITextBitmap_setColor(PyObject_UITextBitmap* self, PyObject* value);
 
 }

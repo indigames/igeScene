@@ -96,12 +96,10 @@ namespace ige::scene
     // Set name
     int SceneObject_setName(PyObject_SceneObject *self, PyObject *value)
     {
-        //char *name = nullptr;
-        //if (PyArg_ParseTuple(value, "s", &name))
-        if(PyUnicode_Check(value))
+        if (PyUnicode_Check(value))
         {
-            const char* name = PyUnicode_AsUTF8(value);
-            self->sceneObject->setName(std::string(name));
+            const char* val = PyUnicode_AsUTF8(value);
+            self->sceneObject->setName(std::string(val));
         }
         return 0;
     }
@@ -135,8 +133,8 @@ namespace ige::scene
     {
         if (PyLong_Check(value))
         {
-            auto selected = (uint32_t)PyLong_AsLong(value) != 0;
-            self->sceneObject->setSelected(selected);
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
+            self->sceneObject->setSelected(val);
             return 0;
         }
         return -1;

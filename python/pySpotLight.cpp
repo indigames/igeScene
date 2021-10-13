@@ -53,9 +53,9 @@ namespace ige::scene
 
     int SpotLight_setIntensity(PyObject_SpotLight *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setIntensity(val);
             return 0;
         }
@@ -70,9 +70,9 @@ namespace ige::scene
 
     int SpotLight_setRange(PyObject_SpotLight *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setRange(val);
             return 0;
         }
@@ -87,9 +87,9 @@ namespace ige::scene
 
     int SpotLight_setAngle(PyObject_SpotLight *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setAngle(val);
             return 0;
         }

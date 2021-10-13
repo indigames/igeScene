@@ -234,10 +234,10 @@ namespace ige::scene
 
     int PhysicObject_setMass(PyObject_PhysicObject *self, PyObject *value)
     {
-        float mass;
-        if (PyArg_ParseTuple(value, "f", &mass))
+        if (PyFloat_Check(value))
         {
-            self->component->setMass(mass);
+            float val = (float)PyFloat_AsDouble(value);
+            self->component->setMass(val);
             return 0;
         }
         return -1;
@@ -251,10 +251,10 @@ namespace ige::scene
 
     int PhysicObject_setFriction(PyObject_PhysicObject *self, PyObject *value)
     {
-        float friction;
-        if (PyArg_ParseTuple(value, "f", &friction))
+        if (PyFloat_Check(value))
         {
-            self->component->setFriction(friction);
+            float val = (float)PyFloat_AsDouble(value);
+            self->component->setFriction(val);
             return 0;
         }
         return -1;
@@ -268,10 +268,10 @@ namespace ige::scene
 
     int PhysicObject_setRestitution(PyObject_PhysicObject *self, PyObject *value)
     {
-        float restitution;
-        if (PyArg_ParseTuple(value, "f", &restitution))
+        if (PyFloat_Check(value))
         {
-            self->component->setRestitution(restitution);
+            float val = (float)PyFloat_AsDouble(value);
+            self->component->setRestitution(val);
             return 0;
         }
         return -1;
@@ -389,10 +389,10 @@ namespace ige::scene
 
     int PhysicObject_setActivationState(PyObject_PhysicObject* self, PyObject* value)
     {
-        int state;
-        if (PyArg_ParseTuple(value, "i", &state))
+        if (PyLong_Check(value))
         {
-            self->component->setActivationState(state);
+            auto val = (uint32_t)PyLong_AsLong(value);
+            self->component->setActivationState(val);
             return 0;
         }
         return -1;
@@ -406,9 +406,9 @@ namespace ige::scene
 
     int PhysicObject_setIsTrigger(PyObject_PhysicObject *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setIsTrigger(val);
             return 0;
         }
@@ -423,9 +423,9 @@ namespace ige::scene
 
     int PhysicObject_setIsKinematic(PyObject_PhysicObject *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setIsKinematic(val);
             return 0;
         }
@@ -440,9 +440,9 @@ namespace ige::scene
 
     int PhysicObject_setEnabled(PyObject_PhysicObject *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setEnabled(val);
             return 0;
         }
@@ -480,9 +480,9 @@ namespace ige::scene
 
     int PhysicObject_setCollisionFilterGroup(PyObject_PhysicObject *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setCollisionFilterGroup(val);
             return 0;
         }
@@ -497,9 +497,9 @@ namespace ige::scene
 
     int PhysicObject_setCollisionFilterMask(PyObject_PhysicObject *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setCollisionFilterMask(val);
             return 0;
         }
@@ -514,9 +514,9 @@ namespace ige::scene
 
     int PhysicObject_setCCD(PyObject_PhysicObject *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setCCD(val);
             return 0;
         }

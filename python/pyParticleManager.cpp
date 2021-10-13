@@ -52,9 +52,9 @@ namespace ige::scene
 
     int ParticleManager_setCullingEnabled(PyObject_ParticleManager *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setCullingEnabled(val);
             return 0;
         }
@@ -89,9 +89,9 @@ namespace ige::scene
 
     int ParticleManager_setCullingLayerNumber(PyObject_ParticleManager *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setCullingLayerNumber(val);
             return 0;
         }
@@ -106,9 +106,9 @@ namespace ige::scene
 
     int ParticleManager_setMaxParticleNumber(PyObject_ParticleManager *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setMaxParticleNumber(val);
             return 0;
         }
@@ -123,9 +123,9 @@ namespace ige::scene
 
     int ParticleManager_setNumberOfThreads(PyObject_ParticleManager *self, PyObject *value)
     {
-        int val;
-        if (PyArg_ParseTuple(value, "i", &val))
+        if (PyLong_Check(value))
         {
+            auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setNumberOfThreads(val);
             return 0;
         }

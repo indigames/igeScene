@@ -34,11 +34,10 @@ namespace ige::scene
     // Set path
     int FigureComponent_setPath(PyObject_FigureComponent* self, PyObject* value)
     {
-        PyObject* val;
-        if (PyArg_ParseTuple(value, "O", &val) && val != nullptr && PyUnicode_Check(val))
+        if (PyUnicode_Check(value))
         {
-            const char* path = PyUnicode_AsUTF8(val);
-            self->component->setPath(std::string(path));
+            const char* val = PyUnicode_AsUTF8(value);
+            self->component->setPath(std::string(val));
             return 0;
         }
         return -1;

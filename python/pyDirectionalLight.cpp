@@ -53,9 +53,9 @@ namespace ige::scene
 
     int DirectionalLight_setIntensity(PyObject_DirectionalLight *self, PyObject *value)
     {
-        float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyFloat_Check(value))
         {
+            float val = (float)PyFloat_AsDouble(value);
             self->component->setIntensity(val);
             return 0;
         }
@@ -73,7 +73,7 @@ namespace ige::scene
 
     PyGetSetDef DirectionalLight_getsets[] = {
         {"color", (getter)DirectionalLight_getColor, (setter)DirectionalLight_setColor, DirectionalLight_color_doc, NULL},
-        {"intensity", (getter)DirectionalLight_getIntensity, (setter)DirectionalLight_getIntensity, DirectionalLight_intensity_doc, NULL},
+        {"intensity", (getter)DirectionalLight_getIntensity, (setter)DirectionalLight_setIntensity, DirectionalLight_intensity_doc, NULL},
         {"direction", (getter)DirectionalLight_getDirection, NULL, DirectionalLight_direction_doc, NULL},
         {NULL, NULL}};
 

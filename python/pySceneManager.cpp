@@ -113,13 +113,10 @@ namespace ige::scene
     // Set current scene
     int SceneManager_setCurrentScene(PyObject_SceneManager* self, PyObject* value)
     {
-        PyObject* obj;
-        if (PyArg_ParseTuple(value, "O", &obj)) {
-            if(obj && obj->ob_type == &PyTypeObject_Scene) {
-                auto sceneObj = (PyObject_Scene*)obj;
-                self->sceneManager->setCurrentScene(sceneObj->scene->getName());
-                return 0;
-            }
+        if (value && value->ob_type == &PyTypeObject_Scene) {
+            auto sceneObj = (PyObject_Scene*)value;
+            self->sceneManager->setCurrentScene(sceneObj->scene->getName());
+            return 0;
         }
         return -1;
     }
