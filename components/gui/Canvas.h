@@ -100,7 +100,7 @@ namespace ige::scene
 
         float m_scaleFactor = 1.0;
 
-        ScreenMatchMode m_ScreenMatchMode = ScreenMatchMode::MatchWidthOrHeight;
+        ScreenMatchMode m_ScreenMatchMode = ScreenMatchMode::Expand;
         float m_MatchWidthOrHeight = 0.5f;
 
         //! Cache temp json
