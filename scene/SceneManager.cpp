@@ -379,6 +379,9 @@ namespace ige::scene
         if (scene) {
             auto node = scene->getRoot();
             if (node) node->dispatchEventIncludeChild(eventType);
+            
+            node = scene->getRootUI();
+            if (node) node->dispatchEventIncludeChild(eventType);
         }
     }
 }
