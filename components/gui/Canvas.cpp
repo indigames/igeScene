@@ -93,6 +93,7 @@ namespace ige::scene
             m_canvasTrueSize = m_canvasSize * m_scaleFactor;
             transform->setTransformDirty();
             m_camera->SetPosition({ worldPosition.X(), worldPosition.Y(), worldPosition.Z() + 10.0f });
+            m_camera->SetAspectRate(m_targetCanvasSize.X() / m_targetCanvasSize.Y());
         }
     }
 
