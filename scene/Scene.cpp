@@ -241,6 +241,11 @@ namespace ige::scene
         if(m_tweenManager) m_tweenManager->update(dt);
 
         resetFlag();
+
+    // Runtime pre-render
+    #ifndef EDITOR_MODE
+        preRender();
+    #endif
     }
 
     void Scene::fixedUpdate(float dt)
@@ -269,21 +274,27 @@ namespace ige::scene
     void Scene::preRender(Camera* camera)
     {
         float dt = Time::Instance().GetElapsedTime();
-
-        if (!SceneManager::getInstance()->isEditor() && m_activeCamera)
+        if (camera) {
+            camera->Step(dt);
+        }
+        else if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
             m_activeCamera->onUpdate(dt);
-
+        } 
         m_showcase->Update(dt);
+
+        if (camera) {
+            m_showcase->ZSort(camera);
+            camera->Render();
+        }
+        else if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
+            m_showcase->ZSort(m_activeCamera->getCamera());
+            m_activeCamera->onRender();
+        }
 
         // Render shadow before actually render objects
         auto renderContext = RenderContext::InstancePtr();
         if (renderContext) {
             renderContext->BeginScene(m_shadowFBO, Vec4(1.f, 1.f, 1.f, 1.f), true, true);
-            if (camera) {
-                camera->Render();
-            } else if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
-                m_activeCamera->onRender();
-            }
             m_showcase->Render(RenderPassFilter::ShadowPass);
 
             renderContext->BeginPass(TransparentPass);
@@ -291,16 +302,10 @@ namespace ige::scene
             m_shadowEdgeMask->Render();
             renderContext->EndScene();
         }
-
-        m_uiShowcase->Update(dt);
     }
 
     void Scene::render()
     {
-        if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
-            m_showcase->ZSort(m_activeCamera->getCamera());
-            m_activeCamera->onRender();
-        }
         m_showcase->Render();
 
         for (auto& obj : m_objects)
@@ -308,9 +313,19 @@ namespace ige::scene
     }
 
     void Scene::renderUI() {
-        if (!SceneManager::getInstance()->isEditor()) {
-            if (getCanvas() != nullptr && getCanvas()->getCamera() != nullptr) {
-                getCanvas()->getCamera()->Render();
+        float dt = Time::Instance().GetElapsedTime();
+        m_uiShowcase->Update(dt);
+
+        // TODO: optimize runtime code below
+        auto runtime = getRoot()->getFirstComponentRecursive("Script");
+        if (runtime) {
+            auto isRunning = std::dynamic_pointer_cast<RuntimeComponent>(runtime)->isRunning();
+            if (isRunning) {
+                if (getCanvas() != nullptr && getCanvas()->getCamera() != nullptr) {
+                    getCanvas()->getCamera()->Step(dt);
+                    m_uiShowcase->ZSort(getCanvas()->getCamera());
+                    getCanvas()->getCamera()->Render();
+                }
             }
         }
         m_uiShowcase->Render();

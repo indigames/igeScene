@@ -435,6 +435,24 @@ namespace ige::scene
         }
     }
 
+    //! Get components by type recursively
+    std::shared_ptr<Component> SceneObject::getFirstComponentRecursive(const std::string& type) const
+    {
+        auto comp = getComponent(type);
+        if(comp != nullptr)
+            return comp;
+
+        for (const auto &child : m_children)
+        {
+            if (!child.expired()) {
+                auto comp = child.lock()->getFirstComponentRecursive(type);
+                if (comp != nullptr)
+                    return comp;
+            }
+        }
+        return nullptr;
+    }
+
     std::shared_ptr<ScriptComponent> SceneObject::getScript(const std::string& path) const
     {
         for (int i = 0; i < m_components.size(); ++i)

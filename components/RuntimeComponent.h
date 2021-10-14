@@ -57,6 +57,8 @@ namespace ige::scene
         virtual void onRuntimeFixedUpdate(float dt) {};
         virtual void onRuntimeLateUpdate(float dt) {};
 
+        bool isRunning() const { return m_bIsInit; }
+
     private:
         void onRunEditor(EventContext* context);
         void onPauseEditor(EventContext* context);
@@ -68,8 +70,6 @@ namespace ige::scene
 
         //! Active when stop runtime
         virtual void Clear();
-
-        bool isRunning() const { return m_bIsInit; }
 
     private:
         bool m_bIsInit = false;

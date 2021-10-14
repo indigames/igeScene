@@ -112,6 +112,9 @@ namespace ige::scene
         //! Get components by type recursively
         void getComponentsRecursive(std::vector<Component*>& components, const std::string& type) const;
 
+        //! Get first component in hierarchy
+        std::shared_ptr<Component> getFirstComponentRecursive(const std::string& type) const;
+
         //! Get components count
         virtual size_t getComponentsCount();
 
