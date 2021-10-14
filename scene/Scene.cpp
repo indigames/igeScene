@@ -880,7 +880,17 @@ namespace ige::scene
         float distance = 100.f;
         if (target->isRaycastTarget()) 
         {
-            if (RayOBBChecker::checkIntersect(target->getAABB(), transform->getWorldMatrix(), distance, 100.f))
+            const auto& transform = target->getTransform();
+            auto tranMat = Mat4::IdentityMat();
+            vmath_mat4_translation(transform->getWorldPosition().P(), tranMat.P());
+
+            auto rotMat = Mat4::IdentityMat();
+            vmath_mat_from_quat(transform->getWorldRotation().P(), 4, rotMat.P());
+
+            auto modelMat = tranMat * rotMat;
+            vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getWorldScale().X(), 1.f / transform->getWorldScale().Y(), 1.f / transform->getWorldScale().Z()).P(), 4, 4, modelMat.P());
+
+            if (RayOBBChecker::checkIntersect(target->getAABB(), modelMat, distance, 100.f))
             {
                 hit.first = target;
                 hit.second = ray.first + ray.second * distance;
