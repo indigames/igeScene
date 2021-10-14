@@ -150,3 +150,8 @@ PyDoc_STRVAR(PhysicObject_collisionMask_doc,
 PyDoc_STRVAR(PhysicObject_continuousDetection_doc,
              "Continuous Colision Detection.\n"
              "Type: bool\n");
+
+// activationState
+PyDoc_STRVAR(PhysicObject_activationState_doc,
+             "Physic activation state.\n"
+             "Type: int\n");

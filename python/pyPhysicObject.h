@@ -84,7 +84,8 @@ namespace ige::scene
     PyObject* PhysicObject_getAngularSleepingThreshold(PyObject_PhysicObject* self);
     int PhysicObject_setAngularSleepingThreshold(PyObject_PhysicObject* self, PyObject* value);
 
-    //! Set Activation State
+    //! Activation State
+    PyObject* PhysicObject_getActivationState(PyObject_PhysicObject* self);
     int PhysicObject_setActivationState(PyObject_PhysicObject* self, PyObject* value);
 
     //! Indicate object is a trigger object

@@ -83,6 +83,14 @@ namespace ige::scene
             std::replace(fPath.begin(), fPath.end(), '\\', '/');
 
             m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str());
+
+            // Update transform from transform component
+            auto transform = getOwner()->getTransform();
+            m_figure->SetPosition(transform->getWorldPosition());
+            m_figure->SetRotation(transform->getWorldRotation());
+            m_figure->SetScale(transform->getWorldScale());
+
+            // Wait build
             m_figure->WaitBuild();
 
             // Cache mesh alpha for visibility setting

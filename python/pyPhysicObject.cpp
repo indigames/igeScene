@@ -387,6 +387,11 @@ namespace ige::scene
         return -1;
     }
 
+    PyObject* PhysicObject_getActivationState(PyObject_PhysicObject* self)
+    {
+        return PyLong_FromLong(self->component->getActivationState());
+    }
+
     int PhysicObject_setActivationState(PyObject_PhysicObject* self, PyObject* value)
     {
         if (PyLong_Check(value))
@@ -533,7 +538,6 @@ namespace ige::scene
         {"removeConstraint", (PyCFunction)PhysicObject_removeConstraint, METH_VARARGS, PhysicObject_removeConstraint_doc},
         {"getConstraints", (PyCFunction)PhysicObject_getConstraints, METH_NOARGS, PhysicObject_getConstraints_doc},
         {"removeConstraints", (PyCFunction)PhysicObject_removeConstraints, METH_NOARGS, PhysicObject_removeConstraints_doc},
-        {"setActivationState", (PyCFunction)PhysicObject_setActivationState, METH_VARARGS, NULL},
         {NULL, NULL},
     };
 
@@ -555,6 +559,7 @@ namespace ige::scene
         {"collisionGroup", (getter)PhysicObject_getCollisionFilterGroup, (setter)PhysicObject_setCollisionFilterGroup, PhysicObject_collisionGroup_doc, NULL},
         {"collisionMask", (getter)PhysicObject_getCollisionFilterMask, (setter)PhysicObject_setCollisionFilterMask, PhysicObject_collisionMask_doc, NULL},
         {"continuousDetection", (getter)PhysicObject_isCCD, (setter)PhysicObject_setCCD, PhysicObject_continuousDetection_doc, NULL},
+        {"activationState", (getter)PhysicObject_getActivationState, (setter)PhysicObject_setActivationState, PhysicObject_activationState_doc, NULL},
         {NULL, NULL},
     };
 

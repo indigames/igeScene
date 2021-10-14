@@ -238,6 +238,10 @@ namespace ige::scene
         }
     }
 
+    int PhysicObject::getActivationState() {
+        return getBody() ? getBody()->getActivationState() : -1;
+    }
+
     void PhysicObject::setActivationState(int state) {
         int _state = MATH_CLAMP(0, 5 , state);
         if (getBody())

@@ -349,7 +349,7 @@ namespace ige::scene
 
     // Methods
     PyMethodDef NavAgentManager_methods[] = {
-        {"getQueryFiltersNumber", (PyCFunction)NavAgentManager_getNumQueryFilterTypes, METH_VARARGS, NavAgentManager_getQueryFiltersNumber_doc},
+        {"getQueryFiltersNumber", (PyCFunction)NavAgentManager_getNumQueryFilterTypes, METH_NOARGS, NavAgentManager_getQueryFiltersNumber_doc},
         {"getAreasNumber", (PyCFunction)NavAgentManager_getNumAreas, METH_VARARGS, NavAgentManager_getAreasNumber_doc},
         {"getAreaCost", (PyCFunction)NavAgentManager_getAreaCost, METH_VARARGS, NavAgentManager_getAreaCost_doc},
         {"setAreaCost", (PyCFunction)NavAgentManager_setAreaCost, METH_VARARGS, NavAgentManager_getAreaCost_doc},
@@ -357,7 +357,7 @@ namespace ige::scene
         {"setIncludeFlags", (PyCFunction)NavAgentManager_setIncludeFlags, METH_VARARGS, NavAgentManager_setIncludeFlags_doc},
         {"getExcludeFlags", (PyCFunction)NavAgentManager_getExcludeFlags, METH_VARARGS, NavAgentManager_getExcludeFlags_doc},
         {"setExcludeFlags", (PyCFunction)NavAgentManager_setExcludeFlags, METH_VARARGS, NavAgentManager_setExcludeFlags_doc},
-        {"getAgents", (PyCFunction)NavAgentManager_getAgents, METH_VARARGS, NavAgentManager_getAgents_doc},
+        {"getAgents", (PyCFunction)NavAgentManager_getAgents, METH_NOARGS, NavAgentManager_getAgents_doc},
         {"findNearestPoint", (PyCFunction)NavAgentManager_findNearestPoint, METH_VARARGS, NavAgentManager_findNearestPoint_doc},
         {"moveAlongSurface", (PyCFunction)NavAgentManager_moveAlongSurface, METH_VARARGS, NavAgentManager_moveAlongSurface_doc},
         {"findPath", (PyCFunction)NavAgentManager_findPath, METH_VARARGS, NavAgentManager_findPath_doc},
