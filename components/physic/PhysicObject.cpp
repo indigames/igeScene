@@ -452,9 +452,8 @@ namespace ige::scene
         if (!m_bIsKinematic)
         {
             const btTransform &result = m_body->getWorldTransform();
-            getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
-            getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
-            getOwner()->getTransform()->onUpdate(0.f);
+            getOwner()->getTransform()->setWorldPosition(PhysicHelper::from_btVector3(result.getOrigin()));
+            getOwner()->getTransform()->setWorldRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
         }
     }
 

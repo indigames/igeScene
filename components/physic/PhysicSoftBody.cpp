@@ -446,13 +446,11 @@ namespace ige::scene
         // Update transform
         if (getOwner()->getTransform())
         {
-            getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(getSoftBody()->m_pose.m_com));
+            getOwner()->getTransform()->setWorldPosition(PhysicHelper::from_btVector3(getSoftBody()->m_pose.m_com));
 
             // Update rotation
             auto xform = btTransform(getSoftBody()->m_pose.m_rot * getSoftBody()->m_pose.m_scl);
-            getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(xform.getRotation()));
-
-            getOwner()->getTransform()->onUpdate(0.f);
+            getOwner()->getTransform()->setWorldRotation(PhysicHelper::from_btQuaternion(xform.getRotation()));
         }
 
         // Update position and normal
