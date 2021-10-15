@@ -1,6 +1,7 @@
 
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioManager.h"
+#include "scene/Scene.h"
 #include "scene/SceneObject.h"
 
 #include <soloud.h>
@@ -21,7 +22,7 @@ namespace ige::scene
         : Component(owner), m_bIsStream(stream)
     {
         // Register audio manager
-        if (getOwner()->getRoot())
+        if (!getOwner()->getScene()->isPrefab() && getOwner()->getRoot())
         {
             auto manager = getOwner()->getRoot()->getComponent<AudioManager>();
             if (manager == nullptr) manager = getOwner()->getRoot()->addComponent<AudioManager>();

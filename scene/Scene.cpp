@@ -357,6 +357,7 @@ namespace ige::scene
         auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, isGUI, size, prefabId);
         m_objects.push_back(sceneObject);
         sceneObject->setParent(parentObject);
+        if (m_root == nullptr) m_root = sceneObject;
         return sceneObject;
     }
 

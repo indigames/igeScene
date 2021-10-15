@@ -7,6 +7,7 @@
 #include "components/physic/SpringConstraint.h"
 #include "components/physic/Dof6SpringConstraint.h"
 #include "components/TransformComponent.h"
+#include "scene/Scene.h"
 #include "scene/SceneObject.h"
 
 #include "utils/PhysicHelper.h"
@@ -24,10 +25,13 @@ namespace ige::scene
         : Component(owner)
     {
         // Register manager
-        auto manager = getOwner()->getRoot()->getComponent<PhysicManager>();
-        if (manager == nullptr)
-            manager = getOwner()->getRoot()->addComponent<PhysicManager>();
-        setManager(manager);
+        if (!getOwner()->getScene()->isPrefab() && getOwner()->getRoot())
+        {
+            auto manager = getOwner()->getRoot()->getComponent<PhysicManager>();
+            if (manager == nullptr)
+                manager = getOwner()->getRoot()->addComponent<PhysicManager>();
+            setManager(manager);
+        }
     }
 
     //! Destructor

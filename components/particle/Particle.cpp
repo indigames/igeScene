@@ -1,6 +1,7 @@
 
 #include "components/particle/Particle.h"
 #include "components/particle/ParticleManager.h"
+#include "scene/Scene.h"
 #include "scene/SceneObject.h"
 
 #include "utils/filesystem.h"
@@ -17,10 +18,13 @@ namespace ige::scene
         : Component(owner)
     {
         // Register manager
-        auto manager = getOwner()->getRoot()->getComponent<ParticleManager>();
-        if(manager == nullptr)
-            getOwner()->getRoot()->addComponent<ParticleManager>();
-        setManager(manager);
+        if (!getOwner()->getScene()->isPrefab() && getOwner()->getRoot())
+        {
+            auto manager = getOwner()->getRoot()->getComponent<ParticleManager>();
+            if (manager == nullptr)
+                getOwner()->getRoot()->addComponent<ParticleManager>();
+            setManager(manager);
+        }
 
         // Set path
         if (!path.empty())

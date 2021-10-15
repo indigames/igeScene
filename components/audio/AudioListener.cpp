@@ -2,6 +2,7 @@
 #include "components/audio/AudioListener.h"
 #include "components/audio/AudioManager.h"
 #include "components/Component.h"
+#include "scene/Scene.h"
 #include "scene/SceneObject.h"
 
 namespace ige::scene
@@ -15,7 +16,7 @@ namespace ige::scene
         : Component(owner)
     {
         // Ensure manager was added in the root node of the scene
-        if(!getOwner()->getRoot()->hasComponent<AudioManager>())
+        if(!getOwner()->getScene()->isPrefab() && !getOwner()->getRoot()->hasComponent<AudioManager>())
             getOwner()->getRoot()->addComponent<AudioManager>();
 
         // Invoke created event
