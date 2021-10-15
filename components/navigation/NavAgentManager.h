@@ -53,7 +53,9 @@ namespace ige::scene
         void Clear() override;
 
         //! Update
-        void onRuntimeUpdate(float dt) override;
+        virtual void onRuntimeUpdate(float dt) override;
+        virtual void onRuntimeFixedUpdate(float dt) override;
+        virtual void onRuntimeLateUpdate(float dt) override;
 
         //! NavMesh for which the crowd was created.
         NavMesh *getNavMesh() const { return m_navMesh; }

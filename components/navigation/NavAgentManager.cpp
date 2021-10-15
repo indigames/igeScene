@@ -118,6 +118,14 @@ namespace ige::scene
         m_crowd->update(dt, nullptr);
     }
 
+    void NavAgentManager::onRuntimeFixedUpdate(float dt)
+    {
+    }
+
+    void NavAgentManager::onRuntimeLateUpdate(float dt)
+    {
+    }
+
     //! Get the detour crowd agent.
     const dtCrowdAgent *NavAgentManager::getDetourCrowdAgent(int agent) const
     {

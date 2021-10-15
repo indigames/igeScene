@@ -164,6 +164,8 @@ namespace ige::scene
 
         //! Update
         virtual void onRuntimeUpdate(float dt) override;
+        virtual void onRuntimeFixedUpdate(float dt) override;
+        virtual void onRuntimeLateUpdate(float dt) override;
 
         //! Created/Destroyed events
         static Event<NavAgent *> &getCreatedEvent() { return m_onCreatedEvent; }

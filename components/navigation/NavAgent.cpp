@@ -68,6 +68,14 @@ namespace ige::scene
         }
     }
 
+    void NavAgent::onRuntimeFixedUpdate(float dt)
+    {
+    }
+
+    void NavAgent::onRuntimeLateUpdate(float dt)
+    {
+    }
+
     //! Enable/disable
     void NavAgent::setEnabled(bool enable)
     {

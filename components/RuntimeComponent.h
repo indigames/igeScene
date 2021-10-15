@@ -27,35 +27,15 @@ namespace ige::scene
         //! Destructor
         virtual ~RuntimeComponent();
 
-        //! Enable
-        virtual void onEnable() override;
-
-        //! Disable
-        virtual void onDisable() override;
-
         //! Update functions
         virtual void onUpdate(float dt) override;
         virtual void onFixedUpdate(float dt) override;
         virtual void onLateUpdate(float dt) override;
 
-        //! Render
-        virtual void onRender() override;
-
-        //! Destroyed
-        virtual void onDestroy() override;
-
-        //! Click
-        virtual void onClick() override;
-
-        //! Suspend
-        virtual void onSuspend() override;
-
-        //! Resume
-        virtual void onResume() override;
-
-        virtual void onRuntimeUpdate(float dt) {};
-        virtual void onRuntimeFixedUpdate(float dt) {};
-        virtual void onRuntimeLateUpdate(float dt) {};
+        //! Runtime functions
+        virtual void onRuntimeUpdate(float dt) = 0;
+        virtual void onRuntimeFixedUpdate(float dt) = 0;
+        virtual void onRuntimeLateUpdate(float dt) = 0;
 
         bool isRunning() const { return m_bIsInit; }
 

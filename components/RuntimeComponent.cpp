@@ -31,48 +31,27 @@ namespace ige::scene
 #endif
     }
 
-    //! Enable
-    void RuntimeComponent::onEnable() {}
-
-    //! Disable
-    void RuntimeComponent::onDisable() {}
-
     //! Update functions
     void RuntimeComponent::onUpdate(float dt) {
-    #ifndef EDITOR_MODE
-        if(!m_bIsInit) {
-            Initialize();
-        }
-    #endif
-
-        if (!isRunning()) return;
+#ifdef EDITOR_MODE
+        if (SceneManager::getInstance()->isEditor() && !isRunning()) return;
+#endif
         onRuntimeUpdate(dt);
     }
 
     void RuntimeComponent::onFixedUpdate(float dt) {
-        if (!isRunning()) return;
+#ifdef EDITOR_MODE
+        if (SceneManager::getInstance()->isEditor() && !isRunning()) return;
+#endif
         onRuntimeFixedUpdate(dt);
     }
 
     void RuntimeComponent::onLateUpdate(float dt) {
-        if (!isRunning()) return;
+#ifdef EDITOR_MODE
+        if (SceneManager::getInstance()->isEditor() && !isRunning()) return;
+#endif
         onRuntimeLateUpdate(dt);
     }
-
-    //! Render
-    void RuntimeComponent::onRender() {}
-
-    //! Destroyed
-    void RuntimeComponent::onDestroy() {}
-
-    //! Click
-    void RuntimeComponent::onClick() {}
-
-    //! Suspend
-    void RuntimeComponent::onSuspend() {}
-
-    //! Resume
-    void RuntimeComponent::onResume() {}
 
     void RuntimeComponent::Initialize()
     {
