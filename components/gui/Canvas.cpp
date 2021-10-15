@@ -124,14 +124,6 @@ namespace ige::scene
     //! Deserialize
     void Canvas::from_json(const json &j)
     {
-        m_canvasSize = j.value("size", Vec2(560.f, 940.f));
-        m_targetCanvasSize = j.value("targetSize", Vec2(560.f, 940.f));
-        if (m_canvasSize[0] == 0 && m_canvasSize[1] == 0) {
-            m_canvasSize = Vec2(560.f, 940.f);
-        }
-        m_ScreenMatchMode = (ScreenMatchMode)j.value("screenmatchmode", 0);
-        m_MatchWidthOrHeight = j.value("matchwithorheight", 0.5);
-        updateCanvas();
 		m_json = j;
         Component::from_json(j);
     }
@@ -139,6 +131,18 @@ namespace ige::scene
     //! Serialize finished event
     void Canvas::onSerializeFinished(Scene* scene)
     {
+        m_canvasSize = m_json.value("size", Vec2(560.f, 940.f));
+        if (SceneManager::getInstance()->isEditor()) {
+            m_targetCanvasSize = m_json.value("targetSize", Vec2(560.f, 940.f));
+        }
+        else {
+            m_targetCanvasSize = Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameH());
+        }
+        m_ScreenMatchMode = (ScreenMatchMode)m_json.value("screenmatchmode", (int)ScreenMatchMode::Expand);
+        m_MatchWidthOrHeight = m_json.value("matchwithorheight", 0.5f);
+
+        updateCanvas();
+
         Component::onSerializeFinished(scene);
         m_json.clear();
     }

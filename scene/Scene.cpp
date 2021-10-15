@@ -55,6 +55,7 @@ namespace ige::scene
     Scene::Scene(const std::string& name)
         : m_name(name)
     {
+        setWindowSize({-1.f, -1.f});
     }
 
     Scene::~Scene()

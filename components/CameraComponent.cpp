@@ -177,7 +177,7 @@ namespace ige::scene
         setScreenOffset(j.at("scrOff"));
         setScreenRadian(j.at("scrRad"));
         setUpAxis(j.at("up"));
-        setAspectRatio(j.value("aspect", -1.f));
+        setAspectRatio(SceneManager::getInstance()->isEditor() ? j.value("aspect", -1.f) : -1.f);
 
         if (getLockOn())
         {
