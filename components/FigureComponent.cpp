@@ -83,7 +83,7 @@ namespace ige::scene
             if (fPath.size() == 0) fPath = fsPath.string();
             std::replace(fPath.begin(), fPath.end(), '\\', '/');
 
-            m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str());
+            m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str(), pyxieFigure::CloneSkeleton);
 
             // Update transform from transform component
             auto transform = getOwner()->getTransform();
