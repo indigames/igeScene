@@ -88,6 +88,12 @@ namespace ige::scene
         //! Set editor mode
         void setIsEditor(bool isEditor) { m_bIsEditor = isEditor; }
 
+        //! Check if this is editor playing mode
+        bool isPlaying() const { return m_bIsPlaying; }
+
+        //! Set editor playing mode
+        void setIsPlaying(bool isPlaying) { m_bIsPlaying = isPlaying; }
+
         //! Project path
         const std::string& getProjectPath() const { return m_projectPath; }
         void setProjectPath(const std::string& path);
@@ -131,6 +137,7 @@ namespace ige::scene
 
         //! Editor mode
         bool m_bIsEditor = false;
+        bool m_bIsPlaying = false;
     };
 
     std::string GetEditorResource(const std::string& path);

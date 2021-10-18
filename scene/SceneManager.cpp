@@ -95,6 +95,10 @@ namespace ige::scene
                 }
             }
         }
+
+    #ifndef EDITOR_MODE
+        setIsPlaying(true);
+    #endif
     }
 
     void SceneManager::deinit()

@@ -316,19 +316,11 @@ namespace ige::scene
     void Scene::renderUI() {
         float dt = Time::Instance().GetElapsedTime();
         m_uiShowcase->Update(dt);
-
-        // TODO: optimize runtime code below
-        if (getRoot()) {
-            auto runtime = getRoot()->getFirstComponentRecursive("Script");
-            if (runtime) {
-                auto isRunning = std::dynamic_pointer_cast<RuntimeComponent>(runtime)->isRunning();
-                if (isRunning) {
-                    if (getCanvas() != nullptr && getCanvas()->getCamera() != nullptr) {
-                        getCanvas()->getCamera()->Step(dt);
-                        m_uiShowcase->ZSort(getCanvas()->getCamera());
-                        getCanvas()->getCamera()->Render();
-                    }
-                }
+        if (SceneManager::getInstance()->isPlaying()) {
+            if (getCanvas() != nullptr && getCanvas()->getCamera() != nullptr) {
+                getCanvas()->getCamera()->Step(dt);
+                m_uiShowcase->ZSort(getCanvas()->getCamera());
+                getCanvas()->getCamera()->Render();
             }
         }
         m_uiShowcase->Render();
