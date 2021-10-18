@@ -26,31 +26,17 @@ namespace ige::scene
 
     Sprite::~Sprite()
     {
-        if(m_figure)
-        {
-            const auto& textureSources = m_figure->GetTextureSources();
-            if (textureSources.size() > 0)
-            {
-                auto& textureSource = textureSources[0];
-                auto texture = (Texture*)ResourceManager::Instance().GetResource(textureSource.path, TEXTURETYPE);
-                if (texture)
-                {
-                    texture->DecReference();
-                    texture = nullptr;
-                }
-            }
-            m_texture = nullptr;
-
-            m_figure->DecReference();
-            m_figure = nullptr;
-        }
-
-        if (m_texture) 
+        if (m_texture)
         {
             m_texture->DecReference();
             m_texture = nullptr;
         }
-            
+
+        if(m_figure)
+        {
+            m_figure->DecReference();
+            m_figure = nullptr;
+        }
     }
 
     void Sprite::setSize(const Vec2& size)
@@ -61,13 +47,6 @@ namespace ige::scene
 
             if (m_figure)
             {
-                /*auto w = m_size.X() / 2.f;
-                auto h = m_size.Y() / 2.f;
-                const std::vector<float> points = { -w,h,0.f, w,h,0.f, -w,-h,0.f, w,-h,0.f };
-
-                auto meshIdx = m_figure->GetMeshIndex(GenerateNameHash("mesh"));
-                if (meshIdx == -1) return;
-                m_figure->SetMeshVertexValues(meshIdx, (const void*)points.data(), (uint32_t)(points.size() / 3), ATTRIBUTE_ID_POSITION, 0);*/
                 draw();
             }
         }
@@ -81,15 +60,6 @@ namespace ige::scene
 
             if (m_figure && m_fillMethod == FillMethod::None)
             {
-                /*auto ow = m_offset.X();
-                auto oh = m_offset.Y();
-                auto tw = ow + m_tiling.X();
-                auto th = oh + m_tiling.Y();
-                const std::vector<float> uvs = { ow, th, tw, th, ow, oh, tw, oh };
-
-                auto meshIdx = m_figure->GetMeshIndex(GenerateNameHash("mesh"));
-                if (meshIdx == -1) return;
-                m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);*/
                 draw();
             }
         }
@@ -103,15 +73,6 @@ namespace ige::scene
 
             if (m_figure && m_fillMethod == FillMethod::None)
             {
-                /*auto ow = m_offset.X();
-                auto oh = m_offset.Y();
-                auto tw = ow + m_tiling.X();
-                auto th = oh + m_tiling.Y();
-                const std::vector<float> uvs = { ow, th, tw, th, ow, oh, tw, oh };
-
-                auto meshIdx = m_figure->GetMeshIndex(GenerateNameHash("mesh"));
-                if (meshIdx == -1) return;
-                m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);*/
                 draw();
             }
         }
@@ -266,9 +227,6 @@ namespace ige::scene
 
     void Sprite::setBorder(float left, float right, float top, float bottom)
     {
-        /*auto w = m_texSize.X();
-        auto h = m_texSize.Y();*/
-
         m_border[0] = left < 0 ? 0 : left;
         m_border[1] = right < 0 ? 0 : right;
         m_border[2] = top < 0 ? 0 : top;

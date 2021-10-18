@@ -236,8 +236,8 @@ namespace ige::scene
 
     void Scene::update(float dt)
     {
-        for (auto& obj : m_objects)
-            if (obj) obj->onUpdate(dt);
+        for(int i = m_objects.size() - 1; i >= 0; i--)
+            m_objects[i]->onUpdate(dt);
 
         if(m_tweenManager) m_tweenManager->update(dt);
 
@@ -251,20 +251,20 @@ namespace ige::scene
 
     void Scene::fixedUpdate(float dt)
     {
-        for (auto& obj : m_objects)
-            if (obj) obj->onFixedUpdate(dt);
+        for (int i = m_objects.size() - 1; i >= 0; i--)
+            m_objects[i]->onFixedUpdate(dt);
     }
 
     void Scene::lateUpdate(float dt)
     {
-        for (auto& obj : m_objects)
-            if (obj) obj->onLateUpdate(dt);
+        for (int i = m_objects.size() - 1; i >= 0; i--)
+            m_objects[i]->onLateUpdate(dt);
     }
 
     void Scene::physicUpdate(float dt)
     {
-        for (auto& obj : m_objects)
-            if (obj) obj->onPhysicUpdate(dt);
+        for (int i = m_objects.size() - 1; i >= 0; i--)
+            m_objects[i]->onPhysicUpdate(dt);
     }
 
     void Scene::resetFlag()
@@ -309,8 +309,8 @@ namespace ige::scene
     {
         m_showcase->Render();
 
-        for (auto& obj : m_objects)
-            if (obj) obj->onRender();
+        for (int i = m_objects.size() - 1; i >= 0; i--)
+            m_objects[i]->onRender();
     }
 
     void Scene::renderUI() {
