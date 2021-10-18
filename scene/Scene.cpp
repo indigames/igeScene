@@ -318,14 +318,16 @@ namespace ige::scene
         m_uiShowcase->Update(dt);
 
         // TODO: optimize runtime code below
-        auto runtime = getRoot()->getFirstComponentRecursive("Script");
-        if (runtime) {
-            auto isRunning = std::dynamic_pointer_cast<RuntimeComponent>(runtime)->isRunning();
-            if (isRunning) {
-                if (getCanvas() != nullptr && getCanvas()->getCamera() != nullptr) {
-                    getCanvas()->getCamera()->Step(dt);
-                    m_uiShowcase->ZSort(getCanvas()->getCamera());
-                    getCanvas()->getCamera()->Render();
+        if (getRoot()) {
+            auto runtime = getRoot()->getFirstComponentRecursive("Script");
+            if (runtime) {
+                auto isRunning = std::dynamic_pointer_cast<RuntimeComponent>(runtime)->isRunning();
+                if (isRunning) {
+                    if (getCanvas() != nullptr && getCanvas()->getCamera() != nullptr) {
+                        getCanvas()->getCamera()->Step(dt);
+                        m_uiShowcase->ZSort(getCanvas()->getCamera());
+                        getCanvas()->getCamera()->Render();
+                    }
                 }
             }
         }
@@ -578,7 +580,7 @@ namespace ige::scene
         auto prefabId = jObj.value("prefabId", std::string());
         auto obj = createObject(jObj.at("name"), nullptr, jObj.value("gui", false), jObj.value("size", Vec2{ 64.f, 64.f }), prefabId);
         obj->from_json(jObj);
-        obj->setParent(parent);
+        if(parent) obj->setParent(parent);
         return obj;
     }
 

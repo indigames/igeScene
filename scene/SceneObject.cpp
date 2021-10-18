@@ -530,7 +530,7 @@ namespace ige::scene
             for (auto &comp : m_components)
             {
                 // Camera rendered before other objects
-                if (comp->getName() != "Camera" && comp->isEnabled())
+                if (comp->isEnabled() && comp->getName() != "Camera")
                     comp->onRender();
             }
         }

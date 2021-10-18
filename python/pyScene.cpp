@@ -85,11 +85,11 @@ namespace ige::scene
     PyObject* Scene_createObject(PyObject_Scene *self, PyObject* args)
     {
         char* name = "";
-        PyObject* parentObj;
+        PyObject* parentObj = nullptr;
 
         if (PyArg_ParseTuple(args, "sO", &name, &parentObj)) {
             auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            auto parent = ((PyObject_SceneObject*)parentObj)->sceneObject->getSharedPtr();
+            auto parent = parentObj && parentObj->ob_type == &PyTypeObject_SceneObject && ((PyObject_SceneObject*)parentObj)->sceneObject ? ((PyObject_SceneObject*)parentObj)->sceneObject->getSharedPtr() : nullptr;
             obj->sceneObject = self->scene->createObject(name, parent).get();
             return (PyObject*)obj;
         }
@@ -100,11 +100,11 @@ namespace ige::scene
     PyObject* Scene_loadPrefab(PyObject_Scene* self, PyObject* args) {
         char* path = "";
         char* name = "";
-        PyObject* parentObj;
+        PyObject* parentObj = nullptr;
 
         if (PyArg_ParseTuple(args, "ssO", &path, &name, &parentObj)) {
             auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            auto parent = ((PyObject_SceneObject*)parentObj)->sceneObject->getSharedPtr();
+            auto parent = parentObj && parentObj->ob_type == &PyTypeObject_SceneObject && ((PyObject_SceneObject*)parentObj)->sceneObject ? ((PyObject_SceneObject*)parentObj)->sceneObject->getSharedPtr() : nullptr;
             obj->sceneObject = self->scene->createObjectFromPrefab(path, name, parent).get();
             return (PyObject*)obj;
         }
