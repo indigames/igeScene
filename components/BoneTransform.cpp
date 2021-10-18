@@ -13,6 +13,7 @@ namespace ige::scene
         : Component(owner)
     {
         m_sceneObjectDeleteEventId = SceneObject::getDestroyedEvent().addListener(std::bind(&BoneTransform::onSceneObjectDeleted, this, std::placeholders::_1));
+        initialize();
     }
 
     //! Destructor
@@ -21,27 +22,43 @@ namespace ige::scene
         if (m_sceneObjectDeleteEventId != (uint64_t)-1)
             SceneObject::getDestroyedEvent().removeListener(m_sceneObjectDeleteEventId);
         m_sceneObjectDeleteEventId = -1;
+
+        clear();
     }
 
     //! Initialize
     bool BoneTransform::initialize()
     {
-        auto figureCmp = getOwner()->getComponent<FigureComponent>();
-        if (figureCmp && figureCmp->isEnabled())
-        {
-            m_figure = figureCmp->getFigure();
-            if (m_figure)
+        if (!isEnabled())
+            return false;
+
+        if (!m_bIsInitialized) {
+            auto figureCmp = getOwner()->getComponent<FigureComponent>();
+            if (figureCmp && figureCmp->isEnabled())
             {
-                auto numJoints = m_figure->NumJoints();
-                for (int i = 0; i < numJoints; ++i)
+                m_figure = figureCmp->getFigure();
+                if (m_figure)
                 {
-                    auto jointName = m_figure->GetJointName(i);
-                    m_jointObjects[jointName] = getOwner()->findChildByName(jointName);
+                    auto numJoints = m_figure->NumJoints();
+                    for (int i = 0; i < numJoints; ++i)
+                    {
+                        auto jointName = m_figure->GetJointName(i);
+                        m_jointObjects[jointName] = getOwner()->findChildByName(jointName);
+                    }
+                    return true;
                 }
-                return true;
             }
+            m_bIsInitialized = true;
         }
-        return false;
+        return m_bIsInitialized;
+    }
+
+    void BoneTransform::clear() {
+        for (auto& [key, val] : m_jointObjects) {
+            getOwner()->getScene()->removeObject(val);
+            m_jointObjects[key] = nullptr;
+        }
+        m_jointObjects.clear();
     }
 
     void BoneTransform::onJointObjectSelected(const std::string& name, bool selected)
@@ -108,6 +125,18 @@ namespace ige::scene
     //! Update
     void BoneTransform::onRender()
     {       
+    }
+
+    //! Enable
+    void BoneTransform::onEnable()
+    {
+        initialize();
+    }
+
+    //! Disable
+    void BoneTransform::onDisable()
+    {
+        clear();
     }
 
     //! Serialize

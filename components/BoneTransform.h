@@ -32,8 +32,17 @@ namespace ige::scene
         //! Render
         void onRender() override;
 
+        //! Enable
+        virtual void onEnable() override;
+
+        //! Disable
+        virtual void onDisable() override;
+
         //! Initialize
         bool initialize();
+
+        //! Clear
+        void clear();
 
         //! Get list of joint objects
         const std::unordered_map<std::string, std::shared_ptr<SceneObject>>& getJointObjects() const { return m_jointObjects; }
@@ -66,5 +75,8 @@ namespace ige::scene
 
         //! SceneObject deleted event ID
         uint64_t m_sceneObjectDeleteEventId = (uint64_t)-1;
+
+        //! Initialized indicator
+        bool m_bIsInitialized = false;
     };
 } // namespace ige::scene
