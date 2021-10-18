@@ -48,7 +48,8 @@ namespace ige::scene
     {
         auto figureObj = (figure_obj*)(&FigureType)->tp_alloc(&FigureType, 0);
         // auto figureObj = PyObject_New(figure_obj, &FigureType);
-        figureObj->figure = self->component->getFigure();        
+        figureObj->figure = self->component->getFigure();
+        if(figureObj->figure) figureObj->figure->IncReference();
         return (PyObject*)figureObj;
         
     }

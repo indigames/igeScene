@@ -371,7 +371,7 @@ namespace ige::scene
     bool Scene::removeAllObjects()
     {
         for (auto& obj : m_objects) {
-            obj->setParent(nullptr);
+            if (obj) obj->setParent(nullptr);
             obj = nullptr;
         }
         m_objects.clear();
