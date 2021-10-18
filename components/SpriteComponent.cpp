@@ -15,36 +15,24 @@ namespace ige::scene
     SpriteComponent::SpriteComponent(SceneObject &owner, const std::string &path, const Vec2 &size, bool isBillboard, bool isGUI)
         : Component(owner), m_bIsGUI(isGUI), m_path(path), m_texture(nullptr)
     {
-        if(path.empty()) 
+        if (path.empty()) {
             m_sprite = std::make_shared<Sprite>(size);
+        }
         else {
             m_texture = ResourceCreator::Instance().NewTexture(m_path.c_str());
             m_sprite = std::make_shared<Sprite>(m_texture, size);
         }
 
-        if (m_sprite->getFigure() && getOwner()->getScene())
-        {
-            if(m_bIsGUI)
-                getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_sprite->getFigure());
-            else 
-                getOwner()->getScene()->getResourceAddedEvent().invoke(m_sprite->getFigure());
-        }
-
         m_sprite->setIsScaleBorder(true);
-
         setBillboard(isBillboard);
+        onResourceAdded(m_sprite->getFigure());
     }
 
     //! Destructor
     SpriteComponent::~SpriteComponent()
     {
         if (m_sprite && m_sprite->getFigure())
-            if (getOwner()->getScene()) {
-                if (m_bIsGUI)
-                    getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_sprite->getFigure());
-                else 
-                    getOwner()->getScene()->getResourceRemovedEvent().invoke(m_sprite->getFigure());
-            }
+            onResourceRemoved(m_sprite->getFigure());
 
         if (m_texture) {
             m_texture->DecReference();
@@ -61,27 +49,13 @@ namespace ige::scene
     {
         if (!getOwner()->isActive() || !isEnabled()) return;
         Component::onEnable();
-        if (m_sprite && m_sprite->getFigure()) {
-            if (getOwner()->getScene()) {
-                if (m_bIsGUI)
-                    getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_sprite->getFigure());
-                else
-                    getOwner()->getScene()->getResourceAddedEvent().invoke(m_sprite->getFigure());
-            }
-        }
+        if (m_sprite) onResourceAdded(m_sprite->getFigure());
     }
 
     //! Disable
     void SpriteComponent::onDisable()
     {
-        if (m_sprite && m_sprite->getFigure()) {
-            if (getOwner()->getScene()) {
-                if (m_bIsGUI)
-                    getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_sprite->getFigure());
-                else
-                    getOwner()->getScene()->getResourceRemovedEvent().invoke(m_sprite->getFigure());
-            }
-        }
+        if(m_sprite) onResourceRemoved(m_sprite->getFigure());
         Component::onDisable();
     }
 
@@ -137,10 +111,10 @@ namespace ige::scene
             auto newFigure = m_sprite->getFigure();
 
             if (oldFigure == nullptr && newFigure) {
-                onCreateFigure(newFigure);
+                onResourceAdded(newFigure);
             }
             if (oldFigure != nullptr && newFigure == nullptr) {
-                onRemoveFigure(oldFigure);
+                onResourceRemoved(oldFigure);
             }
 
             if (newFigure)
@@ -155,18 +129,26 @@ namespace ige::scene
         }
     }
 
-    void SpriteComponent::onCreateFigure(EditableFigure* fig) {
-        if (m_bIsGUI)
-            getOwner()->getScene()->getUIResourceAddedEvent().invoke(fig);
-        else
-            getOwner()->getScene()->getResourceAddedEvent().invoke(fig);
+    void SpriteComponent::onResourceAdded(Resource* res) {
+        if (m_bResAdded || res == nullptr) return;
+        if (getOwner() && getOwner()->getScene()) {
+            if (m_bIsGUI)
+                getOwner()->getScene()->getUIResourceAddedEvent().invoke(res);
+            else
+                getOwner()->getScene()->getResourceAddedEvent().invoke(res);
+            m_bResAdded = true;
+        }       
     }
 
-    void SpriteComponent::onRemoveFigure(EditableFigure* fig) {
-        if (m_bIsGUI)
-            getOwner()->getScene()->getUIResourceRemovedEvent().invoke(fig);
-        else
-            getOwner()->getScene()->getResourceRemovedEvent().invoke(fig);
+    void SpriteComponent::onResourceRemoved(Resource* res) {
+        if (!m_bResAdded || res == nullptr) return;
+        if (getOwner() && getOwner()->getScene()) {
+            if (m_bIsGUI)
+                getOwner()->getScene()->getUIResourceRemovedEvent().invoke(res);
+            else
+                getOwner()->getScene()->getResourceRemovedEvent().invoke(res);
+            m_bResAdded = false;
+        }
     }
 
     //! Set size

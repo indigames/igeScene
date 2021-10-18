@@ -99,9 +99,12 @@ namespace ige::scene
 
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
+
     protected:
-        void onCreateFigure(EditableFigure* figure);
-        void onRemoveFigure(EditableFigure* figure);
+        //! Utils to add/remove resouce from showcase
+        void onResourceAdded(Resource* res);
+        void onResourceRemoved(Resource* res);
+        bool m_bResAdded = false;
 
         const Vec4& getBorder() const { return m_sprite->getBorder(); }
         void setBorder(const Vec4& value);
@@ -122,7 +125,6 @@ namespace ige::scene
 
         //! Billboard setting
         bool m_bIsBillboard = false;
-
         bool m_bIsGUI = false;
 
         friend class UIImage;

@@ -69,8 +69,10 @@ namespace ige::scene
     protected:
         TextComponent(SceneObject& owner, const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color, bool isBillboard, bool isGUI, int fontType);
 
-        void onCreateFigure(EditableFigure* figure);
-        void onRemoveFigure(EditableFigure* figure);
+        //! Utils to add/remove resource from showcase
+        void onResourceAdded(Resource* res);
+        void onResourceRemoved(Resource* res);
+        bool m_bResAdded = false;
 
         virtual void generateText(const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color, int fontType);
 
@@ -84,8 +86,6 @@ namespace ige::scene
 
         //! Text
         std::shared_ptr<Text> m_text;
-
-        bool m_added = false;
 
         //! Billboard setting
         bool m_bIsBillboard = false;

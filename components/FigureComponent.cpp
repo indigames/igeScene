@@ -22,8 +22,8 @@ namespace ige::scene
     {
         if (m_figure)
         {
-            if (getOwner()->getScene())
-                getOwner()->getScene()->getResourceRemovedEvent().invoke(m_figure);
+            onResourceRemoved(m_figure);
+            m_figure->DecReference();
             m_figure = nullptr;
         }
         if (getOwner() && getOwner()->getTransform())
@@ -73,7 +73,8 @@ namespace ige::scene
 
             if (m_figure != nullptr)
             {
-                getOwner()->getScene()->getResourceRemovedEvent().invoke(m_figure);
+                onResourceRemoved(m_figure);
+                m_figure->DecReference();
                 m_figure = nullptr;
             }
 
@@ -100,7 +101,7 @@ namespace ige::scene
                 m_meshAlphaValues.push_back(m_figure->GetMeshAlpha(i));
             }
 
-            getOwner()->getScene()->getResourceAddedEvent().invoke(m_figure);
+            onResourceAdded(m_figure);
             getOwner()->getTransform()->makeDirty();
         }
     }
@@ -282,6 +283,40 @@ namespace ige::scene
                 shaderDesc->SetScissorTest(m_bIsScissorTestEnable);
                 m_figure->SetShaderName(i, shaderDesc->GetValue());
             }
+        }
+    }
+
+    //! Enable
+    void FigureComponent::onEnable()
+    {
+        if (!getOwner()->isActive() || !isEnabled()) return;
+        Component::onEnable();
+        onResourceAdded(m_figure);
+    }
+
+    //! Disable
+    void FigureComponent::onDisable()
+    {
+        onResourceRemoved(m_figure);
+        Component::onDisable();
+    }
+
+    //! Utils to add/remove resource
+    void FigureComponent::onResourceAdded(Resource* res)
+    {
+        if (m_bResAdded || res == nullptr) return;
+        if (getOwner() && getOwner()->getScene()) {
+            getOwner()->getScene()->getResourceAddedEvent().invoke(res);
+            m_bResAdded = true;
+        }
+    }
+
+    void FigureComponent::onResourceRemoved(Resource* res)
+    {
+        if (!m_bResAdded || res == nullptr) return;
+        if (getOwner() && getOwner()->getScene()) {
+            getOwner()->getScene()->getResourceRemovedEvent().invoke(res);
+            m_bResAdded = false;
         }
     }
 

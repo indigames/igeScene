@@ -30,6 +30,12 @@ namespace ige::scene
         //! Render
         void onRender() override;
 
+        //! Enable
+        virtual void onEnable() override;
+
+        //! Disable
+        virtual void onDisable() override;
+
         //! Get associated figure
         Figure *getFigure() { return m_figure; }
 
@@ -82,6 +88,11 @@ namespace ige::scene
 
         //! Deserialize
         virtual void from_json(const json& j) override;
+
+        //! Utils to add/remove resource
+        void onResourceAdded(Resource* figure);
+        void onResourceRemoved(Resource* figure);
+        bool m_bResAdded = false;
 
         //! Associated figure object
         Figure *m_figure;

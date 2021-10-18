@@ -44,7 +44,7 @@ namespace ige::scene
     TextComponent::~TextComponent()
     {
         if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene()) {
-            onRemoveFigure(m_text->getFigure());
+            onResourceRemoved(m_text->getFigure());
         }
         m_text = nullptr;
 
@@ -58,7 +58,7 @@ namespace ige::scene
         if (!getOwner()->isActive() || !isEnabled()) return;
         Component::onEnable();
         if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene()) {
-            onCreateFigure(m_text->getFigure());
+            onResourceAdded(m_text->getFigure());
         }
     }
 
@@ -66,7 +66,7 @@ namespace ige::scene
     void TextComponent::onDisable()
     {
         if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene()) {
-            onRemoveFigure(m_text->getFigure());
+            onResourceRemoved(m_text->getFigure());
         }
         Component::onDisable();
     }
@@ -97,12 +97,12 @@ namespace ige::scene
         {
             //!Release old
             auto oldFigure = m_text->getFigure();
-            onRemoveFigure(oldFigure);
+            onResourceRemoved(oldFigure);
         }
         m_text = std::make_shared<Text>(text, fontPath, fontSize, color, fontType, true);
         if (m_text != nullptr) {
             auto newFigure = m_text->getFigure();
-            onCreateFigure(newFigure);
+            onResourceAdded(newFigure);
         }
     }
 
@@ -120,9 +120,9 @@ namespace ige::scene
             if (oldFigure != newFigure)
             {
                 if (oldFigure)
-                    onRemoveFigure(oldFigure);
+                    onResourceRemoved(oldFigure);
                 if (newFigure)
-                    onCreateFigure(newFigure);
+                    onResourceAdded(newFigure);
             }
         }
         getOwner()->getTransform()->makeDirty();
@@ -143,9 +143,9 @@ namespace ige::scene
             if (oldFigure != newFigure)
             {
                 if (oldFigure)
-                    onRemoveFigure(oldFigure);
+                    onResourceRemoved(oldFigure);
                 if (newFigure)
-                    onCreateFigure(newFigure);
+                    onResourceAdded(newFigure);
             }
         }
         getOwner()->getTransform()->makeDirty();
@@ -165,9 +165,9 @@ namespace ige::scene
             auto newFigure = m_text->getFigure();
             if (oldFigure != newFigure) {
                 if (oldFigure)
-                    onRemoveFigure(oldFigure);
+                    onResourceRemoved(oldFigure);
                 if (newFigure)
-                    onCreateFigure(newFigure);
+                    onResourceAdded(newFigure);
             }
         }
         getOwner()->getTransform()->makeDirty();
@@ -225,30 +225,34 @@ namespace ige::scene
                 if (oldFigure != newFigure)
                 {
                     if (oldFigure)
-                        onRemoveFigure(oldFigure);
+                        onResourceRemoved(oldFigure);
                     if (newFigure)
-                        onCreateFigure(newFigure);
+                        onResourceAdded(newFigure);
                 }
             }
         }
     }
 
-    void TextComponent::onCreateFigure(EditableFigure* fig) {
-        if (m_added) return;
-        if (m_bIsGUI)
-            getOwner()->getScene()->getUIResourceAddedEvent().invoke(fig);
-        else
-            getOwner()->getScene()->getResourceAddedEvent().invoke(fig);
-        m_added = true;
+    void TextComponent::onResourceAdded(Resource* res) {
+        if (m_bResAdded || res == nullptr) return;
+        if (getOwner()->getScene()) {
+            if (m_bIsGUI)
+                getOwner()->getScene()->getUIResourceAddedEvent().invoke(res);
+            else
+                getOwner()->getScene()->getResourceAddedEvent().invoke(res);
+            m_bResAdded = true;
+        }
     }
 
-    void TextComponent::onRemoveFigure(EditableFigure* fig) {
-        if (!m_added) return;
-        if (m_bIsGUI)
-            getOwner()->getScene()->getUIResourceRemovedEvent().invoke(fig);
-        else
-            getOwner()->getScene()->getResourceRemovedEvent().invoke(fig);
-        m_added = false;
+    void TextComponent::onResourceRemoved(Resource* res) {
+        if (!m_bResAdded || res == nullptr) return;
+        if (getOwner()->getScene()) {
+            if (m_bIsGUI)
+                getOwner()->getScene()->getUIResourceRemovedEvent().invoke(res);
+            else
+                getOwner()->getScene()->getResourceRemovedEvent().invoke(res);
+            m_bResAdded = false;
+        }
     }
 
     //! Serialize

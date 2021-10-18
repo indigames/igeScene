@@ -26,17 +26,7 @@ namespace ige::scene
 
     Sprite::~Sprite()
     {
-        if (m_texture)
-        {
-            m_texture->DecReference();
-            m_texture = nullptr;
-        }
-
-        if(m_figure)
-        {
-            m_figure->DecReference();
-            m_figure = nullptr;
-        }
+        releaseSprite();
     }
 
     void Sprite::setSize(const Vec2& size)
@@ -324,21 +314,14 @@ namespace ige::scene
     //!===============================================
 
     void Sprite::releaseSprite() {
+        if (m_texture)
+        {
+            m_texture->DecReference();
+            m_texture = nullptr;
+        }
+
         if (m_figure)
         {
-            const auto& textureSources = m_figure->GetTextureSources();
-            if (textureSources.size() > 0)
-            {
-                auto& textureSource = textureSources[0];
-                auto texture = (Texture*)ResourceManager::Instance().GetResource(textureSource.path, TEXTURETYPE);
-                if (texture)
-                {
-                    texture->DecReference();
-                    texture = nullptr;
-                }
-            }
-            m_texture = nullptr;
-
             m_figure->DecReference();
             m_figure = nullptr;
         }

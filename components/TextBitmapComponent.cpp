@@ -22,7 +22,7 @@ namespace ige::scene
     TextBitmapComponent::~TextBitmapComponent()
     {
         if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene()) {
-            onRemoveFigure(m_text->getFigure());
+            onResourceRemoved(m_text->getFigure());
         }
         m_text = nullptr;
 
