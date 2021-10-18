@@ -469,18 +469,17 @@ namespace ige::scene
     //! Update function
     void SceneObject::onUpdate(float dt)
     {
+        if (!isActive()) return;
+
         if (m_aabbDirty > 0) {
             updateAabb();
             m_aabbDirty--;
         }
 
-        auto itr = m_components.begin();
-        while (itr != m_components.end()) {
-            if (*itr == nullptr) { itr = m_components.erase(itr); continue; }
-            auto comp = *itr;
-            if (isActive() && comp->getName() != "Camera" && comp->isEnabled())
-                comp->onUpdate(dt);
-            ++itr;
+        for (int i = m_components.size() - 1; i >= 0; i--) {
+            if (!m_transform) break; // Which mean object being deleted
+            if(m_components[i]->isEnabled() && m_components[i]->getType() != Component::Type::Camera)
+                m_components[i]->onUpdate(dt);
         }
     }
 
