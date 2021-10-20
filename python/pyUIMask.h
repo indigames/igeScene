@@ -19,8 +19,12 @@ namespace ige::scene
     extern PyTypeObject PyTypeObject_UIMask;
 
     // Dealloc
-    void  UIImage_dealloc(PyObject_UIMask *self);
+    void  UIMask_dealloc(PyObject_UIMask *self);
 
     // String represent
-    PyObject* UIImage_str(PyObject_UIMask *self);
+    PyObject* UIMask_str(PyObject_UIMask *self);
+
+    PyObject* UIMask_getUseMask(PyObject_UIMask* self);
+
+    int UIMask_setUseMask(PyObject_UIMask* self, PyObject* value);
 }
