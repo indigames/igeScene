@@ -139,7 +139,7 @@ namespace ige::scene
 
     void UIText::onResourceAdded(Resource* res) {
         if (m_bResAdded || res == nullptr) return;
-        if (getOwner() && getOwner()->getScene()) {
+        if (getOwner() && getOwner()->isActive(true) && getOwner()->getScene()) {
             getOwner()->getScene()->getUIResourceAddedEvent().invoke(res);
             m_bResAdded = true;
         }

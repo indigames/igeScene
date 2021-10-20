@@ -26,4 +26,7 @@ namespace ige::scene
 
     // Get owner
     PyObject* Component_getOwner(PyObject_Component* self);
+
+    // Update
+    PyObject* Component_onUpdate(PyObject_Component* self, PyObject* args);
 }

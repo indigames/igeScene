@@ -143,7 +143,7 @@ namespace ige::scene
         virtual void setActive(bool isActive, bool recursive = false);
 
         //! Check active
-        virtual bool isActive() const;
+        virtual bool isActive(bool recursive = false) const;
 
         // Set selected
         void setSelected(bool select, bool recursive = false);

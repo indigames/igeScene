@@ -72,6 +72,30 @@ namespace ige::scene
         }
     }
 
+    PyObject* Component_onUpdate(PyObject_Component* self, PyObject* args)
+    {
+        PyObject* obj = nullptr;
+        if (PyArg_ParseTuple(args, "O", &obj))
+        {
+            if (obj)
+            {
+                if (PyNumber_Check(obj))
+                {
+                    float dt = PyFloat_AsDouble(obj);
+                    self->component->onUpdate(dt);
+                    Py_RETURN_TRUE;
+                }
+            }
+        }
+        Py_RETURN_FALSE;
+    }
+
+    // Methods definition
+    PyMethodDef Component_methods[] = {
+        { "onUpdate", (PyCFunction)Component_onUpdate, METH_VARARGS, Component_onUpdate_doc },
+        { NULL, NULL }
+    };
+
     // Variable definition
     PyGetSetDef Component_getsets[] = {
         { "name", (getter)Component_getName, NULL, Component_name_doc, NULL },
@@ -108,7 +132,7 @@ namespace ige::scene
         0,                                          /* tp_weaklistoffset */
         0,                                          /* tp_iter */
         0,                                          /* tp_iternext */
-        0,                                          /* tp_methods */
+        Component_methods,                          /* tp_methods */
         0,                                          /* tp_members */
         Component_getsets,                          /* tp_getset */
         0,                                          /* tp_base */

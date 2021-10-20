@@ -131,7 +131,7 @@ namespace ige::scene
 
     void SpriteComponent::onResourceAdded(Resource* res) {
         if (m_bResAdded || res == nullptr) return;
-        if (getOwner() && getOwner()->getScene()) {
+        if (getOwner() && getOwner()->isActive(true) && getOwner()->getScene()) {
             if (m_bIsGUI)
                 getOwner()->getScene()->getUIResourceAddedEvent().invoke(res);
             else

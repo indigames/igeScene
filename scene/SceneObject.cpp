@@ -585,9 +585,11 @@ namespace ige::scene
     }
 
     //! Check active
-    bool SceneObject::isActive() const
+    bool SceneObject::isActive(bool recursive) const
     {
-        return m_isActive;
+        if (!recursive || !getParent()) return m_isActive;
+        if (!m_isActive) return false;
+        return getParent()->isActive(true);
     }
 
     //! Enable or disable the actor

@@ -235,7 +235,7 @@ namespace ige::scene
 
     void TextComponent::onResourceAdded(Resource* res) {
         if (m_bResAdded || res == nullptr) return;
-        if (getOwner()->getScene()) {
+        if (getOwner()->isActive(true) && getOwner()->getScene()) {
             if (m_bIsGUI)
                 getOwner()->getScene()->getUIResourceAddedEvent().invoke(res);
             else

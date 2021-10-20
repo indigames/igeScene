@@ -56,8 +56,14 @@ namespace ige::scene
             if (getParent()) getParent()->addObserver(this);
         }
 
-        if(!getOwner()->isGUIObject())
+        if(!getOwner()->isGUIObject()) {
             updateWorldToLocal();
+
+            // Force update all children transforms
+            for (auto& obs : m_observers) {
+                obs->onUpdate(0.f);
+            }
+        }
     }
 
     void TransformComponent::onUpdate(float dt)

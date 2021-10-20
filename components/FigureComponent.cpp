@@ -305,7 +305,7 @@ namespace ige::scene
     void FigureComponent::onResourceAdded(Resource* res)
     {
         if (m_bResAdded || res == nullptr) return;
-        if (getOwner() && getOwner()->getScene()) {
+        if (getOwner() && getOwner()->isActive(true) && getOwner()->getScene()) {
             getOwner()->getScene()->getResourceAddedEvent().invoke(res);
             m_bResAdded = true;
         }
