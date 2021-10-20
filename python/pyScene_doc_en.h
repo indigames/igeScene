@@ -120,27 +120,42 @@ PyDoc_STRVAR(Scene_getEnvironment_doc,
 			 "    Type: igeCore.environment\n");
 
 // Raycast
-PyDoc_STRVAR(Scene_raycast_doc,
-			 "Perform raycast to get the hit object and hit position.\n"
-			 "\n"
-			 "Scene().raycast(origin: Vec3, direction: Vec3, distance: float)\n"
-			 "\n"
-			 "Parameters:\n"
-			 "----------\n"
-			 "    origin: Vec3\n"
-			 "      the ray's start point \n"
-			 "    direction: Vec3\n"
-			 "      the ray's direction\n"
-			 "    distance: float [Optional]\n"
-			 "      Max distance. Default: 10000.f\n"
-			 "Return:\n"
-			 "----------\n"
-			 "    Tuple: [object, position]\n");
-
-PyDoc_STRVAR(Scene_raycastFromCamera_doc,
+PyDoc_STRVAR(Scene_raycast_doc,	
 	"Perform raycast to get the hit object and hit position.\n"
 	"\n"
-	"Scene().raycast(screenPos: Vec2, camera: Camera, distance: float)\n"
+	"Scene().raycast(origin: Vec3, direction: Vec3, distance: float)\n"
+	"\n"
+	"Parameters:\n"
+	"----------\n"
+	"    origin: Vec3\n"
+	"      the ray's start point \n"
+	"    direction: Vec3\n"
+	"      the ray's direction\n"
+	"    distance: float [Optional]\n"
+	"      Max distance. Default: 10000.f\n"
+	"Return:\n"
+	"----------\n"
+	"    Tuple: [object, position]\n");
+
+PyDoc_STRVAR(Scene_raycastFromCamera_doc,	
+	"Perform raycast to get the hit object and hit position.\n"
+	"\n"
+	"Parameters:\n"
+	"----------\n"
+	"    screenPos: Vec2\n"
+	"      Screen position (2d screen space)\n"
+	"    camera: pyxieCamera, CameraComponent, Camera SceneObject\n"
+	"      Camera to perform raycast\n"
+	"    distance: float [Optional]\n"
+	"      Max distance. Default: 10000.f\n"
+	"Return:\n"
+	"----------\n"
+	"    Tuple: [object, position]\n");
+
+PyDoc_STRVAR(Scene_raycastUI_doc,	
+	"Perform raycast to get the hit object and hit position on UI layout.\n"
+	"\n"
+	"Scene().raycastUI(screenPos: Vec2, camera: Camera, distance: float)\n"
 	"\n"
 	"Parameters:\n"
 	"----------\n"

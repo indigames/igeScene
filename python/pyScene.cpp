@@ -438,7 +438,7 @@ namespace ige::scene
         { "getEnvironment", (PyCFunction)Scene_getEnvironment, METH_NOARGS, Scene_getEnvironment_doc },
         { "raycast", (PyCFunction)Scene_raycast, METH_VARARGS, Scene_raycast_doc },
         { "raycastFromCamera", (PyCFunction)Scene_raycastFromCamera, METH_VARARGS, Scene_raycastFromCamera_doc },
-        { "raycastUI", (PyCFunction)Scene_raycastUI, METH_VARARGS, Scene_raycastFromCamera_doc },
+        { "raycastUI", (PyCFunction)Scene_raycastUI, METH_VARARGS, Scene_raycastUI_doc },
         { NULL, NULL }
     };
 

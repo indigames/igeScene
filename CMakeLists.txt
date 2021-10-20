@@ -80,6 +80,18 @@ file(GLOB_RECURSE SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
 
+set (EXCLUDE_DIR
+    "/build"
+)
+foreach (TMP_PATH ${SRC})
+    foreach (TMP_DIR ${EXCLUDE_DIR})
+        string (FIND ${TMP_PATH} ${TMP_DIR} EXCLUDE_DIR_FOUND)
+        if (NOT ${EXCLUDE_DIR_FOUND} EQUAL -1)
+            list (REMOVE_ITEM SRC ${TMP_PATH})
+        endif ()
+    endforeach(TMP_DIR)
+endforeach(TMP_PATH)
+
 set(INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${Python3_INCLUDE_DIRS}"
