@@ -24,32 +24,34 @@ namespace ige::scene
         //! Clear 
         Clear();
 
-#if EDITOR_MODE
+    #if EDITOR_MODE
         getOwner()->removeEventListener((int)EventType::RunEditor, m_instanceId);
         getOwner()->removeEventListener((int)EventType::PauseEditor, m_instanceId);
         getOwner()->removeEventListener((int)EventType::StopEditor, m_instanceId);
-#endif
+    #endif
     }
 
     //! Update functions
     void RuntimeComponent::onUpdate(float dt) {
-#ifdef EDITOR_MODE
+    #ifdef EDITOR_MODE
         if (SceneManager::getInstance()->isEditor() && !isRunning()) return;
-#endif
+    #else
+        if (!m_bIsInit) Initialize();
+    #endif
         onRuntimeUpdate(dt);
     }
 
     void RuntimeComponent::onFixedUpdate(float dt) {
-#ifdef EDITOR_MODE
+    #ifdef EDITOR_MODE
         if (SceneManager::getInstance()->isEditor() && !isRunning()) return;
-#endif
+    #endif
         onRuntimeFixedUpdate(dt);
     }
 
     void RuntimeComponent::onLateUpdate(float dt) {
-#ifdef EDITOR_MODE
+    #ifdef EDITOR_MODE
         if (SceneManager::getInstance()->isEditor() && !isRunning()) return;
-#endif
+    #endif
         onRuntimeLateUpdate(dt);
     }
 

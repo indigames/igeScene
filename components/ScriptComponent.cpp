@@ -137,12 +137,12 @@ namespace ige::scene
 
     void ScriptComponent::onClickEvent(EventContext* context)
     {
-        this->onClick();
+        onClick();
     }
 
     void ScriptComponent::onChangedValueEvent(EventContext* context)
     {
-        this->onChangedValue(context->getDataValue());
+        onChangedValue(context->getDataValue());
     }
 
     void ScriptComponent::loadPyModule()
@@ -473,8 +473,6 @@ namespace ige::scene
     //! Click
     void ScriptComponent::onClick()
     {
-        if (SceneManager::getInstance()->isEditor())
-            return;
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onClick"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onClick", NULL);
