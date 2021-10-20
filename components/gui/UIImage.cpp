@@ -57,6 +57,18 @@ namespace ige::scene
         SpriteComponent::onRender();
     }
 
+    //! Enable
+    void UIImage::onEnable()
+    {
+        SpriteComponent::onEnable();
+    }
+
+    //! Disable
+    void UIImage::onDisable()
+    {
+        SpriteComponent::onDisable();
+    }
+
     //! Set Fill Method
     void UIImage::setFillMethod(int value)
     {

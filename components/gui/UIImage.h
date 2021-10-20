@@ -35,6 +35,12 @@ namespace ige::scene
         //! Render
         virtual void onRender() override;
 
+        //! Enable
+        virtual void onEnable() override;
+
+        //! Disable
+        virtual void onDisable() override;
+
         //! FillMethod
         void setFillMethod(int value);
         const FillMethod& getFillMethod() const { return m_sprite->getFillMethod(); }
