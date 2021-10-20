@@ -72,6 +72,9 @@ namespace ige::scene
 
         virtual void generateText(const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color, int fontType);
 
+        void onResourceAdded(Resource* res);
+        void onResourceRemoved(Resource* res);
+
         //! Serialize
         virtual void to_json(json& j) const override;
 
@@ -87,7 +90,7 @@ namespace ige::scene
         int m_fontSize = 11;
         int m_fontType = 0;
         Vec4 m_color = { 1.f, 1.f, 1.f, 1.f };
-
+        bool m_bResAdded = false;
 
 
     };

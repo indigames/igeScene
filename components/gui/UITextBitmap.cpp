@@ -55,9 +55,9 @@ namespace ige::scene
             if (oldFigure != newFigure)
             {
                 if (oldFigure)
-                    getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
+                    onResourceRemoved(oldFigure);
                 if (newFigure)
-                    getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+                    onResourceAdded(newFigure);
             }
         }
         getOwner()->getTransform()->makeDirty();

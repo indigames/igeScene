@@ -14,6 +14,7 @@ namespace ige::scene
     UIText::UIText(SceneObject& owner, const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color)
         : Component(owner), UIMaskable(), m_flagMask(false)
     {
+        m_bResAdded = false;
         m_textData = text;
         m_fontPath = fontPath;
         m_color = color;
@@ -36,6 +37,7 @@ namespace ige::scene
     UIText::UIText(SceneObject &owner, const std::string &text, const std::string &fontPath, int fontSize, const Vec4 &color, int fontType)
         : Component(owner), UIMaskable(), m_flagMask(false)
     {
+        m_bResAdded = false;
         m_textData = text;
         m_fontPath = fontPath;
         m_color = color;
@@ -59,7 +61,7 @@ namespace ige::scene
     UIText::~UIText()
     {
         if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene()) {
-            getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_text->getFigure());
+            onResourceRemoved(m_text->getFigure());
         }
         m_text = nullptr;
         
@@ -75,7 +77,7 @@ namespace ige::scene
         if (!getOwner()->isActive() || !isEnabled()) return;
         Component::onEnable();
         if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene()) {
-            getOwner()->getScene()->getUIResourceAddedEvent().invoke(m_text->getFigure());
+            onResourceAdded(m_text->getFigure());
         }
     }
 
@@ -83,7 +85,7 @@ namespace ige::scene
     void UIText::onDisable()
     {
         if (m_text != nullptr && m_text->getFigure() && getOwner()->getScene()) {
-            getOwner()->getScene()->getUIResourceRemovedEvent().invoke(m_text->getFigure());
+            onResourceRemoved(m_text->getFigure());
         }
         Component::onDisable();
     }
@@ -135,17 +137,33 @@ namespace ige::scene
         getFigure()->Render();*/
     }
 
+    void UIText::onResourceAdded(Resource* res) {
+        if (m_bResAdded || res == nullptr) return;
+        if (getOwner() && getOwner()->getScene()) {
+            getOwner()->getScene()->getUIResourceAddedEvent().invoke(res);
+            m_bResAdded = true;
+        }
+    }
+
+    void UIText::onResourceRemoved(Resource* res) {
+        if (!m_bResAdded || res == nullptr) return;
+        if (getOwner() && getOwner()->getScene()) {
+            getOwner()->getScene()->getUIResourceRemovedEvent().invoke(res);
+            m_bResAdded = false;
+        }
+    }
+
     void UIText::generateText(const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color, int fontType) {
         if (m_text != nullptr)
         {
             //!Release old
             auto oldFigure = m_text->getFigure();
-            getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
+            onResourceRemoved(oldFigure);
         }
         m_text = std::make_shared<Text>(text, fontPath, fontSize, color, fontType);
         if (m_text != nullptr) {
             auto newFigure = m_text->getFigure();
-            getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+            onResourceAdded(newFigure);
         }
     }
     
@@ -183,10 +201,10 @@ namespace ige::scene
             if (oldFigure != newFigure)
             {
                 if (oldFigure) {
-                    getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
+                    onResourceRemoved(oldFigure);
                 }
                 if (newFigure)
-                    getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+                    onResourceAdded(newFigure);
             }
         }
         getOwner()->getTransform()->makeDirty();
@@ -207,9 +225,9 @@ namespace ige::scene
             if (oldFigure != newFigure)
             {
                 if (oldFigure)
-                    getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
+                    onResourceRemoved(oldFigure);
                 if (newFigure)
-                    getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+                    onResourceAdded(newFigure);
             }
         }
         getOwner()->getTransform()->makeDirty();
@@ -230,9 +248,9 @@ namespace ige::scene
             if (oldFigure != newFigure)
             {
                 if (oldFigure)
-                    getOwner()->getScene()->getUIResourceRemovedEvent().invoke(oldFigure);
+                    onResourceRemoved(oldFigure);
                 if (newFigure)
-                    getOwner()->getScene()->getUIResourceAddedEvent().invoke(newFigure);
+                    onResourceAdded(newFigure);
             }
         }
         getOwner()->getTransform()->makeDirty();
