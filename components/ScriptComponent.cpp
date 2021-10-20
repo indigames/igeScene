@@ -404,7 +404,6 @@ namespace ige::scene
 
             m_bOnAwakeCalled = true;
             m_bOnStartCalled = false;
-            return;
         }
 
         // Check call onStart()
@@ -412,7 +411,6 @@ namespace ige::scene
         {
             onStart();
             m_bOnStartCalled = true;
-            return;
         }
 
         // Check call onUpdate()
