@@ -395,9 +395,11 @@ namespace ige::scene
     {
         if (op == Py_LT || op == Py_LE || op == Py_GT || op == Py_GE)
         {
-            return Py_NotImplemented;
+            PyErr_Format(PyExc_TypeError, "Only '==' and '!=' are allowed as comparison operators");
+            Py_RETURN_NOTIMPLEMENTED;
         }
 
+        PyObject* result = Py_False;
         if (self != Py_None && other != Py_None)
         {
             if (other->ob_type == &PyTypeObject_Scene)
@@ -407,21 +409,23 @@ namespace ige::scene
                 bool eq = (selfCmp->scene == otherCmp->scene);
                 if (op == Py_NE)
                     eq = !eq;
-                return eq ? Py_True : Py_False;
+                result = eq ? Py_True : Py_False;
             }
             else
             {
-                return (op == Py_EQ) ? Py_False : Py_True;
+                result = (op == Py_EQ) ? Py_False : Py_True;
             }
         }
         else if (self == Py_None && other == Py_None)
         {
-            return (op == Py_EQ) ? Py_True : Py_False;
+            result = (op == Py_EQ) ? Py_True : Py_False;
         }
         else
         {
-            return (op == Py_EQ) ? Py_False : Py_True;
+            result = (op == Py_EQ) ? Py_False : Py_True;
         }
+        Py_INCREF(result);
+        return result;
     }
 
     // Methods definition
