@@ -428,10 +428,10 @@ namespace ige::scene
         if (!SceneManager::getInstance()->isEditor())
             return;
 
-        auto newTrans = PhysicHelper::to_btTransform(getOwner()->getTransform()->getWorldRotation(), getOwner()->getTransform()->getWorldPosition());
+        auto newTrans = PhysicHelper::to_btTransform(getOwner()->getTransform()->getRotation(), getOwner()->getTransform()->getPosition());
         getSoftBody()->transformTo(newTrans);
 
-        Vec3 scale = getOwner()->getTransform()->getWorldScale();
+        Vec3 scale = getOwner()->getTransform()->getScale();
         Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
         float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
         if (scaleDelta >= 0.01f)
@@ -446,11 +446,11 @@ namespace ige::scene
         // Update transform
         if (getOwner()->getTransform())
         {
-            getOwner()->getTransform()->setWorldPosition(PhysicHelper::from_btVector3(getSoftBody()->m_pose.m_com));
+            getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(getSoftBody()->m_pose.m_com));
 
             // Update rotation
             auto xform = btTransform(getSoftBody()->m_pose.m_rot * getSoftBody()->m_pose.m_scl);
-            getOwner()->getTransform()->setWorldRotation(PhysicHelper::from_btQuaternion(xform.getRotation()));
+            getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(xform.getRotation()));
         }
 
         // Update position and normal

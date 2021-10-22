@@ -186,7 +186,7 @@ namespace ige::scene
             stop();
 
             // Create handle
-            auto position = getOwner()->getTransform()->getWorldPosition();
+            auto position = getOwner()->getTransform()->getPosition();
             m_handle = getManager()->getEffekseerManager()->Play(m_effect, { position[0], position[1], position[2] });
             m_effect->AddRef();
 
@@ -232,7 +232,7 @@ namespace ige::scene
         if (m_handle != -1)
         {
             auto transform = getOwner()->getTransform();
-            auto position = transform->getWorldPosition();
+            auto position = transform->getPosition();
 
             if(m_lastPosition != position)
             {
@@ -240,7 +240,7 @@ namespace ige::scene
                 m_lastPosition = position;
             }
 
-            auto rotation = transform->getWorldRotation();
+            auto rotation = transform->getRotation();
             if (m_lastRotation != rotation)
             {
                 Vec3 euler;
@@ -249,7 +249,7 @@ namespace ige::scene
                 m_lastRotation = rotation;
             }
 
-            auto scale = transform->getWorldScale();
+            auto scale = transform->getScale();
             if (m_lastScale != scale)
             {
                 getManager()->getEffekseerManager()->SetScale(m_handle, scale[0], scale[1], scale[2]);

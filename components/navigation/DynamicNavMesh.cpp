@@ -94,8 +94,8 @@ namespace ige::scene
                     for (unsigned i = 0; i < offMeshlinks.size(); ++i)
                     {
                         auto *link = offMeshlinks[i];
-                        auto start = inverse * link->getOwner()->getTransform()->getWorldPosition();
-                        auto end = inverse * link->getEndPoint()->getTransform()->getWorldPosition();
+                        auto start = inverse * link->getOwner()->getTransform()->getPosition();
+                        auto end = inverse * link->getEndPoint()->getTransform()->getPosition();
 
                         offMeshVertices.push_back(start);
                         offMeshVertices.push_back(end);
@@ -450,7 +450,7 @@ namespace ige::scene
     bool DynamicNavMesh::isObstacleInTile(NavObstacle *obstacle, const Vec2 &tile) const
     {
         const auto tileBoundingBox = getTileBoundingBox(tile);
-        const auto obstaclePosition = obstacle->getOwner()->getTransform()->getWorldPosition();
+        const auto obstaclePosition = obstacle->getOwner()->getTransform()->getPosition();
         return tileBoundingBox.isPointInside(obstaclePosition);
     }
 
@@ -733,7 +733,7 @@ namespace ige::scene
         if (m_tileCache)
         {
             float pos[3];
-            auto obsPos = obstacle->getOwner()->getTransform()->getWorldPosition();
+            auto obsPos = obstacle->getOwner()->getTransform()->getPosition();
             rcVcopy(pos, obsPos.P());
             dtObstacleRef refHolder;
             if (dtStatusFailed(m_tileCache->addObstacle(pos, obstacle->getRadius(), obstacle->getHeight(), &refHolder)))

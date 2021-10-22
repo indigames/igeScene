@@ -25,22 +25,22 @@ namespace ige::scene
     PyObject* TransformComponent_str(PyObject_TransformComponent *self);
 
     // Get position
-    PyObject* TransformComponent_getPosition(PyObject_TransformComponent* self);
+    PyObject* TransformComponent_getLocalPosition(PyObject_TransformComponent* self);
 
     // Set position
-    int TransformComponent_setPosition(PyObject_TransformComponent* self, PyObject* value);
+    int TransformComponent_setLocalPosition(PyObject_TransformComponent* self, PyObject* value);
 
     // Get rotation
-    PyObject* TransformComponent_getRotation(PyObject_TransformComponent* self);
+    PyObject* TransformComponent_getLocalRotation(PyObject_TransformComponent* self);
 
     // Set rotation
-    int TransformComponent_setRotation(PyObject_TransformComponent* self, PyObject* value);
+    int TransformComponent_setLocalRotation(PyObject_TransformComponent* self, PyObject* value);
 
     // Get scale
-    PyObject* TransformComponent_getScale(PyObject_TransformComponent* self);
+    PyObject* TransformComponent_getLocalScale(PyObject_TransformComponent* self);
 
     // Set scale
-    int TransformComponent_setScale(PyObject_TransformComponent* self, PyObject* value);
+    int TransformComponent_setLocalScale(PyObject_TransformComponent* self, PyObject* value);
 
     // Get local transform matrix
     PyObject* TransformComponent_getLocalMatrix(PyObject_TransformComponent* self);
@@ -73,7 +73,7 @@ namespace ige::scene
     PyObject* TransformComponent_getWorldRight(PyObject_TransformComponent* self);
 
     //! Get Local forward, up, right
-    PyObject* TransformComponent_getForward(PyObject_TransformComponent* self);
-    PyObject* TransformComponent_getUp(PyObject_TransformComponent* self);
-    PyObject* TransformComponent_getRight(PyObject_TransformComponent* self);
+    PyObject* TransformComponent_getLocalForward(PyObject_TransformComponent* self);
+    PyObject* TransformComponent_getLocalUp(PyObject_TransformComponent* self);
+    PyObject* TransformComponent_getLocalRight(PyObject_TransformComponent* self);
 }

@@ -326,7 +326,7 @@ namespace ige::scene
     {
         if (getManager() == nullptr) return;
         auto engine = getManager()->getEngine();
-        auto position = getOwner()->getTransform()->getWorldPosition();
+        auto position = getOwner()->getTransform()->getPosition();
         m_handle = engine->play3d(*m_audioSource.get(), position[0], position[0], position[2], m_velocity[0], m_velocity[1], m_velocity[2], m_volume);
         engine->setPan(m_handle, m_pan);
     }

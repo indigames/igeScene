@@ -72,8 +72,8 @@ namespace ige::scene
         auto transCmp = getOwner()->getTransform();
         if (transCmp)
         {
-            m_camera->SetPosition(transCmp->getWorldPosition());
-            m_camera->SetRotation(transCmp->getWorldRotation());
+            m_camera->SetPosition(transCmp->getPosition());
+            m_camera->SetRotation(transCmp->getRotation());
 
             // Update
             m_camera->Step(dt);
@@ -92,39 +92,39 @@ namespace ige::scene
     void CameraComponent::setPosition(const Vec3 &pos)
     {
         auto transCmp = getOwner()->getTransform();
-        transCmp->setWorldPosition(pos);
+        transCmp->setPosition(pos);
     }
 
     Vec3 CameraComponent::getPosition() const
     {
         auto transCmp = getOwner()->getTransform();
-        return transCmp->getWorldPosition();
+        return transCmp->getPosition();
     }
 
     //! Rotation
     void CameraComponent::setRotation(const Quat &rot)
     {
         auto transCmp = getOwner()->getTransform();
-        transCmp->setWorldRotation(rot);
+        transCmp->setRotation(rot);
     }
 
     //! Scale
     void CameraComponent::setScale(const Vec3 &scale)
     {
         auto transCmp = getOwner()->getTransform();
-        transCmp->setWorldScale(scale);
+        transCmp->setScale(scale);
     }
 
     Vec3 CameraComponent::getScale() const
     {
         auto transCmp = getOwner()->getTransform();
-        return transCmp->getWorldScale();
+        return transCmp->getScale();
     }
 
     Quat CameraComponent::getRotation() const
     {
         auto transCmp = getOwner()->getTransform();
-        return transCmp->getWorldRotation();
+        return transCmp->getRotation();
     }
 
     //! Serialize

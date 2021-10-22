@@ -65,25 +65,25 @@ namespace ige::scene
         virtual void setParent(std::shared_ptr<TransformComponent> comp) override;
 
         //! Translate
-        void worldTranslate(const Vec3 &trans) override;
+        void translate(const Vec3 &trans) override;
 
         //! Rotate
-        void worldRotate(const Quat &rot) override { rotate(rot); }
+        void rotate(const Quat &rot) override { localRotate(rot); }
 
         //! Scale
-        void worldScale(const Vec3 &scl) override { scale(scl); }
+        void scale(const Vec3 &scl) override { localScale(scl); }
 
         //! Position
-        void setPosition(const Vec3 &pos) override;
-        void setWorldPosition(const Vec3 &pos) override {}
+        void setLocalPosition(const Vec3 &pos) override;
+        void setPosition(const Vec3 &pos) override {}
 
         //! Rotation
-        void setRotation(const Quat &rot) override;
-        void setWorldRotation(const Quat &rot) override {}
+        void setLocalRotation(const Quat &rot) override;
+        void setRotation(const Quat &rot) override {}
 
         //! Scale
-        void setScale(const Vec3 &scale) override;
-        void setWorldScale(const Vec3 &scale) override {}
+        void setLocalScale(const Vec3 &scale) override;
+        void setScale(const Vec3 &scale) override {}
 
         //! Get rect in canvas space (no scale, no rotate)
         const Vec4 &getRect();

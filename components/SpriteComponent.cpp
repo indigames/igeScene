@@ -67,9 +67,9 @@ namespace ige::scene
 
         // Update transform from transform component
         auto transform = getOwner()->getTransform();
-        getFigure()->SetPosition(transform->getWorldPosition());
-        getFigure()->SetRotation(transform->getWorldRotation());
-        getFigure()->SetScale(transform->getWorldScale());
+        getFigure()->SetPosition(transform->getPosition());
+        getFigure()->SetRotation(transform->getRotation());
+        getFigure()->SetScale(transform->getScale());
 
         // Update
         getFigure()->Pose();

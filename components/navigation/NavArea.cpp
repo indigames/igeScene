@@ -35,7 +35,7 @@ namespace ige::scene
     //! World bounding box
     AABBox NavArea::getWorldBoundingBox() const
     {
-        return m_boundingBox.Transform(Mat4::Translate(getOwner()->getTransform()->getWorldPosition()));
+        return m_boundingBox.Transform(Mat4::Translate(getOwner()->getTransform()->getPosition()));
     }
 
     //! Serialize

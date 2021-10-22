@@ -108,9 +108,9 @@ namespace ige::scene
                 if (jointObj)
                 {
                     auto transform = jointObj->getTransform();
-                    transform->setWorldPosition(joint.translation);
-                    transform->setWorldRotation(joint.rotation);
-                    transform->setWorldScale({ joint.scale[0], joint.scale[1], joint.scale[2] });
+                    transform->setPosition(joint.translation);
+                    transform->setRotation(joint.rotation);
+                    transform->setScale({ joint.scale[0], joint.scale[1], joint.scale[2] });
                 }
             }
         }

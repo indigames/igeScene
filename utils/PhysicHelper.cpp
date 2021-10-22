@@ -5,7 +5,7 @@ namespace ige::scene
     // Convert igeVMath to bullet
     btTransform PhysicHelper::to_btTransform(const TransformComponent& transform)
     {
-        return btTransform(to_btQuaternion(transform.getWorldRotation()), to_btVector3(transform.getWorldPosition()));
+        return btTransform(to_btQuaternion(transform.getRotation()), to_btVector3(transform.getPosition()));
     }
 
     btTransform PhysicHelper::to_btTransform(const Quat& rot, const Vec3& pos)

@@ -43,57 +43,57 @@ namespace ige::scene
 
         //! Translate
         virtual void translate(const Vec3 &trans);
-        virtual void worldTranslate(const Vec3 &trans);
+        virtual void localTranslate(const Vec3& trans);
 
         //! Rotate
         virtual void rotate(const Quat &rot);
-        virtual void worldRotate(const Quat &rot);
+        virtual void localRotate(const Quat& rot);
 
         //! Scale
         virtual void scale(const Vec3 &scale);
-        virtual void worldScale(const Vec3 &scale);
+        virtual void localScale(const Vec3& scale);
 
         //! Set local position
-        virtual void setPosition(const Vec3 &pos);
+        virtual void setLocalPosition(const Vec3& pos);
 
         //! Get local position
-        virtual const Vec3 &getPosition() const;
+        virtual const Vec3 &getLocalPosition() const;
 
         //! Set world position
-        virtual void setWorldPosition(const Vec3 &pos);
+        virtual void setPosition(const Vec3& pos);
 
         //! Get world position
-        virtual const Vec3 &getWorldPosition() const;
+        virtual const Vec3& getPosition() const;
 
         //! Set local rotation
-        virtual void setRotation(const Quat &rot);
+        virtual void setLocalRotation(const Quat &rot);
 
         //! Set local rotation by xyz
-        virtual void setRotation(const Vec3 &rot);
+        virtual void setLocalRotation(const Vec3 &rot);
 
         //! Get local rotation
-        virtual const Quat &getRotation() const;
+        virtual const Quat& getLocalRotation() const;
 
         //! Set world rotation
-        virtual void setWorldRotation(const Quat &rot);
+        virtual void setRotation(const Quat &rot);
 
         //! Set world rotation by xyz
-        virtual void setWorldRotation(const Vec3& rot);
+        virtual void setRotation(const Vec3& rot);
 
         //! get world rotation
-        virtual const Quat &getWorldRotation() const;
+        virtual const Quat &getRotation() const;
 
         //! Set local scale
-        virtual void setScale(const Vec3 &scale);
+        virtual void setLocalScale(const Vec3 &scale);
 
         //! Get local scale
-        virtual const Vec3 &getScale() const;
+        virtual const Vec3 &getLocalScale() const;
 
         //! Set world scale
-        virtual void setWorldScale(const Vec3 &scale);
+        virtual void setScale(const Vec3 &scale);
 
         //! Get world scale
-        virtual const Vec3 &getWorldScale() const;
+        virtual const Vec3 &getScale() const;
 
         //! Get local transform matrix
         virtual const Mat4 &getLocalMatrix() const;

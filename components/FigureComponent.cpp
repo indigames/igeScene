@@ -38,17 +38,17 @@ namespace ige::scene
 
         // Update transform from transform component
         auto transform = getOwner()->getTransform();
-        m_figure->SetPosition(transform->getWorldPosition());
-        m_figure->SetRotation(transform->getWorldRotation());
-        m_figure->SetScale(transform->getWorldScale());
+        m_figure->SetPosition(transform->getPosition());
+        m_figure->SetRotation(transform->getRotation());
+        m_figure->SetScale(transform->getScale());
 
         // Update
         m_figure->Step(dt);
 
         // Update transform back to transform component
-        transform->setWorldPosition(m_figure->GetPosition());
-        transform->setWorldRotation(m_figure->GetRotation());
-        transform->setWorldScale(m_figure->GetScale());
+        transform->setPosition(m_figure->GetPosition());
+        transform->setRotation(m_figure->GetRotation());
+        transform->setScale(m_figure->GetScale());
     }
 
     //! Render
@@ -83,9 +83,9 @@ namespace ige::scene
 
             // Update transform from transform component
             auto transform = getOwner()->getTransform();
-            m_figure->SetPosition(transform->getWorldPosition());
-            m_figure->SetRotation(transform->getWorldRotation());
-            m_figure->SetScale(transform->getWorldScale());
+            m_figure->SetPosition(transform->getPosition());
+            m_figure->SetRotation(transform->getRotation());
+            m_figure->SetScale(transform->getScale());
 
             // Wait build
             m_figure->WaitBuild();

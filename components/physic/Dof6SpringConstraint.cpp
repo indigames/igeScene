@@ -329,10 +329,10 @@ namespace ige::scene
 
         // Create constraint
         auto body = getOwnerBody();
-        auto transform = PhysicHelper::to_btTransform(getOwner()->getOwner()->getTransform()->getWorldRotation(), getOwner()->getOwner()->getTransform()->getWorldPosition());
+        auto transform = PhysicHelper::to_btTransform(getOwner()->getOwner()->getTransform()->getRotation(), getOwner()->getOwner()->getTransform()->getPosition());
 
         auto otherBody = getOtherBody() ? getOtherBody() : &btGeneric6DofConstraint::getFixedBody();
-        auto otherTransform = getOther() ? PhysicHelper::to_btTransform(getOther()->getOwner()->getTransform()->getWorldRotation(), getOther()->getOwner()->getTransform()->getWorldPosition()) : btTransform::getIdentity();
+        auto otherTransform = getOther() ? PhysicHelper::to_btTransform(getOther()->getOwner()->getTransform()->getRotation(), getOther()->getOwner()->getTransform()->getPosition()) : btTransform::getIdentity();
         m_constraint = std::make_unique<btGeneric6DofSpring2Constraint>(*body, *otherBody, transform, otherTransform);
 
         // Linear limit
