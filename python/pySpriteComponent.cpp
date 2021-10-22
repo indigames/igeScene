@@ -80,10 +80,32 @@ namespace ige::scene
         return -1;
     }
 
+    // Get color
+    PyObject* SpriteComponent_getColor(PyObject_SpriteComponent* self)
+    {
+        auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
+        vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
+        vec4Obj->d = 4;
+        return (PyObject*)vec4Obj;
+    }
+
+    // Set color
+    int SpriteComponent_setColor(PyObject_SpriteComponent* self, PyObject* value)
+    {
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v)
+            return -1;
+        self->component->setColor(*((Vec4*)v));
+        return 0;
+    }
+
     PyGetSetDef SpriteComponent_getsets[] = {
         {"path", (getter)SpriteComponent_getPath, (setter)SpriteComponent_setPath, SpriteComponent_path_doc, NULL},
         {"size", (getter)SpriteComponent_getSize, (setter)SpriteComponent_setSize, SpriteComponent_size_doc, NULL},
         {"isBillboard", (getter)SpriteComponent_isBillboard, (setter)SpriteComponent_setBillboard, SpriteComponent_isBillboard_doc, NULL},
+        {"color", (getter)SpriteComponent_getColor, (setter)SpriteComponent_setColor, NULL, NULL},
         {NULL, NULL}};
 
     PyTypeObject PyTypeObject_SpriteComponent = {

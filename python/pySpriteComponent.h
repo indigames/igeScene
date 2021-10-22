@@ -39,4 +39,10 @@ namespace ige::scene
     // Billboard setting
     PyObject* SpriteComponent_isBillboard(PyObject_SpriteComponent* self);
     int SpriteComponent_setBillboard(PyObject_SpriteComponent* self, PyObject* value);
+
+    // Get color
+    PyObject* SpriteComponent_getColor(PyObject_SpriteComponent* self);
+
+    // Set color
+    int SpriteComponent_setColor(PyObject_SpriteComponent* self, PyObject* value);
 }
