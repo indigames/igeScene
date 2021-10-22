@@ -314,14 +314,22 @@ namespace ige::scene
     }
 
     void Scene::renderUI() {
-        float dt = Time::Instance().GetElapsedTime();
-        m_uiShowcase->Update(dt);
         if (SceneManager::getInstance()->isPlaying()) {
+            auto renderContext = RenderContext::InstancePtr();
+            auto rtt = renderContext->GetCurrentRenderTarget();
+            renderContext->EndScene();
+            renderContext->ResetRenderStateAll();
+
+            float dt = Time::Instance().GetElapsedTime();
+            m_uiShowcase->Update(dt);
+
             if (getCanvas() != nullptr && getCanvas()->getCamera() != nullptr) {
                 getCanvas()->getCamera()->Step(dt);
                 m_uiShowcase->ZSort(getCanvas()->getCamera());
                 getCanvas()->getCamera()->Render();
             }
+
+            renderContext->BeginScene(rtt, Vec4(1.f, 1.f, 1.f, 1.f), false, false);
         }
         m_uiShowcase->Render();
     }

@@ -12,8 +12,8 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    SpriteComponent::SpriteComponent(SceneObject &owner, const std::string &path, const Vec2 &size, bool isBillboard, bool isGUI)
-        : Component(owner), m_bIsGUI(isGUI), m_path(path), m_texture(nullptr)
+    SpriteComponent::SpriteComponent(SceneObject &owner, const std::string &path, const Vec2 &size, bool isBillboard)
+        : Component(owner), m_path(path), m_texture(nullptr)
     {
         if (path.empty()) {
             m_sprite = std::make_shared<Sprite>(size);
@@ -75,12 +75,9 @@ namespace ige::scene
         getFigure()->Pose();
     }
 
-    //! Update
+    //! Render
     void SpriteComponent::onRender()
     {
-        /*if (getFigure() == nullptr)
-            return;
-        getFigure()->Render();*/
     }
 
     //! Set path
@@ -119,10 +116,9 @@ namespace ige::scene
 
             if (newFigure)
             {
-                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                shaderDesc->SetValue(newFigure->GetShaderName(0));
-                shaderDesc->SetBillboard(m_bIsBillboard);
-                newFigure->SetShaderName(0, shaderDesc->GetValue());
+                bool isBillboard = m_bIsBillboard;
+                m_bIsBillboard = false;
+                setBillboard(isBillboard);
             }
 
             getOwner()->getTransform()->makeDirty();
@@ -132,7 +128,7 @@ namespace ige::scene
     void SpriteComponent::onResourceAdded(Resource* res) {
         if (m_bResAdded || res == nullptr) return;
         if (getOwner() && getOwner()->isActive(true) && getOwner()->getScene()) {
-            if (m_bIsGUI)
+            if (getOwner()->isGUIObject())
                 getOwner()->getScene()->getUIResourceAddedEvent().invoke(res);
             else
                 getOwner()->getScene()->getResourceAddedEvent().invoke(res);
@@ -143,7 +139,7 @@ namespace ige::scene
     void SpriteComponent::onResourceRemoved(Resource* res) {
         if (!m_bResAdded || res == nullptr) return;
         if (getOwner() && getOwner()->getScene()) {
-            if (m_bIsGUI)
+            if (getOwner()->isGUIObject())
                 getOwner()->getScene()->getUIResourceRemovedEvent().invoke(res);
             else
                 getOwner()->getScene()->getResourceRemovedEvent().invoke(res);
@@ -254,14 +250,13 @@ namespace ige::scene
         j["color"] = getColor();
         j["spritetype"] = (int)getSpriteType();
         j["border"] = getBorder();
-        j["aBlend"] = isAlphaBlendingEnable();
-        j["aBlendOp"] = getAlphaBlendingOp();
     }
 
     //! Deserialize
     void SpriteComponent::from_json(const json &j)
     {
         setSize(j.value("size", Vec2(0, 0)));
+        setPath(j.value("path", ""));
         setBillboard(j.value("billboard", false));
         setTiling(j.value("tiling", Vec2(0, 0)));
         setOffset(j.value("offset", Vec2(0, 0)));
@@ -269,9 +264,6 @@ namespace ige::scene
         setColor(j.value("color", Vec4(0, 0, 0, 0)));
         setSpriteType(j.value("spritetype", 0));
         setBorder(j.value("border", Vec4(0, 0, 0, 0)));
-        setPath(j.value("path", ""));
-        setAlphaBlendingEnable(j.value("aBlend", false));
-        setAlphaBlendingOp(j.value("aBlendOp", 0));
         Component::from_json(j);
     }
 

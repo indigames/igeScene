@@ -8,7 +8,7 @@ namespace ige::scene
 {
     Sprite::Sprite(const Vec2& size)
         : m_figure(nullptr), m_size(size), m_tiling(1, 1), m_offset(0, 0), m_wrapMode(SamplerState::CLAMP),
-        m_spriteType(SpriteType::Simple), m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1), m_texture(nullptr),
+        m_spriteType(SpriteType::Simple), m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_texture(nullptr),
         m_border(0.f, 0.f, 0.f, 0.f), m_bIsScaleBorder (false),
         m_color(1.f, 1.f, 1.f, 1.f) 
     {
@@ -16,12 +16,11 @@ namespace ige::scene
 
     Sprite::Sprite(Texture* texture, const Vec2& size)
         : m_figure(nullptr), m_size(size), m_tiling(1,1), m_offset(0,0), m_wrapMode(SamplerState::CLAMP),
-        m_spriteType(SpriteType::Simple), m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_alpha(1), m_texture(nullptr),
+        m_spriteType(SpriteType::Simple), m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_texture(nullptr),
         m_border(0.f, 0.f, 0.f, 0.f), m_bIsScaleBorder(false),
         m_color(1.f, 1.f, 1.f, 1.f)
     {
-        if(texture != nullptr)
-            setTexture(texture);
+        setTexture(texture);
     }
 
     Sprite::~Sprite()
@@ -153,17 +152,6 @@ namespace ige::scene
         {
             m_clockwise = value;
 
-            if (m_figure)
-            {
-                draw();
-            }
-        }
-    }
-
-    void Sprite::setAlpha(float value) {
-        if (m_alpha != value) {
-            m_alpha = value > 1.f ? 1.f : value < 0 ? 0 : value;
-            
             if (m_figure)
             {
                 draw();
@@ -1200,49 +1188,6 @@ namespace ige::scene
         applyMesh(points, triangles, uvs);
     }
 
-    //! Enable alpha blending
-    void Sprite::setAlphaBlendingEnable(bool enable)
-    {
-        if (m_bIsAlphaBlendingEnable != enable)
-        {
-            m_bIsAlphaBlendingEnable = enable;
-            if (m_figure)
-            {
-                // Setup point lights shader
-                for (int i = 0; i < m_figure->NumMaterials(); ++i)
-                {
-                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                    shaderDesc->SetValue(m_figure->GetShaderName(i));
-                    shaderDesc->SetAlphaBlend(m_bIsAlphaBlendingEnable);
-                    m_figure->SetShaderName(i, shaderDesc->GetValue());
-                }
-            }
-        }
-    }
-
-    //! Alpha blending operation
-    void Sprite::setAlphaBlendingOp(int op)
-    {
-        // Only 4 operations supported now
-        if (op < ShaderDescriptor::AlphaBlendOP::COL || op > ShaderDescriptor::AlphaBlendOP::MUL)
-            op = m_alphaBlendingOp;
-
-        if (m_alphaBlendingOp != op)
-        {
-            m_alphaBlendingOp = op;
-            if (m_figure)
-            {
-                for (int i = 0; i < m_figure->NumMaterials(); ++i)
-                {
-                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                    shaderDesc->SetValue(m_figure->GetShaderName(i));
-                    shaderDesc->SetAlphaBlendOP(m_alphaBlendingOp);
-                    m_figure->SetShaderName(i, shaderDesc->GetValue());
-                }
-            }
-        }
-    }
-
     void Sprite::applyMesh(const std::vector<float>& points, const std::vector<uint32_t>& triangles, const std::vector<float>& uvs) {
         if (m_figure == nullptr)
         {
@@ -1257,7 +1202,7 @@ namespace ige::scene
             m_figure->SetMeshVertexValues(meshIdx, (const void*)points.data(), (uint32_t)(points.size() / 3), ATTRIBUTE_ID_POSITION, 0);
             m_figure->SetMeshIndices(meshIdx, 0, (const uint32_t*)triangles.data(), (uint32_t)(triangles.size()), 4);
             m_figure->SetMeshVertexValues(meshIdx, (const void*)uvs.data(), (uint32_t)(uvs.size() / 2), ATTRIBUTE_ID_UV0, 0);
-            m_figure->SetMeshAlpha(meshIdx, m_alpha);
+            m_figure->SetMeshAlpha(meshIdx, m_color[3]);
 
             int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
             float color[4] = { m_color[0], m_color[1], m_color[2], m_color[3] };
@@ -1284,6 +1229,7 @@ namespace ige::scene
             texSrc.normal = false;
             texSrc.wrap = false;
             sampler.textureNameIndex = m_figure->SetTextureSource(texSrc);
+            m_figure->EnableAlphaModeByTexture(texSrc.path);
         }
 
         int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
@@ -1295,10 +1241,6 @@ namespace ige::scene
         const ShaderParameterInfo* blendOpParam = RenderContext::Instance().GetShaderParameterInfoByName("blend_func");
         uint32_t blendOp[4] = { GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0,0 };
         m_figure->SetMaterialState(materialIdx, (ShaderParameterKey)blendOpParam->key, blendOp);
-
-        const ShaderParameterInfo* blendEqParam = RenderContext::Instance().GetShaderParameterInfoByName("blend_equation");
-        uint32_t blendEq[4] = { GL_FUNC_ADD, 0,0,0 };
-        m_figure->SetMaterialState(materialIdx, (ShaderParameterKey)blendEqParam->key, blendEq);
     }
 
     Vec2 Sprite::rotateByAngle(const Vec2& pivot, const Vec2& target, float angle)

@@ -58,14 +58,6 @@ namespace ige::scene
         const SamplerState::WrapMode& getWrapMode() { return m_wrapMode; }
         void setWrapMode(const SamplerState::WrapMode& value);
 
-        //! Enable alpha blending
-        const bool isAlphaBlendingEnable() const { return m_bIsAlphaBlendingEnable; }
-        void setAlphaBlendingEnable(bool enable = true);
-
-        //! Alpha blending operation
-        const int getAlphaBlendingOp() const { return m_alphaBlendingOp; }
-        void setAlphaBlendingOp(int op);
-
         const FillMethod& getFillMethod() { return m_fillMethod; }
         void setFillMethod(const FillMethod& value);
 
@@ -80,9 +72,6 @@ namespace ige::scene
 
         const bool getClockwise() const { return m_clockwise; }
         void setClockwise(bool value);
-
-        const float getAlpha() const { return m_alpha; }
-        void setAlpha(float value);
 
         const Vec4& getColor() const { return m_color; }
         void setColor(float r, float g, float b, float a = 1, bool redraw = true);
@@ -166,15 +155,10 @@ namespace ige::scene
         //! UV Map Offset
         Vec2 m_offset;
 
-        //!Alpha value
-        float m_alpha;
+        //! Color
         Vec4 m_color;
 
-        //! Border 
-        /*float m_borderLeft;
-        float m_borderRight;
-        float m_borderTop;
-        float m_borderBottom;*/
+        //! Border
         Vec4 m_border;
         bool m_bIsScaleBorder;
 

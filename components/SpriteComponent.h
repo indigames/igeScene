@@ -14,7 +14,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SpriteComponent(SceneObject &owner, const std::string &texture = "", const Vec2 &size = {32.f, 32.f}, bool isBillboard = false, bool isGUI = false);
+        SpriteComponent(SceneObject &owner, const std::string &texture = "", const Vec2 &size = {32.f, 32.f}, bool isBillboard = false);
 
         //! Destructor
         virtual ~SpriteComponent();
@@ -80,14 +80,6 @@ namespace ige::scene
         void setBorderBottom(float value);
         const float getBorderBottom() const { return m_sprite->getBorderBottom(); }
 
-        //! Alpha blending
-        const bool isAlphaBlendingEnable() const { return m_sprite && m_sprite->isAlphaBlendingEnable(); }
-        void setAlphaBlendingEnable(bool enable = true) { if (m_sprite) m_sprite->setAlphaBlendingEnable(enable); }
-
-        //! Alpha blending operation
-        const int getAlphaBlendingOp() const { return m_sprite ? m_sprite->getAlphaBlendingOp() : 0; }
-        void setAlphaBlendingOp(int op) { if (m_sprite) m_sprite->setAlphaBlendingOp(op); }
-
         //! Alpha
         void setAlpha(float value);
         const float getAlpha() const;
@@ -125,7 +117,6 @@ namespace ige::scene
 
         //! Billboard setting
         bool m_bIsBillboard = false;
-        bool m_bIsGUI = false;
 
         friend class UIImage;
     };

@@ -8,21 +8,11 @@ namespace ige::scene
 {
     //! Constructor
     UIImage::UIImage(SceneObject &owner, const std::string &path, const Vec2 &size, const bool isSliced, const Vec4& border)
-        : SpriteComponent(owner, path, size, false, true), UIMaskable(), 
-        m_bIsInteractable(false)
+        : SpriteComponent(owner, path, size, false), UIMaskable(), m_bIsInteractable(false)
     {
-        if (m_sprite) {
-            m_sprite->setIsScaleBorder(true);
-        }
-        if (isSliced)
-            setSpriteType(1);
+        setSpriteType(isSliced ? (int)SpriteType::Sliced : (int)SpriteType::Simple);
         setBorder(border);
-
-        if (getOwner()->isInMask())
-        {
-            setStencilMask(1);
-        }
-
+        setStencilMask(getOwner()->isInMask() ? 1 : -1);
         getOwner()->addEventListener((int)EventType::SetParent, std::bind(&UIImage::onSetParent, this, std::placeholders::_1), m_instanceId);
     }
 

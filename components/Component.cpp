@@ -16,14 +16,15 @@ namespace ige::scene
     //! Destructor
     Component::~Component()
     {
-        if (m_owner.getScene())
+        if (getOwner())
         {
-            if (m_owner.isActive())
+            if (getOwner()->isActive())
             {
                 onDisable();
                 onDestroy();
             }
-            m_owner.getScene()->getSerializeFinishedEvent().removeListener(m_serializeEventId);
+            if (getOwner()->getScene())
+                getOwner()->getScene()->getSerializeFinishedEvent().removeListener(m_serializeEventId);
         }
     }
 

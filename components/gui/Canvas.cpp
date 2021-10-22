@@ -13,10 +13,8 @@ namespace ige::scene
         : Component(owner)
     {
         // Canvas camera
-        m_camera = ResourceCreator::Instance().NewCamera("canvas_camera", nullptr);
-        m_camera->SetPosition({ 0.f, 0.f, 10.f });
+        m_camera = ResourceCreator::Instance().NewCamera((owner.getUUID() + "canvas_camera").c_str(), nullptr);
         m_camera->LockonTarget(false);
-        m_camera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
         m_camera->SetOrthographicProjection(true);
         m_camera->SetWidthBase(false);
 

@@ -51,13 +51,9 @@ namespace ige::scene
         transform->setWorldScale(m_figure->GetScale());
     }
 
-    //! Update
+    //! Render
     void FigureComponent::onRender()
-    {
-        if (m_figure == nullptr)
-            return;
-
-        m_figure->Render();
+    {    
     }
 
     void FigureComponent::setPath(const std::string &path)
