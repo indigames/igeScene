@@ -103,10 +103,13 @@ namespace ige::scene
         PyObject* parentObj = nullptr;
 
         if (PyArg_ParseTuple(args, "ssO", &path, &name, &parentObj)) {
-            auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
             auto parent = parentObj && parentObj->ob_type == &PyTypeObject_SceneObject && ((PyObject_SceneObject*)parentObj)->sceneObject ? ((PyObject_SceneObject*)parentObj)->sceneObject->getSharedPtr() : nullptr;
-            obj->sceneObject = self->scene->createObjectFromPrefab(path, name, parent).get();
-            return (PyObject*)obj;
+            auto preObj = self->scene->createObjectFromPrefab(path, name, parent);
+            if (preObj) {
+                auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+                obj->sceneObject = preObj.get();
+                return (PyObject*)obj;
+            }
         }
         Py_RETURN_NONE;
     }
