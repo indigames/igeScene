@@ -749,9 +749,6 @@ namespace ige::scene
     {
         m_windowSize[0] = size.X() > 0 ? size.X() : SystemInfo::Instance().GetGameW();
         m_windowSize[1] = size.Y() > 0 ? size.Y() : SystemInfo::Instance().GetGameH();
-
-        if(getCanvas())
-            getCanvas()->setTargetCanvasSize(getWindowSize());
     }
 
     Vec2 Scene::screenToClient(const Vec2& pos)

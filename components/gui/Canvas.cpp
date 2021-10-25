@@ -41,11 +41,9 @@ namespace ige::scene
 
     void Canvas::setTargetCanvasSize(const Vec2 &canvasSize)
     {
-        // Editor use predefined canvas size
-        auto _canvasSize = SceneManager::getInstance()->isEditor() ? canvasSize : getOwner()->getScene()->getWindowSize();
-		if (m_targetCanvasSize != _canvasSize)
+        if (m_targetCanvasSize != canvasSize)
         {   
-            m_targetCanvasSize = _canvasSize;
+            m_targetCanvasSize = canvasSize;
             updateCanvas();
         }
     }
@@ -130,14 +128,14 @@ namespace ige::scene
     void Canvas::onSerializeFinished(Scene* scene)
     {
         m_canvasSize = m_json.value("size", Vec2(560.f, 940.f));
-        if (SceneManager::getInstance()->isEditor()) {
-            m_targetCanvasSize = m_json.value("targetSize", Vec2(560.f, 940.f));
-        }
-        else {
-            m_targetCanvasSize = Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameH());
-        }
         m_ScreenMatchMode = (ScreenMatchMode)m_json.value("screenmatchmode", (int)ScreenMatchMode::Expand);
         m_MatchWidthOrHeight = m_json.value("matchwithorheight", 0.5f);
+
+    #if EDITOR_MODE
+        m_targetCanvasSize = m_json.value("targetSize", Vec2(560.f, 940.f));
+    #else
+        m_targetCanvasSize = Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameH());
+    #endif
 
         updateCanvas();
 
