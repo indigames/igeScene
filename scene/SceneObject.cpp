@@ -608,12 +608,6 @@ namespace ige::scene
             }
         }
 
-        if (m_isSelected)
-        {
-            for (auto &comp : m_components)
-                comp->onClick();
-        }
-
         if (recursive)
         {
             for (auto& child : m_children) {
