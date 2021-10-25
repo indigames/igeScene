@@ -307,7 +307,7 @@ namespace ige::scene
         PyObject *cameraObj;
         float distance = 10000.f;
 
-        if (!PyArg_ParseTuple(args, "OO|i", &screenPosObj, &cameraObj, &distance))
+        if (!PyArg_ParseTuple(args, "OO|f", &screenPosObj, &cameraObj, &distance))
             return NULL;
 
         int d;
@@ -393,6 +393,55 @@ namespace ige::scene
         Py_XDECREF(hitPos);
         return res;
     }
+
+    PyObject* Scene_screenToWorldPoint(PyObject_Scene* self, PyObject* args)
+    {
+        PyObject* screenPosObj;
+        PyObject* cameraObj;
+        float distance = 10000.f;
+
+        if (!PyArg_ParseTuple(args, "OO|f", &screenPosObj, &cameraObj, &distance))
+            return NULL;
+
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat(screenPosObj, buff, d);
+        if (!v)
+            return NULL;
+
+        Vec2 screenPos = Vec2(v[0], v[1]);
+        Camera* camera = nullptr;
+        if (cameraObj->ob_type == &CameraType)
+        {
+            auto camObj = (camera_obj*)cameraObj;
+            camera = camObj->camera;
+        }
+        else if (cameraObj->ob_type == &PyTypeObject_CameraComponent)
+        {
+            auto cameraCompObj = (PyObject_CameraComponent*)cameraObj;
+            camera = cameraCompObj->component->getCamera();
+        }
+        else if (cameraObj->ob_type == &PyTypeObject_SceneObject)
+        {
+            auto sceneObj = (PyObject_SceneObject*)cameraObj;
+            auto cameraComp = sceneObj->sceneObject->getComponent<CameraComponent>();
+            if (cameraComp)
+            {
+                camera = cameraComp->getCamera();
+            }
+        }
+
+        if (!camera)
+            return NULL;
+
+        auto hit = self->scene->screenToWorldPoint(screenPos, camera, distance);
+       
+        auto hitPos = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(hit.P(), 3, hitPos->v);
+        hitPos->d = 3;
+        return (PyObject*)hitPos;
+    }
+
     // Compare function
     static PyObject* Scene_richcompare(PyObject* self, PyObject* other, int op)
     {
@@ -446,6 +495,7 @@ namespace ige::scene
         { "raycast", (PyCFunction)Scene_raycast, METH_VARARGS, Scene_raycast_doc },
         { "raycastFromCamera", (PyCFunction)Scene_raycastFromCamera, METH_VARARGS, Scene_raycastFromCamera_doc },
         { "raycastUI", (PyCFunction)Scene_raycastUI, METH_VARARGS, Scene_raycastUI_doc },
+        { "screenToWorldPoint", (PyCFunction)Scene_screenToWorldPoint, METH_VARARGS, NULL },
         { NULL, NULL }
     };
 

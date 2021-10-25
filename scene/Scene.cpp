@@ -762,6 +762,25 @@ namespace ige::scene
         return Vec2(x, y);
     }
 
+    Vec3 Scene::screenToWorldPoint(const Vec2& screenPos, Camera* camera, float nearPlane)
+    {
+        auto wSize = getWindowSize();
+        if (wSize[0] == 0 || wSize[1] == 0 || camera == nullptr) return Vec3(0, 0, 0);
+
+        auto hit = std::pair<std::shared_ptr<SceneObject>, Vec3>(nullptr, Vec3());
+        auto pos = screenToClient(screenPos);
+
+        Mat4 proj;
+        camera->GetProjectionMatrix(proj);
+
+        Mat4 viewInv;
+        camera->GetViewInverseMatrix(viewInv);
+        auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
+        if (nearPlane < 0) nearPlane = 0;
+        auto outPos = ray.first + ray.second * nearPlane;
+        return outPos;
+    }
+
     //! Raycast
     std::pair<std::shared_ptr<SceneObject>, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance, bool forceRaycast)
     {

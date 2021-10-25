@@ -55,6 +55,7 @@ namespace ige::scene
 
         //! Set local position
         virtual void setLocalPosition(const Vec3& pos);
+        virtual void setLocalPositionDelay(const Vec3& pos);
 
         //! Get local position
         virtual const Vec3 &getLocalPosition() const;
@@ -67,9 +68,11 @@ namespace ige::scene
 
         //! Set local rotation
         virtual void setLocalRotation(const Quat &rot);
+        virtual void setLocalRotationDelay(const Quat& rot);
 
         //! Set local rotation by xyz
         virtual void setLocalRotation(const Vec3 &rot);
+        virtual void setLocalRotationDelay(const Vec3& rot);
 
         //! Get local rotation
         virtual const Quat& getLocalRotation() const;
@@ -85,6 +88,7 @@ namespace ige::scene
 
         //! Set local scale
         virtual void setLocalScale(const Vec3 &scale);
+        virtual void setLocalScaleDelay(const Vec3& scale);
 
         //! Get local scale
         virtual const Vec3 &getLocalScale() const;

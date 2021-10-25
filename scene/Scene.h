@@ -194,6 +194,9 @@ namespace ige::scene
         //! Return the prefabId of the prefab scene
         std::string getPrefabId();
 
+        //! Sceen Point to World Point
+        Vec3 screenToWorldPoint(const Vec2& pos, Camera* cam, float nearPlane);
+
     protected:
         //! Create root Objects
         virtual std::shared_ptr<SceneObject> createRootObject(const std::string& name = "");
