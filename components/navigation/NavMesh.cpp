@@ -272,7 +272,7 @@ namespace ige::scene
             auto link = static_cast<OffMeshLink *>(offMeshLinks[i]);
             if (link->isEnabled() && link->getEndPoint())
             {
-                const auto &pos = link->getOwner()->getTransform()->getWorldPosition();
+                const auto &pos = link->getOwner()->getTransform()->getPosition();
 
                 auto aabbMin = pos - Vec3(link->getRadius(), link->getRadius(), link->getRadius());
                 auto aabbMax = pos + Vec3(link->getRadius(), link->getRadius(), link->getRadius());
@@ -357,8 +357,8 @@ namespace ige::scene
                 if (geometryList[i].component->getName() == "OffMeshLink")
                 {
                     auto *link = static_cast<OffMeshLink *>(geometryList[i].component);
-                    auto start = inverse * link->getOwner()->getTransform()->getWorldPosition();
-                    auto end = inverse * link->getEndPoint()->getTransform()->getWorldPosition();
+                    auto start = inverse * link->getOwner()->getTransform()->getPosition();
+                    auto end = inverse * link->getEndPoint()->getTransform()->getPosition();
                     build->offMeshVertices.push_back(start);
                     build->offMeshVertices.push_back(end);
                     build->offMeshRadius.push_back(link->getRadius());
@@ -833,7 +833,7 @@ namespace ige::scene
                     auto aabb = area->getWorldBoundingBox();
                     if (aabb.isPointInside(pt.position))
                     {
-                        auto areaWorldCenter = area->getOwner()->getTransform()->getWorldPosition();
+                        auto areaWorldCenter = area->getOwner()->getTransform()->getPosition();
                         float distance = Vec3::LengthSqr(areaWorldCenter - pt.position);
                         if (distance < nearestDistance)
                         {
@@ -1093,8 +1093,8 @@ namespace ige::scene
                 auto link = static_cast<OffMeshLink*>(comp);
                 if (link && link->isEnabled() && link->getEndPoint())
                 {
-                    const auto& start = link->getOwner()->getTransform()->getWorldPosition();
-                    const auto& end = link->getEndPoint()->getTransform()->getWorldPosition();;
+                    const auto& start = link->getOwner()->getTransform()->getPosition();
+                    const auto& end = link->getEndPoint()->getTransform()->getPosition();;
                     ShapeDrawer::drawLine(start, end, { 1.f, 0.f, 0.f });
                 }
             }

@@ -70,7 +70,7 @@ namespace ige::scene
         dtCrowdAgentParams params;
         params.userData = agent;
         params.queryFilterType = (uint8_t)agent->getQueryFilterType();
-        auto position = agent->getOwner()->getTransform()->getWorldPosition();
+        auto position = agent->getOwner()->getTransform()->getPosition();
         auto agentId = m_crowd->addAgent(position.P(), &params);
 
         if (agent->getRadius() == 0.f)

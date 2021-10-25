@@ -67,7 +67,7 @@ namespace ige::scene
     void PointLight::onUpdate(float dt)
     {
         auto transform = getOwner()->getTransform();
-        getOwner()->getScene()->getEnvironment()->SetPointLampPosition(m_index, transform->getWorldPosition());
+        getOwner()->getScene()->getEnvironment()->SetPointLampPosition(m_index, transform->getPosition());
     }
 
     //! Serialize

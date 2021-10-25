@@ -84,7 +84,7 @@ namespace ige::scene
     void SpotLight::onUpdate(float dt)
     {
         auto transform = getOwner()->getTransform();
-        getOwner()->getScene()->getEnvironment()->SetSpotLampPosition(m_index, transform->getWorldPosition());
+        getOwner()->getScene()->getEnvironment()->SetSpotLampPosition(m_index, transform->getPosition());
         getOwner()->getScene()->getEnvironment()->SetSpotLampDirection(m_index, transform->getWorldForward().Negative());
     }
 

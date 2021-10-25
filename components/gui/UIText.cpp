@@ -121,9 +121,9 @@ namespace ige::scene
         if (sizeChanged)
             transform->setSize(containerSize);
 
-        getFigure()->SetPosition(transform->getWorldPosition());
-        getFigure()->SetRotation(transform->getWorldRotation());
-        getFigure()->SetScale(transform->getWorldScale());
+        getFigure()->SetPosition(transform->getPosition());
+        getFigure()->SetRotation(transform->getRotation());
+        getFigure()->SetScale(transform->getScale());
 
         // Update
         getFigure()->Pose();

@@ -17,7 +17,7 @@ void TweenPropTypeUtils::setProps(SceneObject* target, uint64_t componentID, Twe
 		{
 			auto trans = std::dynamic_pointer_cast<TransformComponent>(comp);
 			if (trans) {
-				trans->setPosition(value.getVec3());
+				trans->setLocalPosition(value.getVec3());
 			}
 		}
 		break;
@@ -25,8 +25,8 @@ void TweenPropTypeUtils::setProps(SceneObject* target, uint64_t componentID, Twe
 		{
 			auto trans = std::dynamic_pointer_cast<TransformComponent>(comp);
 			if (trans) {
-				auto position = trans->getPosition();
-				trans->setPosition(Vec3(value.x, position.Y(), position.Z()));
+				auto position = trans->getLocalPosition();
+				trans->setLocalPosition(Vec3(value.x, position.Y(), position.Z()));
 			}
 		}
 		break;
@@ -34,8 +34,8 @@ void TweenPropTypeUtils::setProps(SceneObject* target, uint64_t componentID, Twe
 		{
 		auto trans = std::dynamic_pointer_cast<TransformComponent>(comp);
 			if (trans) {
-				auto position = trans->getPosition();
-				trans->setPosition(Vec3(position.X(), value.x, position.Z()));
+				auto position = trans->getLocalPosition();
+				trans->setLocalPosition(Vec3(position.X(), value.x, position.Z()));
 			}
 		}
 		break;
@@ -43,8 +43,8 @@ void TweenPropTypeUtils::setProps(SceneObject* target, uint64_t componentID, Twe
 		{
 			auto trans = std::dynamic_pointer_cast<TransformComponent>(comp);
 			if (trans) {
-				auto position = trans->getPosition();
-				trans->setPosition(Vec3(position.X(), position.Y(), value.x));
+				auto position = trans->getLocalPosition();
+				trans->setLocalPosition(Vec3(position.X(), position.Y(), value.x));
 			}
 		}
 		break;
@@ -70,7 +70,7 @@ void TweenPropTypeUtils::setProps(SceneObject* target, uint64_t componentID, Twe
 		{
 			auto trans = std::dynamic_pointer_cast<TransformComponent>(comp);
 			if (trans) {
-				trans->setRotation(value.getVec3());
+				trans->setLocalRotation(value.getVec3());
 			}
 		}
 		break;
@@ -79,7 +79,7 @@ void TweenPropTypeUtils::setProps(SceneObject* target, uint64_t componentID, Twe
 			auto trans = std::dynamic_pointer_cast<TransformComponent>(comp);
 			if (trans) {
 				Quat quat(value.x, value.y, value.z, value.w);
-				trans->setRotation(quat);
+				trans->setLocalRotation(quat);
 			}
 		}
 		break;
@@ -87,7 +87,7 @@ void TweenPropTypeUtils::setProps(SceneObject* target, uint64_t componentID, Twe
 		{
 			auto trans = std::dynamic_pointer_cast<TransformComponent>(comp);
 			if (trans) {
-				trans->setScale(value.getVec3());
+				trans->setLocalScale(value.getVec3());
 			}
 		}
 		break;
@@ -96,7 +96,7 @@ void TweenPropTypeUtils::setProps(SceneObject* target, uint64_t componentID, Twe
 			auto trans = std::dynamic_pointer_cast<TransformComponent>(comp);
 			if (trans) {
 				auto scale = trans->getScale();
-				trans->setScale(Vec3(value.x, scale.Y(), scale.Z()));
+				trans->setLocalScale(Vec3(value.x, scale.Y(), scale.Z()));
 			}
 		}
 		break;
@@ -105,7 +105,7 @@ void TweenPropTypeUtils::setProps(SceneObject* target, uint64_t componentID, Twe
 			auto trans = std::dynamic_pointer_cast<TransformComponent>(comp);
 			if (trans) {
 				auto scale = trans->getScale();
-				trans->setScale(Vec3(scale.X(), value.x, scale.Z()));
+				trans->setLocalScale(Vec3(scale.X(), value.x, scale.Z()));
 			}
 		}
 		break;
@@ -114,7 +114,7 @@ void TweenPropTypeUtils::setProps(SceneObject* target, uint64_t componentID, Twe
 			auto trans = std::dynamic_pointer_cast<TransformComponent>(comp);
 			if (trans) {
 				auto scale = trans->getScale();
-				trans->setScale(Vec3(scale.X(), scale.Y(), value.x));
+				trans->setLocalScale(Vec3(scale.X(), scale.Y(), value.x));
 			}
 		}
 		break;

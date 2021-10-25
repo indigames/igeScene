@@ -70,4 +70,7 @@ namespace ige::scene
     PyObject* Scene_raycastFromCamera(PyObject_Scene* self, PyObject* args);
 
     PyObject* Scene_raycastUI(PyObject_Scene* self, PyObject* args);
+
+    PyObject* Scene_screenToWorldPoint(PyObject_Scene* self, PyObject* args);
+
 }

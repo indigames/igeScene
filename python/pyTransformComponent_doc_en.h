@@ -3,19 +3,19 @@
 #include <Python.h>
 
 // position
-PyDoc_STRVAR(TransformComponent_position_doc,
+PyDoc_STRVAR(TransformComponent_localPosition_doc,
     "Position.\n"\
     "Type: Vec3\n"
 );
 
 // rotation
-PyDoc_STRVAR(TransformComponent_rotation_doc,
+PyDoc_STRVAR(TransformComponent_localRotation_doc,
     "Rotation.\n"\
     "Type: Quat\n"
 );
 
 // scale
-PyDoc_STRVAR(TransformComponent_scale_doc,
+PyDoc_STRVAR(TransformComponent_localScale_doc,
     "Scale.\n"\
     "Type: Vec3\n"
 );

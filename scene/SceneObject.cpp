@@ -958,7 +958,7 @@ namespace ige::scene
                 if (rect) {
                     auto size = rect->getSize();
                     auto scale = rect->getScale();
-                    auto rot = rect->getRotation();
+                    auto rot = rect->getLocalRotation();
                     Vec3 min(-size[0] * 0.5f, -size[1] * 0.5f, -0.5f);
                     Vec3 max(size[0] * 0.5f, size[1] * 0.5f, 0.5f);
                     m_aabb = { min, max };

@@ -182,7 +182,7 @@ void UIScrollBar::_drag(Vec2 clickPoint)
 
     m_bIsDragging = true;
     auto point = RectTransformUtility::WorldToLocalPointInRectable(m_rectArea.get(), clickPoint);
-    Vec2 pos(m_rectArea->getPosition()[0], m_rectArea->getPosition()[1]);
+    Vec2 pos(m_rectArea->getLocalPosition()[0], m_rectArea->getLocalPosition()[1]);
     Vec2 handleCenter = point - m_offsetPos - pos;
 
     Vec2 sizeDelta(m_rectArea->getSize()[0], m_rectArea->getSize()[1]);

@@ -215,7 +215,7 @@ void UIScrollView::_onTouchDrag(EventContext* context)
     if (m_rectContent == nullptr) return;
     auto size = m_rectContent->getSize();
     auto clickPoint = inputContext->getInput()->getPosition();
-    auto point = m_rectContent->globalToLocal(Vec3(clickPoint[0], clickPoint[1], m_rectContent->getWorldPosition()[3]));
+    auto point = m_rectContent->globalToLocal(Vec3(clickPoint[0], clickPoint[1], m_rectContent->getPosition()[3]));
 
     Vec2 delta = clickPoint - m_clickedPos;
 
@@ -330,7 +330,7 @@ void UIScrollView::_updateSize(bool forced)
             flag = true;
             m_currentContentSize = size;
             auto pivot = m_rectContent->getPivot();
-            auto pos = m_rectContent->getPosition();
+            auto pos = m_rectContent->getLocalPosition();
             auto rSize = m_currentViewportSize;
             if (rSize[0] == 0 && rSize[1] == 0) {
                 auto rect = getOwner()->getRectTransform();

@@ -75,37 +75,47 @@ namespace ige::scene
         }
     }
 
-    void TransformComponent::translate(const Vec3 &trans)
+    void TransformComponent::localTranslate(const Vec3 &trans)
     {
-        setPosition(m_localPosition + trans);
+        setLocalPosition(m_localPosition + trans);
     }
 
-    void TransformComponent::worldTranslate(const Vec3 &trans)
+    void TransformComponent::translate(const Vec3 &trans)
     {
-        setWorldPosition(m_worldPosition + trans);
+        setPosition(m_worldPosition + trans);
+    }
+
+    void TransformComponent::localRotate(const Quat &rot)
+    {
+        setLocalRotation(m_localRotation * rot);
     }
 
     void TransformComponent::rotate(const Quat &rot)
     {
-        setRotation(m_localRotation * rot);
+        setRotation(m_worldRotation * rot);
     }
 
-    void TransformComponent::worldRotate(const Quat &rot)
+    void TransformComponent::localScale(const Vec3 &scale)
     {
-        setWorldRotation(m_worldRotation * rot);
+        setLocalScale(Vec3(m_localScale.X() * scale.X(), m_localScale.Y() * scale.Y(), m_localScale.Z() * scale.Z()));
     }
 
     void TransformComponent::scale(const Vec3 &scale)
     {
-        setScale(Vec3(m_localScale.X() * scale.X(), m_localScale.Y() * scale.Y(), m_localScale.Z() * scale.Z()));
+        setScale(Vec3(m_worldScale.X() * scale.X(), m_worldScale.Y() * scale.Y(), m_worldScale.Z() * scale.Z()));
     }
 
-    void TransformComponent::worldScale(const Vec3 &scale)
+    void TransformComponent::setLocalPosition(const Vec3 &pos)
     {
-        setWorldScale(Vec3(m_worldScale.X() * scale.X(), m_worldScale.Y() * scale.Y(), m_worldScale.Z() * scale.Z()));
+        if (m_localPosition != pos)
+        {
+            m_localPosition = pos;
+            updateLocalToWorld();
+            //m_bLocalDirty = true;
+        }
     }
 
-    void TransformComponent::setPosition(const Vec3 &pos)
+    void TransformComponent::setLocalPositionDelay(const Vec3& pos)
     {
         if (m_localPosition != pos)
         {
@@ -114,12 +124,12 @@ namespace ige::scene
         }
     }
 
-    const Vec3 &TransformComponent::getPosition() const
+    const Vec3 &TransformComponent::getLocalPosition() const
     {
         return m_localPosition;
     }
 
-    void TransformComponent::setWorldPosition(const Vec3 &pos)
+    void TransformComponent::setPosition(const Vec3 &pos)
     {
         if (m_worldPosition != pos)
         {
@@ -128,12 +138,22 @@ namespace ige::scene
         }
     }
 
-    const Vec3 &TransformComponent::getWorldPosition() const
+    const Vec3 &TransformComponent::getPosition() const
     {
         return m_worldPosition;
     }
 
-    void TransformComponent::setRotation(const Quat &rot)
+    void TransformComponent::setLocalRotation(const Quat &rot)
+    {
+        if (m_localRotation != rot)
+        {
+            m_localRotation = rot;
+            //m_bLocalDirty = true;
+            updateLocalToWorld();
+        }
+    }
+
+    void TransformComponent::setLocalRotationDelay(const Quat& rot)
     {
         if (m_localRotation != rot)
         {
@@ -142,7 +162,20 @@ namespace ige::scene
         }
     }
 
-    void TransformComponent::setRotation(const Vec3 &rot)
+    void TransformComponent::setLocalRotation(const Vec3 &rot)
+    {
+        Quat rotQuat;
+        vmath_eulerToQuat(rot.P(), rotQuat.P());
+
+        if (m_localRotation != rotQuat)
+        {
+            m_localRotation = rotQuat;
+            //m_bLocalDirty = true;
+            updateLocalToWorld();
+        }
+    }
+
+    void TransformComponent::setLocalRotationDelay(const Vec3& rot)
     {
         Quat rotQuat;
         vmath_eulerToQuat(rot.P(), rotQuat.P());
@@ -154,12 +187,12 @@ namespace ige::scene
         }
     }
 
-    const Quat &TransformComponent::getRotation() const
+    const Quat &TransformComponent::getLocalRotation() const
     {
         return m_localRotation;
     }
 
-    void TransformComponent::setWorldRotation(const Vec3& rot)
+    void TransformComponent::setRotation(const Vec3& rot)
     {
         Quat rotQuat;
         vmath_eulerToQuat(rot.P(), rotQuat.P());
@@ -171,7 +204,7 @@ namespace ige::scene
         }
     }
 
-    void TransformComponent::setWorldRotation(const Quat &rot)
+    void TransformComponent::setRotation(const Quat &rot)
     {
         if (m_worldRotation != rot)
         {
@@ -180,12 +213,22 @@ namespace ige::scene
         }
     }
 
-    const Quat &TransformComponent::getWorldRotation() const
+    const Quat &TransformComponent::getRotation() const
     {
         return m_worldRotation;
     }
 
-    void TransformComponent::setScale(const Vec3 &scale)
+    void TransformComponent::setLocalScale(const Vec3 &scale)
+    {
+        if (m_localScale != scale)
+        {
+            m_localScale = scale;
+            //m_bLocalDirty = true;
+            updateLocalToWorld();
+        }
+    }
+
+    void TransformComponent::setLocalScaleDelay(const Vec3& scale)
     {
         if (m_localScale != scale)
         {
@@ -194,12 +237,12 @@ namespace ige::scene
         }
     }
 
-    const Vec3 &TransformComponent::getScale() const
+    const Vec3 &TransformComponent::getLocalScale() const
     {
         return m_localScale;
     }
 
-    void TransformComponent::setWorldScale(const Vec3 &scale)
+    void TransformComponent::setScale(const Vec3 &scale)
     {
         if (m_worldScale != scale)
         {
@@ -208,7 +251,7 @@ namespace ige::scene
         }
     }
 
-    const Vec3 &TransformComponent::getWorldScale() const
+    const Vec3 &TransformComponent::getScale() const
     {
         return m_worldScale;
     }
@@ -455,9 +498,9 @@ namespace ige::scene
     //! Deserialize
     void TransformComponent::from_json(const json &j)
     {
-        setPosition(j.value("pos", Vec3()));
-        setRotation(j.value("rot", Vec3(0.f, 0.f, 0.f)));
-        setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
+        setLocalPositionDelay(j.value("pos", Vec3()));
+        setLocalRotationDelay(j.value("rot", Vec3(0.f, 0.f, 0.f)));
+        setLocalScaleDelay(j.value("scale", Vec3(1.f, 1.f, 1.f)));
         Component::from_json(j);
         onUpdate(0.f); // pre-warm
     }
@@ -467,27 +510,27 @@ namespace ige::scene
     {
         if (key.compare("pos") == 0)
         {
-            setPosition(val);
+            setLocalPositionDelay(val);
         }
         else if (key.compare("rot") == 0)
         {
-            setRotation((Vec3)val);
+            setLocalRotationDelay((Vec3)val);
         }
         else if (key.compare("scale") == 0)
         {
-            setScale(val);
+            setLocalScaleDelay(val);
         }
         else if (key.compare("wpos") == 0)
         {
-            setWorldPosition(val);
+            setPosition(val);
         }
         else if (key.compare("wrot") == 0)
         {
-            setWorldRotation((Vec3)val);
+            setRotation((Vec3)val);
         }
         else if (key.compare("wscale") == 0)
         {
-            setWorldScale(val);
+            setScale(val);
         }
         else
         {

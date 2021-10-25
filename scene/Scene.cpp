@@ -131,7 +131,7 @@ namespace ige::scene
 
             // Create default camera
             auto camObj = createObject("Default Camera");
-            camObj->getTransform()->setPosition(Vec3(0.f, 0.f, 10.f));
+            camObj->getTransform()->setLocalPosition(Vec3(0.f, 0.f, 10.f));
             auto camComp = camObj->addComponent<CameraComponent>("default_camera");
             camComp->lockOnTarget(false);
             camComp->setAspectRatio(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
@@ -139,8 +139,8 @@ namespace ige::scene
             // Create default directional light
             auto directionalLight = createObject("Directional Light");
             directionalLight->addComponent<DirectionalLight>();
-            directionalLight->getTransform()->setPosition({ 0.f, 5.f, 0.f });
-            directionalLight->getTransform()->setRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
+            directionalLight->getTransform()->setLocalPosition({ 0.f, 5.f, 0.f });
+            directionalLight->getTransform()->setLocalRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
 
             // Add editor debug
             if (SceneManager::getInstance()->isEditor())
@@ -762,6 +762,25 @@ namespace ige::scene
         return Vec2(x, y);
     }
 
+    Vec3 Scene::screenToWorldPoint(const Vec2& screenPos, Camera* camera, float nearPlane)
+    {
+        auto wSize = getWindowSize();
+        if (wSize[0] == 0 || wSize[1] == 0 || camera == nullptr) return Vec3(0, 0, 0);
+
+        auto hit = std::pair<std::shared_ptr<SceneObject>, Vec3>(nullptr, Vec3());
+        auto pos = screenToClient(screenPos);
+
+        Mat4 proj;
+        camera->GetProjectionMatrix(proj);
+
+        Mat4 viewInv;
+        camera->GetViewInverseMatrix(viewInv);
+        auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
+        if (nearPlane < 0) nearPlane = 0;
+        auto outPos = ray.first + ray.second * nearPlane;
+        return outPos;
+    }
+
     //! Raycast
     std::pair<std::shared_ptr<SceneObject>, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance, bool forceRaycast)
     {
@@ -787,13 +806,13 @@ namespace ige::scene
         {
             const auto& transform = obj->getTransform();
             auto tranMat = Mat4::IdentityMat();
-            vmath_mat4_translation(transform->getWorldPosition().P(), tranMat.P());
+            vmath_mat4_translation(transform->getPosition().P(), tranMat.P());
 
             auto rotMat = Mat4::IdentityMat();
-            vmath_mat_from_quat(transform->getWorldRotation().P(), 4, rotMat.P());
+            vmath_mat_from_quat(transform->getRotation().P(), 4, rotMat.P());
 
             auto modelMat = tranMat * rotMat;
-            vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getWorldScale().X(), 1.f / transform->getWorldScale().Y(), 1.f / transform->getWorldScale().Z()).P(), 4, 4, modelMat.P());
+            vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getScale().X(), 1.f / transform->getScale().Y(), 1.f / transform->getScale().Z()).P(), 4, 4, modelMat.P());
 
             if (RayOBBChecker::checkIntersect(obj->getAABB(), modelMat, distance, maxDistance))
             {
@@ -818,13 +837,13 @@ namespace ige::scene
         {
             const auto& transform = obj->getTransform();
             auto tranMat = Mat4::IdentityMat();
-            vmath_mat4_translation(transform->getWorldPosition().P(), tranMat.P());
+            vmath_mat4_translation(transform->getPosition().P(), tranMat.P());
 
             auto rotMat = Mat4::IdentityMat();
-            vmath_mat_from_quat(transform->getWorldRotation().P(), 4, rotMat.P());
+            vmath_mat_from_quat(transform->getRotation().P(), 4, rotMat.P());
 
             auto modelMat = tranMat * rotMat;
-            vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getWorldScale().X(), 1.f / transform->getWorldScale().Y(), 1.f / transform->getWorldScale().Z()).P(), 4, 4, modelMat.P());
+            vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getScale().X(), 1.f / transform->getScale().Y(), 1.f / transform->getScale().Z()).P(), 4, 4, modelMat.P());
 
             if (RayOBBChecker::checkIntersect(obj->getAABB(), modelMat, distance, maxDistance))
             {
@@ -901,13 +920,13 @@ namespace ige::scene
         {
             const auto& transform = target->getTransform();
             auto tranMat = Mat4::IdentityMat();
-            vmath_mat4_translation(transform->getWorldPosition().P(), tranMat.P());
+            vmath_mat4_translation(transform->getPosition().P(), tranMat.P());
 
             auto rotMat = Mat4::IdentityMat();
-            vmath_mat_from_quat(transform->getWorldRotation().P(), 4, rotMat.P());
+            vmath_mat_from_quat(transform->getRotation().P(), 4, rotMat.P());
 
             auto modelMat = tranMat * rotMat;
-            vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getWorldScale().X(), 1.f / transform->getWorldScale().Y(), 1.f / transform->getWorldScale().Z()).P(), 4, 4, modelMat.P());
+            vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getScale().X(), 1.f / transform->getScale().Y(), 1.f / transform->getScale().Z()).P(), 4, 4, modelMat.P());
 
             if (RayOBBChecker::checkIntersect(target->getAABB(), modelMat, distance, 100.f))
             {

@@ -249,7 +249,7 @@ void UISlider::_onTouchPress(EventContext* context)
 	auto parentSize = parentRect->getSize();
 
 	auto clickPoint = inputContext->getInput()->getPosition();
-	auto point = parentRect->globalToLocal(Vec3(clickPoint[0], clickPoint[1], parentRect->getWorldPosition()[3]));
+	auto point = parentRect->globalToLocal(Vec3(clickPoint[0], clickPoint[1], parentRect->getPosition()[3]));
 	float percent = MATH_CLAMP((m_value - m_min) / (m_max - m_min), 0, 1);
 	
 	m_clickPos = clickPoint;
@@ -284,7 +284,7 @@ void UISlider::_onTouchDrag(EventContext* context)
 	auto parentSize = parentRect->getSize();
 	if (inputContext->getInput() == nullptr) return;
 	auto clickPoint = inputContext->getInput()->getPosition();
-	auto point = parentRect->globalToLocal(Vec3(clickPoint[0], clickPoint[1], parentRect->getWorldPosition()[3]));
+	auto point = parentRect->globalToLocal(Vec3(clickPoint[0], clickPoint[1], parentRect->getPosition()[3]));
 	float percent = MATH_CLAMP((m_value - m_min) / (m_max - m_min), 0, 1);
 
 	float deltaX = (clickPoint[0] - m_clickPos[0]) / parentSize[0];

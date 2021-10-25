@@ -53,7 +53,7 @@ namespace ige::scene
             if (m_bUpdateNodePosition)
             {
                 m_bIgnoreTransformChanges = true;
-                getOwner()->getTransform()->setWorldPosition(newPos);
+                getOwner()->getTransform()->setPosition(newPos);
                 m_bIgnoreTransformChanges = false;
             }
         }
@@ -96,7 +96,7 @@ namespace ige::scene
     }
 
     void NavAgent::requestMove() {
-        m_previousPosition = getOwner()->getTransform()->getWorldPosition();
+        m_previousPosition = getOwner()->getTransform()->getPosition();
         if (isInCrowd())
         {
             auto* agent = const_cast<dtCrowdAgent*>(getDetourCrowdAgent());
@@ -332,7 +332,7 @@ namespace ige::scene
     Vec3 NavAgent::getPosition() const
     {
         const auto *agent = getDetourCrowdAgent();
-        return agent ? *(Vec3 *)(agent->npos) : getOwner()->getTransform()->getWorldPosition();
+        return agent ? *(Vec3 *)(agent->npos) : getOwner()->getTransform()->getPosition();
     }
 
     //! Actual velocity

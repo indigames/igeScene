@@ -209,7 +209,7 @@ namespace ige::scene
         PyObject* endObj = nullptr;
         int type;
         int maxVisit = 3;
-        auto newPos = self->component->getOwner()->getTransform()->getWorldPosition();
+        auto newPos = self->component->getOwner()->getTransform()->getPosition();
         if (PyArg_ParseTuple(value, "OOi|i", &startObj, &endObj, &type), maxVisit)
         {
             int d;

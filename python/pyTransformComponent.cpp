@@ -26,47 +26,47 @@ namespace ige::scene
     }
 
     // Get position
-    PyObject* TransformComponent_getPosition(PyObject_TransformComponent* self)
+    PyObject* TransformComponent_getLocalPosition(PyObject_TransformComponent* self)
     {
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
+        vmath_cpy(self->component->getLocalPosition().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject*)vec3Obj;
     }
 
     // Set position
-    int TransformComponent_setPosition(PyObject_TransformComponent* self, PyObject* value)
+    int TransformComponent_setLocalPosition(PyObject_TransformComponent* self, PyObject* value)
     {
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v) return -1;
-        self->component->setPosition(*((Vec3*)v));
+        self->component->setLocalPosition(*((Vec3*)v));
         return 0;
     }
 
     // Get rotation
-    PyObject* TransformComponent_getRotation(PyObject_TransformComponent* self)
+    PyObject* TransformComponent_getLocalRotation(PyObject_TransformComponent* self)
     {
         auto quatObj = PyObject_New(vec_obj, _QuatType);
-        vmath_cpy(self->component->getRotation().P(), 4, quatObj->v);
+        vmath_cpy(self->component->getLocalRotation().P(), 4, quatObj->v);
         quatObj->d = 4;
         return (PyObject*)quatObj;
     }
 
     // Set rotation
-    int TransformComponent_setRotation(PyObject_TransformComponent* self, PyObject* value)
+    int TransformComponent_setLocalRotation(PyObject_TransformComponent* self, PyObject* value)
     {
         int d1;
         float buff[4];
         float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
         if (!v1) return -1;
-        self->component->setRotation(*((Quat*)v1));
+        self->component->setLocalRotation(*((Quat*)v1));
         return 0;
     }
 
     // Get scale
-    PyObject* TransformComponent_getScale(PyObject_TransformComponent* self)
+    PyObject* TransformComponent_getLocalScale(PyObject_TransformComponent* self)
     {
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getScale().P(), 3, vec3Obj->v);
@@ -75,13 +75,13 @@ namespace ige::scene
     }
 
     // Set scale
-    int TransformComponent_setScale(PyObject_TransformComponent* self, PyObject* value)
+    int TransformComponent_setLocalScale(PyObject_TransformComponent* self, PyObject* value)
     {
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v) return -1;
-        self->component->setScale(*((Vec3*)v));
+        self->component->setLocalScale(*((Vec3*)v));
         return 0;
     }
 
@@ -100,7 +100,7 @@ namespace ige::scene
     PyObject* TransformComponent_getWorldPosition(PyObject_TransformComponent* self)
     {
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getWorldPosition().P(), 3, vec3Obj->v);
+        vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject*)vec3Obj;
     }
@@ -112,7 +112,7 @@ namespace ige::scene
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v) return -1;
-        self->component->setWorldPosition(*((Vec3*)v));
+        self->component->setPosition(*((Vec3*)v));
         return 0;
     }
 
@@ -120,7 +120,7 @@ namespace ige::scene
     PyObject* TransformComponent_getWorldRotation(PyObject_TransformComponent* self)
     {
         auto quatObj = PyObject_New(vec_obj, _QuatType);
-        vmath_cpy(self->component->getWorldRotation().P(), 4, quatObj->v);
+        vmath_cpy(self->component->getRotation().P(), 4, quatObj->v);
         quatObj->d = 4;
         return (PyObject*)quatObj;
     }
@@ -132,7 +132,7 @@ namespace ige::scene
         float buff[4];
         float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
         if (!v1) return -1;
-        self->component->setWorldRotation(*((Quat*)v1));
+        self->component->setRotation(*((Quat*)v1));
         return 0;
     }
 
@@ -140,7 +140,7 @@ namespace ige::scene
     PyObject* TransformComponent_getWorldScale(PyObject_TransformComponent* self)
     {
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getWorldScale().P(), 3, vec3Obj->v);
+        vmath_cpy(self->component->getScale().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject*)vec3Obj;
     }
@@ -152,7 +152,7 @@ namespace ige::scene
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v) return -1;
-        self->component->setWorldScale(*((Vec3*)v));
+        self->component->setScale(*((Vec3*)v));
         return 0;
     }
 
@@ -195,7 +195,7 @@ namespace ige::scene
     }
 
     // Get local foward
-    PyObject* TransformComponent_getForward(PyObject_TransformComponent* self)
+    PyObject* TransformComponent_getLocalForward(PyObject_TransformComponent* self)
     {
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getLocalForward().P(), 3, vec3Obj->v);
@@ -204,7 +204,7 @@ namespace ige::scene
     }
 
     // Get local up
-    PyObject* TransformComponent_getUp(PyObject_TransformComponent* self)
+    PyObject* TransformComponent_getLocalUp(PyObject_TransformComponent* self)
     {
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getLocalUp().P(), 3, vec3Obj->v);
@@ -213,7 +213,7 @@ namespace ige::scene
     }
 
     // Get local right
-    PyObject* TransformComponent_getRight(PyObject_TransformComponent* self)
+    PyObject* TransformComponent_getLocalRight(PyObject_TransformComponent* self)
     {
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getLocalRight().P(), 3, vec3Obj->v);
@@ -225,20 +225,20 @@ namespace ige::scene
 
     // Variable definition
     PyGetSetDef TransformComponent_getsets[] = {
-        { "position", (getter)TransformComponent_getPosition, (setter)TransformComponent_setPosition, TransformComponent_position_doc, NULL },
-        { "rotation", (getter)TransformComponent_getRotation, (setter)TransformComponent_setRotation, TransformComponent_rotation_doc, NULL },
-        { "scale", (getter)TransformComponent_getScale, (setter)TransformComponent_setScale, TransformComponent_scale_doc, NULL },
+        { "localPosition", (getter)TransformComponent_getLocalPosition, (setter)TransformComponent_setLocalPosition, TransformComponent_localPosition_doc, NULL },
+        { "localRotation", (getter)TransformComponent_getLocalRotation, (setter)TransformComponent_setLocalRotation, TransformComponent_localRotation_doc, NULL },
+        { "localScale", (getter)TransformComponent_getLocalScale, (setter)TransformComponent_setLocalScale, TransformComponent_localScale_doc, NULL },
         { "localMatrix", (getter)TransformComponent_getLocalMatrix, NULL, TransformComponent_localMatrix_doc, NULL },
-        { "worldPosition", (getter)TransformComponent_getWorldPosition, (setter)TransformComponent_setWorldPosition, TransformComponent_worldPosition_doc, NULL },
-        { "worldRotation", (getter)TransformComponent_getWorldRotation, (setter)TransformComponent_setWorldRotation, TransformComponent_worldRotation_doc, NULL },
-        { "worldScale", (getter)TransformComponent_getWorldScale, (setter)TransformComponent_setWorldScale, TransformComponent_worldScale_doc, NULL },
+        { "position", (getter)TransformComponent_getWorldPosition, (setter)TransformComponent_setWorldPosition, TransformComponent_worldPosition_doc, NULL },
+        { "rotation", (getter)TransformComponent_getWorldRotation, (setter)TransformComponent_setWorldRotation, TransformComponent_worldRotation_doc, NULL },
+        { "scale", (getter)TransformComponent_getWorldScale, (setter)TransformComponent_setWorldScale, TransformComponent_worldScale_doc, NULL },
         { "worldMatrix", (getter)TransformComponent_getWorldMatrix, NULL, TransformComponent_worldMatrix_doc, NULL },
-        { "worldForward", (getter)TransformComponent_getWorldForward, NULL, NULL, NULL },
-        { "worldUp", (getter)TransformComponent_getWorldUp, NULL, NULL, NULL },
-        { "worldRight", (getter)TransformComponent_getWorldRight, NULL, NULL, NULL },
-        { "forward", (getter)TransformComponent_getForward, NULL, NULL, NULL },
-        { "up", (getter)TransformComponent_getUp, NULL, NULL, NULL },
-        { "right", (getter)TransformComponent_getRight, NULL, NULL, NULL },
+        { "forward", (getter)TransformComponent_getWorldForward, NULL, NULL, NULL },
+        { "up", (getter)TransformComponent_getWorldUp, NULL, NULL, NULL },
+        { "right", (getter)TransformComponent_getWorldRight, NULL, NULL, NULL },
+        { "localForward", (getter)TransformComponent_getLocalForward, NULL, NULL, NULL },
+        { "localUp", (getter)TransformComponent_getLocalUp, NULL, NULL, NULL },
+        { "localRight", (getter)TransformComponent_getLocalRight, NULL, NULL, NULL },
         { NULL, NULL }
     };
 
