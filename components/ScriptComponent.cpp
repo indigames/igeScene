@@ -1,6 +1,9 @@
 #include <Python.h>
 #include <algorithm>
 
+#include <pythonResource.h>
+#include <pyVectorMath.h>
+
 #include "components/ScriptComponent.h"
 #include "components/physic/PhysicObject.h"
 
@@ -16,7 +19,8 @@
 namespace fs = ghc::filesystem;
 
 #include "utils/PyxieHeaders.h"
-extern std::shared_ptr<Application> gApp;
+using namespace pyxie;
+
 
 namespace ige::scene
 {
@@ -254,6 +258,16 @@ namespace ige::scene
                         else if (PyFloat_Check(value))
                         {
                             members[key_str] = PyFloat_AsDouble(value);
+                        }
+                        else if (value->ob_type == _Vec2Type || value->ob_type == _Vec3Type || value->ob_type == _Vec4Type || value->ob_type == _QuatType) {
+                            int d;
+                            float buff[4];
+                            float* v = pyObjToFloat((PyObject*)value, buff, d);
+                            if (v != nullptr) {
+                                if (d == 2) members[key_str] = *((Vec2*)v);
+                                else if (d == 3) members[key_str] = *((Vec3*)v);
+                                else if (d > 3) members[key_str] = *((Vec4*)v);
+                            }
                         }
                         else
                         {
@@ -538,6 +552,50 @@ namespace ige::scene
             case json::value_t::boolean:
                 {
                     pyValue = PyBool_FromLong(value.get<bool>());
+                }
+                break;
+
+            case json::value_t::array:
+                {
+                    if (value.size() == 2) {
+                        try {
+                            Vec2 vec;
+                            value.get_to<Vec2>(vec);
+                            auto vecObj = PyObject_New(vec_obj, _Vec2Type);
+                            if (vecObj) {
+                                vmath_cpy(vec.P(), 2, vecObj->v);
+                                vecObj->d = 2;
+                                pyValue = (PyObject*)vecObj;
+                            }
+                        }
+                        catch (std::exception ex) {}
+                    }
+                    else if (value.size() == 3) {
+                        try {
+                            Vec3 vec;
+                            value.get_to<Vec3>(vec);
+                            auto vecObj = PyObject_New(vec_obj, _Vec3Type);
+                            if (vecObj) {
+                                vmath_cpy(vec.P(), 3, vecObj->v);
+                                vecObj->d = 3;
+                                pyValue = (PyObject*)vecObj;
+                            }
+                        }
+                        catch (std::exception ex) {}
+                    }
+                    else if (value.size() > 3) {
+                        try {
+                            Vec4 vec;
+                            value.get_to<Vec4>(vec);
+                            auto vecObj = PyObject_New(vec_obj, _Vec4Type);
+                            if (vecObj) {
+                                vmath_cpy(vec.P(), 4, vecObj->v);
+                                vecObj->d = 4;
+                                pyValue = (PyObject*)vecObj;
+                            }
+                        }
+                        catch (std::exception ex) {}
+                    }
                 }
                 break;
 
