@@ -77,12 +77,6 @@ namespace ige::scene
         static Vec2 s_defaultCanvasSize;
 
     protected:
-        //! Canvas to viewport matrix
-        Mat4 m_canvasToViewportMatrix;
-
-        //! Viewport to canvas matrix
-        Mat4 m_viewportToCanvasMatrix;
-
         //! Canvas size
         Vec2 m_canvasSize;
 
