@@ -766,18 +766,65 @@ namespace ige::scene
     {
         auto wSize = getWindowSize();
         if (wSize[0] == 0 || wSize[1] == 0 || camera == nullptr) return Vec3(0, 0, 0);
+        if (nearPlane < 0) nearPlane = 0;
 
-        auto hit = std::pair<std::shared_ptr<SceneObject>, Vec3>(nullptr, Vec3());
         auto pos = screenToClient(screenPos);
-
+        auto camPos = camera->GetPosition();
         Mat4 proj;
         camera->GetProjectionMatrix(proj);
 
         Mat4 viewInv;
         camera->GetViewInverseMatrix(viewInv);
-        auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
-        if (nearPlane < 0) nearPlane = 0;
-        auto outPos = ray.first + ray.second * nearPlane;
+
+        Vec4 lStart_NDC(
+            pos[0] / wSize[0] * 2.0f,
+            pos[1] / wSize[1] * 2.0f,
+            -1.0f,
+            1.0f
+        );
+
+        Vec4 lEnd_NDC(
+            pos[0] / wSize[0] * 2.0f,
+            pos[1] / wSize[1] * 2.0f,
+            0.f,
+            1.0f
+        );
+
+        Vec4 lZEnd_NDC(
+            0.f,
+            0.f,
+            0.f,
+            1.0f
+        );
+
+        // The Projection matrix goes from Camera Space to NDC.
+        Mat4 projectionInversedMatrix = proj.Inverse();
+
+        Vec4 lStart_camera = projectionInversedMatrix * lStart_NDC; lStart_camera /= lStart_camera.W();
+        Vec4 lStart_world = viewInv * lStart_camera; lStart_world /= lStart_world.W();
+
+        Vec4 lEnd_camera = projectionInversedMatrix * lEnd_NDC; lEnd_camera /= lEnd_camera.W();
+        Vec4 lEnd_world = viewInv * lEnd_camera; lEnd_world /= lEnd_world.W();
+
+        Vec4 lZEnd_camera = projectionInversedMatrix * lZEnd_NDC; lZEnd_camera /= lZEnd_camera.W();
+        Vec4 lZEnd_world = viewInv * lZEnd_camera; lZEnd_world /= lZEnd_world.W();
+        
+        Vec3 p_z(lZEnd_world.X(), lZEnd_world.Y(), lZEnd_world.Z());
+        auto lZDir_world = p_z - camPos;
+        Vec3 g_z(lZDir_world.X(), lZDir_world.Y(), lZDir_world.Z());
+        auto zlen = g_z.Length();
+
+        float per = 0.0;
+        if (zlen > 0)
+            per = nearPlane * 2 / zlen;
+
+        auto lDir_world = lEnd_world - lStart_world;
+        Vec3 g_direction = Vec3(lDir_world.X(), lDir_world.Y(), lDir_world.Z());
+        auto len = g_direction.Length();
+        g_direction.Normalize();
+
+        auto outPos = camPos + g_direction * len * per;
+
         return outPos;
     }
 
