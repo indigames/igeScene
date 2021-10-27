@@ -248,7 +248,6 @@ namespace ige::scene
     {
         auto obj = (showcase_obj*)(&ShowcaseType)->tp_alloc(&ShowcaseType, 0);
         obj->showcase = self->scene->getShowcase();
-        if (obj->showcase) obj->showcase->IncReference();
         return (PyObject *)obj;
     }
 
@@ -257,7 +256,6 @@ namespace ige::scene
     {
         auto obj = (environment_obj*)(&EnvironmentType)->tp_alloc(&EnvironmentType, 0);
         obj->envSet = self->scene->getEnvironment();
-        if (obj->envSet) obj->envSet->IncReference();
         return (PyObject *)obj;
     }
 
