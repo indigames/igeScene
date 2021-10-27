@@ -73,4 +73,6 @@ namespace ige::scene
 
     PyObject* Scene_screenToWorldPoint(PyObject_Scene* self, PyObject* args);
 
+    PyObject* Scene_worldToScreenPoint(PyObject_Scene* self, PyObject* args);
+
 }

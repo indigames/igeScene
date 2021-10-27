@@ -45,4 +45,28 @@ namespace ige::scene
 
     // Set color
     int SpriteComponent_setColor(PyObject_SpriteComponent* self, PyObject* value);
+
+    // Get Fill Method
+    PyObject* SpriteComponent_getFillMethod(PyObject_SpriteComponent* self);
+
+    // Set Fill Method
+    int SpriteComponent_setFillMethod(PyObject_SpriteComponent* self, PyObject* value);
+
+    // Get Fill Origin
+    PyObject* SpriteComponent_getFillOrigin(PyObject_SpriteComponent* self);
+
+    // Set Fill Origin
+    int SpriteComponent_setFillOrigin(PyObject_SpriteComponent* self, PyObject* value);
+
+    // Get Fill Amount
+    PyObject* SpriteComponent_getFillAmount(PyObject_SpriteComponent* self);
+
+    // Set Fill Amount
+    int SpriteComponent_setFillAmount(PyObject_SpriteComponent* self, PyObject* value);
+
+    // Get Fill Clockwise
+    PyObject* SpriteComponent_getClockwise(PyObject_SpriteComponent* self);
+
+    // Set Fill Clockwise
+    int SpriteComponent_setClockwise(PyObject_SpriteComponent* self, PyObject* value);
 }

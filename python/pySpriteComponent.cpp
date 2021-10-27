@@ -101,11 +101,87 @@ namespace ige::scene
         return 0;
     }
 
+    // Get Fill Method
+    PyObject* SpriteComponent_getFillMethod(PyObject_SpriteComponent* self)
+    {
+        return PyLong_FromLong((int)self->component->getFillMethod());
+    }
+
+    // Set Fill Method
+    int SpriteComponent_setFillMethod(PyObject_SpriteComponent* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto val = (uint32_t)PyLong_AsLong(value);
+            self->component->setFillMethod(val);
+            return 0;
+        }
+        return -1;
+    }
+
+    // Get Fill Origin
+    PyObject* SpriteComponent_getFillOrigin(PyObject_SpriteComponent* self)
+    {
+        return PyLong_FromLong((int)self->component->getFillOrigin());
+    }
+
+    // Set Fill Origin
+    int SpriteComponent_setFillOrigin(PyObject_SpriteComponent* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto val = (uint32_t)PyLong_AsLong(value);
+            self->component->setFillOrigin(val);
+            return 0;
+        }
+        return -1;
+    }
+
+    // Get Fill Amount
+    PyObject* SpriteComponent_getFillAmount(PyObject_SpriteComponent* self)
+    {
+        return PyFloat_FromDouble(self->component->getFillAmount());
+    }
+
+    // Set Fill Amount
+    int SpriteComponent_setFillAmount(PyObject_SpriteComponent* self, PyObject* value)
+    {
+        if (PyFloat_Check(value))
+        {
+            auto val = (float)PyFloat_AsDouble(value);
+            self->component->setFillAmount(val);
+            return 0;
+        }
+        return -1;
+    }
+
+    // Get Fill Clockwise
+    PyObject* SpriteComponent_getClockwise(PyObject_SpriteComponent* self)
+    {
+        return PyBool_FromLong(self->component->getClockwise());
+    }
+
+    // Set Fill Clockwise
+    int SpriteComponent_setClockwise(PyObject_SpriteComponent* self, PyObject* value)
+    {
+        if (PyLong_Check(value))
+        {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
+            self->component->setClockwise(val);
+            return 0;
+        }
+        return -1;
+    }
+
     PyGetSetDef SpriteComponent_getsets[] = {
         {"path", (getter)SpriteComponent_getPath, (setter)SpriteComponent_setPath, SpriteComponent_path_doc, NULL},
         {"size", (getter)SpriteComponent_getSize, (setter)SpriteComponent_setSize, SpriteComponent_size_doc, NULL},
         {"isBillboard", (getter)SpriteComponent_isBillboard, (setter)SpriteComponent_setBillboard, SpriteComponent_isBillboard_doc, NULL},
         {"color", (getter)SpriteComponent_getColor, (setter)SpriteComponent_setColor, NULL, NULL},
+        {"fillMethod", (getter)SpriteComponent_getFillMethod, (setter)SpriteComponent_setFillMethod, NULL, NULL},
+        {"fillOrigin", (getter)SpriteComponent_getFillOrigin, (setter)SpriteComponent_setFillOrigin, NULL, NULL},
+        {"fillAmount", (getter)SpriteComponent_getFillAmount, (setter)SpriteComponent_setFillAmount, NULL, NULL},
+        {"clockwise", (getter)SpriteComponent_getClockwise, (setter)SpriteComponent_setClockwise, NULL, NULL},
         {NULL, NULL}};
 
     PyTypeObject PyTypeObject_SpriteComponent = {

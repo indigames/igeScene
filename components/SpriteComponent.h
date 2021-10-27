@@ -89,6 +89,24 @@ namespace ige::scene
         virtual void setColor(const Vec4& value);
         virtual const Vec4 getColor()  const { return m_sprite->getColor(); }
 
+        //! FillMethod
+        virtual void setFillMethod(int value);
+        virtual const FillMethod& getFillMethod() const { return m_sprite->getFillMethod(); }
+
+        //! FillOrigin
+        virtual void setFillOrigin(int value);
+        virtual const FillOrigin& getFillOrigin() const { return m_sprite->getFillOrigin(); }
+
+        //! FillAmount
+        virtual void setFillAmount(float value);
+        virtual const float getFillAmount()  const { return m_sprite->getFillAmount(); }
+
+        //! Clockwise
+        virtual void setClockwise(bool value);
+        virtual const bool getClockwise() const { return m_sprite->getClockwise(); }
+
+
+
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 

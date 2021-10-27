@@ -434,12 +434,60 @@ namespace ige::scene
         if (!camera)
             return NULL;
 
-        auto hit = self->scene->screenToWorldPoint(screenPos, camera, distance);
+        auto screenPoint = self->scene->screenToWorldPoint(screenPos, camera, distance);
        
-        auto hitPos = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(hit.P(), 3, hitPos->v);
-        hitPos->d = 3;
-        return (PyObject*)hitPos;
+        auto pos = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(screenPoint.P(), 3, pos->v);
+        pos->d = 3;
+        return (PyObject*)pos;
+    }
+
+    PyObject* Scene_worldToScreenPoint(PyObject_Scene* self, PyObject* args)
+    {
+        PyObject* worldPosObj;
+        PyObject* cameraObj;
+        float distance = 10000.f;
+
+        if (!PyArg_ParseTuple(args, "OO", &worldPosObj, &cameraObj))
+            return NULL;
+
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat(worldPosObj, buff, d);
+        if (!v)
+            return NULL;
+
+        Vec3 worldPos = Vec3(v[0], v[1], v[2]);
+        Camera* camera = nullptr;
+        if (cameraObj->ob_type == &CameraType)
+        {
+            auto camObj = (camera_obj*)cameraObj;
+            camera = camObj->camera;
+        }
+        else if (cameraObj->ob_type == &PyTypeObject_CameraComponent)
+        {
+            auto cameraCompObj = (PyObject_CameraComponent*)cameraObj;
+            camera = cameraCompObj->component->getCamera();
+        }
+        else if (cameraObj->ob_type == &PyTypeObject_SceneObject)
+        {
+            auto sceneObj = (PyObject_SceneObject*)cameraObj;
+            auto cameraComp = sceneObj->sceneObject->getComponent<CameraComponent>();
+            if (cameraComp)
+            {
+                camera = cameraComp->getCamera();
+            }
+        }
+
+        if (!camera)
+            return NULL;
+
+        auto screenPoint = self->scene->worldToScreenPoint(worldPos, camera);
+
+        auto pos = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(screenPoint.P(), 2, pos->v);
+        pos->d = 2;
+        return (PyObject*)pos;
     }
 
     // Compare function
@@ -496,6 +544,7 @@ namespace ige::scene
         { "raycastFromCamera", (PyCFunction)Scene_raycastFromCamera, METH_VARARGS, Scene_raycastFromCamera_doc },
         { "raycastUI", (PyCFunction)Scene_raycastUI, METH_VARARGS, Scene_raycastUI_doc },
         { "screenToWorldPoint", (PyCFunction)Scene_screenToWorldPoint, METH_VARARGS, NULL },
+        { "worldToScreenPoint", (PyCFunction)Scene_worldToScreenPoint, METH_VARARGS, NULL },
         { NULL, NULL }
     };
 
