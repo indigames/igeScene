@@ -405,6 +405,10 @@ namespace ige::scene
         {
             setScissorTestEnable(val);
         }
+        else if (key.compare("updateRatio") == 0)
+        {
+            setFrameUpdateRatio(val);
+        }
         else
         {
             Component::setProperty(key, val);

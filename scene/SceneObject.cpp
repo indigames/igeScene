@@ -877,7 +877,7 @@ namespace ige::scene
     void SceneObject::updateAabb()
     {
         // Ignore Canvas and root object
-        if (getComponent<Canvas>() != nullptr || getParent() == nullptr)
+        if (getComponent<Canvas>() != nullptr || (!getScene()->isPrefab() && getParent() == nullptr))
         {
             m_frameAABB = m_aabbWorld = m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
             return;
