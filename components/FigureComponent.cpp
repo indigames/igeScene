@@ -79,7 +79,15 @@ namespace ige::scene
             if (fPath.size() == 0) fPath = fsPath.string();
             std::replace(fPath.begin(), fPath.end(), '\\', '/');
 
-            m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str(), pyxieFigure::CloneSkeleton);
+            auto figure = (Figure*)ResourceManager::Instance().GetResource(fPath.c_str(), FIGURETYPE);
+
+            // Backup the original figure for cloning later
+            if (figure == nullptr) {
+                ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton);
+            }
+
+            // Use copy instance
+            m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton);
 
             // Update transform from transform component
             auto transform = getOwner()->getTransform();
@@ -330,6 +338,7 @@ namespace ige::scene
         j["doubleSide"] = isDoubleSideEnable();
         j["scissor"] = isScissorTestEnable();
         j["disableMeshes"] = m_disableMeshes;
+        j["materials"] = m_materials;
     }
 
     //! Deserialize
@@ -347,6 +356,10 @@ namespace ige::scene
         auto disableMeshes = j.value("disableMeshes", std::set<int>());
         for (auto idx: disableMeshes) {
             setMeshEnable(idx, false);
+        }
+        auto materials = j.value("materials", std::vector<FigureMaterial>());
+        for (auto mat : materials) {
+            setMaterialParams(mat);
         }
         Component::from_json(j);
     }
@@ -394,5 +407,64 @@ namespace ige::scene
         {
             Component::setProperty(key, val);
         }
+    }
+
+    void FigureComponent::setMaterialParams(uint64_t index, uint64_t hash, const Vec4& params) {
+        auto itr = std::find_if(m_materials.begin(), m_materials.end(), [index, hash](const auto& elem) {
+            return elem.idx == index && elem.hash == hash;
+        });
+        if(itr != m_materials.end()) {
+            (*itr).params = params;
+        }
+        else {
+            m_materials.push_back(FigureMaterial(index, hash, params));
+        }
+        if (m_figure) {
+            m_figure->SetMaterialParam(index, hash, (void*)params.P());
+        }
+    }
+
+    void FigureComponent::setMaterialParams(uint64_t index, uint64_t hash, const std::string& texPath) {
+        auto fsPath = fs::path(texPath);
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(texPath), fs::current_path()).string() : fsPath.string();
+        if (relPath.size() == 0) relPath = fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+
+        auto itr = std::find_if(m_materials.begin(), m_materials.end(), [index, hash](const auto& elem) {
+            return elem.idx == index && elem.hash == hash;
+        });
+        if (itr != m_materials.end()) {
+            (*itr).texPath = relPath;
+        }
+        else {
+            m_materials.push_back(FigureMaterial(index, hash, relPath));
+        }
+        if (m_figure) {
+            Sampler sampler;
+            sampler.tex = pyxieResourceCreator::Instance().NewTexture(relPath.c_str());
+            sampler.samplerSlotNo = 0;
+            sampler.samplerState.wrap_s = SamplerState::WRAP;
+            sampler.samplerState.wrap_t = SamplerState::WRAP;
+            sampler.samplerState.minfilter = SamplerState::LINEAR_MIPMAP_LINEAR;
+            sampler.samplerState.magfilter = SamplerState::LINEAR;
+            sampler.samplerState.mipfilter = SamplerState::LINEAR_MIPMAP_LINEAR;
+            sampler.samplerState.borderColor = 0;
+            m_figure->SetMaterialParam(index, hash, &sampler);
+        }
+    }
+
+    void FigureComponent::setMaterialParams(uint64_t index, const std::string& name, const Vec4& params) {
+        setMaterialParams(index, GenerateNameHash(name.c_str()), params);
+    }
+
+    void FigureComponent::setMaterialParams(uint64_t index, const std::string& name, const std::string& texPath) {
+        setMaterialParams(index, GenerateNameHash(name.c_str()), texPath);
+    }
+
+    void FigureComponent::setMaterialParams(FigureMaterial mat) {
+        if(!mat.texPath.empty())
+            setMaterialParams(mat.idx, mat.hash, mat.texPath);
+        else
+            setMaterialParams(mat.idx, mat.hash, mat.params);
     }
 } // namespace ige::scene

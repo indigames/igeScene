@@ -8,6 +8,44 @@ using namespace pyxie;
 
 namespace ige::scene
 {
+    class FigureMaterial {
+    public:
+        FigureMaterial():
+            idx((uint64_t)-1), hash((uint64_t)-1) {}
+
+        FigureMaterial(uint64_t idx, uint64_t hash, const Vec4& params)
+            : idx(idx), hash(hash), params(params) {}
+
+        FigureMaterial(uint64_t idx, uint64_t hash, const std::string& path)
+            : idx(idx), hash(hash), texPath(path) {}
+
+    public:
+        uint64_t idx;
+        uint64_t hash;
+        Vec4 params;
+        std::string texPath;
+
+    protected:
+
+        //! Serialize
+        friend void to_json(json& j, const FigureMaterial& obj)
+        {
+            j["idx"] = obj.idx;
+            j["hash"] = obj.hash;
+            if (!obj.texPath.empty()) j["tex"] = obj.texPath;
+            else j["params"] = obj.params;
+        }
+
+        //! Deserialize
+        friend void from_json(const json& j, FigureMaterial& obj)
+        {
+            obj.idx = j.value("idx", (uint64_t)-1);
+            obj.hash = j.value("hash", (uint64_t)-1);
+            obj.params = j.value("params", Vec4());
+            obj.texPath = j.value("tex", std::string());
+        }
+    };
+
     //! FigureComponent
     class FigureComponent : public Component
     {
@@ -82,6 +120,13 @@ namespace ige::scene
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 
+        //! Set material params
+        virtual void setMaterialParams(uint64_t index, uint64_t hash, const Vec4& params);
+        virtual void setMaterialParams(uint64_t index, const std::string& name, const Vec4& params);
+        virtual void setMaterialParams(uint64_t index, uint64_t hash, const std::string& texPath);
+        virtual void setMaterialParams(uint64_t index, const std::string& name, const std::string& texPath);
+        virtual void setMaterialParams(FigureMaterial mat);
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -127,5 +172,8 @@ namespace ige::scene
         //! Cache mesh alpha state for visibility
         std::vector<float> m_meshAlphaValues;
         std::set<int> m_disableMeshes;
+
+        //! Cache material settings
+        std::vector<FigureMaterial> m_materials;
     };
 } // namespace ige::scene
