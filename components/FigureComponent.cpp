@@ -426,6 +426,8 @@ namespace ige::scene
 
     void FigureComponent::setMaterialParams(uint64_t index, uint64_t hash, const std::string& texPath) {
         auto fsPath = fs::path(texPath);
+        fsPath = fsPath.extension().compare(".pyxi") == 0 ? fsPath : fsPath.parent_path().append(fsPath.stem().string() + ".pyxi");
+
         auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(texPath), fs::current_path()).string() : fsPath.string();
         if (relPath.size() == 0) relPath = fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
