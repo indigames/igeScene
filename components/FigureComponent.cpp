@@ -43,7 +43,7 @@ namespace ige::scene
         m_figure->SetScale(transform->getScale());
 
         // Update
-        m_figure->Step(dt);
+        m_figure->Step(dt * getFrameUpdateRatio());
 
         // Update transform back to transform component
         transform->setPosition(m_figure->GetPosition());
@@ -337,6 +337,7 @@ namespace ige::scene
         j["aBlendOp"] = getAlphaBlendingOp();
         j["doubleSide"] = isDoubleSideEnable();
         j["scissor"] = isScissorTestEnable();
+        j["updateRatio"] = getFrameUpdateRatio();
         j["disableMeshes"] = m_disableMeshes;
         j["materials"] = m_materials;
     }
@@ -353,6 +354,7 @@ namespace ige::scene
         setAlphaBlendingOp(j.value("aBlendOp", 2));
         setDoubleSideEnable(j.value("doubleSide", false));
         setScissorTestEnable(j.value("scissor", false));
+        setFrameUpdateRatio(j.value("updateRatio", 1.f));
         auto disableMeshes = j.value("disableMeshes", std::set<int>());
         for (auto idx: disableMeshes) {
             setMeshEnable(idx, false);

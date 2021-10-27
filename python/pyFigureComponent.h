@@ -65,4 +65,8 @@ namespace ige::scene
     // Scissor Test
     PyObject* FigureComponent_isScissorTestEnable(PyObject_FigureComponent* self);
     int FigureComponent_setScissorTestEnable(PyObject_FigureComponent* self, PyObject* value);
+
+    // Frame update ratio (speedup/slower effects)
+    PyObject* FigureComponent_getFrameUpdateRatio(PyObject_FigureComponent* self);
+    int FigureComponent_setFrameUpdateRatio(PyObject_FigureComponent* self, PyObject* value);
 }

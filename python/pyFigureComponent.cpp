@@ -189,6 +189,23 @@ namespace ige::scene
         return -1;
     }
 
+    // Frame update ratio (speedup/slower effects)
+    PyObject* FigureComponent_getFrameUpdateRatio(PyObject_FigureComponent* self)
+    {
+        return PyFloat_FromDouble(self->component->getFrameUpdateRatio());
+    }
+
+    int FigureComponent_setFrameUpdateRatio(PyObject_FigureComponent* self, PyObject* value)
+    {
+        if (PyFloat_Check(value))
+        {
+            float val = (float)PyFloat_AsDouble(value);
+            self->component->setFrameUpdateRatio(val);
+            return 0;
+        }
+        return -1;
+    }
+
     PyGetSetDef FigureComponent_getsets[] = {
         { "path", (getter)FigureComponent_getPath, (setter)FigureComponent_setPath, FigureComponent_path_doc, NULL },
         { "fogEnabled", (getter)FigureComponent_isFogEnabled, (setter)FigureComponent_setFogEnabled, FigureComponent_fogEnabled_doc, NULL },
@@ -199,6 +216,7 @@ namespace ige::scene
         { "alphaBlendEnabled", (getter)FigureComponent_isAlphaBlendingEnable , (setter)FigureComponent_setAlphaBlendingEnable, FigureComponent_alphaBlendEnabled_doc, NULL },
         { "alphaBlendOp", (getter)FigureComponent_getAlphaBlendingOp , (setter)FigureComponent_setAlphaBlendingOp, FigureComponent_alphaBlendOp_doc, NULL },
         { "scissorTestEnabled", (getter)FigureComponent_isScissorTestEnable , (setter)FigureComponent_setScissorTestEnable, FigureComponent_scissorTestEnabled_doc, NULL },
+        { "updateRatio", (getter)FigureComponent_getFrameUpdateRatio, (setter)FigureComponent_setFrameUpdateRatio, FigureComponent_updateRatio_doc, NULL},
         { "figure", (getter)FigureComponent_getFigure, NULL, FigureComponent_figure_doc, NULL },
         { NULL, NULL }
     };

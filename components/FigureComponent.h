@@ -117,6 +117,10 @@ namespace ige::scene
         const bool isMeshEnable(int idx) const;
         void setMeshEnable(int idx, bool enable = true);
 
+        //! Frame update ratio (speedup/slower effects)
+        float getFrameUpdateRatio() const { return m_frameUpdateRatio; };
+        void setFrameUpdateRatio(float ratio) { m_frameUpdateRatio = ratio; }
+
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 
@@ -144,6 +148,9 @@ namespace ige::scene
 
         //! Path to figure file
         std::string m_path;
+
+        //! Frame update ratio (speedup/slower effects)
+        float m_frameUpdateRatio = 1.f;
 
         //! Cache fog state
         bool m_bIsFogEnabled = false;

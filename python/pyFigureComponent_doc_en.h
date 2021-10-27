@@ -69,3 +69,8 @@ PyDoc_STRVAR(FigureComponent_scissorTestEnabled_doc,
     "Type: bool\n"
     "Default: false\n"
 );
+
+// updateRatio
+PyDoc_STRVAR(FigureComponent_updateRatio_doc,
+    "Frame update ratio (speedup/slower effects).\n"
+    "Type: float\n");
