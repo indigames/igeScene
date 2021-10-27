@@ -237,6 +237,30 @@ namespace ige::scene
         m_sprite->setBorder(value[0], value[1], value[2], value[3]);
     }
 
+    //! Set Fill Method
+    void SpriteComponent::setFillMethod(int value)
+    {
+        m_sprite->setFillMethod((FillMethod)value);
+    }
+
+    //! Set Fill Origin
+    void SpriteComponent::setFillOrigin(int value)
+    {
+        m_sprite->setFillOrigin((FillOrigin)value);
+    }
+
+    //! Set Fill Amount
+    void SpriteComponent::setFillAmount(float value)
+    {
+        m_sprite->setFillAmount(value);
+    }
+
+    //! Set Clockwise
+    void SpriteComponent::setClockwise(bool value)
+    {
+        m_sprite->setClockwise(value);
+    }
+
     //! Serialize
     void SpriteComponent::to_json(json &j) const
     {
@@ -250,6 +274,10 @@ namespace ige::scene
         j["color"] = getColor();
         j["spritetype"] = (int)getSpriteType();
         j["border"] = getBorder();
+        j["fillmethod"] = getFillMethod();
+        j["fillorigin"] = getFillOrigin();
+        j["fillamount"] = getFillAmount();
+        j["clockwise"] = getClockwise();
     }
 
     //! Deserialize
@@ -264,6 +292,10 @@ namespace ige::scene
         setColor(j.value("color", Vec4(0, 0, 0, 0)));
         setSpriteType(j.value("spritetype", 0));
         setBorder(j.value("border", Vec4(0, 0, 0, 0)));
+        setFillMethod(j.value("fillmethod", 0));
+        setFillOrigin(j.value("fillorigin", 0));
+        setFillAmount(j.value("fillamount", 1.0f));
+        setClockwise(j.value("clockwise", false));
         Component::from_json(j);
     }
 
@@ -301,6 +333,22 @@ namespace ige::scene
         else if (key.compare("border") == 0)
         {
             setBorder(val);
+        }
+        else if (key.compare("fillmethod") == 0)
+        {
+            setFillMethod(val);
+        }
+        else if (key.compare("fillorigin") == 0)
+        {
+            setFillOrigin(val);
+        }
+        else if (key.compare("fillamount") == 0)
+        {
+            setFillAmount(val);
+        }
+        else if (key.compare("clockwise") == 0)
+        {
+            setClockwise(val);
         }
         else if (key.compare("path") == 0)
         {

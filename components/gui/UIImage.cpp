@@ -59,30 +59,6 @@ namespace ige::scene
         SpriteComponent::onDisable();
     }
 
-    //! Set Fill Method
-    void UIImage::setFillMethod(int value)
-    {
-        m_sprite->setFillMethod((FillMethod)value);
-    }
-
-    //! Set Fill Origin
-    void UIImage::setFillOrigin(int value)
-    {
-        m_sprite->setFillOrigin((FillOrigin)value);
-    }
-
-    //! Set Fill Amount
-    void UIImage::setFillAmount(float value)
-    {
-        m_sprite->setFillAmount(value);
-    }
-
-    //! Set Clockwise
-    void UIImage::setClockwise(bool value)
-    {
-        m_sprite->setClockwise(value);
-    }
-
     //! Set Interactable
     void UIImage::setInteractable(bool value) {
         m_bIsInteractable = value;
@@ -151,10 +127,10 @@ namespace ige::scene
     void UIImage::from_json(const json &j)
     {
         setSize(j.at("size"));
-        setFillMethod(j.at("fillmethod"));
-        setFillOrigin(j.at("fillorigin"));
-        setFillAmount(j.at("fillamount"));
-        setClockwise(j.at("clockwise"));
+        setFillMethod(j.value("fillmethod", 0));
+        setFillOrigin(j.value("fillorigin", 0));
+        setFillAmount(j.value("fillamount", 1.0f));
+        setClockwise(j.value("clockwise", false));
         setColor(j.at("color"));
         setInteractable(j.at("interactable"));
         setSpriteType(j.at("spritetype"));

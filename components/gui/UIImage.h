@@ -40,23 +40,7 @@ namespace ige::scene
 
         //! Disable
         virtual void onDisable() override;
-
-        //! FillMethod
-        void setFillMethod(int value);
-        const FillMethod& getFillMethod() const { return m_sprite->getFillMethod(); }
-
-        //! FillOrigin
-        void setFillOrigin(int value);
-        const FillOrigin& getFillOrigin() const { return m_sprite->getFillOrigin(); }
-        
-        //! FillAmount
-        void setFillAmount(float value);
-        const float getFillAmount()  const { return m_sprite->getFillAmount(); }
-        
-        //! Clockwise
-        void setClockwise(bool value);
-        const bool getClockwise() const { return m_sprite->getClockwise(); }
-        
+            
         void setInteractable(bool value);
         const bool isInteractable() const { return m_bIsInteractable; }
 

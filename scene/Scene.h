@@ -196,6 +196,7 @@ namespace ige::scene
 
         //! Sceen Point to World Point
         Vec3 screenToWorldPoint(const Vec2& pos, Camera* cam, float nearPlane);
+        Vec2 worldToScreenPoint(const Vec3& pos, Camera* cam);
 
     protected:
         //! Create root Objects

@@ -828,6 +828,26 @@ namespace ige::scene
         return outPos;
     }
 
+    Vec2 Scene::worldToScreenPoint(const Vec3& pos, Camera* camera)
+    {
+        auto wSize = getWindowSize();
+        if (wSize[0] == 0 || wSize[1] == 0 || camera == nullptr) return Vec2(0, 0);
+        auto camPos = camera->GetPosition();
+        Mat4 proj;
+        camera->GetProjectionMatrix(proj);
+
+        Mat4 viewInv;
+        camera->GetViewInverseMatrix(viewInv);
+
+        auto clipSpacePos = proj * (viewInv * Vec4(pos, 1.0));
+        auto ndcSpacePos = clipSpacePos / clipSpacePos.W();
+        
+        Vec2 windowSpacePos = Vec2(((0.0 - ndcSpacePos[0]) / 2.0) * wSize[0], ((0.0 - ndcSpacePos[1]) / 2.0) * wSize[1]);
+        windowSpacePos[0] = std::roundf(windowSpacePos[0]);
+        windowSpacePos[1] = std::roundf(windowSpacePos[1]);
+        return windowSpacePos;
+    }
+
     //! Raycast
     std::pair<std::shared_ptr<SceneObject>, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance, bool forceRaycast)
     {

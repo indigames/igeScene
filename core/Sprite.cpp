@@ -8,7 +8,7 @@ namespace ige::scene
 {
     Sprite::Sprite(const Vec2& size)
         : m_figure(nullptr), m_size(size), m_tiling(1, 1), m_offset(0, 0), m_wrapMode(SamplerState::CLAMP),
-        m_spriteType(SpriteType::Simple), m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_texture(nullptr),
+        m_spriteType(SpriteType::Simple), m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_clockwise(false), m_texture(nullptr),
         m_border(0.f, 0.f, 0.f, 0.f), m_bIsScaleBorder (false),
         m_color(1.f, 1.f, 1.f, 1.f) 
     {
@@ -16,7 +16,7 @@ namespace ige::scene
 
     Sprite::Sprite(Texture* texture, const Vec2& size)
         : m_figure(nullptr), m_size(size), m_tiling(1,1), m_offset(0,0), m_wrapMode(SamplerState::CLAMP),
-        m_spriteType(SpriteType::Simple), m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_texture(nullptr),
+        m_spriteType(SpriteType::Simple), m_fillMethod(FillMethod::None), m_fillOrigin(FillOrigin::Bottom), m_fillAmount(1), m_clockwise(false), m_texture(nullptr),
         m_border(0.f, 0.f, 0.f, 0.f), m_bIsScaleBorder(false),
         m_color(1.f, 1.f, 1.f, 1.f)
     {
