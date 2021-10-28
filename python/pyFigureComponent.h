@@ -28,6 +28,9 @@ namespace ige::scene
     // Get figure
     PyObject* FigureComponent_getFigure(PyObject_FigureComponent* self);
 
+    // Set figure
+    int FigureComponent_setFigure(PyObject_FigureComponent* self, PyObject* value);
+
     // Get path
     PyObject* FigureComponent_getPath(PyObject_FigureComponent* self);
 

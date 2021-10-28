@@ -160,8 +160,6 @@ namespace ige::scene
 
     void Scene::clear()
     {
-        removeAllObjects();
-
         getResourceAddedEvent().removeAllListeners();
         getResourceRemovedEvent().removeAllListeners();
         getUIResourceAddedEvent().removeAllListeners();
@@ -173,6 +171,8 @@ namespace ige::scene
         m_root = nullptr;
         m_rootUI = nullptr;
         m_canvas = nullptr;
+
+        removeAllObjects();
 
         if (m_shadowTexture)
         {

@@ -43,6 +43,17 @@ namespace ige::scene
         return -1;
     }
 
+    // Set figure
+    int FigureComponent_setFigure(PyObject_FigureComponent* self, PyObject* value)
+    {
+        if(value && value->ob_type != &FigureType) {
+            auto figObj = (figure_obj*)value;
+            self->component->setFigure(figObj->figure);
+            return 0;
+        }
+        return -1;
+    }
+
     // Get figure
     PyObject* FigureComponent_getFigure(PyObject_FigureComponent* self)
     {
@@ -50,7 +61,6 @@ namespace ige::scene
         figureObj->figure = self->component->getFigure();
         if(figureObj->figure) figureObj->figure->IncReference();
         return (PyObject*)figureObj;
-        
     }
 
     // Fog
@@ -217,7 +227,7 @@ namespace ige::scene
         { "alphaBlendOp", (getter)FigureComponent_getAlphaBlendingOp , (setter)FigureComponent_setAlphaBlendingOp, FigureComponent_alphaBlendOp_doc, NULL },
         { "scissorTestEnabled", (getter)FigureComponent_isScissorTestEnable , (setter)FigureComponent_setScissorTestEnable, FigureComponent_scissorTestEnabled_doc, NULL },
         { "updateRatio", (getter)FigureComponent_getFrameUpdateRatio, (setter)FigureComponent_setFrameUpdateRatio, FigureComponent_updateRatio_doc, NULL},
-        { "figure", (getter)FigureComponent_getFigure, NULL, FigureComponent_figure_doc, NULL },
+        { "figure", (getter)FigureComponent_getFigure, (setter)FigureComponent_setFigure, FigureComponent_figure_doc, NULL },
         { NULL, NULL }
     };
 

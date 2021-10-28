@@ -76,6 +76,7 @@ namespace ige::scene
 
         //! Get associated figure
         Figure *getFigure() { return m_figure; }
+        void setFigure(Figure* figure);
 
         //! Path
         void setPath(const std::string &path);

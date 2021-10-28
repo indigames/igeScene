@@ -56,6 +56,48 @@ namespace ige::scene
     {    
     }
 
+    void FigureComponent::setFigure(Figure* figure)
+    {
+        if (figure == m_figure)
+            return;
+
+        m_path.clear();
+
+        if (m_figure != nullptr) {
+            onResourceRemoved(m_figure);
+            m_figure->DecReference();
+            m_figure = nullptr;
+        }
+
+        if (figure == nullptr)
+            return;
+
+        // Use copy instance
+        m_figure = figure;
+        m_figure->IncReference();
+
+        m_path = std::string(m_figure->ResourceName());
+
+        // Update transform from transform component
+        auto transform = getOwner()->getTransform();
+        m_figure->SetPosition(transform->getPosition());
+        m_figure->SetRotation(transform->getRotation());
+        m_figure->SetScale(transform->getScale());
+
+        // Wait build
+        m_figure->WaitBuild();
+
+        // Cache mesh alpha for visibility setting
+        m_meshAlphaValues.clear();
+        m_disableMeshes.clear();
+        for (int i = 0; i < m_figure->NumMeshes(); ++i) {
+            m_meshAlphaValues.push_back(m_figure->GetMeshAlpha(i));
+        }
+
+        onResourceAdded(m_figure);
+        getOwner()->getTransform()->makeDirty();
+    }
+    
     void FigureComponent::setPath(const std::string &path)
     {
         auto fsPath = fs::path(path);
