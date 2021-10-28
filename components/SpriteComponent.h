@@ -44,6 +44,10 @@ namespace ige::scene
         virtual void setPath(const std::string &path);
         virtual const std::string &getPath() const { return m_path; }
 
+        //! Texture
+        virtual void setTexture(Texture* tex);
+        virtual Texture* getTexture() const { return m_sprite ? m_sprite->getTexture() : nullptr; }
+
         //! Size
         void setSize(const Vec2 &size);
         const Vec2 &getSize() const { return m_sprite->getSize(); }
@@ -105,8 +109,6 @@ namespace ige::scene
         virtual void setClockwise(bool value);
         virtual const bool getClockwise() const { return m_sprite->getClockwise(); }
 
-
-
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 
@@ -127,11 +129,11 @@ namespace ige::scene
 
     protected:
 
+        //! Path
+        std::string m_path;
+
         //! Sprite
         std::shared_ptr<Sprite> m_sprite;
-
-        std::string m_path;
-        Texture* m_texture;
 
         //! Billboard setting
         bool m_bIsBillboard = false;

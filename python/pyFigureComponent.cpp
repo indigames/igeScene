@@ -46,10 +46,16 @@ namespace ige::scene
     // Set figure
     int FigureComponent_setFigure(PyObject_FigureComponent* self, PyObject* value)
     {
-        if(value && value->ob_type != &FigureType) {
-            auto figObj = (figure_obj*)value;
-            self->component->setFigure(figObj->figure);
-            return 0;
+        if(value) {
+            if (value->ob_type == &FigureType) {
+                auto figObj = (figure_obj*)value;
+                self->component->setFigure(figObj->figure);
+                return 0;
+            }
+            else if (value->ob_type == &_PyNone_Type) {
+                self->component->setFigure(nullptr);
+                return 0;
+            }
         }
         return -1;
     }

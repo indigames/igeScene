@@ -173,15 +173,41 @@ namespace ige::scene
         return -1;
     }
 
+    // Texture
+    PyObject* SpriteComponent_getTexture(PyObject_SpriteComponent* self)
+    {
+        auto texObj = (texture_obj*)(&TextureType)->tp_alloc(&TextureType, 0);
+        texObj->colortexture = self->component->getTexture();
+        if (texObj->colortexture) texObj->colortexture->IncReference();
+        return (PyObject*)texObj;
+    }
+
+    int SpriteComponent_setTexture(PyObject_SpriteComponent* self, PyObject* value)
+    {
+        if (value) {
+            if (value->ob_type == &TextureType) {
+                auto texObj = (texture_obj*)value;
+                self->component->setTexture(texObj->colortexture);
+                return 0;
+            }
+            else if (value->ob_type == &_PyNone_Type) {
+                self->component->setTexture(nullptr);
+                return 0;
+            }
+        }
+        return -1;
+    }
+
     PyGetSetDef SpriteComponent_getsets[] = {
         {"path", (getter)SpriteComponent_getPath, (setter)SpriteComponent_setPath, SpriteComponent_path_doc, NULL},
         {"size", (getter)SpriteComponent_getSize, (setter)SpriteComponent_setSize, SpriteComponent_size_doc, NULL},
         {"isBillboard", (getter)SpriteComponent_isBillboard, (setter)SpriteComponent_setBillboard, SpriteComponent_isBillboard_doc, NULL},
-        {"color", (getter)SpriteComponent_getColor, (setter)SpriteComponent_setColor, NULL, NULL},
-        {"fillMethod", (getter)SpriteComponent_getFillMethod, (setter)SpriteComponent_setFillMethod, NULL, NULL},
-        {"fillOrigin", (getter)SpriteComponent_getFillOrigin, (setter)SpriteComponent_setFillOrigin, NULL, NULL},
-        {"fillAmount", (getter)SpriteComponent_getFillAmount, (setter)SpriteComponent_setFillAmount, NULL, NULL},
-        {"clockwise", (getter)SpriteComponent_getClockwise, (setter)SpriteComponent_setClockwise, NULL, NULL},
+        {"color", (getter)SpriteComponent_getColor, (setter)SpriteComponent_setColor, SpriteComponent_color_doc, NULL},
+        {"fillMethod", (getter)SpriteComponent_getFillMethod, (setter)SpriteComponent_setFillMethod, SpriteComponent_fillMethod_doc, NULL},
+        {"fillOrigin", (getter)SpriteComponent_getFillOrigin, (setter)SpriteComponent_setFillOrigin, SpriteComponent_fillOrigin_doc, NULL},
+        {"fillAmount", (getter)SpriteComponent_getFillAmount, (setter)SpriteComponent_setFillAmount, SpriteComponent_fillAmount_doc, NULL},
+        {"clockwise", (getter)SpriteComponent_getClockwise, (setter)SpriteComponent_setClockwise, SpriteComponent_clockwise_doc, NULL},
+        {"texture", (getter)SpriteComponent_getTexture, (setter)SpriteComponent_setTexture, SpriteComponent_texture_doc, NULL},
         {NULL, NULL}};
 
     PyTypeObject PyTypeObject_SpriteComponent = {

@@ -13,14 +13,14 @@ namespace ige::scene
 {
     //! Constructor
     SpriteComponent::SpriteComponent(SceneObject &owner, const std::string &path, const Vec2 &size, bool isBillboard)
-        : Component(owner), m_path(path), m_texture(nullptr)
+        : Component(owner), m_path(path)
     {
         if (path.empty()) {
             m_sprite = std::make_shared<Sprite>(size);
         }
         else {
-            m_texture = ResourceCreator::Instance().NewTexture(m_path.c_str());
-            m_sprite = std::make_shared<Sprite>(m_texture, size);
+            auto texture = ResourceCreator::Instance().NewTexture(m_path.c_str());
+            m_sprite = std::make_shared<Sprite>(texture, size);
         }
 
         m_sprite->setIsScaleBorder(true);
@@ -34,12 +34,8 @@ namespace ige::scene
         if (m_sprite && m_sprite->getFigure())
             onResourceRemoved(m_sprite->getFigure());
 
-        if (m_texture) {
-            m_texture->DecReference();
-            m_texture = nullptr;
-        }
-
         m_sprite = nullptr;
+
         if(getOwner()->getTransform())
             getOwner()->getTransform()->makeDirty();
     }
@@ -81,13 +77,39 @@ namespace ige::scene
     }
 
     //! Set path
-    void SpriteComponent::setPath(const std::string &path)
+    void SpriteComponent::setTexture(Texture *texture)
     {
-        if (m_texture != nullptr) {
-            m_texture->DecReference();
-            m_texture = nullptr;
+        if (texture == getTexture())
+            return;
+
+        m_path.clear();
+        auto oldFigure = m_sprite->getFigure();
+
+        m_sprite->setTexture(texture);
+        auto newFigure = m_sprite->getFigure();
+
+        if (texture != nullptr)
+            m_path = texture->ResourceName();
+
+        if (oldFigure == nullptr && newFigure) {
+            onResourceAdded(newFigure);
         }
 
+        if (oldFigure && newFigure == nullptr) {
+            onResourceRemoved(oldFigure);
+        }
+
+        if (newFigure) {
+            bool isBillboard = m_bIsBillboard;
+            m_bIsBillboard = false;
+            setBillboard(isBillboard);
+        }
+        getOwner()->getTransform()->makeDirty();        
+    }
+
+    //! Set path
+    void SpriteComponent::setPath(const std::string &path)
+    {
         auto fsPath = fs::path(path);
         auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
         if (relPath.size() == 0) relPath = fsPath.string();
@@ -101,10 +123,10 @@ namespace ige::scene
             if (fPath.size() == 0) fPath = fsPath.string();
             std::replace(fPath.begin(), fPath.end(), '\\', '/');
             
-            m_texture = ResourceCreator::Instance().NewTexture(fPath.c_str());
+            auto texture = ResourceCreator::Instance().NewTexture(fPath.c_str());
 
             auto oldFigure = m_sprite->getFigure();
-            m_sprite->setTexture(m_texture);
+            m_sprite->setTexture(texture);
             auto newFigure = m_sprite->getFigure();
 
             if (oldFigure == nullptr && newFigure) {

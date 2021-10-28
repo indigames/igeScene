@@ -39,11 +39,6 @@ UIButton::~UIButton()
     getOwner()->removeEventListener((int)EventType::TouchBegin, m_instanceId);
     getOwner()->removeEventListener((int)EventType::TouchEnd, m_instanceId);
     getOwner()->removeEventListener((int)EventType::Click, m_instanceId);
-    
-    if (m_texture) {
-        m_texture->DecReference();
-        m_texture = nullptr;
-    }
 
     if (m_pressedTexture) {
         m_pressedTexture->DecReference();
@@ -145,9 +140,6 @@ void UIButton::changeState(ButtonState state, bool forced)
                 if (tex != t_tex && t_tex != nullptr) {
                     m_sprite->setTexture(t_tex);
                 }
-                else if (tex != m_texture) {
-                    m_sprite->setTexture(m_texture);
-                }
             }
             break;
         }
@@ -157,7 +149,7 @@ void UIButton::changeState(ButtonState state, bool forced)
 Texture* UIButton::getTextureByState(ButtonState state) const {
     switch (state) {
     case ButtonState::NORMAL:
-        return m_texture;
+        return getTexture();
     case ButtonState::PRESSED:
         return m_pressedTexture;
     case ButtonState::SELECTED:

@@ -36,6 +36,10 @@ namespace ige::scene
     // Set size
     int SpriteComponent_setSize(PyObject_SpriteComponent* self, PyObject* value);
 
+    // Texture
+    PyObject* SpriteComponent_getTexture(PyObject_SpriteComponent* self);
+    int SpriteComponent_setTexture(PyObject_SpriteComponent* self, PyObject* value);
+
     // Billboard setting
     PyObject* SpriteComponent_isBillboard(PyObject_SpriteComponent* self);
     int SpriteComponent_setBillboard(PyObject_SpriteComponent* self, PyObject* value);
