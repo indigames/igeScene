@@ -82,7 +82,7 @@ namespace ige::scene
         if (transform) {
             Vec2 resize = Vec2(m_scaleFactor * m_canvasSize[0], m_scaleFactor * m_canvasSize[1]);
         	Vec3 worldPosition = Vec3(resize[0] * 0.5f, resize[1] * 0.5f, 0);
-            transform->setPosition(worldPosition);
+            transform->setLocalPosition(worldPosition);
             Vec3 worldScale = Vec3(m_scaleFactor, m_scaleFactor, m_scaleFactor);
             transform->setLocalScale(worldScale);
             transform->setSize(m_canvasSize);
