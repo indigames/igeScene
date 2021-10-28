@@ -13,6 +13,7 @@
 #include "components/CameraComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/FigureComponent.h"
+#include "components/EditableFigureComponent.h"
 #include "components/BoneTransform.h"
 #include "components/SpriteComponent.h"
 #include "components/TextComponent.h"
@@ -292,6 +293,7 @@ namespace ige::scene
         if (name == "Environment") return addComponent<EnvironmentComponent>();
         if (name == "BoneTransform") return addComponent<BoneTransform>();
         if (name == "Figure") return addComponent<FigureComponent>();
+        if (name == "EditableFigure") return addComponent<EditableFigureComponent>();
         if (name == "Sprite") return addComponent<SpriteComponent>();
         if (name == "Text") return addComponent<TextComponent>();
         if (name == "TextBitmap") return addComponent<TextBitmapComponent>();

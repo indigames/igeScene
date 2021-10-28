@@ -22,6 +22,7 @@ namespace ige::scene
             Camera = 0,
             Environment,
             Figure,
+            EditableFigure,
             Sprite,
             Text,
             TextBitmap,

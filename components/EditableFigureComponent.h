@@ -4,63 +4,25 @@
 using namespace pyxie;
 
 #include "event/Event.h"
-#include "components/Component.h"
+#include "components/FigureComponent.h"
 
 namespace ige::scene
 {
-    class FigureMaterial {
-    public:
-        FigureMaterial():
-            idx((uint64_t)-1), hash((uint64_t)-1) {}
-
-        FigureMaterial(uint64_t idx, uint64_t hash, const Vec4& params)
-            : idx(idx), hash(hash), params(params) {}
-
-        FigureMaterial(uint64_t idx, uint64_t hash, const std::string& path)
-            : idx(idx), hash(hash), texPath(path) {}
-
-    public:
-        uint64_t idx;
-        uint64_t hash;
-        Vec4 params;
-        std::string texPath;
-
-    protected:
-
-        //! Serialize
-        friend void to_json(json& j, const FigureMaterial& obj)
-        {
-            j["idx"] = obj.idx;
-            j["hash"] = obj.hash;
-            if (!obj.texPath.empty()) j["tex"] = obj.texPath;
-            else j["params"] = obj.params;
-        }
-
-        //! Deserialize
-        friend void from_json(const json& j, FigureMaterial& obj)
-        {
-            obj.idx = j.value("idx", (uint64_t)-1);
-            obj.hash = j.value("hash", (uint64_t)-1);
-            obj.params = j.value("params", Vec4());
-            obj.texPath = j.value("tex", std::string());
-        }
-    };
-
-    //! FigureComponent
-    class FigureComponent : public Component
+    //! EditableFigureComponent
+    class EditableFigureComponent : public Component
     {
     public:
         //! Constructor
-        FigureComponent(SceneObject &owner, const std::string &path = "");
+        EditableFigureComponent(SceneObject &owner, const std::string &path = "");
 
         //! Destructor
-        virtual ~FigureComponent();
+        virtual ~EditableFigureComponent();
 
         //! Get component name
-        virtual std::string getName() const override { return "Figure"; }
+        virtual std::string getName() const override { return "EditableFigure"; }
 
         //! Returns the type of the component
-        virtual Type getType() const override { return Type::Figure; }
+        virtual Type getType() const override { return Type::EditableFigure; }
 
         //! Update
         void onUpdate(float dt) override;
@@ -75,8 +37,8 @@ namespace ige::scene
         virtual void onDisable() override;
 
         //! Get associated figure
-        Figure *getFigure() { return m_figure; }
-        void setFigure(Figure* figure);
+        EditableFigure *getFigure() { return m_figure; }
+        void setFigure(EditableFigure* figure);
 
         //! Path
         void setPath(const std::string &path);
@@ -137,7 +99,7 @@ namespace ige::scene
         bool m_bResAdded = false;
 
         //! Associated figure object
-        Figure *m_figure;
+        EditableFigure *m_figure;
 
         //! Path to figure file
         std::string m_path;

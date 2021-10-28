@@ -1,7 +1,7 @@
-#include "python/pyFigureComponent.h"
-#include "python/pyFigureComponent_doc_en.h"
+#include "python/pyEditableFigureComponent.h"
+#include "python/pyEditableFigureComponent_doc_en.h"
 
-#include "components/FigureComponent.h"
+#include "components/EditableFigureComponent.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
@@ -11,7 +11,7 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    void FigureComponent_dealloc(PyObject_FigureComponent *self)
+    void EditableFigureComponent_dealloc(PyObject_EditableFigureComponent *self)
     {
         if(self && self->component)
         {
@@ -20,19 +20,19 @@ namespace ige::scene
         PyObject_Del(self);
     }
 
-    PyObject* FigureComponent_str(PyObject_FigureComponent *self)
+    PyObject* EditableFigureComponent_str(PyObject_EditableFigureComponent *self)
     {
-        return PyUnicode_FromString("C++ FigureComponent object");
+        return PyUnicode_FromString("C++ EditableFigureComponent object");
     }
 
     // Get path
-    PyObject* FigureComponent_getPath(PyObject_FigureComponent* self)
+    PyObject* EditableFigureComponent_getPath(PyObject_EditableFigureComponent* self)
     {
         return PyUnicode_FromString(self->component->getPath().c_str());
     }
 
     // Set path
-    int FigureComponent_setPath(PyObject_FigureComponent* self, PyObject* value)
+    int EditableFigureComponent_setPath(PyObject_EditableFigureComponent* self, PyObject* value)
     {
         if (PyUnicode_Check(value))
         {
@@ -44,12 +44,12 @@ namespace ige::scene
     }
 
     // Set figure
-    int FigureComponent_setFigure(PyObject_FigureComponent* self, PyObject* value)
+    int EditableFigureComponent_setFigure(PyObject_EditableFigureComponent* self, PyObject* value)
     {
         if(value) {
-            if (value->ob_type == &FigureType) {
-                auto figObj = (figure_obj*)value;
-                self->component->setFigure(figObj->figure);
+            if (value->ob_type == &EditableFigureType) {
+                auto figObj = (editablefigure_obj*)value;
+                self->component->setFigure(figObj->editablefigure);
                 return 0;
             }
             else if (value->ob_type == &_PyNone_Type) {
@@ -61,21 +61,21 @@ namespace ige::scene
     }
 
     // Get figure
-    PyObject* FigureComponent_getFigure(PyObject_FigureComponent* self)
+    PyObject* EditableFigureComponent_getFigure(PyObject_EditableFigureComponent* self)
     {
-        auto figureObj = (figure_obj*)(&FigureType)->tp_alloc(&FigureType, 0);
-        figureObj->figure = self->component->getFigure();
-        if(figureObj->figure) figureObj->figure->IncReference();
-        return (PyObject*)figureObj;
+        auto figObj = (editablefigure_obj*)(&EditableFigureType)->tp_alloc(&EditableFigureType, 0);
+        figObj->editablefigure = self->component->getFigure();
+        if(figObj->editablefigure) figObj->editablefigure->IncReference();
+        return (PyObject*)figObj;
     }
 
     // Fog
-    PyObject* FigureComponent_isFogEnabled(PyObject_FigureComponent* self)
+    PyObject* EditableFigureComponent_isFogEnabled(PyObject_EditableFigureComponent* self)
     {
         return PyBool_FromLong(self->component->isFogEnabled());
     }
 
-    int FigureComponent_setFogEnabled(PyObject_FigureComponent* self, PyObject* value)
+    int EditableFigureComponent_setFogEnabled(PyObject_EditableFigureComponent* self, PyObject* value)
     {
         if (PyLong_Check(value))
         {
@@ -87,12 +87,12 @@ namespace ige::scene
     }
 
     // Front face culling
-    PyObject* FigureComponent_isCullFaceEnable(PyObject_FigureComponent* self)
+    PyObject* EditableFigureComponent_isCullFaceEnable(PyObject_EditableFigureComponent* self)
     {
         return PyBool_FromLong(self->component->isCullFaceEnable());
     }
 
-    int FigureComponent_setCullFaceEnable(PyObject_FigureComponent* self, PyObject* value)
+    int EditableFigureComponent_setCullFaceEnable(PyObject_EditableFigureComponent* self, PyObject* value)
     {
         if (PyLong_Check(value))
         {
@@ -104,12 +104,12 @@ namespace ige::scene
     }
 
     // Double Side
-    PyObject* FigureComponent_isDoubleSideEnable(PyObject_FigureComponent* self)
+    PyObject* EditableFigureComponent_isDoubleSideEnable(PyObject_EditableFigureComponent* self)
     {
         return PyBool_FromLong(self->component->isDoubleSideEnable());
     }
 
-    int FigureComponent_setDoubleSideEnable(PyObject_FigureComponent* self, PyObject* value)
+    int EditableFigureComponent_setDoubleSideEnable(PyObject_EditableFigureComponent* self, PyObject* value)
     {
         if (PyLong_Check(value))
         {
@@ -121,12 +121,12 @@ namespace ige::scene
     }
 
     // Depth test
-    PyObject* FigureComponent_isDepthTestEnable(PyObject_FigureComponent* self)
+    PyObject* EditableFigureComponent_isDepthTestEnable(PyObject_EditableFigureComponent* self)
     {
         return PyBool_FromLong(self->component->isDepthTestEnable());
     }
 
-    int FigureComponent_setDepthTestEnable(PyObject_FigureComponent* self, PyObject* value)
+    int EditableFigureComponent_setDepthTestEnable(PyObject_EditableFigureComponent* self, PyObject* value)
     {
         if (PyLong_Check(value))
         {
@@ -138,12 +138,12 @@ namespace ige::scene
     }
 
     // Depth write
-    PyObject* FigureComponent_isDepthWriteEnable(PyObject_FigureComponent* self)
+    PyObject* EditableFigureComponent_isDepthWriteEnable(PyObject_EditableFigureComponent* self)
     {
         return PyBool_FromLong(self->component->isDepthWriteEnable());
     }
 
-    int FigureComponent_setDepthWriteEnable(PyObject_FigureComponent* self, PyObject* value)
+    int EditableFigureComponent_setDepthWriteEnable(PyObject_EditableFigureComponent* self, PyObject* value)
     {
         if (PyLong_Check(value))
         {
@@ -155,12 +155,12 @@ namespace ige::scene
     }
 
     // Scissor Test
-    PyObject* FigureComponent_isScissorTestEnable(PyObject_FigureComponent* self)
+    PyObject* EditableFigureComponent_isScissorTestEnable(PyObject_EditableFigureComponent* self)
     {
         return PyBool_FromLong(self->component->isScissorTestEnable());
     }
 
-    int FigureComponent_setScissorTestEnable(PyObject_FigureComponent* self, PyObject* value)
+    int EditableFigureComponent_setScissorTestEnable(PyObject_EditableFigureComponent* self, PyObject* value)
     {
         if (PyLong_Check(value))
         {
@@ -172,12 +172,12 @@ namespace ige::scene
     }
 
     // Frame update ratio (speedup/slower effects)
-    PyObject* FigureComponent_getFrameUpdateRatio(PyObject_FigureComponent* self)
+    PyObject* EditableFigureComponent_getFrameUpdateRatio(PyObject_EditableFigureComponent* self)
     {
         return PyFloat_FromDouble(self->component->getFrameUpdateRatio());
     }
 
-    int FigureComponent_setFrameUpdateRatio(PyObject_FigureComponent* self, PyObject* value)
+    int EditableFigureComponent_setFrameUpdateRatio(PyObject_EditableFigureComponent* self, PyObject* value)
     {
         if (PyFloat_Check(value))
         {
@@ -188,25 +188,25 @@ namespace ige::scene
         return -1;
     }
 
-    PyGetSetDef FigureComponent_getsets[] = {
-        { "path", (getter)FigureComponent_getPath, (setter)FigureComponent_setPath, FigureComponent_path_doc, NULL },
-        { "fogEnabled", (getter)FigureComponent_isFogEnabled, (setter)FigureComponent_setFogEnabled, FigureComponent_fogEnabled_doc, NULL },
-        { "frontFaceCullingEnabled", (getter)FigureComponent_isCullFaceEnable, (setter)FigureComponent_setCullFaceEnable, FigureComponent_frontFaceCullingEnabled_doc, NULL },
-        { "doubleSideEnabled", (getter)FigureComponent_isDoubleSideEnable, (setter)FigureComponent_setDoubleSideEnable, FigureComponent_doubleSideEnabled_doc, NULL },
-        { "depthTestEnabled", (getter)FigureComponent_isDepthTestEnable, (setter)FigureComponent_setDepthTestEnable, FigureComponent_depthTestEnabled_doc, NULL },
-        { "depthWriteEnabled", (getter)FigureComponent_isDepthWriteEnable, (setter)FigureComponent_setDepthWriteEnable, FigureComponent_depthWriteEnabled_doc, NULL },
-        { "scissorTestEnabled", (getter)FigureComponent_isScissorTestEnable , (setter)FigureComponent_setScissorTestEnable, FigureComponent_scissorTestEnabled_doc, NULL },
-        { "updateRatio", (getter)FigureComponent_getFrameUpdateRatio, (setter)FigureComponent_setFrameUpdateRatio, FigureComponent_updateRatio_doc, NULL},
-        { "figure", (getter)FigureComponent_getFigure, (setter)FigureComponent_setFigure, FigureComponent_figure_doc, NULL },
+    PyGetSetDef EditableFigureComponent_getsets[] = {
+        { "path", (getter)EditableFigureComponent_getPath, (setter)EditableFigureComponent_setPath, EditableFigureComponent_path_doc, NULL },
+        { "fogEnabled", (getter)EditableFigureComponent_isFogEnabled, (setter)EditableFigureComponent_setFogEnabled, EditableFigureComponent_fogEnabled_doc, NULL },
+        { "frontFaceCullingEnabled", (getter)EditableFigureComponent_isCullFaceEnable, (setter)EditableFigureComponent_setCullFaceEnable, EditableFigureComponent_frontFaceCullingEnabled_doc, NULL },
+        { "doubleSideEnabled", (getter)EditableFigureComponent_isDoubleSideEnable, (setter)EditableFigureComponent_setDoubleSideEnable, EditableFigureComponent_doubleSideEnabled_doc, NULL },
+        { "depthTestEnabled", (getter)EditableFigureComponent_isDepthTestEnable, (setter)EditableFigureComponent_setDepthTestEnable, EditableFigureComponent_depthTestEnabled_doc, NULL },
+        { "depthWriteEnabled", (getter)EditableFigureComponent_isDepthWriteEnable, (setter)EditableFigureComponent_setDepthWriteEnable, EditableFigureComponent_depthWriteEnabled_doc, NULL },
+        { "scissorTestEnabled", (getter)EditableFigureComponent_isScissorTestEnable , (setter)EditableFigureComponent_setScissorTestEnable, EditableFigureComponent_scissorTestEnabled_doc, NULL },
+        { "updateRatio", (getter)EditableFigureComponent_getFrameUpdateRatio, (setter)EditableFigureComponent_setFrameUpdateRatio, EditableFigureComponent_updateRatio_doc, NULL},
+        { "figure", (getter)EditableFigureComponent_getFigure, (setter)EditableFigureComponent_setFigure, EditableFigureComponent_figure_doc, NULL },
         { NULL, NULL }
     };
 
-    PyTypeObject PyTypeObject_FigureComponent = {
+    PyTypeObject PyTypeObject_EditableFigureComponent = {
         PyVarObject_HEAD_INIT(NULL, 0)
-        "igeScene.Figure",                           /* tp_name */
-        sizeof(PyObject_FigureComponent),            /* tp_basicsize */
+        "igeScene.EditableFigure",                           /* tp_name */
+        sizeof(PyObject_EditableFigureComponent),            /* tp_basicsize */
         0,                                           /* tp_itemsize */
-        (destructor)FigureComponent_dealloc,         /* tp_dealloc */
+        (destructor)EditableFigureComponent_dealloc,         /* tp_dealloc */
         0,                                           /* tp_print */
         0,                                           /* tp_getattr */
         0,                                           /* tp_setattr */
@@ -217,7 +217,7 @@ namespace ige::scene
         0,                                           /* tp_as_mapping */
         0,                                           /* tp_hash */
         0,                                           /* tp_call */
-        (reprfunc)FigureComponent_str,               /* tp_str */
+        (reprfunc)EditableFigureComponent_str,               /* tp_str */
         0,                                           /* tp_getattro */
         0,                                           /* tp_setattro */
         0,                                           /* tp_as_buffer */
@@ -231,7 +231,7 @@ namespace ige::scene
         0,                                           /* tp_iternext */
         0,                                           /* tp_methods */  //! [IGE]: no methods
         0,                                           /* tp_members */
-        FigureComponent_getsets,                     /* tp_getset */
+        EditableFigureComponent_getsets,                     /* tp_getset */
         &PyTypeObject_Component,                     /* tp_base */  //! [IGE]: inheritance
         0,                                           /* tp_dict */
         0,                                           /* tp_descr_get */

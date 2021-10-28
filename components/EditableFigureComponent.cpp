@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include "components/FigureComponent.h"
+#include "components/EditableFigureComponent.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
@@ -11,14 +11,14 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    FigureComponent::FigureComponent(SceneObject &owner, const std::string &path)
+    EditableFigureComponent::EditableFigureComponent(SceneObject &owner, const std::string &path)
         : Component(owner), m_figure(nullptr)
     {
         setPath(path);
     }
 
     //! Destructor
-    FigureComponent::~FigureComponent()
+    EditableFigureComponent::~EditableFigureComponent()
     {
         if (m_figure)
         {
@@ -31,7 +31,7 @@ namespace ige::scene
     }
 
     //! Update
-    void FigureComponent::onUpdate(float dt)
+    void EditableFigureComponent::onUpdate(float dt)
     {
         if (m_figure == nullptr || !m_figure->IsInitializeSuccess())
             return;
@@ -52,11 +52,11 @@ namespace ige::scene
     }
 
     //! Render
-    void FigureComponent::onRender()
+    void EditableFigureComponent::onRender()
     {    
     }
 
-    void FigureComponent::setFigure(Figure* figure)
+    void EditableFigureComponent::setFigure(EditableFigure* figure)
     {
         if (figure == m_figure)
             return;
@@ -98,7 +98,7 @@ namespace ige::scene
         getOwner()->getTransform()->makeDirty();
     }
     
-    void FigureComponent::setPath(const std::string &path)
+    void EditableFigureComponent::setPath(const std::string &path)
     {
         auto fsPath = fs::path(path);
         auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
@@ -120,25 +120,18 @@ namespace ige::scene
             auto fPath = fsPath.extension().compare(".pyxf") == 0 ? m_path : fsPath.parent_path().append(fsPath.stem().string() + ".pyxf").string();
             if (fPath.size() == 0) fPath = fsPath.string();
             std::replace(fPath.begin(), fPath.end(), '\\', '/');
-
-            auto figure = (Figure*)ResourceManager::Instance().GetResource(fPath.c_str(), FIGURETYPE);
-
-            // Backup the original figure for cloning later
-            if (figure == nullptr) {
-                ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton);
-            }
-
+            
             // Use copy instance
-            m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton);
+            m_figure = ResourceCreator::Instance().NewEditableFigure(fPath.c_str());
+
+            // Wait build
+            m_figure->WaitBuild();
 
             // Update transform from transform component
             auto transform = getOwner()->getTransform();
             m_figure->SetPosition(transform->getPosition());
             m_figure->SetRotation(transform->getRotation());
             m_figure->SetScale(transform->getScale());
-
-            // Wait build
-            m_figure->WaitBuild();
 
             // Cache mesh alpha for visibility setting
             m_meshAlphaValues.clear();
@@ -153,11 +146,11 @@ namespace ige::scene
     }
 
     //! Set mesh alpha (use to disable rendering of mesh)
-    const bool FigureComponent::isMeshEnable(int idx) const {
+    const bool EditableFigureComponent::isMeshEnable(int idx) const {
         return std::find(m_disableMeshes.begin(), m_disableMeshes.end(), idx) == m_disableMeshes.end();
     }
 
-    void FigureComponent::setMeshEnable(int idx, bool enable) {
+    void EditableFigureComponent::setMeshEnable(int idx, bool enable) {
         auto itr = std::find(m_disableMeshes.begin(), m_disableMeshes.end(), idx);
         if (enable && itr != m_disableMeshes.end()) {
             m_disableMeshes.erase(itr);
@@ -172,7 +165,7 @@ namespace ige::scene
     }
 
     //! Enable fog
-    void FigureComponent::setFogEnabled(bool enable)
+    void EditableFigureComponent::setFogEnabled(bool enable)
     {
         if (m_bIsFogEnabled != enable)
         {
@@ -193,7 +186,7 @@ namespace ige::scene
     }
 
     //! Enable double side
-    void FigureComponent::setDoubleSideEnable(bool enable)
+    void EditableFigureComponent::setDoubleSideEnable(bool enable)
     {
         if (m_bIsDoubleSideEnable != enable)
         {
@@ -213,7 +206,7 @@ namespace ige::scene
     }
 
     //! Enable cull face
-    void FigureComponent::setCullFaceEnable(bool enable)
+    void EditableFigureComponent::setCullFaceEnable(bool enable)
     {
         if (m_bIsCullFaceEnable != enable)
         {
@@ -233,7 +226,7 @@ namespace ige::scene
     }
 
     //! Enable depth testing
-    void FigureComponent::setDepthTestEnable(bool enable)
+    void EditableFigureComponent::setDepthTestEnable(bool enable)
     {
         if (m_bIsDepthTestEnable != enable)
         {
@@ -253,7 +246,7 @@ namespace ige::scene
     }
 
     //! Enable depth testing
-    void FigureComponent::setDepthWriteEnable(bool enable)
+    void EditableFigureComponent::setDepthWriteEnable(bool enable)
     {
         if (m_bIsDepthWriteEnable != enable)
         {
@@ -273,7 +266,7 @@ namespace ige::scene
     }
 
     //! Enable Scissor Test
-    void FigureComponent::setScissorTestEnable(bool enable)
+    void EditableFigureComponent::setScissorTestEnable(bool enable)
     {
         m_bIsScissorTestEnable = enable;
         if (m_figure)
@@ -290,7 +283,7 @@ namespace ige::scene
     }
 
     //! Enable
-    void FigureComponent::onEnable()
+    void EditableFigureComponent::onEnable()
     {
         if (!getOwner()->isActive() || !isEnabled()) return;
         Component::onEnable();
@@ -298,14 +291,14 @@ namespace ige::scene
     }
 
     //! Disable
-    void FigureComponent::onDisable()
+    void EditableFigureComponent::onDisable()
     {
         onResourceRemoved(m_figure);
         Component::onDisable();
     }
 
     //! Utils to add/remove resource
-    void FigureComponent::onResourceAdded(Resource* res)
+    void EditableFigureComponent::onResourceAdded(Resource* res)
     {
         if (m_bResAdded || res == nullptr) return;
         if (getOwner() && getOwner()->isActive(true) && getOwner()->getScene()) {
@@ -314,7 +307,7 @@ namespace ige::scene
         }
     }
 
-    void FigureComponent::onResourceRemoved(Resource* res)
+    void EditableFigureComponent::onResourceRemoved(Resource* res)
     {
         if (!m_bResAdded || res == nullptr) return;
         if (getOwner() && getOwner()->getScene()) {
@@ -324,7 +317,7 @@ namespace ige::scene
     }
 
     //! Serialize
-    void FigureComponent::to_json(json &j) const
+    void EditableFigureComponent::to_json(json &j) const
     {
         Component::to_json(j);
         j["path"] = getPath();
@@ -340,7 +333,7 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void FigureComponent::from_json(const json &j)
+    void EditableFigureComponent::from_json(const json &j)
     {
         setPath(j.value("path", std::string()));
         setFogEnabled(j.value("fog", false));
@@ -362,7 +355,7 @@ namespace ige::scene
     }
 
     //! Update property by key value
-    void FigureComponent::setProperty(const std::string& key, const json& val)
+    void EditableFigureComponent::setProperty(const std::string& key, const json& val)
     {
         if (key.compare("path") == 0)
         {
@@ -402,7 +395,7 @@ namespace ige::scene
         }
     }
 
-    void FigureComponent::setMaterialParams(uint64_t index, uint64_t hash, const Vec4& params) {
+    void EditableFigureComponent::setMaterialParams(uint64_t index, uint64_t hash, const Vec4& params) {
         auto itr = std::find_if(m_materials.begin(), m_materials.end(), [index, hash](const auto& elem) {
             return elem.idx == index && elem.hash == hash;
         });
@@ -417,7 +410,7 @@ namespace ige::scene
         }
     }
 
-    void FigureComponent::setMaterialParams(uint64_t index, uint64_t hash, const std::string& texPath) {
+    void EditableFigureComponent::setMaterialParams(uint64_t index, uint64_t hash, const std::string& texPath) {
         auto fsPath = fs::path(texPath);
         fsPath = fsPath.extension().compare(".pyxi") == 0 ? fsPath : fsPath.parent_path().append(fsPath.stem().string() + ".pyxi");
 
@@ -448,15 +441,15 @@ namespace ige::scene
         }
     }
 
-    void FigureComponent::setMaterialParams(uint64_t index, const std::string& name, const Vec4& params) {
+    void EditableFigureComponent::setMaterialParams(uint64_t index, const std::string& name, const Vec4& params) {
         setMaterialParams(index, GenerateNameHash(name.c_str()), params);
     }
 
-    void FigureComponent::setMaterialParams(uint64_t index, const std::string& name, const std::string& texPath) {
+    void EditableFigureComponent::setMaterialParams(uint64_t index, const std::string& name, const std::string& texPath) {
         setMaterialParams(index, GenerateNameHash(name.c_str()), texPath);
     }
 
-    void FigureComponent::setMaterialParams(FigureMaterial mat) {
+    void EditableFigureComponent::setMaterialParams(FigureMaterial mat) {
         if(!mat.texPath.empty())
             setMaterialParams(mat.idx, mat.hash, mat.texPath);
         else

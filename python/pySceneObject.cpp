@@ -8,6 +8,7 @@
 #include "python/pyTransformComponent.h"
 #include "python/pyCameraComponent.h"
 #include "python/pyFigureComponent.h"
+#include "python/pyEditableFigureComponent.h"
 #include "python/pyEnvironmentComponent.h"
 #include "python/pyAmbientLight.h"
 #include "python/pyDirectionalLight.h"
@@ -343,6 +344,17 @@ namespace ige::scene
                 if (comp)
                 {
                     auto *compObj = PyObject_New(PyObject_FigureComponent, &PyTypeObject_FigureComponent);
+                    compObj->component = comp.get();
+                    compObj->super.component = compObj->component;
+                    return (PyObject *)compObj;
+                }
+            }
+            else if (type == "EditableFigure")
+            {
+                auto comp = self->sceneObject->addComponent<EditableFigureComponent>();
+                if (comp)
+                {
+                    auto *compObj = PyObject_New(PyObject_EditableFigureComponent, &PyTypeObject_EditableFigureComponent);
                     compObj->component = comp.get();
                     compObj->super.component = compObj->component;
                     return (PyObject *)compObj;
@@ -825,6 +837,17 @@ namespace ige::scene
             if (comp)
             {
                 auto* compObj = PyObject_New(PyObject_FigureComponent, &PyTypeObject_FigureComponent);
+                compObj->component = comp.get();
+                compObj->super.component = compObj->component;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "EditableFigure")
+        {
+            auto comp = sceneObject->getComponent<EditableFigureComponent>();
+            if (comp)
+            {
+                auto* compObj = PyObject_New(PyObject_EditableFigureComponent, &PyTypeObject_EditableFigureComponent);
                 compObj->component = comp.get();
                 compObj->super.component = compObj->component;
                 return (PyObject*)compObj;

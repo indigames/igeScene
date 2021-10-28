@@ -57,14 +57,6 @@ namespace ige::scene
     PyObject* FigureComponent_isDepthWriteEnable(PyObject_FigureComponent* self);
     int FigureComponent_setDepthWriteEnable(PyObject_FigureComponent* self, PyObject* value);
 
-    // Alpha blend
-    PyObject* FigureComponent_isAlphaBlendingEnable(PyObject_FigureComponent* self);
-    int FigureComponent_setAlphaBlendingEnable(PyObject_FigureComponent* self, PyObject* value);
-
-    // Alpha blend Operation
-    PyObject* FigureComponent_getAlphaBlendingOp(PyObject_FigureComponent* self);
-    int FigureComponent_setAlphaBlendingOp(PyObject_FigureComponent* self, PyObject* value);
-
     // Scissor Test
     PyObject* FigureComponent_isScissorTestEnable(PyObject_FigureComponent* self);
     int FigureComponent_setScissorTestEnable(PyObject_FigureComponent* self, PyObject* value);
