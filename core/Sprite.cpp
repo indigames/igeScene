@@ -160,23 +160,27 @@ namespace ige::scene
     }
 
     void Sprite::setTexture(Texture* value) {
-        if (m_texture != value) 
-        {
-            if (m_figure != nullptr)
-            {
+        if (m_texture != value)  {
+            if (m_figure != nullptr) {
                 if (m_texture) {
                     m_texture->DecReference();
                     m_texture = nullptr;
                 }
             }
             m_texture = value;
-            if (value == nullptr)
+            if (value == nullptr) {
                 releaseSprite();
-            else
-            {
+            }
+            else {
                 m_texture->IncReference();
                 m_texSize.X(m_texture->GetTextureWidth());
                 m_texSize.Y(m_texture->GetTextureHeight());
+
+                if (m_size[0] == 0.f || m_size[1] == 0.f) {
+                    m_size[0] = m_texSize[0];
+                    m_size[1] = m_texSize[1];
+                }
+
                 draw();
                 applyTexture();
             }

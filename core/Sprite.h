@@ -38,8 +38,8 @@ namespace ige::scene
     class Sprite
     {
     public:
-        Sprite(const Vec2& size = { 64.f, 64.f });
-        Sprite(Texture* texture, const Vec2& size = {64.f, 64.f});
+        Sprite(const Vec2& size = { 0.f, 0.f });
+        Sprite(Texture* texture, const Vec2& size = {0.f, 0.f});
         virtual ~Sprite();
 
         const Vec2& getSize() const { return m_size; }
