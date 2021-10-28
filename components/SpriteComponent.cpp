@@ -104,7 +104,13 @@ namespace ige::scene
             m_bIsBillboard = false;
             setBillboard(isBillboard);
         }
-        getOwner()->getTransform()->makeDirty();        
+
+        if (getOwner()->getRectTransform()) {
+            getOwner()->getRectTransform()->setSize(m_sprite->getSize());
+        }
+        else {
+            getOwner()->getTransform()->makeDirty();
+        }
     }
 
     //! Set path
@@ -143,7 +149,12 @@ namespace ige::scene
                 setBillboard(isBillboard);
             }
 
-            getOwner()->getTransform()->makeDirty();
+            if (getOwner()->getRectTransform()) {
+                getOwner()->getRectTransform()->setSize(m_sprite->getSize());
+            }
+            else {
+                getOwner()->getTransform()->makeDirty();
+            }
         }
     }
 
