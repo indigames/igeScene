@@ -120,12 +120,19 @@ namespace ige::scene
             auto fPath = fsPath.extension().compare(".pyxf") == 0 ? m_path : fsPath.parent_path().append(fsPath.stem().string() + ".pyxf").string();
             if (fPath.size() == 0) fPath = fsPath.string();
             std::replace(fPath.begin(), fPath.end(), '\\', '/');
-            
+
+            // Backup the original figure for cloning later
+            auto figure = (Figure*)ResourceManager::Instance().GetResource(fPath.c_str(), FIGURETYPE);
+            if (figure == nullptr) {
+                figure = ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton);
+                figure->WaitBuild();
+            }
+
             // Use copy instance
             m_figure = ResourceCreator::Instance().NewEditableFigure(fPath.c_str());
 
             // Wait build
-            m_figure->WaitBuild();
+            while(!m_figure->IsBuidSuccess()) m_figure->WaitBuild();
 
             // Update transform from transform component
             auto transform = getOwner()->getTransform();
