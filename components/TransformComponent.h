@@ -12,6 +12,7 @@ using namespace pyxie;
 namespace ige::scene
 {
 
+
     //! Transform messages to childrens
     enum class ETransformMessage
     {
@@ -131,6 +132,10 @@ namespace ige::scene
         virtual Vec3 globalToLocal(Vec3 point) const;
         virtual Vec3 localToGlobal(Vec3 point) const;
 
+        virtual void lockMove(bool active);
+        virtual void lockRotate(bool active);
+        virtual void lockScale(bool active);
+
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 
@@ -159,6 +164,10 @@ namespace ige::scene
         //! Handle notification from parent
         virtual void onNotified(const ETransformMessage &message);
 
+        bool isLockMove() { return ((m_lockTransform & 1) == 1); }
+        bool isLockRotate() { return ((m_lockTransform & 2) == 2); }
+        bool isLockScale() { return ((m_lockTransform & 3) == 3); }
+
     protected:
         //! Local transform
         Vec3 m_localPosition;
@@ -180,5 +189,7 @@ namespace ige::scene
 
         //! Dirty flag
         bool m_bLocalDirty = false;
+
+        int m_lockTransform = 0;
     };
 } // namespace ige::scene

@@ -75,15 +75,15 @@ namespace ige::scene
 
         //! Position
         void setLocalPosition(const Vec3 &pos) override;
-        void setPosition(const Vec3 &pos) override {}
+        void setPosition(const Vec3& pos) override;
 
         //! Rotation
         void setLocalRotation(const Quat &rot) override;
-        void setRotation(const Quat &rot) override {}
+        void setRotation(const Quat& rot) override;
 
         //! Scale
         void setLocalScale(const Vec3 &scale) override;
-        void setScale(const Vec3 &scale) override {}
+        void setScale(const Vec3& scale) override;
 
         //! Get rect in canvas space (no scale, no rotate)
         const Vec4 &getRect();

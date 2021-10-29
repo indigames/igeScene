@@ -107,7 +107,7 @@ namespace ige::scene
 
     void TransformComponent::setLocalPosition(const Vec3 &pos)
     {
-        if (m_localPosition != pos)
+        if (m_localPosition != pos && !isLockMove())
         {
             m_localPosition = pos;
             updateLocalToWorld();
@@ -117,7 +117,7 @@ namespace ige::scene
 
     void TransformComponent::setLocalPositionDelay(const Vec3& pos)
     {
-        if (m_localPosition != pos)
+        if (m_localPosition != pos && !isLockMove())
         {
             m_localPosition = pos;
             m_bLocalDirty = true;
@@ -131,7 +131,7 @@ namespace ige::scene
 
     void TransformComponent::setPosition(const Vec3 &pos)
     {
-        if (m_worldPosition != pos)
+        if (m_worldPosition != pos && !isLockMove())
         {
             m_worldPosition = pos;
             updateWorldToLocal();
@@ -145,7 +145,7 @@ namespace ige::scene
 
     void TransformComponent::setLocalRotation(const Quat &rot)
     {
-        if (m_localRotation != rot)
+        if (m_localRotation != rot && !isLockRotate())
         {
             m_localRotation = rot;
             //m_bLocalDirty = true;
@@ -155,7 +155,7 @@ namespace ige::scene
 
     void TransformComponent::setLocalRotationDelay(const Quat& rot)
     {
-        if (m_localRotation != rot)
+        if (m_localRotation != rot && !isLockRotate())
         {
             m_localRotation = rot;
             m_bLocalDirty = true;
@@ -167,7 +167,7 @@ namespace ige::scene
         Quat rotQuat;
         vmath_eulerToQuat(rot.P(), rotQuat.P());
 
-        if (m_localRotation != rotQuat)
+        if (m_localRotation != rotQuat && !isLockRotate())
         {
             m_localRotation = rotQuat;
             //m_bLocalDirty = true;
@@ -180,7 +180,7 @@ namespace ige::scene
         Quat rotQuat;
         vmath_eulerToQuat(rot.P(), rotQuat.P());
 
-        if (m_localRotation != rotQuat)
+        if (m_localRotation != rotQuat && !isLockRotate())
         {
             m_localRotation = rotQuat;
             m_bLocalDirty = true;
@@ -197,7 +197,7 @@ namespace ige::scene
         Quat rotQuat;
         vmath_eulerToQuat(rot.P(), rotQuat.P());
 
-        if (m_worldRotation != rotQuat)
+        if (m_worldRotation != rotQuat && !isLockRotate())
         {
             m_worldRotation = rotQuat;
             updateWorldToLocal();
@@ -206,7 +206,7 @@ namespace ige::scene
 
     void TransformComponent::setRotation(const Quat &rot)
     {
-        if (m_worldRotation != rot)
+        if (m_worldRotation != rot && !isLockRotate())
         {
             m_worldRotation = rot;
             updateWorldToLocal();
@@ -220,7 +220,7 @@ namespace ige::scene
 
     void TransformComponent::setLocalScale(const Vec3 &scale)
     {
-        if (m_localScale != scale)
+        if (m_localScale != scale && !isLockScale())
         {
             m_localScale = scale;
             //m_bLocalDirty = true;
@@ -230,7 +230,7 @@ namespace ige::scene
 
     void TransformComponent::setLocalScaleDelay(const Vec3& scale)
     {
-        if (m_localScale != scale)
+        if (m_localScale != scale && !isLockScale())
         {
             m_localScale = scale;
             m_bLocalDirty = true;
@@ -244,7 +244,7 @@ namespace ige::scene
 
     void TransformComponent::setScale(const Vec3 &scale)
     {
-        if (m_worldScale != scale)
+        if (m_worldScale != scale && !isLockScale())
         {
             m_worldScale = scale;
             updateWorldToLocal();
@@ -436,6 +436,28 @@ namespace ige::scene
     void TransformComponent::makeDirty() 
     {
         m_bLocalDirty = true;
+    }
+
+    void TransformComponent::lockMove(bool active)
+    {
+        if (active)
+            m_lockTransform != (1 << ((1) - 1));
+        else
+            m_lockTransform ^= (1 << ((1) - 1));
+    }
+    void TransformComponent::lockRotate(bool active)
+    {
+        if (active)
+            m_lockTransform != (1 << ((2) - 1));
+        else
+            m_lockTransform ^= (1 << ((2) - 1));
+    }
+    void TransformComponent::lockScale(bool active)
+    {
+        if (active)
+            m_lockTransform != (1 << ((3) - 1));
+        else
+            m_lockTransform ^= (1 << ((3) - 1));
     }
 
     void TransformComponent::addObserver(TransformComponent *observer)

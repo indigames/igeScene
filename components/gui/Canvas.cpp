@@ -80,6 +80,11 @@ namespace ige::scene
         }
         auto transform = getOwner()->getRectTransform();
         if (transform) {
+
+            transform->lockMove(false);
+            transform->lockRotate(false);
+            transform->lockScale(false);
+
             Vec2 resize = Vec2(m_scaleFactor * m_canvasSize[0], m_scaleFactor * m_canvasSize[1]);
         	Vec3 worldPosition = Vec3(resize[0] * 0.5f, resize[1] * 0.5f, 0);
             transform->setLocalPosition(worldPosition);
@@ -90,6 +95,11 @@ namespace ige::scene
             transform->setTransformDirty();
             m_camera->SetPosition({ worldPosition.X(), worldPosition.Y(), worldPosition.Z() + 10.0f });
             m_camera->SetAspectRate(m_targetCanvasSize.X() / m_targetCanvasSize.Y());
+
+
+            transform->lockMove(true);
+            transform->lockRotate(true);
+            transform->lockScale(true);
         }
     }
 

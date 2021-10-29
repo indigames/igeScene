@@ -222,7 +222,7 @@ namespace ige::scene
 
     void RectTransform::translate(const Vec3 &trans)
     {
-        if (trans.Length() <= 0) return;
+        if (trans.Length() <= 0 || isLockMove()) return;
 
         // Reformat the delta pos to parent direction
         auto deltaPos4 = Vec4(trans[0], trans[1], trans[2], 1.f);
@@ -242,7 +242,7 @@ namespace ige::scene
 
     void RectTransform::setLocalPosition(const Vec3 &pos)
     {
-        if (m_localPosition != pos)
+        if (m_localPosition != pos && !isLockMove())
         {
             m_localPosition = pos;
             setTransformDirty();
@@ -252,22 +252,42 @@ namespace ige::scene
         }
     }
 
+    void RectTransform::setPosition(const Vec3& pos)
+    {
+        if (m_worldPosition != pos && !isLockMove())
+        {
+            m_worldPosition = pos;
+            updateWorldToLocal();
+            setLocalToRectDirty();
+        }
+    }
+
     void RectTransform::setLocalRotation(const Quat &rot)
     {
-        if (m_localRotation != rot)
+        if (m_localRotation != rot && !isLockRotate())
         {
             m_localRotation = rot;
             setTransformDirty();
         }
     }
 
+    void RectTransform::setRotation(const Quat& rot)
+    {
+        TransformComponent::setRotation(rot);
+    }
+
     void RectTransform::setLocalScale(const Vec3 &scale)
     {
-        if (m_localScale != scale)
+        if (m_localScale != scale && !isLockScale())
         {
             m_localScale = scale;
             setTransformDirty();
         }
+    }
+
+    void RectTransform::setScale(const Vec3& scale)
+    {
+        TransformComponent::setScale(scale);
     }
 
     //! OnUpdate
