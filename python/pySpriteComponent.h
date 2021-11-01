@@ -73,4 +73,7 @@ namespace ige::scene
 
     // Set Fill Clockwise
     int SpriteComponent_setClockwise(PyObject_SpriteComponent* self, PyObject* value);
+
+    // Get figure
+    PyObject* SpriteComponent_getFigure(PyObject_SpriteComponent* self);
 }

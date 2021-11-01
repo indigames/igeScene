@@ -246,9 +246,13 @@ namespace ige::scene
     // Get showcase
     PyObject* Scene_getShowcase(PyObject_Scene *self)
     {
-        auto obj = (showcase_obj*)(&ShowcaseType)->tp_alloc(&ShowcaseType, 0);
-        obj->showcase = self->scene->getShowcase();
-        return (PyObject *)obj;
+        auto showcase = self->scene->getShowcase();
+        if (showcase) {
+            auto obj = (showcase_obj*)(&ShowcaseType)->tp_alloc(&ShowcaseType, 0);
+            obj->showcase = showcase;
+            return (PyObject*)obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Get environment

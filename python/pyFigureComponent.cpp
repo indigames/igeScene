@@ -63,10 +63,14 @@ namespace ige::scene
     // Get figure
     PyObject* FigureComponent_getFigure(PyObject_FigureComponent* self)
     {
-        auto figureObj = (figure_obj*)(&FigureType)->tp_alloc(&FigureType, 0);
-        figureObj->figure = self->component->getFigure();
-        if(figureObj->figure) figureObj->figure->IncReference();
-        return (PyObject*)figureObj;
+        auto figure = self->component->getFigure();
+        if (figure) {
+            auto figureObj = (figure_obj*)(&FigureType)->tp_alloc(&FigureType, 0);
+            figureObj->figure = self->component->getFigure();
+            figureObj->figure->IncReference();
+            return (PyObject*)figureObj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Fog

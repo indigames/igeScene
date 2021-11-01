@@ -425,10 +425,11 @@ namespace ige::scene
     // Get camera
     PyObject* CameraComponent_getCamera(PyObject_CameraComponent* self)
     {
-        if (self->component->getCamera() != nullptr) {
+        auto camera = self->component->getCamera();
+        if (camera) {
             auto camObj = (camera_obj*)(&CameraType)->tp_alloc(&CameraType, 0);
-            camObj->camera = self->component->getCamera();
-            if (camObj->camera) camObj->camera->IncReference();
+            camObj->camera = camera;
+            camObj->camera->IncReference();
             return (PyObject*)camObj;
         }
         Py_RETURN_NONE;

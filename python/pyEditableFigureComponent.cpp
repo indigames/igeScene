@@ -63,10 +63,14 @@ namespace ige::scene
     // Get figure
     PyObject* EditableFigureComponent_getFigure(PyObject_EditableFigureComponent* self)
     {
-        auto figObj = (editablefigure_obj*)(&EditableFigureType)->tp_alloc(&EditableFigureType, 0);
-        figObj->editablefigure = self->component->getFigure();
-        if(figObj->editablefigure) figObj->editablefigure->IncReference();
-        return (PyObject*)figObj;
+        auto figure = self->component->getFigure();
+        if (figure) {
+            auto figObj = (editablefigure_obj*)(&EditableFigureType)->tp_alloc(&EditableFigureType, 0);
+            figObj->editablefigure = self->component->getFigure();
+            figObj->editablefigure->IncReference();
+            return (PyObject*)figObj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Fog

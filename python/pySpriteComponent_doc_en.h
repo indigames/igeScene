@@ -53,5 +53,11 @@ PyDoc_STRVAR(SpriteComponent_clockwise_doc,
 // texture
 PyDoc_STRVAR(SpriteComponent_texture_doc,
     "Texture instance.\n"\
-    "Type: pyxieTexture\n"
+    "Type: Texture\n"
+);
+
+// SpriteComponent_figure_doc
+PyDoc_STRVAR(SpriteComponent_figure_doc,
+    "Editable Figure instance (Read only).\n"\
+    "Type: EditableFigure\n"
 );

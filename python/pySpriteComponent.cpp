@@ -176,10 +176,14 @@ namespace ige::scene
     // Texture
     PyObject* SpriteComponent_getTexture(PyObject_SpriteComponent* self)
     {
-        auto texObj = (texture_obj*)(&TextureType)->tp_alloc(&TextureType, 0);
-        texObj->colortexture = self->component->getTexture();
-        if (texObj->colortexture) texObj->colortexture->IncReference();
-        return (PyObject*)texObj;
+        auto texture = self->component->getTexture();
+        if (texture) {
+            auto texObj = (texture_obj*)(&TextureType)->tp_alloc(&TextureType, 0);
+            texObj->colortexture = self->component->getTexture();
+            if (texObj->colortexture) texObj->colortexture->IncReference();
+            return (PyObject*)texObj;
+        }
+        Py_RETURN_NONE;
     }
 
     int SpriteComponent_setTexture(PyObject_SpriteComponent* self, PyObject* value)
@@ -198,6 +202,19 @@ namespace ige::scene
         return -1;
     }
 
+    // figure
+    PyObject* SpriteComponent_getFigure(PyObject_SpriteComponent* self)
+    {
+        auto figure = self->component->getFigure();
+        if (figure) {
+            auto figObj = (editablefigure_obj*)(&EditableFigureType)->tp_alloc(&EditableFigureType, 0);
+            figObj->editablefigure = figure;
+            figObj->editablefigure->IncReference();
+            return (PyObject*)figObj;
+        }
+        Py_RETURN_NONE;
+    }
+
     PyGetSetDef SpriteComponent_getsets[] = {
         {"path", (getter)SpriteComponent_getPath, (setter)SpriteComponent_setPath, SpriteComponent_path_doc, NULL},
         {"size", (getter)SpriteComponent_getSize, (setter)SpriteComponent_setSize, SpriteComponent_size_doc, NULL},
@@ -208,6 +225,7 @@ namespace ige::scene
         {"fillAmount", (getter)SpriteComponent_getFillAmount, (setter)SpriteComponent_setFillAmount, SpriteComponent_fillAmount_doc, NULL},
         {"clockwise", (getter)SpriteComponent_getClockwise, (setter)SpriteComponent_setClockwise, SpriteComponent_clockwise_doc, NULL},
         {"texture", (getter)SpriteComponent_getTexture, (setter)SpriteComponent_setTexture, SpriteComponent_texture_doc, NULL},
+        {"figure", (getter)SpriteComponent_getFigure, NULL, SpriteComponent_figure_doc, NULL},
         {NULL, NULL}};
 
     PyTypeObject PyTypeObject_SpriteComponent = {
