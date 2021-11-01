@@ -40,8 +40,6 @@ namespace ige::scene
     template<class... Args>
     void Event<Args...>::removeAllListeners()
     {
-        for (auto& [key, val] : m_callbacks)
-            val = nullptr;
         m_callbacks.clear();
     }
 
