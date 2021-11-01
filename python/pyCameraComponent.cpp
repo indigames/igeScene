@@ -422,6 +422,18 @@ namespace ige::scene
         return (PyObject*)m4obj;
     }
 
+    // Get camera
+    PyObject* CameraComponent_getCamera(PyObject_CameraComponent* self)
+    {
+        if (self->component->getCamera() != nullptr) {
+            auto camObj = (camera_obj*)(&CameraType)->tp_alloc(&CameraType, 0);
+            camObj->camera = self->component->getCamera();
+            if (camObj->camera) camObj->camera->IncReference();
+            return (PyObject*)camObj;
+        }
+        Py_RETURN_NONE;
+    }
+
     PyGetSetDef CameraComponent_getsets[] = {
         { "position", (getter)CameraComponent_getPosition, (setter)CameraComponent_setPosition, CameraComponent_position_doc, NULL },
         { "rotation", (getter)CameraComponent_getRotation, (setter)CameraComponent_setRotation, CameraComponent_rotation_doc, NULL },
@@ -446,6 +458,7 @@ namespace ige::scene
         { "projectionMatrix", (getter)CameraComponent_getProjectionMatrix, NULL, CameraComponent_projectionMatrix_doc, NULL },
         { "viewInverseMatrix", (getter)CameraComponent_getViewInverseMatrix, NULL, CameraComponent_viewInverseMatrix_doc, NULL },
         { "screenMatrix", (getter)CameraComponent_getScreenMatrix, NULL, CameraComponent_screenMatrix_doc, NULL },
+        { "camera", (getter)CameraComponent_getCamera, NULL, CameraComponent_getCamera_doc, NULL },
         { NULL, NULL }
     };
 

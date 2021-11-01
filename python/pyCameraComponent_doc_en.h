@@ -139,3 +139,9 @@ PyDoc_STRVAR(CameraComponent_screenMatrix_doc,
     "Screen Matrix.\n"\
     "Type: Mat4\n"
 );
+
+// camera
+PyDoc_STRVAR(CameraComponent_getCamera_doc,
+    "Get internal camera instance.\n"\
+    "Type: igeCore.Camera\n"
+);

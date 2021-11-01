@@ -149,4 +149,7 @@ namespace ige::scene
 
     // Get Screen Matrix
     PyObject* CameraComponent_getScreenMatrix(PyObject_CameraComponent* self);
+
+    // Get camera
+    PyObject* CameraComponent_getCamera(PyObject_CameraComponent* self);
 }
