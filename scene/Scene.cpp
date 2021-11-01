@@ -296,6 +296,13 @@ namespace ige::scene
         auto renderContext = RenderContext::InstancePtr();
         if (renderContext) {
             renderContext->BeginScene(m_shadowFBO, Vec4(1.f, 1.f, 1.f, 1.f), true, true);
+            m_showcase->Update(0.f);
+            if (camera) {
+                camera->Render();
+            }
+            else if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
+                m_activeCamera->onRender();
+            }
             m_showcase->Render(RenderPassFilter::ShadowPass);
 
             renderContext->BeginPass(TransparentPass);
