@@ -67,6 +67,8 @@ namespace ige::scene
     // Raycast
     PyObject* Scene_raycast(PyObject_Scene *self, PyObject* args);
 
+    PyObject* Scene_raycastAll(PyObject_Scene* self, PyObject* args);
+
     PyObject* Scene_raycastFromCamera(PyObject_Scene* self, PyObject* args);
 
     PyObject* Scene_raycastUI(PyObject_Scene* self, PyObject* args);
@@ -75,4 +77,8 @@ namespace ige::scene
 
     PyObject* Scene_worldToScreenPoint(PyObject_Scene* self, PyObject* args);
 
+    // ScreenPos
+    PyObject* Scene_convertScreenPoint(PyObject_Scene* self, PyObject* args);
+
+    PyObject* Scene_getScreenSize(PyObject_Scene* self);
 }

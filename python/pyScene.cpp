@@ -320,6 +320,55 @@ namespace ige::scene
         return res;
     }
 
+    PyObject* Scene_raycastAll(PyObject_Scene* self, PyObject* args)
+    {
+        PyObject* position;
+        PyObject* direction;
+        float distance = 10000.f;
+
+        if (!PyArg_ParseTuple(args, "OO|i", &position, &direction, &distance))
+            return NULL;
+
+        int d;
+        float buff[4];
+        auto v1 = pyObjToFloat(position, buff, d);
+        if (!v1)
+            return NULL;
+
+        auto v2 = pyObjToFloat(direction, buff, d);
+        if (!v2)
+            return NULL;
+
+        Vec3 pPosition = Vec3(v1[0], v1[1], v1[2]);
+        Vec3 pDirection = Vec3(v2[0], v2[1], v2[2]);
+
+        auto hits = self->scene->raycastAll(pPosition, pDirection, distance);
+        int len = hits.size();
+        if (len == 0)
+            Py_RETURN_NONE;
+
+        auto hitTuple = PyTuple_New(len);
+        for (int i = 0; i < len; ++i)
+        {
+            auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
+            hitObj->sceneObject = hits[i].first.get();
+
+            auto hitPos = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(hits[i].second.P(), 3, hitPos->v);
+            hitPos->d = 3;
+
+            PyObject* res = Py_BuildValue("{s:O,s:O}",
+                "hitObject", hitObj,
+                "hitPosition", hitPos);
+
+            Py_XDECREF(hitObj);
+            Py_XDECREF(hitPos);
+
+            PyTuple_SetItem(hitTuple, i, res);
+        }
+        return (PyObject*)hitTuple;
+    }
+
     PyObject* Scene_raycastFromCamera(PyObject_Scene *self, PyObject* args)
     {
         if (!self->scene) Py_RETURN_NONE;
@@ -513,6 +562,35 @@ namespace ige::scene
         return (PyObject*)pos;
     }
 
+    PyObject* Scene_convertScreenPoint(PyObject_Scene* self, PyObject* args)
+    {
+        PyObject* screenPosObj;
+
+        if (!PyArg_ParseTuple(args, "O", &screenPosObj))
+            return NULL;
+
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat(screenPosObj, buff, d);
+        if (!v)
+            return NULL;
+
+        Vec2 screenPos = Vec2(v[0], v[1]);
+        auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
+        vmath_cpy(self->scene->getScreenPos(screenPos).P(), 2, vec2Obj->v);
+        vec2Obj->d = 2;
+        return (PyObject*)vec2Obj;
+    }
+
+    PyObject* Scene_getScreenSize(PyObject_Scene* self)
+    {
+        auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
+        vmath_cpy(self->scene->getWindowSize().P(), 2, vec2Obj->v);
+        vec2Obj->d = 2;
+        return (PyObject*)vec2Obj;
+    }
+
+
     // Compare function
     static PyObject* Scene_richcompare(PyObject* self, PyObject* other, int op)
     {
@@ -564,10 +642,13 @@ namespace ige::scene
         { "getShowcase", (PyCFunction)Scene_getShowcase, METH_NOARGS, Scene_getShowcase_doc },
         { "getEnvironment", (PyCFunction)Scene_getEnvironment, METH_NOARGS, Scene_getEnvironment_doc },
         { "raycast", (PyCFunction)Scene_raycast, METH_VARARGS, Scene_raycast_doc },
+        { "raycastAll", (PyCFunction)Scene_raycastAll, METH_VARARGS, NULL },
         { "raycastFromCamera", (PyCFunction)Scene_raycastFromCamera, METH_VARARGS, Scene_raycastFromCamera_doc },
         { "raycastUI", (PyCFunction)Scene_raycastUI, METH_VARARGS, Scene_raycastUI_doc },
         { "screenToWorldPoint", (PyCFunction)Scene_screenToWorldPoint, METH_VARARGS, NULL },
         { "worldToScreenPoint", (PyCFunction)Scene_worldToScreenPoint, METH_VARARGS, NULL },
+        { "convertScreenPoint", (PyCFunction)Scene_convertScreenPoint, METH_VARARGS, NULL },
+        { "getScreenSize", (PyCFunction)Scene_getScreenSize, METH_NOARGS, NULL },
         { NULL, NULL }
     };
 

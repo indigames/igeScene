@@ -171,6 +171,7 @@ namespace ige::scene
 
         std::pair< std::shared_ptr<SceneObject>, Vec3> raycast(const Vec3& position, Vec3& direction, float maxDistance = 10000.f, bool forceRaycast = false);
 
+        std::vector<std::pair<std::shared_ptr<SceneObject>, Vec3>> raycastAll(const Vec3& position, Vec3& direction, float maxDistance = 10000.f, bool forceRaycast = false);
         //! Raycast UI 
         std::pair< std::shared_ptr<SceneObject>, Vec3> raycastUI(const Vec2& screenPos);
 
@@ -181,6 +182,14 @@ namespace ige::scene
         //! Window size
         const Vec2& getWindowSize() const { return m_windowSize; }
         void setWindowSize(const Vec2& size);
+
+        //! View size
+        const Vec2 getViewSize() const { return m_viewSize; }
+        void setViewSize(const Vec2& size);
+
+        //! View position
+        const Vec2& getViewPosition() const { return m_viewPosition; }
+        void setViewPosition(const Vec2& pos) { m_viewPosition = pos; }
 
         //! Screen coordinate to client coordinate
         Vec2 screenToClient(const Vec2& pos);
@@ -197,6 +206,9 @@ namespace ige::scene
         //! Sceen Point to World Point
         Vec3 screenToWorldPoint(const Vec2& pos, Camera* cam, float nearPlane);
         Vec2 worldToScreenPoint(const Vec3& pos, Camera* cam);
+
+        //Finger
+        Vec2 getScreenPos(const Vec2& pos);
 
     protected:
         //! Create root Objects
@@ -276,9 +288,11 @@ namespace ige::scene
 
         //! Cache window position
         Vec2 m_windowPosition = {0.f, 0.f};
+        Vec2 m_viewPosition = { 0.f, 0.f };
 
         //! Cache window size
         Vec2 m_windowSize = {-1.f, -1.f};
+        Vec2 m_viewSize = { -1.f, -1.f };
 
         //! TweenManager
         std::shared_ptr<TweenManager> m_tweenManager;

@@ -56,6 +56,7 @@ namespace ige::scene
         : m_name(name)
     {
         setWindowSize({-1.f, -1.f});
+        setViewSize({ -1.f, -1.f });
     }
 
     Scene::~Scene()
@@ -758,10 +759,20 @@ namespace ige::scene
         m_windowSize[1] = size.Y() > 0 ? size.Y() : SystemInfo::Instance().GetGameH();
     }
 
+    void Scene::setViewSize(const Vec2& size)
+    {
+        m_viewSize[0] = size.X() > 0 ? size.X() : SystemInfo::Instance().GetGameW();
+        m_viewSize[1] = size.Y() > 0 ? size.Y() : SystemInfo::Instance().GetGameH();
+    }
+
     Vec2 Scene::screenToClient(const Vec2& pos)
     {
         auto wSize = getWindowSize();
+        auto vSize = getViewSize();
+
         auto wPos = getWindowPosition();
+        auto vPos = getViewPosition(); 
+        pyxie_printf("View Position %f %f\n", vPos[0], vPos[1]);
         auto x = pos.X() - wPos.X() * 0.5f;
         auto y = pos.Y() + wPos.Y() * 0.5f;
         x = x + (SystemInfo::Instance().GetGameW() - (wSize.X() + wPos.X())) * 0.5f;
@@ -782,7 +793,7 @@ namespace ige::scene
 
         Mat4 viewInv;
         camera->GetViewInverseMatrix(viewInv);
-
+        
         Vec4 lStart_NDC(
             pos[0] / wSize[0] * 2.0f,
             pos[1] / wSize[1] * 2.0f,
@@ -853,6 +864,11 @@ namespace ige::scene
         windowSpacePos[0] = std::roundf(windowSpacePos[0]);
         windowSpacePos[1] = std::roundf(windowSpacePos[1]);
         return windowSpacePos;
+    }
+
+    Vec2 Scene::getScreenPos(const Vec2& screenPos)
+    {
+        return screenToClient(screenPos);
     }
 
     //! Raycast
@@ -930,6 +946,37 @@ namespace ige::scene
             }
         }
         return hit;
+    }
+
+    std::vector<std::pair<std::shared_ptr<SceneObject>, Vec3>> Scene::raycastAll(const Vec3& position, Vec3& direction, float maxDistance, bool forceRaycast)
+    {
+        std::vector<std::pair<std::shared_ptr<SceneObject>, Vec3>> hits;
+        std::pair<Vec3, Vec3> ray = RayOBBChecker::RayOBB(position, direction);
+        for (const auto& obj : m_objects)
+        {
+            const auto& transform = obj->getTransform();
+            auto tranMat = Mat4::IdentityMat();
+            vmath_mat4_translation(transform->getPosition().P(), tranMat.P());
+
+            auto rotMat = Mat4::IdentityMat();
+            vmath_mat_from_quat(transform->getRotation().P(), 4, rotMat.P());
+
+            auto modelMat = tranMat * rotMat;
+            vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getScale().X(), 1.f / transform->getScale().Y(), 1.f / transform->getScale().Z()).P(), 4, 4, modelMat.P());
+            
+            float distance = 0;
+            if (RayOBBChecker::checkIntersect(obj->getAABB(), modelMat, distance, maxDistance))
+            {
+                if (maxDistance > distance && distance > 0.f)
+                {
+                    auto hit = std::pair<std::shared_ptr<SceneObject>, Vec3>(nullptr, Vec3());
+                    hit.first = obj;
+                    hit.second = ray.first + ray.second * distance;
+                    hits.push_back(hit);
+                }
+            }
+        }
+        return hits;
     }
 
     std::pair<std::shared_ptr<SceneObject>, Vec3> Scene::raycastUI(const Vec2& screenPos)
