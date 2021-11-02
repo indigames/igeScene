@@ -28,12 +28,13 @@ namespace ige::scene
     //! Path
     PyObject *PhysicMesh_getPath(PyObject_PhysicMesh *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getPath().c_str());
     }
 
     int PhysicMesh_setPath(PyObject_PhysicMesh *self, PyObject *value)
     {
-        if (PyUnicode_Check(value))
+        if (PyUnicode_Check(value) && self->component)
         {
             const char* val = PyUnicode_AsUTF8(value);
             if (val != NULL)
@@ -48,12 +49,13 @@ namespace ige::scene
     //! Convex
     PyObject *PhysicMesh_isConvex(PyObject_PhysicMesh *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isConvex());
     }
 
     int PhysicMesh_setConvex(PyObject_PhysicMesh *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setConvex(val);

@@ -28,6 +28,7 @@ namespace ige::scene
     // Get design canvas size
     PyObject* Canvas_getDesignCanvasSize(PyObject_Canvas* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
         vmath_cpy(self->component->getDesignCanvasSize().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
@@ -37,6 +38,7 @@ namespace ige::scene
     // Set design canvas size
     int Canvas_setDesignCanvasSize(PyObject_Canvas* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -48,6 +50,7 @@ namespace ige::scene
     // Get target size
     PyObject* Canvas_getTargetCanvasSize(PyObject_Canvas* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
         vmath_cpy(self->component->getTargetCanvasSize().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
@@ -57,6 +60,7 @@ namespace ige::scene
     // Set target size
     int Canvas_setTargetCanvasSize(PyObject_Canvas* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);

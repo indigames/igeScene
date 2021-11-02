@@ -28,12 +28,13 @@ namespace ige::scene
     // Recursive
     PyObject *Navigable_isRecursive(PyObject_Navigable *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isRecursive());
     }
 
     int Navigable_setRecursive(PyObject_Navigable *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setRecursive(val);

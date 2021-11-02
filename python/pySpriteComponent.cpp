@@ -28,12 +28,14 @@ namespace ige::scene
     // Get path
     PyObject *SpriteComponent_getPath(PyObject_SpriteComponent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getPath().c_str());
     }
 
     // Set path
     int SpriteComponent_setPath(PyObject_SpriteComponent *self, PyObject *value)
     {
+        if (!self->component) return -1;
         if (PyUnicode_Check(value))
         {
             const char* name = PyUnicode_AsUTF8(value);
@@ -46,6 +48,7 @@ namespace ige::scene
     // Get size
     PyObject *SpriteComponent_getSize(PyObject_SpriteComponent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
         vmath_cpy(self->component->getSize().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
@@ -55,6 +58,7 @@ namespace ige::scene
     // Set size
     int SpriteComponent_setSize(PyObject_SpriteComponent *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -66,11 +70,13 @@ namespace ige::scene
 
     PyObject* SpriteComponent_isBillboard(PyObject_SpriteComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isBillboard());
     }
 
     int SpriteComponent_setBillboard(PyObject_SpriteComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto isActive = (uint32_t)PyLong_AsLong(value) != 0;
@@ -83,6 +89,7 @@ namespace ige::scene
     // Get color
     PyObject* SpriteComponent_getColor(PyObject_SpriteComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
@@ -92,6 +99,7 @@ namespace ige::scene
     // Set color
     int SpriteComponent_setColor(PyObject_SpriteComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -104,12 +112,14 @@ namespace ige::scene
     // Get Fill Method
     PyObject* SpriteComponent_getFillMethod(PyObject_SpriteComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong((int)self->component->getFillMethod());
     }
 
     // Set Fill Method
     int SpriteComponent_setFillMethod(PyObject_SpriteComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
@@ -122,12 +132,14 @@ namespace ige::scene
     // Get Fill Origin
     PyObject* SpriteComponent_getFillOrigin(PyObject_SpriteComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong((int)self->component->getFillOrigin());
     }
 
     // Set Fill Origin
     int SpriteComponent_setFillOrigin(PyObject_SpriteComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
@@ -140,12 +152,14 @@ namespace ige::scene
     // Get Fill Amount
     PyObject* SpriteComponent_getFillAmount(PyObject_SpriteComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getFillAmount());
     }
 
     // Set Fill Amount
     int SpriteComponent_setFillAmount(PyObject_SpriteComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             auto val = (float)PyFloat_AsDouble(value);
@@ -158,12 +172,14 @@ namespace ige::scene
     // Get Fill Clockwise
     PyObject* SpriteComponent_getClockwise(PyObject_SpriteComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->getClockwise());
     }
 
     // Set Fill Clockwise
     int SpriteComponent_setClockwise(PyObject_SpriteComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
@@ -176,6 +192,7 @@ namespace ige::scene
     // Texture
     PyObject* SpriteComponent_getTexture(PyObject_SpriteComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto texture = self->component->getTexture();
         if (texture) {
             auto texObj = (texture_obj*)(&TextureType)->tp_alloc(&TextureType, 0);
@@ -188,6 +205,7 @@ namespace ige::scene
 
     int SpriteComponent_setTexture(PyObject_SpriteComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (value) {
             if (value->ob_type == &TextureType) {
                 auto texObj = (texture_obj*)value;
@@ -205,6 +223,7 @@ namespace ige::scene
     // figure
     PyObject* SpriteComponent_getFigure(PyObject_SpriteComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto figure = self->component->getFigure();
         if (figure) {
             auto figObj = (editablefigure_obj*)(&EditableFigureType)->tp_alloc(&EditableFigureType, 0);

@@ -28,200 +28,258 @@ namespace ige::scene
     // Get position
     PyObject* TransformComponent_getLocalPosition(PyObject_TransformComponent* self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getLocalPosition().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject*)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getLocalPosition().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Set position
     int TransformComponent_setLocalPosition(PyObject_TransformComponent* self, PyObject* value)
     {
-        int d;
-        float buff[4];
-        auto v = pyObjToFloat((PyObject*)value, buff, d);
-        if (!v) return -1;
-        self->component->setLocalPosition(*((Vec3*)v));
-        return 0;
+        if (self->component) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)value, buff, d);
+            if (!v) return -1;
+            self->component->setLocalPosition(*((Vec3*)v));
+            return 0;
+        }
+        return -1;
     }
 
     // Get rotation
     PyObject* TransformComponent_getLocalRotation(PyObject_TransformComponent* self)
     {
-        auto quatObj = PyObject_New(vec_obj, _QuatType);
-        vmath_cpy(self->component->getLocalRotation().P(), 4, quatObj->v);
-        quatObj->d = 4;
-        return (PyObject*)quatObj;
+        if (self->component) {
+            auto quatObj = PyObject_New(vec_obj, _QuatType);
+            vmath_cpy(self->component->getLocalRotation().P(), 4, quatObj->v);
+            quatObj->d = 4;
+            return (PyObject*)quatObj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Set rotation
     int TransformComponent_setLocalRotation(PyObject_TransformComponent* self, PyObject* value)
     {
-        int d1;
-        float buff[4];
-        float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
-        if (!v1) return -1;
-        self->component->setLocalRotation(*((Quat*)v1));
-        return 0;
+        if (self->component) {
+            int d1;
+            float buff[4];
+            float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
+            if (!v1) return -1;
+            self->component->setLocalRotation(*((Quat*)v1));
+            return 0;
+        }
+        return -1;
     }
 
     // Get scale
     PyObject* TransformComponent_getLocalScale(PyObject_TransformComponent* self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getScale().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject*)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getScale().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Set scale
     int TransformComponent_setLocalScale(PyObject_TransformComponent* self, PyObject* value)
     {
-        int d;
-        float buff[4];
-        auto v = pyObjToFloat((PyObject*)value, buff, d);
-        if (!v) return -1;
-        self->component->setLocalScale(*((Vec3*)v));
-        return 0;
+        if (self->component) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)value, buff, d);
+            if (!v) return -1;
+            self->component->setLocalScale(*((Vec3*)v));
+            return 0;
+        }
+        return -1;
     }
 
     // Get local transform matrix
     PyObject* TransformComponent_getLocalMatrix(PyObject_TransformComponent* self)
     {
-        auto m4obj = PyObject_New(mat_obj, _Mat44Type);
-        if (!m4obj) return NULL;
-        auto mat = self->component->getLocalMatrix();
-        vmath_cpy(mat.P(), 16, m4obj->m);
-        m4obj->d = 4;
-        return (PyObject*)m4obj;
+        if (self->component) {
+            auto m4obj = PyObject_New(mat_obj, _Mat44Type);
+            if (!m4obj) Py_RETURN_NONE;
+            auto mat = self->component->getLocalMatrix();
+            vmath_cpy(mat.P(), 16, m4obj->m);
+            m4obj->d = 4;
+            return (PyObject*)m4obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Get world position
     PyObject* TransformComponent_getWorldPosition(PyObject_TransformComponent* self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject*)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Set world position
     int TransformComponent_setWorldPosition(PyObject_TransformComponent* self, PyObject* value)
     {
-        int d;
-        float buff[4];
-        auto v = pyObjToFloat((PyObject*)value, buff, d);
-        if (!v) return -1;
-        self->component->setPosition(*((Vec3*)v));
-        return 0;
+        if (self->component) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)value, buff, d);
+            if (!v) return -1;
+            self->component->setPosition(*((Vec3*)v));
+            return 0;
+        }
+        return -1;
     }
 
     // Get world rotation
     PyObject* TransformComponent_getWorldRotation(PyObject_TransformComponent* self)
     {
-        auto quatObj = PyObject_New(vec_obj, _QuatType);
-        vmath_cpy(self->component->getRotation().P(), 4, quatObj->v);
-        quatObj->d = 4;
-        return (PyObject*)quatObj;
+        if (self->component) {
+            auto quatObj = PyObject_New(vec_obj, _QuatType);
+            vmath_cpy(self->component->getRotation().P(), 4, quatObj->v);
+            quatObj->d = 4;
+            return (PyObject*)quatObj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Set world rotation
     int TransformComponent_setWorldRotation(PyObject_TransformComponent* self, PyObject* value)
     {
-        int d1;
-        float buff[4];
-        float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
-        if (!v1) return -1;
-        self->component->setRotation(*((Quat*)v1));
-        return 0;
+        if (self->component) {
+            int d1;
+            float buff[4];
+            float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
+            if (!v1) return -1;
+            self->component->setRotation(*((Quat*)v1));
+            return 0;
+        }
+        return -1;
     }
 
     // Get world scale
     PyObject* TransformComponent_getWorldScale(PyObject_TransformComponent* self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getScale().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject*)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getScale().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Set world scale
     int TransformComponent_setWorldScale(PyObject_TransformComponent* self, PyObject* value)
     {
-        int d;
-        float buff[4];
-        auto v = pyObjToFloat((PyObject*)value, buff, d);
-        if (!v) return -1;
-        self->component->setScale(*((Vec3*)v));
-        return 0;
+        if (self->component) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)value, buff, d);
+            if (!v) return -1;
+            self->component->setScale(*((Vec3*)v));
+            return 0;
+        }
+        return -1;
     }
 
     // Get world transform matrix
     PyObject* TransformComponent_getWorldMatrix(PyObject_TransformComponent* self)
     {
-        auto m4obj = PyObject_New(mat_obj, _Mat44Type);
-        if (!m4obj) return NULL;
-        auto mat = self->component->getWorldMatrix();
-        vmath_cpy(mat.P(), 16, m4obj->m);
-        m4obj->d = 4;
-        return (PyObject*)m4obj;
+        if (self->component) {
+            auto m4obj = PyObject_New(mat_obj, _Mat44Type);
+            if (!m4obj) Py_RETURN_NONE;
+            auto mat = self->component->getWorldMatrix();
+            vmath_cpy(mat.P(), 16, m4obj->m);
+            m4obj->d = 4;
+            return (PyObject*)m4obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Get world foward
     PyObject* TransformComponent_getWorldForward(PyObject_TransformComponent* self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getWorldForward().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject*)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getWorldForward().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Get world up
     PyObject* TransformComponent_getWorldUp(PyObject_TransformComponent* self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getWorldUp().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject*)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getWorldUp().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Get world right
     PyObject* TransformComponent_getWorldRight(PyObject_TransformComponent* self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getWorldRight().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject*)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getWorldRight().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Get local foward
     PyObject* TransformComponent_getLocalForward(PyObject_TransformComponent* self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getLocalForward().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject*)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getLocalForward().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Get local up
     PyObject* TransformComponent_getLocalUp(PyObject_TransformComponent* self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getLocalUp().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject*)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getLocalUp().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Get local right
     PyObject* TransformComponent_getLocalRight(PyObject_TransformComponent* self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getLocalRight().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject*)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getLocalRight().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
-
-
 
     // Variable definition
     PyGetSetDef TransformComponent_getsets[] = {

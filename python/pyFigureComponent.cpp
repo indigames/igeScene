@@ -28,13 +28,14 @@ namespace ige::scene
     // Get path
     PyObject* FigureComponent_getPath(PyObject_FigureComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getPath().c_str());
     }
 
     // Set path
     int FigureComponent_setPath(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyUnicode_Check(value))
+        if (PyUnicode_Check(value) && self->component)
         {
             const char* val = PyUnicode_AsUTF8(value);
             self->component->setPath(std::string(val));
@@ -46,7 +47,7 @@ namespace ige::scene
     // Set figure
     int FigureComponent_setFigure(PyObject_FigureComponent* self, PyObject* value)
     {
-        if(value) {
+        if(value && self->component) {
             if (value->ob_type == &FigureType) {
                 auto figObj = (figure_obj*)value;
                 self->component->setFigure(figObj->figure);
@@ -63,6 +64,7 @@ namespace ige::scene
     // Get figure
     PyObject* FigureComponent_getFigure(PyObject_FigureComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto figure = self->component->getFigure();
         if (figure) {
             auto figureObj = (figure_obj*)(&FigureType)->tp_alloc(&FigureType, 0);
@@ -76,12 +78,13 @@ namespace ige::scene
     // Fog
     PyObject* FigureComponent_isFogEnabled(PyObject_FigureComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isFogEnabled());
     }
 
     int FigureComponent_setFogEnabled(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setFogEnabled(enable);
@@ -93,12 +96,13 @@ namespace ige::scene
     // Front face culling
     PyObject* FigureComponent_isCullFaceEnable(PyObject_FigureComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isCullFaceEnable());
     }
 
     int FigureComponent_setCullFaceEnable(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setCullFaceEnable(enable);
@@ -110,12 +114,13 @@ namespace ige::scene
     // Double Side
     PyObject* FigureComponent_isDoubleSideEnable(PyObject_FigureComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isDoubleSideEnable());
     }
 
     int FigureComponent_setDoubleSideEnable(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setDoubleSideEnable(enable);
@@ -127,12 +132,13 @@ namespace ige::scene
     // Depth test
     PyObject* FigureComponent_isDepthTestEnable(PyObject_FigureComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isDepthTestEnable());
     }
 
     int FigureComponent_setDepthTestEnable(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setDepthTestEnable(enable);
@@ -144,12 +150,13 @@ namespace ige::scene
     // Depth write
     PyObject* FigureComponent_isDepthWriteEnable(PyObject_FigureComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isDepthWriteEnable());
     }
 
     int FigureComponent_setDepthWriteEnable(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setDepthWriteEnable(enable);
@@ -161,12 +168,13 @@ namespace ige::scene
     // Scissor Test
     PyObject* FigureComponent_isScissorTestEnable(PyObject_FigureComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isScissorTestEnable());
     }
 
     int FigureComponent_setScissorTestEnable(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setScissorTestEnable(enable);
@@ -178,12 +186,13 @@ namespace ige::scene
     // Frame update ratio (speedup/slower effects)
     PyObject* FigureComponent_getFrameUpdateRatio(PyObject_FigureComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getFrameUpdateRatio());
     }
 
     int FigureComponent_setFrameUpdateRatio(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setFrameUpdateRatio(val);

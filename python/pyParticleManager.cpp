@@ -47,12 +47,13 @@ namespace ige::scene
     //! Culling
     PyObject *ParticleManager_isCullingEnabled(PyObject_ParticleManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isCullingEnabled());
     }
 
     int ParticleManager_setCullingEnabled(PyObject_ParticleManager *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setCullingEnabled(val);
@@ -64,6 +65,7 @@ namespace ige::scene
     //! Culling world size
     PyObject *ParticleManager_getCullingWorldSize(PyObject_ParticleManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getCullingWorldSize().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -72,6 +74,7 @@ namespace ige::scene
 
     int ParticleManager_setCullingWorldSize(PyObject_ParticleManager *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -84,12 +87,13 @@ namespace ige::scene
     //! Culling layers number
     PyObject *ParticleManager_getCullingLayerNumber(PyObject_ParticleManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getCullingLayerNumber());
     }
 
     int ParticleManager_setCullingLayerNumber(PyObject_ParticleManager *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setCullingLayerNumber(val);
@@ -101,12 +105,13 @@ namespace ige::scene
     //! Max particles number
     PyObject *ParticleManager_getMaxParticleNumber(PyObject_ParticleManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getMaxParticleNumber());
     }
 
     int ParticleManager_setMaxParticleNumber(PyObject_ParticleManager *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setMaxParticleNumber(val);
@@ -118,12 +123,13 @@ namespace ige::scene
     //! Threads number
     PyObject *ParticleManager_getNumberOfThreads(PyObject_ParticleManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getNumberOfThreads());
     }
 
     int ParticleManager_setNumberOfThreads(PyObject_ParticleManager *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setNumberOfThreads(val);

@@ -27,12 +27,14 @@ namespace ige::scene
     // Get text
     PyObject* TextBitmapComponent_getText(PyObject_TextBitmapComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getText().c_str());
     }
 
     // Set text
     int TextBitmapComponent_setText(PyObject_TextBitmapComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
@@ -45,12 +47,14 @@ namespace ige::scene
     // Get font path
     PyObject* TextBitmapComponent_getFontPath(PyObject_TextBitmapComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getFontPath().c_str());
     }
 
     // Set font path
     int TextBitmapComponent_setFontPath(PyObject_TextBitmapComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
@@ -63,12 +67,14 @@ namespace ige::scene
     // Get font size
     PyObject* TextBitmapComponent_getFontSize(PyObject_TextBitmapComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getFontSize());
     }
 
     // Set font size
     int TextBitmapComponent_setFontSize(PyObject_TextBitmapComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
@@ -81,6 +87,7 @@ namespace ige::scene
     // Get color
     PyObject* TextBitmapComponent_getColor(PyObject_TextBitmapComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
@@ -90,6 +97,7 @@ namespace ige::scene
     // Set color
     int TextBitmapComponent_setColor(PyObject_TextBitmapComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -101,11 +109,13 @@ namespace ige::scene
     
     PyObject* TextBitmapComponent_isBillboard(PyObject_TextBitmapComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isBillboard());
     }
 
     int TextBitmapComponent_setBillboard(PyObject_TextBitmapComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;

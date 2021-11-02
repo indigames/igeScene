@@ -47,23 +47,29 @@ namespace ige::scene
     // getActiveListener
     PyObject *AudioManager_getActiveListener(PyObject_AudioManager *self)
     {
-        if(!self->component->getActiveListener().has_value())
-            Py_RETURN_NONE;
-        auto listener = (*(self->component->getActiveListener())).get();
-        auto *listenerObj = PyObject_New(PyObject_AudioListener, &PyTypeObject_AudioListener);
-        listenerObj->component = &listener;
-        return (PyObject *)listenerObj;
+        if (self->component) {
+            if (!self->component->getActiveListener().has_value())
+                Py_RETURN_NONE;
+            auto listener = (*(self->component->getActiveListener())).get();
+            auto* listenerObj = PyObject_New(PyObject_AudioListener, &PyTypeObject_AudioListener);
+            listenerObj->component = &listener;
+            return (PyObject*)listenerObj;
+        }
+        Py_RETURN_NONE;
     }
 
     // globalVolume
     PyObject *AudioManager_getGlobalVolume(PyObject_AudioManager *self)
     {
-        return PyFloat_FromDouble(self->component->getGlobalVolume());
+        if (self->component) {
+            return PyFloat_FromDouble(self->component->getGlobalVolume());
+        }
+        Py_RETURN_NONE;
     }
 
     int AudioManager_setGlobalVolume(PyObject_AudioManager *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setGlobalVolume(val);

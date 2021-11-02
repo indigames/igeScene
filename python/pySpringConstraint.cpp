@@ -29,6 +29,7 @@ namespace ige::scene
     // enable
     PyObject *SpringConstraint_getEnable(PyObject_SpringConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getEnable().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -37,6 +38,7 @@ namespace ige::scene
 
     int SpringConstraint_setEnable(PyObject_SpringConstraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -49,6 +51,7 @@ namespace ige::scene
     // stiffness
     PyObject *SpringConstraint_getStiffness(PyObject_SpringConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getStiffness().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -57,6 +60,7 @@ namespace ige::scene
 
     int SpringConstraint_setStiffness(PyObject_SpringConstraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -69,6 +73,7 @@ namespace ige::scene
     // damping
     PyObject *SpringConstraint_getDamping(PyObject_SpringConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getDamping().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -77,6 +82,7 @@ namespace ige::scene
 
     int SpringConstraint_setDamping(PyObject_SpringConstraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -89,6 +95,7 @@ namespace ige::scene
     // lowerLimit
     PyObject *SpringConstraint_getLowerLimit(PyObject_SpringConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLowerLimit().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -97,6 +104,7 @@ namespace ige::scene
 
     int SpringConstraint_setLowerLimit(PyObject_SpringConstraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -109,6 +117,7 @@ namespace ige::scene
     // upperLimit
     PyObject *SpringConstraint_getUpperLimit(PyObject_SpringConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getUpperLimit().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -117,6 +126,7 @@ namespace ige::scene
 
     int SpringConstraint_setUpperLimit(PyObject_SpringConstraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);

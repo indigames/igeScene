@@ -30,12 +30,13 @@ namespace ige::scene
     //! size
     PyObject *PhysicSphere_getRadius(PyObject_PhysicSphere *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getRadius());
     }
 
     int PhysicSphere_setRadius(PyObject_PhysicSphere *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setRadius(val);

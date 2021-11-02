@@ -29,6 +29,7 @@ namespace ige::scene
     // linearLowerLimit
     PyObject *Dof6Constraint_getLinearLowerLimit(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLinearLowerLimit().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -37,6 +38,7 @@ namespace ige::scene
 
     int Dof6Constraint_setLinearLowerLimit(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -49,6 +51,7 @@ namespace ige::scene
     // linearUpperLimit
     PyObject *Dof6Constraint_getLinearUpperLimit(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLinearUpperLimit().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -57,6 +60,7 @@ namespace ige::scene
 
     int Dof6Constraint_setLinearUpperLimit(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -69,6 +73,7 @@ namespace ige::scene
     // linearTargetVelocity
     PyObject *Dof6Constraint_getLinearTargetVelocity(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLinearTargetVelocity().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -77,6 +82,7 @@ namespace ige::scene
 
     int Dof6Constraint_setLinearTargetVelocity(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -89,6 +95,7 @@ namespace ige::scene
     // linearBounce
     PyObject *Dof6Constraint_getLinearBounce(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLinearBounce().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -97,6 +104,7 @@ namespace ige::scene
 
     int Dof6Constraint_setLinearBounce(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -109,6 +117,7 @@ namespace ige::scene
     // linearSpringEnabled
     PyObject *Dof6Constraint_getLinearSpringEnabled(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLinearSpringEnabled().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -117,6 +126,7 @@ namespace ige::scene
 
     int Dof6Constraint_setLinearSpringEnabled(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -129,6 +139,7 @@ namespace ige::scene
     // linearStiffness
     PyObject *Dof6Constraint_getLinearStiffness(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLinearStiffness().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -137,6 +148,7 @@ namespace ige::scene
 
     int Dof6Constraint_setLinearStiffness(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -149,6 +161,7 @@ namespace ige::scene
     // linearDamping
     PyObject *Dof6Constraint_getLinearDamping(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLinearDamping().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -157,6 +170,7 @@ namespace ige::scene
 
     int Dof6Constraint_setLinearDamping(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -169,6 +183,7 @@ namespace ige::scene
     // linearMotorEnabled
     PyObject *Dof6Constraint_getLinearMotorEnabled(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLinearMotorEnabled().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -177,6 +192,7 @@ namespace ige::scene
 
     int Dof6Constraint_setLinearMotorEnabled(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -189,6 +205,7 @@ namespace ige::scene
     // linearMaxMotorForce
     PyObject *Dof6Constraint_getLinearMaxMotorForce(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLinearMaxMotorForce().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -197,6 +214,7 @@ namespace ige::scene
 
     int Dof6Constraint_setLinearMaxMotorForce(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -209,6 +227,7 @@ namespace ige::scene
     // linearServoEnabled
     PyObject *Dof6Constraint_getLinearServoEnabled(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLinearServoEnabled().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -217,6 +236,7 @@ namespace ige::scene
 
     int Dof6Constraint_setLinearServoEnabled(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -229,6 +249,7 @@ namespace ige::scene
     // linearServoTarget
     PyObject *Dof6Constraint_getLinearServoTarget(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLinearServoTarget().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -237,6 +258,7 @@ namespace ige::scene
 
     int Dof6Constraint_setLinearServoTarget(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -249,6 +271,7 @@ namespace ige::scene
     // angularLowerLimit
     PyObject *Dof6Constraint_getAngularLowerLimit(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAngularLowerLimit().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -257,6 +280,7 @@ namespace ige::scene
 
     int Dof6Constraint_setAngularLowerLimit(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -269,6 +293,7 @@ namespace ige::scene
     // angularUpperLimit
     PyObject *Dof6Constraint_getAngularUpperLimit(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAngularUpperLimit().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -277,6 +302,7 @@ namespace ige::scene
 
     int Dof6Constraint_setAngularUpperLimit(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -289,6 +315,7 @@ namespace ige::scene
     // angularTargetVelocity
     PyObject *Dof6Constraint_getAngularTargetVelocity(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAngularTargetVelocity().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -297,6 +324,7 @@ namespace ige::scene
 
     int Dof6Constraint_setAngularTargetVelocity(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -309,6 +337,7 @@ namespace ige::scene
     // angularBounce
     PyObject *Dof6Constraint_getAngularBounce(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAngularBounce().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -317,6 +346,7 @@ namespace ige::scene
 
     int Dof6Constraint_setAngularBounce(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -329,6 +359,7 @@ namespace ige::scene
     // angularSpringEnabled
     PyObject *Dof6Constraint_getAngularSpringEnabled(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAngularSpringEnabled().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -337,6 +368,7 @@ namespace ige::scene
 
     int Dof6Constraint_setAngularSpringEnabled(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -349,6 +381,7 @@ namespace ige::scene
     // angularStiffness
     PyObject *Dof6Constraint_getAngularStiffness(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAngularStiffness().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -357,6 +390,7 @@ namespace ige::scene
 
     int Dof6Constraint_setAngularStiffness(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -369,6 +403,7 @@ namespace ige::scene
     // angularDamping
     PyObject *Dof6Constraint_getAngularDamping(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAngularDamping().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -377,6 +412,7 @@ namespace ige::scene
 
     int Dof6Constraint_setAngularDamping(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -389,6 +425,7 @@ namespace ige::scene
     // angularMotorEnabled
     PyObject *Dof6Constraint_getAngularMotorEnabled(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAngularMotorEnabled().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -397,6 +434,7 @@ namespace ige::scene
 
     int Dof6Constraint_setAngularMotorEnabled(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -409,6 +447,7 @@ namespace ige::scene
     // angularMaxMotorForce
     PyObject *Dof6Constraint_getAngularMaxMotorForce(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAngularMaxMotorForce().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -417,6 +456,7 @@ namespace ige::scene
 
     int Dof6Constraint_setAngularMaxMotorForce(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -429,6 +469,7 @@ namespace ige::scene
     // angularServoEnabled
     PyObject *Dof6Constraint_getAngularServoEnabled(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAngularServoEnabled().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -437,6 +478,7 @@ namespace ige::scene
 
     int Dof6Constraint_setAngularServoEnabled(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -449,6 +491,7 @@ namespace ige::scene
     // angularServoTarget
     PyObject *Dof6Constraint_getAngularServoTarget(PyObject_Dof6Constraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAngularServoTarget().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -457,6 +500,7 @@ namespace ige::scene
 
     int Dof6Constraint_setAngularServoTarget(PyObject_Dof6Constraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);

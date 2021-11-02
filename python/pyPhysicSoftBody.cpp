@@ -34,6 +34,7 @@ namespace ige::scene
     //! Apply Repulsion Force
     PyObject *PhysicSoftBody_applyRepulsionForce(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         float timeStep = 0.f;
         int applySpringForce = 0;
         if (PyArg_ParseTuple(value, "fi", &timeStep, &applySpringForce))
@@ -44,6 +45,7 @@ namespace ige::scene
     //! Add Velocity
     PyObject *PhysicSoftBody_addVelocity(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject *velocityObj;
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "O|i", &velocityObj, &nodeIdx))
@@ -59,12 +61,14 @@ namespace ige::scene
     //! Get Volume
     PyObject *PhysicSoftBody_getVolume(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getVolume());
     }
 
     //! Get Center Of Mass
     PyObject *PhysicSoftBody_getCenterOfMass(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(PhysicHelper::from_btVector3(self->component->getCenterOfMass()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -74,6 +78,7 @@ namespace ige::scene
     //! Get nearest node
     PyObject *PhysicSoftBody_getNearestNodeIndex(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (!self->component) return PyLong_FromLong(-1);
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -87,6 +92,7 @@ namespace ige::scene
     //! Get node position
     PyObject *PhysicSoftBody_getNodePosition(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "i", &nodeIdx))
         {
@@ -102,6 +108,7 @@ namespace ige::scene
     //! Get node normal
     PyObject *PhysicSoftBody_getNodeNormal(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "i", &nodeIdx))
         {
@@ -117,6 +124,7 @@ namespace ige::scene
     //! Append deformable anchor
     PyObject *PhysicSoftBody_appendDeformableAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         int nodeIdx = -1;
         PyObject *obj = nullptr;
         if (PyArg_ParseTuple(value, "iO", &nodeIdx, &obj) && nodeIdx >= 0 && obj)
@@ -153,6 +161,7 @@ namespace ige::scene
     //! Append anchor
     PyObject *PhysicSoftBody_appendAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         int nodeIdx = -1;
         PyObject *obj = nullptr;
         int disableLinkedCollission = 0;
@@ -192,6 +201,7 @@ namespace ige::scene
     //! Remove anchor
     PyObject *PhysicSoftBody_removeAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "i", &nodeIdx))
         {
@@ -205,12 +215,13 @@ namespace ige::scene
     //! Damping coefficient
     PyObject *PhysicSoftBody_getDampingCoeff(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getDampingCoeff());
     }
 
     int PhysicSoftBody_setDampingCoeff(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setDampingCoeff(val);
@@ -222,13 +233,14 @@ namespace ige::scene
     //! Pressure coefficient
     PyObject *PhysicSoftBody_getPressureCoeff(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getPressureCoeff());
     }
 
     int PhysicSoftBody_setPressureCoeff(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyArg_ParseTuple(value, "f", &val) && self->component)
         {
             self->component->setPressureCoeff(val);
             return 0;
@@ -239,13 +251,14 @@ namespace ige::scene
     //! Volume conversation coefficient
     PyObject *PhysicSoftBody_getVolumeConvCoeff(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getVolumeConvCoeff());
     }
 
     int PhysicSoftBody_setVolumeConvCoeff(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyArg_ParseTuple(value, "f", &val) && self->component)
         {
             self->component->setVolumeConvCoeff(val);
             return 0;
@@ -256,13 +269,14 @@ namespace ige::scene
     //! Dynamic friction coefficient
     PyObject *PhysicSoftBody_getDynamicFrictionCoeff(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getDynamicFrictionCoeff());
     }
 
     int PhysicSoftBody_setDynamicFrictionCoeff(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyArg_ParseTuple(value, "f", &val) && self->component)
         {
             self->component->setDynamicFrictionCoeff(val);
             return 0;
@@ -273,13 +287,14 @@ namespace ige::scene
     //! Pose matching coefficient
     PyObject *PhysicSoftBody_getPoseMatchCoeff(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getPoseMatchCoeff());
     }
 
     int PhysicSoftBody_setPoseMatchCoeff(PyObject_PhysicSoftBody *self, PyObject *value)
     {
         float val;
-        if (PyArg_ParseTuple(value, "f", &val))
+        if (PyArg_ParseTuple(value, "f", &val) && self->component)
         {
             self->component->setPoseMatchCoeff(val);
             return 0;
@@ -290,12 +305,13 @@ namespace ige::scene
     //! Repulsion Stiffness
     PyObject *PhysicSoftBody_getRepulsionStiffness(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getRepulsionStiffness());
     }
 
     int PhysicSoftBody_setRepulsionStiffness(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setRepulsionStiffness(val);
@@ -307,12 +323,13 @@ namespace ige::scene
     //! Sleeping Threshold
     PyObject *PhysicSoftBody_getSleepingThreshold(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getSleepingThreshold());
     }
 
     int PhysicSoftBody_setSleepingThreshold(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setSleepingThreshold(val);
@@ -324,12 +341,13 @@ namespace ige::scene
     //! Rest Length Scale
     PyObject *PhysicSoftBody_getRestLengthScale(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getRestLengthScale());
     }
 
     int PhysicSoftBody_setRestLengthScale(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setRestLengthScale(val);
@@ -341,12 +359,13 @@ namespace ige::scene
     //! Gravity factor
     PyObject *PhysicSoftBody_getGravityFactor(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getGravityFactor());
     }
 
     int PhysicSoftBody_setGravityFactor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setGravityFactor(val);
@@ -358,12 +377,13 @@ namespace ige::scene
     //! Velocities correction factor
     PyObject *PhysicSoftBody_getVelocityFactor(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getVelocityFactor());
     }
 
     int PhysicSoftBody_setVelocityFactor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setVelocityFactor(val);
@@ -375,12 +395,13 @@ namespace ige::scene
     //! Rigid contacts hardness
     PyObject *PhysicSoftBody_getRigidContactHardness(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getRigidContactHardness());
     }
 
     int PhysicSoftBody_setRigidContactHardness(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setRigidContactHardness(val);
@@ -392,12 +413,13 @@ namespace ige::scene
     //! Kinetic contacts hardness
     PyObject *PhysicSoftBody_getKineticContactHardness(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getKineticContactHardness());
     }
 
     int PhysicSoftBody_setKineticContactHardness(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setKineticContactHardness(val);
@@ -409,12 +431,13 @@ namespace ige::scene
     //! Soft contacts hardness
     PyObject *PhysicSoftBody_getSoftContactHardness(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getSoftContactHardness());
     }
 
     int PhysicSoftBody_setSoftContactHardness(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setSoftContactHardness(val);
@@ -426,12 +449,13 @@ namespace ige::scene
     //! Anchor hardness
     PyObject *PhysicSoftBody_getAnchorHardness(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getAnchorHardness());
     }
 
     int PhysicSoftBody_setAnchorHardness(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setAnchorHardness(val);
@@ -443,12 +467,13 @@ namespace ige::scene
     //! Anchor hardness
     PyObject *PhysicSoftBody_getPosIterationNumber(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getPosIterationNumber());
     }
 
     int PhysicSoftBody_setPosIterationNumber(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setPosIterationNumber(val);
@@ -460,12 +485,13 @@ namespace ige::scene
     //! Aero Model
     PyObject *PhysicSoftBody_getAeroModel(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getAeroModel());
     }
 
     int PhysicSoftBody_setAeroModel(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setAeroModel(val);
@@ -477,12 +503,13 @@ namespace ige::scene
     //! Self collision
     PyObject *PhysicSoftBody_isSelfCollision(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isSelfCollision());
     }
 
     int PhysicSoftBody_setSelfCollision(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setSelfCollision(val);
@@ -494,12 +521,13 @@ namespace ige::scene
     //! Soft soft-collision
     PyObject *PhysicSoftBody_isSoftSoftCollision(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isSoftSoftCollision());
     }
 
     int PhysicSoftBody_setSoftSoftCollision(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setSoftSoftCollision(val);
@@ -511,6 +539,7 @@ namespace ige::scene
     //! Wind velocity
     PyObject *PhysicSoftBody_getWindVelocity(PyObject_PhysicSoftBody *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(PhysicHelper::from_btVector3(self->component->getWindVelocity()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -519,6 +548,7 @@ namespace ige::scene
 
     int PhysicSoftBody_setWindVelocity(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);

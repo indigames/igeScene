@@ -52,6 +52,7 @@ namespace ige::scene
     // Clear
     PyObject *PhysicManager_clear(PyObject_PhysicManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         self->component->clear();
         Py_RETURN_NONE;
     }
@@ -59,12 +60,14 @@ namespace ige::scene
     // Get deformable
     PyObject *PhysicManager_isDeformable(PyObject_PhysicManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isDeformable());
     }
 
     // Raytest closest
     PyObject *PhysicManager_rayTestClosest(PyObject_PhysicManager *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject *startObj;
         PyObject *endObj;
         int mask = -1;
@@ -113,6 +116,7 @@ namespace ige::scene
     // Raytest all
     PyObject *PhysicManager_rayTestAll(PyObject_PhysicManager *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject *startObj;
         PyObject *endObj;
         int mask = -1;
@@ -169,6 +173,7 @@ namespace ige::scene
     // Contact test
     PyObject *PhysicManager_contactTest(PyObject_PhysicManager *self, PyObject *args)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject *obj;
         int group = 1;
         int mask = -1;
@@ -255,6 +260,7 @@ namespace ige::scene
     // Contact pair test
     PyObject *PhysicManager_contactPairTest(PyObject_PhysicManager *self, PyObject *args)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject *objA;
         PyObject *objB;
         int group = 1;
@@ -366,6 +372,7 @@ namespace ige::scene
     // Get gravity
     PyObject *PhysicManager_getGravity(PyObject_PhysicManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(PhysicHelper::from_btVector3(self->component->getGravity()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -375,6 +382,7 @@ namespace ige::scene
     // Set gravity
     int PhysicManager_setGravity(PyObject_PhysicManager *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -387,13 +395,14 @@ namespace ige::scene
     // Get number of iteration
     PyObject *PhysicManager_getNumIteration(PyObject_PhysicManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getNumIteration());
     }
 
     // Set number of iteration
     int PhysicManager_setNumIteration(PyObject_PhysicManager *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setNumIteration(val);
@@ -405,13 +414,14 @@ namespace ige::scene
     // Get frame update ratio (speedup/slower effects)
     PyObject *PhysicManager_getFrameUpdateRatio(PyObject_PhysicManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getFrameUpdateRatio());
     }
 
     // Set frame update ratio
     int PhysicManager_setFrameUpdateRatio(PyObject_PhysicManager *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setFrameUpdateRatio(val);
@@ -423,13 +433,14 @@ namespace ige::scene
     // Get frame max simulation sub step
     PyObject *PhysicManager_getFrameMaxSubStep(PyObject_PhysicManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getFrameMaxSubStep());
     }
 
     // Set frame max simulation sub step
     int PhysicManager_setFrameMaxSubStep(PyObject_PhysicManager *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setFrameMaxSubStep(val);
@@ -441,13 +452,14 @@ namespace ige::scene
     // Get fixed time steps
     PyObject *PhysicManager_getFixedTimeStep(PyObject_PhysicManager *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getFixedTimeStep());
     }
 
     // Set fixed time steps
     int PhysicManager_setFixedTimeStep(PyObject_PhysicManager *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setFixedTimeStep(val);

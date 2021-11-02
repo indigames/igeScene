@@ -28,53 +28,68 @@ namespace ige::scene
     // Get position
     PyObject* CameraComponent_getPosition(PyObject_CameraComponent* self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject*)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Set position
     int CameraComponent_setPosition(PyObject_CameraComponent* self, PyObject* value)
     {
-        int d;
-        float buff[4];
-        auto v = pyObjToFloat((PyObject*)value, buff, d);
-        if (!v) return -1;
-        self->component->setPosition(*((Vec3*)v));
-        return 0;
+        if (self->component) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)value, buff, d);
+            if (!v) return -1;
+            self->component->setPosition(*((Vec3*)v));
+            return 0;
+        }
+        return -1;
     }
 
     // Get rotation
     PyObject* CameraComponent_getRotation(PyObject_CameraComponent* self)
     {
-        auto quatObj = PyObject_New(vec_obj, _QuatType);        
-        vmath_cpy(self->component->getRotation().P(), 4, quatObj->v);
-        quatObj->d = 4;
-        return (PyObject*)quatObj;
+        if (self->component) {
+            auto quatObj = PyObject_New(vec_obj, _QuatType);
+            vmath_cpy(self->component->getRotation().P(), 4, quatObj->v);
+            quatObj->d = 4;
+            return (PyObject*)quatObj;
+        }
+        Py_RETURN_NONE;
     }
 
     // Set rotation
     int CameraComponent_setRotation(PyObject_CameraComponent* self, PyObject* value)
     {
-        int d1;
-        float buff[4];
-        float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
-        if (!v1) return -1;
-        self->component->setRotation(*((Quat*)v1));
-        return 0;
+        if (self->component) {
+            int d1;
+            float buff[4];
+            float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
+            if (!v1) return -1;
+            self->component->setRotation(*((Quat*)v1));
+            return 0;
+        }
+        return -1;
     }
 
     // Get aspect ratio
     PyObject* CameraComponent_getAspectRatio(PyObject_CameraComponent* self)
     {
-        return PyFloat_FromDouble(self->component->getAspectRatio());
+        if (self->component) {
+            return PyFloat_FromDouble(self->component->getAspectRatio());
+        }
+        Py_RETURN_NONE;
     }
 
     // Set aspect ratio
     int CameraComponent_setAspectRatio(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setAspectRatio(val);
@@ -86,13 +101,16 @@ namespace ige::scene
     // Get width based
     PyObject* CameraComponent_getWidthBased(PyObject_CameraComponent* self)
     {
-        return PyBool_FromLong(self->component->isWidthBase());
+        if (self->component) {
+            return PyBool_FromLong(self->component->isWidthBase());
+        }
+        Py_RETURN_NONE;
     }
 
     // Set width based
     int CameraComponent_setWidthBased(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setWidthBase(val);
@@ -104,13 +122,16 @@ namespace ige::scene
     // Get FOV
     PyObject* CameraComponent_getFieldOfView(PyObject_CameraComponent* self)
     {
-        return PyFloat_FromDouble(self->component->getFieldOfView());
+        if (self->component) {
+            return PyFloat_FromDouble(self->component->getFieldOfView());
+        }
+        Py_RETURN_NONE;
     }
 
     // Set FOV
     int CameraComponent_setFieldOfView(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setFieldOfView(val);
@@ -122,13 +143,16 @@ namespace ige::scene
     // Get Near Plane
     PyObject* CameraComponent_getNearPlane(PyObject_CameraComponent* self)
     {
-        return PyFloat_FromDouble(self->component->getNearPlane());
+        if (self->component) {
+            return PyFloat_FromDouble(self->component->getNearPlane());
+        }
+        Py_RETURN_NONE;
     }
 
     // Set Near Plane
     int CameraComponent_setNearPlane(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setNearPlane(val);
@@ -140,13 +164,16 @@ namespace ige::scene
     // Get Far Plane
     PyObject* CameraComponent_getFarPlane(PyObject_CameraComponent* self)
     {
-        return PyFloat_FromDouble(self->component->getFarPlane());
+        if (self->component) {
+            return PyFloat_FromDouble(self->component->getFarPlane());
+        }
+        Py_RETURN_NONE;
     }
 
     // Set Far Plane
     int CameraComponent_setFarPlane(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setFarPlane(val);
@@ -158,13 +185,16 @@ namespace ige::scene
     // Get Pan
     PyObject* CameraComponent_getPan(PyObject_CameraComponent* self)
     {
-        return PyFloat_FromDouble(self->component->getPan());
+        if (self->component) {
+            return PyFloat_FromDouble(self->component->getPan());
+        }
+        Py_RETURN_NONE;
     }
 
     // Set Pan
     int CameraComponent_setPan(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) &&self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setPan(val);
@@ -176,13 +206,16 @@ namespace ige::scene
     // Get Tilt
     PyObject* CameraComponent_getTilt(PyObject_CameraComponent* self)
     {
-        return PyFloat_FromDouble(self->component->getTilt());
+        if (self->component) {
+            return PyFloat_FromDouble(self->component->getTilt());
+        }
+        Py_RETURN_NONE;
     }
 
     // Set Tilt
     int CameraComponent_setTilt(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setTilt(val);
@@ -194,13 +227,14 @@ namespace ige::scene
     // Get Roll
     PyObject* CameraComponent_getRoll(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getRoll());
     }
 
     // Set Roll
     int CameraComponent_setRoll(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setRoll(val);
@@ -212,13 +246,14 @@ namespace ige::scene
     // Get Lock On Target
     PyObject* CameraComponent_getLockOnTarget(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->getLockOn());
     }
 
     // Set Lock On Target
     int CameraComponent_setLockOnTarget(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->lockOnTarget(val);
@@ -230,6 +265,7 @@ namespace ige::scene
     // Get Target
     PyObject* CameraComponent_getTarget(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getTarget().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -239,6 +275,7 @@ namespace ige::scene
     // Get World Target
     PyObject* CameraComponent_getWorldTarget(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getWorldTarget().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -248,6 +285,7 @@ namespace ige::scene
     // Set Target
     int CameraComponent_setTarget(PyObject_CameraComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -259,13 +297,14 @@ namespace ige::scene
     // Get Ortho Projection
     PyObject* CameraComponent_getOrthoProjection(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isOrthoProjection());
     }
 
     // Set Ortho Projection
     int CameraComponent_setOrthoProjection(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setOrthoProjection(val);
@@ -277,13 +316,14 @@ namespace ige::scene
     // Get Ortho Width
     PyObject* CameraComponent_getOrthoWidth(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getOrthoWidth());
     }
 
     // Set Ortho Width
     int CameraComponent_setOrthoWidth(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setOrthoWidth(val);
@@ -295,13 +335,14 @@ namespace ige::scene
     // Get Ortho Height
     PyObject* CameraComponent_getOrthoHeight(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getOrthoHeight());
     }
 
     // Set Ortho Height
     int CameraComponent_setOrthoHeight(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setOrthoHeight(val);
@@ -313,6 +354,7 @@ namespace ige::scene
     // Get Screen Scale
     PyObject* CameraComponent_getScreenScale(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
         vmath_cpy(self->component->getScreenScale().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
@@ -322,6 +364,7 @@ namespace ige::scene
     // Set Screen Scale
     int CameraComponent_setScreenScale(PyObject_CameraComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -333,6 +376,7 @@ namespace ige::scene
     // Get Screen Offset
     PyObject* CameraComponent_getScreenOffset(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
         vmath_cpy(self->component->getScreenOffset().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
@@ -342,6 +386,7 @@ namespace ige::scene
     // Set Screen Offset
     int CameraComponent_setScreenOffset(PyObject_CameraComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -353,13 +398,14 @@ namespace ige::scene
     // Get Screen Radian
     PyObject* CameraComponent_getScreenRadian(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getScreenRadian());
     }
 
     // Set Screen Radian
     int CameraComponent_setScreenRadian(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setScreenRadian(val);
@@ -371,13 +417,14 @@ namespace ige::scene
     // Get Up Axis
     PyObject* CameraComponent_getUpAxis(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getUpAxis());
     }
 
     // Set Up Axis
     int CameraComponent_setUpAxis(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setUpAxis(val);
@@ -389,6 +436,7 @@ namespace ige::scene
     // Get Projection Matrix
     PyObject* CameraComponent_getProjectionMatrix(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto m4obj = PyObject_New(mat_obj, _Mat44Type);
         if (!m4obj) return NULL;
         Mat4 mat;
@@ -401,6 +449,7 @@ namespace ige::scene
     // Get View Inverse Matrix
     PyObject* CameraComponent_getViewInverseMatrix(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto m4obj = PyObject_New(mat_obj, _Mat44Type);
         if (!m4obj) return NULL;
         Mat4 mat;
@@ -413,6 +462,7 @@ namespace ige::scene
     // Get Screen Matrix
     PyObject* CameraComponent_getScreenMatrix(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto m4obj = PyObject_New(mat_obj, _Mat44Type);
         if (!m4obj) return NULL;
         Mat4 mat;
@@ -425,6 +475,7 @@ namespace ige::scene
     // Get camera
     PyObject* CameraComponent_getCamera(PyObject_CameraComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto camera = self->component->getCamera();
         if (camera) {
             auto camObj = (camera_obj*)(&CameraType)->tp_alloc(&CameraType, 0);

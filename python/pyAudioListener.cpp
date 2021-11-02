@@ -28,12 +28,15 @@ namespace ige::scene
     //! enable
     PyObject *AudioListener_isEnabled(PyObject_AudioListener *self)
     {
-        return PyBool_FromLong(self->component->isEnabled());
+        if (self->component) {
+            return PyBool_FromLong(self->component->isEnabled());
+        }
+        Py_RETURN_NONE;
     }
 
     int AudioListener_setEnabled(PyObject_AudioListener *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto isActive = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setEnabled(isActive);

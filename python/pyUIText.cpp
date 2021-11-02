@@ -28,12 +28,14 @@ namespace ige::scene
     // Get text
     PyObject *UIText_getText(PyObject_UIText *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getText().c_str());
     }
 
     // Set text
     int UIText_setText(PyObject_UIText *self, PyObject *value)
     {
+        if (!self->component) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
@@ -46,12 +48,14 @@ namespace ige::scene
     // Get font path
     PyObject *UIText_getFontPath(PyObject_UIText *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getFontPath().c_str());
     }
 
     // Set font path
     int UIText_setFontPath(PyObject_UIText *self, PyObject *value)
     {
+        if (!self->component) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
@@ -64,12 +68,14 @@ namespace ige::scene
     // Get font size
     PyObject *UIText_getFontSize(PyObject_UIText *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getFontSize());
     }
 
     // Set font size
     int UIText_setFontSize(PyObject_UIText *self, PyObject *value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
@@ -82,6 +88,7 @@ namespace ige::scene
     // Get color
     PyObject *UIText_getColor(PyObject_UIText *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
@@ -91,6 +98,7 @@ namespace ige::scene
     // Set color
     int UIText_setColor(PyObject_UIText *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);

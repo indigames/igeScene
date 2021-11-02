@@ -28,6 +28,7 @@ namespace ige::scene
     // Get Distance Fog Color
     PyObject* EnvironmentComponent_getDistanceFogColor(PyObject_EnvironmentComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getDistanceFogColor().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -37,6 +38,7 @@ namespace ige::scene
     // Set Distance Fog Color
     int EnvironmentComponent_setDistanceFogColor(PyObject_EnvironmentComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -48,13 +50,14 @@ namespace ige::scene
     // Get Distance Fog Alpha
     PyObject* EnvironmentComponent_getDistanceFogAlpha(PyObject_EnvironmentComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getDistanceFogAlpha());
     }
 
     // Set Distance Fog Alpha
     int EnvironmentComponent_setDistanceFogAlpha(PyObject_EnvironmentComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setDistanceFogAlpha(val);
@@ -66,13 +69,14 @@ namespace ige::scene
     // Get Distance Fog Near
     PyObject* EnvironmentComponent_getDistanceFogNear(PyObject_EnvironmentComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getDistanceFogNear());
     }
 
     // Set Distance Fog Near
     int EnvironmentComponent_setDistanceFogNear(PyObject_EnvironmentComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setDistanceFogNear(val);
@@ -84,13 +88,14 @@ namespace ige::scene
     // Get Distance Fog Far
     PyObject* EnvironmentComponent_getDistanceFogFar(PyObject_EnvironmentComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getDistanceFogFar());
     }
 
     // Set Distance Fog Far
     int EnvironmentComponent_setDistanceFogFar(PyObject_EnvironmentComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setDistanceFogFar(val);
@@ -102,6 +107,7 @@ namespace ige::scene
     // Get Shadow Color
     PyObject* EnvironmentComponent_getShadowColor(PyObject_EnvironmentComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getShadowColor().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -111,6 +117,7 @@ namespace ige::scene
     // Set Shadow Color
     int EnvironmentComponent_setShadowColor(PyObject_EnvironmentComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -122,13 +129,14 @@ namespace ige::scene
     // Get Shadow Density
     PyObject* EnvironmentComponent_getShadowDensity(PyObject_EnvironmentComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getShadowDensity());
     }
 
     // Set Shadow Density
     int EnvironmentComponent_setShadowDensity(PyObject_EnvironmentComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setShadowDensity(val);
@@ -140,13 +148,14 @@ namespace ige::scene
     // Get Shadow Wideness
     PyObject* EnvironmentComponent_getShadowWideness(PyObject_EnvironmentComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getShadowWideness());
     }
 
     // Set Shadow Wideness
     int EnvironmentComponent_setShadowWideness(PyObject_EnvironmentComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setShadowWideness(val);

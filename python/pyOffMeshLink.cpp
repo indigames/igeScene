@@ -31,12 +31,13 @@ namespace ige::scene
     // Radius
     PyObject *OffMeshLink_getRadius(PyObject_OffMeshLink *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getRadius());
     }
 
     int OffMeshLink_setRadius(PyObject_OffMeshLink *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setRadius(val);
@@ -48,12 +49,13 @@ namespace ige::scene
     //! Mask
     PyObject *OffMeshLink_getMask(PyObject_OffMeshLink *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getMask());
     }
 
     int OffMeshLink_setMask(PyObject_OffMeshLink *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setMask(val);
@@ -65,12 +67,13 @@ namespace ige::scene
     //! AreaId
     PyObject *OffMeshLink_getAreaId(PyObject_OffMeshLink *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getAreaId());
     }
 
     int OffMeshLink_setAreaId(PyObject_OffMeshLink *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setAreaId(val);
@@ -82,13 +85,16 @@ namespace ige::scene
     //! Endpoint
     PyObject *OffMeshLink_getEndPoint(PyObject_OffMeshLink *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        obj->sceneObject = self->component->getEndPoint().get();
+        auto endPoint = self->component->getEndPoint();
+        obj->sceneObject = endPoint.get();
         return (PyObject*)obj;
     }
 
     int OffMeshLink_setEndPoint(PyObject_OffMeshLink *self, PyObject *value)
     {
+        if (!self->component) return -1;
         if (PyUnicode_Check(value))
         {
             const char* uuid = PyUnicode_AsUTF8(value);
@@ -112,12 +118,13 @@ namespace ige::scene
     //! Bidirectional
     PyObject *OffMeshLink_isBidirectional(PyObject_OffMeshLink *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isBidirectional());
     }
 
     int OffMeshLink_setBidirectional(PyObject_OffMeshLink *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setBidirectional(val);

@@ -24,12 +24,13 @@ namespace ige::scene
     //! Max obstacles
     PyObject *DynamicNavMesh_getMaxObstacles(PyObject_DynamicNavMesh *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getMaxObstacles());
     }
 
     int DynamicNavMesh_setMaxObstacles(PyObject_DynamicNavMesh *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setMaxObstacles(val);
@@ -41,12 +42,13 @@ namespace ige::scene
     //! Max layers
     PyObject *DynamicNavMesh_getMaxLayers(PyObject_DynamicNavMesh *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getMaxLayers());
     }
 
     int DynamicNavMesh_setMaxLayers(PyObject_DynamicNavMesh *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setMaxLayers(val);

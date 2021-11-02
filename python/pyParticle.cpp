@@ -28,12 +28,13 @@ namespace ige::scene
     //! Path
     PyObject *Particle_getPath(PyObject_Particle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getPath().c_str());
     }
 
     int Particle_setPath(PyObject_Particle *self, PyObject *value)
     {
-        if (PyUnicode_Check(value))
+        if (PyUnicode_Check(value) && self->component)
         {
             const char* val = PyUnicode_AsUTF8(value);
             self->component->setPath(std::string(val));
@@ -45,11 +46,13 @@ namespace ige::scene
     //! isEnabled
     PyObject *Particle_isEnabled(PyObject_Particle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isEnabled());
     }
 
     int Particle_setEnabled(PyObject_Particle *self, PyObject *value)
     {
+        if (!self->component) return -1;
         if (value == NULL || !PyBool_Check(value)) {
             return -1;
         }
@@ -61,11 +64,13 @@ namespace ige::scene
     //! isLooped
     PyObject *Particle_isLooped(PyObject_Particle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isLooped());
     }
 
     int Particle_setLooped(PyObject_Particle *self, PyObject *value)
     {
+        if (!self->component) return -1;
         if (value == NULL || !PyBool_Check(value)) {
             return -1;
         }
@@ -77,12 +82,13 @@ namespace ige::scene
     //! isAutoDrawing
     PyObject *Particle_isAutoDrawing(PyObject_Particle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isAutoDrawing());
     }
 
     int Particle_setAutoDrawing(PyObject_Particle *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setAutoDrawing(val);
@@ -94,12 +100,13 @@ namespace ige::scene
     //! layer
     PyObject *Particle_getLayer(PyObject_Particle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getLayer());
     }
 
     int Particle_setLayer(PyObject_Particle *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setLayer(val);
@@ -111,12 +118,13 @@ namespace ige::scene
     //! groupMask
     PyObject *Particle_getGroupMask(PyObject_Particle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getGroupMask());
     }
 
     int Particle_setGroupMask(PyObject_Particle *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setGroupMask(val);
@@ -128,12 +136,13 @@ namespace ige::scene
     //! speed
     PyObject *Particle_getSpeed(PyObject_Particle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getSpeed());
     }
 
     int Particle_setSpeed(PyObject_Particle *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setSpeed(val);
@@ -145,12 +154,13 @@ namespace ige::scene
     //! timeScale
     PyObject *Particle_getTimeScale(PyObject_Particle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getTimeScale());
     }
 
     int Particle_setTimeScale(PyObject_Particle *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setTimeScale(val);
@@ -162,6 +172,7 @@ namespace ige::scene
     //! targetLocation
     PyObject *Particle_getTargetLocation(PyObject_Particle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getTargetLocation().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -170,6 +181,7 @@ namespace ige::scene
 
     int Particle_setTargetLocation(PyObject_Particle *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -182,6 +194,7 @@ namespace ige::scene
     //! dynamicParameter
     PyObject *Particle_getDynamicParameter(PyObject_Particle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getDynamicInputParameter().P(), 4, vec3Obj->v);
         vec3Obj->d = 4;
@@ -190,6 +203,7 @@ namespace ige::scene
 
     int Particle_setDynamicParameter(PyObject_Particle *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -202,6 +216,7 @@ namespace ige::scene
     // skyColor
     PyObject *Particle_getColor(PyObject_Particle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getColor().P(), 4, vec3Obj->v);
         vec3Obj->d = 4;
@@ -210,6 +225,7 @@ namespace ige::scene
 
     int Particle_setColor(PyObject_Particle *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);

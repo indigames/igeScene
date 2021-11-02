@@ -29,6 +29,7 @@ namespace ige::scene
     // anchor
     PyObject *HingeConstraint_getAnchor(PyObject_HingeConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAnchor().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -37,6 +38,7 @@ namespace ige::scene
 
     int HingeConstraint_setAnchor(PyObject_HingeConstraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -49,6 +51,7 @@ namespace ige::scene
     // axis1
     PyObject *HingeConstraint_getAxis1(PyObject_HingeConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAxis1().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -57,6 +60,7 @@ namespace ige::scene
 
     int HingeConstraint_setAxis1(PyObject_HingeConstraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -69,6 +73,7 @@ namespace ige::scene
     // axis2
     PyObject *HingeConstraint_getAxis2(PyObject_HingeConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getAxis2().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -77,6 +82,7 @@ namespace ige::scene
 
     int HingeConstraint_setAxis2(PyObject_HingeConstraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -89,12 +95,13 @@ namespace ige::scene
     // lowerLimit
     PyObject *HingeConstraint_getLowerLimit(PyObject_HingeConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->constraint->getLowerLimit());
     }
 
     int HingeConstraint_setLowerLimit(PyObject_HingeConstraint *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->constraint)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->constraint->setLowerLimit(val);
@@ -106,12 +113,13 @@ namespace ige::scene
     // upperLimit
     PyObject *HingeConstraint_getUpperLimit(PyObject_HingeConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->constraint->getUpperLimit());
     }
 
     int HingeConstraint_setUpperLimit(PyObject_HingeConstraint *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->constraint)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->constraint->setUpperLimit(val);

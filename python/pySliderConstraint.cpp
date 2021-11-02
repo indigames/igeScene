@@ -29,6 +29,7 @@ namespace ige::scene
     // lowerLimit
     PyObject *SliderConstraint_getLowerLimit(PyObject_SliderConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getLowerLimit().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -37,6 +38,7 @@ namespace ige::scene
 
     int SliderConstraint_setLowerLimit(PyObject_SliderConstraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -49,6 +51,7 @@ namespace ige::scene
     // upperLimit
     PyObject *SliderConstraint_getUpperLimit(PyObject_SliderConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->constraint->getUpperLimit().m_floats, 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -57,6 +60,7 @@ namespace ige::scene
 
     int SliderConstraint_setUpperLimit(PyObject_SliderConstraint *self, PyObject *value)
     {
+        if (!self->constraint) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);

@@ -24,14 +24,36 @@ namespace ige::scene
     {
         return PyUnicode_FromString("C++ UIMask object");
     }
+    
+    // Set Interactable
+    PyObject* UIMask_getInteractable(PyObject_UIMask* self)
+    {
+        if (!self->component) Py_RETURN_NONE;
+        return PyBool_FromLong(self->component->isInteractable());
+    }
+
+    // Set Interactable
+    int UIMask_setInteractable(PyObject_UIMask* self, PyObject* value)
+    {
+        if (!self->component) return -1;
+        if (PyLong_Check(value))
+        {
+            auto val = (uint32_t)PyLong_AsLong(value) != 0;
+            self->component->setInteractable(val);
+            return 0;
+        }
+        return -1;
+    }
 
     PyObject* UIMask_getUseMask(PyObject_UIMask* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isUseMask());
     }
 
     int UIMask_setUseMask(PyObject_UIMask* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
@@ -43,7 +65,7 @@ namespace ige::scene
 
     // Get/Set
     PyGetSetDef UIMask_getsets[] = {
-        {"interactable", (getter)UIImage_getInteractable, (setter)UIImage_setInteractable, NULL, NULL},
+        {"interactable", (getter)UIMask_getInteractable, (setter)UIMask_setInteractable, NULL, NULL},
         {"useMask", (getter)UIMask_getUseMask, (setter)UIMask_setUseMask, NULL, NULL},
         {NULL, NULL} };
 

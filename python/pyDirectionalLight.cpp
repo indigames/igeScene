@@ -28,6 +28,7 @@ namespace ige::scene
     // Color
     PyObject *DirectionalLight_getColor(PyObject_DirectionalLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getColor().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -36,6 +37,7 @@ namespace ige::scene
 
     int DirectionalLight_setColor(PyObject_DirectionalLight *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -48,12 +50,13 @@ namespace ige::scene
     //! Intensity
     PyObject *DirectionalLight_getIntensity(PyObject_DirectionalLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getIntensity());
     }
 
     int DirectionalLight_setIntensity(PyObject_DirectionalLight *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setIntensity(val);
@@ -65,6 +68,7 @@ namespace ige::scene
     // Direction
     PyObject *DirectionalLight_getDirection(PyObject_DirectionalLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getDirection().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;

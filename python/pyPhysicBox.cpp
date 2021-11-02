@@ -29,6 +29,7 @@ namespace ige::scene
     //! size
     PyObject *PhysicBox_getSize(PyObject_PhysicBox *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getSize().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -37,6 +38,7 @@ namespace ige::scene
 
     int PhysicBox_setSize(PyObject_PhysicBox *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);

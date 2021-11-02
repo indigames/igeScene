@@ -32,6 +32,7 @@ namespace ige::scene
     //Methods
     PyObject* UIScrollBar_setHandle(PyObject_UIScrollBar* self, PyObject* value)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             if (obj->ob_type == &PyTypeObject_SceneObject)
@@ -55,10 +56,13 @@ namespace ige::scene
     //Get Set
     PyObject* UIScrollBar_getValue(PyObject_UIScrollBar* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getValue());
     }
+
     int UIScrollBar_setValue(PyObject_UIScrollBar* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
@@ -70,10 +74,13 @@ namespace ige::scene
 
     PyObject* UIScrollBar_getSize(PyObject_UIScrollBar* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getSize());
     }
+
     int UIScrollBar_setSize(PyObject_UIScrollBar* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
@@ -86,11 +93,14 @@ namespace ige::scene
     // Set Direction
     PyObject* UIScrollBar_getDirection(PyObject_UIScrollBar* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong((int)self->component->getDirection());
     }
+
     // Get Direction
     int UIScrollBar_setDirection(PyObject_UIScrollBar* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
@@ -103,14 +113,17 @@ namespace ige::scene
     // Get color
     PyObject* UIScrollBar_getColor(PyObject_UIScrollBar* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
+
     // Set color
     int UIScrollBar_setColor(PyObject_UIScrollBar* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -123,14 +136,17 @@ namespace ige::scene
     // Get Press color
     PyObject* UIScrollBar_getPressColor(PyObject_UIScrollBar* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getPressedColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
+
     // Set Press color
     int UIScrollBar_setPressColor(PyObject_UIScrollBar* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -143,14 +159,17 @@ namespace ige::scene
     // Get Disable color
     PyObject* UIScrollBar_getDisableColor(PyObject_UIScrollBar* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getDisabledColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
+
     // Set Disable color
     int UIScrollBar_setDisableColor(PyObject_UIScrollBar* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -163,11 +182,14 @@ namespace ige::scene
     // Set Fade Duration
     PyObject* UIScrollBar_getFadeDuration(PyObject_UIScrollBar* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getFadeDuration());
     }
+
     // Get Fade Duration
     int UIScrollBar_setFadeDuration(PyObject_UIScrollBar* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);

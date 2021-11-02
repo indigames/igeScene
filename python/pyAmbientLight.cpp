@@ -28,61 +28,79 @@ namespace ige::scene
     // skyColor
     PyObject *AmbientLight_getSkyColor(PyObject_AmbientLight *self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getSkyColor().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject *)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getSkyColor().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     int AmbientLight_setSkyColor(PyObject_AmbientLight *self, PyObject *value)
     {
-        int d;
-        float buff[4];
-        auto v = pyObjToFloat((PyObject *)value, buff, d);
-        if (!v)
-            return -1;
-        self->component->setSkyColor(*((Vec3 *)v));
-        return 0;
+        if (self->component) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)value, buff, d);
+            if (!v)
+                return -1;
+            self->component->setSkyColor(*((Vec3*)v));
+            return 0;
+        }
+        return -1;
     }
 
     // groundColor
     PyObject *AmbientLight_getGroundColor(PyObject_AmbientLight *self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getGroundColor().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject *)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getGroundColor().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     int AmbientLight_setGroundColor(PyObject_AmbientLight *self, PyObject *value)
     {
-        int d;
-        float buff[4];
-        auto v = pyObjToFloat((PyObject *)value, buff, d);
-        if (!v)
-            return -1;
-        self->component->setGroundColor(*((Vec3 *)v));
-        return 0;
+        if (self->component) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)value, buff, d);
+            if (!v)
+                return -1;
+            self->component->setGroundColor(*((Vec3*)v));
+            return 0;
+        }
+        return -1;
     }
 
     // direction
     PyObject *AmbientLight_getDirection(PyObject_AmbientLight *self)
     {
-        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getDirection().P(), 3, vec3Obj->v);
-        vec3Obj->d = 3;
-        return (PyObject *)vec3Obj;
+        if (self->component) {
+            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+            vmath_cpy(self->component->getDirection().P(), 3, vec3Obj->v);
+            vec3Obj->d = 3;
+            return (PyObject*)vec3Obj;
+        }
+        Py_RETURN_NONE;
     }
 
     int AmbientLight_setDirection(PyObject_AmbientLight *self, PyObject *value)
     {
-        int d;
-        float buff[4];
-        auto v = pyObjToFloat((PyObject *)value, buff, d);
-        if (!v)
-            return -1;
-        self->component->setDirection(*((Vec3 *)v));
-        return 0;
+        if (self->component) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)value, buff, d);
+            if (!v)
+                return -1;
+            self->component->setDirection(*((Vec3*)v));
+            return 0;
+        }
+        return -1;
     }
 
     PyGetSetDef AmbientLight_getsets[] = {

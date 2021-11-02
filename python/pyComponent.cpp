@@ -27,12 +27,14 @@ namespace ige::scene
     // Get name
     PyObject* Component_getName(PyObject_Component* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getName().c_str());
     }
 
     // Get owner
     PyObject* Component_getOwner(PyObject_Component* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
         obj->sceneObject = self->component->getOwner();
         return (PyObject*)obj;
@@ -77,6 +79,7 @@ namespace ige::scene
 
     PyObject* Component_onUpdate(PyObject_Component* self, PyObject* args)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject* obj = nullptr;
         if (PyArg_ParseTuple(args, "O", &obj))
         {

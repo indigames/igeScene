@@ -27,12 +27,14 @@ namespace ige::scene
     // Get text
     PyObject* TextComponent_getText(PyObject_TextComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getText().c_str());
     }
 
     // Set text
     int TextComponent_setText(PyObject_TextComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
@@ -45,12 +47,14 @@ namespace ige::scene
     // Get font path
     PyObject* TextComponent_getFontPath(PyObject_TextComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getFontPath().c_str());
     }
 
     // Set font path
     int TextComponent_setFontPath(PyObject_TextComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
@@ -63,12 +67,14 @@ namespace ige::scene
     // Get font size
     PyObject* TextComponent_getFontSize(PyObject_TextComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getFontSize());
     }
 
     // Set font size
     int TextComponent_setFontSize(PyObject_TextComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         self->component->setFontSize(PyLong_AsLong(value));
         return 0;
     }
@@ -76,6 +82,7 @@ namespace ige::scene
     // Get color
     PyObject* TextComponent_getColor(PyObject_TextComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
@@ -85,6 +92,7 @@ namespace ige::scene
     // Set color
     int TextComponent_setColor(PyObject_TextComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -96,11 +104,13 @@ namespace ige::scene
     
     PyObject* TextComponent_isBillboard(PyObject_TextComponent* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isBillboard());
     }
 
     int TextComponent_setBillboard(PyObject_TextComponent* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;

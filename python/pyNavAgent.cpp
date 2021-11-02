@@ -28,12 +28,13 @@ namespace ige::scene
     //! ID
     PyObject *NavAgent_getAgentId(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getAgentId());
     }
 
     int NavAgent_setAgentId(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setAgentId(val);
@@ -45,12 +46,13 @@ namespace ige::scene
     // Radius
     PyObject *NavAgent_getRadius(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getRadius());
     }
 
     int NavAgent_setRadius(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setRadius(val);
@@ -62,12 +64,13 @@ namespace ige::scene
     // Height
     PyObject *NavAgent_getHeight(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getHeight());
     }
 
     int NavAgent_setHeight(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setHeight(val);
@@ -79,12 +82,13 @@ namespace ige::scene
     //! Max speed
     PyObject *NavAgent_getMaxSpeed(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getMaxSpeed());
     }
 
     int NavAgent_setMaxSpeed(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setMaxSpeed(val);
@@ -96,12 +100,13 @@ namespace ige::scene
     //! Max acceleration
     PyObject *NavAgent_getMaxAcceleration(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getMaxAcceleration());
     }
 
     int NavAgent_setMaxAcceleration(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setMaxAcceleration(val);
@@ -113,6 +118,7 @@ namespace ige::scene
     //! Target position
     PyObject *NavAgent_getTargetPosition(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getTargetPosition().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -121,6 +127,7 @@ namespace ige::scene
 
     int NavAgent_setTargetPosition(PyObject_NavAgent *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -133,12 +140,13 @@ namespace ige::scene
     //! Auto Update Position
     PyObject *NavAgent_isUpdateNodePosition(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isUpdateNodePosition());
     }
 
     int NavAgent_setUpdateNodePosition(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setUpdateNodePosition(val);
@@ -150,12 +158,13 @@ namespace ige::scene
     //! Query filter type
     PyObject *NavAgent_getQueryFilterType(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getQueryFilterType());
     }
 
     int NavAgent_setQueryFilterType(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setQueryFilterType(val);
@@ -167,12 +176,13 @@ namespace ige::scene
     //! Obstacle avoidance type
     PyObject *NavAgent_getObstacleAvoidanceType(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getObstacleAvoidanceType());
     }
 
     int NavAgent_setObstacleAvoidanceType(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setObstacleAvoidanceType(val);
@@ -184,12 +194,13 @@ namespace ige::scene
     //! Navigation quality
     PyObject *NavAgent_getNavigationQuality(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong((int)self->component->getObstacleAvoidanceType());
     }
 
     int NavAgent_setNavigationQuality(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setObstacleAvoidanceType(val);
@@ -201,12 +212,13 @@ namespace ige::scene
     //! Navigation quality
     PyObject *NavAgent_getNavigationPushiness(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong((int)self->component->getNavigationPushiness());
     }
 
     int NavAgent_setNavigationPushiness(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setObstacleAvoidanceType(val);
@@ -218,18 +230,21 @@ namespace ige::scene
     //! Is in crowd
     PyObject *NavAgent_isInCrowd(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isInCrowd());
     }
 
     //! Has target
     PyObject *NavAgent_hasTarget(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isInCrowd());
     }
 
     //! Reset target
     PyObject *NavAgent_resetTarget(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         self->component->resetTarget();
         Py_RETURN_NONE;
     }
@@ -237,12 +252,14 @@ namespace ige::scene
     //! Has arrived
     PyObject *NavAgent_hasArrived(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->hasArrived());
     }
 
     //! Get position
     PyObject *NavAgent_getPosition(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -252,6 +269,7 @@ namespace ige::scene
     //! Get velocity
     PyObject *NavAgent_getVelocity(PyObject_NavAgent *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getVelocity().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;

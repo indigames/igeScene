@@ -33,6 +33,7 @@ namespace ige::scene
     //Methods
     PyObject* UIScrollView_setContent(PyObject_UIScrollView* self, PyObject* value)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             if (obj->ob_type == &PyTypeObject_SceneObject)
@@ -54,6 +55,7 @@ namespace ige::scene
 
     PyObject* UIScrollView_setViewport(PyObject_UIScrollView* self, PyObject* value)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             if (obj->ob_type == &PyTypeObject_SceneObject)
@@ -75,6 +77,7 @@ namespace ige::scene
 
     PyObject* UIScrollView_scrollTo(PyObject_UIScrollView* self, PyObject* value)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             int d;
@@ -91,11 +94,13 @@ namespace ige::scene
     //Get set
     PyObject* UIScrollView_getEnableHorizontal(PyObject_UIScrollView* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->enableHorizontal());
     }
 
     int UIScrollView_setEnableHorizontal(PyObject_UIScrollView* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
@@ -107,10 +112,13 @@ namespace ige::scene
 
     PyObject* UIScrollView_getEnableVertical(PyObject_UIScrollView* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->enableVertical());
     }
+
     int UIScrollView_setEnableVertical(PyObject_UIScrollView* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
@@ -122,6 +130,7 @@ namespace ige::scene
 
     PyObject* UIScrollView_getHorizontalScrollBar(PyObject_UIScrollView* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto bar = self->component->getHorizontalScrollBar();
         if (bar)
         {
@@ -132,6 +141,7 @@ namespace ige::scene
         Py_RETURN_NONE;
     }
     int UIScrollView_setHorizontalScrollBar(PyObject_UIScrollView* self, PyObject* value) {
+        if (!self->component) return -1;
         if (value != nullptr) {
             if (value->ob_type == &PyTypeObject_UIScrollBar) {
                 auto val = (PyObject_UIScrollBar*)(value);
@@ -153,6 +163,7 @@ namespace ige::scene
 
     PyObject* UIScrollView_getVerticalScrollBar(PyObject_UIScrollView* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto bar = self->component->getVerticalScrollBar();
         if (bar)
         {
@@ -162,8 +173,10 @@ namespace ige::scene
         }
         Py_RETURN_NONE;
     }
+
     int UIScrollView_setVerticalScrollBar(PyObject_UIScrollView* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (value != nullptr) {
             if (value->ob_type == &PyTypeObject_UIScrollBar) {
                 auto val = (PyObject_UIScrollBar*)(value);
@@ -185,10 +198,13 @@ namespace ige::scene
 
     PyObject* UIScrollView_getMovementType(PyObject_UIScrollView* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong((int)self->component->getMovementType());
     }
+
     int UIScrollView_setMovementType(PyObject_UIScrollView* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
@@ -200,13 +216,16 @@ namespace ige::scene
 
     PyObject* UIScrollView_getElasticExtra(PyObject_UIScrollView* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
         vmath_cpy(self->component->getElasticExtra().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
         return (PyObject*)vec2Obj;
     }
+
     int UIScrollView_setElasticExtra(PyObject_UIScrollView* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -217,10 +236,13 @@ namespace ige::scene
 
     PyObject* UIScrollView_getElasticity(PyObject_UIScrollView* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getElasticity());
     }
+
     int UIScrollView_setElasticity(PyObject_UIScrollView* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
@@ -232,10 +254,13 @@ namespace ige::scene
 
     PyObject* UIScrollView_getIsInertia(PyObject_UIScrollView* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isInertia());
     }
+
     int UIScrollView_setInertia(PyObject_UIScrollView* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
@@ -247,10 +272,13 @@ namespace ige::scene
 
     PyObject* UIScrollView_getDecelerationRate(PyObject_UIScrollView* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getDecelerationRate());
     }
+
     int UIScrollView_setDecelerationRate(PyObject_UIScrollView* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);

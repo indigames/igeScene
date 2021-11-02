@@ -28,12 +28,13 @@ namespace ige::scene
     // Radius
     PyObject *NavObstacle_getRadius(PyObject_NavObstacle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getRadius());
     }
 
     int NavObstacle_setRadius(PyObject_NavObstacle *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setRadius(val);
@@ -45,12 +46,13 @@ namespace ige::scene
     // Height
     PyObject *NavObstacle_getHeight(PyObject_NavObstacle *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getHeight());
     }
 
     int NavObstacle_setHeight(PyObject_NavObstacle *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setHeight(val);

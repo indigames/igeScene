@@ -28,6 +28,7 @@ namespace ige::scene
     // Color
     PyObject *PointLight_getColor(PyObject_PointLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getColor().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -36,6 +37,7 @@ namespace ige::scene
 
     int PointLight_setColor(PyObject_PointLight *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -48,12 +50,13 @@ namespace ige::scene
     //! Intensity
     PyObject *PointLight_getIntensity(PyObject_PointLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getIntensity());
     }
 
     int PointLight_setIntensity(PyObject_PointLight *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setIntensity(val);
@@ -65,12 +68,13 @@ namespace ige::scene
     //! Range
     PyObject *PointLight_getRange(PyObject_PointLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getRange());
     }
 
     int PointLight_setRange(PyObject_PointLight *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setRange(val);
@@ -82,6 +86,7 @@ namespace ige::scene
     // Position
     PyObject *PointLight_getPosition(PyObject_PointLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;

@@ -28,12 +28,13 @@ namespace ige::scene
     // AreaId
     PyObject *NavArea_getAreaId(PyObject_NavArea *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getAreaId());
     }
 
     int NavArea_setAreaId(PyObject_NavArea *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setAreaId(val);
@@ -45,12 +46,13 @@ namespace ige::scene
     // AreaCost
     PyObject *NavArea_getAreaCost(PyObject_NavArea *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getAreaCost());
     }
 
     int NavArea_setAreaCost(PyObject_NavArea *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setAreaCost(val);
@@ -62,6 +64,7 @@ namespace ige::scene
     // Bounding box
     PyObject *NavArea_getBoundingBox(PyObject_NavArea *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto aabb = self->component->getBoundingBox();
         auto min = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(aabb.MinEdge.P(), 3, min->v);
@@ -79,7 +82,7 @@ namespace ige::scene
     {
         PyObject *minObj, maxObj;
 
-        if (PyArg_ParseTuple(value, "OO", &minObj, &maxObj))
+        if (self->component && PyArg_ParseTuple(value, "OO", &minObj, &maxObj))
         {
             int d;
             float buff[4];
@@ -98,6 +101,7 @@ namespace ige::scene
     // World bounding box
     PyObject *NavArea_getWorldBoundingBox(PyObject_NavArea *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto aabb = self->component->getWorldBoundingBox();
         auto min = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(aabb.MinEdge.P(), 3, min->v);

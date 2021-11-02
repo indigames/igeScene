@@ -27,11 +27,13 @@ namespace ige::scene
 
     PyObject* UIImage_getFillMethod(PyObject_UIImage* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong((int)self->component->getFillMethod());
     }
 
     int UIImage_setFillMethod(PyObject_UIImage* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
@@ -44,12 +46,14 @@ namespace ige::scene
     // Get path
     PyObject* UIImage_getPath(PyObject_UIImage* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyUnicode_FromString(self->component->getPath().c_str());
     }
 
     // Set path
     int UIImage_setPath(PyObject_UIImage* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyUnicode_Check(value))
         {
             const char* name = PyUnicode_AsUTF8(value);
@@ -62,6 +66,7 @@ namespace ige::scene
     // Get color
     PyObject* UIImage_getColor(PyObject_UIImage* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
@@ -71,6 +76,7 @@ namespace ige::scene
     // Set color
     int UIImage_setColor(PyObject_UIImage* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -83,12 +89,14 @@ namespace ige::scene
     // Get Fill Origin
     PyObject* UIImage_getFillOrigin(PyObject_UIImage* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong((int)self->component->getFillOrigin());
     }
 
     // Set Fill Origin
     int UIImage_setFillOrigin(PyObject_UIImage* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
@@ -101,12 +109,14 @@ namespace ige::scene
     // Get Fill Amount
     PyObject* UIImage_getFillAmount(PyObject_UIImage* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getFillAmount());
     }
 
     // Set Fill Amount
     int UIImage_setFillAmount(PyObject_UIImage* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             auto val = (float)PyFloat_AsDouble(value);
@@ -119,12 +129,14 @@ namespace ige::scene
     // Get Fill Clockwise
     PyObject* UIImage_getClockwise(PyObject_UIImage* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->getClockwise());
     }
 
     // Set Fill Clockwise
     int UIImage_setClockwise(PyObject_UIImage* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
@@ -137,12 +149,14 @@ namespace ige::scene
     // Set Interactable
     PyObject* UIImage_getInteractable(PyObject_UIImage* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isInteractable());
     }
 
     // Set Interactable
     int UIImage_setInteractable(PyObject_UIImage* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;

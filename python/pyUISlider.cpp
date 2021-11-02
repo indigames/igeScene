@@ -33,6 +33,7 @@ namespace ige::scene
     //Methods
     PyObject* UISlider_setFillObject(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             if (obj->ob_type == &PyTypeObject_SceneObject)
@@ -54,6 +55,7 @@ namespace ige::scene
 
     PyObject* UISlider_setHandleObject(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) Py_RETURN_NONE;
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             if (obj->ob_type == &PyTypeObject_SceneObject)
@@ -76,11 +78,13 @@ namespace ige::scene
     //Get set
     PyObject* UISlider_getMin(PyObject_UISlider* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getMin());
     }
 
     int UISlider_setMin(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
@@ -92,11 +96,13 @@ namespace ige::scene
 
     PyObject* UISlider_getMax(PyObject_UISlider* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getMax());
     }
 
     int UISlider_setMax(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
@@ -108,11 +114,13 @@ namespace ige::scene
 
     PyObject* UISlider_getValue(PyObject_UISlider* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getValue());
     }
 
     int UISlider_setValue(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
@@ -124,11 +132,13 @@ namespace ige::scene
 
     PyObject* UISlider_getWholeNumbers(PyObject_UISlider* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->getWholeNumbers());
     }
 
     int UISlider_setWholeNumbers(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
@@ -141,6 +151,7 @@ namespace ige::scene
     // Get color
     PyObject* UISlider_getColor(PyObject_UISlider* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
@@ -150,6 +161,7 @@ namespace ige::scene
     // Set color
     int UISlider_setColor(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -162,6 +174,7 @@ namespace ige::scene
     // Get Press color
     PyObject* UISlider_getPressColor(PyObject_UISlider* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getPressedColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
@@ -171,6 +184,7 @@ namespace ige::scene
     // Set Press color
     int UISlider_setPressColor(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -183,6 +197,7 @@ namespace ige::scene
     // Get Disable color
     PyObject* UISlider_getDisableColor(PyObject_UISlider* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
         vmath_cpy(self->component->getDisabledColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
@@ -192,6 +207,7 @@ namespace ige::scene
     // Set Disable color
     int UISlider_setDisableColor(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
@@ -204,12 +220,14 @@ namespace ige::scene
     // Get Interactable
     PyObject* UISlider_getInteractable(PyObject_UISlider* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isInteractable());
     }
 
     // Set Interactable
     int UISlider_setInteractable(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
@@ -222,12 +240,14 @@ namespace ige::scene
     // Get Direction
     PyObject* UISlider_getDirection(PyObject_UISlider* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong((int)self->component->getDirection());
     }
 
     // Set Direction
     int UISlider_setDirection(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
@@ -240,12 +260,14 @@ namespace ige::scene
     // Set Fade Duration
     PyObject* UISlider_getFadeDuration(PyObject_UISlider* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getFadeDuration());
     }
 
     // Get Fade Duration
     int UISlider_setFadeDuration(PyObject_UISlider* self, PyObject* value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);

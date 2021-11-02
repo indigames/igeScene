@@ -57,12 +57,14 @@ namespace ige::scene
     // Get name
     PyObject *PhysicConstraint_getType(PyObject_PhysicConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         return PyLong_FromLong((int)self->constraint->getType());
     }
 
     // Get owner
     PyObject *PhysicConstraint_getOwner(PyObject_PhysicConstraint *self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         auto *obj = PyObject_New(PyObject_PhysicObject, &PyTypeObject_PhysicObject);
         obj->component = self->constraint->getOwner();
         return (PyObject *)obj;
@@ -71,6 +73,7 @@ namespace ige::scene
     // other
     PyObject* PhysicConstraint_getOther(PyObject_PhysicConstraint* self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         if(self->constraint->getOther())
         {
             auto *obj = PyObject_New(PyObject_PhysicObject, &PyTypeObject_PhysicObject);
@@ -82,6 +85,7 @@ namespace ige::scene
 
     int PhysicConstraint_setOther(PyObject_PhysicConstraint* self, PyObject* value)
     {
+        if (!self->constraint) return -1;
         if (value->ob_type != &PyTypeObject_PhysicObject)
             return -1;
 
@@ -93,12 +97,13 @@ namespace ige::scene
     // isEnabled
     PyObject* PhysicConstraint_isEnabled(PyObject_PhysicConstraint* self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         return PyBool_FromLong(self->constraint->isEnabled());
     }
 
     int PhysicConstraint_setEnabled(PyObject_PhysicConstraint* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->constraint)
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->constraint->setEnabled(val);
@@ -110,12 +115,13 @@ namespace ige::scene
     // isBodiesCollisionEnabled
     PyObject* PhysicConstraint_isBodiesCollisionEnabled(PyObject_PhysicConstraint* self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         return PyBool_FromLong(self->constraint->isEnableCollisionBetweenBodies());
     }
 
     int PhysicConstraint_setBodiesCollisionEnabled(PyObject_PhysicConstraint* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->constraint)
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->constraint->setEnableCollisionBetweenBodies(val);
@@ -127,12 +133,13 @@ namespace ige::scene
     // breakingImpulse
     PyObject* PhysicConstraint_getBreakingImpulse(PyObject_PhysicConstraint* self)
     {
+        if (!self->constraint) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->constraint->getBreakingImpulseThreshold());
     }
 
     int PhysicConstraint_setBreakingImpulse(PyObject_PhysicConstraint* self, PyObject* value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->constraint)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->constraint->setBreakingImpulseThreshold(val);

@@ -18,8 +18,9 @@ namespace ige::scene
         char* name;
         PyObject_Scene* self = nullptr;
         if (PyArg_ParseTuple(args, "s", &name)) {
+            auto scene = SceneManager::getInstance()->createScene(std::string(name));
             self = (PyObject_Scene*)type->tp_alloc(type, 0);
-            self->scene = SceneManager::getInstance()->createScene(std::string(name)).get();
+            self->scene = scene.get();
         }
         return (PyObject*)self;
     }
@@ -41,6 +42,7 @@ namespace ige::scene
     // Get name
     PyObject* Scene_getName(PyObject_Scene* self)
     {
+        if (!self->scene) Py_RETURN_NONE;
         const char* str = self->scene ? self->scene->getName().c_str() : "";
         return PyUnicode_FromString(str);
     }
@@ -48,7 +50,7 @@ namespace ige::scene
     // Set name
     int Scene_setName(PyObject_Scene* self, PyObject* value)
     {
-        if (PyUnicode_Check(value))
+        if (PyUnicode_Check(value) && self->scene)
         {
             const char* val = PyUnicode_AsUTF8(value);
             if(val != NULL)
@@ -60,6 +62,7 @@ namespace ige::scene
     // Get active camera
     PyObject* Scene_getActiveCamera(PyObject_Scene* self)
     {
+        if (!self->scene) Py_RETURN_NONE;
         auto camera = self->scene->getActiveCamera();
         if (camera)
         {
@@ -74,6 +77,7 @@ namespace ige::scene
     // Set active camera
     int Scene_setActiveCamera(PyObject_Scene* self, PyObject* value)
     {
+        if (!self->scene) return -1;
         PyObject* camera;
         if (PyArg_ParseTuple(value, "O", &camera)) {
            self->scene->setActiveCamera(((PyObject_CameraComponent*)camera)->component);
@@ -84,6 +88,7 @@ namespace ige::scene
     // Create object
     PyObject* Scene_createObject(PyObject_Scene *self, PyObject* args)
     {
+        if (!self->scene) Py_RETURN_NONE;
         char* name = "";
         PyObject* parentObj = nullptr;
 
@@ -98,6 +103,7 @@ namespace ige::scene
 
     // Create object from Prefab
     PyObject* Scene_loadPrefab(PyObject_Scene* self, PyObject* args) {
+        if (!self->scene) Py_RETURN_NONE;
         char* path = "";
         char* name = "";
         PyObject* parentObj = nullptr;
@@ -117,6 +123,7 @@ namespace ige::scene
     // Remove object
     PyObject* Scene_removeObject(PyObject_Scene *self, PyObject* args)
     {
+        if (!self->scene) Py_RETURN_NONE;
         PyObject* obj = nullptr;
 		if (PyArg_ParseTuple(args, "O", &obj))
         {
@@ -158,6 +165,7 @@ namespace ige::scene
     // Find object
     PyObject* Scene_findObject(PyObject_Scene *self, PyObject* args)
     {
+        if (!self->scene) Py_RETURN_NONE;
         PyObject* obj = nullptr;
 		if (PyArg_ParseTuple(args, "O", &obj))
         {
@@ -193,6 +201,7 @@ namespace ige::scene
     // Find object by name
     PyObject* Scene_findObjectByName(PyObject_Scene* self, PyObject* args)
     {
+        if (!self->scene) Py_RETURN_NONE;
         PyObject* obj = nullptr;
         if (PyArg_ParseTuple(args, "O", &obj))
         {
@@ -217,6 +226,7 @@ namespace ige::scene
     // Get roots
     PyObject* Scene_getObjects(PyObject_Scene *self)
     {
+        if (!self->scene) Py_RETURN_NONE;
         auto roots = self->scene->getObjects();
         PyObject* pyList = PyList_New(0);
         for(int i = 0; i < roots.size(); ++i)
@@ -232,6 +242,7 @@ namespace ige::scene
     // Get root object
     PyObject* Scene_getRoot(PyObject_Scene *self)
     {
+        if (!self->scene) Py_RETURN_NONE;
         auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
         obj->sceneObject = self->scene->getRoot().get();
         return (PyObject*)obj;
@@ -240,12 +251,14 @@ namespace ige::scene
     // Get path
     PyObject* Scene_getPath(PyObject_Scene *self)
     {
+        if (!self->scene) Py_RETURN_NONE;
         return PyUnicode_FromString(self->scene->getPath().c_str());
     }
 
     // Get showcase
     PyObject* Scene_getShowcase(PyObject_Scene *self)
     {
+        if (!self->scene) Py_RETURN_NONE;
         auto showcase = self->scene->getShowcase();
         if (showcase) {
             auto obj = (showcase_obj*)(&ShowcaseType)->tp_alloc(&ShowcaseType, 0);
@@ -258,6 +271,7 @@ namespace ige::scene
     // Get environment
     PyObject* Scene_getEnvironment(PyObject_Scene *self)
     {
+        if (!self->scene) Py_RETURN_NONE;
         auto obj = (environment_obj*)(&EnvironmentType)->tp_alloc(&EnvironmentType, 0);
         obj->envSet = self->scene->getEnvironment();
         return (PyObject *)obj;
@@ -266,6 +280,7 @@ namespace ige::scene
     // Raycast
     PyObject* Scene_raycast(PyObject_Scene* self, PyObject* args)
     {
+        if (!self->scene) Py_RETURN_NONE;
         PyObject* position;
         PyObject* direction;
         float distance = 10000.f;
@@ -307,6 +322,7 @@ namespace ige::scene
 
     PyObject* Scene_raycastFromCamera(PyObject_Scene *self, PyObject* args)
     {
+        if (!self->scene) Py_RETURN_NONE;
         PyObject *screenPosObj;
         PyObject *cameraObj;
         float distance = 10000.f;
@@ -366,6 +382,7 @@ namespace ige::scene
 
     PyObject* Scene_raycastUI(PyObject_Scene* self, PyObject* args)
     {
+        if (!self->scene) Py_RETURN_NONE;
         PyObject* screenPosObj;
 
         if (!PyArg_ParseTuple(args, "O", &screenPosObj))
@@ -400,6 +417,7 @@ namespace ige::scene
 
     PyObject* Scene_screenToWorldPoint(PyObject_Scene* self, PyObject* args)
     {
+        if (!self->scene) Py_RETURN_NONE;
         PyObject* screenPosObj;
         PyObject* cameraObj;
         float distance = 10000.f;
@@ -448,6 +466,7 @@ namespace ige::scene
 
     PyObject* Scene_worldToScreenPoint(PyObject_Scene* self, PyObject* args)
     {
+        if (!self->scene) Py_RETURN_NONE;
         PyObject* worldPosObj;
         PyObject* cameraObj;
         float distance = 10000.f;

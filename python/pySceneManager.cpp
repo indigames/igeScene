@@ -34,11 +34,13 @@ namespace ige::scene
     // Create scene
     PyObject* SceneManager_createScene(PyObject_SceneManager* self, PyObject* value)
     {
+        if (!self->sceneManager) Py_RETURN_NONE;
         char* name;
         if (PyArg_ParseTuple(value, "s", &name)) {
             if(name) {
+                auto scene = self->sceneManager->createScene(std::string(name));
                 auto *obj = PyObject_New(PyObject_Scene, &PyTypeObject_Scene);
-                obj->scene = self->sceneManager->createScene(std::string(name)).get();
+                obj->scene = scene.get();
                 return (PyObject*)obj;
             }
         }
@@ -48,6 +50,7 @@ namespace ige::scene
     // Load scene
     PyObject* SceneManager_loadScene(PyObject_SceneManager* self, PyObject* value)
     {
+        if (!self->sceneManager) Py_RETURN_NONE;
         char* path;
         if (PyArg_ParseTuple(value, "s", &path)) {
             if(path) {
@@ -66,6 +69,7 @@ namespace ige::scene
     // Unload scene
     PyObject* SceneManager_unloadScene(PyObject_SceneManager* self, PyObject* value)
     {
+        if (!self->sceneManager) Py_RETURN_NONE;
         PyObject* obj = nullptr;
 		if (PyArg_ParseTuple(value, "O", &obj))
         {
@@ -91,6 +95,7 @@ namespace ige::scene
     // Save scene
     PyObject* SceneManager_saveScene(PyObject_SceneManager* self, PyObject* value)
     {
+        if (!self->sceneManager) Py_RETURN_NONE;
         char* path;
         if (PyArg_ParseTuple(value, "s", &path)) {
             if(path) {
@@ -105,6 +110,7 @@ namespace ige::scene
     // Get current scene
     PyObject* SceneManager_getCurrentScene(PyObject_SceneManager* self)
     {
+        if (!self->sceneManager) Py_RETURN_NONE;
         auto *obj = PyObject_New(PyObject_Scene, &PyTypeObject_Scene);
         obj->scene = self->sceneManager->getCurrentScene().get();
         return (PyObject*)obj;
@@ -113,6 +119,7 @@ namespace ige::scene
     // Set current scene
     int SceneManager_setCurrentScene(PyObject_SceneManager* self, PyObject* value)
     {
+        if (!self->sceneManager) return -1;
         if (value && value->ob_type == &PyTypeObject_Scene) {
             auto sceneObj = (PyObject_Scene*)value;
             self->sceneManager->setCurrentScene(sceneObj->scene->getName());

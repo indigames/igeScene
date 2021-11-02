@@ -28,6 +28,7 @@ namespace ige::scene
     // Color
     PyObject *SpotLight_getColor(PyObject_SpotLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getColor().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -36,6 +37,7 @@ namespace ige::scene
 
     int SpotLight_setColor(PyObject_SpotLight *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -48,11 +50,13 @@ namespace ige::scene
     //! Intensity
     PyObject *SpotLight_getIntensity(PyObject_SpotLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getIntensity());
     }
 
     int SpotLight_setIntensity(PyObject_SpotLight *self, PyObject *value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
@@ -65,11 +69,13 @@ namespace ige::scene
     //! Range
     PyObject *SpotLight_getRange(PyObject_SpotLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getRange());
     }
 
     int SpotLight_setRange(PyObject_SpotLight *self, PyObject *value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
@@ -82,11 +88,13 @@ namespace ige::scene
     //! Angle
     PyObject *SpotLight_getAngle(PyObject_SpotLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getAngle());
     }
 
     int SpotLight_setAngle(PyObject_SpotLight *self, PyObject *value)
     {
+        if (!self->component) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
@@ -99,6 +107,7 @@ namespace ige::scene
     // Position
     PyObject *SpotLight_getPosition(PyObject_SpotLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -108,6 +117,7 @@ namespace ige::scene
     // Direction
     PyObject *SpotLight_getDirection(PyObject_SpotLight *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(self->component->getDirection().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;

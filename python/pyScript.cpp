@@ -42,6 +42,7 @@ namespace ige::scene
     // Get get owner
     PyObject* Script_getOwner(PyObject_Script* self)
     {
+        if (!self->owner) Py_RETURN_NONE;
         auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
         obj->sceneObject = self->owner;
         return (PyObject*)obj;

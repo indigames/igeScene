@@ -35,6 +35,7 @@ namespace ige::scene
     //! Apply torque
     PyObject *PhysicObject_applyTorque(PyObject_PhysicObject *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -48,6 +49,7 @@ namespace ige::scene
     //! Apply force
     PyObject *PhysicObject_applyForce(PyObject_PhysicObject *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -61,6 +63,7 @@ namespace ige::scene
     //! Apply impulse
     PyObject *PhysicObject_applyImpulse(PyObject_PhysicObject *self, PyObject *value)
     {
+        if (!self->component) Py_RETURN_NONE;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -74,6 +77,7 @@ namespace ige::scene
     //! Clear forces
     PyObject *PhysicObject_clearForces(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         self->component->clearForces();
         Py_RETURN_NONE;
     }
@@ -81,6 +85,7 @@ namespace ige::scene
     //! Add constraint
     PyObject* PhysicObject_addConstraint(PyObject_PhysicObject* self, PyObject* value)
     {
+        if (!self->component) Py_RETURN_NONE;
         int type = -1;
         if (PyArg_ParseTuple(value, "i", &type))
         {
@@ -133,6 +138,7 @@ namespace ige::scene
     //! Remove constraint
     PyObject* PhysicObject_removeConstraint(PyObject_PhysicObject* self, PyObject* value)
     {
+        if (!self->component) Py_RETURN_NONE;
         if (value->ob_type == &PyTypeObject_PhysicConstraint || value->ob_type == &PyTypeObject_FixedConstraint || value->ob_type == &PyTypeObject_HingeConstraint ||
             value->ob_type == &PyTypeObject_SliderConstraint || value->ob_type == &PyTypeObject_SpringConstraint || value->ob_type == &PyTypeObject_Dof6Constraint)
         {
@@ -149,6 +155,7 @@ namespace ige::scene
     //! Get all constraints
     PyObject* PhysicObject_getConstraints(PyObject_PhysicObject* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto len = self->component->getContraints().size();
         if (len > 0)
         {
@@ -222,6 +229,7 @@ namespace ige::scene
     //! Remove all constraints
     PyObject* PhysicObject_removeConstraints(PyObject_PhysicObject* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         self->component->removeAllConstraints();
         Py_RETURN_TRUE;
     }
@@ -229,12 +237,13 @@ namespace ige::scene
     //! Mass
     PyObject *PhysicObject_getMass(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getMass());
     }
 
     int PhysicObject_setMass(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setMass(val);
@@ -246,12 +255,13 @@ namespace ige::scene
     //! Friction
     PyObject *PhysicObject_getFriction(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getFriction());
     }
 
     int PhysicObject_setFriction(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setFriction(val);
@@ -263,12 +273,13 @@ namespace ige::scene
     //! Restitution
     PyObject *PhysicObject_getRestitution(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getRestitution());
     }
 
     int PhysicObject_setRestitution(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyFloat_Check(value))
+        if (PyFloat_Check(value) && self->component)
         {
             float val = (float)PyFloat_AsDouble(value);
             self->component->setRestitution(val);
@@ -280,6 +291,7 @@ namespace ige::scene
     //! Linear velocity
     PyObject *PhysicObject_getLinearVelocity(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(PhysicHelper::from_btVector3(self->component->getLinearVelocity()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -288,6 +300,7 @@ namespace ige::scene
 
     int PhysicObject_setLinearVelocity(PyObject_PhysicObject *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -300,6 +313,7 @@ namespace ige::scene
     //! Angular velocity
     PyObject *PhysicObject_getAngularVelocity(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(PhysicHelper::from_btVector3(self->component->getAngularVelocity()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -308,6 +322,7 @@ namespace ige::scene
 
     int PhysicObject_setAngularVelocity(PyObject_PhysicObject *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -320,6 +335,7 @@ namespace ige::scene
     //! Linear factor
     PyObject *PhysicObject_getLinearFactor(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(PhysicHelper::from_btVector3(self->component->getLinearFactor()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -328,6 +344,7 @@ namespace ige::scene
 
     int PhysicObject_setLinearFactor(PyObject_PhysicObject *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -340,6 +357,7 @@ namespace ige::scene
     //! Angular factor
     PyObject *PhysicObject_getAngularFactor(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(PhysicHelper::from_btVector3(self->component->getAngularFactor()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
@@ -348,6 +366,7 @@ namespace ige::scene
 
     int PhysicObject_setAngularFactor(PyObject_PhysicObject *self, PyObject *value)
     {
+        if (!self->component) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
@@ -359,12 +378,13 @@ namespace ige::scene
 
     PyObject* PhysicObject_getLinearSleepingThreshold(PyObject_PhysicObject* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getLinearSleepingThreshold());
     }
 
     int PhysicObject_setLinearSleepingThreshold(PyObject_PhysicObject* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             self->component->setLinearSleepingThreshold((uint32_t)PyLong_AsLong(value));
             return 0;
@@ -374,12 +394,13 @@ namespace ige::scene
 
     PyObject* PhysicObject_getAngularSleepingThreshold(PyObject_PhysicObject* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyFloat_FromDouble(self->component->getAngularSleepingThreshold());
     }
 
     int PhysicObject_setAngularSleepingThreshold(PyObject_PhysicObject* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             self->component->setAngularSleepingThreshold((uint32_t)PyLong_AsLong(value));
             return 0;
@@ -389,12 +410,13 @@ namespace ige::scene
 
     PyObject* PhysicObject_getActivationState(PyObject_PhysicObject* self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getActivationState());
     }
 
     int PhysicObject_setActivationState(PyObject_PhysicObject* self, PyObject* value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setActivationState(val);
@@ -406,12 +428,13 @@ namespace ige::scene
     //! Indicate object is a trigger object
     PyObject *PhysicObject_isTrigger(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isTrigger());
     }
 
     int PhysicObject_setIsTrigger(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setIsTrigger(val);
@@ -423,12 +446,13 @@ namespace ige::scene
     //! Indicate object is a kinematic object
     PyObject *PhysicObject_isKinematic(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isKinematic());
     }
 
     int PhysicObject_setIsKinematic(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setIsKinematic(val);
@@ -440,12 +464,13 @@ namespace ige::scene
     //! Enable/Disable physic component
     PyObject *PhysicObject_isEnabled(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isEnabled());
     }
 
     int PhysicObject_setEnabled(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setEnabled(val);
@@ -457,6 +482,7 @@ namespace ige::scene
     //! Get AABB
     PyObject *PhysicObject_getAABB(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         auto aabb = self->component->getAABB();
 
         vec_obj *min = PyObject_New(vec_obj, _Vec3Type);
@@ -480,12 +506,13 @@ namespace ige::scene
     //! Collision group
     PyObject *PhysicObject_getCollisionFilterGroup(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getCollisionFilterGroup());
     }
 
     int PhysicObject_setCollisionFilterGroup(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setCollisionFilterGroup(val);
@@ -497,12 +524,13 @@ namespace ige::scene
     //! Collision mask
     PyObject *PhysicObject_getCollisionFilterMask(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyLong_FromLong(self->component->getCollisionFilterMask());
     }
 
     int PhysicObject_setCollisionFilterMask(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value);
             self->component->setCollisionFilterMask(val);
@@ -514,12 +542,13 @@ namespace ige::scene
     //! Continuos Collision Detection mode
     PyObject *PhysicObject_isCCD(PyObject_PhysicObject *self)
     {
+        if (!self->component) Py_RETURN_NONE;
         return PyBool_FromLong(self->component->isCCD());
     }
 
     int PhysicObject_setCCD(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value))
+        if (PyLong_Check(value) && self->component)
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
             self->component->setCCD(val);
