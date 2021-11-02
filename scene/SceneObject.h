@@ -221,10 +221,10 @@ namespace ige::scene
         const AABBox& getAABB() const { return m_aabb; }
 
         //! AABB in world space
-        const AABBox& getWorldAABB() const { return m_aabbWorld; }
+        AABBox getWorldAABB() { return m_aabb.Transform(getTransform()->getWorldMatrix()); }
 
         //! Get Frame AABB in world space (use for )
-        const AABBox& getFrameAABB() const { return m_frameAABB; }
+        AABBox getFrameAABB() { return m_bLockedFrameAABB ? m_aabb : getWorldAABB(); }
 
         //! Set locked frame AABB
         void setLockedFrameAABB(bool locked = true) { m_bLockedFrameAABB = locked; }
@@ -254,9 +254,6 @@ namespace ige::scene
         //! Event
         void doDispatch(int eventType, EventContext* context, bool includeChild = false);
         void doBubble(int eventType, EventContext* context);
-
-        //! Transform changed event
-        void onTransformChanged(SceneObject& sceneObject);
 
         //! Active children components
         void activeChildren(bool active);
@@ -312,12 +309,6 @@ namespace ige::scene
 
         //! Cached aabb
         AABBox m_aabb;
-
-        //! Cached world aabb
-        AABBox m_aabbWorld;
-
-        //! Cached frame aabb
-        AABBox m_frameAABB;
 
         //! Obj will not update frame AABB
         bool m_bLockedFrameAABB = false;

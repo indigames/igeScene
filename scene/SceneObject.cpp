@@ -81,8 +81,6 @@ namespace ige::scene
 
         // Set AABB to default
         m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
-        m_frameAABB = AABBox({ -5.f, -5.f, -5.f }, { 5.f, 5.f, 5.f });
-        getTransformChangedEvent().addListener(std::bind(&SceneObject::onTransformChanged, this, std::placeholders::_1));
 
         // Set prefabId
         setPrefabId(prefabId);
@@ -867,21 +865,13 @@ namespace ige::scene
         }
     }
 
-    //! Transform changed event
-    void SceneObject::onTransformChanged(SceneObject& sceneObject)
-    {
-        if (m_aabbDirty != 0) return;
-        //updateAabb();
-        m_aabbDirty = 2;
-    }
-
     //! Update AABB
     void SceneObject::updateAabb()
     {
         // Ignore Canvas and root object
         if (getComponent<Canvas>() != nullptr || (!getScene()->isPrefab() && getParent() == nullptr))
         {
-            m_frameAABB = m_aabbWorld = m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
+            m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
             return;
         }
 
@@ -967,10 +957,6 @@ namespace ige::scene
                 }
             }
         }
-
-        // Update world AABB
-        m_aabbWorld = m_aabb.Transform(m_transform->getWorldMatrix());
-        m_frameAABB = m_bLockedFrameAABB ? m_frameAABB : m_aabbWorld;
     }
 
 
