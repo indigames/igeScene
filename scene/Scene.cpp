@@ -772,7 +772,7 @@ namespace ige::scene
 
         auto wPos = getWindowPosition();
         auto vPos = getViewPosition(); 
-        pyxie_printf("View Position %f %f\n", vPos[0], vPos[1]);
+
         auto x = pos.X() - wPos.X() * 0.5f;
         auto y = pos.Y() + wPos.Y() * 0.5f;
         x = x + (SystemInfo::Instance().GetGameW() - (wSize.X() + wPos.X())) * 0.5f;

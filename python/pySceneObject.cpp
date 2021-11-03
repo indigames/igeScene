@@ -105,8 +105,9 @@ namespace ige::scene
         {
             const char* val = PyUnicode_AsUTF8(value);
             self->sceneObject->setName(std::string(val));
+            return 0;
         }
-        return 0;
+        return -1;
     }
 
     // Get active

@@ -104,12 +104,8 @@ namespace ige::scene
 
     void ScriptComponent::PyErr_CheckAndClear() {
         if (PyErr_Occurred()) {
-            PyObject* ptype, *pvalue, *ptraceback;
-            PyErr_Fetch(&ptype, &pvalue, &ptraceback);
-            auto pStrErrorMessage = PyUnicode_AsUTF8(PyObject_Str(pvalue));
-            auto ptrace = (PyTracebackObject*)ptraceback;
-            if (pStrErrorMessage != nullptr)
-                pyxie_printf("[PYTHON] ERROR in '%s', line %d : %s", getPath().c_str(), ptrace ? ptrace->tb_lineno : -1, pStrErrorMessage);
+            PyErr_PrintEx(1);
+            PyRun_SimpleString("import traceback\ntraceback.print_exception(sys.last_type, sys.last_value, sys.last_traceback)");
             PyErr_Clear();
         }
     }
