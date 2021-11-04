@@ -308,7 +308,7 @@ namespace ige::scene
     void Sprite::releaseSprite() {
         if (m_texture)
         {
-            m_texture->DecReference();
+            // m_texture->DecReference(); // [IGE]: decreased by figure instance
             m_texture = nullptr;
         }
 
@@ -1216,35 +1216,27 @@ namespace ige::scene
 
     void Sprite::applyTexture() {
         if (m_figure == nullptr) return;
-
-        Sampler sampler;
-        sampler.samplerSlotNo = 0;
-        sampler.samplerState.wrap_s = m_wrapMode;
-        sampler.samplerState.wrap_t = m_wrapMode;
-        sampler.samplerState.minfilter = SamplerState::LINEAR;
-        sampler.samplerState.magfilter = SamplerState::LINEAR;
         if (m_texture) {
+            Sampler sampler;
+            sampler.samplerSlotNo = 0;
+            sampler.samplerState.wrap_s = m_wrapMode;
+            sampler.samplerState.wrap_t = m_wrapMode;
+            sampler.samplerState.minfilter = SamplerState::LINEAR;
+            sampler.samplerState.magfilter = SamplerState::LINEAR;
+
             sampler.tex = m_texture;
             sampler.tex->WaitInitialize();
-            sampler.tex->WaitBuild();
 
             TextureSource texSrc;
             strncpy(texSrc.path, m_texture->ResourceName(), MAX_PATH);
             texSrc.normal = false;
             texSrc.wrap = false;
             sampler.textureNameIndex = m_figure->SetTextureSource(texSrc);
+
+            int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
+            m_figure->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &sampler);
             m_figure->EnableAlphaModeByTexture(texSrc.path);
         }
-
-        int materialIdx = m_figure->GetMaterialIndex(GenerateNameHash("mate"));
-        m_figure->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &sampler);
-        const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
-        uint32_t blendVal[4] = { 1,0,0,0 };
-        m_figure->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, blendVal);
-
-        const ShaderParameterInfo* blendOpParam = RenderContext::Instance().GetShaderParameterInfoByName("blend_func");
-        uint32_t blendOp[4] = { GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0,0 };
-        m_figure->SetMaterialState(materialIdx, (ShaderParameterKey)blendOpParam->key, blendOp);
     }
 
     Vec2 Sprite::rotateByAngle(const Vec2& pivot, const Vec2& target, float angle)

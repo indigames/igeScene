@@ -97,15 +97,6 @@ namespace ige::scene
             sampler.textureNameIndex = efig->SetTextureSource(texSrc);
             efig->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &sampler);
             efig->EnableAlphaModeByTexture(texSrc.path);
-
-            const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
-            uint32_t blendVal[4] = { 1,0,0,0 };
-            efig->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, blendVal);
-
-            const ShaderParameterInfo* blendOpParam = RenderContext::Instance().GetShaderParameterInfoByName("blend_func");
-            uint32_t blendOp[4] = { GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0,0 };
-            efig->SetMaterialState(materialIdx, (ShaderParameterKey)blendOpParam->key, blendOp);
-
         }
         return efig;
     }
@@ -173,15 +164,6 @@ namespace ige::scene
             sampler.textureNameIndex = efig->SetTextureSource(texSrc);
             efig->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &sampler);
             efig->EnableAlphaModeByTexture(texSrc.path);
-
-            const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
-            uint32_t blendVal[4] = { 1,0,0,0 };
-            efig->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, blendVal);
-
-            const ShaderParameterInfo* blendOpParam = RenderContext::Instance().GetShaderParameterInfoByName("blend_func");
-            uint32_t blendOp[4] = { GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0,0 };
-            efig->SetMaterialState(materialIdx, (ShaderParameterKey)blendOpParam->key, blendOp);
-
         }
         return efig;
     }
@@ -260,15 +242,6 @@ namespace ige::scene
         sampler.textureNameIndex = efig->SetTextureSource(texSrc);
         efig->SetMaterialParam(materialIdx, GenerateNameHash("ColorSampler"), &sampler);
         efig->EnableAlphaModeByTexture(texSrc.path);
-
-        const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("blend_enable");
-        uint32_t blendVal[4] = { 1,0,0,0 };
-        efig->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, blendVal);
-
-        const ShaderParameterInfo* blendOpParam = RenderContext::Instance().GetShaderParameterInfoByName("blend_func");
-        uint32_t blendOp[4] = { GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0,0 };
-        efig->SetMaterialState(materialIdx, (ShaderParameterKey)blendOpParam->key, blendOp);
-
         return efig;
     }
 
