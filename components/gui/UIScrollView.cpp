@@ -774,7 +774,7 @@ void UIScrollView::to_json(json& j) const
     j["elasticity"] = getElasticity();
     j["inertia"] = isInertia();
     j["decelerationrate"] = getDecelerationRate();
-
+    j["interactable"] = isInteractable();
 
 }
 
@@ -793,6 +793,7 @@ void UIScrollView::from_json(const json& j)
     setElasticity(j.at("elasticity"));
     setInertia(j.at("inertia"));
     setDecelerationRate(j.at("decelerationrate"));
+    setInteractable(j.at("interactable"));
     m_dirtySetObj = true;
 }
 
@@ -884,6 +885,10 @@ void UIScrollView::setProperty(const std::string& key, const json& val)
     else if (key.compare("decelerationrate") == 0)
     {
         setDecelerationRate(val);
+    }
+    else if (key.compare("interactable") == 0)
+    {
+        setInteractable(val);
     }
     else
     {

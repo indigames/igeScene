@@ -182,6 +182,10 @@ namespace ige::scene
         {
             setPath(val);
         }
+        else if (key.compare("interactable") == 0)
+        {
+            setInteractable(val);
+        }
         else
         {
             SpriteComponent::setProperty(key, val);
