@@ -116,6 +116,7 @@ namespace ige::scene
     //! Time scale
     void Particle::setTimeScale(float timeScale)
     {
+        m_timeScale = timeScale;
         if (m_handle != -1)
             getManager()->getEffekseerManager()->SetTimeScaleByHandle(m_handle, timeScale);
     }
@@ -123,6 +124,7 @@ namespace ige::scene
     //! Auto Drawing
     void Particle::setAutoDrawing(bool autoDraw)
     {
+        m_bIsAutoDrawing = autoDraw;
         if (m_handle != -1)
             getManager()->getEffekseerManager()->SetAutoDrawing(m_handle, autoDraw);
     }
