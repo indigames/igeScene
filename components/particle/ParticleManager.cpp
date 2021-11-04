@@ -31,10 +31,12 @@ namespace ige::scene
             auto texture = (Texture*)ResourceCreator::Instance().NewTexture((const char*)fsPath.c_str());
             if(texture != nullptr)
             {
-                texture->WaitBuild();
+                texture->WaitInitialize();
                 data = Effekseer::MakeRefPtr <Effekseer::Texture>();
                 auto ret = ::Effekseer::MakeRefPtr <::EffekseerRendererGL::Backend::Texture>(nullptr);
-                ret->Init(texture->GetTextureHandle(), texture->GetNumMips() > 0, nullptr);
+                ret->Init(texture->GetTextureHandle(), texture->GetNumMips() > 0, [texture]() {
+                    texture->DecReference();
+                });
                 data->SetBackend(ret);
             }
         }

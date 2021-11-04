@@ -22,7 +22,7 @@ namespace ige::scene
         {
             auto manager = getOwner()->getRoot()->getComponent<ParticleManager>();
             if (manager == nullptr)
-                getOwner()->getRoot()->addComponent<ParticleManager>();
+                manager = getOwner()->getRoot()->addComponent<ParticleManager>();
             setManager(manager);
         }
 
