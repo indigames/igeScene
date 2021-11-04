@@ -323,6 +323,7 @@ void UIButton::to_json(json& j) const
     j["fadeduration"] = getFadeDuration();
     j["spritetype"] = (int)getSpriteType();
     j["border"] = getBorder();
+    j["interactable"] = isInteractable();
 }
 
 //! Deserialize
@@ -344,6 +345,7 @@ void UIButton::from_json(const json& j)
     setFadeDuration(j.at("fadeduration"));
     setSpriteType(j.at("spritetype"));
     setBorder(j.at("border"));
+    setInteractable(j.value("interactable", true));
     Component::from_json(j);
 }
 
@@ -413,6 +415,10 @@ void UIButton::setProperty(const std::string& key, const json& val)
     else if (key.compare("border") == 0)
     {
         setBorder(val);
+    }
+    else if (key.compare("interactable") == 0)
+    {
+        setInteractable(val);
     }
     else
     {

@@ -149,6 +149,7 @@ void UIMask::to_json(json& j) const
 {
     UIImage::to_json(j);
     j["usemask"] = isUseMask();
+    j["interactable"] = isInteractable();
 }
 
 //! Deserialize
@@ -156,6 +157,7 @@ void UIMask::from_json(const json& j)
 {
     UIImage::from_json(j);
     setUseMask(j.at("usemask"));
+    setInteractable(j.at("interactable"));
 }
 
 //! Update property by key value
@@ -164,6 +166,10 @@ void UIMask::setProperty(const std::string& key, const json& val)
     if (key.compare("usemask") == 0)
     {
         setUseMask(val);
+    }
+    else if (key.compare("interactable") == 0)
+    {
+        setInteractable(val);
     }
     else
     {

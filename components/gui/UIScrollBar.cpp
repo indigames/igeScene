@@ -539,6 +539,7 @@ void UIScrollBar::to_json(json& j) const
     j["pressedcolor"] = getPressedColor();
     j["disabledcolor"] = getDisabledColor();
     j["fadeduration"] = getFadeDuration();
+    j["interactable"] = isInteractable();
 }
 
 //! Deserialize
@@ -553,6 +554,7 @@ void UIScrollBar::from_json(const json& j)
     setPressedColor(j.at("pressedcolor"));
     setDisabledColor(j.at("disabledcolor"));
     setFadeDuration(j.at("fadeduration"));
+    setInteractable(j.at("interactable"));
     m_dirtySetObj = true;
     _update();
 }
@@ -604,6 +606,10 @@ void UIScrollBar::setProperty(const std::string& key, const json& val)
     else if (key.compare("fadeduration") == 0)
     {
         setFadeDuration(val);
+    }
+    else if (key.compare("interactable") == 0)
+    {
+        setInteractable(val);
     }
     else
     {

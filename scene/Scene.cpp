@@ -772,11 +772,15 @@ namespace ige::scene
 
         auto wPos = getWindowPosition();
         auto vPos = getViewPosition(); 
-
+        
         auto x = pos.X() - wPos.X() * 0.5f;
         auto y = pos.Y() + wPos.Y() * 0.5f;
+
+        /*x = x + (SystemInfo::Instance().GetGameW() - (vSize.X() + wPos.X())) * 0.5f - vPos[0];
+        y = y - (SystemInfo::Instance().GetGameH() - (vSize.Y() + wPos.Y())) * 0.5f - vPos[1];*/
         x = x + (SystemInfo::Instance().GetGameW() - (wSize.X() + wPos.X())) * 0.5f;
         y = y - (SystemInfo::Instance().GetGameH() - (wSize.Y() + wPos.Y())) * 0.5f;
+
         return Vec2(x, y);
     }
 
@@ -848,18 +852,32 @@ namespace ige::scene
 
     Vec2 Scene::worldToScreenPoint(const Vec3& pos, Camera* camera)
     {
-        auto wSize = getWindowSize();
+        auto wSize = getViewSize();
         if (wSize[0] == 0 || wSize[1] == 0 || camera == nullptr) return Vec2(0, 0);
-        auto camPos = camera->GetPosition();
+
         Mat4 proj;
         camera->GetProjectionMatrix(proj);
 
         Mat4 viewInv;
         camera->GetViewInverseMatrix(viewInv);
 
-        auto clipSpacePos = proj * (viewInv * Vec4(pos, 1.0));
+        /*vec<4, T, Q> tmp = vec<4, T, Q>(obj, static_cast<T>(1));
+        tmp = model * tmp;
+        tmp = proj * tmp;
+
+        tmp /= tmp.w;
+        tmp = tmp * static_cast<T>(0.5) + static_cast<T>(0.5);
+        tmp[0] = tmp[0] * T(viewport[2]) + T(viewport[0]);
+        tmp[1] = tmp[1] * T(viewport[3]) + T(viewport[1]);*/
+
+        Vec4 v(pos[0], pos[1], pos[2], 1.0);
+        Vec4 ww(0, 0, wSize[0], wSize[1]);
+
+        auto clipSpacePos = viewInv * v;
+        clipSpacePos = proj * clipSpacePos;
         auto ndcSpacePos = clipSpacePos / clipSpacePos.W();
-        
+        //pyxie_printf("%f %f %f %f  \n", clipSpacePos[0], clipSpacePos[1], clipSpacePos[2], clipSpacePos[3]);
+        //pyxie_printf("%f %f %f size %f %f vs %f %f \n", pos[0], pos[1], pos[2],wSize[0], wSize[1], ((0.0 - ndcSpacePos[0]) / 2.0), ((0.0 - ndcSpacePos[1]) / 2.0));
         Vec2 windowSpacePos = Vec2(((0.0 - ndcSpacePos[0]) / 2.0) * wSize[0], ((0.0 - ndcSpacePos[1]) / 2.0) * wSize[1]);
         windowSpacePos[0] = std::roundf(windowSpacePos[0]);
         windowSpacePos[1] = std::roundf(windowSpacePos[1]);
@@ -1006,7 +1024,7 @@ namespace ige::scene
         bool m_isEnd = false;
         std::shared_ptr<SceneObject> m_node = m_canvas->getOwner()->getSharedPtr();
         hit = findIntersectInHierachy(m_node, ray);
-        if(hit.first != nullptr && hit.first->isInteractable()) m_raycastCapture = true;
+        if(hit.first != nullptr && hit.first->isInteractable() && hit.first->isActive()) m_raycastCapture = true;
         else if (hit.first == nullptr) {
             if (m_canvas) {
                 hit.first = m_canvas->getOwner()->getSharedPtr();

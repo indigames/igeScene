@@ -549,6 +549,7 @@ void UISlider::to_json(json& j) const
 	j["min"] = getMin();
 	j["max"] = getMax();
 	j["value"] = getValue();
+	j["interactable"] = isInteractable();
 }
 
 //! Deserialize
@@ -566,6 +567,7 @@ void UISlider::from_json(const json& j)
 	setMax(j.value("max", 1));
 	setValue(j.value("value", 0));
 	setDirection((int)j.at("direction"));
+	setInteractable(j.at("interactable"));
 	m_dirtySetObj = true;
 	Component::from_json(j);
 	init();
@@ -617,6 +619,10 @@ void UISlider::setProperty(const std::string& key, const json& val)
 	else if (key.compare("direction") == 0)
 	{
 		setDirection((int)val);
+	}
+	else if (key.compare("interactable") == 0)
+	{
+		setInteractable(val);
 	}
 	else
 	{

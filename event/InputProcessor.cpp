@@ -214,7 +214,7 @@ void InputProcessor::onTouchBegan(int touchId, float x, float y)
     if (m_captureCallback)
         m_captureCallback((int)EventType::TouchBegin);
 
-    if(target->isInteractable())
+    if(target->isInteractable() && target->isActive())
         target->bubbleInputEvent((int)EventType::TouchBegin);
 
     handleRollOver(ti, target);

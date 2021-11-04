@@ -91,6 +91,10 @@ namespace ige::scene
         //! Set editor mode
         void setIsEditor(bool isEditor) { m_bIsEditor = isEditor; }
 
+        bool isIgeEditor() const { return m_bIsIgeEditor; }
+
+        void setIsIgeEditor(bool isEditor) { m_bIsIgeEditor = isEditor; }
+
         //! Check if this is editor playing mode
         bool isPlaying() const { return m_bIsPlaying; }
 
@@ -140,6 +144,7 @@ namespace ige::scene
 
         //! Editor mode
         bool m_bIsEditor = false;
+        bool m_bIsIgeEditor = false;
         bool m_bIsPlaying = false;
     };
 
