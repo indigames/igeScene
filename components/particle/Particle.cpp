@@ -70,9 +70,10 @@ namespace ige::scene
         {
             m_path = relPath;
 
+            stop();
+
             if (m_effect.Get())
             {
-                stop();
                 m_effect->Release();
                 m_effect = nullptr;
             }
@@ -220,9 +221,12 @@ namespace ige::scene
     //! Stop
     void Particle::stop()
     {
-        if (m_handle != -1)
+        if (m_handle != -1) {
             getManager()->getEffekseerManager()->StopEffect(m_handle);
-        m_handle = -1;
+            m_handle = -1;
+            if (m_effect.Get())
+                m_effect->Release();
+        }
     }
 
     //! Update function

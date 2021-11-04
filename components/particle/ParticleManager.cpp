@@ -87,6 +87,7 @@ namespace ige::scene
         m_manager = Effekseer::Manager::Create(m_maxParticleNumber);
 
         // Set renderers
+        m_manager->SetSpriteRenderer(m_renderer->CreateSpriteRenderer());
         m_manager->SetRibbonRenderer(m_renderer->CreateRibbonRenderer());
         m_manager->SetRingRenderer(m_renderer->CreateRingRenderer());
         m_manager->SetTrackRenderer(m_renderer->CreateTrackRenderer());
@@ -157,9 +158,8 @@ namespace ige::scene
     //! Render
     void ParticleManager::onRender()
     {
-        auto renderContext = RenderContext::InstancePtr();
-
         // Setup render matrix
+        auto renderContext = RenderContext::InstancePtr();
         setProjectionMatrix(renderContext->GetRenderProjectionMatrix());
         setCameraMatrix(renderContext->GetRenderViewMatrix());
 
