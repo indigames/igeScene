@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void Navigable_dealloc(PyObject_Navigable *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *Navigable_str(PyObject_Navigable *self)
@@ -28,16 +27,16 @@ namespace ige::scene
     // Recursive
     PyObject *Navigable_isRecursive(PyObject_Navigable *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isRecursive());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<Navigable>(self->component.lock())->isRecursive());
     }
 
     int Navigable_setRecursive(PyObject_Navigable *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setRecursive(val);
+            std::dynamic_pointer_cast<Navigable>(self->component.lock())->setRecursive(val);
             return 0;
         }
         return -1;

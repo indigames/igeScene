@@ -49,7 +49,7 @@ namespace ige::scene
         virtual void setParent(std::shared_ptr<SceneObject> parent);
 
         // Get shared_ptr
-        virtual std::shared_ptr<SceneObject> getSharedPtr() const;
+        virtual std::shared_ptr<SceneObject> getSharedPtr();
 
         // Get parent
         virtual std::shared_ptr<SceneObject> getParent() const;

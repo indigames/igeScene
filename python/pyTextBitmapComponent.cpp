@@ -12,11 +12,10 @@ namespace ige::scene
 {
     void TextBitmapComponent_dealloc(PyObject_TextBitmapComponent *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *TextBitmapComponent_str(PyObject_TextBitmapComponent*self)
@@ -27,18 +26,18 @@ namespace ige::scene
     // Get text
     PyObject* TextBitmapComponent_getText(PyObject_TextBitmapComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getText().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<TextBitmapComponent>(self->component.lock())->getText().c_str());
     }
 
     // Set text
     int TextBitmapComponent_setText(PyObject_TextBitmapComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
-            self->component->setText(std::string(val));
+            std::dynamic_pointer_cast<TextBitmapComponent>(self->component.lock())->setText(std::string(val));
             return 0;
         }
         return -1;
@@ -47,18 +46,18 @@ namespace ige::scene
     // Get font path
     PyObject* TextBitmapComponent_getFontPath(PyObject_TextBitmapComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getFontPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<TextBitmapComponent>(self->component.lock())->getFontPath().c_str());
     }
 
     // Set font path
     int TextBitmapComponent_setFontPath(PyObject_TextBitmapComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
-            self->component->setFontPath(std::string(val));
+            std::dynamic_pointer_cast<TextBitmapComponent>(self->component.lock())->setFontPath(std::string(val));
             return 0;
         }
         return -1;
@@ -67,18 +66,18 @@ namespace ige::scene
     // Get font size
     PyObject* TextBitmapComponent_getFontSize(PyObject_TextBitmapComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getFontSize());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<TextBitmapComponent>(self->component.lock())->getFontSize());
     }
 
     // Set font size
     int TextBitmapComponent_setFontSize(PyObject_TextBitmapComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setFontSize(val);
+            std::dynamic_pointer_cast<TextBitmapComponent>(self->component.lock())->setFontSize(val);
             return 0;
         }
         return -1;
@@ -87,9 +86,9 @@ namespace ige::scene
     // Get color
     PyObject* TextBitmapComponent_getColor(PyObject_TextBitmapComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<TextBitmapComponent>(self->component.lock())->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
@@ -97,29 +96,29 @@ namespace ige::scene
     // Set color
     int TextBitmapComponent_setColor(PyObject_TextBitmapComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v)
             return -1;
-        self->component->setColor(*((Vec4*)v));
+        std::dynamic_pointer_cast<TextBitmapComponent>(self->component.lock())->setColor(*((Vec4*)v));
         return 0;
     }
     
     PyObject* TextBitmapComponent_isBillboard(PyObject_TextBitmapComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isBillboard());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<TextBitmapComponent>(self->component.lock())->isBillboard());
     }
 
     int TextBitmapComponent_setBillboard(PyObject_TextBitmapComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setBillboard(val);
+            std::dynamic_pointer_cast<TextBitmapComponent>(self->component.lock())->setBillboard(val);
             return 0;
         }
         return -1;

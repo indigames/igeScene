@@ -14,12 +14,10 @@ namespace ige::scene
 {
     void PhysicSphere_dealloc(PyObject_PhysicSphere *self)
     {
-        if (self->component)
-        {
-            self->super.component = nullptr;
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *PhysicSphere_str(PyObject_PhysicSphere *self)
@@ -30,16 +28,16 @@ namespace ige::scene
     //! size
     PyObject *PhysicSphere_getRadius(PyObject_PhysicSphere *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRadius());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSphere>(self->component.lock())->getRadius());
     }
 
     int PhysicSphere_setRadius(PyObject_PhysicSphere *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRadius(val);
+            std::dynamic_pointer_cast<PhysicSphere>(self->component.lock())->setRadius(val);
             return 0;
         }
         return -1;

@@ -14,11 +14,10 @@ namespace ige::scene
 {
     void PhysicBox_dealloc(PyObject_PhysicBox *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *PhysicBox_str(PyObject_PhysicBox *self)
@@ -29,22 +28,22 @@ namespace ige::scene
     //! size
     PyObject *PhysicBox_getSize(PyObject_PhysicBox *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getSize().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<PhysicBox>(self->component.lock())->getSize().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int PhysicBox_setSize(PyObject_PhysicBox *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setSize(*((Vec3 *)v));
+        std::dynamic_pointer_cast<PhysicBox>(self->component.lock())->setSize(*((Vec3 *)v));
         return 0;
     }
 

@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_TextBitmapComponent
-    {
-        PyObject_Component super;
-        TextBitmapComponent* component;
-    };
+    struct PyObject_TextBitmapComponent : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_TextBitmapComponent;

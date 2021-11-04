@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_DirectionalLight
-    {
-        PyObject_Component super;
-        DirectionalLight *component;
-    };
+    struct PyObject_DirectionalLight : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_DirectionalLight;

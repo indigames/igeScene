@@ -14,11 +14,10 @@ namespace ige::scene
     // RectTransform
     void RectTransform_dealloc(PyObject_RectTransform *self)
     {
-        if(self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject* RectTransform_str(PyObject_RectTransform *self)
@@ -29,117 +28,99 @@ namespace ige::scene
     // Get anchor
     PyObject* RectTransform_getAnchor(PyObject_RectTransform* self)
     {
-        if (self->component) {
-            auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-            vmath_cpy(self->component->getAnchor().P(), 4, vec4Obj->v);
-            vec4Obj->d = 4;
-            return (PyObject*)vec4Obj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getAnchor().P(), 4, vec4Obj->v);
+        vec4Obj->d = 4;
+        return (PyObject*)vec4Obj;
     }
 
     // Set anchor
     int RectTransform_setAnchor(PyObject_RectTransform* self, PyObject* value)
     {
-        if (self->component) {
-            int d;
-            float buff[4];
-            auto v = pyObjToFloat((PyObject*)value, buff, d);
-            if (!v) return -1;
-            self->component->setAnchor(*((Vec4*)v));
-            return 0;
-        }
-        return -1;
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v) return -1;
+        std::dynamic_pointer_cast<RectTransform>(self->component.lock())->setAnchor(*((Vec4*)v));
+        return 0;
     }
 
     // Get pivot
     PyObject* RectTransform_getPivot(PyObject_RectTransform* self)
     {
-        if (self->component) {
-            auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
-            vmath_cpy(self->component->getPivot().P(), 2, vec2Obj->v);
-            vec2Obj->d = 2;
-            return (PyObject*)vec2Obj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getPivot().P(), 2, vec2Obj->v);
+        vec2Obj->d = 2;
+        return (PyObject*)vec2Obj;
     }
 
     // Set pivot
     int RectTransform_setPivot(PyObject_RectTransform* self, PyObject* value)
     {
-        if (self->component) {
-            int d;
-            float buff[4];
-            auto v = pyObjToFloat((PyObject*)value, buff, d);
-            if (!v) return -1;
-            self->component->setPivot(*((Vec2*)v));
-            return 0;
-        }
-        return -1;
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v) return -1;
+        std::dynamic_pointer_cast<RectTransform>(self->component.lock())->setPivot(*((Vec2*)v));
+        return 0;
     }
 
     // Get offset
     PyObject* RectTransform_getOffset(PyObject_RectTransform* self)
     {
-        if (self->component) {
-            auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-            vmath_cpy(self->component->getOffset().P(), 4, vec4Obj->v);
-            vec4Obj->d = 4;
-            return (PyObject*)vec4Obj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getOffset().P(), 4, vec4Obj->v);
+        vec4Obj->d = 4;
+        return (PyObject*)vec4Obj;
     }
 
     // Set offset
     int RectTransform_setOffset(PyObject_RectTransform* self, PyObject* value)
     {
-        if (self->component) {
-            int d;
-            float buff[4];
-            auto v = pyObjToFloat((PyObject*)value, buff, d);
-            if (!v) return -1;
-            self->component->setOffset(*((Vec4*)v));
-            return 0;
-        }
-        return -1;
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v) return -1;
+        std::dynamic_pointer_cast<RectTransform>(self->component.lock())->setOffset(*((Vec4*)v));
+        return 0;
     }
 
     // Get size
     PyObject* RectTransform_getSize(PyObject_RectTransform* self)
     {
-        if (self->component) {
-            auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
-            vmath_cpy(self->component->getSize().P(), 2, vec2Obj->v);
-            vec2Obj->d = 2;
-            return (PyObject*)vec2Obj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getSize().P(), 2, vec2Obj->v);
+        vec2Obj->d = 2;
+        return (PyObject*)vec2Obj;
     }
 
     // Set size
     int RectTransform_setSize(PyObject_RectTransform* self, PyObject* value)
     {
-        if (self->component) {
-            int d;
-            float buff[4];
-            auto v = pyObjToFloat((PyObject*)value, buff, d);
-            if (!v) return -1;
-            self->component->setSize(*((Vec2*)v));
-            return 0;
-        }
-        return -1;
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v) return -1;
+        std::dynamic_pointer_cast<RectTransform>(self->component.lock())->setSize(*((Vec2*)v));
+        return 0;
     }
 
     // Get rect
     PyObject* RectTransform_getRect(PyObject_RectTransform* self)
     {
-        if (self->component) {
-            auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-            vmath_cpy(self->component->getRect().P(), 4, vec4Obj->v);
-            vec4Obj->d = 4;
-            return (PyObject*)vec4Obj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getRect().P(), 4, vec4Obj->v);
+        vec4Obj->d = 4;
+        return (PyObject*)vec4Obj;
     }
 
     PyGetSetDef RectTransform_getsets[] = {

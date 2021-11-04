@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_TransformComponent
-    {
-        PyObject_Component super;
-        TransformComponent* component;
-    };
+    struct PyObject_TransformComponent: PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_TransformComponent;

@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void UIMask_dealloc(PyObject_UIMask *self)
     {
-        if(self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject* UIMask_str(PyObject_UIMask *self)
@@ -28,18 +27,18 @@ namespace ige::scene
     // Set Interactable
     PyObject* UIMask_getInteractable(PyObject_UIMask* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isInteractable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<UIMask>(self->component.lock())->isInteractable());
     }
 
     // Set Interactable
     int UIMask_setInteractable(PyObject_UIMask* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setInteractable(val);
+            std::dynamic_pointer_cast<UIMask>(self->component.lock())->setInteractable(val);
             return 0;
         }
         return -1;
@@ -47,17 +46,17 @@ namespace ige::scene
 
     PyObject* UIMask_getUseMask(PyObject_UIMask* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isUseMask());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<UIMask>(self->component.lock())->isUseMask());
     }
 
     int UIMask_setUseMask(PyObject_UIMask* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setUseMask(val);
+            std::dynamic_pointer_cast<UIMask>(self->component.lock())->setUseMask(val);
             return 0;
         }
         return -1;

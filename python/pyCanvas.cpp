@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void Canvas_dealloc(PyObject_Canvas *self)
     {
-        if(self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject* Canvas_str(PyObject_Canvas *self)
@@ -28,9 +27,9 @@ namespace ige::scene
     // Get design canvas size
     PyObject* Canvas_getDesignCanvasSize(PyObject_Canvas* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
-        vmath_cpy(self->component->getDesignCanvasSize().P(), 2, vec2Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<Canvas>(self->component.lock())->getDesignCanvasSize().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
         return (PyObject*)vec2Obj;
     }
@@ -38,21 +37,21 @@ namespace ige::scene
     // Set design canvas size
     int Canvas_setDesignCanvasSize(PyObject_Canvas* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v) return -1;
-        self->component->setDesignCanvasSize(*((Vec2*)v));
+        std::dynamic_pointer_cast<Canvas>(self->component.lock())->setDesignCanvasSize(*((Vec2*)v));
         return 0;
     }
 
     // Get target size
     PyObject* Canvas_getTargetCanvasSize(PyObject_Canvas* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
-        vmath_cpy(self->component->getTargetCanvasSize().P(), 2, vec2Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<Canvas>(self->component.lock())->getTargetCanvasSize().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
         return (PyObject*)vec2Obj;
     }
@@ -60,12 +59,12 @@ namespace ige::scene
     // Set target size
     int Canvas_setTargetCanvasSize(PyObject_Canvas* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v) return -1;
-        self->component->setTargetCanvasSize(*((Vec2*)v));
+        std::dynamic_pointer_cast<Canvas>(self->component.lock())->setTargetCanvasSize(*((Vec2*)v));
         return 0;
     }
 

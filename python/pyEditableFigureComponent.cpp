@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void EditableFigureComponent_dealloc(PyObject_EditableFigureComponent *self)
     {
-        if(self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject* EditableFigureComponent_str(PyObject_EditableFigureComponent *self)
@@ -28,17 +27,17 @@ namespace ige::scene
     // Get path
     PyObject* EditableFigureComponent_getPath(PyObject_EditableFigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->getPath().c_str());
     }
 
     // Set path
     int EditableFigureComponent_setPath(PyObject_EditableFigureComponent* self, PyObject* value)
     {
-        if (PyUnicode_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyUnicode_Check(value)) {
             const char* val = PyUnicode_AsUTF8(value);
-            self->component->setPath(std::string(val));
+            std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->setPath(std::string(val));
             return 0;
         }
         return -1;
@@ -47,14 +46,15 @@ namespace ige::scene
     // Set figure
     int EditableFigureComponent_setFigure(PyObject_EditableFigureComponent* self, PyObject* value)
     {
-        if(value && self->component) {
+        if (self->component.expired()) return -1;
+        if(value) {
             if (value->ob_type == &EditableFigureType) {
                 auto figObj = (editablefigure_obj*)value;
-                self->component->setFigure(figObj->editablefigure);
+                std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->setFigure(figObj->editablefigure);
                 return 0;
             }
             else if (value->ob_type == &_PyNone_Type) {
-                self->component->setFigure(nullptr);
+                std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->setFigure(nullptr);
                 return 0;
             }
         }
@@ -64,11 +64,11 @@ namespace ige::scene
     // Get figure
     PyObject* EditableFigureComponent_getFigure(PyObject_EditableFigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto figure = self->component->getFigure();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto figure = std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->getFigure();
         if (figure) {
             auto figObj = (editablefigure_obj*)(&EditableFigureType)->tp_alloc(&EditableFigureType, 0);
-            figObj->editablefigure = self->component->getFigure();
+            figObj->editablefigure = std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->getFigure();
             figObj->editablefigure->IncReference();
             return (PyObject*)figObj;
         }
@@ -78,16 +78,16 @@ namespace ige::scene
     // Fog
     PyObject* EditableFigureComponent_isFogEnabled(PyObject_EditableFigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isFogEnabled());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->isFogEnabled());
     }
 
     int EditableFigureComponent_setFogEnabled(PyObject_EditableFigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setFogEnabled(enable);
+            std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->setFogEnabled(enable);
             return 0;
         }
         return -1;
@@ -96,16 +96,16 @@ namespace ige::scene
     // Front face culling
     PyObject* EditableFigureComponent_isCullFaceEnable(PyObject_EditableFigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isCullFaceEnable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->isCullFaceEnable());
     }
 
     int EditableFigureComponent_setCullFaceEnable(PyObject_EditableFigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setCullFaceEnable(enable);
+            std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->setCullFaceEnable(enable);
             return 0;
         }
         return -1;
@@ -114,16 +114,16 @@ namespace ige::scene
     // Double Side
     PyObject* EditableFigureComponent_isDoubleSideEnable(PyObject_EditableFigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isDoubleSideEnable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->isDoubleSideEnable());
     }
 
     int EditableFigureComponent_setDoubleSideEnable(PyObject_EditableFigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setDoubleSideEnable(enable);
+            std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->setDoubleSideEnable(enable);
             return 0;
         }
         return -1;
@@ -132,16 +132,16 @@ namespace ige::scene
     // Depth test
     PyObject* EditableFigureComponent_isDepthTestEnable(PyObject_EditableFigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isDepthTestEnable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->isDepthTestEnable());
     }
 
     int EditableFigureComponent_setDepthTestEnable(PyObject_EditableFigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setDepthTestEnable(enable);
+            std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->setDepthTestEnable(enable);
             return 0;
         }
         return -1;
@@ -150,16 +150,16 @@ namespace ige::scene
     // Depth write
     PyObject* EditableFigureComponent_isDepthWriteEnable(PyObject_EditableFigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isDepthWriteEnable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->isDepthWriteEnable());
     }
 
     int EditableFigureComponent_setDepthWriteEnable(PyObject_EditableFigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setDepthWriteEnable(enable);
+            std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->setDepthWriteEnable(enable);
             return 0;
         }
         return -1;
@@ -168,16 +168,16 @@ namespace ige::scene
     // Scissor Test
     PyObject* EditableFigureComponent_isScissorTestEnable(PyObject_EditableFigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isScissorTestEnable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->isScissorTestEnable());
     }
 
     int EditableFigureComponent_setScissorTestEnable(PyObject_EditableFigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setScissorTestEnable(enable);
+            std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->setScissorTestEnable(enable);
             return 0;
         }
         return -1;
@@ -186,16 +186,16 @@ namespace ige::scene
     // Frame update ratio (speedup/slower effects)
     PyObject* EditableFigureComponent_getFrameUpdateRatio(PyObject_EditableFigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getFrameUpdateRatio());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->getFrameUpdateRatio());
     }
 
     int EditableFigureComponent_setFrameUpdateRatio(PyObject_EditableFigureComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setFrameUpdateRatio(val);
+            std::dynamic_pointer_cast<EditableFigureComponent>(self->component.lock())->setFrameUpdateRatio(val);
             return 0;
         }
         return -1;

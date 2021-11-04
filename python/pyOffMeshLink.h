@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_OffMeshLink
-    {
-        PyObject_Component super;
-        OffMeshLink *component;
-    };
+    struct PyObject_OffMeshLink : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_OffMeshLink;

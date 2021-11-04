@@ -20,11 +20,10 @@ namespace ige::scene
 {
     void PhysicObject_dealloc(PyObject_PhysicObject *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *PhysicObject_str(PyObject_PhysicObject *self)
@@ -35,13 +34,12 @@ namespace ige::scene
     //! Apply torque
     PyObject *PhysicObject_applyTorque(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
-        if (v)
-        {
-            self->component->applyTorque(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        if (v) {
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyTorque(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         }
         Py_RETURN_NONE;
     }
@@ -49,13 +47,12 @@ namespace ige::scene
     //! Apply force
     PyObject *PhysicObject_applyForce(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
-        if (v)
-        {
-            self->component->applyForce(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        if (v) {
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyForce(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         }
         Py_RETURN_NONE;
     }
@@ -63,13 +60,12 @@ namespace ige::scene
     //! Apply impulse
     PyObject *PhysicObject_applyImpulse(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
-        if (v)
-        {
-            self->component->applyImpulse(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        if (v) {
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyImpulse(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         }
         Py_RETURN_NONE;
     }
@@ -77,54 +73,54 @@ namespace ige::scene
     //! Clear forces
     PyObject *PhysicObject_clearForces(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        self->component->clearForces();
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->clearForces();
         Py_RETURN_NONE;
     }
 
     //! Add constraint
     PyObject* PhysicObject_addConstraint(PyObject_PhysicObject* self, PyObject* value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         int type = -1;
         if (PyArg_ParseTuple(value, "i", &type))
         {
-            auto constraint = self->component->addConstraint(type);
+            auto constraint = std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->addConstraint(type);
             if (constraint != nullptr)
             {
                 switch (type)
                 {
                     case (int)PhysicConstraint::ConstraintType::Fixed:
                     {
-                        auto pyConst = PyObject_New(PyObject_FixedConstraint, &PyTypeObject_FixedConstraint);
+                        auto pyConst = (PyObject_FixedConstraint*)(&PyTypeObject_FixedConstraint)->tp_alloc(&PyTypeObject_FixedConstraint, 0);
                         pyConst->constraint = (FixedConstraint*)constraint.get();
                         pyConst->super.constraint = constraint.get();
                         return (PyObject*)pyConst;
                     }
                     case (int)PhysicConstraint::ConstraintType::Hinge:
                     {
-                        auto pyConst = PyObject_New(PyObject_HingeConstraint, &PyTypeObject_HingeConstraint);
+                        auto pyConst = (PyObject_HingeConstraint*)(&PyTypeObject_HingeConstraint)->tp_alloc(&PyTypeObject_HingeConstraint, 0);
                         pyConst->constraint = (HingeConstraint*)constraint.get();
                         pyConst->super.constraint = constraint.get();
                         return (PyObject*)pyConst;
                     }
                     case (int)PhysicConstraint::ConstraintType::Slider:
                     {
-                        auto pyConst = PyObject_New(PyObject_SliderConstraint, &PyTypeObject_SliderConstraint);
+                        auto pyConst = (PyObject_SliderConstraint*)(&PyTypeObject_SliderConstraint)->tp_alloc(&PyTypeObject_SliderConstraint, 0);
                         pyConst->constraint = (SliderConstraint*)constraint.get();
                         pyConst->super.constraint = constraint.get();
                         return (PyObject*)pyConst;
                     }
                     case (int)PhysicConstraint::ConstraintType::Spring:
                     {
-                        auto pyConst = PyObject_New(PyObject_SpringConstraint, &PyTypeObject_SpringConstraint);
+                        auto pyConst = (PyObject_SpringConstraint*)(&PyTypeObject_SpringConstraint)->tp_alloc(&PyTypeObject_SpringConstraint, 0);
                         pyConst->constraint = (SpringConstraint*)constraint.get();
                         pyConst->super.constraint = constraint.get();
                         return (PyObject*)pyConst;
                     }
                     case (int)PhysicConstraint::ConstraintType::Dof6Spring:
                     {
-                        auto pyConst = PyObject_New(PyObject_Dof6Constraint, &PyTypeObject_Dof6Constraint);
+                        auto pyConst = (PyObject_Dof6Constraint*)(&PyTypeObject_Dof6Constraint)->tp_alloc(&PyTypeObject_Dof6Constraint, 0);
                         pyConst->constraint = (Dof6SpringConstraint*)constraint.get();
                         pyConst->super.constraint = constraint.get();
                         return (PyObject*)pyConst;
@@ -138,14 +134,14 @@ namespace ige::scene
     //! Remove constraint
     PyObject* PhysicObject_removeConstraint(PyObject_PhysicObject* self, PyObject* value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         if (value->ob_type == &PyTypeObject_PhysicConstraint || value->ob_type == &PyTypeObject_FixedConstraint || value->ob_type == &PyTypeObject_HingeConstraint ||
             value->ob_type == &PyTypeObject_SliderConstraint || value->ob_type == &PyTypeObject_SpringConstraint || value->ob_type == &PyTypeObject_Dof6Constraint)
         {
             auto pyConst = (PyObject_PhysicConstraint*)value;
             if (pyConst && pyConst->constraint)
             {
-                self->component->removeConstraint(pyConst->constraint);
+                std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->removeConstraint(pyConst->constraint);
                 Py_RETURN_TRUE;
             }
         }
@@ -155,11 +151,11 @@ namespace ige::scene
     //! Get all constraints
     PyObject* PhysicObject_getConstraints(PyObject_PhysicObject* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto len = self->component->getContraints().size();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto len = std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getContraints().size();
         if (len > 0)
         {
-            auto constraints = self->component->getContraints();
+            auto constraints = std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getContraints();
             auto compTuple = PyTuple_New(len);
             for (int i = 0; i < len; ++i)
             {
@@ -173,7 +169,7 @@ namespace ige::scene
                     {
                         case (int)PhysicConstraint::ConstraintType::Fixed:
                         {
-                            auto pyConst = PyObject_New(PyObject_FixedConstraint, &PyTypeObject_FixedConstraint);
+                            auto pyConst = (PyObject_FixedConstraint*)(&PyTypeObject_FixedConstraint)->tp_alloc(&PyTypeObject_FixedConstraint, 0);
                             pyConst->constraint = (FixedConstraint*)constraint.get();
                             pyConst->super.constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
@@ -181,7 +177,7 @@ namespace ige::scene
                         break;
                         case (int)PhysicConstraint::ConstraintType::Hinge:
                         {
-                            auto pyConst = PyObject_New(PyObject_HingeConstraint, &PyTypeObject_HingeConstraint);
+                            auto pyConst = (PyObject_HingeConstraint*)(&PyTypeObject_HingeConstraint)->tp_alloc(&PyTypeObject_HingeConstraint, 0);
                             pyConst->constraint = (HingeConstraint*)constraint.get();
                             pyConst->super.constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
@@ -189,7 +185,7 @@ namespace ige::scene
                         break;
                         case (int)PhysicConstraint::ConstraintType::Slider:
                         {
-                            auto pyConst = PyObject_New(PyObject_SliderConstraint, &PyTypeObject_SliderConstraint);
+                            auto pyConst = (PyObject_SliderConstraint*)(&PyTypeObject_SliderConstraint)->tp_alloc(&PyTypeObject_SliderConstraint, 0);
                             pyConst->constraint = (SliderConstraint*)constraint.get();
                             pyConst->super.constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
@@ -197,7 +193,7 @@ namespace ige::scene
                         break;
                         case (int)PhysicConstraint::ConstraintType::Spring:
                         {
-                            auto pyConst = PyObject_New(PyObject_SpringConstraint, &PyTypeObject_SpringConstraint);
+                            auto pyConst = (PyObject_SpringConstraint*)(&PyTypeObject_SpringConstraint)->tp_alloc(&PyTypeObject_SpringConstraint, 0);
                             pyConst->constraint = (SpringConstraint*)constraint.get();
                             pyConst->super.constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
@@ -205,7 +201,7 @@ namespace ige::scene
                         break;
                         case (int)PhysicConstraint::ConstraintType::Dof6Spring:
                         {
-                            auto pyConst = PyObject_New(PyObject_Dof6Constraint, &PyTypeObject_Dof6Constraint);
+                            auto pyConst = (PyObject_Dof6Constraint*)(&PyTypeObject_Dof6Constraint)->tp_alloc(&PyTypeObject_Dof6Constraint, 0);
                             pyConst->constraint = (Dof6SpringConstraint*)constraint.get();
                             pyConst->super.constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
@@ -213,7 +209,7 @@ namespace ige::scene
                         break;
                         default:
                         {
-                            auto pyConst = PyObject_New(PyObject_PhysicConstraint, &PyTypeObject_PhysicConstraint);
+                            auto pyConst = (PyObject_PhysicConstraint*)(&PyTypeObject_PhysicConstraint)->tp_alloc(&PyTypeObject_PhysicConstraint, 0);
                             pyConst->constraint = constraint.get();
                             PyTuple_SetItem(compTuple, i, (PyObject*)pyConst);
                         }
@@ -229,24 +225,24 @@ namespace ige::scene
     //! Remove all constraints
     PyObject* PhysicObject_removeConstraints(PyObject_PhysicObject* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        self->component->removeAllConstraints();
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->removeAllConstraints();
         Py_RETURN_TRUE;
     }
 
     //! Mass
     PyObject *PhysicObject_getMass(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getMass());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getMass());
     }
 
     int PhysicObject_setMass(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setMass(val);
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setMass(val);
             return 0;
         }
         return -1;
@@ -255,16 +251,16 @@ namespace ige::scene
     //! Friction
     PyObject *PhysicObject_getFriction(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getFriction());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getFriction());
     }
 
     int PhysicObject_setFriction(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setFriction(val);
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setFriction(val);
             return 0;
         }
         return -1;
@@ -273,16 +269,16 @@ namespace ige::scene
     //! Restitution
     PyObject *PhysicObject_getRestitution(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRestitution());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getRestitution());
     }
 
     int PhysicObject_setRestitution(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRestitution(val);
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setRestitution(val);
             return 0;
         }
         return -1;
@@ -291,102 +287,102 @@ namespace ige::scene
     //! Linear velocity
     PyObject *PhysicObject_getLinearVelocity(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(self->component->getLinearVelocity()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getLinearVelocity()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int PhysicObject_setLinearVelocity(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setLinearVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setLinearVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         return 0;
     }
 
     //! Angular velocity
     PyObject *PhysicObject_getAngularVelocity(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(self->component->getAngularVelocity()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getAngularVelocity()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int PhysicObject_setAngularVelocity(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setAngularVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setAngularVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         return 0;
     }
 
     //! Linear factor
     PyObject *PhysicObject_getLinearFactor(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(self->component->getLinearFactor()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getLinearFactor()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int PhysicObject_setLinearFactor(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setLinearFactor(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setLinearFactor(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         return 0;
     }
 
     //! Angular factor
     PyObject *PhysicObject_getAngularFactor(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(self->component->getAngularFactor()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getAngularFactor()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int PhysicObject_setAngularFactor(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setAngularFactor(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setAngularFactor(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         return 0;
     }
 
     PyObject* PhysicObject_getLinearSleepingThreshold(PyObject_PhysicObject* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getLinearSleepingThreshold());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getLinearSleepingThreshold());
     }
 
     int PhysicObject_setLinearSleepingThreshold(PyObject_PhysicObject* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
-            self->component->setLinearSleepingThreshold((uint32_t)PyLong_AsLong(value));
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setLinearSleepingThreshold((uint32_t)PyLong_AsLong(value));
             return 0;
         }
         return -1;
@@ -394,15 +390,15 @@ namespace ige::scene
 
     PyObject* PhysicObject_getAngularSleepingThreshold(PyObject_PhysicObject* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getAngularSleepingThreshold());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getAngularSleepingThreshold());
     }
 
     int PhysicObject_setAngularSleepingThreshold(PyObject_PhysicObject* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
-            self->component->setAngularSleepingThreshold((uint32_t)PyLong_AsLong(value));
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setAngularSleepingThreshold((uint32_t)PyLong_AsLong(value));
             return 0;
         }
         return -1;
@@ -410,16 +406,16 @@ namespace ige::scene
 
     PyObject* PhysicObject_getActivationState(PyObject_PhysicObject* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getActivationState());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getActivationState());
     }
 
     int PhysicObject_setActivationState(PyObject_PhysicObject* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setActivationState(val);
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setActivationState(val);
             return 0;
         }
         return -1;
@@ -428,16 +424,16 @@ namespace ige::scene
     //! Indicate object is a trigger object
     PyObject *PhysicObject_isTrigger(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isTrigger());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->isTrigger());
     }
 
     int PhysicObject_setIsTrigger(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setIsTrigger(val);
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setIsTrigger(val);
             return 0;
         }
         return -1;
@@ -446,16 +442,16 @@ namespace ige::scene
     //! Indicate object is a kinematic object
     PyObject *PhysicObject_isKinematic(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isKinematic());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->isKinematic());
     }
 
     int PhysicObject_setIsKinematic(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setIsKinematic(val);
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setIsKinematic(val);
             return 0;
         }
         return -1;
@@ -464,16 +460,16 @@ namespace ige::scene
     //! Enable/Disable physic component
     PyObject *PhysicObject_isEnabled(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isEnabled());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->isEnabled());
     }
 
     int PhysicObject_setEnabled(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setEnabled(val);
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setEnabled(val);
             return 0;
         }
         return -1;
@@ -482,8 +478,8 @@ namespace ige::scene
     //! Get AABB
     PyObject *PhysicObject_getAABB(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto aabb = self->component->getAABB();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto aabb = std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getAABB();
 
         vec_obj *min = PyObject_New(vec_obj, _Vec3Type);
         vec_obj *max = PyObject_New(vec_obj, _Vec3Type);
@@ -506,16 +502,16 @@ namespace ige::scene
     //! Collision group
     PyObject *PhysicObject_getCollisionFilterGroup(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getCollisionFilterGroup());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getCollisionFilterGroup());
     }
 
     int PhysicObject_setCollisionFilterGroup(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setCollisionFilterGroup(val);
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setCollisionFilterGroup(val);
             return 0;
         }
         return -1;
@@ -524,16 +520,16 @@ namespace ige::scene
     //! Collision mask
     PyObject *PhysicObject_getCollisionFilterMask(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getCollisionFilterMask());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getCollisionFilterMask());
     }
 
     int PhysicObject_setCollisionFilterMask(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setCollisionFilterMask(val);
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setCollisionFilterMask(val);
             return 0;
         }
         return -1;
@@ -542,16 +538,16 @@ namespace ige::scene
     //! Continuos Collision Detection mode
     PyObject *PhysicObject_isCCD(PyObject_PhysicObject *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isCCD());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->isCCD());
     }
 
     int PhysicObject_setCCD(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setCCD(val);
+            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setCCD(val);
             return 0;
         }
         return -1;

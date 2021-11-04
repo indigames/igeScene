@@ -20,11 +20,10 @@ namespace ige::scene
     // Deallocation
     void PhysicManager_dealloc(PyObject_PhysicManager *self)
     {
-        if (self)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     // String representation
@@ -39,10 +38,9 @@ namespace ige::scene
         if (SceneManager::getInstance()->getCurrentScene())
         {
             auto physicManager = SceneManager::getInstance()->getCurrentScene()->getRoot()->getComponent<PhysicManager>();
-            if (physicManager)
-            {
-                auto* self = PyObject_New(PyObject_PhysicManager, &PyTypeObject_PhysicManager);
-                self->component = physicManager.get();
+            if (physicManager) {
+                auto* self = (PyObject_PhysicManager*)(&PyTypeObject_PhysicManager)->tp_alloc(&PyTypeObject_PhysicManager, 0);
+                self->component = physicManager;
                 return (PyObject*)self;
             }
         }
@@ -52,22 +50,22 @@ namespace ige::scene
     // Clear
     PyObject *PhysicManager_clear(PyObject_PhysicManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        self->component->clear();
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->clear();
         Py_RETURN_NONE;
     }
 
     // Get deformable
     PyObject *PhysicManager_isDeformable(PyObject_PhysicManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isDeformable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->isDeformable());
     }
 
     // Raytest closest
     PyObject *PhysicManager_rayTestClosest(PyObject_PhysicManager *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         PyObject *startObj;
         PyObject *endObj;
         int mask = -1;
@@ -87,12 +85,12 @@ namespace ige::scene
             return NULL;
         auto end = PhysicHelper::to_btVector3(*((Vec3 *)v));
 
-        auto hit = self->component->rayTestClosest(start, end, group, mask);
+        auto hit = std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->rayTestClosest(start, end, group, mask);
         if (hit.object == nullptr)
             Py_RETURN_NONE;
 
-        auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        hitObj->sceneObject = reinterpret_cast<PhysicObject *>(hit.object->getUserPointer())->getOwner();
+        auto hitObj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+        hitObj->sceneObject = reinterpret_cast<PhysicObject *>(hit.object->getUserPointer())->getOwner()->getSharedPtr();
 
         auto hitPos = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(PhysicHelper::from_btVector3(hit.position).P(), 3, hitPos->v);
@@ -116,7 +114,7 @@ namespace ige::scene
     // Raytest all
     PyObject *PhysicManager_rayTestAll(PyObject_PhysicManager *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         PyObject *startObj;
         PyObject *endObj;
         int mask = -1;
@@ -136,17 +134,17 @@ namespace ige::scene
             return NULL;
         auto end = PhysicHelper::to_btVector3(*((Vec3 *)v));
 
-        auto hits = self->component->rayTestAll(start, end, group, mask);
+        auto hits = std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->rayTestAll(start, end, group, mask);
         PyObject *res = PyTuple_New(hits.size());
 
         for (int i = 0; i < hits.size(); ++i)
         {
-            auto hit = self->component->rayTestClosest(start, end, group, mask);
+            auto hit = std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->rayTestClosest(start, end, group, mask);
             if (hit.object == nullptr)
                 Py_RETURN_NONE;
 
-            auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            hitObj->sceneObject = reinterpret_cast<PhysicObject *>(hits[i].object->getUserPointer())->getOwner();
+            auto hitObj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            hitObj->sceneObject = reinterpret_cast<PhysicObject *>(hits[i].object->getUserPointer())->getOwner()->getSharedPtr();
 
             auto hitPos = PyObject_New(vec_obj, _Vec3Type);
             vmath_cpy(PhysicHelper::from_btVector3(hits[i].position).P(), 3, hitPos->v);
@@ -173,7 +171,7 @@ namespace ige::scene
     // Contact test
     PyObject *PhysicManager_contactTest(PyObject_PhysicManager *self, PyObject *args)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         PyObject *obj;
         int group = 1;
         int mask = -1;
@@ -189,7 +187,7 @@ namespace ige::scene
         if (obj->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)obj;
-            auto physicComp = sceneObj->sceneObject->getComponent<PhysicObject>();
+            auto physicComp = sceneObj->sceneObject.lock()->getComponent<PhysicObject>();
             if (physicComp && physicComp->getBody())
             {
                 object = physicComp->getBody();
@@ -198,8 +196,7 @@ namespace ige::scene
         else if (obj->ob_type == &PyTypeObject_PhysicObject)
         {
             auto physicObjectObj = (PyObject_PhysicObject*)obj;
-            if (physicObjectObj->component->getBody())
-                object = physicObjectObj->component->getBody();
+            object = std::dynamic_pointer_cast<PhysicObject>(physicObjectObj->component.lock())->getBody();
         }
         else if (obj->ob_type == &RigidBodyType)
         {
@@ -211,17 +208,17 @@ namespace ige::scene
         if (object == nullptr)
             return PyTuple_New(0);
 
-        auto results = self->component->contactTest(object, group, mask);
+        auto results = std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->contactTest(object, group, mask);
         PyObject *pyResults = PyTuple_New(results.size());
         for (int i = 0; i < results.size(); ++i)
         {
             const auto &result = results[i];
 
-            auto objectA = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            objectA->sceneObject = reinterpret_cast<PhysicObject *>(result.objectA->getUserPointer())->getOwner();
+            auto objectA = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            objectA->sceneObject = reinterpret_cast<PhysicObject *>(result.objectA->getUserPointer())->getOwner()->getSharedPtr();
 
-            auto objectB = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            objectB->sceneObject = reinterpret_cast<PhysicObject *>(result.objectB->getUserPointer())->getOwner();
+            auto objectB = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            objectB->sceneObject = reinterpret_cast<PhysicObject *>(result.objectB->getUserPointer())->getOwner()->getSharedPtr();
 
             auto localPosA = PyObject_New(vec_obj, _Vec3Type);
             vmath_cpy(PhysicHelper::from_btVector3(result.localPosA).P(), 3, localPosA->v);
@@ -260,7 +257,7 @@ namespace ige::scene
     // Contact pair test
     PyObject *PhysicManager_contactPairTest(PyObject_PhysicManager *self, PyObject *args)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         PyObject *objA;
         PyObject *objB;
         int group = 1;
@@ -278,7 +275,7 @@ namespace ige::scene
         if (objA->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)objA;
-            auto physicComp = sceneObj->sceneObject->getComponent<PhysicObject>();
+            auto physicComp = sceneObj->sceneObject.lock()->getComponent<PhysicObject>();
             if (physicComp && physicComp->getBody())
             {
                 objectA = physicComp->getBody();
@@ -287,8 +284,7 @@ namespace ige::scene
         else if (objA->ob_type == &PyTypeObject_PhysicObject)
         {
             auto physicObjectObj = (PyObject_PhysicObject*)objA;
-            if (physicObjectObj->component->getBody())
-                objectA = physicObjectObj->component->getBody();
+            objectA = std::dynamic_pointer_cast<PhysicObject>(physicObjectObj->component.lock())->getBody();
         }
         else if (objA->ob_type == &RigidBodyType)
         {
@@ -300,7 +296,7 @@ namespace ige::scene
         if (objB->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)objB;
-            auto physicComp = sceneObj->sceneObject->getComponent<PhysicObject>();
+            auto physicComp = sceneObj->sceneObject.lock()->getComponent<PhysicObject>();
             if (physicComp && physicComp->getBody())
             {
                 objectB = physicComp->getBody();
@@ -309,8 +305,7 @@ namespace ige::scene
         else if (objB->ob_type == &PyTypeObject_PhysicObject)
         {
             auto physicObjectObj = (PyObject_PhysicObject*)objB;
-            if (physicObjectObj->component->getBody())
-                objectB = physicObjectObj->component->getBody();
+            objectB = std::dynamic_pointer_cast<PhysicObject>(physicObjectObj->component.lock())->getBody();            
         }
         else if (objB->ob_type == &RigidBodyType)
         {
@@ -322,18 +317,18 @@ namespace ige::scene
         if (objectA == nullptr || objectB == nullptr)
             return PyTuple_New(0);
 
-        auto results = self->component->contactPairTest(objectA, objectB, group, mask);
+        auto results = std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->contactPairTest(objectA, objectB, group, mask);
 
         PyObject *pyResults = PyTuple_New(results.size());
         for (int i = 0; i < results.size(); ++i)
         {
             const auto &result = results[i];
 
-            auto objectA = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            objectA->sceneObject = reinterpret_cast<PhysicObject *>(result.objectA->getUserPointer())->getOwner();
+            auto objectA = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            objectA->sceneObject = reinterpret_cast<PhysicObject *>(result.objectA->getUserPointer())->getOwner()->getSharedPtr();
 
-            auto objectB = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            objectB->sceneObject = reinterpret_cast<PhysicObject *>(result.objectB->getUserPointer())->getOwner();
+            auto objectB = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            objectB->sceneObject = reinterpret_cast<PhysicObject *>(result.objectB->getUserPointer())->getOwner()->getSharedPtr();
 
             auto localPosA = PyObject_New(vec_obj, _Vec3Type);
             vmath_cpy(PhysicHelper::from_btVector3(result.localPosA).P(), 3, localPosA->v);
@@ -372,9 +367,9 @@ namespace ige::scene
     // Get gravity
     PyObject *PhysicManager_getGravity(PyObject_PhysicManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(self->component->getGravity()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->getGravity()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
@@ -382,30 +377,30 @@ namespace ige::scene
     // Set gravity
     int PhysicManager_setGravity(PyObject_PhysicManager *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setGravity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->setGravity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         return 0;
     }
 
     // Get number of iteration
     PyObject *PhysicManager_getNumIteration(PyObject_PhysicManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getNumIteration());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->getNumIteration());
     }
 
     // Set number of iteration
     int PhysicManager_setNumIteration(PyObject_PhysicManager *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setNumIteration(val);
+            std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->setNumIteration(val);
             return 0;
         }
         return -1;
@@ -414,17 +409,17 @@ namespace ige::scene
     // Get frame update ratio (speedup/slower effects)
     PyObject *PhysicManager_getFrameUpdateRatio(PyObject_PhysicManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getFrameUpdateRatio());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->getFrameUpdateRatio());
     }
 
     // Set frame update ratio
     int PhysicManager_setFrameUpdateRatio(PyObject_PhysicManager *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setFrameUpdateRatio(val);
+            std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->setFrameUpdateRatio(val);
             return 0;
         }
         return -1;
@@ -433,17 +428,17 @@ namespace ige::scene
     // Get frame max simulation sub step
     PyObject *PhysicManager_getFrameMaxSubStep(PyObject_PhysicManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getFrameMaxSubStep());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->getFrameMaxSubStep());
     }
 
     // Set frame max simulation sub step
     int PhysicManager_setFrameMaxSubStep(PyObject_PhysicManager *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setFrameMaxSubStep(val);
+            std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->setFrameMaxSubStep(val);
             return 0;
         }
         return -1;
@@ -452,17 +447,17 @@ namespace ige::scene
     // Get fixed time steps
     PyObject *PhysicManager_getFixedTimeStep(PyObject_PhysicManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getFixedTimeStep());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->getFixedTimeStep());
     }
 
     // Set fixed time steps
     int PhysicManager_setFixedTimeStep(PyObject_PhysicManager *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setFixedTimeStep(val);
+            std::dynamic_pointer_cast<PhysicManager>(self->component.lock())->setFixedTimeStep(val);
             return 0;
         }
         return -1;

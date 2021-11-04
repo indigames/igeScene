@@ -10,11 +10,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_PhysicBox
-    {
-        PyObject_PhysicObject super;
-        PhysicBox *component;
-    };
+    struct PyObject_PhysicBox : PyObject_PhysicObject {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_PhysicBox;

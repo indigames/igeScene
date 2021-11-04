@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_NavAgentManager
-    {
-        PyObject_Component super;
-        NavAgentManager *component;
-    };
+    struct PyObject_NavAgentManager : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_NavAgentManager;

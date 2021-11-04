@@ -14,11 +14,10 @@ namespace ige::scene
 {
     void HingeConstraint_dealloc(PyObject_HingeConstraint *self)
     {
-        if (self && self->constraint)
-        {
+        if (self) {
             self->constraint = nullptr;
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *HingeConstraint_str(PyObject_HingeConstraint *self)

@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void NavArea_dealloc(PyObject_NavArea *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *NavArea_str(PyObject_NavArea *self)
@@ -28,16 +27,16 @@ namespace ige::scene
     // AreaId
     PyObject *NavArea_getAreaId(PyObject_NavArea *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getAreaId());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<NavArea>(self->component.lock())->getAreaId());
     }
 
     int NavArea_setAreaId(PyObject_NavArea *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setAreaId(val);
+            std::dynamic_pointer_cast<NavArea>(self->component.lock())->setAreaId(val);
             return 0;
         }
         return -1;
@@ -46,16 +45,16 @@ namespace ige::scene
     // AreaCost
     PyObject *NavArea_getAreaCost(PyObject_NavArea *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getAreaCost());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavArea>(self->component.lock())->getAreaCost());
     }
 
     int NavArea_setAreaCost(PyObject_NavArea *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setAreaCost(val);
+            std::dynamic_pointer_cast<NavArea>(self->component.lock())->setAreaCost(val);
             return 0;
         }
         return -1;
@@ -64,8 +63,8 @@ namespace ige::scene
     // Bounding box
     PyObject *NavArea_getBoundingBox(PyObject_NavArea *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto aabb = self->component->getBoundingBox();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto aabb = std::dynamic_pointer_cast<NavArea>(self->component.lock())->getBoundingBox();
         auto min = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(aabb.MinEdge.P(), 3, min->v);
         min->d = 3;
@@ -80,9 +79,9 @@ namespace ige::scene
 
     int NavArea_setBoundingBox(PyObject_NavArea *self, PyObject *value)
     {
+        if (self->component.expired()) return -1;
         PyObject *minObj, maxObj;
-
-        if (self->component && PyArg_ParseTuple(value, "OO", &minObj, &maxObj))
+        if (PyArg_ParseTuple(value, "OO", &minObj, &maxObj))
         {
             int d;
             float buff[4];
@@ -92,7 +91,7 @@ namespace ige::scene
             auto max = pyObjToFloat((PyObject *)minObj, buff, d);
             if (!max)
                 return -1;
-            self->component->setBoundingBox({*((Vec3 *)min), *((Vec3 *)max)});
+            std::dynamic_pointer_cast<NavArea>(self->component.lock())->setBoundingBox({*((Vec3 *)min), *((Vec3 *)max)});
             return 0;
         }
         return -1;
@@ -101,8 +100,8 @@ namespace ige::scene
     // World bounding box
     PyObject *NavArea_getWorldBoundingBox(PyObject_NavArea *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto aabb = self->component->getWorldBoundingBox();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto aabb = std::dynamic_pointer_cast<NavArea>(self->component.lock())->getWorldBoundingBox();
         auto min = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(aabb.MinEdge.P(), 3, min->v);
         min->d = 3;

@@ -11,7 +11,7 @@ namespace ige::scene
     struct PyObject_Script
     {
         PyObject_HEAD
-        SceneObject* owner;
+        std::weak_ptr<SceneObject> owner;
     };
 
     // Type declaration

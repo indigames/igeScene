@@ -14,11 +14,10 @@ namespace ige::scene
 {
     void PhysicCapsule_dealloc(PyObject_PhysicCapsule *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *PhysicCapsule_str(PyObject_PhysicCapsule *self)
@@ -29,16 +28,16 @@ namespace ige::scene
     //! size
     PyObject *PhysicCapsule_getRadius(PyObject_PhysicCapsule *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRadius());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicCapsule>(self->component.lock())->getRadius());
     }
 
     int PhysicCapsule_setRadius(PyObject_PhysicCapsule *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRadius(val);
+            std::dynamic_pointer_cast<PhysicCapsule>(self->component.lock())->setRadius(val);
             return 0;
         }
         return -1;
@@ -47,16 +46,16 @@ namespace ige::scene
     //! height
     PyObject *PhysicCapsule_getHeight(PyObject_PhysicCapsule *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getHeight());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicCapsule>(self->component.lock())->getHeight());
     }
 
     int PhysicCapsule_setHeight(PyObject_PhysicCapsule *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setHeight(val);
+            std::dynamic_pointer_cast<PhysicCapsule>(self->component.lock())->setHeight(val);
             return 0;
         }
         return -1;

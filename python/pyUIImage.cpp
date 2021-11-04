@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void UIImage_dealloc(PyObject_UIImage *self)
     {
-        if(self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject* UIImage_str(PyObject_UIImage *self)
@@ -27,17 +26,17 @@ namespace ige::scene
 
     PyObject* UIImage_getFillMethod(PyObject_UIImage* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong((int)self->component->getFillMethod());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong((int)std::dynamic_pointer_cast<UIImage>(self->component.lock())->getFillMethod());
     }
 
     int UIImage_setFillMethod(PyObject_UIImage* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setFillMethod(val);
+            std::dynamic_pointer_cast<UIImage>(self->component.lock())->setFillMethod(val);
             return 0;
         }
         return -1;
@@ -46,18 +45,18 @@ namespace ige::scene
     // Get path
     PyObject* UIImage_getPath(PyObject_UIImage* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<UIImage>(self->component.lock())->getPath().c_str());
     }
 
     // Set path
     int UIImage_setPath(PyObject_UIImage* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* name = PyUnicode_AsUTF8(value);
-            self->component->setPath(std::string(name));
+            std::dynamic_pointer_cast<UIImage>(self->component.lock())->setPath(std::string(name));
             return 0;
         }
         return -1;
@@ -66,9 +65,9 @@ namespace ige::scene
     // Get color
     PyObject* UIImage_getColor(PyObject_UIImage* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<UIImage>(self->component.lock())->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
@@ -76,31 +75,31 @@ namespace ige::scene
     // Set color
     int UIImage_setColor(PyObject_UIImage* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v)
             return -1;
-        self->component->setColor(*((Vec4*)v));
+        std::dynamic_pointer_cast<UIImage>(self->component.lock())->setColor(*((Vec4*)v));
         return 0;
     }
 
     // Get Fill Origin
     PyObject* UIImage_getFillOrigin(PyObject_UIImage* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong((int)self->component->getFillOrigin());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong((int)std::dynamic_pointer_cast<UIImage>(self->component.lock())->getFillOrigin());
     }
 
     // Set Fill Origin
     int UIImage_setFillOrigin(PyObject_UIImage* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setFillOrigin(val);
+            std::dynamic_pointer_cast<UIImage>(self->component.lock())->setFillOrigin(val);
             return 0;
         }
         return -1;
@@ -109,18 +108,18 @@ namespace ige::scene
     // Get Fill Amount
     PyObject* UIImage_getFillAmount(PyObject_UIImage* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getFillAmount());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<UIImage>(self->component.lock())->getFillAmount());
     }
 
     // Set Fill Amount
     int UIImage_setFillAmount(PyObject_UIImage* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyFloat_Check(value))
         {
             auto val = (float)PyFloat_AsDouble(value);
-            self->component->setFillAmount(val);
+            std::dynamic_pointer_cast<UIImage>(self->component.lock())->setFillAmount(val);
             return 0;
         }
         return -1;
@@ -129,18 +128,18 @@ namespace ige::scene
     // Get Fill Clockwise
     PyObject* UIImage_getClockwise(PyObject_UIImage* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->getClockwise());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<UIImage>(self->component.lock())->getClockwise());
     }
 
     // Set Fill Clockwise
     int UIImage_setClockwise(PyObject_UIImage* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setClockwise(val);
+            std::dynamic_pointer_cast<UIImage>(self->component.lock())->setClockwise(val);
             return 0;
         }
         return -1;
@@ -149,18 +148,18 @@ namespace ige::scene
     // Set Interactable
     PyObject* UIImage_getInteractable(PyObject_UIImage* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isInteractable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<UIImage>(self->component.lock())->isInteractable());
     }
 
     // Set Interactable
     int UIImage_setInteractable(PyObject_UIImage* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setInteractable(val);
+            std::dynamic_pointer_cast<UIImage>(self->component.lock())->setInteractable(val);
             return 0;
         }
         return -1;

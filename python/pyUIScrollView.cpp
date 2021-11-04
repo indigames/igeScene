@@ -18,11 +18,10 @@ namespace ige::scene
 {
     void UIScrollView_dealloc(PyObject_UIScrollView *self)
     {
-        if(self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject* UIScrollView_str(PyObject_UIScrollView *self)
@@ -33,19 +32,21 @@ namespace ige::scene
     //Methods
     PyObject* UIScrollView_setContent(PyObject_UIScrollView* self, PyObject* value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             if (obj->ob_type == &PyTypeObject_SceneObject)
             {
                 auto pySceneObject = (PyObject_SceneObject*)(obj);
-                auto id = pySceneObject->sceneObject->getUUID();
-                if (SceneManager::getInstance() != nullptr && SceneManager::getInstance()->getCurrentScene() != nullptr) {
-                    auto sObj = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(id);
-                    if (sObj != nullptr)
-                    {
-                        self->component->setContent(sObj);
-                        Py_RETURN_TRUE;
+                if (!pySceneObject->sceneObject.expired()) {
+                    auto id = pySceneObject->sceneObject.lock()->getUUID();
+                    if (SceneManager::getInstance() != nullptr && SceneManager::getInstance()->getCurrentScene() != nullptr) {
+                        auto sObj = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(id);
+                        if (sObj != nullptr)
+                        {
+                            std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setContent(sObj);
+                            Py_RETURN_TRUE;
+                        }
                     }
                 }
             }
@@ -55,19 +56,21 @@ namespace ige::scene
 
     PyObject* UIScrollView_setViewport(PyObject_UIScrollView* self, PyObject* value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             if (obj->ob_type == &PyTypeObject_SceneObject)
             {
                 auto pySceneObject = (PyObject_SceneObject*)(obj);
-                auto id = pySceneObject->sceneObject->getUUID();
-                if (SceneManager::getInstance() != nullptr && SceneManager::getInstance()->getCurrentScene() != nullptr) {
-                    auto sObj = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(id);
-                    if (sObj != nullptr)
-                    {
-                        self->component->setViewport(sObj);
-                        Py_RETURN_TRUE;
+                if (!pySceneObject->sceneObject.expired()) {
+                    auto id = pySceneObject->sceneObject.lock()->getUUID();
+                    if (SceneManager::getInstance() != nullptr && SceneManager::getInstance()->getCurrentScene() != nullptr) {
+                        auto sObj = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(id);
+                        if (sObj != nullptr)
+                        {
+                            std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setViewport(sObj);
+                            Py_RETURN_TRUE;
+                        }
                     }
                 }
             }
@@ -77,14 +80,14 @@ namespace ige::scene
 
     PyObject* UIScrollView_scrollTo(PyObject_UIScrollView* self, PyObject* value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             int d;
             float buff[4];
             auto v = pyObjToFloat((PyObject*)value, buff, d);
             if (v) {
-                self->component->scrollTo(*((Vec2*)v));
+                std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->scrollTo(*((Vec2*)v));
                 Py_RETURN_TRUE;
             }
         }
@@ -94,17 +97,17 @@ namespace ige::scene
     //Get set
     PyObject* UIScrollView_getEnableHorizontal(PyObject_UIScrollView* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->enableHorizontal());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->enableHorizontal());
     }
 
     int UIScrollView_setEnableHorizontal(PyObject_UIScrollView* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setEnableHorizontal(val);
+            std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setEnableHorizontal(val);
             return 0;
         }
         return -1;
@@ -112,17 +115,17 @@ namespace ige::scene
 
     PyObject* UIScrollView_getEnableVertical(PyObject_UIScrollView* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->enableVertical());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->enableVertical());
     }
 
     int UIScrollView_setEnableVertical(PyObject_UIScrollView* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setEnableVertical(val);
+            std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setEnableVertical(val);
             return 0;
         }
         return -1;
@@ -130,25 +133,24 @@ namespace ige::scene
 
     PyObject* UIScrollView_getHorizontalScrollBar(PyObject_UIScrollView* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto bar = self->component->getHorizontalScrollBar();
-        if (bar)
-        {
-            auto* obj = PyObject_New(PyObject_UIScrollBar, &PyTypeObject_UIScrollBar);
-            obj->component = bar.get();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto bar = std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->getHorizontalScrollBar();
+        if (bar) {
+            auto* obj = (PyObject_UIScrollBar*)(&PyTypeObject_UIScrollBar)->tp_alloc(&PyTypeObject_UIScrollBar, 0);;
+            obj->component = bar;
             return (PyObject*)obj;
         }
         Py_RETURN_NONE;
     }
     int UIScrollView_setHorizontalScrollBar(PyObject_UIScrollView* self, PyObject* value) {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (value != nullptr) {
             if (value->ob_type == &PyTypeObject_UIScrollBar) {
                 auto val = (PyObject_UIScrollBar*)(value);
-                if (val) {
-                    auto owner = val->component->getOwner();
+                if (val && !val->component.expired()) {
+                    auto owner = val->component.lock()->getOwner();
                     auto component = owner->getComponent<UIScrollBar>();
-                    self->component->setHorizontalScrollBar(component);
+                    std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setHorizontalScrollBar(component);
                     component = nullptr;
                     return 0;
                 }
@@ -156,19 +158,18 @@ namespace ige::scene
             return -1;
         }
         else {
-            self->component->setHorizontalScrollBar(nullptr);
+            std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setHorizontalScrollBar(nullptr);
             return 0;
         }
     }
 
     PyObject* UIScrollView_getVerticalScrollBar(PyObject_UIScrollView* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto bar = self->component->getVerticalScrollBar();
-        if (bar)
-        {
-            auto* obj = PyObject_New(PyObject_UIScrollBar, &PyTypeObject_UIScrollBar);
-            obj->component = bar.get();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto bar = std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->getVerticalScrollBar();
+        if (bar) {
+            auto* obj = (PyObject_UIScrollBar*)(&PyTypeObject_UIScrollBar)->tp_alloc(&PyTypeObject_UIScrollBar, 0);;
+            obj->component = bar;
             return (PyObject*)obj;
         }
         Py_RETURN_NONE;
@@ -176,14 +177,14 @@ namespace ige::scene
 
     int UIScrollView_setVerticalScrollBar(PyObject_UIScrollView* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (value != nullptr) {
             if (value->ob_type == &PyTypeObject_UIScrollBar) {
                 auto val = (PyObject_UIScrollBar*)(value);
-                if (val) {
-                    auto owner = val->component->getOwner();
+                if (val &&! val->component.expired()) {
+                    auto owner = val->component.lock()->getOwner();
                     auto component = owner->getComponent<UIScrollBar>();
-                    self->component->setVerticalScrollBar(component);
+                    std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setVerticalScrollBar(component);
                     component = nullptr;
                     return 0;
                 }
@@ -191,24 +192,24 @@ namespace ige::scene
             return -1;
         }
         else {
-            self->component->setHorizontalScrollBar(nullptr);
+            std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setHorizontalScrollBar(nullptr);
             return 0;
         }
     }
 
     PyObject* UIScrollView_getMovementType(PyObject_UIScrollView* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong((int)self->component->getMovementType());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong((int)std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->getMovementType());
     }
 
     int UIScrollView_setMovementType(PyObject_UIScrollView* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setMovementType(val);
+            std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setMovementType(val);
             return 0;
         }
         return -1;
@@ -216,37 +217,37 @@ namespace ige::scene
 
     PyObject* UIScrollView_getElasticExtra(PyObject_UIScrollView* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
-        vmath_cpy(self->component->getElasticExtra().P(), 2, vec2Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->getElasticExtra().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
         return (PyObject*)vec2Obj;
     }
 
     int UIScrollView_setElasticExtra(PyObject_UIScrollView* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v) return -1;
-        self->component->setElasticExtra(*((Vec2*)v));
+        std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setElasticExtra(*((Vec2*)v));
         return 0;
     }
 
     PyObject* UIScrollView_getElasticity(PyObject_UIScrollView* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getElasticity());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->getElasticity());
     }
 
     int UIScrollView_setElasticity(PyObject_UIScrollView* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setElasticity(val);
+            std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setElasticity(val);
             return 0;
         }
         return -1;
@@ -254,17 +255,17 @@ namespace ige::scene
 
     PyObject* UIScrollView_getIsInertia(PyObject_UIScrollView* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isInertia());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->isInertia());
     }
 
     int UIScrollView_setInertia(PyObject_UIScrollView* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setInertia(val);
+            std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setInertia(val);
             return 0;
         }
         return -1;
@@ -272,17 +273,17 @@ namespace ige::scene
 
     PyObject* UIScrollView_getDecelerationRate(PyObject_UIScrollView* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getDecelerationRate());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->getDecelerationRate());
     }
 
     int UIScrollView_setDecelerationRate(PyObject_UIScrollView* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setDecelerationRate(val);
+            std::dynamic_pointer_cast<UIScrollView>(self->component.lock())->setDecelerationRate(val);
             return 0;
         }
         return -1;

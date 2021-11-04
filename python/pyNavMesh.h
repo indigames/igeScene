@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_NavMesh
-    {
-        PyObject_Component super;
-        NavMesh *component;
-    };
+    struct PyObject_NavMesh : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_NavMesh;

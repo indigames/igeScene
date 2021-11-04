@@ -6,11 +6,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_AudioManager
-    {
-        PyObject_Component super;
-        AudioManager *component;
-    };
+    struct PyObject_AudioManager : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_AudioManager;

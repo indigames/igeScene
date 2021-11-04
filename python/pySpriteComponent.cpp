@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void SpriteComponent_dealloc(PyObject_SpriteComponent *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *SpriteComponent_str(PyObject_SpriteComponent *self)
@@ -28,18 +27,18 @@ namespace ige::scene
     // Get path
     PyObject *SpriteComponent_getPath(PyObject_SpriteComponent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->getPath().c_str());
     }
 
     // Set path
     int SpriteComponent_setPath(PyObject_SpriteComponent *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* name = PyUnicode_AsUTF8(value);
-            self->component->setPath(std::string(name));
+            std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->setPath(std::string(name));
             return 0;
         }
         return -1;
@@ -48,9 +47,9 @@ namespace ige::scene
     // Get size
     PyObject *SpriteComponent_getSize(PyObject_SpriteComponent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
-        vmath_cpy(self->component->getSize().P(), 2, vec2Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->getSize().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
         return (PyObject *)vec2Obj;
     }
@@ -58,29 +57,29 @@ namespace ige::scene
     // Set size
     int SpriteComponent_setSize(PyObject_SpriteComponent *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setSize(*((Vec2 *)v));
+        std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->setSize(*((Vec2 *)v));
         return 0;
     }
 
     PyObject* SpriteComponent_isBillboard(PyObject_SpriteComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isBillboard());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->isBillboard());
     }
 
     int SpriteComponent_setBillboard(PyObject_SpriteComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto isActive = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setBillboard(isActive);
+            std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->setBillboard(isActive);
             return 0;
         }
         return -1;
@@ -89,9 +88,9 @@ namespace ige::scene
     // Get color
     PyObject* SpriteComponent_getColor(PyObject_SpriteComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
@@ -99,31 +98,31 @@ namespace ige::scene
     // Set color
     int SpriteComponent_setColor(PyObject_SpriteComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v)
             return -1;
-        self->component->setColor(*((Vec4*)v));
+        std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->setColor(*((Vec4*)v));
         return 0;
     }
 
     // Get Fill Method
     PyObject* SpriteComponent_getFillMethod(PyObject_SpriteComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong((int)self->component->getFillMethod());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong((int)std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->getFillMethod());
     }
 
     // Set Fill Method
     int SpriteComponent_setFillMethod(PyObject_SpriteComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setFillMethod(val);
+            std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->setFillMethod(val);
             return 0;
         }
         return -1;
@@ -132,18 +131,18 @@ namespace ige::scene
     // Get Fill Origin
     PyObject* SpriteComponent_getFillOrigin(PyObject_SpriteComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong((int)self->component->getFillOrigin());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong((int)std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->getFillOrigin());
     }
 
     // Set Fill Origin
     int SpriteComponent_setFillOrigin(PyObject_SpriteComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setFillOrigin(val);
+            std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->setFillOrigin(val);
             return 0;
         }
         return -1;
@@ -152,18 +151,18 @@ namespace ige::scene
     // Get Fill Amount
     PyObject* SpriteComponent_getFillAmount(PyObject_SpriteComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getFillAmount());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->getFillAmount());
     }
 
     // Set Fill Amount
     int SpriteComponent_setFillAmount(PyObject_SpriteComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyFloat_Check(value))
         {
             auto val = (float)PyFloat_AsDouble(value);
-            self->component->setFillAmount(val);
+            std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->setFillAmount(val);
             return 0;
         }
         return -1;
@@ -172,18 +171,18 @@ namespace ige::scene
     // Get Fill Clockwise
     PyObject* SpriteComponent_getClockwise(PyObject_SpriteComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->getClockwise());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->getClockwise());
     }
 
     // Set Fill Clockwise
     int SpriteComponent_setClockwise(PyObject_SpriteComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setClockwise(val);
+            std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->setClockwise(val);
             return 0;
         }
         return -1;
@@ -192,11 +191,11 @@ namespace ige::scene
     // Texture
     PyObject* SpriteComponent_getTexture(PyObject_SpriteComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto texture = self->component->getTexture();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto texture = std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->getTexture();
         if (texture) {
             auto texObj = (texture_obj*)(&TextureType)->tp_alloc(&TextureType, 0);
-            texObj->colortexture = self->component->getTexture();
+            texObj->colortexture = std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->getTexture();
             if (texObj->colortexture) texObj->colortexture->IncReference();
             return (PyObject*)texObj;
         }
@@ -205,15 +204,15 @@ namespace ige::scene
 
     int SpriteComponent_setTexture(PyObject_SpriteComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (value) {
             if (value->ob_type == &TextureType) {
                 auto texObj = (texture_obj*)value;
-                self->component->setTexture(texObj->colortexture);
+                std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->setTexture(texObj->colortexture);
                 return 0;
             }
             else if (value->ob_type == &_PyNone_Type) {
-                self->component->setTexture(nullptr);
+                std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->setTexture(nullptr);
                 return 0;
             }
         }
@@ -223,8 +222,8 @@ namespace ige::scene
     // figure
     PyObject* SpriteComponent_getFigure(PyObject_SpriteComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto figure = self->component->getFigure();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto figure = std::dynamic_pointer_cast<SpriteComponent>(self->component.lock())->getFigure();
         if (figure) {
             auto figObj = (editablefigure_obj*)(&EditableFigureType)->tp_alloc(&EditableFigureType, 0);
             figObj->editablefigure = figure;

@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_TextComponent
-    {
-        PyObject_Component super;
-        TextComponent* component;
-    };
+    struct PyObject_TextComponent : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_TextComponent;

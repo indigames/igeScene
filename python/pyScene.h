@@ -9,7 +9,7 @@ namespace ige::scene
     struct PyObject_Scene
     {
         PyObject_HEAD
-        Scene* scene;
+        std::weak_ptr<Scene> scene;
     };
 
     // Type declaration

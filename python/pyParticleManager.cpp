@@ -16,11 +16,10 @@ namespace ige::scene
 {
     void ParticleManager_dealloc(PyObject_ParticleManager *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *ParticleManager_str(PyObject_ParticleManager *self)
@@ -34,10 +33,9 @@ namespace ige::scene
         if (SceneManager::getInstance()->getCurrentScene())
         {
             auto particleManager = SceneManager::getInstance()->getCurrentScene()->getRoot()->getComponent<ParticleManager>();
-            if (particleManager)
-            {
-                auto* self = PyObject_New(PyObject_ParticleManager, &PyTypeObject_ParticleManager);
-                self->component = particleManager.get();
+            if (particleManager) {
+                auto* self = (PyObject_ParticleManager*)(&PyTypeObject_ParticleManager)->tp_alloc(&PyTypeObject_ParticleManager, 0);
+                self->component = particleManager;
                 return (PyObject*)self;
             }
         }
@@ -47,16 +45,16 @@ namespace ige::scene
     //! Culling
     PyObject *ParticleManager_isCullingEnabled(PyObject_ParticleManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isCullingEnabled());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<ParticleManager>(self->component.lock())->isCullingEnabled());
     }
 
     int ParticleManager_setCullingEnabled(PyObject_ParticleManager *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setCullingEnabled(val);
+            std::dynamic_pointer_cast<ParticleManager>(self->component.lock())->setCullingEnabled(val);
             return 0;
         }
 		return -1;
@@ -65,38 +63,38 @@ namespace ige::scene
     //! Culling world size
     PyObject *ParticleManager_getCullingWorldSize(PyObject_ParticleManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getCullingWorldSize().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<ParticleManager>(self->component.lock())->getCullingWorldSize().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int ParticleManager_setCullingWorldSize(PyObject_ParticleManager *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setCullingWorldSize(*((Vec3 *)v));
+        std::dynamic_pointer_cast<ParticleManager>(self->component.lock())->setCullingWorldSize(*((Vec3 *)v));
         return 0;
     }
 
     //! Culling layers number
     PyObject *ParticleManager_getCullingLayerNumber(PyObject_ParticleManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getCullingLayerNumber());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<ParticleManager>(self->component.lock())->getCullingLayerNumber());
     }
 
     int ParticleManager_setCullingLayerNumber(PyObject_ParticleManager *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setCullingLayerNumber(val);
+            std::dynamic_pointer_cast<ParticleManager>(self->component.lock())->setCullingLayerNumber(val);
             return 0;
         }
         return -1;
@@ -105,16 +103,16 @@ namespace ige::scene
     //! Max particles number
     PyObject *ParticleManager_getMaxParticleNumber(PyObject_ParticleManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getMaxParticleNumber());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<ParticleManager>(self->component.lock())->getMaxParticleNumber());
     }
 
     int ParticleManager_setMaxParticleNumber(PyObject_ParticleManager *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setMaxParticleNumber(val);
+            std::dynamic_pointer_cast<ParticleManager>(self->component.lock())->setMaxParticleNumber(val);
             return 0;
         }
         return -1;
@@ -123,16 +121,16 @@ namespace ige::scene
     //! Threads number
     PyObject *ParticleManager_getNumberOfThreads(PyObject_ParticleManager *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getNumberOfThreads());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<ParticleManager>(self->component.lock())->getNumberOfThreads());
     }
 
     int ParticleManager_setNumberOfThreads(PyObject_ParticleManager *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setNumberOfThreads(val);
+            std::dynamic_pointer_cast<ParticleManager>(self->component.lock())->setNumberOfThreads(val);
             return 0;
         }
         return -1;

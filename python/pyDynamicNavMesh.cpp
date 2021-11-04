@@ -9,11 +9,10 @@ namespace ige::scene
 {
     void DynamicNavMesh_dealloc(PyObject_DynamicNavMesh *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *DynamicNavMesh_str(PyObject_DynamicNavMesh *self)
@@ -24,16 +23,16 @@ namespace ige::scene
     //! Max obstacles
     PyObject *DynamicNavMesh_getMaxObstacles(PyObject_DynamicNavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getMaxObstacles());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<DynamicNavMesh>(self->component.lock())->getMaxObstacles());
     }
 
     int DynamicNavMesh_setMaxObstacles(PyObject_DynamicNavMesh *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setMaxObstacles(val);
+            std::dynamic_pointer_cast<DynamicNavMesh>(self->component.lock())->setMaxObstacles(val);
             return 0;
         }
         return -1;
@@ -42,16 +41,16 @@ namespace ige::scene
     //! Max layers
     PyObject *DynamicNavMesh_getMaxLayers(PyObject_DynamicNavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getMaxLayers());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<DynamicNavMesh>(self->component.lock())->getMaxLayers());
     }
 
     int DynamicNavMesh_setMaxLayers(PyObject_DynamicNavMesh *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setMaxLayers(val);
+            std::dynamic_pointer_cast<DynamicNavMesh>(self->component.lock())->setMaxLayers(val);
             return 0;
         }
         return -1;

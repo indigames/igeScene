@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void UITextField_dealloc(PyObject_UITextField *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *UITextField_str(PyObject_UITextField *self)

@@ -8,8 +8,9 @@
 namespace ige::scene
 {
     NavAgentManager::NavAgentManager(SceneObject &owner)
-        : RuntimeComponent(owner), m_navMesh(nullptr)
+        : RuntimeComponent(owner)
     {
+        m_navMesh.reset();
         // Register event listeners
         NavAgent::getCreatedEvent().addListener(std::bind(static_cast<void (NavAgentManager::*)(NavAgent *)>(&NavAgentManager::onCreated), this, std::placeholders::_1));
         NavAgent::getDestroyedEvent().addListener(std::bind(static_cast<void (NavAgentManager::*)(NavAgent *)>(&NavAgentManager::onDestroyed), this, std::placeholders::_1));
@@ -35,13 +36,18 @@ namespace ige::scene
         }
 
         // Release nav mesh
-        m_navMesh = nullptr;
+        m_navMesh.reset();
+
+        // Clear agents
+        m_agents.clear();
     }
 
     //! NavAgent created/destroyed events
     void NavAgentManager::onCreated(NavAgent *agent)
     {
-        m_agents.push_back(agent);
+        //TODO: optimize
+        auto agentPtr = std::dynamic_pointer_cast<NavAgent>(agent->getOwner()->getComponent(agent->getInstanceId()));
+        m_agents.push_back(agentPtr);
         if (agent->isEnabled() && isRunning()) {
             onActivated(agent);
         }
@@ -50,7 +56,7 @@ namespace ige::scene
     void NavAgentManager::onDestroyed(NavAgent *agent)
     {
         auto found = std::find_if(m_agents.begin(), m_agents.end(), [&agent](auto element) {
-            return agent == element;
+            return agent && !element.expired() && agent->getInstanceId() == element.lock()->getInstanceId();
         });
 
         if (found != m_agents.end())
@@ -64,7 +70,7 @@ namespace ige::scene
     {
         initCrowd();
 
-        if (!m_crowd || !agent)
+        if (!m_crowd || !agent || m_navMesh.expired())
             return;
 
         dtCrowdAgentParams params;
@@ -74,9 +80,9 @@ namespace ige::scene
         auto agentId = m_crowd->addAgent(position.P(), &params);
 
         if (agent->getRadius() == 0.f)
-            agent->setRadius(m_navMesh->getAgentRadius());
+            agent->setRadius(m_navMesh.lock()->getAgentRadius());
         if (agent->getHeight() == 0.f)
-            agent->setHeight(m_navMesh->getAgentHeight());
+            agent->setHeight(m_navMesh.lock()->getAgentHeight());
 
         agent->setAgentId(agentId);
         agent->setManager(this);
@@ -103,8 +109,8 @@ namespace ige::scene
         int size = m_agents.size();
         for(int i = size - 1; i >= 0; i--)
         {
-            if (m_agents[i] != nullptr)
-                onDeactivated(m_agents[i]);
+            if (!m_agents[i].expired())
+                onDeactivated(m_agents[i].lock().get());
             else
                 m_agents.erase(m_agents.begin() + i);
         }
@@ -143,7 +149,8 @@ namespace ige::scene
     {
         for (auto& agent : m_agents)
         {
-            onDeactivated(agent);
+            if(!agent.expired())
+                onDeactivated(agent.lock().get());
         }
 
         // Deallocate crowd
@@ -152,7 +159,7 @@ namespace ige::scene
             dtFreeCrowd(m_crowd);
             m_crowd = nullptr;
         }
-        m_navMesh = nullptr;
+        m_navMesh.reset();
         m_bInitialized = false;
     }
 
@@ -161,8 +168,8 @@ namespace ige::scene
     {
         for (auto& agent : m_agents)
         {
-            if(agent && agent->isEnabled())
-                onActivated(agent);
+            if(!agent.expired() && agent.lock()->isEnabled())
+                onActivated(agent.lock().get());
         }
     }
 
@@ -172,33 +179,33 @@ namespace ige::scene
     {
         if (!m_bInitialized)
         {
-            if (!m_navMesh)
+            if (m_navMesh.expired())
             {
                 auto dynNavMesh = getOwner()->getComponent<DynamicNavMesh>();
                 if (dynNavMesh)
                 {
-                    m_navMesh = dynNavMesh.get();
+                    m_navMesh = dynNavMesh;
                 }
                 else
                 {
                     auto navMesh = getOwner()->getComponent<NavMesh>();
-                    m_navMesh = navMesh.get();
+                    m_navMesh = navMesh;
                 }
 
-                if (!m_navMesh)
+                if (m_navMesh.expired())
                     return false;
             }
 
-            if (!m_navMesh->initializeQuery())
+            if (!m_navMesh.lock()->initializeQuery())
                 return false;
 
             // Initialize the crowd
             if (m_maxAgentRadius == 0.f)
-                m_maxAgentRadius = m_navMesh->getAgentRadius();
+                m_maxAgentRadius = m_navMesh.lock()->getAgentRadius();
 
             // Allocate crowd
             m_crowd = dtAllocCrowd();
-            if (!m_crowd->init(m_maxAgents, m_maxAgentRadius, m_navMesh->getNavMesh()))
+            if (!m_crowd->init(m_maxAgents, m_maxAgentRadius, m_navMesh.lock()->getNavMesh()))
             {
                 return false;
             }
@@ -213,28 +220,28 @@ namespace ige::scene
     {
         if (nearestRef)
             *nearestRef = 0;
-        if (!m_crowd || !m_navMesh)
+        if (!m_crowd || m_navMesh.expired())
             return point;
         auto extend = m_crowd->getQueryExtents();
-        return m_navMesh->findNearestPoint(point, Vec3(extend[0], extend[1], extend[2]), m_crowd->getFilter(queryFilterType), nearestRef);
+        return m_navMesh.lock()->findNearestPoint(point, Vec3(extend[0], extend[1], extend[2]), m_crowd->getFilter(queryFilterType), nearestRef);
     }
 
     //! Move along the surface
     Vec3 NavAgentManager::moveAlongSurface(const Vec3 &start, const Vec3 &end, int queryFilterType, int maxVisited)
     {
-        if (!m_crowd || !m_navMesh)
+        if (!m_crowd || m_navMesh.expired())
             return end;
         auto extend = m_crowd->getQueryExtents();
-        return m_navMesh->moveAlongSurface(start, end, Vec3(extend[0], extend[1], extend[2]), maxVisited, m_crowd->getFilter(queryFilterType));
+        return m_navMesh.lock()->moveAlongSurface(start, end, Vec3(extend[0], extend[1], extend[2]), maxVisited, m_crowd->getFilter(queryFilterType));
     }
 
     //! Find a path between points
     void NavAgentManager::findPath(std::vector<Vec3> &dest, const Vec3 &start, const Vec3 &end, int queryFilterType)
     {
-        if (m_crowd && m_navMesh)
+        if (m_crowd && !m_navMesh.expired())
         {
             auto extend = m_crowd->getQueryExtents();
-            m_navMesh->findPath(dest, start, end, Vec3(extend[0], extend[1], extend[2]), m_crowd->getFilter(queryFilterType));
+            m_navMesh.lock()->findPath(dest, start, end, Vec3(extend[0], extend[1], extend[2]), m_crowd->getFilter(queryFilterType));
         }
     }
 
@@ -243,9 +250,9 @@ namespace ige::scene
     {
         if (randomRef)
             *randomRef = 0;
-        if (!m_crowd || !m_navMesh)
+        if (!m_crowd || m_navMesh.expired())
             return {0.f, 0.f, 0.f};
-        return m_navMesh->getRandomPoint(m_crowd->getFilter(queryFilterType), randomRef);
+        return m_navMesh.lock()->getRandomPoint(m_crowd->getFilter(queryFilterType), randomRef);
     }
 
     //! Return a random point on the navigation mesh within a circle
@@ -253,10 +260,10 @@ namespace ige::scene
     {
         if (randomRef)
             *randomRef = 0;
-        if (!m_crowd || !m_navMesh)
+        if (!m_crowd || m_navMesh.expired())
             return center;
         auto extend = m_crowd->getQueryExtents();
-        return m_navMesh->getRandomPointInCircle(center, radius, Vec3(extend[0], extend[1], extend[2]), m_crowd->getFilter(queryFilterType), randomRef);
+        return m_navMesh.lock()->getRandomPointInCircle(center, radius, Vec3(extend[0], extend[1], extend[2]), m_crowd->getFilter(queryFilterType), randomRef);
     }
 
     //! Return distance to wall from a point
@@ -266,10 +273,10 @@ namespace ige::scene
             *hitPos = {0.f, 0.f, 0.f};
         if (hitNormal)
             *hitNormal = {0.f, -1.f, 0.f};
-        if (!m_crowd || !m_navMesh)
+        if (!m_crowd || m_navMesh.expired())
             return radius;
         auto extend = m_crowd->getQueryExtents();
-        return m_navMesh->getDistanceToWall(point, radius, Vec3(extend[0], extend[1], extend[2]), m_crowd->getFilter(queryFilterType), hitPos, hitNormal);
+        return m_navMesh.lock()->getDistanceToWall(point, radius, Vec3(extend[0], extend[1], extend[2]), m_crowd->getFilter(queryFilterType), hitPos, hitNormal);
     }
 
     //! Perform a walkability raycast on the navigation mesh
@@ -277,10 +284,10 @@ namespace ige::scene
     {
         if (hitNormal)
             *hitNormal = {0.f, -1.f, 0.f};
-        if (!m_crowd || !m_navMesh)
+        if (!m_crowd || m_navMesh.expired())
             return end;
         auto extend = m_crowd->getQueryExtents();
-        return m_navMesh->raycast(start, end, Vec3(extend[0], extend[1], extend[2]), m_crowd->getFilter(queryFilterType), hitNormal);
+        return m_navMesh.lock()->raycast(start, end, Vec3(extend[0], extend[1], extend[2]), m_crowd->getFilter(queryFilterType), hitNormal);
     }
 
     //! Number of configured area in the specified query filter type.

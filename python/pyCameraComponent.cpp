@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void CameraComponent_dealloc(PyObject_CameraComponent *self)
     {
-        if(self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject* CameraComponent_str(PyObject_CameraComponent *self)
@@ -28,71 +27,61 @@ namespace ige::scene
     // Get position
     PyObject* CameraComponent_getPosition(PyObject_CameraComponent* self)
     {
-        if (self->component) {
-            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-            vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
-            vec3Obj->d = 3;
-            return (PyObject*)vec3Obj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;        
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getPosition().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;        
     }
 
     // Set position
     int CameraComponent_setPosition(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (self->component) {
-            int d;
-            float buff[4];
-            auto v = pyObjToFloat((PyObject*)value, buff, d);
-            if (!v) return -1;
-            self->component->setPosition(*((Vec3*)v));
-            return 0;
-        }
-        return -1;
+        if (self->component.expired()) return -1;        
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v) return -1;
+        std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setPosition(*((Vec3*)v));
+        return 0;
     }
 
     // Get rotation
     PyObject* CameraComponent_getRotation(PyObject_CameraComponent* self)
     {
-        if (self->component) {
-            auto quatObj = PyObject_New(vec_obj, _QuatType);
-            vmath_cpy(self->component->getRotation().P(), 4, quatObj->v);
-            quatObj->d = 4;
-            return (PyObject*)quatObj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto quatObj = PyObject_New(vec_obj, _QuatType);
+        vmath_cpy(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getRotation().P(), 4, quatObj->v);
+        quatObj->d = 4;
+        return (PyObject*)quatObj;
     }
 
     // Set rotation
     int CameraComponent_setRotation(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (self->component) {
-            int d1;
-            float buff[4];
-            float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
-            if (!v1) return -1;
-            self->component->setRotation(*((Quat*)v1));
-            return 0;
-        }
-        return -1;
+        if (self->component.expired()) return -1;
+        int d1;
+        float buff[4];
+        float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
+        if (!v1) return -1;
+        std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setRotation(*((Quat*)v1));
+        return 0;
     }
 
     // Get aspect ratio
     PyObject* CameraComponent_getAspectRatio(PyObject_CameraComponent* self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getAspectRatio());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getAspectRatio());
     }
 
     // Set aspect ratio
     int CameraComponent_setAspectRatio(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setAspectRatio(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setAspectRatio(val);
             return 0;
         }
         return -1;
@@ -101,19 +90,17 @@ namespace ige::scene
     // Get width based
     PyObject* CameraComponent_getWidthBased(PyObject_CameraComponent* self)
     {
-        if (self->component) {
-            return PyBool_FromLong(self->component->isWidthBase());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->isWidthBase());
     }
 
     // Set width based
     int CameraComponent_setWidthBased(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setWidthBase(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setWidthBase(val);
             return 0;
         }
         return -1;
@@ -122,19 +109,17 @@ namespace ige::scene
     // Get FOV
     PyObject* CameraComponent_getFieldOfView(PyObject_CameraComponent* self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getFieldOfView());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getFieldOfView());
     }
 
     // Set FOV
     int CameraComponent_setFieldOfView(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setFieldOfView(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setFieldOfView(val);
             return 0;
         }
         return -1;
@@ -143,19 +128,17 @@ namespace ige::scene
     // Get Near Plane
     PyObject* CameraComponent_getNearPlane(PyObject_CameraComponent* self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getNearPlane());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getNearPlane());
     }
 
     // Set Near Plane
     int CameraComponent_setNearPlane(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setNearPlane(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setNearPlane(val);
             return 0;
         }
         return -1;
@@ -164,19 +147,17 @@ namespace ige::scene
     // Get Far Plane
     PyObject* CameraComponent_getFarPlane(PyObject_CameraComponent* self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getFarPlane());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getFarPlane());
     }
 
     // Set Far Plane
     int CameraComponent_setFarPlane(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setFarPlane(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setFarPlane(val);
             return 0;
         }
         return -1;
@@ -185,19 +166,17 @@ namespace ige::scene
     // Get Pan
     PyObject* CameraComponent_getPan(PyObject_CameraComponent* self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getPan());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getPan());
     }
 
     // Set Pan
     int CameraComponent_setPan(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) &&self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setPan(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setPan(val);
             return 0;
         }
         return -1;
@@ -206,19 +185,17 @@ namespace ige::scene
     // Get Tilt
     PyObject* CameraComponent_getTilt(PyObject_CameraComponent* self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getTilt());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getTilt());
     }
 
     // Set Tilt
     int CameraComponent_setTilt(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setTilt(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setTilt(val);
             return 0;
         }
         return -1;
@@ -227,17 +204,17 @@ namespace ige::scene
     // Get Roll
     PyObject* CameraComponent_getRoll(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRoll());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getRoll());
     }
 
     // Set Roll
     int CameraComponent_setRoll(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRoll(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setRoll(val);
             return 0;
         }
         return -1;
@@ -246,17 +223,17 @@ namespace ige::scene
     // Get Lock On Target
     PyObject* CameraComponent_getLockOnTarget(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->getLockOn());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getLockOn());
     }
 
     // Set Lock On Target
     int CameraComponent_setLockOnTarget(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->lockOnTarget(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->lockOnTarget(val);
             return 0;
         }
         return -1;
@@ -265,9 +242,9 @@ namespace ige::scene
     // Get Target
     PyObject* CameraComponent_getTarget(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getTarget().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getTarget().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject*)vec3Obj;
     }
@@ -275,9 +252,9 @@ namespace ige::scene
     // Get World Target
     PyObject* CameraComponent_getWorldTarget(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getWorldTarget().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getWorldTarget().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject*)vec3Obj;
     }
@@ -285,29 +262,29 @@ namespace ige::scene
     // Set Target
     int CameraComponent_setTarget(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v) return -1;
-        self->component->setTarget(*((Vec3*)v));
+        std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setTarget(*((Vec3*)v));
         return 0;
     }
 
     // Get Ortho Projection
     PyObject* CameraComponent_getOrthoProjection(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isOrthoProjection());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->isOrthoProjection());
     }
 
     // Set Ortho Projection
     int CameraComponent_setOrthoProjection(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setOrthoProjection(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setOrthoProjection(val);
             return 0;
         }
         return -1;
@@ -316,17 +293,17 @@ namespace ige::scene
     // Get Ortho Width
     PyObject* CameraComponent_getOrthoWidth(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getOrthoWidth());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getOrthoWidth());
     }
 
     // Set Ortho Width
     int CameraComponent_setOrthoWidth(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setOrthoWidth(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setOrthoWidth(val);
             return 0;
         }
         return -1;
@@ -335,17 +312,17 @@ namespace ige::scene
     // Get Ortho Height
     PyObject* CameraComponent_getOrthoHeight(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getOrthoHeight());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getOrthoHeight());
     }
 
     // Set Ortho Height
     int CameraComponent_setOrthoHeight(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setOrthoHeight(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setOrthoHeight(val);
             return 0;
         }
         return -1;
@@ -354,9 +331,9 @@ namespace ige::scene
     // Get Screen Scale
     PyObject* CameraComponent_getScreenScale(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
-        vmath_cpy(self->component->getScreenScale().P(), 2, vec2Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getScreenScale().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
         return (PyObject*)vec2Obj;
     }
@@ -364,21 +341,21 @@ namespace ige::scene
     // Set Screen Scale
     int CameraComponent_setScreenScale(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v) return -1;
-        self->component->setScreenScale(*((Vec2*)v));
+        std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setScreenScale(*((Vec2*)v));
         return 0;
     }
 
     // Get Screen Offset
     PyObject* CameraComponent_getScreenOffset(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
-        vmath_cpy(self->component->getScreenOffset().P(), 2, vec2Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getScreenOffset().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
         return (PyObject*)vec2Obj;
     }
@@ -386,29 +363,29 @@ namespace ige::scene
     // Set Screen Offset
     int CameraComponent_setScreenOffset(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v) return -1;
-        self->component->setScreenOffset(*((Vec2*)v));
+        std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setScreenOffset(*((Vec2*)v));
         return 0;
     }
 
     // Get Screen Radian
     PyObject* CameraComponent_getScreenRadian(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getScreenRadian());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getScreenRadian());
     }
 
     // Set Screen Radian
     int CameraComponent_setScreenRadian(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setScreenRadian(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setScreenRadian(val);
             return 0;
         }
         return -1;
@@ -417,17 +394,17 @@ namespace ige::scene
     // Get Up Axis
     PyObject* CameraComponent_getUpAxis(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getUpAxis());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getUpAxis());
     }
 
     // Set Up Axis
     int CameraComponent_setUpAxis(PyObject_CameraComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setUpAxis(val);
+            std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setUpAxis(val);
             return 0;
         }
         return -1;
@@ -436,11 +413,11 @@ namespace ige::scene
     // Get Projection Matrix
     PyObject* CameraComponent_getProjectionMatrix(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto m4obj = PyObject_New(mat_obj, _Mat44Type);
         if (!m4obj) return NULL;
         Mat4 mat;
-        self->component->getProjectionMatrix(mat);
+        std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getProjectionMatrix(mat);
         vmath_cpy(mat.P(), 16, m4obj->m);
         m4obj->d = 4;
         return (PyObject*)m4obj;
@@ -449,11 +426,11 @@ namespace ige::scene
     // Get View Inverse Matrix
     PyObject* CameraComponent_getViewInverseMatrix(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto m4obj = PyObject_New(mat_obj, _Mat44Type);
         if (!m4obj) return NULL;
         Mat4 mat;
-        self->component->getViewInverseMatrix(mat);
+        std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getViewInverseMatrix(mat);
         vmath_cpy(mat.P(), 16, m4obj->m);
         m4obj->d = 4;
         return (PyObject*)m4obj;
@@ -462,11 +439,11 @@ namespace ige::scene
     // Get Screen Matrix
     PyObject* CameraComponent_getScreenMatrix(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto m4obj = PyObject_New(mat_obj, _Mat44Type);
         if (!m4obj) return NULL;
         Mat4 mat;
-        self->component->getScreenMatrix(mat);
+        std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getScreenMatrix(mat);
         vmath_cpy(mat.P(), 16, m4obj->m);
         m4obj->d = 4;
         return (PyObject*)m4obj;
@@ -475,8 +452,8 @@ namespace ige::scene
     // Get camera
     PyObject* CameraComponent_getCamera(PyObject_CameraComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto camera = self->component->getCamera();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto camera = std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getCamera();
         if (camera) {
             auto camObj = (camera_obj*)(&CameraType)->tp_alloc(&CameraType, 0);
             camObj->camera = camera;

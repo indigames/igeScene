@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void PhysicMesh_dealloc(PyObject_PhysicMesh *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *PhysicMesh_str(PyObject_PhysicMesh *self)
@@ -28,18 +27,17 @@ namespace ige::scene
     //! Path
     PyObject *PhysicMesh_getPath(PyObject_PhysicMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<PhysicMesh>(self->component.lock())->getPath().c_str());
     }
 
     int PhysicMesh_setPath(PyObject_PhysicMesh *self, PyObject *value)
     {
-        if (PyUnicode_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyUnicode_Check(value)) {
             const char* val = PyUnicode_AsUTF8(value);
-            if (val != NULL)
-            {
-                self->component->setPath(std::string(val));
+            if (val != NULL) {
+                std::dynamic_pointer_cast<PhysicMesh>(self->component.lock())->setPath(std::string(val));
                 return 0;
             }
         }
@@ -49,16 +47,16 @@ namespace ige::scene
     //! Convex
     PyObject *PhysicMesh_isConvex(PyObject_PhysicMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isConvex());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicMesh>(self->component.lock())->isConvex());
     }
 
     int PhysicMesh_setConvex(PyObject_PhysicMesh *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setConvex(val);
+            std::dynamic_pointer_cast<PhysicMesh>(self->component.lock())->setConvex(val);
             return 0;
         }
         return -1;

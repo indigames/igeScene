@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_Canvas
-    {
-        PyObject_Component super;
-        Canvas* component;
-    };
+    struct PyObject_Canvas: PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_Canvas;

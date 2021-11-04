@@ -14,11 +14,10 @@ namespace ige::scene
 {
     void SpringConstraint_dealloc(PyObject_SpringConstraint *self)
     {
-        if (self && self->constraint)
-        {
+        if (self) {
             self->constraint = nullptr;
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *SpringConstraint_str(PyObject_SpringConstraint *self)

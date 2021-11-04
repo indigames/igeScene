@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_PointLight
-    {
-        PyObject_Component super;
-        PointLight *component;
-    };
+    struct PyObject_PointLight : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_PointLight;

@@ -12,7 +12,7 @@ namespace ige::scene
         PyObject_Script* self = nullptr;
         if (PyArg_ParseTuple(args, "|O", &owner)) {
             self = (PyObject_Script*)type->tp_alloc(type, 0);
-            self->owner = owner ? ((PyObject_SceneObject*)owner)->sceneObject : nullptr;
+            self->owner = owner && !((PyObject_SceneObject*)owner)->sceneObject.expired() ? ((PyObject_SceneObject*)owner)->sceneObject.lock() : nullptr;
         }
         return (PyObject*)self;
     }
@@ -20,31 +20,28 @@ namespace ige::scene
     // Deallocation
     void  Script_dealloc(PyObject_Script *self)
     {
-        if(self)
-        {
-            self->owner = nullptr;
+        if(self && !self->owner.expired()) {
+            self->owner.reset();
         }
         Py_TYPE(self)->tp_free(self);
     }
 
     // Init
-    int Script_init(PyObject_Script* self, PyObject* args, PyObject* kw)
-    {
+    int Script_init(PyObject_Script* self, PyObject* args, PyObject* kw) {
         return 0;
     }
 
     // String representation
-    PyObject* Script_str(PyObject_Script *self)
-    {
+    PyObject* Script_str(PyObject_Script *self) {
         return PyUnicode_FromString("C++ Script object");
     }
 
     // Get get owner
     PyObject* Script_getOwner(PyObject_Script* self)
     {
-        if (!self->owner) Py_RETURN_NONE;
-        auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        obj->sceneObject = self->owner;
+        if (self->owner.expired()) Py_RETURN_NONE;
+        auto *obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+        obj->sceneObject = self->owner.lock();
         return (PyObject*)obj;
     }
 

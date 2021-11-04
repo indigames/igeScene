@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void NavMesh_dealloc(PyObject_NavMesh *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *NavMesh_str(PyObject_NavMesh *self)
@@ -28,16 +27,16 @@ namespace ige::scene
     //! Tile size
     PyObject *NavMesh_getTileSize(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getTileSize());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getTileSize());
     }
 
     int NavMesh_setTileSize(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setTileSize(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setTileSize(val);
             return 0;
         }
         return -1;
@@ -46,16 +45,16 @@ namespace ige::scene
     //! Cell size
     PyObject *NavMesh_getCellSize(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getCellSize());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getCellSize());
     }
 
     int NavMesh_setCellSize(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setCellSize(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setCellSize(val);
             return 0;
         }
         return -1;
@@ -64,16 +63,16 @@ namespace ige::scene
     //! Cell height
     PyObject *NavMesh_getCellHeight(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getCellHeight());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getCellHeight());
     }
 
     int NavMesh_setCellHeight(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setCellHeight(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setCellHeight(val);
             return 0;
         }
         return -1;
@@ -82,16 +81,16 @@ namespace ige::scene
     //! Agent height
     PyObject *NavMesh_getAgentHeight(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getAgentHeight());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getAgentHeight());
     }
 
     int NavMesh_setAgentHeight(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setAgentHeight(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setAgentHeight(val);
             return 0;
         }
         return -1;
@@ -100,16 +99,16 @@ namespace ige::scene
     //! Agent radius
     PyObject *NavMesh_getAgentRadius(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getAgentRadius());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getAgentRadius());
     }
 
     int NavMesh_setAgentRadius(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setAgentRadius(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setAgentRadius(val);
             return 0;
         }
         return -1;
@@ -118,16 +117,16 @@ namespace ige::scene
     //! Agent max vertical climb
     PyObject *NavMesh_getAgentMaxClimb(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getAgentMaxClimb());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getAgentMaxClimb());
     }
 
     int NavMesh_setAgentMaxClimb(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setAgentMaxClimb(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setAgentMaxClimb(val);
             return 0;
         }
         return -1;
@@ -136,16 +135,16 @@ namespace ige::scene
     //! Agent max slope
     PyObject *NavMesh_getAgentMaxSlope(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getAgentMaxSlope());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getAgentMaxSlope());
     }
 
     int NavMesh_setAgentMaxSlope(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setAgentMaxSlope(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setAgentMaxSlope(val);
             return 0;
         }
         return -1;
@@ -154,16 +153,16 @@ namespace ige::scene
     //! Region minimum size
     PyObject *NavMesh_getRegionMinSize(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRegionMinSize());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getRegionMinSize());
     }
 
     int NavMesh_setRegionMinSize(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRegionMinSize(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setRegionMinSize(val);
             return 0;
         }
         return -1;
@@ -172,16 +171,16 @@ namespace ige::scene
     //! Region merge size
     PyObject *NavMesh_getRegionMergeSize(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRegionMergeSize());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getRegionMergeSize());
     }
 
     int NavMesh_setRegionMergeSize(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRegionMergeSize(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setRegionMergeSize(val);
             return 0;
         }
         return -1;
@@ -190,16 +189,16 @@ namespace ige::scene
     //! Edge max length
     PyObject *NavMesh_getEdgeMaxLength(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getEdgeMaxLength());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getEdgeMaxLength());
     }
 
     int NavMesh_setEdgeMaxLength(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setEdgeMaxLength(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setEdgeMaxLength(val);
             return 0;
         }
         return -1;
@@ -208,16 +207,16 @@ namespace ige::scene
     //! Edge max error
     PyObject *NavMesh_getEdgeMaxError(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getEdgeMaxError());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getEdgeMaxError());
     }
 
     int NavMesh_setEdgeMaxError(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setEdgeMaxError(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setEdgeMaxError(val);
             return 0;
         }
         return -1;
@@ -226,16 +225,16 @@ namespace ige::scene
     //! Detail sampling distance
     PyObject *NavMesh_getDetailSampleDistance(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getDetailSampleDistance());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getDetailSampleDistance());
     }
 
     int NavMesh_setDetailSampleDistance(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setDetailSampleDistance(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setDetailSampleDistance(val);
             return 0;
         }
         return -1;
@@ -244,16 +243,16 @@ namespace ige::scene
     //! Detail sampling maximum error
     PyObject *NavMesh_getDetailSampleMaxError(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getDetailSampleMaxError());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getDetailSampleMaxError());
     }
 
     int NavMesh_setDetailSampleMaxError(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setDetailSampleMaxError(val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setDetailSampleMaxError(val);
             return 0;
         }
         return -1;
@@ -262,16 +261,16 @@ namespace ige::scene
     //! Partitioning type
     PyObject *NavMesh_getPartitionType(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong((int)self->component->getPartitionType());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong((int)std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getPartitionType());
     }
 
     int NavMesh_setPartitionType(PyObject_NavMesh *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setPartitionType((NavMesh::EPartitionType)val);
+            std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setPartitionType((NavMesh::EPartitionType)val);
             return 0;
         }
         return -1;
@@ -280,30 +279,30 @@ namespace ige::scene
     //! Bounding box padding
     PyObject *NavMesh_getPadding(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getPadding().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getPadding().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int NavMesh_setPadding(PyObject_NavMesh *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setPadding(*((Vec3 *)v));
+        std::dynamic_pointer_cast<NavMesh>(self->component.lock())->setPadding(*((Vec3 *)v));
         return 0;
     }
 
     //! Build
     PyObject *NavMesh_build(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        if(self->component->build())
+        if (self->component.expired()) Py_RETURN_NONE;
+        if(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->build())
             Py_RETURN_TRUE;
         Py_RETURN_FALSE;
     }
@@ -311,8 +310,8 @@ namespace ige::scene
     //! Get AABB
     PyObject *NavMesh_getAABB(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto aabb = self->component->getBoundingBox();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto aabb = std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getBoundingBox();
         auto aabbMinObj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(aabb.MinEdge.P(), 3, aabbMinObj->v);
         aabbMinObj->d = 3;
@@ -330,8 +329,8 @@ namespace ige::scene
     //! Get world AABB
     PyObject *NavMesh_getWorldAABB(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto aabb = self->component->getWorldBoundingBox();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto aabb = std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getWorldBoundingBox();
         auto aabbMinObj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(aabb.MinEdge.P(), 3, aabbMinObj->v);
         aabbMinObj->d = 3;
@@ -349,9 +348,9 @@ namespace ige::scene
     //! Get number of tiles
     PyObject *NavMesh_getNumTiles(PyObject_NavMesh *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vecObj = PyObject_New(vec_obj, _Vec2Type);
-        vmath_cpy(self->component->getNumTiles().P(), 2, vecObj->v);
+        vmath_cpy(std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getNumTiles().P(), 2, vecObj->v);
         vecObj->d = 2;
         return (PyObject *)vecObj;
     }
@@ -359,14 +358,14 @@ namespace ige::scene
     //! Get tile index
     PyObject *NavMesh_getTileIndex(PyObject_NavMesh *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         auto tileIdx = Vec2(-1.f, -1.f);
         if (v)
         {
-            tileIdx = self->component->getTileIndex(*((Vec3 *)v));
+            tileIdx = std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getTileIndex(*((Vec3 *)v));
         }
         auto vecObj = PyObject_New(vec_obj, _Vec2Type);
         vmath_cpy(tileIdx.P(), 2, vecObj->v);
@@ -377,14 +376,14 @@ namespace ige::scene
     //! Get tile aabb
     PyObject *NavMesh_getTileAABB(PyObject_NavMesh *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         AABBox tileAabb;
         if (v)
         {
-            tileAabb = self->component->getTileBoundingBox(*((Vec2 *)v));
+            tileAabb = std::dynamic_pointer_cast<NavMesh>(self->component.lock())->getTileBoundingBox(*((Vec2 *)v));
         }
         auto aabbMinObj = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(tileAabb.MinEdge.P(), 3, aabbMinObj->v);

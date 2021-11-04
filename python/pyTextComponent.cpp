@@ -12,11 +12,10 @@ namespace ige::scene
 {
     void TextComponent_dealloc(PyObject_TextComponent *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *TextComponent_str(PyObject_TextComponent*self)
@@ -27,18 +26,18 @@ namespace ige::scene
     // Get text
     PyObject* TextComponent_getText(PyObject_TextComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getText().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<TextComponent>(self->component.lock())->getText().c_str());
     }
 
     // Set text
     int TextComponent_setText(PyObject_TextComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
-            self->component->setText(std::string(val));
+            std::dynamic_pointer_cast<TextComponent>(self->component.lock())->setText(std::string(val));
             return 0;
         }
         return -1;
@@ -47,18 +46,18 @@ namespace ige::scene
     // Get font path
     PyObject* TextComponent_getFontPath(PyObject_TextComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getFontPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<TextComponent>(self->component.lock())->getFontPath().c_str());
     }
 
     // Set font path
     int TextComponent_setFontPath(PyObject_TextComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
-            self->component->setFontPath(std::string(val));
+            std::dynamic_pointer_cast<TextComponent>(self->component.lock())->setFontPath(std::string(val));
             return 0;
         }
         return -1;
@@ -67,24 +66,24 @@ namespace ige::scene
     // Get font size
     PyObject* TextComponent_getFontSize(PyObject_TextComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getFontSize());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<TextComponent>(self->component.lock())->getFontSize());
     }
 
     // Set font size
     int TextComponent_setFontSize(PyObject_TextComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
-        self->component->setFontSize(PyLong_AsLong(value));
+        if (self->component.expired()) return -1;
+        std::dynamic_pointer_cast<TextComponent>(self->component.lock())->setFontSize(PyLong_AsLong(value));
         return 0;
     }
 
     // Get color
     PyObject* TextComponent_getColor(PyObject_TextComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<TextComponent>(self->component.lock())->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
@@ -92,29 +91,29 @@ namespace ige::scene
     // Set color
     int TextComponent_setColor(PyObject_TextComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v)
             return -1;
-        self->component->setColor(*((Vec4*)v));
+        std::dynamic_pointer_cast<TextComponent>(self->component.lock())->setColor(*((Vec4*)v));
         return 0;
     }
     
     PyObject* TextComponent_isBillboard(PyObject_TextComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isBillboard());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<TextComponent>(self->component.lock())->isBillboard());
     }
 
     int TextComponent_setBillboard(PyObject_TextComponent* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setBillboard(val);
+            std::dynamic_pointer_cast<TextComponent>(self->component.lock())->setBillboard(val);
             return 0;
         }
         return -1;

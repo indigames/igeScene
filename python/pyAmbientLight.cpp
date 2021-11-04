@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void AmbientLight_dealloc(PyObject_AmbientLight *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) 
+{        self->component.reset();
+        Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *AmbientLight_str(PyObject_AmbientLight *self)
@@ -28,79 +27,67 @@ namespace ige::scene
     // skyColor
     PyObject *AmbientLight_getSkyColor(PyObject_AmbientLight *self)
     {
-        if (self->component) {
-            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-            vmath_cpy(self->component->getSkyColor().P(), 3, vec3Obj->v);
-            vec3Obj->d = 3;
-            return (PyObject*)vec3Obj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(std::dynamic_pointer_cast<AmbientLight>(self->component.lock())->getSkyColor().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
     }
 
     int AmbientLight_setSkyColor(PyObject_AmbientLight *self, PyObject *value)
     {
-        if (self->component) {
-            int d;
-            float buff[4];
-            auto v = pyObjToFloat((PyObject*)value, buff, d);
-            if (!v)
-                return -1;
-            self->component->setSkyColor(*((Vec3*)v));
-            return 0;
-        }
-        return -1;
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v)
+            return -1;
+        std::dynamic_pointer_cast<AmbientLight>(self->component.lock())->setSkyColor(*((Vec3*)v));
+        return 0;
     }
 
     // groundColor
     PyObject *AmbientLight_getGroundColor(PyObject_AmbientLight *self)
     {
-        if (self->component) {
-            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-            vmath_cpy(self->component->getGroundColor().P(), 3, vec3Obj->v);
-            vec3Obj->d = 3;
-            return (PyObject*)vec3Obj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(std::dynamic_pointer_cast<AmbientLight>(self->component.lock())->getGroundColor().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
     }
 
     int AmbientLight_setGroundColor(PyObject_AmbientLight *self, PyObject *value)
     {
-        if (self->component) {
-            int d;
-            float buff[4];
-            auto v = pyObjToFloat((PyObject*)value, buff, d);
-            if (!v)
-                return -1;
-            self->component->setGroundColor(*((Vec3*)v));
-            return 0;
-        }
-        return -1;
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v)
+            return -1;
+        std::dynamic_pointer_cast<AmbientLight>(self->component.lock())->setGroundColor(*((Vec3*)v));
+        return 0;
     }
 
     // direction
     PyObject *AmbientLight_getDirection(PyObject_AmbientLight *self)
     {
-        if (self->component) {
-            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-            vmath_cpy(self->component->getDirection().P(), 3, vec3Obj->v);
-            vec3Obj->d = 3;
-            return (PyObject*)vec3Obj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(std::dynamic_pointer_cast<AmbientLight>(self->component.lock())->getDirection().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
     }
 
     int AmbientLight_setDirection(PyObject_AmbientLight *self, PyObject *value)
     {
-        if (self->component) {
-            int d;
-            float buff[4];
-            auto v = pyObjToFloat((PyObject*)value, buff, d);
-            if (!v)
-                return -1;
-            self->component->setDirection(*((Vec3*)v));
-            return 0;
-        }
-        return -1;
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v)
+            return -1;
+        std::dynamic_pointer_cast<AmbientLight>(self->component.lock())->setDirection(*((Vec3*)v));
+        return 0;
     }
 
     PyGetSetDef AmbientLight_getsets[] = {

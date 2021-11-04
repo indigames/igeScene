@@ -58,8 +58,8 @@ namespace ige::scene
         virtual void onRuntimeLateUpdate(float dt) override;
 
         //! NavMesh for which the crowd was created.
-        NavMesh *getNavMesh() const { return m_navMesh; }
-        void setNavMesh(NavMesh *navMesh) { m_navMesh = navMesh; }
+        std::shared_ptr<NavMesh> getNavMesh() const { return (m_navMesh.expired() ? nullptr : m_navMesh.lock()); }
+        void setNavMesh(std::shared_ptr<NavMesh> navMesh) { m_navMesh = navMesh; }
 
         //! The maximum number of agents the crowd can manage.
         uint32_t getMaxAgentNumber() const { return m_maxAgents; }
@@ -106,7 +106,7 @@ namespace ige::scene
         void setObstacleAvoidanceParams(uint32_t obstacleAvoidanceType, const ObstacleParams& params);
 
         //! Agents
-        const std::vector<NavAgent *> &getAgents() const { return m_agents; }
+        const std::vector<std::weak_ptr<NavAgent>> &getAgents() const { return m_agents; }
 
         //! Find the nearest point on the navigation mesh to a given point using the crowd initialized query extent and the specified query filter type.
         Vec3 findNearestPoint(const Vec3 &point, int queryFilterType, dtPolyRef *nearestRef = nullptr);
@@ -167,10 +167,10 @@ namespace ige::scene
 
     protected:
         //! Agents
-        std::vector<NavAgent *> m_agents;
+        std::vector<std::weak_ptr<NavAgent>> m_agents;
 
         //! NavMesh for which the crowd was created.
-        NavMesh *m_navMesh = nullptr;
+        std::weak_ptr<NavMesh> m_navMesh;
 
         //! The maximum number of agents the crowd can manage.
         uint32_t m_maxAgents = 512;

@@ -39,6 +39,9 @@ namespace ige::scene
         //! Clear
         void clear();
 
+        //! Get uuid
+        const std::string& getUUID() const { return m_uuid; }
+
         //! Get name
         const std::string& getName() const { return m_name; }
 
@@ -108,10 +111,10 @@ namespace ige::scene
         std::vector<std::shared_ptr<SceneObject>>& getObjects() { return m_objects; };
 
         //! Set active camera component
-        void setActiveCamera(CameraComponent* camera);
+        void setActiveCamera(std::shared_ptr<CameraComponent> camera);
 
         //! Get active camera
-        CameraComponent* getActiveCamera() { return m_activeCamera; }
+        std::shared_ptr<CameraComponent> getActiveCamera() { return m_activeCamera.expired() ? nullptr : m_activeCamera.lock(); }
 
         //! Return the cached path
         const std::string& getPath() const { return m_path; }
@@ -210,6 +213,9 @@ namespace ige::scene
         //Finger
         Vec2 getScreenPos(const Vec2& pos);
 
+        //! Get shared pointer
+        std::shared_ptr<Scene> getSharedPtr();
+
     protected:
         //! Create root Objects
         virtual std::shared_ptr<SceneObject> createRootObject(const std::string& name = "");
@@ -257,7 +263,7 @@ namespace ige::scene
         Event<Scene*> m_serializeFinishedEvent;
 
         //! Cache active camera
-        CameraComponent* m_activeCamera = nullptr;
+        std::weak_ptr<CameraComponent> m_activeCamera;
 
         //! Cache active camera
         Camera* m_camera = nullptr;
@@ -270,6 +276,9 @@ namespace ige::scene
 
         //! Object ID counter, reserver 0 for multiple object
         uint64_t m_nextObjectID = 1;
+
+        //! Scene uuid
+        std::string m_uuid;
 
         //! Scene name
         std::string m_name;

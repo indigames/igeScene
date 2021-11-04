@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_SpriteComponent
-    {
-        PyObject_Component super;
-        SpriteComponent* component;
-    };
+    struct PyObject_SpriteComponent : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_SpriteComponent;

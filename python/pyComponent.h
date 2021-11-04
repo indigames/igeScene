@@ -9,7 +9,7 @@ namespace ige::scene
     struct PyObject_Component
     {
         PyObject_HEAD
-        Component* component;
+        std::weak_ptr<Component> component;
     };
 
     // Type declaration

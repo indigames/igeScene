@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_CameraComponent
-    {
-		PyObject_Component super;
-		CameraComponent* component;
-	};
+    struct PyObject_CameraComponent : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_CameraComponent;

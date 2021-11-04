@@ -10,11 +10,10 @@ namespace ige::scene
     // Deallocation
     void  SceneManager_dealloc(PyObject_SceneManager *self)
     {
-        if(self)
-        {
+        if(self) {
             self->sceneManager = nullptr;
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     // String representation
@@ -26,7 +25,7 @@ namespace ige::scene
     // Get singleton instance
     PyObject* SceneManager_getInstance()
     {
-        auto* self = PyObject_New(PyObject_SceneManager, &PyTypeObject_SceneManager);
+        auto* self = (PyObject_SceneManager*)(&PyTypeObject_SceneManager)->tp_alloc(&PyTypeObject_SceneManager, 0);
         self->sceneManager = SceneManager::getInstance().get();
         return (PyObject*)self;
     }
@@ -38,9 +37,9 @@ namespace ige::scene
         char* name;
         if (PyArg_ParseTuple(value, "s", &name)) {
             if(name) {
-                auto scene = self->sceneManager->createScene(std::string(name));
-                auto *obj = PyObject_New(PyObject_Scene, &PyTypeObject_Scene);
-                obj->scene = scene.get();
+                auto scene = self->sceneManager->createScene(std::string((const char*)name));
+                auto *obj = (PyObject_Scene*)(&PyTypeObject_Scene)->tp_alloc(&PyTypeObject_Scene, 0);
+                obj->scene = scene;
                 return (PyObject*)obj;
             }
         }
@@ -57,8 +56,8 @@ namespace ige::scene
                 auto scene = self->sceneManager->createScene();
                 auto success = self->sceneManager->loadScene(scene, std::string(path));
                 if (success) {
-                    auto* obj = PyObject_New(PyObject_Scene, &PyTypeObject_Scene);
-                    obj->scene = scene.get();
+                    auto* obj = (PyObject_Scene*)(&PyTypeObject_Scene)->tp_alloc(&PyTypeObject_Scene, 0);
+                    obj->scene = scene;
                     return (PyObject*)obj;
                 }
             }
@@ -84,8 +83,10 @@ namespace ige::scene
                 else if(obj->ob_type == &PyTypeObject_Scene)
                 {
                     auto sceneObj = (PyObject_Scene*)obj;
-                    self->sceneManager->unloadScene(sceneObj->scene->getName());
-                    Py_RETURN_TRUE;
+                    if (!sceneObj->scene.expired()) {
+                        self->sceneManager->unloadScene(sceneObj->scene.lock()->getName());
+                        Py_RETURN_TRUE;
+                    }
                 }
             }
         }
@@ -99,7 +100,7 @@ namespace ige::scene
         char* path;
         if (PyArg_ParseTuple(value, "s", &path)) {
             if(path) {
-                auto *obj = PyObject_New(PyObject_Scene, &PyTypeObject_Scene);
+                auto *obj = (PyObject_Scene*)(&PyTypeObject_Scene)->tp_alloc(&PyTypeObject_Scene, 0);
                 self->sceneManager->saveScene(std::string(path));
                 Py_RETURN_TRUE;
             }
@@ -111,8 +112,8 @@ namespace ige::scene
     PyObject* SceneManager_getCurrentScene(PyObject_SceneManager* self)
     {
         if (!self->sceneManager) Py_RETURN_NONE;
-        auto *obj = PyObject_New(PyObject_Scene, &PyTypeObject_Scene);
-        obj->scene = self->sceneManager->getCurrentScene().get();
+        auto *obj = (PyObject_Scene*)(&PyTypeObject_Scene)->tp_alloc(&PyTypeObject_Scene, 0);
+        obj->scene = self->sceneManager->getCurrentScene();
         return (PyObject*)obj;
     }
 
@@ -122,8 +123,10 @@ namespace ige::scene
         if (!self->sceneManager) return -1;
         if (value && value->ob_type == &PyTypeObject_Scene) {
             auto sceneObj = (PyObject_Scene*)value;
-            self->sceneManager->setCurrentScene(sceneObj->scene->getName());
-            return 0;
+            if (!sceneObj->scene.expired()) {
+                self->sceneManager->setCurrentScene(sceneObj->scene.lock()->getName());
+                return 0;
+            }
         }
         return -1;
     }

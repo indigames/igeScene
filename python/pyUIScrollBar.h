@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_UIScrollBar
-    {
-        PyObject_UIImage super;
-        UIScrollBar* component;
-    };
+    struct PyObject_UIScrollBar : PyObject_UIImage {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_UIScrollBar;

@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_ParticleManager
-    {
-        PyObject_Component super;
-        ParticleManager *component;
-    };
+    struct PyObject_ParticleManager : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_ParticleManager;

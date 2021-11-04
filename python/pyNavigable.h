@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_Navigable
-    {
-        PyObject_Component super;
-        Navigable *component;
-    };
+    struct PyObject_Navigable : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_Navigable;

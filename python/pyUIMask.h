@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_UIMask
-    {
-        PyObject_UIImage super;
-        UIMask* component;
-    };
+    struct PyObject_UIMask : PyObject_UIImage {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_UIMask;

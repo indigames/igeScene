@@ -202,7 +202,7 @@ namespace ige::scene
 
         if (getOwner()->isActive())
         {
-            getOwner()->getScene()->setActiveCamera(this);
+            getOwner()->getScene()->setActiveCamera(std::dynamic_pointer_cast<CameraComponent>(getOwner()->getComponent(getInstanceId())));
         }
 
         if (getCamera()) getCamera()->SetResourceName(m_name.c_str());

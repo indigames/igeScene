@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_AudioListener
-    {
-        PyObject_Component super;
-        AudioListener *component;
-    };
+    struct PyObject_AudioListener : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_AudioListener;

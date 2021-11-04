@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_EnvironmentComponent
-    {
-        PyObject_Component super;
-        EnvironmentComponent* component;
-    };
+    struct PyObject_EnvironmentComponent : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_EnvironmentComponent;

@@ -8,11 +8,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_PhysicManager
-    {
-        PyObject_Component super;
-        PhysicManager *component;
-    };
+    struct PyObject_PhysicManager : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_PhysicManager;

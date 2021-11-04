@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void DirectionalLight_dealloc(PyObject_DirectionalLight *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *DirectionalLight_str(PyObject_DirectionalLight *self)
@@ -28,38 +27,38 @@ namespace ige::scene
     // Color
     PyObject *DirectionalLight_getColor(PyObject_DirectionalLight *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getColor().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<DirectionalLight>(self->component.lock())->getColor().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int DirectionalLight_setColor(PyObject_DirectionalLight *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setColor(*((Vec3 *)v));
+        std::dynamic_pointer_cast<DirectionalLight>(self->component.lock())->setColor(*((Vec3 *)v));
         return 0;
     }
 
     //! Intensity
     PyObject *DirectionalLight_getIntensity(PyObject_DirectionalLight *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getIntensity());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<DirectionalLight>(self->component.lock())->getIntensity());
     }
 
     int DirectionalLight_setIntensity(PyObject_DirectionalLight *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setIntensity(val);
+            std::dynamic_pointer_cast<DirectionalLight>(self->component.lock())->setIntensity(val);
             return 0;
         }
         return -1;
@@ -68,9 +67,9 @@ namespace ige::scene
     // Direction
     PyObject *DirectionalLight_getDirection(PyObject_DirectionalLight *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getDirection().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<DirectionalLight>(self->component.lock())->getDirection().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }

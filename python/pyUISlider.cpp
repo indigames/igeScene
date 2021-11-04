@@ -17,11 +17,10 @@ namespace ige::scene
 {
     void UISlider_dealloc(PyObject_UISlider *self)
     {
-        if(self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject* UISlider_str(PyObject_UISlider*self)
@@ -33,19 +32,21 @@ namespace ige::scene
     //Methods
     PyObject* UISlider_setFillObject(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             if (obj->ob_type == &PyTypeObject_SceneObject)
             {
                 auto pySceneObject = (PyObject_SceneObject*)(obj);
-                auto id = pySceneObject->sceneObject->getUUID();
-                if (SceneManager::getInstance() != nullptr && SceneManager::getInstance()->getCurrentScene() != nullptr) {
-                    auto sObj = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(id);
-                    if (sObj != nullptr)
-                    {
-                        self->component->setFillObject(sObj);
-                        Py_RETURN_TRUE;
+                if (!pySceneObject->sceneObject.expired()) {
+                    auto id = pySceneObject->sceneObject.lock()->getUUID();
+                    if (SceneManager::getInstance() != nullptr && SceneManager::getInstance()->getCurrentScene() != nullptr) {
+                        auto sObj = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(id);
+                        if (sObj != nullptr)
+                        {
+                            std::dynamic_pointer_cast<UISlider>(self->component.lock())->setFillObject(sObj);
+                            Py_RETURN_TRUE;
+                        }
                     }
                 }
             }
@@ -55,19 +56,21 @@ namespace ige::scene
 
     PyObject* UISlider_setHandleObject(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         PyObject* obj;
         if (PyArg_ParseTuple(value, "O", &obj)) {
             if (obj->ob_type == &PyTypeObject_SceneObject)
             {
                 auto pySceneObject = (PyObject_SceneObject*)(obj);
-                auto id = pySceneObject->sceneObject->getUUID();
-                if (SceneManager::getInstance() != nullptr && SceneManager::getInstance()->getCurrentScene() != nullptr) {
-                    auto sObj = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(id);
-                    if (sObj != nullptr)
-                    {
-                        self->component->setHandleObject(sObj);
-                        Py_RETURN_TRUE;
+                if (!pySceneObject->sceneObject.expired()) {
+                    auto id = pySceneObject->sceneObject.lock()->getUUID();
+                    if (SceneManager::getInstance() != nullptr && SceneManager::getInstance()->getCurrentScene() != nullptr) {
+                        auto sObj = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(id);
+                        if (sObj != nullptr)
+                        {
+                            std::dynamic_pointer_cast<UISlider>(self->component.lock())->setHandleObject(sObj);
+                            Py_RETURN_TRUE;
+                        }
                     }
                 }
             }
@@ -78,17 +81,17 @@ namespace ige::scene
     //Get set
     PyObject* UISlider_getMin(PyObject_UISlider* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getMin());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<UISlider>(self->component.lock())->getMin());
     }
 
     int UISlider_setMin(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setMin(val);
+            std::dynamic_pointer_cast<UISlider>(self->component.lock())->setMin(val);
             return 0;
         }
         return -1;
@@ -96,17 +99,17 @@ namespace ige::scene
 
     PyObject* UISlider_getMax(PyObject_UISlider* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getMax());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<UISlider>(self->component.lock())->getMax());
     }
 
     int UISlider_setMax(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setMax(val);
+            std::dynamic_pointer_cast<UISlider>(self->component.lock())->setMax(val);
             return 0;
         }
         return -1;
@@ -114,17 +117,17 @@ namespace ige::scene
 
     PyObject* UISlider_getValue(PyObject_UISlider* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getValue());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<UISlider>(self->component.lock())->getValue());
     }
 
     int UISlider_setValue(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setValue(val);
+            std::dynamic_pointer_cast<UISlider>(self->component.lock())->setValue(val);
             return 0;
         }
         return -1;
@@ -132,17 +135,17 @@ namespace ige::scene
 
     PyObject* UISlider_getWholeNumbers(PyObject_UISlider* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->getWholeNumbers());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<UISlider>(self->component.lock())->getWholeNumbers());
     }
 
     int UISlider_setWholeNumbers(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setWholeNumbers(val);
+            std::dynamic_pointer_cast<UISlider>(self->component.lock())->setWholeNumbers(val);
             return 0;
         }
         return -1;
@@ -151,9 +154,9 @@ namespace ige::scene
     // Get color
     PyObject* UISlider_getColor(PyObject_UISlider* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<UISlider>(self->component.lock())->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
@@ -161,22 +164,22 @@ namespace ige::scene
     // Set color
     int UISlider_setColor(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v)
             return -1;
-        self->component->setColor(*((Vec4*)v));
+        std::dynamic_pointer_cast<UISlider>(self->component.lock())->setColor(*((Vec4*)v));
         return 0;
     }
 
     // Get Press color
     PyObject* UISlider_getPressColor(PyObject_UISlider* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getPressedColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<UISlider>(self->component.lock())->getPressedColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
@@ -184,22 +187,22 @@ namespace ige::scene
     // Set Press color
     int UISlider_setPressColor(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v)
             return -1;
-        self->component->setPressedColor(*((Vec4*)v));
+        std::dynamic_pointer_cast<UISlider>(self->component.lock())->setPressedColor(*((Vec4*)v));
         return 0;
     }
 
     // Get Disable color
     PyObject* UISlider_getDisableColor(PyObject_UISlider* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getDisabledColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<UISlider>(self->component.lock())->getDisabledColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
@@ -207,31 +210,31 @@ namespace ige::scene
     // Set Disable color
     int UISlider_setDisableColor(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v)
             return -1;
-        self->component->setDisabledColor(*((Vec4*)v));
+        std::dynamic_pointer_cast<UISlider>(self->component.lock())->setDisabledColor(*((Vec4*)v));
         return 0;
     }
 
     // Get Interactable
     PyObject* UISlider_getInteractable(PyObject_UISlider* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isInteractable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<UISlider>(self->component.lock())->isInteractable());
     }
 
     // Set Interactable
     int UISlider_setInteractable(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setInteractable(val);
+            std::dynamic_pointer_cast<UISlider>(self->component.lock())->setInteractable(val);
             return 0;
         }
         return -1;
@@ -240,18 +243,18 @@ namespace ige::scene
     // Get Direction
     PyObject* UISlider_getDirection(PyObject_UISlider* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong((int)self->component->getDirection());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong((int)std::dynamic_pointer_cast<UISlider>(self->component.lock())->getDirection());
     }
 
     // Set Direction
     int UISlider_setDirection(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setDirection(val);
+            std::dynamic_pointer_cast<UISlider>(self->component.lock())->setDirection(val);
             return 0;
         }
         return -1;
@@ -260,18 +263,18 @@ namespace ige::scene
     // Set Fade Duration
     PyObject* UISlider_getFadeDuration(PyObject_UISlider* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getFadeDuration());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<UISlider>(self->component.lock())->getFadeDuration());
     }
 
     // Get Fade Duration
     int UISlider_setFadeDuration(PyObject_UISlider* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setFadeDuration(val);
+            std::dynamic_pointer_cast<UISlider>(self->component.lock())->setFadeDuration(val);
             return 0;
         }
         return -1;

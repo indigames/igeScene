@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void FigureComponent_dealloc(PyObject_FigureComponent *self)
     {
-        if(self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject* FigureComponent_str(PyObject_FigureComponent *self)
@@ -28,17 +27,17 @@ namespace ige::scene
     // Get path
     PyObject* FigureComponent_getPath(PyObject_FigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->getPath().c_str());
     }
 
     // Set path
     int FigureComponent_setPath(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyUnicode_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyUnicode_Check(value)) {
             const char* val = PyUnicode_AsUTF8(value);
-            self->component->setPath(std::string(val));
+            std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->setPath(std::string(val));
             return 0;
         }
         return -1;
@@ -47,14 +46,15 @@ namespace ige::scene
     // Set figure
     int FigureComponent_setFigure(PyObject_FigureComponent* self, PyObject* value)
     {
-        if(value && self->component) {
+        if (self->component.expired()) return -1;
+        if(value) {
             if (value->ob_type == &FigureType) {
                 auto figObj = (figure_obj*)value;
-                self->component->setFigure(figObj->figure);
+                std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->setFigure(figObj->figure);
                 return 0;
             }
             else if (value->ob_type == &_PyNone_Type) {
-                self->component->setFigure(nullptr);
+                std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->setFigure(nullptr);
                 return 0;
             }
         }
@@ -64,11 +64,11 @@ namespace ige::scene
     // Get figure
     PyObject* FigureComponent_getFigure(PyObject_FigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto figure = self->component->getFigure();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto figure = std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->getFigure();
         if (figure) {
             auto figureObj = (figure_obj*)(&FigureType)->tp_alloc(&FigureType, 0);
-            figureObj->figure = self->component->getFigure();
+            figureObj->figure = std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->getFigure();
             figureObj->figure->IncReference();
             return (PyObject*)figureObj;
         }
@@ -78,16 +78,16 @@ namespace ige::scene
     // Fog
     PyObject* FigureComponent_isFogEnabled(PyObject_FigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isFogEnabled());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->isFogEnabled());
     }
 
     int FigureComponent_setFogEnabled(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setFogEnabled(enable);
+            std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->setFogEnabled(enable);
             return 0;
         }
         return -1;
@@ -96,16 +96,16 @@ namespace ige::scene
     // Front face culling
     PyObject* FigureComponent_isCullFaceEnable(PyObject_FigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isCullFaceEnable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->isCullFaceEnable());
     }
 
     int FigureComponent_setCullFaceEnable(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setCullFaceEnable(enable);
+            std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->setCullFaceEnable(enable);
             return 0;
         }
         return -1;
@@ -114,16 +114,16 @@ namespace ige::scene
     // Double Side
     PyObject* FigureComponent_isDoubleSideEnable(PyObject_FigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isDoubleSideEnable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->isDoubleSideEnable());
     }
 
     int FigureComponent_setDoubleSideEnable(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setDoubleSideEnable(enable);
+            std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->setDoubleSideEnable(enable);
             return 0;
         }
         return -1;
@@ -132,16 +132,16 @@ namespace ige::scene
     // Depth test
     PyObject* FigureComponent_isDepthTestEnable(PyObject_FigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isDepthTestEnable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->isDepthTestEnable());
     }
 
     int FigureComponent_setDepthTestEnable(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setDepthTestEnable(enable);
+            std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->setDepthTestEnable(enable);
             return 0;
         }
         return -1;
@@ -150,16 +150,16 @@ namespace ige::scene
     // Depth write
     PyObject* FigureComponent_isDepthWriteEnable(PyObject_FigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isDepthWriteEnable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->isDepthWriteEnable());
     }
 
     int FigureComponent_setDepthWriteEnable(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setDepthWriteEnable(enable);
+            std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->setDepthWriteEnable(enable);
             return 0;
         }
         return -1;
@@ -168,16 +168,16 @@ namespace ige::scene
     // Scissor Test
     PyObject* FigureComponent_isScissorTestEnable(PyObject_FigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isScissorTestEnable());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->isScissorTestEnable());
     }
 
     int FigureComponent_setScissorTestEnable(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto enable = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setScissorTestEnable(enable);
+            std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->setScissorTestEnable(enable);
             return 0;
         }
         return -1;
@@ -186,16 +186,16 @@ namespace ige::scene
     // Frame update ratio (speedup/slower effects)
     PyObject* FigureComponent_getFrameUpdateRatio(PyObject_FigureComponent* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getFrameUpdateRatio());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->getFrameUpdateRatio());
     }
 
     int FigureComponent_setFrameUpdateRatio(PyObject_FigureComponent* self, PyObject* value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setFrameUpdateRatio(val);
+            std::dynamic_pointer_cast<FigureComponent>(self->component.lock())->setFrameUpdateRatio(val);
             return 0;
         }
         return -1;

@@ -16,11 +16,10 @@ namespace ige::scene
 {
     void OffMeshLink_dealloc(PyObject_OffMeshLink *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *OffMeshLink_str(PyObject_OffMeshLink *self)
@@ -31,16 +30,16 @@ namespace ige::scene
     // Radius
     PyObject *OffMeshLink_getRadius(PyObject_OffMeshLink *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRadius());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->getRadius());
     }
 
     int OffMeshLink_setRadius(PyObject_OffMeshLink *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRadius(val);
+            std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->setRadius(val);
             return 0;
         }
         return -1;
@@ -49,16 +48,16 @@ namespace ige::scene
     //! Mask
     PyObject *OffMeshLink_getMask(PyObject_OffMeshLink *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getMask());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->getMask());
     }
 
     int OffMeshLink_setMask(PyObject_OffMeshLink *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setMask(val);
+            std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->setMask(val);
             return 0;
         }
         return -1;
@@ -67,16 +66,16 @@ namespace ige::scene
     //! AreaId
     PyObject *OffMeshLink_getAreaId(PyObject_OffMeshLink *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getAreaId());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->getAreaId());
     }
 
     int OffMeshLink_setAreaId(PyObject_OffMeshLink *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setAreaId(val);
+            std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->setAreaId(val);
             return 0;
         }
         return -1;
@@ -85,32 +84,34 @@ namespace ige::scene
     //! Endpoint
     PyObject *OffMeshLink_getEndPoint(PyObject_OffMeshLink *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        auto endPoint = self->component->getEndPoint();
-        obj->sceneObject = endPoint.get();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+        auto endPoint = std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->getEndPoint();
+        obj->sceneObject = endPoint;
         return (PyObject*)obj;
     }
 
     int OffMeshLink_setEndPoint(PyObject_OffMeshLink *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* uuid = PyUnicode_AsUTF8(value);
-            auto sceneObject = self->component->getOwner()->getScene()->findObjectByUUID(std::string(uuid));
+            auto sceneObject = std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->getOwner()->getScene()->findObjectByUUID(std::string(uuid));
             if (sceneObject)
             {
-                self->component->setEndPoint(sceneObject);
+                std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->setEndPoint(sceneObject);
                 return 0;
             }
         }
         else if (value->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)value;
-            auto sceneObject = self->component->getOwner()->getScene()->findObjectByUUID(std::string(sceneObj->sceneObject->getUUID()));
-            self->component->setEndPoint(sceneObject);
-            return 0;
+            if (!sceneObj->sceneObject.expired()) {
+                auto sceneObject = std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->getOwner()->getScene()->findObjectByUUID(std::string(sceneObj->sceneObject.lock()->getUUID()));
+                std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->setEndPoint(sceneObject);
+                return 0;
+            }
         }
         return -1;
     }
@@ -118,16 +119,16 @@ namespace ige::scene
     //! Bidirectional
     PyObject *OffMeshLink_isBidirectional(PyObject_OffMeshLink *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isBidirectional());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->isBidirectional());
     }
 
     int OffMeshLink_setBidirectional(PyObject_OffMeshLink *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setBidirectional(val);
+            std::dynamic_pointer_cast<OffMeshLink>(self->component.lock())->setBidirectional(val);
             return 0;
         }
         return -1;

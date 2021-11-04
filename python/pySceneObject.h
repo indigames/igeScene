@@ -9,7 +9,7 @@ namespace ige::scene
     struct PyObject_SceneObject
     {
         PyObject_HEAD
-        SceneObject* sceneObject;
+        std::weak_ptr<SceneObject> sceneObject;
     };
 
     // Type declaration
@@ -73,7 +73,7 @@ namespace ige::scene
     PyObject* SceneObject_removeComponent(PyObject_SceneObject* self, PyObject* value);
 
     // Get component by type
-    PyObject* pySceneObject_getComponent(SceneObject* sceneObject, const std::string& type);
+    PyObject* pySceneObject_getComponent(std::shared_ptr<SceneObject> sceneObject, const std::string& type);
     PyObject* SceneObject_getComponent(PyObject_SceneObject* self, PyObject* value);
 
     // Get components

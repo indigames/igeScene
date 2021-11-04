@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void UIButton_dealloc(PyObject_UIButton *self)
     {
-        if(self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject* UIButton_str(PyObject_UIButton *self)
@@ -28,18 +27,18 @@ namespace ige::scene
     // Get path
     PyObject* UIButton_getPath(PyObject_UIButton* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<UIButton>(self->component.lock())->getPath().c_str());
     }
 
     // Set path
     int UIButton_setPath(PyObject_UIButton* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* name = PyUnicode_AsUTF8(value);
-            self->component->setPath(std::string(name));
+            std::dynamic_pointer_cast<UIButton>(self->component.lock())->setPath(std::string(name));
             return 0;
         }
         return -1;
@@ -48,18 +47,18 @@ namespace ige::scene
     // Get press path
     PyObject* UIButton_getPressPath(PyObject_UIButton* self) 
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getPressedPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<UIButton>(self->component.lock())->getPressedPath().c_str());
     }
 
     // Set press path
     int UIButton_setPressPath(PyObject_UIButton* self, PyObject* value) 
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* name = PyUnicode_AsUTF8(value);
-            self->component->setTexturePath(std::string(name), ButtonState::PRESSED);
+            std::dynamic_pointer_cast<UIButton>(self->component.lock())->setTexturePath(std::string(name), ButtonState::PRESSED);
             return 0;
         }
         return -1;
@@ -68,18 +67,18 @@ namespace ige::scene
     // Get selected path
     PyObject* UIButton_getSelectedPath(PyObject_UIButton* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getSelectedPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<UIButton>(self->component.lock())->getSelectedPath().c_str());
     }
 
     // Set selected path
     int UIButton_setSelectedPath(PyObject_UIButton* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* name = PyUnicode_AsUTF8(value);
-            self->component->setTexturePath(std::string(name), ButtonState::SELECTED);
+            std::dynamic_pointer_cast<UIButton>(self->component.lock())->setTexturePath(std::string(name), ButtonState::SELECTED);
             return 0;
         }
         return -1;
@@ -88,18 +87,18 @@ namespace ige::scene
     // Get disable path
     PyObject* UIButton_getDisablePath(PyObject_UIButton* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getDisabledPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<UIButton>(self->component.lock())->getDisabledPath().c_str());
     }
 
     // Set disable path
     int UIButton_setDisablePath(PyObject_UIButton* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* name = PyUnicode_AsUTF8(value);
-            self->component->setTexturePath(std::string(name), ButtonState::DISABLE);
+            std::dynamic_pointer_cast<UIButton>(self->component.lock())->setTexturePath(std::string(name), ButtonState::DISABLE);
             return 0;
         }
         return -1;
@@ -109,9 +108,9 @@ namespace ige::scene
     // Get color
     PyObject* UIButton_getColor(PyObject_UIButton* self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<UIButton>(self->component.lock())->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
@@ -119,92 +118,92 @@ namespace ige::scene
     // Set color
     int UIButton_setColor(PyObject_UIButton* self, PyObject* value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v)
             return -1;
-        self->component->setColor(*((Vec4*)v));
+        std::dynamic_pointer_cast<UIButton>(self->component.lock())->setColor(*((Vec4*)v));
         return 0;
     }
 
     // Get Press color
     PyObject* UIButton_getPressColor(PyObject_UIButton* self) {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getPressedColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<UIButton>(self->component.lock())->getPressedColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
 
     // Set Press color
     int UIButton_setPressColor(PyObject_UIButton* self, PyObject* value) {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v)
             return -1;
-        self->component->setPressedColor(*((Vec4*)v));
+        std::dynamic_pointer_cast<UIButton>(self->component.lock())->setPressedColor(*((Vec4*)v));
         return 0;
     }
 
     // Get Selected color
     PyObject* UIButton_getSelectedColor(PyObject_UIButton* self) {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getSelectedColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<UIButton>(self->component.lock())->getSelectedColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
 
     // Set Selected color
     int UIButton_setSelectedColor(PyObject_UIButton* self, PyObject* value) {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v)
             return -1;
-        self->component->setSelectedColor(*((Vec4*)v));
+        std::dynamic_pointer_cast<UIButton>(self->component.lock())->setSelectedColor(*((Vec4*)v));
         return 0;
     }
 
     // Get Disable color
     PyObject* UIButton_getDisableColor(PyObject_UIButton* self) {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getDisabledColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<UIButton>(self->component.lock())->getDisabledColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject*)vec4Obj;
     }
 
     // Set Disable color
     int UIButton_setDisableColor(PyObject_UIButton* self, PyObject* value) {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v)
             return -1;
-        self->component->setDisabledColor(*((Vec4*)v));
+        std::dynamic_pointer_cast<UIButton>(self->component.lock())->setDisabledColor(*((Vec4*)v));
         return 0;
     }
 
     // Get Transition Mode
     PyObject* UIButton_getTransitionMode(PyObject_UIButton* self) {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong((int)self->component->getTransitionMode());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong((int)std::dynamic_pointer_cast<UIButton>(self->component.lock())->getTransitionMode());
     }
 
     // Set Transition Mode
     int UIButton_setTransitionMode(PyObject_UIButton* self, PyObject* value) {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setTransitionMode((TransitionMode)val);
+            std::dynamic_pointer_cast<UIButton>(self->component.lock())->setTransitionMode((TransitionMode)val);
             return 0;
         }
         return -1;
@@ -212,17 +211,17 @@ namespace ige::scene
 
     // Get Fade Duration
     PyObject* UIButton_getFadeDuration(PyObject_UIButton* self) {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getFadeDuration());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<UIButton>(self->component.lock())->getFadeDuration());
     }
 
     // Set Fade Duration
     int UIButton_setFadeDuration(PyObject_UIButton* self, PyObject* value) {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyFloat_Check(value))
         {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setFadeDuration(val);
+            std::dynamic_pointer_cast<UIButton>(self->component.lock())->setFadeDuration(val);
             return 0;
         }
         return -1;

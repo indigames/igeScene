@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_UISlider
-    {
-        PyObject_Component super;
-        UISlider* component;
-    };
+    struct PyObject_UISlider : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_UISlider;

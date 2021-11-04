@@ -210,8 +210,9 @@ namespace ige::scene
             }
 
             // Creates an instance of the class
-            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = getOwner();
+            auto obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            auto owner = getOwner()->getSharedPtr();
+            obj->sceneObject = std::weak_ptr<SceneObject>(owner);
             auto arglist = Py_BuildValue("(O)", obj);
             PyObject *pyConstruct = PyInstanceMethod_New(pyClass);
             m_pyInstance = PyObject_CallObject(pyConstruct, arglist);
@@ -608,12 +609,12 @@ namespace ige::scene
                         if (obj) {
                             auto compName = value.value("comp", "");
                             if (compName.empty() || compName.compare("") == 0 || compName.compare("SceneObject") == 0) {
-                                auto pyObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                                pyObj->sceneObject = obj.get();
+                                auto pyObj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+                                pyObj->sceneObject = obj;
                                 pyValue = (PyObject*)pyObj;
                             }
                             else {
-                                pyValue = pySceneObject_getComponent(obj.get(), compName);
+                                pyValue = pySceneObject_getComponent(obj, compName);
                             }
                         }
                     }
@@ -631,8 +632,8 @@ namespace ige::scene
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onTriggerStart"))
         {
-            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = &other;
+            auto obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            obj->sceneObject = other.getSharedPtr();
 
             auto ret = PyObject_CallMethod(m_pyInstance, "onTriggerStart", "(O)", obj);
             Py_XDECREF(ret);
@@ -644,8 +645,8 @@ namespace ige::scene
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onTriggerStay"))
         {
-            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = &other;
+            auto obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            obj->sceneObject = other.getSharedPtr();
 
             auto ret = PyObject_CallMethod(m_pyInstance, "onTriggerStay", "(O)", obj);
             Py_XDECREF(ret);
@@ -657,8 +658,8 @@ namespace ige::scene
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onTriggerStop"))
         {
-            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = &other;
+            auto obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            obj->sceneObject = other.getSharedPtr();
 
             auto ret = PyObject_CallMethod(m_pyInstance, "onTriggerStop", "(O)", obj);
             Py_XDECREF(ret);
@@ -671,8 +672,8 @@ namespace ige::scene
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onCollisionStart"))
         {
-            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = &other;
+            auto obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            obj->sceneObject = other.getSharedPtr();
 
             auto ret = PyObject_CallMethod(m_pyInstance, "onCollisionStart", "(O)", obj);
             Py_XDECREF(ret);
@@ -684,8 +685,8 @@ namespace ige::scene
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onCollisionStay"))
         {
-            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = &other;
+            auto obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            obj->sceneObject = other.getSharedPtr();
 
             auto ret = PyObject_CallMethod(m_pyInstance, "onCollisionStay", "(O)", obj);
             Py_XDECREF(ret);
@@ -697,8 +698,8 @@ namespace ige::scene
     {
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onCollisionStop"))
         {
-            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = &other;
+            auto obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            obj->sceneObject = other.getSharedPtr();
 
             auto ret = PyObject_CallMethod(m_pyInstance, "onCollisionStop", "(O)", obj);
             Py_XDECREF(ret);

@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void AudioListener_dealloc(PyObject_AudioListener *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *AudioListener_str(PyObject_AudioListener *self)
@@ -28,18 +27,16 @@ namespace ige::scene
     //! enable
     PyObject *AudioListener_isEnabled(PyObject_AudioListener *self)
     {
-        if (self->component) {
-            return PyBool_FromLong(self->component->isEnabled());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<AudioListener>(self->component.lock())->isEnabled());
     }
 
     int AudioListener_setEnabled(PyObject_AudioListener *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto isActive = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setEnabled(isActive);
+            std::dynamic_pointer_cast<AudioListener>(self->component.lock())->setEnabled(isActive);
             return 0;
         }
         return -1;

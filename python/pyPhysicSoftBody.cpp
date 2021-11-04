@@ -19,11 +19,10 @@ namespace ige::scene
 {
     void PhysicSoftBody_dealloc(PyObject_PhysicSoftBody *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *PhysicSoftBody_str(PyObject_PhysicSoftBody *self)
@@ -34,18 +33,18 @@ namespace ige::scene
     //! Apply Repulsion Force
     PyObject *PhysicSoftBody_applyRepulsionForce(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         float timeStep = 0.f;
         int applySpringForce = 0;
         if (PyArg_ParseTuple(value, "fi", &timeStep, &applySpringForce))
-            self->component->applyRepulsionForce(timeStep, applySpringForce);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->applyRepulsionForce(timeStep, applySpringForce);
         Py_RETURN_NONE;
     }
 
     //! Add Velocity
     PyObject *PhysicSoftBody_addVelocity(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         PyObject *velocityObj;
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "O|i", &velocityObj, &nodeIdx))
@@ -53,7 +52,7 @@ namespace ige::scene
             int d;
             float buff[4];
             auto v = pyObjToFloat((PyObject *)velocityObj, buff, d);
-            self->component->addVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)), nodeIdx);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->addVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)), nodeIdx);
         }
         Py_RETURN_NONE;
     }
@@ -61,16 +60,16 @@ namespace ige::scene
     //! Get Volume
     PyObject *PhysicSoftBody_getVolume(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getVolume());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getVolume());
     }
 
     //! Get Center Of Mass
     PyObject *PhysicSoftBody_getCenterOfMass(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(self->component->getCenterOfMass()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getCenterOfMass()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
@@ -78,13 +77,13 @@ namespace ige::scene
     //! Get nearest node
     PyObject *PhysicSoftBody_getNearestNodeIndex(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (!self->component) return PyLong_FromLong(-1);
+        if (self->component.expired()) return PyLong_FromLong(-1);
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (v)
         {
-            return PyLong_FromLong(self->component->getNearestNodeIndex(PhysicHelper::to_btVector3(*((Vec3 *)v))));
+            return PyLong_FromLong(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getNearestNodeIndex(PhysicHelper::to_btVector3(*((Vec3 *)v))));
         }
         return PyLong_FromLong(-1);
     }
@@ -92,12 +91,12 @@ namespace ige::scene
     //! Get node position
     PyObject *PhysicSoftBody_getNodePosition(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "i", &nodeIdx))
         {
             auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-            vmath_cpy(PhysicHelper::from_btVector3(self->component->getNodePosition(nodeIdx)).P(), 3, vec3Obj->v);
+            vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getNodePosition(nodeIdx)).P(), 3, vec3Obj->v);
             vec3Obj->d = 3;
             return (PyObject *)vec3Obj;
         }
@@ -108,12 +107,12 @@ namespace ige::scene
     //! Get node normal
     PyObject *PhysicSoftBody_getNodeNormal(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "i", &nodeIdx))
         {
             auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-            vmath_cpy(PhysicHelper::from_btVector3(self->component->getNodeNormal(nodeIdx)).P(), 3, vec3Obj->v);
+            vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getNodeNormal(nodeIdx)).P(), 3, vec3Obj->v);
             vec3Obj->d = 3;
             return (PyObject *)vec3Obj;
         }
@@ -124,7 +123,7 @@ namespace ige::scene
     //! Append deformable anchor
     PyObject *PhysicSoftBody_appendDeformableAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         int nodeIdx = -1;
         PyObject *obj = nullptr;
         if (PyArg_ParseTuple(value, "iO", &nodeIdx, &obj) && nodeIdx >= 0 && obj)
@@ -132,26 +131,28 @@ namespace ige::scene
             if (obj->ob_type == &PyTypeObject_SceneObject)
             {
                 auto sceneObj = (PyObject_SceneObject *)obj;
-                auto physicComp = sceneObj->sceneObject->getComponent<PhysicObject>();
-                if (physicComp && physicComp->getBody())
-                {
-                    self->component->appendDeformableAnchor(nodeIdx, physicComp->getBody());
+                if (!sceneObj->sceneObject.expired()) {
+                    auto physicComp = sceneObj->sceneObject.lock()->getComponent<PhysicObject>();
+                    if (physicComp && physicComp->getBody()) {
+                        std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->appendDeformableAnchor(nodeIdx, physicComp->getBody());
+                    }
                 }
             }
             else if (obj->ob_type == &PyTypeObject_PhysicObject)
             {
                 auto physicObjectObj = (PyObject_PhysicObject *)obj;
-                if (physicObjectObj->component->getBody())
-                {
-                    self->component->appendDeformableAnchor(nodeIdx, physicObjectObj->component->getBody());
+                if (!physicObjectObj->component.expired()) {
+                    auto body = std::dynamic_pointer_cast<PhysicObject>(physicObjectObj->component.lock())->getBody();
+                    if (body) {
+                        std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->appendDeformableAnchor(nodeIdx, body);
+                    }
                 }
             }
             else if (obj->ob_type == &RigidBodyType)
             {
                 auto rigidBodyObject = (rigidbody_obj *)obj;
-                if (rigidBodyObject->btbody)
-                {
-                    self->component->appendDeformableAnchor(nodeIdx, (btRigidBody *)(rigidBodyObject->btbody));
+                if (rigidBodyObject->btbody) {
+                    std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->appendDeformableAnchor(nodeIdx, (btRigidBody *)(rigidBodyObject->btbody));
                 }
             }
         }
@@ -161,7 +162,7 @@ namespace ige::scene
     //! Append anchor
     PyObject *PhysicSoftBody_appendAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         int nodeIdx = -1;
         PyObject *obj = nullptr;
         int disableLinkedCollission = 0;
@@ -172,26 +173,28 @@ namespace ige::scene
             if (obj->ob_type == &PyTypeObject_SceneObject)
             {
                 auto sceneObj = (PyObject_SceneObject *)obj;
-                auto physicComp = sceneObj->sceneObject->getComponent<PhysicObject>();
-                if (physicComp && physicComp->getBody())
-                {
-                    self->component->appendAnchor(nodeIdx, physicComp->getBody(), disableLinkedCollission, influent);
+                if (!sceneObj->sceneObject.expired()) {
+                    auto physicComp = sceneObj->sceneObject.lock()->getComponent<PhysicObject>();
+                    if (physicComp && physicComp->getBody()) {
+                        std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->appendAnchor(nodeIdx, physicComp->getBody(), disableLinkedCollission, influent);
+                    }
                 }
             }
             else if (obj->ob_type == &PyTypeObject_PhysicObject)
             {
                 auto physicObjectObj = (PyObject_PhysicObject *)obj;
-                if (physicObjectObj->component->getBody())
-                {
-                    self->component->appendAnchor(nodeIdx, physicObjectObj->component->getBody(), disableLinkedCollission, influent);
+                if (!physicObjectObj->component.expired()) {
+                    auto body = std::dynamic_pointer_cast<PhysicObject>(physicObjectObj->component.lock())->getBody();
+                    if (body) {
+                        std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->appendAnchor(nodeIdx, body, disableLinkedCollission, influent);
+                    }
                 }
             }
             else if (obj->ob_type == &RigidBodyType)
             {
                 auto rigidBodyObject = (rigidbody_obj *)obj;
-                if (rigidBodyObject->btbody)
-                {
-                    self->component->appendAnchor(nodeIdx, (btRigidBody *)(rigidBodyObject->btbody), disableLinkedCollission, influent);
+                if (rigidBodyObject->btbody) {
+                    std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->appendAnchor(nodeIdx, (btRigidBody *)(rigidBodyObject->btbody), disableLinkedCollission, influent);
                 }
             }
         }
@@ -201,11 +204,11 @@ namespace ige::scene
     //! Remove anchor
     PyObject *PhysicSoftBody_removeAnchor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         int nodeIdx = -1;
         if (PyArg_ParseTuple(value, "i", &nodeIdx))
         {
-            self->component->removeAnchor(nodeIdx);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->removeAnchor(nodeIdx);
             Py_RETURN_NONE;
         }
         PyErr_SetString(PyExc_TypeError, "Parameter error: 'nodeIdx' was not set.");
@@ -215,16 +218,16 @@ namespace ige::scene
     //! Damping coefficient
     PyObject *PhysicSoftBody_getDampingCoeff(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getDampingCoeff());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getDampingCoeff());
     }
 
     int PhysicSoftBody_setDampingCoeff(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setDampingCoeff(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setDampingCoeff(val);
             return 0;
         }
         return -1;
@@ -233,16 +236,17 @@ namespace ige::scene
     //! Pressure coefficient
     PyObject *PhysicSoftBody_getPressureCoeff(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getPressureCoeff());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getPressureCoeff());
     }
 
     int PhysicSoftBody_setPressureCoeff(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (self->component.expired()) return -1;
         float val;
-        if (PyArg_ParseTuple(value, "f", &val) && self->component)
+        if (PyArg_ParseTuple(value, "f", &val))
         {
-            self->component->setPressureCoeff(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setPressureCoeff(val);
             return 0;
         }
         return -1;
@@ -251,16 +255,17 @@ namespace ige::scene
     //! Volume conversation coefficient
     PyObject *PhysicSoftBody_getVolumeConvCoeff(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getVolumeConvCoeff());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getVolumeConvCoeff());
     }
 
     int PhysicSoftBody_setVolumeConvCoeff(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (self->component.expired()) return -1;
         float val;
-        if (PyArg_ParseTuple(value, "f", &val) && self->component)
+        if (PyArg_ParseTuple(value, "f", &val))
         {
-            self->component->setVolumeConvCoeff(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setVolumeConvCoeff(val);
             return 0;
         }
         return -1;
@@ -269,16 +274,17 @@ namespace ige::scene
     //! Dynamic friction coefficient
     PyObject *PhysicSoftBody_getDynamicFrictionCoeff(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getDynamicFrictionCoeff());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getDynamicFrictionCoeff());
     }
 
     int PhysicSoftBody_setDynamicFrictionCoeff(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (self->component.expired()) return -1;
         float val;
-        if (PyArg_ParseTuple(value, "f", &val) && self->component)
+        if (PyArg_ParseTuple(value, "f", &val))
         {
-            self->component->setDynamicFrictionCoeff(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setDynamicFrictionCoeff(val);
             return 0;
         }
         return -1;
@@ -287,16 +293,17 @@ namespace ige::scene
     //! Pose matching coefficient
     PyObject *PhysicSoftBody_getPoseMatchCoeff(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getPoseMatchCoeff());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getPoseMatchCoeff());
     }
 
     int PhysicSoftBody_setPoseMatchCoeff(PyObject_PhysicSoftBody *self, PyObject *value)
     {
+        if (self->component.expired()) return -1;
         float val;
-        if (PyArg_ParseTuple(value, "f", &val) && self->component)
+        if (PyArg_ParseTuple(value, "f", &val))
         {
-            self->component->setPoseMatchCoeff(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setPoseMatchCoeff(val);
             return 0;
         }
         return -1;
@@ -305,16 +312,16 @@ namespace ige::scene
     //! Repulsion Stiffness
     PyObject *PhysicSoftBody_getRepulsionStiffness(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRepulsionStiffness());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getRepulsionStiffness());
     }
 
     int PhysicSoftBody_setRepulsionStiffness(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRepulsionStiffness(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setRepulsionStiffness(val);
             return 0;
         }
         return -1;
@@ -323,16 +330,16 @@ namespace ige::scene
     //! Sleeping Threshold
     PyObject *PhysicSoftBody_getSleepingThreshold(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getSleepingThreshold());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getSleepingThreshold());
     }
 
     int PhysicSoftBody_setSleepingThreshold(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setSleepingThreshold(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setSleepingThreshold(val);
             return 0;
         }
         return -1;
@@ -341,16 +348,16 @@ namespace ige::scene
     //! Rest Length Scale
     PyObject *PhysicSoftBody_getRestLengthScale(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRestLengthScale());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getRestLengthScale());
     }
 
     int PhysicSoftBody_setRestLengthScale(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRestLengthScale(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setRestLengthScale(val);
             return 0;
         }
         return -1;
@@ -359,16 +366,16 @@ namespace ige::scene
     //! Gravity factor
     PyObject *PhysicSoftBody_getGravityFactor(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getGravityFactor());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getGravityFactor());
     }
 
     int PhysicSoftBody_setGravityFactor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setGravityFactor(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setGravityFactor(val);
             return 0;
         }
         return -1;
@@ -377,16 +384,16 @@ namespace ige::scene
     //! Velocities correction factor
     PyObject *PhysicSoftBody_getVelocityFactor(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getVelocityFactor());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getVelocityFactor());
     }
 
     int PhysicSoftBody_setVelocityFactor(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setVelocityFactor(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setVelocityFactor(val);
             return 0;
         }
         return -1;
@@ -395,16 +402,16 @@ namespace ige::scene
     //! Rigid contacts hardness
     PyObject *PhysicSoftBody_getRigidContactHardness(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRigidContactHardness());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getRigidContactHardness());
     }
 
     int PhysicSoftBody_setRigidContactHardness(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRigidContactHardness(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setRigidContactHardness(val);
             return 0;
         }
         return -1;
@@ -413,16 +420,16 @@ namespace ige::scene
     //! Kinetic contacts hardness
     PyObject *PhysicSoftBody_getKineticContactHardness(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getKineticContactHardness());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getKineticContactHardness());
     }
 
     int PhysicSoftBody_setKineticContactHardness(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setKineticContactHardness(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setKineticContactHardness(val);
             return 0;
         }
         return -1;
@@ -431,16 +438,16 @@ namespace ige::scene
     //! Soft contacts hardness
     PyObject *PhysicSoftBody_getSoftContactHardness(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getSoftContactHardness());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getSoftContactHardness());
     }
 
     int PhysicSoftBody_setSoftContactHardness(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setSoftContactHardness(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setSoftContactHardness(val);
             return 0;
         }
         return -1;
@@ -449,16 +456,16 @@ namespace ige::scene
     //! Anchor hardness
     PyObject *PhysicSoftBody_getAnchorHardness(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getAnchorHardness());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getAnchorHardness());
     }
 
     int PhysicSoftBody_setAnchorHardness(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setAnchorHardness(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setAnchorHardness(val);
             return 0;
         }
         return -1;
@@ -467,16 +474,16 @@ namespace ige::scene
     //! Anchor hardness
     PyObject *PhysicSoftBody_getPosIterationNumber(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getPosIterationNumber());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getPosIterationNumber());
     }
 
     int PhysicSoftBody_setPosIterationNumber(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setPosIterationNumber(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setPosIterationNumber(val);
             return 0;
         }
         return -1;
@@ -485,16 +492,16 @@ namespace ige::scene
     //! Aero Model
     PyObject *PhysicSoftBody_getAeroModel(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getAeroModel());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getAeroModel());
     }
 
     int PhysicSoftBody_setAeroModel(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setAeroModel(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setAeroModel(val);
             return 0;
         }
         return -1;
@@ -503,16 +510,16 @@ namespace ige::scene
     //! Self collision
     PyObject *PhysicSoftBody_isSelfCollision(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isSelfCollision());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->isSelfCollision());
     }
 
     int PhysicSoftBody_setSelfCollision(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setSelfCollision(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setSelfCollision(val);
             return 0;
         }
         return -1;
@@ -521,16 +528,16 @@ namespace ige::scene
     //! Soft soft-collision
     PyObject *PhysicSoftBody_isSoftSoftCollision(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isSoftSoftCollision());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->isSoftSoftCollision());
     }
 
     int PhysicSoftBody_setSoftSoftCollision(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setSoftSoftCollision(val);
+            std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setSoftSoftCollision(val);
             return 0;
         }
         return -1;
@@ -539,22 +546,22 @@ namespace ige::scene
     //! Wind velocity
     PyObject *PhysicSoftBody_getWindVelocity(PyObject_PhysicSoftBody *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(self->component->getWindVelocity()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->getWindVelocity()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int PhysicSoftBody_setWindVelocity(PyObject_PhysicSoftBody *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setWindVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        std::dynamic_pointer_cast<PhysicSoftBody>(self->component.lock())->setWindVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         return 0;
     }
 

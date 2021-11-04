@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void AudioSource_dealloc(PyObject_AudioSource *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *AudioSource_str(PyObject_AudioSource *self)
@@ -28,18 +27,16 @@ namespace ige::scene
     //! enable
     PyObject *AudioSource_isEnabled(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyBool_FromLong(self->component->isEnabled());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->isEnabled());
     }
 
     int AudioSource_setEnabled(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setEnabled(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setEnabled(val);
             return 0;
         }
         return -1;
@@ -48,18 +45,16 @@ namespace ige::scene
     //! playOnEnabled
     PyObject *AudioSource_getPlayOnEnabled(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyBool_FromLong(self->component->getPlayOnEnabled());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->getPlayOnEnabled());
     }
 
     int AudioSource_setPlayOnEnabled(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setPlayOnEnabled(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setPlayOnEnabled(val);
             return 0;
         }
         return -1;
@@ -68,18 +63,16 @@ namespace ige::scene
     //! stream
     PyObject *AudioSource_isStream(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyBool_FromLong(self->component->isStream());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->isStream());
     }
 
     int AudioSource_setStream(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setStream(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setStream(val);
             return 0;
         }
         return -1;
@@ -88,18 +81,16 @@ namespace ige::scene
     //! loop
     PyObject *AudioSource_isLooped(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyBool_FromLong(self->component->isLooped());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->isLooped());
     }
 
     int AudioSource_setLoop(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setLoop(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setLoop(val);
             return 0;
         }
         return -1;
@@ -108,18 +99,16 @@ namespace ige::scene
     //! singleInstance
     PyObject *AudioSource_isSingleInstance(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyBool_FromLong(self->component->isSingleInstance());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->isSingleInstance());
     }
 
     int AudioSource_setSingleInstance(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            self->component->setSingleInstance(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setSingleInstance(val);
             return 0;
         }
         return -1;
@@ -128,18 +117,16 @@ namespace ige::scene
     //! path
     PyObject *AudioSource_getPath(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyUnicode_FromString(self->component->getPath().c_str());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->getPath().c_str());        
     }
 
     int AudioSource_setPath(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyUnicode_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyUnicode_Check(value)) {
             const char* val = PyUnicode_AsUTF8(value);
-            self->component->setPath(std::string(val));
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setPath(std::string(val));
             return 0;
         }
         return -1;
@@ -148,18 +135,16 @@ namespace ige::scene
     //! volume
     PyObject *AudioSource_getVolume(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getVolume());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->getVolume());
     }
 
     int AudioSource_setVolume(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setVolume(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setVolume(val);
             return 0;
         }
         return -1;
@@ -168,18 +153,16 @@ namespace ige::scene
     //! pan
     PyObject *AudioSource_getPan(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getPan());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->getPan());
     }
 
     int AudioSource_setPan(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setPan(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setPan(val);
             return 0;
         }
         return -1;
@@ -188,18 +171,16 @@ namespace ige::scene
     //! minDistance
     PyObject *AudioSource_getMinDistance(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getMinDistance());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->getMinDistance());        
     }
 
     int AudioSource_setMinDistance(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setMinDistance(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setMinDistance(val);
             return 0;
         }
         return -1;
@@ -208,18 +189,16 @@ namespace ige::scene
     //! maxDistance
     PyObject *AudioSource_getMaxDistance(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getMaxDistance());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->getMaxDistance());        
     }
 
     int AudioSource_setMaxDistance(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setMaxDistance(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setMaxDistance(val);
             return 0;
         }
         return -1;
@@ -228,18 +207,16 @@ namespace ige::scene
     //! attenuationModel
     PyObject *AudioSource_getAttenuationModel(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyLong_FromLong(self->component->getAttenuationModel());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->getAttenuationModel());        
     }
 
     int AudioSource_setAttenuationModel(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setAttenuationModel(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setAttenuationModel(val);
             return 0;
         }
         return -1;
@@ -248,18 +225,16 @@ namespace ige::scene
     //! attenuationRollOffFactor
     PyObject *AudioSource_getAttenuationRollOffFactor(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getAttenuationRollOffFactor());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->getAttenuationRollOffFactor());
     }
 
     int AudioSource_setAttenuationRollOffFactor(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setAttenuationRollOffFactor(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setAttenuationRollOffFactor(val);
             return 0;
         }
         return -1;
@@ -268,18 +243,16 @@ namespace ige::scene
     //! dopplerFactor
     PyObject *AudioSource_getDopplerFactor(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getDopplerFactor());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->getDopplerFactor());
     }
 
     int AudioSource_setDopplerFactor(PyObject_AudioSource *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setDopplerFactor(val);
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setDopplerFactor(val);
             return 0;
         }
         return -1;
@@ -288,91 +261,81 @@ namespace ige::scene
     //! velocity
     PyObject *AudioSource_getVelocity(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-            vmath_cpy(self->component->getVelocity().P(), 3, vec3Obj->v);
-            vec3Obj->d = 3;
-            return (PyObject*)vec3Obj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->getVelocity().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
     }
 
     int AudioSource_setVelocity(PyObject_AudioSource *self, PyObject *value)
     {
-        if (self->component) {
-            int d;
-            float buff[4];
-            auto v = pyObjToFloat((PyObject*)value, buff, d);
-            if (!v)
-                return -1;
-            self->component->setVelocity(*((Vec3*)v));
-            return 0;
-        }
-        return -1;
+        if (self->component.expired()) return -1;        
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v)
+            return -1;
+        std::dynamic_pointer_cast<AudioSource>(self->component.lock())->setVelocity(*((Vec3*)v));
+        return 0;        
     }
 
     //! Play
     PyObject *AudioSource_play(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            self->component->play();
-        }
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<AudioSource>(self->component.lock())->play();
         Py_RETURN_NONE;
     }
 
     //! Pause
     PyObject *AudioSource_pause(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            self->component->pause();
-        }
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<AudioSource>(self->component.lock())->pause();
         Py_RETURN_NONE;
     }
 
     //! Resume
     PyObject *AudioSource_resume(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            self->component->resume();
-        }
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<AudioSource>(self->component.lock())->resume();
         Py_RETURN_NONE;
     }
 
     //! Stop
     PyObject *AudioSource_stop(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            self->component->stop();
-        }
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<AudioSource>(self->component.lock())->stop();
         Py_RETURN_NONE;
     }
 
     //! Seek
     PyObject *AudioSource_seek(PyObject_AudioSource *self, PyObject *value)
     {
-        if (self->component) {
-            float val;
-            if (PyArg_ParseTuple(value, "f", &val))
-            {
-                self->component->seek(val);
-            }
-        }
+        if (self->component.expired()) Py_RETURN_NONE;        
+        float val;
+        if (PyArg_ParseTuple(value, "f", &val)) {
+            std::dynamic_pointer_cast<AudioSource>(self->component.lock())->seek(val);
+        }        
         Py_RETURN_NONE;
     }
 
     //! isPaused
     PyObject *AudioSource_isPaused(PyObject_AudioSource *self)
     {
-        if (self->component) {
-            return PyBool_FromLong(self->component->isPaused());
-        }
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->isPaused());        
         Py_RETURN_NONE;
     }
 
     //! isStopped
     PyObject *AudioSource_isStopped(PyObject_AudioSource *self)
     {
-        return PyBool_FromLong(self->component->isStopped());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<AudioSource>(self->component.lock())->isStopped());
     }
 
     // Methods definition

@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_AmbientLight
-    {
-        PyObject_Component super;
-        AmbientLight *component;
-    };
+    struct PyObject_AmbientLight : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_AmbientLight;

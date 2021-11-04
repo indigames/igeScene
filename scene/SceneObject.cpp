@@ -171,8 +171,8 @@ namespace ige::scene
         dispatchEvent((int)EventType::SetParent);
     }
 
-    // Get thj
-    std::shared_ptr<SceneObject> SceneObject::getSharedPtr() const
+    // Get shared_ptr instance
+    std::shared_ptr<SceneObject> SceneObject::getSharedPtr()
     {
         return getScene() ? getScene()->findObjectById(getId()) : nullptr;
     }

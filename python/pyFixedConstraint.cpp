@@ -14,11 +14,10 @@ namespace ige::scene
 {
     void FixedConstraint_dealloc(PyObject_FixedConstraint *self)
     {
-        if (self && self->constraint)
-        {
+        if (self) {
             self->constraint = nullptr;
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *FixedConstraint_str(PyObject_FixedConstraint *self)

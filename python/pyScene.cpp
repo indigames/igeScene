@@ -20,16 +20,15 @@ namespace ige::scene
         if (PyArg_ParseTuple(args, "s", &name)) {
             auto scene = SceneManager::getInstance()->createScene(std::string(name));
             self = (PyObject_Scene*)type->tp_alloc(type, 0);
-            self->scene = scene.get();
+            self->scene = scene;
         }
         return (PyObject*)self;
     }
 
     void  Scene_dealloc(PyObject_Scene *self)
     {
-        if(self && self->scene)
-        {
-            self->scene = nullptr;
+        if(self && self->scene.expired()) {
+            self->scene.reset();
         }
         Py_TYPE(self)->tp_free(self);
     }
@@ -42,19 +41,18 @@ namespace ige::scene
     // Get name
     PyObject* Scene_getName(PyObject_Scene* self)
     {
-        if (!self->scene) Py_RETURN_NONE;
-        const char* str = self->scene ? self->scene->getName().c_str() : "";
-        return PyUnicode_FromString(str);
+        if (self->scene.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(self->scene.lock()->getName().c_str());
     }
 
     // Set name
     int Scene_setName(PyObject_Scene* self, PyObject* value)
     {
-        if (PyUnicode_Check(value) && self->scene)
-        {
+        if (self->scene.expired()) return -1;
+        if (PyUnicode_Check(value)) {
             const char* val = PyUnicode_AsUTF8(value);
             if(val != NULL)
-                self->scene->setName(std::string(val));
+                self->scene.lock()->setName(std::string(val));
         }
         return 0;
     }
@@ -62,13 +60,11 @@ namespace ige::scene
     // Get active camera
     PyObject* Scene_getActiveCamera(PyObject_Scene* self)
     {
-        if (!self->scene) Py_RETURN_NONE;
-        auto camera = self->scene->getActiveCamera();
-        if (camera)
-        {
-           auto* obj = PyObject_New(PyObject_CameraComponent, &PyTypeObject_CameraComponent);
+        if (self->scene.expired()) Py_RETURN_NONE;
+        auto camera = self->scene.lock()->getActiveCamera();
+        if (camera) {
+           auto* obj = (PyObject_CameraComponent*)(&PyTypeObject_CameraComponent)->tp_alloc(&PyTypeObject_CameraComponent, 0);
            obj->component = camera;
-           obj->super.component = obj->component;
            return (PyObject*)obj;
         }
         Py_RETURN_NONE;
@@ -77,10 +73,12 @@ namespace ige::scene
     // Set active camera
     int Scene_setActiveCamera(PyObject_Scene* self, PyObject* value)
     {
-        if (!self->scene) return -1;
+        if (self->scene.expired()) return -1;
         PyObject* camera;
-        if (PyArg_ParseTuple(value, "O", &camera)) {
-           self->scene->setActiveCamera(((PyObject_CameraComponent*)camera)->component);
+        if (PyArg_ParseTuple(value, "O", &camera) && camera->ob_type == &PyTypeObject_CameraComponent) {
+            auto cameraObj = (PyObject_CameraComponent*)camera;
+            if(!cameraObj->component.expired())
+                self->scene.lock()->setActiveCamera(std::dynamic_pointer_cast<CameraComponent>(cameraObj->component.lock()));
         }
         return 0;
     }
@@ -88,33 +86,36 @@ namespace ige::scene
     // Create object
     PyObject* Scene_createObject(PyObject_Scene *self, PyObject* args)
     {
-        if (!self->scene) Py_RETURN_NONE;
+        if (self->scene.expired()) Py_RETURN_NONE;
         char* name = "";
         PyObject* parentObj = nullptr;
-
         if (PyArg_ParseTuple(args, "sO", &name, &parentObj)) {
-            auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            auto parent = parentObj && parentObj->ob_type == &PyTypeObject_SceneObject && ((PyObject_SceneObject*)parentObj)->sceneObject ? ((PyObject_SceneObject*)parentObj)->sceneObject->getSharedPtr() : nullptr;
-            obj->sceneObject = self->scene->createObject(name, parent).get();
-            return (PyObject*)obj;
+            if (parentObj && parentObj->ob_type == &PyTypeObject_SceneObject) {
+                auto* obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+                auto parent = (PyObject_SceneObject*)parentObj;
+                obj->sceneObject = self->scene.lock()->createObject(name, parent->sceneObject.expired() ? nullptr : parent->sceneObject.lock());
+                return (PyObject*)obj;
+            }
         }
         Py_RETURN_NONE;
     }
 
     // Create object from Prefab
     PyObject* Scene_loadPrefab(PyObject_Scene* self, PyObject* args) {
-        if (!self->scene) Py_RETURN_NONE;
+        if (self->scene.expired()) Py_RETURN_NONE;
         char* path = "";
         char* name = "";
         PyObject* parentObj = nullptr;
 
         if (PyArg_ParseTuple(args, "ssO", &path, &name, &parentObj)) {
-            auto parent = parentObj && parentObj->ob_type == &PyTypeObject_SceneObject && ((PyObject_SceneObject*)parentObj)->sceneObject ? ((PyObject_SceneObject*)parentObj)->sceneObject->getSharedPtr() : nullptr;
-            auto preObj = self->scene->createObjectFromPrefab(path, name, parent);
-            if (preObj) {
-                auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                obj->sceneObject = preObj.get();
-                return (PyObject*)obj;
+            if (parentObj && parentObj->ob_type == &PyTypeObject_SceneObject) {
+                auto parent = (PyObject_SceneObject*)parentObj;
+                auto preObj = self->scene.lock()->createObjectFromPrefab(path, name, parent->sceneObject.expired() ? nullptr : parent->sceneObject.lock());
+                if (preObj) {
+                    auto* obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+                    obj->sceneObject = preObj;
+                    return (PyObject*)obj;
+                }
             }
         }
         Py_RETURN_NONE;
@@ -123,7 +124,7 @@ namespace ige::scene
     // Remove object
     PyObject* Scene_removeObject(PyObject_Scene *self, PyObject* args)
     {
-        if (!self->scene) Py_RETURN_NONE;
+        if (self->scene.expired()) Py_RETURN_NONE;
         PyObject* obj = nullptr;
 		if (PyArg_ParseTuple(args, "O", &obj))
         {
@@ -132,10 +133,10 @@ namespace ige::scene
                 if(PyUnicode_Check(obj))
                 {
                     const char* name = PyUnicode_AsUTF8(obj);
-                    auto sceneObject = self->scene->findObjectByName(std::string(name));
+                    auto sceneObject = self->scene.lock()->findObjectByName(std::string(name));
                     if(sceneObject)
                     {
-                        if(self->scene->removeObject(sceneObject))
+                        if(self->scene.lock()->removeObject(sceneObject))
                         {
                             Py_RETURN_TRUE;
                         }
@@ -144,7 +145,7 @@ namespace ige::scene
                 else if(PyNumber_Check(obj))
                 {
                     uint64_t id = PyLong_AsUnsignedLongLong(obj);
-                    if(self->scene->removeObjectById(id))
+                    if(self->scene.lock()->removeObjectById(id))
                     {
                         Py_RETURN_TRUE;
                     }
@@ -152,9 +153,10 @@ namespace ige::scene
                 else if (obj->ob_type == &PyTypeObject_SceneObject)
                 {
                     auto pySceneObject = (PyObject_SceneObject*)(obj);
-                    if(self->scene->removeObjectById(pySceneObject->sceneObject->getId()))
-                    {
-                        Py_RETURN_TRUE;
+                    if (!pySceneObject->sceneObject.expired()) {
+                        if (self->scene.lock()->removeObjectById(pySceneObject->sceneObject.lock()->getId())) {
+                            Py_RETURN_TRUE;
+                        }
                     }
                 }
             }
@@ -165,7 +167,7 @@ namespace ige::scene
     // Find object
     PyObject* Scene_findObject(PyObject_Scene *self, PyObject* args)
     {
-        if (!self->scene) Py_RETURN_NONE;
+        if (self->scene.expired()) Py_RETURN_NONE;
         PyObject* obj = nullptr;
 		if (PyArg_ParseTuple(args, "O", &obj))
         {
@@ -174,22 +176,22 @@ namespace ige::scene
                 if (PyUnicode_Check(obj))
                 {
                     const char* uuid = PyUnicode_AsUTF8(obj);
-                    auto sceneObject = self->scene->findObjectByUUID(std::string(uuid));
+                    auto sceneObject = self->scene.lock()->findObjectByUUID(std::string(uuid));
                     if (sceneObject)
                     {
-                        auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                        obj->sceneObject = sceneObject.get();
+                        auto* obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+                        obj->sceneObject = sceneObject;
                         return (PyObject*)obj;
                     }
                 }
                 else if (PyNumber_Check(obj))
                 {
                     uint64_t id = PyLong_AsUnsignedLongLong(obj);
-                    auto sceneObject = self->scene->findObjectById(id);
+                    auto sceneObject = self->scene.lock()->findObjectById(id);
                     if (sceneObject)
                     {
-                        auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                        obj->sceneObject = sceneObject.get();
+                        auto* obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+                        obj->sceneObject = sceneObject;
                         return (PyObject*)obj;
                     }
                 }
@@ -201,7 +203,7 @@ namespace ige::scene
     // Find object by name
     PyObject* Scene_findObjectByName(PyObject_Scene* self, PyObject* args)
     {
-        if (!self->scene) Py_RETURN_NONE;
+        if (self->scene.expired()) Py_RETURN_NONE;
         PyObject* obj = nullptr;
         if (PyArg_ParseTuple(args, "O", &obj))
         {
@@ -210,11 +212,11 @@ namespace ige::scene
                 if (PyUnicode_Check(obj))
                 {
                     const char* name = PyUnicode_AsUTF8(obj);
-                    auto sceneObject = self->scene->findObjectByName(std::string(name));
+                    auto sceneObject = self->scene.lock()->findObjectByName(std::string(name));
                     if (sceneObject)
                     {
-                        auto* obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-                        obj->sceneObject = sceneObject.get();
+                        auto* obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+                        obj->sceneObject = sceneObject;
                         return (PyObject*)obj;
                     }
                 }
@@ -226,13 +228,13 @@ namespace ige::scene
     // Get roots
     PyObject* Scene_getObjects(PyObject_Scene *self)
     {
-        if (!self->scene) Py_RETURN_NONE;
-        auto roots = self->scene->getObjects();
+        if (self->scene.expired()) Py_RETURN_NONE;
+        auto roots = self->scene.lock()->getObjects();
         PyObject* pyList = PyList_New(0);
         for(int i = 0; i < roots.size(); ++i)
         {
-            auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            obj->sceneObject = roots[i].get();
+            auto obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            obj->sceneObject = roots[i];
             PyList_Append(pyList, (PyObject*)obj);
             Py_XDECREF(obj);
         }
@@ -242,24 +244,24 @@ namespace ige::scene
     // Get root object
     PyObject* Scene_getRoot(PyObject_Scene *self)
     {
-        if (!self->scene) Py_RETURN_NONE;
-        auto obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        obj->sceneObject = self->scene->getRoot().get();
+        if (self->scene.expired()) Py_RETURN_NONE;
+        auto obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+        obj->sceneObject = self->scene.lock()->getRoot();
         return (PyObject*)obj;
     }
 
     // Get path
     PyObject* Scene_getPath(PyObject_Scene *self)
     {
-        if (!self->scene) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->scene->getPath().c_str());
+        if (self->scene.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(self->scene.lock()->getPath().c_str());
     }
 
     // Get showcase
     PyObject* Scene_getShowcase(PyObject_Scene *self)
     {
-        if (!self->scene) Py_RETURN_NONE;
-        auto showcase = self->scene->getShowcase();
+        if (self->scene.expired()) Py_RETURN_NONE;
+        auto showcase = self->scene.lock()->getShowcase();
         if (showcase) {
             auto obj = (showcase_obj*)(&ShowcaseType)->tp_alloc(&ShowcaseType, 0);
             obj->showcase = showcase;
@@ -271,16 +273,16 @@ namespace ige::scene
     // Get environment
     PyObject* Scene_getEnvironment(PyObject_Scene *self)
     {
-        if (!self->scene) Py_RETURN_NONE;
+        if (self->scene.expired()) Py_RETURN_NONE;
         auto obj = (environment_obj*)(&EnvironmentType)->tp_alloc(&EnvironmentType, 0);
-        obj->envSet = self->scene->getEnvironment();
+        obj->envSet = self->scene.lock()->getEnvironment();
         return (PyObject *)obj;
     }
 
     // Raycast
     PyObject* Scene_raycast(PyObject_Scene* self, PyObject* args)
     {
-        if (!self->scene) Py_RETURN_NONE;
+        if (self->scene.expired()) Py_RETURN_NONE;
         PyObject* position;
         PyObject* direction;
         float distance = 10000.f;
@@ -301,12 +303,12 @@ namespace ige::scene
         Vec3 pPosition = Vec3(v1[0], v1[1], v1[2]);
         Vec3 pDirection = Vec3(v2[0], v2[1], v2[2]);
         
-        auto hit = self->scene->raycast(pPosition, pDirection, distance);
+        auto hit = self->scene.lock()->raycast(pPosition, pDirection, distance);
         if (hit.first == nullptr)
             Py_RETURN_NONE;
 
-        auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        hitObj->sceneObject = hit.first.get();
+        auto hitObj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+        hitObj->sceneObject = hit.first;
 
         auto hitPos = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(hit.second.P(), 3, hitPos->v);
@@ -342,7 +344,7 @@ namespace ige::scene
         Vec3 pPosition = Vec3(v1[0], v1[1], v1[2]);
         Vec3 pDirection = Vec3(v2[0], v2[1], v2[2]);
 
-        auto hits = self->scene->raycastAll(pPosition, pDirection, distance);
+        auto hits = self->scene.lock()->raycastAll(pPosition, pDirection, distance);
         int len = hits.size();
         if (len == 0)
             Py_RETURN_NONE;
@@ -350,8 +352,8 @@ namespace ige::scene
         auto hitTuple = PyTuple_New(len);
         for (int i = 0; i < len; ++i)
         {
-            auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-            hitObj->sceneObject = hits[i].first.get();
+            auto hitObj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+            hitObj->sceneObject = hits[i].first;
 
             auto hitPos = PyObject_New(vec_obj, _Vec3Type);
             vmath_cpy(hits[i].second.P(), 3, hitPos->v);
@@ -371,7 +373,7 @@ namespace ige::scene
 
     PyObject* Scene_raycastFromCamera(PyObject_Scene *self, PyObject* args)
     {
-        if (!self->scene) Py_RETURN_NONE;
+        if (self->scene.expired()) Py_RETURN_NONE;
         PyObject *screenPosObj;
         PyObject *cameraObj;
         float distance = 10000.f;
@@ -395,27 +397,30 @@ namespace ige::scene
         else if(cameraObj->ob_type == &PyTypeObject_CameraComponent)
         {
             auto cameraCompObj = (PyObject_CameraComponent*)cameraObj;
-            camera = cameraCompObj->component->getCamera();
+            if (!cameraCompObj->component.expired()) {
+                camera = std::dynamic_pointer_cast<CameraComponent>(cameraCompObj->component.lock())->getCamera();
+            }
         }
         else if(cameraObj->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)cameraObj;
-            auto cameraComp = sceneObj->sceneObject->getComponent<CameraComponent>();
-            if(cameraComp)
-            {
-                camera = cameraComp->getCamera();
+            if (!sceneObj->sceneObject.expired()) {
+                auto cameraComp = sceneObj->sceneObject.lock()->getComponent<CameraComponent>();
+                if (cameraComp) {
+                    camera = cameraComp->getCamera();
+                }
             }
         }
 
         if (!camera)
             return NULL;
 
-        auto hit = self->scene->raycast(screenPos, camera, distance);
+        auto hit = self->scene.lock()->raycast(screenPos, camera, distance);
         if(hit.first == nullptr)
             Py_RETURN_NONE;
 
-        auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        hitObj->sceneObject = hit.first.get();
+        auto hitObj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+        hitObj->sceneObject = hit.first;
 
         auto hitPos = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(hit.second.P(), 3, hitPos->v);
@@ -431,7 +436,7 @@ namespace ige::scene
 
     PyObject* Scene_raycastUI(PyObject_Scene* self, PyObject* args)
     {
-        if (!self->scene) Py_RETURN_NONE;
+        if (self->scene.expired()) Py_RETURN_NONE;
         PyObject* screenPosObj;
 
         if (!PyArg_ParseTuple(args, "O", &screenPosObj))
@@ -445,12 +450,12 @@ namespace ige::scene
 
         Vec2 screenPos = Vec2(v[0], v[1]);
 
-        auto hit = self->scene->raycastUI(screenPos);
+        auto hit = self->scene.lock()->raycastUI(screenPos);
         if (hit.first == nullptr)
             Py_RETURN_NONE;
 
-        auto hitObj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        hitObj->sceneObject = hit.first.get();
+        auto hitObj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+        hitObj->sceneObject = hit.first;
 
         auto hitPos = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(hit.second.P(), 3, hitPos->v);
@@ -466,7 +471,7 @@ namespace ige::scene
 
     PyObject* Scene_screenToWorldPoint(PyObject_Scene* self, PyObject* args)
     {
-        if (!self->scene) Py_RETURN_NONE;
+        if (self->scene.expired()) Py_RETURN_NONE;
         PyObject* screenPosObj;
         PyObject* cameraObj;
         float distance = 10000.f;
@@ -490,22 +495,25 @@ namespace ige::scene
         else if (cameraObj->ob_type == &PyTypeObject_CameraComponent)
         {
             auto cameraCompObj = (PyObject_CameraComponent*)cameraObj;
-            camera = cameraCompObj->component->getCamera();
+            if (!cameraCompObj->component.expired()) {
+                camera = std::dynamic_pointer_cast<CameraComponent>(cameraCompObj->component.lock())->getCamera();
+            }
         }
         else if (cameraObj->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)cameraObj;
-            auto cameraComp = sceneObj->sceneObject->getComponent<CameraComponent>();
-            if (cameraComp)
-            {
-                camera = cameraComp->getCamera();
+            if (!sceneObj->sceneObject.expired()) {
+                auto cameraComp = sceneObj->sceneObject.lock()->getComponent<CameraComponent>();
+                if (cameraComp) {
+                    camera = cameraComp->getCamera();
+                }
             }
         }
 
         if (!camera)
             return NULL;
 
-        auto screenPoint = self->scene->screenToWorldPoint(screenPos, camera, distance);
+        auto screenPoint = self->scene.lock()->screenToWorldPoint(screenPos, camera, distance);
        
         auto pos = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(screenPoint.P(), 3, pos->v);
@@ -515,7 +523,7 @@ namespace ige::scene
 
     PyObject* Scene_worldToScreenPoint(PyObject_Scene* self, PyObject* args)
     {
-        if (!self->scene) Py_RETURN_NONE;
+        if (self->scene.expired()) Py_RETURN_NONE;
         PyObject* worldPosObj;
         PyObject* cameraObj;
         float distance = 10000.f;
@@ -539,22 +547,25 @@ namespace ige::scene
         else if (cameraObj->ob_type == &PyTypeObject_CameraComponent)
         {
             auto cameraCompObj = (PyObject_CameraComponent*)cameraObj;
-            camera = cameraCompObj->component->getCamera();
+            if (!cameraCompObj->component.expired()) {
+                camera = std::dynamic_pointer_cast<CameraComponent>(cameraCompObj->component.lock())->getCamera();
+            }
         }
         else if (cameraObj->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)cameraObj;
-            auto cameraComp = sceneObj->sceneObject->getComponent<CameraComponent>();
-            if (cameraComp)
-            {
-                camera = cameraComp->getCamera();
+            if (!sceneObj->sceneObject.expired()) {
+                auto cameraComp = sceneObj->sceneObject.lock()->getComponent<CameraComponent>();
+                if (cameraComp) {
+                    camera = cameraComp->getCamera();
+                }
             }
         }
 
         if (!camera)
             return NULL;
 
-        auto screenPoint = self->scene->worldToScreenPoint(worldPos, camera);
+        auto screenPoint = self->scene.lock()->worldToScreenPoint(worldPos, camera);
 
         auto pos = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(screenPoint.P(), 2, pos->v);
@@ -564,6 +575,7 @@ namespace ige::scene
 
     PyObject* Scene_convertScreenPoint(PyObject_Scene* self, PyObject* args)
     {
+        if (self->scene.expired()) Py_RETURN_NONE;
         PyObject* screenPosObj;
 
         if (!PyArg_ParseTuple(args, "O", &screenPosObj))
@@ -577,19 +589,19 @@ namespace ige::scene
 
         Vec2 screenPos = Vec2(v[0], v[1]);
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
-        vmath_cpy(self->scene->getScreenPos(screenPos).P(), 2, vec2Obj->v);
+        vmath_cpy(self->scene.lock()->getScreenPos(screenPos).P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
         return (PyObject*)vec2Obj;
     }
 
     PyObject* Scene_getScreenSize(PyObject_Scene* self)
     {
+        if (self->scene.expired()) Py_RETURN_NONE;
         auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
-        vmath_cpy(self->scene->getWindowSize().P(), 2, vec2Obj->v);
+        vmath_cpy(self->scene.lock()->getWindowSize().P(), 2, vec2Obj->v);
         vec2Obj->d = 2;
         return (PyObject*)vec2Obj;
     }
-
 
     // Compare function
     static PyObject* Scene_richcompare(PyObject* self, PyObject* other, int op)
@@ -607,10 +619,16 @@ namespace ige::scene
             {
                 auto selfCmp = (PyObject_Scene*)(self);
                 auto otherCmp = (PyObject_Scene*)(other);
-                bool eq = (selfCmp->scene == otherCmp->scene);
-                if (op == Py_NE)
-                    eq = !eq;
-                result = eq ? Py_True : Py_False;
+
+                if (selfCmp->scene.expired() || otherCmp->scene.expired()) {
+                    result = Py_False;
+                }
+                else {
+                    bool eq = (selfCmp->scene.lock() == otherCmp->scene.lock());
+                    if (op == Py_NE)
+                        eq = !eq;
+                    result = eq ? Py_True : Py_False;
+                }
             }
             else
             {

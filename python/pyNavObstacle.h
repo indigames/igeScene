@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_NavObstacle
-    {
-        PyObject_Component super;
-        NavObstacle *component;
-    };
+    struct PyObject_NavObstacle : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_NavObstacle;

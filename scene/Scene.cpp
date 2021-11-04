@@ -57,6 +57,7 @@ namespace ige::scene
     {
         setWindowSize({-1.f, -1.f});
         setViewSize({ -1.f, -1.f });
+        m_uuid = SceneObject::generateUUID();
     }
 
     Scene::~Scene()
@@ -168,7 +169,7 @@ namespace ige::scene
         getSerializeFinishedEvent().removeAllListeners();
 
         m_nextObjectID = 1;
-        m_activeCamera = nullptr;
+        m_activeCamera.reset();
         m_root = nullptr;
         m_rootUI = nullptr;
         m_canvas = nullptr;
@@ -279,8 +280,8 @@ namespace ige::scene
         if (camera) {
             camera->Step(dt);
         }
-        else if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
-            m_activeCamera->onUpdate(dt);
+        else if (!SceneManager::getInstance()->isEditor() && !m_activeCamera.expired()) {
+            m_activeCamera.lock()->onUpdate(dt);
         } 
         m_showcase->Update(dt);
 
@@ -288,9 +289,9 @@ namespace ige::scene
             m_showcase->ZSort(camera);
             camera->Render();
         }
-        else if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
-            m_showcase->ZSort(m_activeCamera->getCamera());
-            m_activeCamera->onRender();
+        else if (!SceneManager::getInstance()->isEditor() && !m_activeCamera.expired()) {
+            m_showcase->ZSort(m_activeCamera.lock()->getCamera());
+            m_activeCamera.lock()->onRender();
         }
 
         // Render shadow before actually render objects
@@ -301,8 +302,8 @@ namespace ige::scene
             if (camera) {
                 camera->Render();
             }
-            else if (!SceneManager::getInstance()->isEditor() && m_activeCamera) {
-                m_activeCamera->onRender();
+            else if (!SceneManager::getInstance()->isEditor() && !m_activeCamera.expired()) {
+                m_activeCamera.lock()->onRender();
             }
             m_showcase->Render(RenderPassFilter::ShadowPass);
 
@@ -410,7 +411,9 @@ namespace ige::scene
 
         // Remove active camera
         if (auto camera = obj->getComponent<CameraComponent>()) {
-            if (getActiveCamera() == camera.get()) setActiveCamera(nullptr);
+            auto activeCam = getActiveCamera();
+            if (activeCam && activeCam->getInstanceId() == camera->getInstanceId())
+                setActiveCamera(nullptr);
         }
 
         // Remove root object
@@ -473,18 +476,15 @@ namespace ige::scene
 
 
     //! Set active camera
-    void Scene::setActiveCamera(CameraComponent* camera)
+    void Scene::setActiveCamera(std::shared_ptr<CameraComponent> camera)
     {
-        if (m_activeCamera != camera)
-        {
-            if (camera && camera->getOwner()->isActive())
-            {
-                m_activeCamera = camera;
-            }
-            else
-            {
-                m_activeCamera = nullptr;
-            }
+        if (camera) {
+            if (!camera->getOwner()->isActive())
+                camera->getOwner()->setActive(true);
+            m_activeCamera = camera;
+        }
+        else {
+            m_activeCamera.reset();
         }
     }
 
@@ -871,6 +871,11 @@ namespace ige::scene
         return screenToClient(screenPos);
     }
 
+    std::shared_ptr<Scene> Scene::getSharedPtr()
+    {
+        return SceneManager::getInstance()->getScene(getUUID());
+    }
+
     //! Raycast
     std::pair<std::shared_ptr<SceneObject>, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance, bool forceRaycast)
     {
@@ -1090,6 +1095,7 @@ namespace ige::scene
     void Scene::to_json(json& j) const
     {
         j = json{
+            {"uuid", m_uuid},
             {"name", m_name},
             {"path", m_path},
             {"objId", m_nextObjectID},
@@ -1117,6 +1123,7 @@ namespace ige::scene
         initialize(true);
         
         j.at("name").get_to(m_name);
+        m_uuid = j.value("uuid", SceneObject::generateUUID());
         setPath(j.value("path", std::string()));
 
         if (j.contains("root"))
@@ -1151,9 +1158,8 @@ namespace ige::scene
             if (camObj)
             {
                 auto cam = camObj->getComponent<CameraComponent>();
-                if (cam)
-                {
-                    setActiveCamera(cam.get());
+                if (cam) {
+                    setActiveCamera(cam);
                 }
             }
         }

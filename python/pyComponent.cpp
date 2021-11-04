@@ -12,11 +12,10 @@ namespace ige::scene
 {
     void  Component_dealloc(PyObject_Component *self)
     {
-        if(self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject* Component_str(PyObject_Component *self)
@@ -27,16 +26,17 @@ namespace ige::scene
     // Get name
     PyObject* Component_getName(PyObject_Component* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getName().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(self->component.lock()->getName().c_str());
     }
 
     // Get owner
     PyObject* Component_getOwner(PyObject_Component* self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        auto *obj = PyObject_New(PyObject_SceneObject, &PyTypeObject_SceneObject);
-        obj->sceneObject = self->component->getOwner();
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto *obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+        // TODO: optimize
+        obj->sceneObject = self->component.lock()->getOwner()->getSharedPtr();
         return (PyObject*)obj;
     }
 
@@ -56,9 +56,15 @@ namespace ige::scene
             {
                 auto selfCmp = (PyObject_Component*)(self);
                 auto otherCmp = (PyObject_Component*)(other);
-                bool eq = (selfCmp->component->getInstanceId() == otherCmp->component->getInstanceId());
-                if (op == Py_NE)
-                    eq = !eq;
+                if (selfCmp->component.expired() || otherCmp->component.expired()) {
+                    result = Py_False;
+                }
+                else {
+                    bool eq = (selfCmp->component.lock()->getInstanceId() == otherCmp->component.lock()->getInstanceId());
+                    if (op == Py_NE)
+                        eq = !eq;
+                    result = eq ? Py_True : Py_False;
+                }                
             }
             else
             {
@@ -79,7 +85,7 @@ namespace ige::scene
 
     PyObject* Component_onUpdate(PyObject_Component* self, PyObject* args)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         PyObject* obj = nullptr;
         if (PyArg_ParseTuple(args, "O", &obj))
         {
@@ -88,7 +94,7 @@ namespace ige::scene
                 if (PyNumber_Check(obj))
                 {
                     float dt = PyFloat_AsDouble(obj);
-                    self->component->onUpdate(dt);
+                    self->component.lock()->onUpdate(dt);
                     Py_RETURN_TRUE;
                 }
             }

@@ -14,11 +14,10 @@ namespace ige::scene
 {
     void SliderConstraint_dealloc(PyObject_SliderConstraint *self)
     {
-        if (self && self->constraint)
-        {
+        if (self) {
             self->constraint = nullptr;
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *SliderConstraint_str(PyObject_SliderConstraint *self)

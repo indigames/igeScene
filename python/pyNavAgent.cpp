@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void NavAgent_dealloc(PyObject_NavAgent *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *NavAgent_str(PyObject_NavAgent *self)
@@ -28,16 +27,16 @@ namespace ige::scene
     //! ID
     PyObject *NavAgent_getAgentId(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getAgentId());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getAgentId());
     }
 
     int NavAgent_setAgentId(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setAgentId(val);
+            std::dynamic_pointer_cast<NavAgent>(self->component.lock())->setAgentId(val);
             return 0;
         }
         return -1;
@@ -46,16 +45,16 @@ namespace ige::scene
     // Radius
     PyObject *NavAgent_getRadius(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRadius());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getRadius());
     }
 
     int NavAgent_setRadius(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRadius(val);
+            std::dynamic_pointer_cast<NavAgent>(self->component.lock())->setRadius(val);
             return 0;
         }
         return -1;
@@ -64,16 +63,16 @@ namespace ige::scene
     // Height
     PyObject *NavAgent_getHeight(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getHeight());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getHeight());
     }
 
     int NavAgent_setHeight(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setHeight(val);
+            std::dynamic_pointer_cast<NavAgent>(self->component.lock())->setHeight(val);
             return 0;
         }
         return -1;
@@ -82,16 +81,16 @@ namespace ige::scene
     //! Max speed
     PyObject *NavAgent_getMaxSpeed(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getMaxSpeed());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getMaxSpeed());
     }
 
     int NavAgent_setMaxSpeed(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setMaxSpeed(val);
+            std::dynamic_pointer_cast<NavAgent>(self->component.lock())->setMaxSpeed(val);
             return 0;
         }
         return -1;
@@ -100,16 +99,16 @@ namespace ige::scene
     //! Max acceleration
     PyObject *NavAgent_getMaxAcceleration(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getMaxAcceleration());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getMaxAcceleration());
     }
 
     int NavAgent_setMaxAcceleration(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setMaxAcceleration(val);
+            std::dynamic_pointer_cast<NavAgent>(self->component.lock())->setMaxAcceleration(val);
             return 0;
         }
         return -1;
@@ -118,38 +117,38 @@ namespace ige::scene
     //! Target position
     PyObject *NavAgent_getTargetPosition(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getTargetPosition().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getTargetPosition().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int NavAgent_setTargetPosition(PyObject_NavAgent *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setTargetPosition(*((Vec3 *)v));
+        std::dynamic_pointer_cast<NavAgent>(self->component.lock())->setTargetPosition(*((Vec3 *)v));
         return 0;
     }
 
     //! Auto Update Position
     PyObject *NavAgent_isUpdateNodePosition(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isUpdateNodePosition());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->isUpdateNodePosition());
     }
 
     int NavAgent_setUpdateNodePosition(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setUpdateNodePosition(val);
+            std::dynamic_pointer_cast<NavAgent>(self->component.lock())->setUpdateNodePosition(val);
             return 0;
         }
         return -1;
@@ -158,16 +157,16 @@ namespace ige::scene
     //! Query filter type
     PyObject *NavAgent_getQueryFilterType(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getQueryFilterType());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getQueryFilterType());
     }
 
     int NavAgent_setQueryFilterType(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setQueryFilterType(val);
+            std::dynamic_pointer_cast<NavAgent>(self->component.lock())->setQueryFilterType(val);
             return 0;
         }
         return -1;
@@ -176,16 +175,16 @@ namespace ige::scene
     //! Obstacle avoidance type
     PyObject *NavAgent_getObstacleAvoidanceType(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getObstacleAvoidanceType());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getObstacleAvoidanceType());
     }
 
     int NavAgent_setObstacleAvoidanceType(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setObstacleAvoidanceType(val);
+            std::dynamic_pointer_cast<NavAgent>(self->component.lock())->setObstacleAvoidanceType(val);
             return 0;
         }
         return -1;
@@ -194,16 +193,16 @@ namespace ige::scene
     //! Navigation quality
     PyObject *NavAgent_getNavigationQuality(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong((int)self->component->getObstacleAvoidanceType());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong((int)std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getObstacleAvoidanceType());
     }
 
     int NavAgent_setNavigationQuality(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setObstacleAvoidanceType(val);
+            std::dynamic_pointer_cast<NavAgent>(self->component.lock())->setObstacleAvoidanceType(val);
             return 0;
         }
         return -1;
@@ -212,16 +211,16 @@ namespace ige::scene
     //! Navigation quality
     PyObject *NavAgent_getNavigationPushiness(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong((int)self->component->getNavigationPushiness());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong((int)std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getNavigationPushiness());
     }
 
     int NavAgent_setNavigationPushiness(PyObject_NavAgent *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setObstacleAvoidanceType(val);
+            std::dynamic_pointer_cast<NavAgent>(self->component.lock())->setObstacleAvoidanceType(val);
             return 0;
         }
         return -1;
@@ -230,38 +229,38 @@ namespace ige::scene
     //! Is in crowd
     PyObject *NavAgent_isInCrowd(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isInCrowd());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->isInCrowd());
     }
 
     //! Has target
     PyObject *NavAgent_hasTarget(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isInCrowd());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->isInCrowd());
     }
 
     //! Reset target
     PyObject *NavAgent_resetTarget(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        self->component->resetTarget();
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<NavAgent>(self->component.lock())->resetTarget();
         Py_RETURN_NONE;
     }
 
     //! Has arrived
     PyObject *NavAgent_hasArrived(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->hasArrived());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->hasArrived());
     }
 
     //! Get position
     PyObject *NavAgent_getPosition(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getPosition().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
@@ -269,9 +268,9 @@ namespace ige::scene
     //! Get velocity
     PyObject *NavAgent_getVelocity(PyObject_NavAgent *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getVelocity().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<NavAgent>(self->component.lock())->getVelocity().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }

@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void Particle_dealloc(PyObject_Particle *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *Particle_str(PyObject_Particle *self)
@@ -28,16 +27,16 @@ namespace ige::scene
     //! Path
     PyObject *Particle_getPath(PyObject_Particle *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<Particle>(self->component.lock())->getPath().c_str());
     }
 
     int Particle_setPath(PyObject_Particle *self, PyObject *value)
     {
-        if (PyUnicode_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyUnicode_Check(value)) {
             const char* val = PyUnicode_AsUTF8(value);
-            self->component->setPath(std::string(val));
+            std::dynamic_pointer_cast<Particle>(self->component.lock())->setPath(std::string(val));
             return 0;
         }
         return -1;
@@ -46,52 +45,52 @@ namespace ige::scene
     //! isEnabled
     PyObject *Particle_isEnabled(PyObject_Particle *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isEnabled());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<Particle>(self->component.lock())->isEnabled());
     }
 
     int Particle_setEnabled(PyObject_Particle *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (value == NULL || !PyBool_Check(value)) {
             return -1;
         }
         int val = PyObject_IsTrue(value);
-        self->component->setEnabled((bool)val);
+        std::dynamic_pointer_cast<Particle>(self->component.lock())->setEnabled((bool)val);
         return 0;
     }
 
     //! isLooped
     PyObject *Particle_isLooped(PyObject_Particle *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isLooped());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<Particle>(self->component.lock())->isLooped());
     }
 
     int Particle_setLooped(PyObject_Particle *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (value == NULL || !PyBool_Check(value)) {
             return -1;
         }
         int val = PyObject_IsTrue(value);
-        self->component->setLoop((bool)val);
+        std::dynamic_pointer_cast<Particle>(self->component.lock())->setLoop((bool)val);
         return 0;
     }
 
     //! isAutoDrawing
     PyObject *Particle_isAutoDrawing(PyObject_Particle *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyBool_FromLong(self->component->isAutoDrawing());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<Particle>(self->component.lock())->isAutoDrawing());
     }
 
     int Particle_setAutoDrawing(PyObject_Particle *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setAutoDrawing(val);
+            std::dynamic_pointer_cast<Particle>(self->component.lock())->setAutoDrawing(val);
             return 0;
         }
         return -1;
@@ -100,16 +99,16 @@ namespace ige::scene
     //! layer
     PyObject *Particle_getLayer(PyObject_Particle *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getLayer());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<Particle>(self->component.lock())->getLayer());
     }
 
     int Particle_setLayer(PyObject_Particle *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setLayer(val);
+            std::dynamic_pointer_cast<Particle>(self->component.lock())->setLayer(val);
             return 0;
         }
         return -1;
@@ -118,16 +117,16 @@ namespace ige::scene
     //! groupMask
     PyObject *Particle_getGroupMask(PyObject_Particle *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getGroupMask());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<Particle>(self->component.lock())->getGroupMask());
     }
 
     int Particle_setGroupMask(PyObject_Particle *self, PyObject *value)
     {
-        if (PyLong_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setGroupMask(val);
+            std::dynamic_pointer_cast<Particle>(self->component.lock())->setGroupMask(val);
             return 0;
         }
         return -1;
@@ -136,16 +135,16 @@ namespace ige::scene
     //! speed
     PyObject *Particle_getSpeed(PyObject_Particle *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getSpeed());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<Particle>(self->component.lock())->getSpeed());
     }
 
     int Particle_setSpeed(PyObject_Particle *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setSpeed(val);
+            std::dynamic_pointer_cast<Particle>(self->component.lock())->setSpeed(val);
             return 0;
         }
         return -1;
@@ -154,16 +153,16 @@ namespace ige::scene
     //! timeScale
     PyObject *Particle_getTimeScale(PyObject_Particle *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getTimeScale());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<Particle>(self->component.lock())->getTimeScale());
     }
 
     int Particle_setTimeScale(PyObject_Particle *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setTimeScale(val);
+            std::dynamic_pointer_cast<Particle>(self->component.lock())->setTimeScale(val);
             return 0;
         }
         return -1;
@@ -172,66 +171,66 @@ namespace ige::scene
     //! targetLocation
     PyObject *Particle_getTargetLocation(PyObject_Particle *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getTargetLocation().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<Particle>(self->component.lock())->getTargetLocation().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int Particle_setTargetLocation(PyObject_Particle *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setTargetLocation(*((Vec3 *)v));
+        std::dynamic_pointer_cast<Particle>(self->component.lock())->setTargetLocation(*((Vec3 *)v));
         return 0;
     }
 
     //! dynamicParameter
     PyObject *Particle_getDynamicParameter(PyObject_Particle *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getDynamicInputParameter().P(), 4, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<Particle>(self->component.lock())->getDynamicInputParameter().P(), 4, vec3Obj->v);
         vec3Obj->d = 4;
         return (PyObject *)vec3Obj;
     }
 
     int Particle_setDynamicParameter(PyObject_Particle *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setDynamicInputParameter(*((Vec4 *)v));
+        std::dynamic_pointer_cast<Particle>(self->component.lock())->setDynamicInputParameter(*((Vec4 *)v));
         return 0;
     }
 
     // skyColor
     PyObject *Particle_getColor(PyObject_Particle *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getColor().P(), 4, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<Particle>(self->component.lock())->getColor().P(), 4, vec3Obj->v);
         vec3Obj->d = 4;
         return (PyObject *)vec3Obj;
     }
 
     int Particle_setColor(PyObject_Particle *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setColor(*((Vec4 *)v));
+        std::dynamic_pointer_cast<Particle>(self->component.lock())->setColor(*((Vec4 *)v));
         return 0;
     }
 

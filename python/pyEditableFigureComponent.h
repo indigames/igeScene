@@ -10,11 +10,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_EditableFigureComponent
-    {
-        PyObject_Component super;
-        EditableFigureComponent* component;
-    };
+    struct PyObject_EditableFigureComponent : PyObject_Component {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_EditableFigureComponent;

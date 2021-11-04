@@ -16,11 +16,10 @@ namespace ige::scene
 {
     void AudioManager_dealloc(PyObject_AudioManager *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *AudioManager_str(PyObject_AudioManager *self)
@@ -34,10 +33,9 @@ namespace ige::scene
         if (SceneManager::getInstance()->getCurrentScene())
         {
             auto audioManager = SceneManager::getInstance()->getCurrentScene()->getRoot()->getComponent<AudioManager>();
-            if (audioManager)
-            {
-                auto* self = PyObject_New(PyObject_AudioManager, &PyTypeObject_AudioManager);
-                self->component = audioManager.get();
+            if (audioManager) {
+                auto* self = (PyObject_AudioManager*)(&PyTypeObject_AudioManager)->tp_alloc(&PyTypeObject_AudioManager, 0);
+                self->component = audioManager;
                 return (PyObject*)self;
             }
         }
@@ -47,32 +45,30 @@ namespace ige::scene
     // getActiveListener
     PyObject *AudioManager_getActiveListener(PyObject_AudioManager *self)
     {
-        if (self->component) {
-            if (!self->component->getActiveListener().has_value())
-                Py_RETURN_NONE;
-            auto listener = (*(self->component->getActiveListener())).get();
-            auto* listenerObj = PyObject_New(PyObject_AudioListener, &PyTypeObject_AudioListener);
-            listenerObj->component = &listener;
-            return (PyObject*)listenerObj;
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        if (!std::dynamic_pointer_cast<AudioManager>(self->component.lock())->getActiveListener().has_value())
+            Py_RETURN_NONE;
+        auto listenerRef = (*(std::dynamic_pointer_cast<AudioManager>(self->component.lock())->getActiveListener())).get();
+        auto listener = listenerRef.getOwner()->getComponent(listenerRef.getInstanceId());
+        auto* listenerObj = (PyObject_AudioListener*)(&PyTypeObject_AudioListener)->tp_alloc(&PyTypeObject_AudioListener, 0);
+        listenerObj->component = listener;
+        return (PyObject*)listenerObj;
+        
     }
 
     // globalVolume
     PyObject *AudioManager_getGlobalVolume(PyObject_AudioManager *self)
     {
-        if (self->component) {
-            return PyFloat_FromDouble(self->component->getGlobalVolume());
-        }
-        Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<AudioManager>(self->component.lock())->getGlobalVolume());
     }
 
     int AudioManager_setGlobalVolume(PyObject_AudioManager *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setGlobalVolume(val);
+            std::dynamic_pointer_cast<AudioManager>(self->component.lock())->setGlobalVolume(val);
             return 0;
         }
         return -1;

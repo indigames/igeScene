@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_UITextField
-    {
-        PyObject_UIText super;
-        UITextField* component;
-    };
+    struct PyObject_UITextField : PyObject_UIText {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_UITextField;

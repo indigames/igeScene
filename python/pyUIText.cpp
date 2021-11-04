@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void UIText_dealloc(PyObject_UIText *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *UIText_str(PyObject_UIText *self)
@@ -28,18 +27,18 @@ namespace ige::scene
     // Get text
     PyObject *UIText_getText(PyObject_UIText *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getText().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<UIText>(self->component.lock())->getText().c_str());
     }
 
     // Set text
     int UIText_setText(PyObject_UIText *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
-            self->component->setText(std::string(val));
+            std::dynamic_pointer_cast<UIText>(self->component.lock())->setText(std::string(val));
             return 0;
         }
         return -1;
@@ -48,18 +47,18 @@ namespace ige::scene
     // Get font path
     PyObject *UIText_getFontPath(PyObject_UIText *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyUnicode_FromString(self->component->getFontPath().c_str());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyUnicode_FromString(std::dynamic_pointer_cast<UIText>(self->component.lock())->getFontPath().c_str());
     }
 
     // Set font path
     int UIText_setFontPath(PyObject_UIText *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyUnicode_Check(value))
         {
             const char* val = PyUnicode_AsUTF8(value);
-            self->component->setFontPath(std::string(val));
+            std::dynamic_pointer_cast<UIText>(self->component.lock())->setFontPath(std::string(val));
             return 0;
         }
         return -1;
@@ -68,18 +67,18 @@ namespace ige::scene
     // Get font size
     PyObject *UIText_getFontSize(PyObject_UIText *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyLong_FromLong(self->component->getFontSize());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyLong_FromLong(std::dynamic_pointer_cast<UIText>(self->component.lock())->getFontSize());
     }
 
     // Set font size
     int UIText_setFontSize(PyObject_UIText *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         if (PyLong_Check(value))
         {
             auto val = (uint32_t)PyLong_AsLong(value);
-            self->component->setFontSize(val);
+            std::dynamic_pointer_cast<UIText>(self->component.lock())->setFontSize(val);
             return 0;
         }
         return -1;
@@ -88,9 +87,9 @@ namespace ige::scene
     // Get color
     PyObject *UIText_getColor(PyObject_UIText *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
-        vmath_cpy(self->component->getColor().P(), 4, vec4Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<UIText>(self->component.lock())->getColor().P(), 4, vec4Obj->v);
         vec4Obj->d = 4;
         return (PyObject *)vec4Obj;
     }
@@ -98,13 +97,13 @@ namespace ige::scene
     // Set color
     int UIText_setColor(PyObject_UIText *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setColor(*((Vec4 *)v));
+        std::dynamic_pointer_cast<UIText>(self->component.lock())->setColor(*((Vec4 *)v));
         return 0;
     }
 

@@ -3,16 +3,16 @@
 #include "python/pyPhysicObject.h"
 
 #include "components/physic/PhysicConstraint.h"
+#include "scene/SceneObject.h"
 
 namespace ige::scene
 {
     void PhysicConstraint_dealloc(PyObject_PhysicConstraint *self)
     {
-        if (self && self->constraint)
-        {
+        if (self) {
             self->constraint = nullptr;
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *PhysicConstraint_str(PyObject_PhysicConstraint *self)
@@ -65,8 +65,8 @@ namespace ige::scene
     PyObject *PhysicConstraint_getOwner(PyObject_PhysicConstraint *self)
     {
         if (!self->constraint) Py_RETURN_NONE;
-        auto *obj = PyObject_New(PyObject_PhysicObject, &PyTypeObject_PhysicObject);
-        obj->component = self->constraint->getOwner();
+        auto *obj = (PyObject_PhysicObject*)(&PyTypeObject_PhysicObject)->tp_alloc(&PyTypeObject_PhysicObject, 0);
+        obj->component = self->constraint->getOther()->getOwner()->getComponent(self->constraint->getOther()->getInstanceId());
         return (PyObject *)obj;
     }
 
@@ -76,8 +76,8 @@ namespace ige::scene
         if (!self->constraint) Py_RETURN_NONE;
         if(self->constraint->getOther())
         {
-            auto *obj = PyObject_New(PyObject_PhysicObject, &PyTypeObject_PhysicObject);
-            obj->component = self->constraint->getOther();
+            auto *obj = (PyObject_PhysicObject*)(&PyTypeObject_PhysicObject)->tp_alloc(&PyTypeObject_PhysicObject, 0);
+            obj->component = self->constraint->getOther()->getOwner()->getComponent(self->constraint->getOther()->getInstanceId());
             return (PyObject *)obj;
         }
         Py_RETURN_NONE;
@@ -90,7 +90,8 @@ namespace ige::scene
             return -1;
 
         auto other = (PyObject_PhysicObject *)(value);
-        self->constraint->setOther(other->component);
+        if(!other->component.expired())
+            self->constraint->setOther(std::dynamic_pointer_cast<PhysicObject>(other->component.lock()).get());
         return 1;
     }
 

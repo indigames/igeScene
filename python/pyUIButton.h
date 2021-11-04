@@ -9,11 +9,7 @@
 
 namespace ige::scene
 {
-    struct PyObject_UIButton
-    {
-        PyObject_UIImage super;
-        UIButton* component;
-    };
+    struct PyObject_UIButton : PyObject_UIImage {};
 
     // Type declaration
     extern PyTypeObject PyTypeObject_UIButton;

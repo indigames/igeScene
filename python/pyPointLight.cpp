@@ -13,11 +13,10 @@ namespace ige::scene
 {
     void PointLight_dealloc(PyObject_PointLight *self)
     {
-        if (self && self->component)
-        {
-            self->component = nullptr;
+        if (self) {
+            self->component.reset();
+            Py_TYPE(self)->tp_free(self);
         }
-        PyObject_Del(self);
     }
 
     PyObject *PointLight_str(PyObject_PointLight *self)
@@ -28,38 +27,38 @@ namespace ige::scene
     // Color
     PyObject *PointLight_getColor(PyObject_PointLight *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getColor().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<PointLight>(self->component.lock())->getColor().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
     int PointLight_setColor(PyObject_PointLight *self, PyObject *value)
     {
-        if (!self->component) return -1;
+        if (self->component.expired()) return -1;
         int d;
         float buff[4];
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        self->component->setColor(*((Vec3 *)v));
+        std::dynamic_pointer_cast<PointLight>(self->component.lock())->setColor(*((Vec3 *)v));
         return 0;
     }
 
     //! Intensity
     PyObject *PointLight_getIntensity(PyObject_PointLight *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getIntensity());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PointLight>(self->component.lock())->getIntensity());
     }
 
     int PointLight_setIntensity(PyObject_PointLight *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setIntensity(val);
+            std::dynamic_pointer_cast<PointLight>(self->component.lock())->setIntensity(val);
             return 0;
         }
         return -1;
@@ -68,16 +67,16 @@ namespace ige::scene
     //! Range
     PyObject *PointLight_getRange(PyObject_PointLight *self)
     {
-        if (!self->component) Py_RETURN_NONE;
-        return PyFloat_FromDouble(self->component->getRange());
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<PointLight>(self->component.lock())->getRange());
     }
 
     int PointLight_setRange(PyObject_PointLight *self, PyObject *value)
     {
-        if (PyFloat_Check(value) && self->component)
-        {
+        if (self->component.expired()) return -1;
+        if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            self->component->setRange(val);
+            std::dynamic_pointer_cast<PointLight>(self->component.lock())->setRange(val);
             return 0;
         }
         return -1;
@@ -86,9 +85,9 @@ namespace ige::scene
     // Position
     PyObject *PointLight_getPosition(PyObject_PointLight *self)
     {
-        if (!self->component) Py_RETURN_NONE;
+        if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(self->component->getPosition().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<PointLight>(self->component.lock())->getPosition().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
