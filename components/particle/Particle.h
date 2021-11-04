@@ -88,6 +88,12 @@ namespace ige::scene
         //! Stop
         void stop();
 
+        //! isPaused
+        bool isPaused();
+
+        //! isStopped
+        bool isStopped();
+
         //! Created/Destroyed events
         static Event<Particle*>& getCreatedEvent() { return m_onCreatedEvent; }
         static Event<Particle*>& getDestroyedEvent() { return m_onDestroyedEvent; }
@@ -97,6 +103,9 @@ namespace ige::scene
 
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
+
+        //! Events
+        Event<>& getFrameEndedEvent() { return m_frameEndedEvent; }
 
     protected:
         //! Serialize
@@ -159,5 +168,8 @@ namespace ige::scene
 
         //! Cache ParticleManager
         std::weak_ptr<ParticleManager> m_manager;
+
+        //! Events
+        Event<> m_frameEndedEvent;
     };
 } // namespace ige::scene

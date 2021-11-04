@@ -344,6 +344,7 @@ namespace ige::scene
         {"play", (PyCFunction)AudioSource_play, METH_NOARGS, AudioSource_play_doc},
         {"pause", (PyCFunction)AudioSource_pause, METH_NOARGS, AudioSource_pause_doc},
         {"stop", (PyCFunction)AudioSource_stop, METH_NOARGS, AudioSource_stop_doc},
+        {"resume", (PyCFunction)AudioSource_resume, METH_NOARGS, AudioSource_resume_doc},
         {"isPaused", (PyCFunction)AudioSource_isPaused, METH_NOARGS, AudioSource_isPaused_doc},
         {"isStopped", (PyCFunction)AudioSource_isStopped, METH_NOARGS, AudioSource_isStopped_doc},
         {NULL, NULL},

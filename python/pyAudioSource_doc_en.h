@@ -84,6 +84,10 @@ PyDoc_STRVAR(AudioSource_pause_doc,
 PyDoc_STRVAR(AudioSource_stop_doc,
              "Stop audio.\n");
 
+// resume
+PyDoc_STRVAR(AudioSource_resume_doc,
+             "Resume audio.\n");
+
 // seek
 PyDoc_STRVAR(AudioSource_seek_doc,
              "Seek audio by seconds.\n"

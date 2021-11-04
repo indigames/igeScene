@@ -6,6 +6,7 @@
 
 #include "components/ScriptComponent.h"
 #include "components/physic/PhysicObject.h"
+#include "components/particle/Particle.h"
 
 #include "python/pySceneObject.h"
 #include "python/pyScript.h"
@@ -292,11 +293,11 @@ namespace ige::scene
             m_pyModule = nullptr;
         }
 
-        unregisterPhysicEvents();
+        unregisterEvents();
     }
 
     //! Register physic events
-    void ScriptComponent::registerPhysicEvents()
+    void ScriptComponent::registerEvents()
     {
         if (getOwner() == nullptr)
             return;
@@ -334,10 +335,17 @@ namespace ige::scene
                 onCollisionStop(*otherObject);
             });
         }
+
+        auto particleComp = getOwner()->getComponent<Particle>();
+        if (particleComp) {
+            particleComp->getFrameEndedEvent().addListener([this]() {
+                onParticleFrameEnded();
+            });
+        }
     }
 
     //! Unregister physic events
-    void ScriptComponent::unregisterPhysicEvents()
+    void ScriptComponent::unregisterEvents()
     {
         if (getOwner() == nullptr)
             return;
@@ -352,6 +360,11 @@ namespace ige::scene
             physicComp->getCollisionStartEvent().removeAllListeners();
             physicComp->getCollisionStayEvent().removeAllListeners();
             physicComp->getCollisionStayEvent().removeAllListeners();
+        }
+
+        auto particleComp = getOwner()->getComponent<Particle>();
+        if (particleComp) {
+            particleComp->getFrameEndedEvent().removeAllListeners();
         }
     }
 
@@ -408,7 +421,7 @@ namespace ige::scene
         if (!m_bOnAwakeCalled)
         {
             // Register physic events
-            registerPhysicEvents();
+            registerEvents();
 
             // Initialized, call invoke onAwake()
             onAwake();
@@ -702,6 +715,16 @@ namespace ige::scene
             obj->sceneObject = other.getSharedPtr();
 
             auto ret = PyObject_CallMethod(m_pyInstance, "onCollisionStop", "(O)", obj);
+            Py_XDECREF(ret);
+        }
+        PyErr_CheckAndClear();
+    }
+
+    void ScriptComponent::onParticleFrameEnded()
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onParticleFrameEnded"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onParticleFrameEnded", NULL);
             Py_XDECREF(ret);
         }
         PyErr_CheckAndClear();

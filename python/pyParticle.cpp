@@ -234,6 +234,64 @@ namespace ige::scene
         return 0;
     }
 
+    //! Play
+    PyObject* Particle_play(PyObject_Particle* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<Particle>(self->component.lock())->play();
+        Py_RETURN_NONE;
+    }
+
+    //! Pause
+    PyObject* Particle_pause(PyObject_Particle* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<Particle>(self->component.lock())->pause();
+        Py_RETURN_NONE;
+    }
+
+    //! Resume
+    PyObject* Particle_resume(PyObject_Particle* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<Particle>(self->component.lock())->resume();
+        Py_RETURN_NONE;
+    }
+
+    //! Stop
+    PyObject* Particle_stop(PyObject_Particle* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        std::dynamic_pointer_cast<Particle>(self->component.lock())->stop();
+        Py_RETURN_NONE;
+    }
+
+    //! isPaused
+    PyObject* Particle_isPaused(PyObject_Particle* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<Particle>(self->component.lock())->isPaused());
+        Py_RETURN_NONE;
+    }
+
+    //! isStopped
+    PyObject* Particle_isStopped(PyObject_Particle* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<Particle>(self->component.lock())->isStopped());
+    }
+
+    // Methods definition
+    PyMethodDef Particle_methods[] = {
+        {"play", (PyCFunction)Particle_play, METH_NOARGS, Particle_play_doc},
+        {"pause", (PyCFunction)Particle_pause, METH_NOARGS, Particle_pause_doc},
+        {"stop", (PyCFunction)Particle_stop, METH_NOARGS, Particle_stop_doc},
+        {"resume", (PyCFunction)Particle_resume, METH_NOARGS, Particle_resume_doc},
+        {"isPaused", (PyCFunction)Particle_isPaused, METH_NOARGS, Particle_isPaused_doc},
+        {"isStopped", (PyCFunction)Particle_isStopped, METH_NOARGS, Particle_isStopped_doc},
+        {NULL, NULL},
+    };
+
     PyGetSetDef Particle_getsets[] = {
         {"path", (getter)Particle_getPath, (setter)Particle_setPath, Particle_path_doc, NULL},
         {"enable", (getter)Particle_isEnabled, (setter)Particle_setEnabled, Particle_enable_doc, NULL},
@@ -275,7 +333,7 @@ namespace ige::scene
         0,                                                  /* tp_weaklistoffset */
         0,                                                  /* tp_iter */
         0,                                                  /* tp_iternext */
-        0,                                                  /* tp_methods */
+        Particle_methods,                                   /* tp_methods */
         0,                                                  /* tp_members */
         Particle_getsets,                                   /* tp_getset */
         &PyTypeObject_Component,                            /* tp_base */

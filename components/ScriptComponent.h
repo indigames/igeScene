@@ -82,6 +82,9 @@ namespace ige::scene
         virtual void onCollisionStay(SceneObject &other);
         virtual void onCollisionStop(SceneObject &other);
 
+        //! Particle events
+        virtual void onParticleFrameEnded();
+
         //! Path
         void setPath(const std::string &path, bool forceReload = false);
         const std::string &getPath() { return m_path; }
@@ -118,8 +121,10 @@ namespace ige::scene
         //! Load/unload modules
         void loadPyModule();
         void unloadPyModule();
-        void registerPhysicEvents();
-        void unregisterPhysicEvents();
+
+        //! Register/unregister events
+        void registerEvents();
+        void unregisterEvents();
 
         void onClickEvent(EventContext* context);
         void onChangedValueEvent(EventContext* context);

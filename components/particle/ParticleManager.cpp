@@ -145,9 +145,14 @@ namespace ige::scene
         // Replay looped particles
         for (auto& particle : m_particles)
         {
-            if (particle->getHandle() != -1 && !m_manager->Exists(particle->getHandle()) && particle->isLooped())
+            if (particle->getHandle() != -1 && !m_manager->Exists(particle->getHandle()))
             {
-                particle->play();
+                particle->getFrameEndedEvent().invoke();
+
+                if(particle->isLooped())
+                    particle->play();
+                else
+                    particle->stop();
             }
         }
 

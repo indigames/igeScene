@@ -64,4 +64,21 @@ namespace ige::scene
     PyObject *Particle_getColor(PyObject_Particle *self);
     int Particle_setColor(PyObject_Particle *self, PyObject *value);
 
+    //! Play
+    PyObject* Particle_play(PyObject_Particle* self);
+
+    //! Pause
+    PyObject* Particle_pause(PyObject_Particle* self);
+
+    //! Resume
+    PyObject* Particle_resume(PyObject_Particle* self);
+
+    //! Stop
+    PyObject* Particle_stop(PyObject_Particle* self);
+
+    //! isPaused
+    PyObject* Particle_isPaused(PyObject_Particle* self);
+
+    //! isStopped
+    PyObject* Particle_isStopped(PyObject_Particle* self);
 } // namespace ige::scene

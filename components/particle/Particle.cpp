@@ -39,12 +39,8 @@ namespace ige::scene
     //! Destructor
     Particle::~Particle()
     {
+        m_effect.Reset();
         m_onDestroyedEvent.invoke(this);
-        if (m_effect.Get())
-        {
-            m_effect->Release();
-            m_effect = nullptr;
-        }
         m_manager.reset();
     }
 
@@ -72,16 +68,11 @@ namespace ige::scene
 
             stop();
 
-            if (m_effect.Get())
-            {
-                m_effect->Release();
-                m_effect = nullptr;
-            }
-
             EFK_CHAR path[512] = { 0 };
             Effekseer::ConvertUtf8ToUtf16(path, 512, m_path.c_str());
 
             // Create new effect
+            m_effect.Reset();
             m_effect = Effekseer::Effect::Create(getManager()->getEffekseerManager(), (const EFK_CHAR*)path);
 
             if(isEnabled())
@@ -231,6 +222,18 @@ namespace ige::scene
         }
     }
 
+    //! isPaused
+    bool Particle::isPaused()
+    {
+        return (m_handle != -1) && getManager()->getEffekseerManager()->GetPaused(m_handle);
+    }
+
+    //! isStopped
+    bool Particle::isStopped()
+    {
+        return (m_handle == -1);
+    }
+
     //! Update function
     void Particle::onUpdate(float dt)
     {
@@ -283,7 +286,7 @@ namespace ige::scene
     //! Deserialize
     void Particle::from_json(const json &j)
     {
-        setPath(j.value("path", std::string()));
+        Component::from_json(j);
         setLayer(j.value("layer", 0));
         setGroupMask(j.value("mask", 0));
         setSpeed(j.value("speed", 1.f));
@@ -293,7 +296,7 @@ namespace ige::scene
         setTargetLocation(j.value("target", Vec3(0.f, 0.f, 0.f)));
         setDynamicInputParameter(j.value("param", Vec4(0.f, 0.f, 0.f, 0.f)));
         setColor(j.value("color", Vec4(1.f, 1.f, 1.f, 1.f)));
-        Component::from_json(j);
+        setPath(j.value("path", std::string()));        
     }
 
     //! Update property by key value

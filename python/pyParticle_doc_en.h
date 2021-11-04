@@ -56,3 +56,27 @@ PyDoc_STRVAR(Particle_dynamicParameter_doc,
 PyDoc_STRVAR(Particle_color_doc,
              "Particle Color. Default: (1.0f, 1.0f, 1.0f, 1.0f)\n"
              "Type: Vec4\n");
+
+// play
+PyDoc_STRVAR(Particle_play_doc,
+    "Play particle.\n");
+
+// pause
+PyDoc_STRVAR(Particle_pause_doc,
+    "Pause particle.\n");
+
+// stop
+PyDoc_STRVAR(Particle_stop_doc,
+    "Stop particle.\n");
+
+// resume
+PyDoc_STRVAR(Particle_resume_doc,
+    "Resume particle.\n");
+
+// isPaused
+PyDoc_STRVAR(Particle_isPaused_doc,
+    "Check whether the particle is paused.\n");
+
+// isStopped
+PyDoc_STRVAR(Particle_isStopped_doc,
+    "Check whether the particle is stopped.\n");
