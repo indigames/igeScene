@@ -1060,33 +1060,35 @@ namespace ige::scene
         if (target == nullptr) return hit;
         const auto& transform = target->getTransform();
         float distance = 100.f;
-        if (target->isRaycastTarget()) 
-        {
-            const auto& transform = target->getTransform();
-            auto tranMat = Mat4::IdentityMat();
-            vmath_mat4_translation(transform->getPosition().P(), tranMat.P());
-
-            auto rotMat = Mat4::IdentityMat();
-            vmath_mat_from_quat(transform->getRotation().P(), 4, rotMat.P());
-
-            auto modelMat = tranMat * rotMat;
-            vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getScale().X(), 1.f / transform->getScale().Y(), 1.f / transform->getScale().Z()).P(), 4, 4, modelMat.P());
-
-            if (RayOBBChecker::checkIntersect(target->getAABB(), modelMat, distance, 100.f))
+        if (target->isActive()) {
+            if (target->isRaycastTarget())
             {
-                hit.first = target;
-                hit.second = ray.first + ray.second * distance;
+                const auto& transform = target->getTransform();
+                auto tranMat = Mat4::IdentityMat();
+                vmath_mat4_translation(transform->getPosition().P(), tranMat.P());
+
+                auto rotMat = Mat4::IdentityMat();
+                vmath_mat_from_quat(transform->getRotation().P(), 4, rotMat.P());
+
+                auto modelMat = tranMat * rotMat;
+                vmath_mat_appendScale(modelMat.P(), Vec3(1.f / transform->getScale().X(), 1.f / transform->getScale().Y(), 1.f / transform->getScale().Z()).P(), 4, 4, modelMat.P());
+
+                if (RayOBBChecker::checkIntersect(target->getAABB(), modelMat, distance, 100.f))
+                {
+                    hit.first = target;
+                    hit.second = ray.first + ray.second * distance;
+                }
             }
-        }
-        if (target->getChildren().size() > 0) {
-            const auto& children = target->getChildren();
-            int cnt = children.size();
-            for (int i = cnt-1; i >= 0; i--) {
-                if (!children[i].expired()) {
-                    auto temp_hit = findIntersectInHierachy(children[i].lock(), ray);
-                    if (temp_hit.first != nullptr) {
-                        hit = temp_hit;
-                        break;
+            if (target->getChildren().size() > 0) {
+                const auto& children = target->getChildren();
+                int cnt = children.size();
+                for (int i = cnt - 1; i >= 0; i--) {
+                    if (!children[i].expired()) {
+                        auto temp_hit = findIntersectInHierachy(children[i].lock(), ray);
+                        if (temp_hit.first != nullptr) {
+                            hit = temp_hit;
+                            break;
+                        }
                     }
                 }
             }
