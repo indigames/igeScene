@@ -4,6 +4,8 @@
 #include <bitmapHelper.h>
 using namespace pyxie;
 
+#include <algorithm>
+
 namespace ige::scene
 {
     //! Constructor
@@ -37,9 +39,13 @@ namespace ige::scene
     //! Font Path
     void Text::setFontPath(const std::string& path)
     {
-        if(m_fontPath != path)
+        auto tmpPath = path;
+        std::replace(tmpPath.begin(), tmpPath.end(), '\\', '/');
+        m_fontPath = tmpPath;
+
+        if(m_fontPath != tmpPath)
         {
-            m_fontPath = path;
+            m_fontPath = tmpPath;
             updateFigure();
         }
     }

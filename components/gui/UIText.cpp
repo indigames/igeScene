@@ -213,17 +213,18 @@ namespace ige::scene
     //! Font Path
     void UIText::setFontPath(const std::string &path)
     {
-        m_fontPath = path;
+        auto tmpPath = path;
+        std::replace(tmpPath.begin(), tmpPath.end(), '\\', '/');
+        m_fontPath = tmpPath;
+
         if (m_text == nullptr) {
             generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
         }
-        else
-        {
+        else {
             auto oldFigure = m_text->getFigure();
-            m_text->setFontPath(path);
+            m_text->setFontPath(m_fontPath);
             auto newFigure = m_text->getFigure();
-            if (oldFigure != newFigure)
-            {
+            if (oldFigure != newFigure) {
                 if (oldFigure)
                     onResourceRemoved(oldFigure);
                 if (newFigure)
