@@ -334,7 +334,7 @@ namespace ige::scene
     std::shared_ptr<Scene> SceneManager::getScene(const std::string& uuid) 
     {
         auto found = std::find_if(m_scenes.begin(), m_scenes.end(), [&](auto elem) {
-            return elem->getUUID() == uuid;
+            return elem && elem->getUUID() == uuid;
         });
         if (found != m_scenes.end())
             return std::dynamic_pointer_cast<Scene>(*found);
