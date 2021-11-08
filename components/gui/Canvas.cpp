@@ -80,26 +80,26 @@ namespace ige::scene
         }
         auto transform = getOwner()->getRectTransform();
         if (transform) {
+            //transform->lockMove(false);
+            //transform->lockRotate(false);
+            //transform->lockScale(false);
 
-            transform->lockMove(false);
-            transform->lockRotate(false);
-            transform->lockScale(false);
+            m_canvasTrueSize = m_canvasSize * m_scaleFactor;
+            transform->setSize(m_canvasSize);
 
             Vec2 resize = Vec2(m_scaleFactor * m_canvasSize[0], m_scaleFactor * m_canvasSize[1]);
-        	Vec3 worldPosition = Vec3(resize[0] * 0.5f, resize[1] * 0.5f, 0);
+            Vec3 worldPosition = Vec3(resize[0] * 0.5f, resize[1] * 0.5f, 0);
             transform->setLocalPosition(worldPosition);
+
             Vec3 worldScale = Vec3(m_scaleFactor, m_scaleFactor, m_scaleFactor);
             transform->setLocalScale(worldScale);
-            transform->setSize(m_canvasSize);
-            m_canvasTrueSize = m_canvasSize * m_scaleFactor;
-            transform->setTransformDirty();
+
             m_camera->SetPosition({ worldPosition.X(), worldPosition.Y(), worldPosition.Z() + 10.0f });
             m_camera->SetAspectRate(m_targetCanvasSize.X() / m_targetCanvasSize.Y());
 
-
-            transform->lockMove(true);
-            transform->lockRotate(true);
-            transform->lockScale(true);
+            //transform->lockMove(true);
+            //transform->lockRotate(true);
+            //transform->lockScale(true);
         }
     }
 
