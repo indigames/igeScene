@@ -768,16 +768,12 @@ namespace ige::scene
     Vec2 Scene::screenToClient(const Vec2& pos)
     {
         auto wSize = getWindowSize();
-        auto vSize = getViewSize();
 
         auto wPos = getWindowPosition();
-        auto vPos = getViewPosition(); 
         
         auto x = pos.X() - wPos.X() * 0.5f;
         auto y = pos.Y() + wPos.Y() * 0.5f;
 
-        /*x = x + (SystemInfo::Instance().GetGameW() - (vSize.X() + wPos.X())) * 0.5f - vPos[0];
-        y = y - (SystemInfo::Instance().GetGameH() - (vSize.Y() + wPos.Y())) * 0.5f - vPos[1];*/
         x = x + (SystemInfo::Instance().GetGameW() - (wSize.X() + wPos.X())) * 0.5f;
         y = y - (SystemInfo::Instance().GetGameH() - (wSize.Y() + wPos.Y())) * 0.5f;
 
@@ -790,7 +786,7 @@ namespace ige::scene
         if (wSize[0] == 0 || wSize[1] == 0 || camera == nullptr) return Vec3(0, 0, 0);
         if (nearPlane < 0) nearPlane = 0;
 
-        auto pos = screenToClient(screenPos);
+        auto pos = getScreenPos(screenPos);
         auto camPos = camera->GetPosition();
         Mat4 proj;
         camera->GetProjectionMatrix(proj);
@@ -852,7 +848,8 @@ namespace ige::scene
 
     Vec2 Scene::worldToScreenPoint(const Vec3& pos, Camera* camera)
     {
-        auto wSize = getViewSize();
+        auto wSize = getWindowSize();
+
         if (wSize[0] == 0 || wSize[1] == 0 || camera == nullptr) return Vec2(0, 0);
 
         Mat4 proj;
@@ -860,6 +857,29 @@ namespace ige::scene
 
         Mat4 viewInv;
         camera->GetViewInverseMatrix(viewInv);
+
+        Mat4 worldMatrix = viewInv.Inverse();
+
+        Mat4 worldToClip = proj * worldMatrix;
+
+        Vec3 clip;
+        float w;
+        clip[0] = worldToClip[0][0] * pos[0] + worldToClip[0][1] * pos[1] + worldToClip[0][2] * pos[2] + worldToClip[0][3];
+        clip[1] = worldToClip[1][0] * pos[0] + worldToClip[1][1] * pos[1] + worldToClip[1][2] * pos[2] + worldToClip[1][3];
+        clip[2] = worldToClip[2][0] * pos[0] + worldToClip[2][1] * pos[1] + worldToClip[2][2] * pos[2] + worldToClip[2][3];
+        w = worldToClip[3][0] * pos[0] + worldToClip[3][1] * pos[1] + worldToClip[3][2] * pos[2] + worldToClip[3][3];
+
+        w = 1.0f / w;
+        clip[0] *= w;
+        clip[1] *= w;
+        clip[2] *= w;
+
+        Vec2 windowSpacePos =  Vec2(
+            (0.0f - clip[0]) * wSize[0] * 1.75f,
+            (0.0f - clip[1]) * wSize[1] * 1.75f);
+
+        windowSpacePos[0] = std::roundf(windowSpacePos[0]);
+        windowSpacePos[1] = std::roundf(windowSpacePos[1]);
 
         /*vec<4, T, Q> tmp = vec<4, T, Q>(obj, static_cast<T>(1));
         tmp = model * tmp;
@@ -870,23 +890,24 @@ namespace ige::scene
         tmp[0] = tmp[0] * T(viewport[2]) + T(viewport[0]);
         tmp[1] = tmp[1] * T(viewport[3]) + T(viewport[1]);*/
 
-        Vec4 v(pos[0], pos[1], pos[2], 1.0);
-        Vec4 ww(0, 0, wSize[0], wSize[1]);
-
-        auto clipSpacePos = viewInv * v;
-        clipSpacePos = proj * clipSpacePos;
-        auto ndcSpacePos = clipSpacePos / clipSpacePos.W();
-        //pyxie_printf("%f %f %f %f  \n", clipSpacePos[0], clipSpacePos[1], clipSpacePos[2], clipSpacePos[3]);
-        //pyxie_printf("%f %f %f size %f %f vs %f %f \n", pos[0], pos[1], pos[2],wSize[0], wSize[1], ((0.0 - ndcSpacePos[0]) / 2.0), ((0.0 - ndcSpacePos[1]) / 2.0));
-        Vec2 windowSpacePos = Vec2(((0.0 - ndcSpacePos[0]) / 2.0) * wSize[0], ((0.0 - ndcSpacePos[1]) / 2.0) * wSize[1]);
-        windowSpacePos[0] = std::roundf(windowSpacePos[0]);
-        windowSpacePos[1] = std::roundf(windowSpacePos[1]);
         return windowSpacePos;
     }
 
-    Vec2 Scene::getScreenPos(const Vec2& screenPos)
+    Vec2 Scene::getScreenPos(const Vec2& pos)
     {
-        return screenToClient(screenPos);
+        auto wSize = getWindowSize();
+        auto vSize = getViewSize();
+
+        auto wPos = getWindowPosition();
+        auto vPos = getViewPosition();
+
+        auto x = pos.X() - wPos.X() * 0.5f;
+        auto y = pos.Y() + wPos.Y() * 0.5f;
+
+        x = x + (SystemInfo::Instance().GetGameW() - (vSize.X() + wPos.X())) * 0.5f - vPos[0];
+        y = y - (SystemInfo::Instance().GetGameH() - (vSize.Y() + wPos.Y())) * 0.5f - vPos[1];
+
+        return Vec2(x, y);
     }
 
     std::shared_ptr<Scene> Scene::getSharedPtr()
