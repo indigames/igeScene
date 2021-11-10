@@ -80,9 +80,9 @@ namespace ige::scene
         }
         auto transform = getOwner()->getRectTransform();
         if (transform) {
-            //transform->lockMove(false);
-            //transform->lockRotate(false);
-            //transform->lockScale(false);
+            transform->lockMove(false);
+            transform->lockRotate(false);
+            transform->lockScale(false);
 
             m_canvasTrueSize = m_canvasSize * m_scaleFactor;
             transform->setSize(m_canvasSize);
@@ -97,9 +97,9 @@ namespace ige::scene
             m_camera->SetPosition({ worldPosition.X(), worldPosition.Y(), worldPosition.Z() + 10.0f });
             m_camera->SetAspectRate(m_targetCanvasSize.X() / m_targetCanvasSize.Y());
 
-            //transform->lockMove(true);
-            //transform->lockRotate(true);
-            //transform->lockScale(true);
+            transform->lockMove(true);
+            transform->lockRotate(true);
+            transform->lockScale(true);
         }
     }
 

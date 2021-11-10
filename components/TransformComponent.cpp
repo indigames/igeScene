@@ -392,6 +392,7 @@ namespace ige::scene
 
     void TransformComponent::lockMove(bool active)
     {
+        if (isLockMove() == active) return;
         if (active)
             m_lockTransform |= (1 << ((1) - 1));
         else
@@ -399,6 +400,7 @@ namespace ige::scene
     }
     void TransformComponent::lockRotate(bool active)
     {
+        if (isLockRotate() == active) return;
         if (active)
             m_lockTransform |= (1 << ((2) - 1));
         else
@@ -406,6 +408,7 @@ namespace ige::scene
     }
     void TransformComponent::lockScale(bool active)
     {
+        if (isLockScale() == active) return;
         if (active)
             m_lockTransform |= (1 << ((3) - 1));
         else
