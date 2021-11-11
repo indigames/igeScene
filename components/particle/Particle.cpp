@@ -68,15 +68,17 @@ namespace ige::scene
 
             stop();
 
-            EFK_CHAR path[512] = { 0 };
-            Effekseer::ConvertUtf8ToUtf16(path, 512, m_path.c_str());
+            if (getManager()) {
+                EFK_CHAR path[512] = { 0 };
+                Effekseer::ConvertUtf8ToUtf16(path, 512, m_path.c_str());
 
-            // Create new effect
-            m_effect.Reset();
-            m_effect = Effekseer::Effect::Create(getManager()->getEffekseerManager(), (const EFK_CHAR*)path);
+                // Create new effect
+                m_effect.Reset();
+                m_effect = Effekseer::Effect::Create(getManager()->getEffekseerManager(), (const EFK_CHAR*)path);
 
-            if(isEnabled())
-                play();
+                if (isEnabled())
+                    play();
+            }
         }
     }
 
@@ -84,7 +86,7 @@ namespace ige::scene
     void Particle::setLayer(int layer)
     {
         m_layer = layer;
-        if (m_handle != -1)
+        if (m_handle != -1 && getManager())
             getManager()->getEffekseerManager()->SetLayer(m_handle, m_layer);
     }
 
@@ -92,7 +94,7 @@ namespace ige::scene
     void Particle::setGroupMask(int mask)
     {
         m_groupMask = mask;
-        if (m_handle != -1)
+        if (m_handle != -1 && getManager())
             getManager()->getEffekseerManager()->SetGroupMask(m_handle, m_groupMask);
     }
 
@@ -100,7 +102,7 @@ namespace ige::scene
     void Particle::setSpeed(float speed)
     {
         m_speed = speed;
-        if (m_handle != -1)
+        if (m_handle != -1 && getManager())
             getManager()->getEffekseerManager()->SetSpeed(m_handle, m_speed);
     }
 
@@ -108,7 +110,7 @@ namespace ige::scene
     void Particle::setTimeScale(float timeScale)
     {
         m_timeScale = timeScale;
-        if (m_handle != -1)
+        if (m_handle != -1 && getManager())
             getManager()->getEffekseerManager()->SetTimeScaleByHandle(m_handle, timeScale);
     }
 
@@ -116,7 +118,7 @@ namespace ige::scene
     void Particle::setAutoDrawing(bool autoDraw)
     {
         m_bIsAutoDrawing = autoDraw;
-        if (m_handle != -1)
+        if (m_handle != -1 && getManager())
             getManager()->getEffekseerManager()->SetAutoDrawing(m_handle, autoDraw);
     }
 
@@ -125,7 +127,7 @@ namespace ige::scene
     {
         m_dynamicInputParameter = param;
 
-        if (m_handle != -1)
+        if (m_handle != -1 && getManager())
         {
             for (int i = 0; i < 4; ++i)
             {
@@ -139,7 +141,7 @@ namespace ige::scene
     {
         m_color = color;
 
-        if (m_handle != -1)
+        if (m_handle != -1 && getManager())
         {
             getManager()->getEffekseerManager()->SetAllColor(m_handle, { (uint8_t)(m_color[0] * 255), (uint8_t)(m_color[1] * 255), (uint8_t)(m_color[2] * 255), (uint8_t)(m_color[3] * 255) });
         }
@@ -165,7 +167,7 @@ namespace ige::scene
     {
         m_targetLocation = location;
 
-        if (m_handle != -1)
+        if (m_handle != -1 && getManager())
         {
             getManager()->getEffekseerManager()->SetTargetLocation(m_handle, m_targetLocation[0], m_targetLocation[1], m_targetLocation[2]);
         }
@@ -174,7 +176,7 @@ namespace ige::scene
     //! Play
     void Particle::play()
     {
-        if (m_effect.Get())
+        if (m_effect.Get() && getManager())
         {
             // Stop playing effect
             stop();
@@ -200,21 +202,21 @@ namespace ige::scene
     //! Pause
     void Particle::pause()
     {
-        if (m_handle != -1)
+        if (m_handle != -1 && getManager())
             getManager()->getEffekseerManager()->SetPaused(m_handle, true);
     }
 
     //! Resume
     void Particle::resume()
     {
-        if (m_handle != -1)
+        if (m_handle != -1 && getManager())
             getManager()->getEffekseerManager()->SetPaused(m_handle, false);
     }
 
     //! Stop
     void Particle::stop()
     {
-        if (m_handle != -1) {
+        if (m_handle != -1 && getManager()) {
             getManager()->getEffekseerManager()->StopEffect(m_handle);
             m_handle = -1;
             if (m_effect.Get())
@@ -225,7 +227,7 @@ namespace ige::scene
     //! isPaused
     bool Particle::isPaused()
     {
-        return (m_handle != -1) && getManager()->getEffekseerManager()->GetPaused(m_handle);
+        return (m_handle != -1 && getManager()) && getManager()->getEffekseerManager()->GetPaused(m_handle);
     }
 
     //! isStopped
@@ -238,7 +240,7 @@ namespace ige::scene
     void Particle::onUpdate(float dt)
     {
         // Apply transform
-        if (m_handle != -1)
+        if (m_handle != -1 && getManager())
         {
             auto transform = getOwner()->getTransform();
             auto position = transform->getPosition();
@@ -296,7 +298,7 @@ namespace ige::scene
         setTargetLocation(j.value("target", Vec3(0.f, 0.f, 0.f)));
         setDynamicInputParameter(j.value("param", Vec4(0.f, 0.f, 0.f, 0.f)));
         setColor(j.value("color", Vec4(1.f, 1.f, 1.f, 1.f)));
-        setPath(j.value("path", std::string()));        
+        setPath(j.value("path", std::string()));
     }
 
     //! Update property by key value
