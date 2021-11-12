@@ -64,6 +64,7 @@ namespace ige::scene
 
         //! Update
         void onUpdate(float dt) override;
+        void onAlwaysUpdate(float dt) override;
 
         //! Render
         void onRender() override;

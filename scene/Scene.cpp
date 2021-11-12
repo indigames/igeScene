@@ -343,7 +343,8 @@ namespace ige::scene
         m_uiShowcase->Render();
     }
 
-    std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, const std::string& prefabId)
+    std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, const std::string& prefabId,
+        const Vec3& position, const Quat& rotation, const Vec3& scale)
     {
         auto parentObject = parent ? parent : m_root;
         if (name.compare("Canvas") != 0) {
@@ -365,17 +366,25 @@ namespace ige::scene
                     isGUI = true;
             }
         }
-        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, isGUI, size, prefabId);
+        auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, isGUI, size, prefabId, position, rotation, scale);
         m_objects.push_back(sceneObject);
         sceneObject->setParent(parentObject);
         if (m_root == nullptr) m_root = sceneObject;
         return sceneObject;
     }
 
-    std::shared_ptr<SceneObject> Scene::createObjectFromPrefab(const std::string& path, const std::string& name, const std::shared_ptr<SceneObject>& parent)
+    std::shared_ptr<SceneObject> Scene::createObjectFromPrefab(const std::string& path, const std::string& name, const std::shared_ptr<SceneObject>& parent, const Vec3& position, const Quat& rotation, const Vec3& scale)
     {
-        auto object = loadPrefab(parent ? parent->getId() : -1, path);
-        if (object) object->setName(name);
+        auto object = loadPrefab(parent ? parent->getId() : -1, path, position, rotation, scale);
+        if (object) {
+            object->setName(name);
+            auto transform = object->getTransform();
+            if (transform != nullptr) {
+                transform->setPosition(position);
+                transform->setRotation(rotation);
+                transform->setScale(scale);
+            }
+        }
         return object;
     }
 
@@ -568,7 +577,8 @@ namespace ige::scene
         return false;
     }
 
-    std::shared_ptr<SceneObject> Scene::loadPrefab(uint64_t parentId, const std::string& path)
+    std::shared_ptr<SceneObject> Scene::loadPrefab(uint64_t parentId, const std::string& path, 
+        const Vec3& pos, const Quat& rot, const Vec3& scale)
     {
         if (path.empty())
             return nullptr;
@@ -586,7 +596,8 @@ namespace ige::scene
 
         auto parent = findObjectById(parentId);
         auto prefabId = jObj.value("prefabId", std::string());
-        auto obj = createObject(jObj.at("name"), nullptr, jObj.value("gui", false), jObj.value("size", Vec2{ 64.f, 64.f }), prefabId);
+        auto obj = createObject(jObj.at("name"), nullptr, jObj.value("gui", false), jObj.value("size", Vec2{ 64.f, 64.f }), prefabId,
+            pos, rot, scale);
         obj->from_json(jObj);
         if(parent) obj->setParent(parent);
         return obj;

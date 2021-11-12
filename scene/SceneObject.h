@@ -27,7 +27,8 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SceneObject(Scene* scene, uint64_t id, std::string name = "", bool isGui = false, const Vec2& size = { 64.f, 64.f }, const std::string& prefabId = std::string());
+        SceneObject(Scene* scene, uint64_t id, std::string name = "", bool isGui = false, const Vec2& size = { 64.f, 64.f }, const std::string& prefabId = std::string(),
+            const Vec3& pos = Vec3(), const Quat& rot = Quat(), const Vec3& scale = Vec3(1.f, 1.f, 1.f));
 
         //! Destructor
         virtual ~SceneObject();
@@ -249,7 +250,6 @@ namespace ige::scene
         void setInMask(bool value);
 
         std::shared_ptr<ScriptComponent> getScript(const std::string& path) const;
-
     protected:
         //! Event
         void doDispatch(int eventType, EventContext* context, bool includeChild = false);

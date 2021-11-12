@@ -106,11 +106,45 @@ namespace ige::scene
         char* path = "";
         char* name = "";
         PyObject* parentObj = nullptr;
+        PyObject* position = nullptr;
+        PyObject* rotation = nullptr;
+        PyObject* scale = nullptr;
 
-        if (PyArg_ParseTuple(args, "ssO", &path, &name, &parentObj)) {
+        if (PyArg_ParseTuple(args, "ssO|OOO", &path, &name, &parentObj, &position, &rotation, &scale)) {
             if (parentObj && parentObj->ob_type == &PyTypeObject_SceneObject) {
                 auto parent = (PyObject_SceneObject*)parentObj;
-                auto preObj = self->scene.lock()->createObjectFromPrefab(path, name, parent->sceneObject.expired() ? nullptr : parent->sceneObject.lock());
+                Vec3 pPosition = Vec3(0, 0, 0);
+                if (position)
+                {
+                    int d;
+                    float buff[4];
+                    auto v1 = pyObjToFloat(position, buff, d);
+                    if (v1)
+                        pPosition = Vec3(v1[0], v1[1], v1[2]);
+                }
+
+                Quat pRotation = Quat(0, 0, 0, 1);
+                if (rotation != nullptr)
+                {
+                    int d;
+                    float buff[4];
+                    auto v2 = pyObjToFloat(rotation, buff, d);
+                    if (v2)
+                        pRotation = Quat(v2[0], v2[1], v2[2], v2[3]);
+                }
+
+                Vec3 pScale = Vec3(1, 1, 1);
+                if (scale != nullptr)
+                {
+                    int d;
+                    float buff[4];
+                    auto v3 = pyObjToFloat(scale, buff, d);
+                    if (v3)
+                        pScale = Vec3(v3[0], v3[1], v3[2]);
+                }
+
+                auto preObj = self->scene.lock()->createObjectFromPrefab(path, name, parent->sceneObject.expired() ? nullptr : parent->sceneObject.lock(), pPosition, pRotation, pScale);
+                
                 if (preObj) {
                     auto* obj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
                     obj->sceneObject = preObj;

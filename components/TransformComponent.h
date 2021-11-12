@@ -122,6 +122,7 @@ namespace ige::scene
 
         //! Update
         virtual void onUpdate(float dt) override;
+        virtual void onAlwaysUpdate(float dt) override;
 
         virtual void makeDirty();
 

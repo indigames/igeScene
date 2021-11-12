@@ -64,7 +64,8 @@ namespace ige::scene
     Event<SceneObject&> SceneObject::s_deselectedEvent;
 
     //! Constructor
-    SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, bool isGui, const Vec2 &size, const std::string& prefabId)
+    SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, bool isGui, const Vec2 &size, const std::string& prefabId,
+        const Vec3& pos, const Quat& rot, const Vec3& scale)
         : m_scene(scene), m_id(id), m_name(name), m_bIsGui(isGui), m_isActive(true), m_isSelected(false), m_transform(nullptr),
         m_dispatching(0), m_aabbDirty(2), m_bIsInMask(false)
     {
@@ -77,7 +78,7 @@ namespace ige::scene
         if (isGui)
             m_transform = addComponent<RectTransform>(Vec3(0.f, 0.f, 0.f), size);
         else
-            m_transform = addComponent<TransformComponent>(Vec3(0.f, 0.f, 0.f));
+            m_transform = addComponent<TransformComponent>(pos, rot, scale);
 
         // Set AABB to default
         m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
@@ -469,7 +470,14 @@ namespace ige::scene
     //! Update function
     void SceneObject::onUpdate(float dt)
     {
-        if (!isActive()) return;
+        for (int i = m_components.size() - 1; i >= 0; i--) {
+            if (!m_transform) break; // Which mean object being deleted
+            if (m_components[i]->isEnabled() && m_components[i]->getType() != Component::Type::Camera)
+                m_components[i]->onAlwaysUpdate(dt);
+        }
+
+        if (!isActive()) 
+            return;
 
         if (m_aabbDirty > 0) {
             updateAabb();

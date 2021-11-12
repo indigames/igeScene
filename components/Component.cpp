@@ -48,6 +48,8 @@ namespace ige::scene
     //! Update functions
     void Component::onUpdate(float dt) {}
 
+    void Component::onAlwaysUpdate(float dt) {}
+
     void Component::onFixedUpdate(float dt) {}
 
     void Component::onLateUpdate(float dt) {}

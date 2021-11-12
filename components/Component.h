@@ -101,6 +101,7 @@ namespace ige::scene
 
         //! Update functions
         virtual void onUpdate(float dt);
+        virtual void onAlwaysUpdate(float dt);
         virtual void onFixedUpdate(float dt);
         virtual void onLateUpdate(float dt);
         virtual void onPhysicUpdate(float dt);

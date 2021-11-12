@@ -61,7 +61,7 @@ namespace ige::scene
         }
     }
 
-    void TransformComponent::onUpdate(float dt)
+    void TransformComponent::onAlwaysUpdate(float dt)
     {
         if (m_bLocalDirty)
         {
@@ -69,6 +69,12 @@ namespace ige::scene
             m_bLocalDirty = false;
         }
     }
+
+    void TransformComponent::onUpdate(float dt)
+    {
+        
+    }
+
 
     void TransformComponent::localTranslate(const Vec3 &trans)
     {
