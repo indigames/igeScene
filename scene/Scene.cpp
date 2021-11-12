@@ -376,15 +376,7 @@ namespace ige::scene
     std::shared_ptr<SceneObject> Scene::createObjectFromPrefab(const std::string& path, const std::string& name, const std::shared_ptr<SceneObject>& parent, const Vec3& position, const Quat& rotation, const Vec3& scale)
     {
         auto object = loadPrefab(parent ? parent->getId() : -1, path, position, rotation, scale);
-        if (object) {
-            object->setName(name);
-            auto transform = object->getTransform();
-            if (transform != nullptr) {
-                transform->setPosition(position);
-                transform->setRotation(rotation);
-                transform->setScale(scale);
-            }
-        }
+        if (object) object->setName(name);
         return object;
     }
 

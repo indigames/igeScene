@@ -120,9 +120,11 @@ namespace ige::scene
         //! Get world forward vector
         virtual Vec3 getWorldForward() const;
 
+        //! Should always update
+        inline virtual bool shouldAlwaysUpdate() { return true; }
+
         //! Update
-        virtual void onUpdate(float dt) override;
-        virtual void onAlwaysUpdate(float dt) override;
+        virtual void onUpdate(float dt) override;        
 
         virtual void makeDirty();
 

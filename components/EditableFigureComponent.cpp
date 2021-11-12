@@ -30,9 +30,7 @@ namespace ige::scene
             getOwner()->getTransform()->makeDirty();
     }
 
-    //! Update
-    void EditableFigureComponent::onAlwaysUpdate(float dt)
-    {
+    void EditableFigureComponent::onUpdate(float dt) {
         if (m_figure == nullptr || !m_figure->IsInitializeSuccess())
             return;
 
@@ -51,10 +49,6 @@ namespace ige::scene
         transform->setScale(m_figure->GetScale());
         if (!getOwner()->isActive())
             pyxie_printf("f Update\n");
-    }
-
-    void EditableFigureComponent::onUpdate(float dt) {
-
     }
 
     //! Render

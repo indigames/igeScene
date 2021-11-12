@@ -470,15 +470,6 @@ namespace ige::scene
     //! Update function
     void SceneObject::onUpdate(float dt)
     {
-        for (int i = m_components.size() - 1; i >= 0; i--) {
-            if (!m_transform) break; // Which mean object being deleted
-            if (m_components[i]->isEnabled() && m_components[i]->getType() != Component::Type::Camera)
-                m_components[i]->onAlwaysUpdate(dt);
-        }
-
-        if (!isActive()) 
-            return;
-
         if (m_aabbDirty > 0) {
             updateAabb();
             m_aabbDirty--;
@@ -486,47 +477,39 @@ namespace ige::scene
 
         for (int i = m_components.size() - 1; i >= 0; i--) {
             if (!m_transform) break; // Which mean object being deleted
-            if(m_components[i]->isEnabled() && m_components[i]->getType() != Component::Type::Camera)
-                m_components[i]->onUpdate(dt);
+            if (m_components[i]->getType() != Component::Type::Camera) {
+                auto shouldUpdate = m_components[i]->isEnabled() && (isActive() || m_components[i]->shouldAlwaysUpdate());
+                if (shouldUpdate) {
+                    m_components[i]->onUpdate(dt);
+                }
+            }
         }
     }
 
     //! Update function
     void SceneObject::onFixedUpdate(float dt)
     {
-        if (isActive())
-        {
-            for (auto &comp : m_components)
-            {
-                if(comp->isEnabled())
-                    comp->onFixedUpdate(dt);
-            }
+        for (auto &comp : m_components) {
+            if(comp->isEnabled() && (isActive() || comp->shouldAlwaysUpdate()))
+                comp->onFixedUpdate(dt);
         }
     }
 
     //! Update function
     void SceneObject::onLateUpdate(float dt)
     {
-        if (isActive())
-        {
-            for (auto &comp : m_components)
-            {
-                if(comp->isEnabled())
-                    comp->onLateUpdate(dt);
-            }
+        for (auto& comp : m_components) {
+            if (comp->isEnabled() && (isActive() || comp->shouldAlwaysUpdate()))
+                comp->onLateUpdate(dt);
         }
     }
 
     //! Physic Update function
     void SceneObject::onPhysicUpdate(float dt)
     {
-        if (isActive())
-        {
-            for (auto& comp : m_components)
-            {
-                if(comp->isEnabled())
-                    comp->onPhysicUpdate(dt);
-            }
+        for (auto& comp : m_components) {
+            if (comp->isEnabled() && (isActive() || comp->shouldAlwaysUpdate()))
+                comp->onPhysicUpdate(dt);
         }
     }
 

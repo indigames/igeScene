@@ -61,18 +61,13 @@ namespace ige::scene
         }
     }
 
-    void TransformComponent::onAlwaysUpdate(float dt)
+    void TransformComponent::onUpdate(float dt)
     {
         if (m_bLocalDirty)
         {
             updateLocalToWorld();
             m_bLocalDirty = false;
         }
-    }
-
-    void TransformComponent::onUpdate(float dt)
-    {
-        
     }
 
 
@@ -481,9 +476,9 @@ namespace ige::scene
     //! Deserialize
     void TransformComponent::from_json(const json &j)
     {
-        setLocalPosition(j.value("pos", Vec3()));
-        setLocalRotation(j.value("rot", Vec3(0.f, 0.f, 0.f)));
-        setLocalScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
+        setPosition(j.value("wpos", Vec3()));
+        setRotation(j.value("wrot", Vec3(0.f, 0.f, 0.f)));
+        setScale(j.value("wscale", Vec3(1.f, 1.f, 1.f)));
         Component::from_json(j);
         onUpdate(0.f); // pre-warm
     }

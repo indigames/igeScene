@@ -24,10 +24,11 @@ namespace ige::scene
         //! Returns the type of the component
         virtual Type getType() const override { return Type::EditableFigure; }
 
+        //! Should always update
+        inline virtual bool shouldAlwaysUpdate() { return true; }
+
         //! Update
         void onUpdate(float dt) override;
-
-        void onAlwaysUpdate(float dt) override;
 
         //! Render
         void onRender() override;

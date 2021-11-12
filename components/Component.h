@@ -93,6 +93,9 @@ namespace ige::scene
         //! Can multiple edit
         inline virtual bool canMultiEdit() { return true; }
 
+        //! Should always update
+        inline virtual bool shouldAlwaysUpdate() { return false; }
+
         //! Enable
         virtual void onEnable();
 
@@ -101,7 +104,6 @@ namespace ige::scene
 
         //! Update functions
         virtual void onUpdate(float dt);
-        virtual void onAlwaysUpdate(float dt);
         virtual void onFixedUpdate(float dt);
         virtual void onLateUpdate(float dt);
         virtual void onPhysicUpdate(float dt);

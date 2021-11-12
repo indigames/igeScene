@@ -33,10 +33,6 @@ namespace ige::scene
     //! Update
     void FigureComponent::onUpdate(float dt)
     {
-    }
-
-    void FigureComponent::onAlwaysUpdate(float dt)
-    {
         if (m_figure == nullptr || !m_figure->IsInitializeSuccess())
             return;
 
@@ -53,10 +49,7 @@ namespace ige::scene
         transform->setPosition(m_figure->GetPosition());
         transform->setRotation(m_figure->GetRotation());
         transform->setScale(m_figure->GetScale());
-        
     }
-
-    
 
     //! Render
     void FigureComponent::onRender()
