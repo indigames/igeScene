@@ -67,6 +67,11 @@ namespace ige::scene
         //! Add child by id
         virtual void addChildById(uint64_t id);
 
+        virtual int getChildIndex(const std::shared_ptr<SceneObject>& child);
+
+        //! Insert child
+        virtual void insertChild(int idx, std::shared_ptr<SceneObject> child);
+
         //! Removes child
         virtual void removeChild(std::shared_ptr<SceneObject> child);
 

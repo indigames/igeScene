@@ -138,7 +138,7 @@ namespace ige::scene
     //! Set parent
     void SceneObject::setParent(std::shared_ptr<SceneObject> parent)
     {
-        if (getParent())
+        if (getParent() && getParent() != parent)
         {
             getParent()->removeChildById(getId());
             getDetachedEvent().invoke(*this);
@@ -147,8 +147,6 @@ namespace ige::scene
             setCanvas(nullptr);
             m_parent.reset();
         }
-
-        //auto parent_temp = (parent == nullptr) ? getRoot() : parent;
 
         if (parent)
         {
@@ -216,6 +214,32 @@ namespace ige::scene
     {
         if (getScene() == nullptr) return;
         return addChild(getScene()->findObjectById(id));
+    }
+
+    //! Get child index
+    int SceneObject::getChildIndex(const std::shared_ptr<SceneObject>& child)
+    {
+        auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return !elem.expired() && elem.lock()->getId() == child->getId(); });
+        if (itr != m_children.end()) {
+            return (int)(itr - m_children.begin());
+        }
+        return -1;
+    }
+
+    //! Insert child
+    void SceneObject::insertChild(int idx, std::shared_ptr<SceneObject> child)
+    {
+        if (idx < 0 || idx >= m_children.size())
+            return;
+
+        auto itr = std::find_if(m_children.begin(), m_children.end(), [&](auto elem) { return !elem.expired() && elem.lock()->getId() == child->getId(); });
+        if (itr != m_children.end()) {
+            m_children.erase(itr);
+            dispatchEvent((int)EventType::RemoveChild, Value(child->getUUID()));
+        }
+
+        m_children.insert(m_children.begin() + idx, child);
+        dispatchEvent((int)EventType::AddChild, Value(child->getUUID()));
     }
 
     //! Removes child
