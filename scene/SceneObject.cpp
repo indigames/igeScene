@@ -227,7 +227,7 @@ namespace ige::scene
     }
 
     //! Insert child
-    void SceneObject::insertChild(int idx, std::shared_ptr<SceneObject> child)
+    void SceneObject::setChildIndex(std::shared_ptr<SceneObject> child, int idx)
     {
         if (idx < 0 || idx >= m_children.size())
             return;
@@ -240,6 +240,16 @@ namespace ige::scene
 
         m_children.insert(m_children.begin() + idx, child);
         dispatchEvent((int)EventType::AddChild, Value(child->getUUID()));
+
+        child->setParent(getSharedPtr());
+    }
+
+    //! Get child by index
+    std::shared_ptr<SceneObject> SceneObject::getChildByIndex(int idx)
+    {
+        if (idx < 0 || idx >= m_children.size())
+            return nullptr;
+        return m_children[idx].expired() ? nullptr : m_children[idx].lock();
     }
 
     //! Removes child

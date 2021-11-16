@@ -130,6 +130,51 @@ PyDoc_STRVAR(SceneObject_getScene_doc,
 	"----------\n"\
 );
 
+PyDoc_STRVAR(SceneObject_getChildIndex_doc,
+	"Get the index of child object.\n"\
+	"\n"\
+	"SceneObject().getChildIndex(child: SceneObject|string)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    child : SceneObject|string\n"\
+	"        Child object instance or it's UUID.\n"\
+	"Return:\n"\
+	"    index: int\n"\
+	"----------\n"\
+);
+
+PyDoc_STRVAR(SceneObject_setChildIndex_doc,
+	"Set the index of child object.\n"\
+	"\n"\
+	"SceneObject().setChildIndex(child: SceneObject|string, index: int)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    child : SceneObject|string\n"\
+	"        Child object instance or it's UUID.\n"\
+	"    index : int\n"\
+	"        The index to be inserted as child.\n"\
+	"Return:\n"\
+	"    result: bool\n"\
+	"----------\n"\
+);
+
+PyDoc_STRVAR(SceneObject_getChildByIndex_doc,
+	"Get the child object by index.\n"\
+	"\n"\
+	"SceneObject().getChildByIndex(index: int)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        The index of the child object.\n"\
+	"Return:\n"\
+	"    child: SceneObject\n"\
+	"----------\n"\
+);
+
+
 // id
 PyDoc_STRVAR(SceneObject_id_doc,
     "The ID of the scene object.\n"\

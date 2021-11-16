@@ -84,4 +84,9 @@ namespace ige::scene
 
     // Get Python Script
     PyObject* SceneObject_getScript(PyObject_SceneObject* self, PyObject* args);
+
+    // Get/set child index
+    PyObject* SceneObject_getChildIndex(PyObject_SceneObject* self, PyObject* value);
+    PyObject* SceneObject_setChildIndex(PyObject_SceneObject* self, PyObject* value);
+    PyObject* SceneObject_getChildByIndex(PyObject_SceneObject* self, PyObject* value);
 }

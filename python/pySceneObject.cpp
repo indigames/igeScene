@@ -920,6 +920,66 @@ namespace ige::scene
         Py_RETURN_NONE;
     }
 
+    // Get/set child index
+    PyObject* SceneObject_getChildIndex(PyObject_SceneObject* self, PyObject* value)
+    {
+        if (self->sceneObject.expired()) Py_RETURN_NONE;
+        PyObject* obj = nullptr;
+        if (PyArg_ParseTuple(value, "O", &obj) && obj) {
+            std::shared_ptr<SceneObject> sceneObject = nullptr;
+            if (PyUnicode_Check(obj)) {
+                auto uuid = std::string(PyUnicode_AsUTF8(obj));
+                sceneObject = self->sceneObject.lock()->findChild(uuid);
+            }
+            else if(obj->ob_type == &PyTypeObject_SceneObject) {
+                auto pySceneObject = (PyObject_SceneObject*)obj;
+                sceneObject = pySceneObject->sceneObject.expired() ? nullptr : pySceneObject->sceneObject.lock();
+            }
+            if (sceneObject != nullptr) {
+                return PyLong_FromLong(self->sceneObject.lock()->getChildIndex(sceneObject));
+            }
+        }
+        return PyLong_FromLong(-1);
+    }
+
+    PyObject* SceneObject_setChildIndex(PyObject_SceneObject* self, PyObject* value)
+    {
+        if (self->sceneObject.expired()) Py_RETURN_NONE;
+        PyObject* obj = nullptr;
+        int idx = -1;
+        if (PyArg_ParseTuple(value, "Oi", &obj, &idx) && obj) {
+            std::shared_ptr<SceneObject> sceneObject = nullptr;
+            if (PyUnicode_Check(obj)) {
+                auto uuid = std::string(PyUnicode_AsUTF8(obj));
+                sceneObject = self->sceneObject.lock()->findChild(uuid);
+            }
+            else if (obj->ob_type == &PyTypeObject_SceneObject) {
+                auto pySceneObject = (PyObject_SceneObject*)obj;
+                sceneObject = pySceneObject->sceneObject.expired() ? nullptr : pySceneObject->sceneObject.lock();
+            }
+            if (sceneObject != nullptr) {
+                self->sceneObject.lock()->setChildIndex(sceneObject, idx);
+                Py_RETURN_TRUE;
+            }
+        }
+        Py_RETURN_FALSE;
+    }
+
+    PyObject* SceneObject_getChildByIndex(PyObject_SceneObject* self, PyObject* value)
+    {
+        if (self->sceneObject.expired()) Py_RETURN_NONE;
+        int idx = -1;
+        if (PyArg_ParseTuple(value, "i", &idx)) {
+            auto sceneObject = self->sceneObject.lock()->getChildByIndex(idx);
+            if (sceneObject) {
+                auto* sobj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
+                sobj->sceneObject = sceneObject;
+                return (PyObject*)sobj;
+            }
+        }
+        Py_RETURN_NONE;
+    }
+
     // Compare function
     static PyObject* SceneObject_richcompare(PyObject* self, PyObject* other, int op)
     {
@@ -936,7 +996,7 @@ namespace ige::scene
             {
                 auto selfCmp = (PyObject_SceneObject*)(self);
                 auto otherCmp = (PyObject_SceneObject*)(other);
-                if (selfCmp->sceneObject.expired() || selfCmp->sceneObject.expired()) {
+                if (selfCmp->sceneObject.expired() || otherCmp->sceneObject.expired()) {
                     result = Py_False;
                 }
                 else {
@@ -975,6 +1035,9 @@ namespace ige::scene
         {"getScript", (PyCFunction)SceneObject_getScript, METH_NOARGS, SceneObject_getScript_doc},
         {"getScene", (PyCFunction)SceneObject_getScene, METH_NOARGS, SceneObject_getScene_doc},
         {"findChildByName", (PyCFunction)SceneObject_findChildByName, METH_VARARGS, SceneObject_getChildren_doc},
+        {"getChildIndex", (PyCFunction)SceneObject_getChildIndex, METH_VARARGS, SceneObject_getChildIndex_doc},
+        {"setChildIndex", (PyCFunction)SceneObject_setChildIndex, METH_VARARGS, SceneObject_setChildIndex_doc},
+        {"getChildByIndex", (PyCFunction)SceneObject_getChildByIndex, METH_VARARGS, SceneObject_getChildByIndex_doc},
         {NULL, NULL}};
 
     // Get/Set
