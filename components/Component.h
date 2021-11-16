@@ -89,8 +89,11 @@ namespace ige::scene
         //! Skip serialize
         bool isSkipSerialize() const { return m_bSkipSerialize; }
         void setSkipSerialize(bool skip = true) { m_bSkipSerialize = skip; }
-        
-        //! Can multiple edit
+
+        //! Can attach multiple instance to one object?
+        inline virtual bool canMultiInstance() { return false; }
+
+        //! Can multiple edit?
         inline virtual bool canMultiEdit() { return false; }
 
         //! Should always update

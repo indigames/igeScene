@@ -25,6 +25,9 @@ namespace ige::scene
         //! Returns the type of the component
         virtual Type getType() const override { return Type::Script; }
 
+        //! Allow multiple scripts attached to one object
+        virtual bool canMultiInstance() override { return true; }
+
         //! Check and clear error
         void PyErr_CheckAndClear();
 

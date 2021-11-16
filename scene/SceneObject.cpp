@@ -1093,7 +1093,6 @@ namespace ige::scene
             {"uuid", m_uuid},
             {"name", m_name},
             {"active", m_isActive},
-            {"selected", m_isSelected},
             {"gui", m_bIsGui},
             {"raycast", m_bIsRaycastTarget},
             {"interactable", m_bIsInteractable},
@@ -1132,7 +1131,6 @@ namespace ige::scene
         setPrefabId(j.value("prefabId", std::string()));
         if (!isInPrefab()) {
             setUUID(j.value("uuid", getUUID()));
-            setSelected(j.value("selected", false));
         }
         m_bIsGui = j.value("gui", false);
         m_bIsRaycastTarget = j.value("raycast", false);
