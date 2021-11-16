@@ -39,6 +39,9 @@ namespace ige::scene
         //! Get parent transform component
         std::shared_ptr<TransformComponent> getParent() const;
 
+        //! Can multiple edit
+        virtual bool canMultiEdit() override { return true; }
+
         //! Set parent transform
         virtual void setParent(std::shared_ptr<TransformComponent> comp);
 
@@ -163,6 +166,7 @@ namespace ige::scene
         //! Handle notification from parent
         virtual void onNotified(const ETransformMessage &message);
 
+        //! Lock handler
         bool isLockMove() { return ((m_lockTransform & 1) == 1); }
         bool isLockRotate() { return ((m_lockTransform & 2) == 2); }
         bool isLockScale() { return ((m_lockTransform & 3) == 3); }
@@ -189,6 +193,7 @@ namespace ige::scene
         //! Dirty flag
         bool m_bLocalDirty = false;
 
+        //! Lock transform mask
         int m_lockTransform = 0;
     };
 } // namespace ige::scene

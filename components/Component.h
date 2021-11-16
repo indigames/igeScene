@@ -91,7 +91,7 @@ namespace ige::scene
         void setSkipSerialize(bool skip = true) { m_bSkipSerialize = skip; }
         
         //! Can multiple edit
-        inline virtual bool canMultiEdit() { return true; }
+        inline virtual bool canMultiEdit() { return false; }
 
         //! Should always update
         inline virtual bool shouldAlwaysUpdate() { return false; }
