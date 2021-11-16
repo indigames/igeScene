@@ -113,8 +113,12 @@ PyDoc_STRVAR(SceneObject_invoke_doc,
 PyDoc_STRVAR(SceneObject_getScript_doc,
 	"Get script from current scene object.\n"\
 	"\n"\
-	"SceneObject().getScript()\n"\
+	"SceneObject().getScript(path: string)\n"\
 	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    path : string\n"\
+	"        [Optional] Will return the Script specified by path, or the first Script if path is not specified.\n"\
 	"Return:\n"\
 	"    script: Script\n"\
 	"----------\n"\
