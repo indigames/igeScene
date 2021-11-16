@@ -82,7 +82,7 @@ namespace ige::scene
 
         // Set AABB to default
         m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
-
+        
         // Set prefabId
         setPrefabId(prefabId);
 
@@ -1142,8 +1142,9 @@ namespace ige::scene
             auto key = it.at(0);
             auto val = it.at(1);
             auto comp = createComponent(key);
-            if (comp)
+            if (comp) {
                 val.get_to(*comp);
+            }
         }
 
         // Add editor camera figure debug

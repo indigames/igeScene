@@ -72,7 +72,9 @@ namespace ige::scene
         //! Create scene object
         virtual std::shared_ptr<SceneObject> createObject(const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 }, const std::string& prefabId = std::string(), const Vec3& position = Vec3(), const Quat& rotation = Quat(), const Vec3& scale = { 1,1,1 });
 
-        virtual std::shared_ptr<SceneObject> createObjectFromPrefab(const std::string& file, const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr, const Vec3& position = Vec3(), const Quat& rotation = Quat(), const Vec3& scale = {1,1,1});
+        virtual std::shared_ptr<SceneObject> createObjectFromPrefab(const std::string& file, const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr);
+        virtual std::shared_ptr<SceneObject> createObjectFromPrefab(const std::string& file, const std::string& name, const std::shared_ptr<SceneObject>& parent, const Vec3& position);
+        virtual std::shared_ptr<SceneObject> createObjectFromPrefab(const std::string& file, const std::string& name, const std::shared_ptr<SceneObject>& parent, const Vec3& position, const Quat& rotation);
 
         //! Remove all scene objects
         virtual bool removeAllObjects();
@@ -145,7 +147,11 @@ namespace ige::scene
         //! Prefab save/load
         bool isSavingPrefab() { return m_bIsSavingPrefab; }
         bool savePrefab(uint64_t objectId, const std::string& file);
-        std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file, const Vec3& pos = Vec3(), const Quat& rot = Quat(), const Vec3& scale = Vec3(1.f, 1.f, 1.f));
+        
+        std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file);
+        std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file, const Vec3& pos);
+        std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file, const Vec3& pos, const Quat& rot);
+
         bool reloadAllPrefabs();
         bool reloadPrefabs(const std::string& prefabId);
 

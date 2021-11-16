@@ -373,9 +373,23 @@ namespace ige::scene
         return sceneObject;
     }
 
-    std::shared_ptr<SceneObject> Scene::createObjectFromPrefab(const std::string& path, const std::string& name, const std::shared_ptr<SceneObject>& parent, const Vec3& position, const Quat& rotation, const Vec3& scale)
+    std::shared_ptr<SceneObject> Scene::createObjectFromPrefab(const std::string& path, const std::string& name, const std::shared_ptr<SceneObject>& parent)
     {
-        auto object = loadPrefab(parent ? parent->getId() : -1, path, position, rotation, scale);
+        auto object = loadPrefab(parent ? parent->getId() : -1, path);
+        if (object) object->setName(name);
+        return object;
+    }
+
+    std::shared_ptr<SceneObject> Scene::createObjectFromPrefab(const std::string& path, const std::string& name, const std::shared_ptr<SceneObject>& parent, const Vec3& position)
+    {
+        auto object = loadPrefab(-1, path, position);
+        if (object) object->setName(name);
+        return object;
+    }
+
+    std::shared_ptr<SceneObject> Scene::createObjectFromPrefab(const std::string& path, const std::string& name, const std::shared_ptr<SceneObject>& parent, const Vec3& position, const Quat& rotation)
+    {
+        auto object = loadPrefab(parent ? parent->getId() : -1, path, position, rotation);
         if (object) object->setName(name);
         return object;
     }
@@ -569,8 +583,32 @@ namespace ige::scene
         return false;
     }
 
+    std::shared_ptr<SceneObject> Scene::loadPrefab(uint64_t parentId, const std::string& path)
+    {
+        if (path.empty())
+            return nullptr;
+
+        auto fsPath = fs::path(path);
+        if (fsPath.extension().string() != ".prefab")
+            return nullptr;
+
+        std::ifstream file(fsPath);
+        if (!file.is_open())
+            return nullptr;
+
+        json jObj;
+        file >> jObj;
+
+        auto parent = findObjectById(parentId);
+        auto prefabId = jObj.value("prefabId", std::string());
+        auto obj = createObject(jObj.at("name"), nullptr, jObj.value("gui", false), jObj.value("size", Vec2{ 64.f, 64.f }), prefabId);
+        obj->from_json(jObj);
+        if (parent) obj->setParent(parent);
+        return obj;
+    }
+
     std::shared_ptr<SceneObject> Scene::loadPrefab(uint64_t parentId, const std::string& path, 
-        const Vec3& pos, const Quat& rot, const Vec3& scale)
+        const Vec3& pos)
     {
         if (path.empty())
             return nullptr;
@@ -589,9 +627,51 @@ namespace ige::scene
         auto parent = findObjectById(parentId);
         auto prefabId = jObj.value("prefabId", std::string());
         auto obj = createObject(jObj.at("name"), nullptr, jObj.value("gui", false), jObj.value("size", Vec2{ 64.f, 64.f }), prefabId,
-            pos, rot, scale);
+            pos);
+        auto transform = obj->getTransform();
+        if (transform != nullptr) {
+            transform->lockMove(true);
+        }
         obj->from_json(jObj);
+        if (transform != nullptr && obj->getComponent<Canvas>() == nullptr) {
+            transform->lockMove(false);
+        }
         if(parent) obj->setParent(parent);
+        return obj;
+    }
+
+    std::shared_ptr<SceneObject> Scene::loadPrefab(uint64_t parentId, const std::string& path,
+        const Vec3& pos, const Quat& rot)
+    {
+        if (path.empty())
+            return nullptr;
+
+        auto fsPath = fs::path(path);
+        if (fsPath.extension().string() != ".prefab")
+            return nullptr;
+
+        std::ifstream file(fsPath);
+        if (!file.is_open())
+            return nullptr;
+
+        json jObj;
+        file >> jObj;
+
+        auto parent = findObjectById(parentId);
+        auto prefabId = jObj.value("prefabId", std::string());
+        auto obj = createObject(jObj.at("name"), nullptr, jObj.value("gui", false), jObj.value("size", Vec2{ 64.f, 64.f }), prefabId,
+            pos, rot);
+        auto transform = obj->getTransform();
+        if (transform != nullptr) {
+            transform->lockMove(true);
+            transform->lockRotate(true);
+        }
+        obj->from_json(jObj);
+        if (transform != nullptr && obj->getComponent<Canvas>() == nullptr) {
+            transform->lockMove(false);
+            transform->lockRotate(false);
+        }
+        if (parent) obj->setParent(parent);
         return obj;
     }
 
