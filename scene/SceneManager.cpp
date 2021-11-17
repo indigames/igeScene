@@ -222,7 +222,8 @@ namespace ige::scene
         auto scene = findPrefabSceneById(prefabId);
         if (scene != nullptr) return scene;
 
-        scene = createScene(jObj.value("name", "Prefab"), true);        
+        scene = createScene(jObj.value("name", "Prefab"), true);
+        scene->setPath(path);
         auto obj = scene->createObject(jObj.at("name"), nullptr, jObj.value("gui", false), {64.f, 64.f}, prefabId);
         obj->from_json(jObj);
 
