@@ -61,6 +61,7 @@ namespace ige::scene
         float getMatchWidthOrHeight() const { return m_MatchWidthOrHeight; }
         void setMatchWidthOrHeight(float value);
 
+
     protected:
         virtual void updateCanvas();
 
@@ -99,5 +100,7 @@ namespace ige::scene
 
         //! Cache temp json
         json m_json;
+
+        float m_fov;
     };
 } // namespace ige::scene
