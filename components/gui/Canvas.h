@@ -54,6 +54,9 @@ namespace ige::scene
         //! Get camera
         Camera* getCamera() { return m_camera; }
 
+        //! Event
+        Event<Vec2>& getOnTargetSizeChanged() { return m_onTargetSizeChanged; };
+
         ScreenMatchMode getScreenMatchMode() const { return m_ScreenMatchMode; }
         void setScreenMatchMode(ScreenMatchMode mode);
         void setScreenMatchMode(int mode);
@@ -101,6 +104,7 @@ namespace ige::scene
         //! Cache temp json
         json m_json;
 
-        float m_fov;
+        //! Events
+        Event<Vec2> m_onTargetSizeChanged;
     };
 } // namespace ige::scene

@@ -44,6 +44,7 @@ namespace ige::scene
         if (m_targetCanvasSize != canvasSize)
         {   
             m_targetCanvasSize = canvasSize;
+            getOnTargetSizeChanged().invoke(m_targetCanvasSize);
             updateCanvas();
         }
     }
