@@ -78,6 +78,7 @@ namespace ige::scene
             m_scaleFactor = std::max(m_deviceScale[0], m_deviceScale[1]);
             break;
         }
+        if (m_scaleFactor <= 0) m_scaleFactor = 0.001f;
         auto transform = getOwner()->getRectTransform();
         if (transform) {
             transform->lockMove(false);
@@ -88,7 +89,7 @@ namespace ige::scene
             transform->setSize(m_canvasSize);
 
             Vec2 resize = Vec2(m_scaleFactor * m_canvasSize[0], m_scaleFactor * m_canvasSize[1]);
-            Vec3 worldPosition = Vec3(resize[0] * 0.5f, resize[1] * 0.5f, 0);
+            Vec3 worldPosition = Vec3(m_targetCanvasSize[0] * 0.5f, m_targetCanvasSize[1] * 0.5f, 0);
             transform->setLocalPosition(worldPosition);
 
             Vec3 worldScale = Vec3(m_scaleFactor, m_scaleFactor, m_scaleFactor);
@@ -98,6 +99,8 @@ namespace ige::scene
             m_camera->SetAspectRate(m_targetCanvasSize.X() / m_targetCanvasSize.Y());
             m_camera->SetOrthoWidth(m_targetCanvasSize.X() * 0.5f);
             m_camera->SetOrthoHeight(m_targetCanvasSize.Y() * 0.5f);
+
+            transform->setSize(m_targetCanvasSize / m_scaleFactor);
 
             transform->lockMove(true);
             transform->lockRotate(true);
