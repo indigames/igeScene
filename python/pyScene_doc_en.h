@@ -169,6 +169,22 @@ PyDoc_STRVAR(Scene_raycastUI_doc,
 	"----------\n"
 	"    Tuple: [object, position]\n");
 
+PyDoc_STRVAR(Scene_capture_doc,
+	"Capture the current rendered scene to device storage as a PNG file.\n"
+	"To capture whole scene, call Scene.capture() in onRenderUI().\n"
+	"To capture just 3D scene, call it in onRender().\n"
+	"Call the function else where like onUpdate, onClick, ... will return false.\n"
+	"\n"
+	"Scene().capture(file_name: string)\n"
+	"\n"
+	"Parameters:\n"
+	"----------\n"
+	"    file_name: string\n"
+	"      Name of the file, without extension.\n"
+	"Return:\n"
+	"----------\n"
+	"    result: bool\n");
+
 // name
 PyDoc_STRVAR(Scene_name_doc,
 			 "Name of scene.\n"

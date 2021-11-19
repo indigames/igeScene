@@ -113,6 +113,7 @@ namespace ige::scene
 
         //! Render
         virtual void onRender();
+        virtual void onRenderUI();
 
         //! Destroyed
         virtual void onDestroy();

@@ -56,6 +56,7 @@ namespace ige::scene
 
     //! Render
     void Component::onRender() {}
+    void Component::onRenderUI() {}
 
     //! Destroyed
     void Component::onDestroy() {}

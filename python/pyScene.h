@@ -80,5 +80,9 @@ namespace ige::scene
     // ScreenPos
     PyObject* Scene_convertScreenPoint(PyObject_Scene* self, PyObject* args);
 
+    // Screen size
     PyObject* Scene_getScreenSize(PyObject_Scene* self);
+
+    // Capture
+    PyObject* Scene_capture(PyObject_Scene* self, PyObject* args);
 }

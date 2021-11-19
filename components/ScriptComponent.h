@@ -59,6 +59,7 @@ namespace ige::scene
 
         //! Render
         virtual void onRender() override;
+        virtual void onRenderUI() override;
 
         //! Destroyed
         virtual void onDestroy() override;

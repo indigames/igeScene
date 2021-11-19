@@ -562,6 +562,20 @@ namespace ige::scene
         }
     }
 
+    //! RenderUI
+    void SceneObject::onRenderUI()
+    {
+        if (isActive())
+        {
+            for (auto &comp : m_components)
+            {
+                // Camera rendered before other objects
+                if (comp->isEnabled() && comp->getName() != "Camera")
+                    comp->onRenderUI();
+            }
+        }
+    }
+
     //! Enable or disable the actor
     void SceneObject::setActive(bool isActive, bool recursive)
     {

@@ -10,6 +10,8 @@
 
 #include <pyVectorMath.h>
 #include <pythonResource.h>
+#include <stb_image_write.h>
+#include <bitmapHelper.h>
 
 namespace ige::scene
 {
@@ -642,6 +644,35 @@ namespace ige::scene
         return (PyObject*)vec2Obj;
     }
 
+    PyObject* Scene_capture(PyObject_Scene* self, PyObject* args)
+    {
+        if (self->scene.expired()) Py_RETURN_FALSE;
+
+        char* name = nullptr;
+        if (!PyArg_ParseTuple(args, "s", &name))
+            Py_RETURN_FALSE;
+
+        auto screenRtt = RenderContext::Instance().GetCurrentRenderTarget();
+        if (screenRtt) {
+            auto width = screenRtt->GetWidth();
+            auto height = screenRtt->GetHeight();
+
+            auto rtData = (uint8_t*)PYXIE_MALLOC(width * height * 4 * sizeof(uint8_t));
+            bool result = screenRtt->ReadColorBufferImage(rtData, 0, 0, width, height);
+            if (result)
+            {
+                char path[512] = {0};
+                sprintf(path, "%s%s.png", pyxieFios::Instance().GetRoot(), name);
+
+                FlipRGBAY(rtData, width, height);
+                int result = stbi_write_png(path, width, height, 4, rtData, 0);
+                PYXIE_FREE(rtData);
+                Py_RETURN_TRUE;
+            }
+        }
+        Py_RETURN_FALSE;        
+    }
+
     // Compare function
     static PyObject* Scene_richcompare(PyObject* self, PyObject* other, int op)
     {
@@ -706,6 +737,7 @@ namespace ige::scene
         { "worldToScreenPoint", (PyCFunction)Scene_worldToScreenPoint, METH_VARARGS, NULL },
         { "convertScreenPoint", (PyCFunction)Scene_convertScreenPoint, METH_VARARGS, NULL },
         { "getScreenSize", (PyCFunction)Scene_getScreenSize, METH_NOARGS, NULL },
+        { "capture", (PyCFunction)Scene_capture, METH_VARARGS, Scene_capture_doc },
         { NULL, NULL }
     };
 

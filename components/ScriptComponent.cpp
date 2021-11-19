@@ -483,6 +483,19 @@ namespace ige::scene
         PyErr_CheckAndClear();
     }
 
+    //! Render
+    void ScriptComponent::onRenderUI()
+    {
+        if (SceneManager::getInstance()->isEditor())
+            return;
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onRenderUI"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onRenderUI", NULL);
+            Py_XDECREF(ret);
+        }
+        PyErr_CheckAndClear();
+    }
+
     //! Destroyed
     void ScriptComponent::onDestroy()
     {

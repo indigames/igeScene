@@ -318,8 +318,9 @@ namespace ige::scene
     {
         m_showcase->Render();
 
-        for (int i = m_objects.size() - 1; i >= 0; i--)
+        for (int i = m_objects.size() - 1; i >= 0; i--) {
             m_objects[i]->onRender();
+        }
     }
 
     void Scene::renderUI() {
@@ -341,6 +342,10 @@ namespace ige::scene
             renderContext->BeginScene(rtt, Vec4(1.f, 1.f, 1.f, 1.f), false, false);
         }
         m_uiShowcase->Render();
+
+        for (int i = m_objects.size() - 1; i >= 0; i--) {
+            m_objects[i]->onRenderUI();
+        }
     }
 
     std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, const std::string& prefabId,
