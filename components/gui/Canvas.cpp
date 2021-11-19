@@ -95,7 +95,7 @@ namespace ige::scene
             Vec3 worldScale = Vec3(m_scaleFactor, m_scaleFactor, m_scaleFactor);
             transform->setLocalScale(worldScale);
 
-            m_camera->SetPosition({ worldPosition.X(), worldPosition.Y(), worldPosition.Z() + 100.0f });
+            m_camera->SetPosition({ worldPosition.X(), worldPosition.Y(), worldPosition.Z() + 10.0f });
             m_camera->SetAspectRate(m_targetCanvasSize.X() / m_targetCanvasSize.Y());
             m_camera->SetOrthoWidth(m_targetCanvasSize.X() * 0.5f);
             m_camera->SetOrthoHeight(m_targetCanvasSize.Y() * 0.5f);
