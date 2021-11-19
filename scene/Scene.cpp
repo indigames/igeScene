@@ -339,7 +339,7 @@ namespace ige::scene
                 getCanvas()->getCamera()->Render();
             }
 
-            renderContext->BeginScene(rtt, Vec4(1.f, 1.f, 1.f, 1.f), false, false);
+            renderContext->BeginScene(rtt, Vec4(1.f, 1.f, 1.f, 1.f), false, true);
         }
         m_uiShowcase->Render();
 
