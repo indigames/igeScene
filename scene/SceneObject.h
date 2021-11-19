@@ -175,6 +175,7 @@ namespace ige::scene
         static Event<SceneObject &> &getDetachedEvent() { return s_detachedEvent; }
         static Event<SceneObject &> &getSelectedEvent() { return s_selectedEvent; }
         static Event<SceneObject&>& getDeselectedEvent() { return s_deselectedEvent; }
+        static Event<SceneObject&>& getActivatedEvent() { return s_activatedEvent; }
 
         //! Helper to generate UUID
         static std::string generateUUID(unsigned int len = 16);
@@ -306,6 +307,7 @@ namespace ige::scene
         static Event<SceneObject&> s_detachedEvent;
         static Event<SceneObject&> s_selectedEvent;
         static Event<SceneObject&> s_deselectedEvent;
+        static Event<SceneObject&> s_activatedEvent;
 
         //! Cache transform component
         std::shared_ptr<TransformComponent> m_transform = nullptr;

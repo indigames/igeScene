@@ -62,6 +62,7 @@ namespace ige::scene
     Event<SceneObject &> SceneObject::s_detachedEvent;
     Event<SceneObject &> SceneObject::s_selectedEvent;
     Event<SceneObject&> SceneObject::s_deselectedEvent;
+    Event<SceneObject&> SceneObject::s_activatedEvent;
 
     //! Constructor
     SceneObject::SceneObject(Scene *scene, uint64_t id, std::string name, bool isGui, const Vec2 &size, const std::string& prefabId,
@@ -587,6 +588,8 @@ namespace ige::scene
             else {
                 activeChildren(isActive);
             }
+
+            getActivatedEvent().invoke(*this);
         }
     }
 
