@@ -11,6 +11,7 @@
 #include "components/CameraComponent.h"
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
+#include "components/EditableFigureComponent.h"
 #include "components/SpriteComponent.h"
 #include "components/EnvironmentComponent.h"
 #include "components/light/AmbientLight.h"
@@ -1001,6 +1002,63 @@ namespace ige::scene
     std::shared_ptr<Scene> Scene::getSharedPtr()
     {
         return SceneManager::getInstance()->getScene(getUUID());
+    }
+
+    bool Scene::reloadResource(const std::string& path) {
+
+        auto fsPath = fs::path(path);
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        if (relPath.size() == 0) relPath = fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+
+        bool reloaded = false;
+
+        auto figures = std::vector<std::shared_ptr<FigureComponent>>();
+        auto efigures = std::vector<std::shared_ptr<EditableFigureComponent>>();
+        auto sprites = std::vector<std::shared_ptr<SpriteComponent>>();
+
+        // Release old resouces
+        for (auto& obj : m_objects) {
+            if (!obj) continue;
+            for (auto& comp : obj->getComponents()) {
+                if (!comp) continue;
+                if (auto figComp = std::dynamic_pointer_cast<FigureComponent>(comp)) {
+                    if (figComp->getPath().compare(relPath) == 0) {
+                        figComp->setPath(std::string());
+                        figures.push_back(figComp);
+                    }
+                }
+                else if (auto efigComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp)) {
+                    if (efigComp->getPath().compare(relPath) == 0) {
+                        efigComp->setPath(std::string());
+                        efigures.push_back(efigComp);
+                    }
+                }
+                else if (auto spriteComp = std::dynamic_pointer_cast<SpriteComponent>(comp)) {
+                    if (spriteComp->getPath().compare(relPath) == 0) {
+                        spriteComp->setPath(std::string());
+                        sprites.push_back(spriteComp);
+                    }
+                }
+            }
+        }
+
+        // Clean up
+        ResourceManager::Instance().DeleteDaemon();
+
+        // Load new resources
+        for (auto& figComp : figures) figComp->setPath(relPath);
+        for (auto& efigComp : efigures) efigComp->setPath(relPath);
+        for (auto& spriteComp : sprites) spriteComp->setPath(relPath);
+
+        reloaded = !(figures.empty() || efigures.empty() || sprites.empty());
+
+        // Clear
+        figures.clear();
+        efigures.clear();
+        sprites.clear();
+
+        return reloaded;
     }
 
     //! Raycast

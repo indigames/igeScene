@@ -112,23 +112,23 @@ namespace ige::scene
             if (m_figure != nullptr)
             {
                 onResourceRemoved(m_figure);
+
                 m_figure->DecReference();
+                if (m_figure->ReferenceCount() == 0) {
+                    ResourceManager::Instance().DeleteDaemon();
+                }
                 m_figure = nullptr;
             }
+
+            if (m_path.empty())
+                return;
 
             auto fsPath = fs::path(m_path);
             auto fPath = fsPath.extension().compare(".pyxf") == 0 ? m_path : fsPath.parent_path().append(fsPath.stem().string() + ".pyxf").string();
             if (fPath.size() == 0) fPath = fsPath.string();
             std::replace(fPath.begin(), fPath.end(), '\\', '/');
 
-            auto figure = (Figure*)ResourceManager::Instance().GetResource(fPath.c_str(), FIGURETYPE);
-
-            // Backup the original figure for cloning later
-            if (figure == nullptr) {
-                ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton);
-            }
-
-            // Use copy instance
+            // Initialize figure instance
             m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton);
 
             // Update transform from transform component

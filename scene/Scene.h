@@ -222,6 +222,9 @@ namespace ige::scene
         //! Get shared pointer
         std::shared_ptr<Scene> getSharedPtr();
 
+        //! Reload resource
+        bool reloadResource(const std::string& path);
+
     protected:
         //! Create root Objects
         virtual std::shared_ptr<SceneObject> createRootObject(const std::string& name = "");
