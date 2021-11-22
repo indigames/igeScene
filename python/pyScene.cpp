@@ -76,8 +76,8 @@ namespace ige::scene
     int Scene_setActiveCamera(PyObject_Scene* self, PyObject* value)
     {
         if (self->scene.expired()) return -1;
-        PyObject* camera;
-        if (PyArg_ParseTuple(value, "O", &camera) && camera->ob_type == &PyTypeObject_CameraComponent) {
+        PyObject* camera = value;
+        if (camera != nullptr && camera->ob_type == &PyTypeObject_CameraComponent) {
             auto cameraObj = (PyObject_CameraComponent*)camera;
             if(!cameraObj->component.expired())
                 self->scene.lock()->setActiveCamera(std::dynamic_pointer_cast<CameraComponent>(cameraObj->component.lock()));
