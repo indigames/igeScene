@@ -12,7 +12,6 @@
 #include "components/FigureComponent.h"
 #include "components/light/AmbientLight.h"
 #include "components/light/DirectionalLight.h"
-#include "utils/ShapeDrawer.h"
 
 #include <Python.h>
 
@@ -34,9 +33,6 @@ namespace ige::scene
     SceneManager::SceneManager()
     {
         m_currScene = nullptr;
-
-        // Initialize shape drawer
-        ShapeDrawer::initialize();
     }
 
     SceneManager::~SceneManager()
@@ -141,15 +137,10 @@ namespace ige::scene
             m_currScene->preRender(camera);
     }
 
-    void SceneManager::render()
+    void SceneManager::render(RenderTarget* fbo)
     {
-        if (m_currScene)
-        {
-            ShapeDrawer::setViewProjectionMatrix(RenderContext::InstancePtr()->GetRenderViewProjectionMatrix());
-            m_currScene->render();
-            m_currScene->renderUI();
-            ShapeDrawer::flush();
-        }
+        if (m_currScene) 
+            m_currScene->render(fbo);
     }
 
     void SceneManager::setProjectPath(const std::string& path)

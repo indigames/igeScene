@@ -315,22 +315,24 @@ namespace ige::scene
         }
     }
 
-    void Scene::render()
+    void Scene::render(RenderTarget* fbo)
     {
-        m_showcase->Render();
-
-        for (int i = m_objects.size() - 1; i >= 0; i--) {
-            m_objects[i]->onRender();
+        // Render 3D scene
+        {
+            if(fbo) RenderContext::InstancePtr()->BeginScene(fbo, !m_activeCamera.expired() ? m_activeCamera.lock()->getClearColor() : Vec4(1.f, 1.f, 1.f, 1.f), true, true);
+            m_showcase->Render();
+            for (int i = m_objects.size() - 1; i >= 0; i--) {
+                m_objects[i]->onRender();
+            }
+            if (fbo) RenderContext::InstancePtr()->EndScene();
         }
+
+        // Render UI
+        renderUI(fbo);
     }
 
-    void Scene::renderUI() {
+    void Scene::renderUI(RenderTarget* fbo) {
         if (SceneManager::getInstance()->isPlaying()) {
-            auto renderContext = RenderContext::InstancePtr();
-            auto rtt = renderContext->GetCurrentRenderTarget();
-            renderContext->EndScene();
-            renderContext->ResetRenderStateAll();
-
             float dt = Time::Instance().GetElapsedTime();
             m_uiShowcase->Update(dt);
 
@@ -340,12 +342,16 @@ namespace ige::scene
                 getCanvas()->getCamera()->Render();
             }
 
-            renderContext->BeginScene(rtt, Vec4(1.f, 1.f, 1.f, 1.f), false, true);
+            if(fbo) RenderContext::InstancePtr()->BeginScene(fbo, Vec4(1.f, 1.f, 1.f, 1.f), false, true);
         }
         m_uiShowcase->Render();
 
         for (int i = m_objects.size() - 1; i >= 0; i--) {
             m_objects[i]->onRenderUI();
+        }
+
+        if (SceneManager::getInstance()->isPlaying()) {
+            if (fbo) RenderContext::InstancePtr()->EndScene();
         }
     }
 

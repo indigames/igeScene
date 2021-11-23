@@ -148,6 +148,7 @@ namespace ige::scene
         j["rot"] = getRotation();
         j["scale"] = getScale();
         j["aspect"] = getAspectRatio();
+        j["clearColor"] = getClearColor();
 
         if (getLockOn())
         {
@@ -178,6 +179,7 @@ namespace ige::scene
         setScreenRadian(j.at("scrRad"));
         setUpAxis(j.at("up"));
         setAspectRatio(SceneManager::getInstance()->isEditor() ? j.value("aspect", -1.f) : -1.f);
+        setClearColor(j.value("clearColor", Vec4(1.f, 1.f, 1.f, 1.f)));
 
         if (getLockOn())
         {
@@ -294,6 +296,10 @@ namespace ige::scene
         else if (key.compare("roll") == 0)
         {
             setRoll(val);
+        }
+        else if (key.compare("clearColor") == 0)
+        {
+            setClearColor(val);
         }
         else
         {

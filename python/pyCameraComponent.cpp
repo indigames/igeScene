@@ -410,6 +410,28 @@ namespace ige::scene
         return -1;
     }
 
+    // Get clear color
+    PyObject* CameraComponent_getClearColor(PyObject_CameraComponent* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec4Obj = PyObject_New(vec_obj, _Vec4Type);
+        vmath_cpy(std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->getClearColor().P(), 4, vec4Obj->v);
+        vec4Obj->d = 4;
+        return (PyObject*)vec4Obj;
+    }
+
+    // Set Up Axis
+    int CameraComponent_setClearColor(PyObject_CameraComponent* self, PyObject* value)
+    {
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v) return -1;
+        std::dynamic_pointer_cast<CameraComponent>(self->component.lock())->setClearColor(*((Vec4*)v));
+        return 0;
+    }
+
     // Get Projection Matrix
     PyObject* CameraComponent_getProjectionMatrix(PyObject_CameraComponent* self)
     {
@@ -488,6 +510,7 @@ namespace ige::scene
         { "viewInverseMatrix", (getter)CameraComponent_getViewInverseMatrix, NULL, CameraComponent_viewInverseMatrix_doc, NULL },
         { "screenMatrix", (getter)CameraComponent_getScreenMatrix, NULL, CameraComponent_screenMatrix_doc, NULL },
         { "camera", (getter)CameraComponent_getCamera, NULL, CameraComponent_getCamera_doc, NULL },
+        { "clearColor", (getter)CameraComponent_getClearColor, (setter)CameraComponent_setClearColor, CameraComponent_clearColor_doc, NULL },
         { NULL, NULL }
     };
 

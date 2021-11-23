@@ -125,6 +125,10 @@ namespace ige::scene
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 
+        //! Clear color
+        const Vec4& getClearColor() const { return m_clearColor; }
+        void setClearColor(const Vec4& color) { m_clearColor = color; };
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -137,5 +141,8 @@ namespace ige::scene
 
         //! Camera name
         std::string m_name;
+
+        //! Clear color
+        Vec4 m_clearColor = { 1.f, 1.f, 1.f, 1.f };
     };
 } // namespace ige::scene

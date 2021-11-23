@@ -137,6 +137,12 @@ namespace ige::scene
     // Set Up Axis
     int CameraComponent_setUpAxis(PyObject_CameraComponent* self, PyObject* value);
 
+    // Get Clear Color
+    PyObject* CameraComponent_getClearColor(PyObject_CameraComponent* self);
+
+    // Set Clear Color
+    int CameraComponent_setClearColor(PyObject_CameraComponent* self, PyObject* value);
+
     // Get Projection Matrix
     PyObject* CameraComponent_getProjectionMatrix(PyObject_CameraComponent* self);
 

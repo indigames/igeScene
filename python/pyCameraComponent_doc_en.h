@@ -145,3 +145,9 @@ PyDoc_STRVAR(CameraComponent_getCamera_doc,
     "Get internal camera instance.\n"\
     "Type: igeCore.Camera\n"
 );
+
+// clearColor
+PyDoc_STRVAR(CameraComponent_clearColor_doc,
+    "Color to clear before render.\n"\
+    "Type: Vec4\n"
+);

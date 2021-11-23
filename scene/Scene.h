@@ -64,10 +64,10 @@ namespace ige::scene
         virtual void preRender(Camera* camera = nullptr);
 
         //! Render
-        virtual void render();
+        virtual void render(RenderTarget* fbo = nullptr);
 
         //! Canvas Render
-        virtual void renderUI();
+        virtual void renderUI(RenderTarget* fbo = nullptr);
 
         //! Create scene object
         virtual std::shared_ptr<SceneObject> createObject(const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 }, const std::string& prefabId = std::string(), const Vec3& position = Vec3(), const Quat& rotation = Quat(), const Vec3& scale = { 1,1,1 });
@@ -147,7 +147,7 @@ namespace ige::scene
         //! Prefab save/load
         bool isSavingPrefab() { return m_bIsSavingPrefab; }
         bool savePrefab(uint64_t objectId, const std::string& file);
-        
+
         std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file);
         std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file, const Vec3& pos);
         std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file, const Vec3& pos, const Quat& rot);
@@ -305,11 +305,11 @@ namespace ige::scene
         bool m_spotLights[MAX_SPOT_LIGHT_NUMBER] = { false };
 
         //! Cache window position
-        Vec2 m_windowPosition = {0.f, 0.f};
+        Vec2 m_windowPosition = { 0.f, 0.f };
         Vec2 m_viewPosition = { 0.f, 0.f };
 
         //! Cache window size
-        Vec2 m_windowSize = {-1.f, -1.f};
+        Vec2 m_windowSize = { -1.f, -1.f };
         Vec2 m_viewSize = { -1.f, -1.f };
 
         //! TweenManager
