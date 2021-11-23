@@ -100,7 +100,7 @@ namespace ige::scene
         getTransformChangedEvent().removeAllListeners();
 
         setParent(nullptr);
-        setCanvas(nullptr);
+        m_canvas = nullptr;
 
         getDestroyedEvent().invoke(*this);
 

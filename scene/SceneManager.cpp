@@ -261,6 +261,41 @@ namespace ige::scene
 
     bool SceneManager::loadScene(std::shared_ptr<Scene> scene, const std::string& path)
     {
+        // Reload all modules
+        PyObject* sysModule = PyImport_ImportModule("sys");
+        PyObject* modules = PyObject_GetAttrString(sysModule, "modules");
+        for (const auto& entry : fs::recursive_directory_iterator(m_projectPath + "/scripts")) {
+            if (entry.is_regular_file() && entry.path().extension().string().compare(".py") == 0) {
+                auto path = fs::absolute(entry.path());
+                auto pyc = path.parent_path().append("__pycache__").append(path.stem().string() + ".cpython-39.pyc");
+                if (fs::exists(pyc)) fs::remove(pyc);
+
+                PyObject* sysModule = PyImport_ImportModule("sys");
+                PyObject* modules = PyObject_GetAttrString(sysModule, "modules");
+
+                PyObject* key = nullptr, * value = nullptr;
+                Py_ssize_t pos = 0;
+                while (PyDict_Next(modules, &pos, &key, &value)) {
+                    auto sKey = PyUnicode_AsUTF8(key);
+                    if (strstr(sKey, path.stem().string().c_str()) && strcmp(sKey, path.parent_path().stem().string().c_str()) != 0) {
+                        auto delCmd = std::string("import sys\ndel sys.modules['") + sKey + "']";
+                        PyRun_SimpleString(delCmd.c_str());
+
+                        auto importCmd = std::string("import importlib\nimportlib.reload(") + sKey + ")";
+                        PyRun_SimpleString(importCmd.c_str());
+
+                        if (PyErr_Occurred()) {
+                            PyErr_PrintEx(1);
+                            PyRun_SimpleString("import traceback\ntraceback.print_exception(sys.last_type, sys.last_value, sys.last_traceback)");
+                            PyErr_Clear();
+                        }
+                        break;
+                    }
+                } 
+            }
+        }
+
+        // Load scene
         json jScene;
 
         auto fsPath = fs::path(path);

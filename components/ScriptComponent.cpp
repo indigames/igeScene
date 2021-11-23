@@ -154,7 +154,7 @@ namespace ige::scene
         {
             // Load the module from python source file
             auto path = fs::absolute(fs::path(m_path));
-            auto appendCmd = std::string("import sys\nsys.path.append('") + path.parent_path().string() + "'\n)";
+            auto appendCmd = std::string("import sys\nsys.path.append('") + path.parent_path().string() + "')";
             std::replace(appendCmd.begin(), appendCmd.end(), '\\', '/');
             PyRun_SimpleString(appendCmd.c_str());
 
@@ -179,7 +179,7 @@ namespace ige::scene
                     auto pStrErrorMessage = PyUnicode_AsUTF8(PyObject_Str(pvalue));
                     if (pStrErrorMessage != nullptr)
                         pyxie_printf("[PYTHON] ERROR in '%s': %s", getPath().c_str(), pStrErrorMessage);
-                    PyErr_Clear();
+                    PyErr_CheckAndClear();
                 }
                 return;
             }
