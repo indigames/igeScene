@@ -362,11 +362,12 @@ namespace ige::scene
         vmath_mat4_from_rottrans(m_localRotation.P(), point.P(), localMatrix.P());
         vmath_mat_appendScale(localMatrix.P(), m_localScale.P(), 4, 4, localMatrix.P());
 
-        auto worldMatrix = (getParent()) ? getParent()->getWorldMatrix() * localMatrix : localMatrix;
+        auto worldMatrix = m_worldMatrix * localMatrix;
         Vec3 lpoint;
         lpoint.X(worldMatrix[3][0]);
         lpoint.Y(worldMatrix[3][1]);
         lpoint.Z(worldMatrix[3][2]);
+        
         return lpoint;
     }
 

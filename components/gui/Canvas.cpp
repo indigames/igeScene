@@ -51,7 +51,7 @@ namespace ige::scene
 
     void Canvas::setMatchWidthOrHeight(float value)
     {
-        float _value = MATH_CLAMP(0, 1, value);
+        float _value = MATH_CLAMP(value, 0, 1);
         if (_value != m_MatchWidthOrHeight) {
             m_MatchWidthOrHeight = _value;
             updateCanvas();
@@ -119,7 +119,7 @@ namespace ige::scene
 
     void Canvas::setScreenMatchMode(int mode)
     {
-        int _mode = MATH_CLAMP(0, 2, mode);
+        int _mode = MATH_CLAMP(mode, 0, 2);
         setScreenMatchMode((ScreenMatchMode)mode);
     }
 

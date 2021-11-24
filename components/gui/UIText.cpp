@@ -121,12 +121,14 @@ namespace ige::scene
         if (sizeChanged)
             transform->setSize(containerSize);
 
-        getFigure()->SetPosition(transform->getPosition());
-        getFigure()->SetRotation(transform->getRotation());
-        getFigure()->SetScale(transform->getScale());
+        updatePosition();
 
-        // Update
-        getFigure()->Pose();
+        //getFigure()->SetPosition(transform->getPosition());
+        //getFigure()->SetRotation(transform->getRotation());
+        //getFigure()->SetScale(transform->getScale());
+
+        //// Update
+        //getFigure()->Pose();
     }
 
     //! Render
@@ -136,6 +138,63 @@ namespace ige::scene
             return;
         getFigure()->Render();*/
     }
+
+    void UIText::updatePosition()
+    {
+        auto transform = getOwner()->getRectTransform();
+        auto containerSize = transform->getSize();
+        auto size = m_text->getSize();
+
+        auto center = Vec3(0, 0, 0);
+        switch (m_textAlignHorizontal) {
+        case 0:
+            center[0] -= (containerSize[0] - size[0]) * 0.5f;
+            break;
+        case 1:
+            break;
+        case 2:
+            center[0] += (containerSize[0] - size[0]) * 0.5f;
+            break;
+        }
+
+        switch (m_textAlignVertical) {
+        case 0:
+            center[1] += (containerSize[1] - size[1]) * 0.5f;
+            break;
+        case 1:
+            break;
+        case 2:
+            center[1] -= (containerSize[1] - size[1]) * 0.5f;
+            break;
+        }
+        getFigure()->SetRotation(transform->getRotation());
+        getFigure()->SetScale(transform->getScale());
+        auto point = transform->localToGlobal(center);
+        getFigure()->SetPosition(point);
+
+        // Update
+        getFigure()->Pose();
+    }
+
+    void UIText::setTextAlignHorizontal(int val)
+    {
+        auto _val = MATH_CLAMP(val, 0, 2);
+        if (m_textAlignHorizontal != _val) {
+            m_textAlignHorizontal = _val;
+            updatePosition();
+        }
+    }
+
+    void UIText::setTextAlignVertical(int val)
+    {
+        auto _val = MATH_CLAMP(val, 0, 2);
+        if (m_textAlignVertical != _val) {
+            m_textAlignVertical = _val;
+            updatePosition();
+        }
+    }
+
+
 
     void UIText::onResourceAdded(Resource* res) {
         if (m_bResAdded || res == nullptr) return;
@@ -175,11 +234,15 @@ namespace ige::scene
         j["font"] = getFontPath();
         j["size"] = getFontSize();
         j["color"] = getColor();
+        j["alignhorizontal"] = getTextAlignHorizontal();
+        j["alignvertical"] = getTextAlignVertical();
     }
 
     //! Deserialize
     void UIText::from_json(const json &j)
     {
+        m_textAlignHorizontal = (j.value("alignhorizontal", 0));
+        m_textAlignVertical = (j.value("alignvertical", 0));
         setText(j.at("text"));
         setFontPath(j.at("font"));
         setFontSize(j.at("size"));
@@ -291,6 +354,14 @@ namespace ige::scene
         else if (key.compare("color") == 0)
         {
             setColor(val);
+        }
+        else if (key.compare("alignhorizontal") == 0)
+        {
+            setTextAlignHorizontal(val);
+        }
+        else if (key.compare("alignvertical") == 0)
+        {
+            setTextAlignVertical(val);
         }
         else
         {

@@ -57,6 +57,15 @@ namespace ige::scene
         const Vec4 &getColor() const { return m_text->getColor(); }
         void setColor(const Vec4 &color);
 
+
+        //Text Align Horizontal
+        int getTextAlignHorizontal() const { return m_textAlignHorizontal; }
+        void setTextAlignHorizontal(int val);
+
+        //Text Align Vertical
+        int getTextAlignVertical() const { return m_textAlignVertical; }
+        void setTextAlignVertical(int val);
+
         //! Figure
         EditableFigure *getFigure() { return m_text->getFigure(); }
 
@@ -75,6 +84,8 @@ namespace ige::scene
         void onResourceAdded(Resource* res);
         void onResourceRemoved(Resource* res);
 
+        virtual void updatePosition();
+
         //! Serialize
         virtual void to_json(json& j) const override;
 
@@ -91,7 +102,8 @@ namespace ige::scene
         int m_fontType = 0;
         Vec4 m_color = { 1.f, 1.f, 1.f, 1.f };
         bool m_bResAdded = false;
-
+        int m_textAlignHorizontal = 0;
+        int m_textAlignVertical = 0;
 
     };
 } // namespace ige::scene

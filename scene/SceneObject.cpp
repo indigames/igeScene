@@ -967,27 +967,8 @@ namespace ige::scene
             }
         }
         else if (isGUIObject()) {
-            if (getComponent<UIText>() != nullptr)
-            {
-                auto uiText = getComponent<UIText>();
-                if (uiText->getFigure())
-                {
-                    Vec3 aabbMin, aabbMax;
-                    uiText->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
-                    m_aabb = { aabbMin, aabbMax };
-                }
-            }
-            else if (getComponent<UITextBitmap>() != nullptr)
-            {
-                auto uiText = getComponent<UITextBitmap>();
-                if (uiText->getFigure())
-                {
-                    Vec3 aabbMin, aabbMax;
-                    uiText->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
-                    m_aabb = { aabbMin, aabbMax };
-                }
-            }
-            else if (getComponent<RectTransform>() != nullptr) {
+            
+            if (getComponent<RectTransform>() != nullptr) {
                 auto rect = getComponent<RectTransform>();
                 if (rect) {
                     auto size = rect->getSize();
