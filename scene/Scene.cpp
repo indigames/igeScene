@@ -319,12 +319,18 @@ namespace ige::scene
     {
         // Render 3D scene
         {
-            if(fbo) RenderContext::InstancePtr()->BeginScene(fbo, !m_activeCamera.expired() ? m_activeCamera.lock()->getClearColor() : Vec4(1.f, 1.f, 1.f, 1.f), true, true);
+            if (fbo) {
+                RenderContext::InstancePtr()->BeginScene(fbo, !m_activeCamera.expired() ? m_activeCamera.lock()->getClearColor() : Vec4(1.f, 1.f, 1.f, 1.f), true, true);
+            }
+
             m_showcase->Render();
             for (int i = m_objects.size() - 1; i >= 0; i--) {
                 m_objects[i]->onRender();
             }
-            if (fbo) RenderContext::InstancePtr()->EndScene();
+
+            if (fbo) {
+                RenderContext::InstancePtr()->EndScene();
+            }
         }
 
         // Render UI
@@ -333,6 +339,12 @@ namespace ige::scene
 
     void Scene::renderUI(RenderTarget* fbo) {
         if (SceneManager::getInstance()->isPlaying()) {
+            // already begin scene in other places
+            if(!fbo) {
+                RenderContext::InstancePtr()->EndScene();
+                RenderContext::InstancePtr()->ResetRenderStateAll();
+            }
+
             float dt = Time::Instance().GetElapsedTime();
             m_uiShowcase->Update(dt);
 
@@ -342,7 +354,7 @@ namespace ige::scene
                 getCanvas()->getCamera()->Render();
             }
 
-            if(fbo) RenderContext::InstancePtr()->BeginScene(fbo, Vec4(1.f, 1.f, 1.f, 1.f), false, true);
+            RenderContext::InstancePtr()->BeginScene(fbo ? fbo : RenderContext::InstancePtr()->GetCurrentRenderTarget(), Vec4(1.f, 1.f, 1.f, 1.f), false, true);
         }
         m_uiShowcase->Render();
 
@@ -351,7 +363,9 @@ namespace ige::scene
         }
 
         if (SceneManager::getInstance()->isPlaying()) {
-            if (fbo) RenderContext::InstancePtr()->EndScene();
+            if (fbo) {
+                RenderContext::InstancePtr()->EndScene();
+            }
         }
     }
 
