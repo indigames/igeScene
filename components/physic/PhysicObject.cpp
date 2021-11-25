@@ -242,7 +242,7 @@ namespace ige::scene
         }
     }
 
-    int PhysicObject::getActivationState() {
+    int PhysicObject::getActivationState() const {
         return getBody() ? getBody()->getActivationState() : -1;
     }
 
@@ -489,6 +489,7 @@ namespace ige::scene
         j["margin"] = getCollisionMargin();
         j["linearSleepingThreshold"] = getLinearSleepingThreshold();
         j["angularSleepingThreshold"] = getAngularSleepingThreshold();
+        j["activeState"] = getActivationState();
 
         auto jConstraints = json::array();
         for (const auto &constraint : m_constraints)
@@ -515,6 +516,7 @@ namespace ige::scene
         setCollisionMargin(j.value("margin", 0.025f));
         setLinearSleepingThreshold(j.value("linearSleepingThreshold", 0.8f));
         setAngularSleepingThreshold(j.value("angularSleepingThreshold", 1.0f));
+        setActivationState(j.value("activeState", 1));
         Component::from_json(j);
 
         auto jConstraints = j.value("consts", json());
@@ -581,6 +583,8 @@ namespace ige::scene
             setLinearSleepingThreshold(val);
         else if (key.compare("angularSleepingThreshold") == 0)
             setAngularSleepingThreshold(val);
+        else if (key.compare("activeState") == 0)
+            setActivationState(val);
         else
             Component::setProperty(key, val);
     }

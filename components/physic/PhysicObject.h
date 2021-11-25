@@ -86,7 +86,7 @@ namespace ige::scene
         virtual float getAngularSleepingThreshold() const { return m_angularSleepingThreshold; }
         virtual void setAngularSleepingThreshold(float value);
 
-        virtual int getActivationState();
+        virtual int getActivationState() const;
         virtual void setActivationState(int state);
 
         //! Indicate object is a trigger object
