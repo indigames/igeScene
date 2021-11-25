@@ -77,7 +77,7 @@ namespace ige::scene
     //! Serialize
     void PhysicCapsule::to_json(json &j) const
     {
-        PhysicObject::to_json(j);
+       PhysicObject::to_json(j);
        j["height"] = getHeight();
        j["radius"] = getRadius();
     }
@@ -85,9 +85,9 @@ namespace ige::scene
     //! Deserialize
     void PhysicCapsule::from_json(const json &j)
     {
+        PhysicObject::from_json(j);
         setHeight(j.at("height"));
         setRadius(j.at("radius"));
-        PhysicObject::from_json(j);
     }
 
     //! Update property by key value

@@ -649,6 +649,7 @@ namespace ige::scene
     //! Deserialize
     void PhysicSoftBody::from_json(const json &j)
     {
+        PhysicObject::from_json(j);
         setMeshIndex(j.value("meshIdx", 0));
         setDampingCoeff(j.value("dampCoeff", 0.4f));
         setPressureCoeff(j.value("presCoeff", 0.f));
@@ -669,7 +670,6 @@ namespace ige::scene
         setKineticContactHardness(j.value("kch", 0.1f));
         setSoftContactHardness(j.value("sch", 1.f));
         setAnchorHardness(j.value("ahr", 1.f));
-        PhysicObject::from_json(j);
     }
 
     //! Update property by key value

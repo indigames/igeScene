@@ -68,8 +68,8 @@ namespace ige::scene
     //! Deserialize
     void PhysicBox::from_json(const json &j)
     {
-        setSize(j.value("size", Vec3(1.f, 1.f, 1.f)));
         PhysicObject::from_json(j);
+        setSize(j.value("size", Vec3(1.f, 1.f, 1.f)));
     }
 
     //! Update property by key value

@@ -81,8 +81,8 @@ namespace ige::scene
     //! Deserialize
     void PhysicSphere::from_json(const json &j)
     {
-        setRadius(j.at("radius"));
         PhysicObject::from_json(j);
+        setRadius(j.at("radius"));
     }
 
     //! Update property by key value
