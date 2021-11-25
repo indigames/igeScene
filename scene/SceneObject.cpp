@@ -1126,7 +1126,7 @@ namespace ige::scene
     {
         setName(j.value("name", ""));
         setActive(j.value("active", false));
-        setPrefabId(j.value("prefabId", std::string()));
+        setPrefabId(j.value("prefabId", m_prefabId));
         if (!isInPrefab()) {
             setUUID(j.value("uuid", getUUID()));
         }
