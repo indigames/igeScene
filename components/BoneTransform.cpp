@@ -131,12 +131,20 @@ namespace ige::scene
     void BoneTransform::onEnable()
     {
         initialize();
+
+        // Reactive children
+        for (auto& [key, val] : m_jointObjects) {
+            if (val) val->setActive(true);
+        }
     }
 
     //! Disable
     void BoneTransform::onDisable()
     {
-        clear();
+        // DO NOT CLEAR, just deactive children for references
+        for (auto& [key, val] : m_jointObjects) {
+            if (val) val->setActive(false);
+        }
     }
 
     //! Serialize
