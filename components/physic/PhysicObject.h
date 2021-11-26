@@ -327,6 +327,9 @@ namespace ige::scene
         //! Cache dirty state
         bool m_bIsDirty = false;
 
+        //! Cache activeState
+        int m_activeState = 1;
+
         //! Cache PhysicManager
         std::weak_ptr<PhysicManager> m_manager;
     };

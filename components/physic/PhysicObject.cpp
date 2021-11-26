@@ -243,13 +243,13 @@ namespace ige::scene
     }
 
     int PhysicObject::getActivationState() const {
-        return getBody() ? getBody()->getActivationState() : -1;
+        return m_activeState;
     }
 
     void PhysicObject::setActivationState(int state) {
-        int _state = MATH_CLAMP(0, 5 , state);
+        m_activeState = MATH_CLAMP(0, 5 , state);
         if (getBody())
-            getBody()->setActivationState(state);
+            getBody()->setActivationState(m_activeState);
     }
 
     void PhysicObject::setCollisionMargin(float margin)
