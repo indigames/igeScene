@@ -102,13 +102,13 @@ namespace ige::scene
         }
         
         // Update transform from transform component
-        auto transform = getOwner()->getRectTransform();
+        //auto transform = getOwner()->getRectTransform();
 
         // Scale container to fit text size
-        auto containerSize = transform->getSize();
+        /*auto containerSize = transform->getSize();
         auto size = m_text->getSize();
-        auto sizeChanged = false;
-        if (size.X() > containerSize.X())
+        auto sizeChanged = false;*/
+        /*if (size.X() > containerSize.X())
         {
             containerSize.X(size.X() + 1.f);
             sizeChanged = true;
@@ -119,7 +119,7 @@ namespace ige::scene
             sizeChanged = true;
         }
         if (sizeChanged)
-            transform->setSize(containerSize);
+            transform->setSize(containerSize);*/
 
         updatePosition();
 
@@ -241,6 +241,7 @@ namespace ige::scene
     //! Deserialize
     void UIText::from_json(const json &j)
     {
+        m_fontType = 0;
         m_textAlignHorizontal = (j.value("alignhorizontal", 0));
         m_textAlignVertical = (j.value("alignvertical", 0));
         setText(j.at("text"));

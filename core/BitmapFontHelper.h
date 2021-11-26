@@ -87,7 +87,7 @@ namespace ige::scene
 			short size, short base, int x, int y, int w, int h,
 			float xoffset, float yoffset, float xadvance);
 
-		EditableFigure* createText(const char* word, const std::string& fontPath, int fontsize);
+		EditableFigure* createText(const char* word, const std::string& fontPath, int fontsize, int& outW, int& outH);
 
 		void loadBitmapFromPath(std::string path, std::shared_ptr<BitmapFont> &font);
 	protected:

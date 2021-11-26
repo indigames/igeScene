@@ -93,11 +93,12 @@ namespace ige::scene
                 m_figure->DecReference();
                 m_figure = nullptr;
             }
-            
 
             if (m_fontType == 1)
             {
-                m_figure = GraphicsHelper::getInstance()->createBitmapText(m_text, m_fontPath, m_fontSize, m_color);
+                int w = 0, h = 0;
+                m_figure = GraphicsHelper::getInstance()->createBitmapText(m_text, m_fontPath, m_fontSize, m_color, w, h);
+                m_size = Vec2(w, h);
             }
             else
             {
@@ -106,6 +107,7 @@ namespace ige::scene
                 m_size = Vec2(w, h);
                 m_figure = GraphicsHelper::getInstance()->createText(m_text, m_fontPath, m_fontSize, m_color, m_worldSpace ? 0.01f : 1.0f);
             }
+
             if (m_figure == nullptr) return;
 
             m_figure->SetPosition(pos);

@@ -245,31 +245,26 @@ namespace ige::scene
         return efig;
     }
 
-    EditableFigure* GraphicsHelper::createBitmapText(const std::string& words, const std::string& fontPath, int fontSize, const Vec4& color, uint32_t pivot, float scale)
+    EditableFigure* GraphicsHelper::createBitmapText(const std::string& words, const std::string& fontPath, int fontSize, int& outW, int& outH)
     {
-        //int w = 0, h = 0;
+        return createBitmapText(words, fontPath, fontSize, { 1.f, 1.f, 1.f, 1.f }, 4, 1.0f, outW, outH);
+    }
 
-        /*auto id = BitmapFontHelper::getInstance()->createBitmapFont(fontPath, 0, 0, 0);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "T", 18, 14, 363, 331, 10, 11, 0, 3, 10);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "h", 18, 14, 225, 382, 8, 11, 1, 3, 10);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "i", 18, 14, 478, 377, 2, 11, 1, 3, 4);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "s", 18, 14, 199, 455, 7, 8, 1, 6, 9);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, " ", 18, 14, 66, 185, 1, 1, 0, 14, 5);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "a", 18, 14, 18, 459, 8, 8, 1, 6, 10);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "b", 18, 14, 198, 383, 8, 11, 1, 3, 10);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "t", 18, 14, 436, 377, 5, 11, 1, 3, 6);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "m", 18, 14, 494, 429, 12, 8, 2, 6, 16);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "p", 18, 14, 436, 353, 8, 11, 1, 6, 10);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "f", 18, 14, 442, 377, 5, 11, 1, 3, 7);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "o", 18, 14, 483, 438, 8, 8, 1, 6, 10);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, "n", 18, 14, 0, 459, 8, 8, 1, 6, 10);
-        BitmapFontHelper::getInstance()->addGlyphForChar(id, ".", 18, 14, 285, 476, 2, 3, 1, 11, 6);
+    EditableFigure* GraphicsHelper::createBitmapText(const std::string& words, const std::string& fontPath, int fontSize, const Vec4& color, int& outW, int& outH)
+    {
+        return createBitmapText(words, fontPath, fontSize, color, 4, 1.0f, outW, outH);
+    }
 
-        auto efig = BitmapFontHelper::getInstance()->createText("This is a bitmap font.", fontPath, fontSize);*/
+    EditableFigure* GraphicsHelper::createBitmapText(const std::string& words, const std::string& fontPath, int fontSize, const Vec4& color, uint32_t pivot, int& outW, int& outH)
+    {
+        return createBitmapText(words, fontPath, fontSize, color, pivot, 1.0f, outW, outH);
+    }
 
+    EditableFigure* GraphicsHelper::createBitmapText(const std::string& words, const std::string& fontPath, int fontSize, const Vec4& color, uint32_t pivot, float scale, int& outW, int& outH)
+    {
         auto id = BitmapFontHelper::getInstance()->createBitmapFont(fontPath);
 
-        auto efig = BitmapFontHelper::getInstance()->createText(words.c_str(), fontPath, fontSize);
+        auto efig = BitmapFontHelper::getInstance()->createText(words.c_str(), fontPath, fontSize, outW, outH);
 
         return efig;
     }

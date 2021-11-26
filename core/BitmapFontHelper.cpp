@@ -345,7 +345,7 @@ int BitmapFontHelper::getQuad(struct ige_bitmap_font* fnt, struct ige_glyph* gly
 	return 1;
 }
 
-EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& fontPath, int size)
+EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& fontPath, int size, int& outW, int& outH)
 {
 
 	auto fsPath = fs::path(fontPath);
@@ -419,28 +419,21 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 
 		if (!getQuad(fnt, glyph, isize, &x, &y, &q))
 			continue;
-
-		//v = &texture->verts[texture->nverts * 4];
-
-		/*v = setv(v, q.x0, q.y0, q.s0, q.t0);
-		v = setv(v, q.x1, q.y0, q.s1, q.t0);
-		v = setv(v, q.x1, q.y1, q.s1, q.t1);
-		v = setv(v, q.x0, q.y1, q.s0, q.t1);*/
-
+		float h = q.y0 - q.y1;
 		points.push_back(q.x0);
-		points.push_back(q.y0);
+		points.push_back(q.y0 - h);
 		points.push_back(0);
 
 		points.push_back(q.x1);
-		points.push_back(q.y0);
+		points.push_back(q.y0 - h);
 		points.push_back(0);
 
 		points.push_back(q.x0);
-		points.push_back(q.y1);
+		points.push_back(q.y1 - h);
 		points.push_back(0);
 
 		points.push_back(q.x1);
-		points.push_back(q.y1);
+		points.push_back(q.y1 - h);
 		points.push_back(0);
 
 		uvs.push_back(q.s0);
@@ -486,7 +479,8 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 
 	float hw = std::abs(ax - ix) * 0.5f;
 	float hh = std::abs(ay - iy) * 0.5f;
-	
+	outW = hw * 2;
+	outH = hh * 2;
 	fOffset = 0;
 	int pointSize = points.size();
 	for (int i = 0; i < len; i++)
@@ -494,16 +488,16 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 		if (fOffset >= pointSize) break;
 
 		points[fOffset] -= hw;
-		points[fOffset + 1] -= hh;
+		points[fOffset + 1] += hh;
 
 		points[fOffset + 3] -= hw;
-		points[fOffset + 4] -= hh;
+		points[fOffset + 4] += hh;
 
 		points[fOffset + 6] -= hw;
-		points[fOffset + 7] -= hh;
+		points[fOffset + 7] += hh;
 
 		points[fOffset + 9] -= hw;
-		points[fOffset + 10] -= hh;
+		points[fOffset + 10] += hh;
 		
 		fOffset += 12;
 	}
@@ -515,7 +509,6 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 	shader->DiscardColorMapRGB(true);
 
 	auto efig = GraphicsHelper::getInstance()->createMesh(points, trianglesIndices, texture->texture, uvs, shader);
-
 	return efig;
 }
 

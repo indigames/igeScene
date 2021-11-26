@@ -28,12 +28,16 @@ namespace ige::scene
         j["font"] = getFontPath();
         j["size"] = getFontSize();
         j["color"] = getColor();
+        j["alignhorizontal"] = getTextAlignHorizontal();
+        j["alignvertical"] = getTextAlignVertical();
     }
 
     //! Deserialize
     void UITextBitmap::from_json(const json &j)
     {
         m_fontType = 1;
+        m_textAlignHorizontal = (j.value("alignhorizontal", 0));
+        m_textAlignVertical = (j.value("alignvertical", 0));
         setText(j.at("text"));
         setFontPath(j.at("font"));
         setFontSize(j.at("size"));
