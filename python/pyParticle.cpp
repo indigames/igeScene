@@ -96,24 +96,6 @@ namespace ige::scene
         return -1;
     }
 
-    //! layer
-    PyObject *Particle_getLayer(PyObject_Particle *self)
-    {
-        if (self->component.expired()) Py_RETURN_NONE;
-        return PyLong_FromLong(std::dynamic_pointer_cast<Particle>(self->component.lock())->getLayer());
-    }
-
-    int Particle_setLayer(PyObject_Particle *self, PyObject *value)
-    {
-        if (self->component.expired()) return -1;
-        if (PyLong_Check(value)) {
-            auto val = (uint32_t)PyLong_AsLong(value);
-            std::dynamic_pointer_cast<Particle>(self->component.lock())->setLayer(val);
-            return 0;
-        }
-        return -1;
-    }
-
     //! groupMask
     PyObject *Particle_getGroupMask(PyObject_Particle *self)
     {
@@ -297,7 +279,6 @@ namespace ige::scene
         {"enable", (getter)Particle_isEnabled, (setter)Particle_setEnabled, Particle_enable_doc, NULL},
         {"loop", (getter)Particle_isLooped, (setter)Particle_setLooped, Particle_loop_doc, NULL},
         {"autoDrawing", (getter)Particle_isAutoDrawing, (setter)Particle_setAutoDrawing, Particle_autoDrawing_doc, NULL},
-        {"layer", (getter)Particle_getLayer, (setter)Particle_setLayer, Particle_layer_doc, NULL},
         {"groupMask", (getter)Particle_getGroupMask, (setter)Particle_setGroupMask, Particle_groupMask_doc, NULL},
         {"speed", (getter)Particle_getSpeed, (setter)Particle_setSpeed, Particle_speed_doc, NULL},
         {"timeScale", (getter)Particle_getTimeScale, (setter)Particle_setTimeScale, Particle_timeScale_doc, NULL},

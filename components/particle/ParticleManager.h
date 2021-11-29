@@ -51,15 +51,18 @@ namespace ige::scene
 
         //! Render.
         void onRender() override;
+        void onRenderUI() override;
 
         //! Get manager
         Effekseer::ManagerRef getEffekseerManager() { return m_manager; }
 
         //! Set projection matrix
         void setProjectionMatrix(const Mat4 &matrix);
+        void setUIProjectionMatrix(const Mat4 &matrix);
 
         //! Set camera matrix
         void setCameraMatrix(const Mat4 &matrix);
+        void setUICameraMatrix(const Mat4 &matrix);
 
         //! Culling
         bool isCullingEnabled() const {return m_bIsCullingEnabled; }
@@ -128,8 +131,16 @@ namespace ige::scene
 
         //! Projection matrix
         Mat4 m_projectionMatrix = {};
+        Effekseer::Matrix44 m_projectionMatrixEff = {};
+
+        Mat4 m_UIProjectionMatrix = {};
+        Effekseer::Matrix44 m_UIProjectionMatrixEff = {};
 
         //! Camera matrix
         Mat4 m_cameraMatrix = {};
+        Effekseer::Matrix44 m_cameraMatrixEff = {};
+
+        Mat4 m_UICameraMatrix = {};
+        Effekseer::Matrix44 m_UICameraMatrixEff = {};
     };
 } // namespace ige::scene

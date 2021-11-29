@@ -36,10 +36,6 @@ namespace ige::scene
     PyObject *Particle_isAutoDrawing(PyObject_Particle *self);
     int Particle_setAutoDrawing(PyObject_Particle *self, PyObject *value);
 
-    //! layer
-    PyObject *Particle_getLayer(PyObject_Particle *self);
-    int Particle_setLayer(PyObject_Particle *self, PyObject *value);
-
     //! groupMask
     PyObject *Particle_getGroupMask(PyObject_Particle *self);
     int Particle_setGroupMask(PyObject_Particle *self, PyObject *value);

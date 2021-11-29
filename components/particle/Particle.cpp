@@ -82,14 +82,6 @@ namespace ige::scene
         }
     }
 
-    //! Layer
-    void Particle::setLayer(int layer)
-    {
-        m_layer = layer;
-        if (m_handle != -1 && getManager())
-            getManager()->getEffekseerManager()->SetLayer(m_handle, m_layer);
-    }
-
     //! Group mask
     void Particle::setGroupMask(int mask)
     {
@@ -183,19 +175,27 @@ namespace ige::scene
 
             // Create handle
             auto position = getOwner()->getTransform()->getPosition();
-            m_handle = getManager()->getEffekseerManager()->Play(m_effect, { position[0], position[1], position[2] });
+
+            auto manager = getManager()->getEffekseerManager();
+            m_handle = manager->Play(m_effect, { position[0], position[1], position[2] });
             m_effect->AddRef();
 
             // Apply configuration
-            setLayer(m_layer);
-            setGroupMask(m_groupMask);
-            setSpeed(m_speed);
-            setTimeScale(m_timeScale);
-            setAutoDrawing(m_bIsAutoDrawing);
-            setLoop(m_bIsLooped);
-            setTargetLocation(m_targetLocation);
-            setDynamicInputParameter(m_dynamicInputParameter);
-            setColor(m_color);
+            if (m_handle != -1) {
+                setGroupMask(m_groupMask);
+                setSpeed(m_speed);
+                setTimeScale(m_timeScale);
+                setAutoDrawing(m_bIsAutoDrawing);
+                setLoop(m_bIsLooped);
+                setTargetLocation(m_targetLocation);
+                setDynamicInputParameter(m_dynamicInputParameter);
+                setColor(m_color);
+
+                auto layer = (int)(getOwner()->isGUIObject() ? Layer::_2D : Layer::_3D);
+                manager->SetLayer(m_handle, layer);
+                m_lastMatrix = {};
+                onUpdate(0.f);
+            }
         }
     }
 
@@ -240,33 +240,32 @@ namespace ige::scene
     void Particle::onUpdate(float dt)
     {
         // Apply transform
-        if (m_handle != -1 && getManager())
-        {
-            auto transform = getOwner()->getTransform();
-            auto position = transform->getPosition();
-
-            if(m_lastPosition != position)
-            {
-                getManager()->getEffekseerManager()->SetLocation(m_handle, position[0], position[1], position[2]);
-                m_lastPosition = position;
-            }
-
-            auto rotation = transform->getRotation();
-            if (m_lastRotation != rotation)
-            {
-                Vec3 euler;
-                vmath_quatToEuler(rotation.P(), euler.P());
-                getManager()->getEffekseerManager()->SetRotation(m_handle, euler[0], euler[1], euler[2]);
-                m_lastRotation = rotation;
-            }
-
-            auto scale = transform->getScale();
-            if (m_lastScale != scale)
-            {
-                getManager()->getEffekseerManager()->SetScale(m_handle, scale[0], scale[1], scale[2]);
-                m_lastScale = scale;
-            }
+        if (m_handle != -1 && getManager()){
+            getManager()->getEffekseerManager()->SetMatrix(m_handle, getEfkMatrix43());
         }
+    }
+
+    inline Effekseer::Matrix43 Particle::getEfkMatrix43()
+    {
+        const auto& worldMatrix = getOwner()->getTransform()->getWorldMatrix();
+        if (m_lastMatrix != worldMatrix) {
+            Effekseer::Matrix43 matrix;
+            matrix.Value[0][0] = worldMatrix[0][0];
+            matrix.Value[0][1] = worldMatrix[0][1];
+            matrix.Value[0][2] = worldMatrix[0][2];
+            matrix.Value[1][0] = worldMatrix[1][0];
+            matrix.Value[1][1] = worldMatrix[1][1];
+            matrix.Value[1][2] = worldMatrix[1][2];
+            matrix.Value[2][0] = worldMatrix[2][0];
+            matrix.Value[2][1] = worldMatrix[2][1];
+            matrix.Value[2][2] = worldMatrix[2][2];
+            matrix.Value[3][0] = worldMatrix[3][0];
+            matrix.Value[3][1] = worldMatrix[3][1];
+            matrix.Value[3][2] = worldMatrix[3][2];
+            m_lastMatrix = worldMatrix;
+            m_lastMatrixEff = matrix;
+        }
+        return m_lastMatrixEff;
     }
 
     //! Serialize
@@ -274,7 +273,6 @@ namespace ige::scene
     {
         Component::to_json(j);
         j["path"] = getPath();
-        j["layer"] = getLayer();
         j["mask"] = getGroupMask();
         j["speed"] = getSpeed();
         j["timeScale"] = getTimeScale();
@@ -289,7 +287,6 @@ namespace ige::scene
     void Particle::from_json(const json &j)
     {
         Component::from_json(j);
-        setLayer(j.value("layer", 0));
         setGroupMask(j.value("mask", 0));
         setSpeed(j.value("speed", 1.f));
         setTimeScale(j.value("timeScale", 1.f));
@@ -307,10 +304,6 @@ namespace ige::scene
         if (key.compare("path") == 0)
         {
             setPath(val);
-        }
-        else if (key.compare("layer") == 0)
-        {
-            setLayer(val);
         }
         else if (key.compare("mask") == 0)
         {

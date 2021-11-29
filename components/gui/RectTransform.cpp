@@ -114,40 +114,6 @@ namespace ige::scene
         return getRectCenter(anchorRect);
     }
 
-    const Mat4 &RectTransform::getLocalTransform()
-    {
-        if (m_bLocalDirty)
-        {
-            m_worldMatrix.Identity();
-            auto pivot = getPivotInCanvasSpace();
-            auto transformToPivotSpace = Mat4::Translate(Vec3(-pivot.X(), -pivot.Y(), m_localPosition.Z()));
-            auto transformFromPivotSpace = Mat4::Translate(Vec3(pivot.X(), pivot.Y(), m_localPosition.Z()));
-            m_worldMatrix = transformFromPivotSpace * Mat4::Rotation(m_localRotation) * Mat4::Scale(m_localScale) * transformToPivotSpace * Mat4::Translate(m_localPosition);
-            m_bLocalDirty = false;
-        }
-        return m_worldMatrix;
-    }
-
-    //! Get canvas space transform
-    const Mat4 &RectTransform::getCanvasSpaceTransform()
-    {
-        if (m_canvasTransformDirty)
-        {
-            m_canvasTransform = getLocalTransform();
-            auto parent = getOwner()->getParent();
-            if (parent)
-            {
-                auto parentTransform = parent->getRectTransform();
-                if (parentTransform)
-                {
-                    m_canvasTransform = parentTransform->getCanvasSpaceTransform() * m_canvasTransform;
-                }
-            }
-            m_canvasTransformDirty = false;
-        }
-        return m_canvasTransform;
-    }
-
     //! Get viewport transform
     const Mat4 &RectTransform::getViewportTransform()
     {
@@ -298,7 +264,7 @@ namespace ige::scene
 
         // Ensure transform updated
         getViewportTransform();
-        
+
         // Allow object picking
         TransformComponent::onUpdate(dt);
 
@@ -327,7 +293,6 @@ namespace ige::scene
     {
         m_bLocalDirty = true;
         m_viewportTransformDirty = true;
-        m_canvasTransformDirty = true;
         
         // Recursive update flag of all child object
         for (auto &child : getOwner()->getChildren())

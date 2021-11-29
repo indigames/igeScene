@@ -15,6 +15,12 @@ namespace ige::scene
     class Particle : public Component
     {
     public:
+        enum class Layer {
+            _3D,
+            _2D
+        };
+
+    public:
         Particle(SceneObject &owner, const std::string &path = {});
         virtual ~Particle();
 
@@ -36,10 +42,6 @@ namespace ige::scene
 
         //! Set path
         void setPath(const std::string &path);
-
-        //! Layer
-        int getLayer() const { return m_layer; }
-        void setLayer(int layer);
 
         //! Group mask
         int getGroupMask() const { return m_groupMask; }
@@ -114,6 +116,9 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j) override;
 
+        //! Get transform matrix
+        inline Effekseer::Matrix43 getEfkMatrix43();
+
         //! On created event
         static Event<Particle *> m_onCreatedEvent;
 
@@ -129,9 +134,6 @@ namespace ige::scene
 
         //! Path to effect file
         std::string m_path;
-
-        //! Layer
-        int m_layer = 0;
 
         //! Group mask
         int m_groupMask = 0;
@@ -157,19 +159,14 @@ namespace ige::scene
         //! Color
         Vec4 m_color = {1.f, 1.f, 1.f, 1.f};
 
-        //! Cache last position
-        Vec3 m_lastPosition = {};
-
-        //! Cache last rotation
-        Quat m_lastRotation = {};
-
-        //! Cache last scale
-        Vec3 m_lastScale = {};
-
         //! Cache ParticleManager
         std::weak_ptr<ParticleManager> m_manager;
 
         //! Events
         Event<> m_frameEndedEvent;
+
+        //! Transform matrix
+        Mat4 m_lastMatrix = {};
+        Effekseer::Matrix43 m_lastMatrixEff = {};
     };
 } // namespace ige::scene

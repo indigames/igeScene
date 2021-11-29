@@ -28,12 +28,6 @@ namespace ige::scene
         //! Returns the type of the component
         virtual Type getType() const override { return Type::RectTransform; }
 
-        //! Get local transform
-        const Mat4 &getLocalTransform();
-
-        //! Get canvas space transform
-        const Mat4 &getCanvasSpaceTransform();
-
         //! Get viewport transform
         const Mat4 &getViewportTransform();
 
@@ -157,11 +151,6 @@ namespace ige::scene
         //! Cached transform to viewport space
         Mat4 m_viewportTransform;
         bool m_viewportTransformDirty = true;
-
-        //! Cached transform to canvas space
-        Mat4 m_canvasTransform;
-        bool m_canvasTransformDirty = true;
-
         uint64_t m_SelectedListenerID = 0;
     };
 } // namespace ige::scene

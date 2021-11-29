@@ -99,6 +99,9 @@ namespace ige::scene
         m_manager->SetModelLoader(m_renderer->CreateModelLoader());
         m_manager->SetMaterialLoader(m_renderer->CreateMaterialLoader());
 
+        // Set projection matrix to identity
+        m_renderer->SetProjectionMatrix(Effekseer::Matrix44().Indentity());
+
         // Set culling properties
         if(m_bIsCullingEnabled && m_cullingLayerNumber > 0)
         {
@@ -149,7 +152,7 @@ namespace ige::scene
             {
                 particle->getFrameEndedEvent().invoke();
 
-                if(particle->isLooped())
+                if (particle->isLooped())
                     particle->play();
                 else
                     particle->stop();
@@ -157,24 +160,44 @@ namespace ige::scene
         }
 
         // Update manager
-        m_manager->Update(dt * 60);
+        m_manager->Update(Time::Instance().GetElapsedTime() * 60);
     }
 
     //! Render
     void ParticleManager::onRender()
     {
         // Setup render matrix
-        auto renderContext = RenderContext::InstancePtr();
-        setProjectionMatrix(renderContext->GetRenderProjectionMatrix());
-        setCameraMatrix(renderContext->GetRenderViewMatrix());
+        m_renderer->ResetRenderState();
+        setProjectionMatrix(RenderContext::InstancePtr()->GetRenderProjectionMatrix());
+        setCameraMatrix(RenderContext::InstancePtr()->GetRenderViewMatrix());
+
+        auto param = Effekseer::Manager::DrawParameter();
+        param.CameraCullingMask = (int32_t)(1 << (int)Particle::Layer::_3D);
 
         m_renderer->BeginRendering();
         {
-            if (m_bIsCullingEnabled)
-            {
+            if (m_bIsCullingEnabled) {
                 m_manager->CalcCulling(m_renderer->GetCameraProjectionMatrix(), true);
             }
-            m_manager->Draw();
+            m_manager->Draw(param);
+        }
+        m_renderer->EndRendering();
+    }
+
+    //! Render
+    void ParticleManager::onRenderUI()
+    {
+        // Setup render matrix
+        m_renderer->ResetRenderState();
+        setUIProjectionMatrix(RenderContext::InstancePtr()->GetRenderProjectionMatrix());
+        setUICameraMatrix(RenderContext::InstancePtr()->GetRenderViewMatrix());
+
+        auto param = Effekseer::Manager::DrawParameter();
+        param.CameraCullingMask = (int32_t)(1 << (int)Particle::Layer::_2D);
+
+        m_renderer->BeginRendering();
+        {
+            m_manager->Draw(param);
         }
         m_renderer->EndRendering();
     }
@@ -182,31 +205,58 @@ namespace ige::scene
     //! Set projection matrix
     void ParticleManager::setProjectionMatrix(const Mat4& matrix)
     {
-        if(m_projectionMatrix != matrix)
-        {
+        if(m_projectionMatrix != matrix) {
             m_projectionMatrix = matrix;
-            if (m_renderer.Get())
-            {
-                Effekseer::Matrix44 projectionMatrix;
-                memcpy(projectionMatrix.Values, m_projectionMatrix.P(), sizeof(float) * 16);
-                m_renderer->SetProjectionMatrix(projectionMatrix);
+            if (m_renderer.Get()) {
+                Effekseer::Matrix44 mat;
+                memcpy(mat.Values, m_projectionMatrix.P(), sizeof(float) * 16);
+                m_projectionMatrixEff = mat;
             }
         }
+        m_renderer->SetProjectionMatrix(m_projectionMatrixEff);
+    }
+
+    //! Set projection matrix
+    void ParticleManager::setUIProjectionMatrix(const Mat4& matrix)
+    {
+        if(m_UIProjectionMatrix != matrix) {
+            m_UIProjectionMatrix = matrix;
+            if (m_renderer.Get()) {
+                Effekseer::Matrix44 mat;
+                memcpy(mat.Values, m_UIProjectionMatrix.P(), sizeof(float) * 16);
+                m_UIProjectionMatrixEff = mat;
+            }
+        }
+        m_renderer->SetProjectionMatrix(m_UIProjectionMatrixEff);
     }
 
     //! Set camera matrix
     void ParticleManager::setCameraMatrix(const Mat4& matrix)
     {
-        if (m_cameraMatrix != matrix)
-        {
+        if (m_cameraMatrix != matrix) {
             m_cameraMatrix = matrix;
-            if (m_renderer.Get())
-            {
-                Effekseer::Matrix44 projectionMatrix;
-                memcpy(projectionMatrix.Values, m_cameraMatrix.P(), sizeof(float) * 16);
-                m_renderer->SetCameraMatrix(projectionMatrix);
+            if (m_renderer.Get()) {
+                Effekseer::Matrix44 mat;
+                memcpy(mat.Values, m_cameraMatrix.P(), sizeof(float) * 16);
+                m_cameraMatrixEff = mat;
             }
         }
+        m_renderer->SetCameraMatrix(m_cameraMatrixEff);
+    }
+
+    //! Set camera matrix
+    void ParticleManager::setUICameraMatrix(const Mat4& matrix)
+    {
+        if (m_UICameraMatrix != matrix) {
+            m_UICameraMatrix = matrix;
+            if (m_renderer.Get()) {
+                Effekseer::Matrix44 mat;
+                memcpy(mat.Values, m_UICameraMatrix.P(), sizeof(float) * 16);
+                mat.Values[3][2] = -1.f;
+                m_UICameraMatrixEff = mat;
+            }
+        }
+        m_renderer->SetCameraMatrix(m_UICameraMatrixEff);
     }
 
 

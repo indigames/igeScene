@@ -22,11 +22,6 @@ PyDoc_STRVAR(Particle_autoDrawing_doc,
              "Particle autoDrawing? Default: true.\n"
              "Type: bool\n");
 
-// layer
-PyDoc_STRVAR(Particle_layer_doc,
-             "Particle layer. Default: 0.\n"
-             "Type: int\n");
-
 // groupMask
 PyDoc_STRVAR(Particle_groupMask_doc,
              "Particle group mask. Default: 0.\n"
