@@ -465,9 +465,11 @@ namespace ige::scene
     //! Get AABB
     AABBox PhysicObject::getAABB()
     {
+        if (!getBody()) return {};
         btVector3 aabbMin, aabbMax;
         getBody()->getAabb(aabbMin, aabbMax);
-        return AABBox(PhysicHelper::from_btVector3(aabbMin), PhysicHelper::from_btVector3(aabbMax));
+        auto box = AABBox(PhysicHelper::from_btVector3(aabbMin), PhysicHelper::from_btVector3(aabbMax));
+        return box.Transform(getOwner()->getTransform()->getWorldMatrix().Inverse());
     }
 
     //! Serialize

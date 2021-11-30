@@ -919,55 +919,7 @@ namespace ige::scene
 
         m_aabb = AABBox({ -0.5f, -0.5f, -0.5f }, { 0.5f, 0.5f, 0.5f });
 
-        if (getComponent<FigureComponent>() != nullptr)
-        {
-            auto figureComp = getComponent<FigureComponent>();
-            if (figureComp->getFigure())
-            {
-                Vec3 aabbMin, aabbMax;
-                figureComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P(), LocalSpace);
-                m_aabb = { aabbMin, aabbMax };
-                if (m_aabb.getVolume() == 0)
-                {
-                    if ((aabbMax[0] - aabbMin[0]) == 0) aabbMax[0] = 0.01f;
-                    if ((aabbMax[1] - aabbMin[1]) == 0) aabbMax[1] = 0.01f;
-                    if ((aabbMax[2] - aabbMin[2]) == 0) aabbMax[2] = 0.01f;
-                    m_aabb = { aabbMin, aabbMax };
-                }
-            }
-        }
-        else if (getComponent<SpriteComponent>() != nullptr && !isGUIObject())
-        {
-            auto spriteComp = getComponent<SpriteComponent>();
-            if (spriteComp->getFigure())
-            {
-                Vec3 aabbMin, aabbMax;
-                spriteComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
-                m_aabb = { aabbMin, aabbMax };
-            }
-        }
-        else if (getComponent<TextComponent>() != nullptr && !isGUIObject())
-        {
-            auto comp = getComponent<TextComponent>();
-            if (comp->getFigure())
-            {
-                Vec3 aabbMin, aabbMax;
-                comp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
-                m_aabb = { aabbMin, aabbMax };
-            }
-        }
-        else if (getComponent<TextBitmapComponent>() != nullptr && !isGUIObject())
-        {
-            auto comp = getComponent<TextBitmapComponent>();
-            if (comp->getFigure())
-            {
-                Vec3 aabbMin, aabbMax;
-                comp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
-                m_aabb = { aabbMin, aabbMax };
-            }
-        }
-        else if (isGUIObject()) {
-            
+        if (isGUIObject()) {
             if (getComponent<RectTransform>() != nullptr) {
                 auto rect = getComponent<RectTransform>();
                 if (rect) {
@@ -977,6 +929,49 @@ namespace ige::scene
                     Vec3 min(-size[0] * 0.5f, -size[1] * 0.5f, -0.5f);
                     Vec3 max(size[0] * 0.5f, size[1] * 0.5f, 0.5f);
                     m_aabb = { min, max };
+                }
+            }
+        }
+        else {
+            if (getComponent<PhysicObject>() != nullptr) {
+                m_aabb = getComponent<PhysicObject>()->getAABB();
+            }
+            else  if (getComponent<FigureComponent>() != nullptr) {
+                auto figureComp = getComponent<FigureComponent>();
+                if (figureComp->getFigure()) {
+                    Vec3 aabbMin, aabbMax;
+                    figureComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P(), LocalSpace);
+                    m_aabb = { aabbMin, aabbMax };
+                    if (m_aabb.getVolume() == 0) {
+                        if ((aabbMax[0] - aabbMin[0]) == 0) aabbMax[0] = 0.01f;
+                        if ((aabbMax[1] - aabbMin[1]) == 0) aabbMax[1] = 0.01f;
+                        if ((aabbMax[2] - aabbMin[2]) == 0) aabbMax[2] = 0.01f;
+                        m_aabb = { aabbMin, aabbMax };
+                    }
+                }
+            }
+            else if (getComponent<SpriteComponent>() != nullptr) {
+                auto spriteComp = getComponent<SpriteComponent>();
+                if (spriteComp->getFigure()) {
+                    Vec3 aabbMin, aabbMax;
+                    spriteComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
+                    m_aabb = { aabbMin, aabbMax };
+                }
+            }
+            else if (getComponent<TextComponent>() != nullptr) {
+                auto comp = getComponent<TextComponent>();
+                if (comp->getFigure()) {
+                    Vec3 aabbMin, aabbMax;
+                    comp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
+                    m_aabb = { aabbMin, aabbMax };
+                }
+            }
+            else if (getComponent<TextBitmapComponent>() != nullptr) {
+                auto comp = getComponent<TextBitmapComponent>();
+                if (comp->getFigure()) {
+                    Vec3 aabbMin, aabbMax;
+                    comp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
+                    m_aabb = { aabbMin, aabbMax };
                 }
             }
         }
