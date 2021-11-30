@@ -206,6 +206,10 @@ PyMODINIT_FUNC PyInit_igeScene()
     Py_INCREF(&PyTypeObject_PhysicManager);
     PyModule_AddObject(module, "PhysicManager", (PyObject*)&PyTypeObject_PhysicManager);
 
+    if (PyType_Ready(&PyTypeObject_PhysicObject) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_PhysicObject);
+    PyModule_AddObject(module, "PhysicObject", (PyObject*)&PyTypeObject_PhysicObject);
+
     if (PyType_Ready(&PyTypeObject_PhysicBox) < 0) return NULL;
     Py_INCREF(&PyTypeObject_PhysicBox);
     PyModule_AddObject(module, "PhysicBox", (PyObject*)&PyTypeObject_PhysicBox);
