@@ -280,6 +280,7 @@ namespace ige::scene
         if (m_bIsDirty || m_bIsKinematic != isKinematic)
         {
             m_bIsKinematic = isKinematic;
+            recreateBody();
             if (m_bIsKinematic)
             {
                 setMass(0.f);
