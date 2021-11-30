@@ -261,6 +261,15 @@ namespace ige::scene
         }
     }
 
+    void PhysicObject::setPositionOffset(const Vec3& offset)
+    {
+        if(m_positionOffset != offset) {
+            m_positionOffset = offset;
+            updateBtTransform();
+            getOwner()->updateAabb();
+        }
+    }
+
     //! Set is trigger
     void PhysicObject::setIsTrigger(bool isTrigger)
     {
@@ -439,7 +448,7 @@ namespace ige::scene
     //! Update Bullet transform
     void PhysicObject::updateBtTransform()
     {
-        m_body->setWorldTransform(PhysicHelper::to_btTransform(getOwner()->getTransform()->getRotation(), getOwner()->getTransform()->getPosition()));
+        m_body->setWorldTransform(PhysicHelper::to_btTransform(getOwner()->getTransform()->getRotation(), getOwner()->getTransform()->getPosition() + m_positionOffset));
 
         Vec3 scale = getOwner()->getTransform()->getScale();
         Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
@@ -457,7 +466,7 @@ namespace ige::scene
         if (!m_bIsKinematic)
         {
             const btTransform &result = m_body->getWorldTransform();
-            getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
+            getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(result.getOrigin()) - m_positionOffset);
             getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
         }
     }
@@ -493,6 +502,7 @@ namespace ige::scene
         j["linearSleepingThreshold"] = getLinearSleepingThreshold();
         j["angularSleepingThreshold"] = getAngularSleepingThreshold();
         j["activeState"] = getActivationState();
+        j["offset"] = getPositionOffset();
 
         auto jConstraints = json::array();
         for (const auto &constraint : m_constraints)
@@ -520,6 +530,7 @@ namespace ige::scene
         setLinearSleepingThreshold(j.value("linearSleepingThreshold", 0.8f));
         setAngularSleepingThreshold(j.value("angularSleepingThreshold", 1.0f));
         setActivationState(j.value("activeState", 1));
+        setPositionOffset(j.value("offset", Vec3(0.f, 0.f, 0.f)));
         Component::from_json(j);
 
         auto jConstraints = j.value("consts", json());
@@ -588,6 +599,8 @@ namespace ige::scene
             setAngularSleepingThreshold(val);
         else if (key.compare("activeState") == 0)
             setActivationState(val);
+        else if (key.compare("offset") == 0)
+            setPositionOffset(val);
         else
             Component::setProperty(key, val);
     }

@@ -108,12 +108,12 @@ namespace ige::scene
         virtual AABBox getAABB();
 
         //! Add collision flag
-        virtual void addCollisionFlag(btCollisionObject::CollisionFlags flag) {
+        virtual void addCollisionFlag(int flag) {
             m_body->setCollisionFlags(m_body->getCollisionFlags() | flag);
         }
 
         //! Remove collision flag
-        virtual void removeCollisionFlag(btCollisionObject::CollisionFlags flag) {
+        virtual void removeCollisionFlag(int flag) {
             m_body->setCollisionFlags(m_body->getCollisionFlags() & ~flag);
         }
 
@@ -128,6 +128,10 @@ namespace ige::scene
         //! Collision Margin
         float getCollisionMargin() const { return m_collisionMargin; }
         void setCollisionMargin(float margin);
+
+        //! Position offset
+        const Vec3& getPositionOffset() const { return m_positionOffset; }
+        void setPositionOffset(const Vec3& offset);
 
         //! Get contraints vector
         const std::vector<std::shared_ptr<PhysicConstraint>>& getContraints() const { return m_constraints; }
@@ -320,6 +324,9 @@ namespace ige::scene
 
         //! Cache previous scale value
         Vec3 m_previousScale = {1.f, 1.f, 1.f};
+
+        //! Position offsets
+        Vec3 m_positionOffset = { 0.f, 0.f, 0.f };
 
         //! Cache isSoftBody state
         bool m_bIsSoftBody = false;
