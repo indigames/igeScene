@@ -35,11 +35,14 @@ namespace ige::scene
     PyObject *PhysicObject_applyTorque(PyObject_PhysicObject *self, PyObject *value)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        int d;
-        float buff[4];
-        auto v = pyObjToFloat((PyObject *)value, buff, d);
-        if (v) {
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyTorque(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        PyObject* pyObj;
+        if (PyArg_ParseTuple(value, "O", &pyObj)) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)pyObj, buff, d);
+            if (v && d >= 3) {
+                std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyTorque(PhysicHelper::to_btVector3(*((Vec3*)v)));
+            }
         }
         Py_RETURN_NONE;
     }
@@ -48,11 +51,14 @@ namespace ige::scene
     PyObject *PhysicObject_applyForce(PyObject_PhysicObject *self, PyObject *value)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        int d;
-        float buff[4];
-        auto v = pyObjToFloat((PyObject *)value, buff, d);
-        if (v) {
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyForce(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        PyObject* pyObj;
+        if (PyArg_ParseTuple(value, "O", &pyObj)) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)pyObj, buff, d);
+            if (v && d >= 3) {
+                std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyForce(PhysicHelper::to_btVector3(*((Vec3*)v)));
+            }
         }
         Py_RETURN_NONE;
     }
@@ -60,12 +66,14 @@ namespace ige::scene
     //! Apply impulse
     PyObject *PhysicObject_applyImpulse(PyObject_PhysicObject *self, PyObject *value)
     {
-        if (self->component.expired()) Py_RETURN_NONE;
-        int d;
-        float buff[4];
-        auto v = pyObjToFloat((PyObject *)value, buff, d);
-        if (v) {
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyImpulse(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        PyObject* pyObj;
+        if (PyArg_ParseTuple(value, "O", &pyObj)) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)pyObj, buff, d);
+            if (v && d >= 3) {
+                std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyImpulse(PhysicHelper::to_btVector3(*((Vec3*)v)));
+            }
         }
         Py_RETURN_NONE;
     }
