@@ -456,7 +456,9 @@ namespace ige::scene
     //! Update Bullet transform
     void PhysicObject::updateBtTransform()
     {
-        m_body->setWorldTransform(PhysicHelper::to_btTransform(getOwner()->getTransform()->getRotation(), getOwner()->getTransform()->getPosition() + m_positionOffset));
+        getOwner()->getTransform()->translate(m_positionOffset);
+        m_body->setWorldTransform(PhysicHelper::to_btTransform(getOwner()->getTransform()->getRotation(), getOwner()->getTransform()->getPosition()));
+        getOwner()->getTransform()->translate(m_positionOffset * -1.f);
 
         Vec3 scale = getOwner()->getTransform()->getScale();
         Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
@@ -474,8 +476,9 @@ namespace ige::scene
         if (!m_bIsKinematic)
         {
             const btTransform &result = m_body->getWorldTransform();
-            getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(result.getOrigin()) - m_positionOffset);
+            getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
             getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
+            getOwner()->getTransform()->translate(m_positionOffset * -1.f);
         }
     }
 
