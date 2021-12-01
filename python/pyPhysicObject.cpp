@@ -596,6 +596,28 @@ namespace ige::scene
         return -1;
     }
 
+    //! Position offset
+    PyObject* PhysicObject_getOffset(PyObject_PhysicObject* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getPositionOffset().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
+    }
+
+    int PhysicObject_setOffset(PyObject_PhysicObject* self, PyObject* value)
+    {
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v || d < 3)
+            return -1;
+        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setPositionOffset(*((Vec3*)v));
+        return 0;
+    }
+
     // Methods definition
     PyMethodDef PhysicObject_methods[] = {
         {"applyTorque", (PyCFunction)PhysicObject_applyTorque, METH_VARARGS, PhysicObject_applyTorque_doc},
@@ -629,6 +651,7 @@ namespace ige::scene
         {"collisionMask", (getter)PhysicObject_getCollisionFilterMask, (setter)PhysicObject_setCollisionFilterMask, PhysicObject_collisionMask_doc, NULL},
         {"continuousDetection", (getter)PhysicObject_isCCD, (setter)PhysicObject_setCCD, PhysicObject_continuousDetection_doc, NULL},
         {"activationState", (getter)PhysicObject_getActivationState, (setter)PhysicObject_setActivationState, PhysicObject_activationState_doc, NULL},
+        {"offset", (getter)PhysicObject_getOffset, (setter)PhysicObject_setOffset, PhysicObject_offset_doc, NULL},
         {NULL, NULL},
     };
 

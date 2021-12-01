@@ -263,7 +263,7 @@ namespace ige::scene
 
     void PhysicObject::setPositionOffset(const Vec3& offset)
     {
-        if(m_positionOffset != offset) {
+        if(m_bIsDirty || m_positionOffset != offset) {
             m_positionOffset = offset;
             updateBtTransform();
             getOwner()->updateAabb();
@@ -539,6 +539,10 @@ namespace ige::scene
         setAngularSleepingThreshold(j.value("angularSleepingThreshold", 1.0f));
         setActivationState(j.value("activeState", 1));
         setPositionOffset(j.value("offset", Vec3(0.f, 0.f, 0.f)));
+
+        // Recrease body from updated values
+        recreateBody();
+
         Component::from_json(j);
 
         auto jConstraints = j.value("consts", json());

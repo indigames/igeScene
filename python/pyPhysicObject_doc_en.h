@@ -164,3 +164,8 @@ PyDoc_STRVAR(PhysicObject_continuousDetection_doc,
 PyDoc_STRVAR(PhysicObject_activationState_doc,
              "Physic activation state.\n"
              "Type: int\n");
+
+// offset
+PyDoc_STRVAR(PhysicObject_offset_doc,
+             "Postion offset to adjust physic according to model in case the base position is not at the center of the model.\n"
+             "Type: Vec3\n");

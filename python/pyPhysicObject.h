@@ -114,4 +114,7 @@ namespace ige::scene
     PyObject* PhysicObject_isCCD(PyObject_PhysicObject* self);
     int PhysicObject_setCCD(PyObject_PhysicObject* self, PyObject* value);
 
+    //! Position offset
+    PyObject* PhysicObject_getOffset(PyObject_PhysicObject* self);
+    int PhysicObject_setOffset(PyObject_PhysicObject* self, PyObject* value);
 } // namespace ige::scene
