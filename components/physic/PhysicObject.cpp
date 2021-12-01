@@ -367,6 +367,9 @@ namespace ige::scene
         if (isTrigger())
             addCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
+        // Update transform
+        updateBtTransform();
+
         m_bIsDirty = false;
 
         if (isEnabled())
@@ -456,15 +459,19 @@ namespace ige::scene
     //! Update Bullet transform
     void PhysicObject::updateBtTransform()
     {
-        getOwner()->getTransform()->translate(m_positionOffset);
-        m_body->setWorldTransform(PhysicHelper::to_btTransform(getOwner()->getTransform()->getRotation(), getOwner()->getTransform()->getPosition()));
-        getOwner()->getTransform()->translate(m_positionOffset * -1.f);
-
-        Vec3 scale = getOwner()->getTransform()->getScale();
+        auto offset = Vec3();
+        const auto& transform = getOwner()->getTransform();
+        if (m_positionOffset.LengthSqr() > 0) {
+            auto matrix = Mat4::IdentityMat();
+            vmath_mat_from_quat(transform->getRotation().P(), 4, matrix.P());
+            vmath_mat_appendScale(matrix.P(), transform->getScale().P(), 4, 4, matrix.P());
+            offset = matrix * m_positionOffset;
+        }
+        m_body->setWorldTransform(PhysicHelper::to_btTransform(transform->getRotation(), transform->getPosition() + offset));
+        Vec3 scale = transform->getScale();
         Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
         float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
-        if (scaleDelta >= 0.01f)
-        {
+        if (scaleDelta >= 0.01f) {
             setLocalScale({std::abs(scale[0]), std::abs(scale[1]), std::abs(scale[2])});
             recreateBody();
         }
@@ -475,10 +482,18 @@ namespace ige::scene
     {
         if (!m_bIsKinematic)
         {
-            const btTransform &result = m_body->getWorldTransform();
-            getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
-            getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
-            getOwner()->getTransform()->translate(m_positionOffset * -1.f);
+            auto transform = getOwner()->getTransform();
+            const auto &result = m_body->getWorldTransform();
+            transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
+            transform->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
+
+            if (m_positionOffset.LengthSqr() > 0) {
+                auto matrix = Mat4::IdentityMat();
+                vmath_mat_from_quat(transform->getRotation().P(), 4, matrix.P());
+                vmath_mat_appendScale(matrix.P(), transform->getScale().P(), 4, 4, matrix.P());
+                auto offset = matrix * m_positionOffset;
+                transform->translate(-offset);
+            }
         }
     }
 
