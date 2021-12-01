@@ -11,6 +11,15 @@ PyDoc_STRVAR(PhysicObject_applyTorque_doc,
              "    torque : Vec3\n"
              "        torque to apply\n");
 
+// applyTorqueImpulse
+PyDoc_STRVAR(PhysicObject_applyTorqueImpulse_doc,
+             "Apply torque impulse.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "    torque : Vec3\n"
+             "        torque to apply\n");
+
 // applyForce
 PyDoc_STRVAR(PhysicObject_applyForce_doc,
              "Apply force.\n"

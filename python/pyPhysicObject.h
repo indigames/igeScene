@@ -23,6 +23,9 @@ namespace ige::scene
     //! Apply torque
     PyObject* PhysicObject_applyTorque(PyObject_PhysicObject *self, PyObject *value);
 
+    //! Apply torque impulse
+    PyObject* PhysicObject_applyTorqueImpulse(PyObject_PhysicObject *self, PyObject *value);
+
     //! Apply force
     PyObject* PhysicObject_applyForce(PyObject_PhysicObject *self, PyObject *value);
 

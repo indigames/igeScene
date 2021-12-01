@@ -47,6 +47,22 @@ namespace ige::scene
         Py_RETURN_NONE;
     }
 
+    //! Apply torque impulse
+    PyObject *PhysicObject_applyTorqueImpulse(PyObject_PhysicObject *self, PyObject *value)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        PyObject* pyObj;
+        if (PyArg_ParseTuple(value, "O", &pyObj)) {
+            int d;
+            float buff[4];
+            auto v = pyObjToFloat((PyObject*)pyObj, buff, d);
+            if (v && d >= 3) {
+                std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyTorqueImpulse(PhysicHelper::to_btVector3(*((Vec3*)v)));
+            }
+        }
+        Py_RETURN_NONE;
+    }
+
     //! Apply force
     PyObject *PhysicObject_applyForce(PyObject_PhysicObject *self, PyObject *value)
     {
@@ -583,6 +599,7 @@ namespace ige::scene
     // Methods definition
     PyMethodDef PhysicObject_methods[] = {
         {"applyTorque", (PyCFunction)PhysicObject_applyTorque, METH_VARARGS, PhysicObject_applyTorque_doc},
+        {"applyTorqueImpulse", (PyCFunction)PhysicObject_applyTorqueImpulse, METH_VARARGS, PhysicObject_applyTorqueImpulse_doc},
         {"applyForce", (PyCFunction)PhysicObject_applyForce, METH_VARARGS, PhysicObject_applyForce_doc},
         {"applyImpulse", (PyCFunction)PhysicObject_applyImpulse, METH_VARARGS, PhysicObject_applyImpulse_doc},
         {"clearForces", (PyCFunction)PhysicObject_clearForces, METH_NOARGS, PhysicObject_clearForces_doc},

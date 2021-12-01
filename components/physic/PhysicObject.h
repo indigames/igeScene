@@ -160,14 +160,13 @@ namespace ige::scene
 
     public:
         //! Apply torque
-        virtual void applyTorque(const btVector3& torque) {
-            if (getBody()) {
-                getBody()->applyTorque(torque);
-            }
-        }
+        virtual void applyTorque(const btVector3& torque) { if (getBody()) getBody()->applyTorque(torque); }
+
+        //! Apply Torque Impulse
+        virtual void applyTorqueImpulse(const btVector3& torque) { if (getBody()) getBody()->applyTorqueImpulse(torque); }
 
         //! Apply force
-        virtual void applyForce(const btVector3& force) { getBody()->applyCentralForce(force); }
+        virtual void applyForce(const btVector3& force) { if(getBody()) getBody()->applyCentralForce(force); }
         virtual void applyForce(const btVector3& force, const btVector3& pos) { getBody()->applyForce(force, pos); }
 
         //! Apply impulse

@@ -349,7 +349,6 @@ namespace ige::scene
         setAngularFactor(getAngularFactor());
         setIsKinematic(isKinematic());
         setIsTrigger(isTrigger());
-        setLocalScale(getLocalScale());
         setCollisionFilterGroup(getCollisionFilterGroup());
         setCollisionFilterMask(getCollisionFilterMask());
         setCCD(isCCD());
