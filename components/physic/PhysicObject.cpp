@@ -288,8 +288,11 @@ namespace ige::scene
     {
         if (m_bIsDirty || m_bIsKinematic != isKinematic)
         {
-            m_bIsKinematic = isKinematic;
-            recreateBody();
+            if (m_bIsKinematic != isKinematic)
+            {
+                m_bIsKinematic = isKinematic;
+                recreateBody();
+            }
             if (m_bIsKinematic)
             {
                 setMass(0.f);
@@ -337,17 +340,23 @@ namespace ige::scene
         m_bIsDirty = true;
 
         // Apply pre-configured values
-        setMass(m_mass);
-        setFriction(m_friction);
-        setRestitution(m_restitution);
-        setLinearVelocity(m_linearVelocity);
-        setAngularVelocity(m_angularVelocity);
-        setLinearFactor(m_linearFactor);
-        setAngularFactor(m_angularFactor);
-        setCollisionMargin(m_collisionMargin);
-
-        // Continuos detection mode
-        setCCD(m_bIsCCD);
+        setMass(getMass());
+        setFriction(getFriction());
+        setRestitution(getRestitution());
+        setLinearVelocity(getLinearVelocity());
+        setAngularVelocity(getAngularVelocity());
+        setLinearFactor(getLinearFactor());
+        setAngularFactor(getAngularFactor());
+        setIsKinematic(isKinematic());
+        setIsTrigger(isTrigger());
+        setLocalScale(getLocalScale());
+        setCollisionFilterGroup(getCollisionFilterGroup());
+        setCollisionFilterMask(getCollisionFilterMask());
+        setCCD(isCCD());
+        setCollisionMargin(getCollisionMargin());
+        setLinearSleepingThreshold(getLinearSleepingThreshold());
+        setAngularSleepingThreshold(getAngularSleepingThreshold());
+        setActivationState(getActivationState());
 
         // Apply inertia
         applyInertia();
@@ -356,12 +365,12 @@ namespace ige::scene
         addCollisionFlag(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 
         // Add trigger flag
-        if (m_bIsTrigger)
+        if (isTrigger())
             addCollisionFlag(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
         m_bIsDirty = false;
 
-        if (m_bIsEnabled)
+        if (isEnabled())
             activate();
     }
 
