@@ -299,16 +299,11 @@ namespace ige::scene
                 clearForces();
                 setLinearVelocity({0.f, 0.f, 0.f});
                 setAngularVelocity({0.f, 0.f, 0.f});
-
                 addCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
-                m_collisionFilterGroup = 2;
-                m_collisionFilterMask = 3;
             }
             else
             {
                 removeCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
-                m_collisionFilterGroup = 1;
-                m_collisionFilterMask = -1;
             }
 
             if (m_body->getBroadphaseHandle())
