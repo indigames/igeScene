@@ -20,17 +20,6 @@ namespace ige::scene
 {
     class Particle;
 
-    //! Class ParticleTextureLoader: load IGE texture to Effekseer
-    class ParticleTextureLoader : public Effekseer::TextureLoader
-    {
-    public:
-        //! Constructor
-        ParticleTextureLoader();
-
-        //! Load
-        Effekseer::TextureRef Load(const char16_t* path, Effekseer::TextureType textureType) override;       
-    };
-
     /**
      * Class ParticleManager: Manage particle effects. Should be added to the root node.
      */

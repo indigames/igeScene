@@ -1,4 +1,4 @@
-#include "components/particle/ParticleManager.h"
+﻿#include "components/particle/ParticleManager.h"
 #include "components/particle/Particle.h"
 
 #include "utils/PyxieHeaders.h"
@@ -12,48 +12,14 @@ namespace fs = ghc::filesystem;
 
 namespace ige::scene
 {
-    ParticleTextureLoader::ParticleTextureLoader()
-        : Effekseer::TextureLoader()
-    {
-    }
-
-    Effekseer::TextureRef ParticleTextureLoader::Load(const char16_t* path, Effekseer::TextureType textureType)
-    {
-        auto data = Effekseer::TextureLoader::Load(path, textureType);
-        if(data == nullptr)
-        {
-            char utf8Path[512];
-            Effekseer::ConvertUtf16ToUtf8(utf8Path, 512, path);
-
-            auto fsPath = fs::path(utf8Path);
-            fsPath = fsPath.replace_extension(".pyxi");
-
-            auto texture = (Texture*)ResourceCreator::Instance().NewTexture((const char*)fsPath.c_str());
-            if(texture != nullptr)
-            {
-                texture->WaitInitialize();
-                data = Effekseer::MakeRefPtr <Effekseer::Texture>();
-                auto ret = ::Effekseer::MakeRefPtr <::EffekseerRendererGL::Backend::Texture>(nullptr);
-                ret->Init(texture->GetTextureHandle(), texture->GetNumMips() > 0, [texture]() {
-                    texture->DecReference();
-                });
-                data->SetBackend(ret);
-            }
-        }
-        return data;
-    }
-
     ParticleManager::ParticleManager(SceneObject& owner, int maxParticlesNumber, bool enableCulling, int threadsNumber)
         : Component(owner), m_maxParticleNumber(maxParticlesNumber), m_bIsCullingEnabled(enableCulling), m_numThreads(threadsNumber)
     {
     #if defined(_MOBILE)
-        m_renderer = EffekseerRendererGL::Renderer::Create(maxParticlesNumber, EffekseerRendererGL::OpenGLDeviceType::OpenGLES3);
+        m_renderer = EffekseerRendererGL::Renderer::Create(m_maxParticleNumber, EffekseerRendererGL::OpenGLDeviceType::OpenGLES3);
     #else
-        m_renderer = EffekseerRendererGL::Renderer::Create(maxParticlesNumber, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
+        m_renderer = EffekseerRendererGL::Renderer::Create(m_maxParticleNumber, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
     #endif
-
-        // Create renderer instance        
-        m_renderer->SetTextureUVStyle(EffekseerRenderer::UVStyle::VerticalFlipped);
 
         // Create manager instance
         initializeManager();
@@ -94,10 +60,10 @@ namespace ige::scene
         m_manager->SetModelRenderer(m_renderer->CreateModelRenderer());
 
         // Set loaders
-        auto textureLoader = Effekseer::MakeRefPtr<ParticleTextureLoader>();
-        m_manager->SetTextureLoader(textureLoader);
+        m_manager->SetTextureLoader(m_renderer->CreateTextureLoader());
         m_manager->SetModelLoader(m_renderer->CreateModelLoader());
         m_manager->SetMaterialLoader(m_renderer->CreateMaterialLoader());
+        m_manager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
 
         // Set projection matrix to identity
         m_renderer->SetProjectionMatrix(Effekseer::Matrix44().Indentity());
@@ -160,7 +126,10 @@ namespace ige::scene
         }
 
         // Update manager
-        m_manager->Update(Time::Instance().GetElapsedTime() * 60);
+        m_manager->Update(dt * 60.f);
+
+        // Update time params
+        m_renderer->SetTime(m_renderer->GetTime() + dt);
     }
 
     //! Render
