@@ -24,6 +24,8 @@ namespace ige::scene
         m_worldRotation = rot;
         m_worldScale = scale;
 
+        vmath_quatToEuler(m_localRotation.P(), m_originEuler.P());
+
         if (getOwner()->getParent())
         {
             m_parent = getOwner()->getParent()->getTransform();
@@ -249,6 +251,12 @@ namespace ige::scene
         return m_worldRotation * Vec3(0.f, 0.f, 1.f);
     }
 
+    void TransformComponent::setOriginEuler(const Vec3& rot)
+    {
+        m_originEuler = rot;
+        setLocalRotation(rot);
+    }
+
     void TransformComponent::updateLocalToWorld()
     {
         // Update local matrix
@@ -472,6 +480,7 @@ namespace ige::scene
         j["wpos"] = m_worldPosition;
         j["wrot"] = wRotEuler;
         j["wscale"] = m_worldScale;
+        j["originRot"] = getOriginEuler();
     }
 
     //! Deserialize
@@ -510,6 +519,10 @@ namespace ige::scene
         else if (key.compare("wscale") == 0)
         {
             setScale(val);
+        }
+        else if (key.compare("originRot") == 0) 
+        {
+            setOriginEuler(val);
         }
         else
         {

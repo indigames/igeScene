@@ -123,6 +123,12 @@ namespace ige::scene
         //! Get world forward vector
         virtual Vec3 getWorldForward() const;
 
+        //! Set origin Euler rotation by xyz
+        virtual void setOriginEuler(const Vec3& rot);
+
+        //! get origin rotation
+        virtual const Vec3 getOriginEuler() const { return m_originEuler; }
+
         //! Should always update
         inline virtual bool shouldAlwaysUpdate() { return true; }
 
@@ -183,6 +189,8 @@ namespace ige::scene
         Quat m_worldRotation;
         Vec3 m_worldScale;
         Mat4 m_worldMatrix;
+
+        Vec3 m_originEuler;
 
         //! Transform observers
         std::set<TransformComponent*> m_observers;
