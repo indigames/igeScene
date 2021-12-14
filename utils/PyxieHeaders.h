@@ -39,5 +39,6 @@ using Time = pyxie::pyxieTime;
 using ShaderDescriptor = pyxie::pyxieShaderDescriptor;
 using Drawable = pyxie::pyxieDrawable;
 using AABBox = pyxie::pyxieAABBox;
+using Animator = pyxie::pyxieAnimator;
 
 using namespace pyxie;

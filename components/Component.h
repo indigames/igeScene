@@ -64,6 +64,7 @@ namespace ige::scene
             Transform,
             RectTransform,
             Compound,
+            Animator
         };
 
     public:

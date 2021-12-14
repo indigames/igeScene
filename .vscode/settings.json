@@ -84,5 +84,6 @@
         "bit": "cpp",
         "format": "cpp",
         "stop_token": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": false
 }
