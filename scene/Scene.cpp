@@ -146,11 +146,13 @@ namespace ige::scene
             directionalLight->getTransform()->setLocalRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
 
             // Add editor debug
+        #if EDITOR_MODE
             if (SceneManager::getInstance()->isEditor())
             {
                 camObj->addComponent<FigureComponent>(GetEditorResource("figures/camera"))->setSkipSerialize(true);
                 directionalLight->addComponent<SpriteComponent>(GetEditorResource("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
             }
+        #endif
         }        
 
         // Tween manager
