@@ -22,11 +22,25 @@ namespace ige::scene
         AnimatorComponent(SceneObject& owner);
         virtual ~AnimatorComponent();
 
+        //! Initialize
+        void initialize();
+
+        //! Clear
+        void clear();
+
         //! Get name
         virtual std::string getName() const override { return "Animator"; }
 
         //! Returns the type of the component
         virtual Type getType() const override { return Type::Animator; }
+
+        //! Controller Path
+        const std::string& getControllerPath() const { return m_controllerPath; }
+        void setControllerPath(const std::string& path);
+
+        //! Controller
+        std::shared_ptr<AnimatorController> getController() { return controller; }
+        void setController(const std::shared_ptr<AnimatorController>& controller);
 
         //! Override update functions
         virtual void onUpdate(float dt) override;
@@ -36,9 +50,12 @@ namespace ige::scene
 
     public:
         //! Animator controller instance
-        std::shared_ptr<AnimatorController> controller;
+        std::shared_ptr<AnimatorController> controller = nullptr;
 
         //! Update mode
         int m_updateMode = UpdateMode::Normal;
+
+        //! Controller path
+        std::string m_controllerPath = {};
     };
 } // namespace ige::scene

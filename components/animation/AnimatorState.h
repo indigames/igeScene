@@ -12,14 +12,6 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    class AnimatorState;
-    class AnimationClip;
-
-    struct ChildState {
-        std::weak_ptr<AnimatorState> state;
-        Vec3 position;
-    };
-    
     class AnimatorState : public std::enable_shared_from_this<AnimatorState>
     {
     public:
@@ -34,7 +26,7 @@ namespace ige::scene
 
         virtual void onEnter() {}
         virtual void onExit() {}
-        virtual void onUpdate() {}
+        virtual void onUpdate(float dt) {}
 
         virtual void addTransition(const std::shared_ptr<AnimatorTransition>& transition);
         virtual bool removeTransition(const std::shared_ptr<AnimatorTransition>& transition);
@@ -57,7 +49,7 @@ namespace ige::scene
 
     protected:
         std::string m_name;
-        std::weak_ptr<AnimationClip> m_motionClip;
+        Animator* m_motionClip;
         float m_motionSpeed = 1.f;
 
     };

@@ -1,7 +1,7 @@
 #include "AnimatorStateMachine.h"
 
 namespace ige::scene {
-    auto StateMachineCache::childStateMachines = std::map<std::weak_ptr<AnimatorStateMachine>, std::vector<ChildStateMachine>>();
+    auto StateMachineCache::childStateMachines = std::map<std::weak_ptr<AnimatorStateMachine>, std::vector<AnimatorState>>();
 
     void StateMachineCache::init()
     {
@@ -13,7 +13,7 @@ namespace ige::scene {
         childStateMachines.swap({});
     }
 
-    const std::vector<std::weak_ptr<ChildStateMachine>>& StateMachineCache::getChildStateMachines(const std::shared_ptr<AnimatorStateMachine>& parent)
+    const std::vector<std::weak_ptr<AnimatorStateMachine>>& StateMachineCache::getChildStateMachines(const std::shared_ptr<AnimatorStateMachine>& parent)
     {
         init();
 
@@ -59,19 +59,19 @@ namespace ige::scene {
     std::shared_ptr<AnimatorState> AnimatorStateMachine::findState(const std::shared_ptr<AnimatorState>& state, bool recursive)
     {
         auto itr = std::find_if(states.begin(), states.end(), [state](const auto& elem){
-            return !elem.expired() && !elem.lock()->state.expired() && elem.lock()->state.lock() == state;
+            return !elem.expired() && !elem.lock() == state;
         });
 
         if(!recursive && itr != states.end())
-            return (*itr).lock()->state.lock();
+            return (*itr).lock();
 
         const auto& statesRecursive = getStatesRecursive();
         auto itr2 = std::find_if(statesRecursive.begin(), statesRecursive.end(), [state](const auto& elem){
-            return !elem.expired() && !elem.lock()->state.expired() && elem.lock()->state.lock() == state;
+            return !elem.expired() && !elem.lock() == state;
         });
 
         if(itr2 != statesRecursive.end())
-            return (*itr2).lock()->state.lock();
+            return (*itr2).lock();
 
         return nullptr;
     }
@@ -79,19 +79,19 @@ namespace ige::scene {
     std::shared_ptr<AnimatorState> AnimatorStateMachine::findState(const std::string& name, bool recursive)
     {
         auto itr = std::find_if(states.begin(), states.end(), [name](const auto& elem){
-            return !elem.expired() && !elem.lock()->state.expired() && elem.lock()->state.lock()->getName().compare(name) == 0;
+            return !elem.expired() && !elem.lock()->getName().compare(name) == 0;
         });
 
         if(!recursive && itr != states.end())
-            return (*itr).lock()->state.lock();
+            return (*itr).lock();
 
         const auto& statesRecursive = getStatesRecursive();
         auto itr2 = std::find_if(statesRecursive.begin(), statesRecursive.end(), [name](const auto& elem){
-            return !elem.expired() && !elem.lock()->state.expired() && elem.lock()->state.lock()->getName().compare(name) == 0;
+            return !elem.expired() && !elem.lock()->getName().compare(name) == 0;
         });
 
         if(itr2 != statesRecursive.end())
-            return (*itr2).lock()->state.lock();
+            return (*itr2).lock();
 
         return nullptr;
     }
@@ -99,19 +99,19 @@ namespace ige::scene {
     std::shared_ptr<AnimatorStateMachine> AnimatorStateMachine::findStateMachine(const std::shared_ptr<AnimatorStateMachine>& stateMachine, bool recursive)
     {
         auto itr = std::find_if(stateMachines.begin(), stateMachines.end(), [stateMachine](const auto& elem){
-            return !elem.expired() && !elem.lock()->stateMachine.expired() && elem.lock()->stateMachine.lock() == stateMachine;
+            return !elem.expired() && !elem.lock() == stateMachine;
         });
 
         if(!recursive && itr != stateMachines.end())
-            return (*itr).lock()->stateMachine.lock();
+            return (*itr).lock();
 
         const auto& stateMachinesRecursive = getStatesMachinesRecursive();
         auto itr2 = std::find_if(stateMachinesRecursive.begin(), stateMachinesRecursive.end(), [stateMachine](const auto& elem){
-            return !elem.expired() && !elem.lock()->stateMachine.expired() && elem.lock()->stateMachine.lock() == stateMachine;
+            return !elem.expired() && !elem.lock() == stateMachine;
         });
 
         if(itr2 != stateMachinesRecursive.end())
-            return (*itr2).lock()->stateMachine.lock();
+            return (*itr2).lock();
 
         return nullptr;
     }
@@ -121,9 +121,9 @@ namespace ige::scene {
         if (hasState(state, false)) return getSharedPtr();
         const auto& stateMachinesRecursive = getStatesMachinesRecursive();
         auto itr = std::find_if(stateMachinesRecursive.begin(), stateMachinesRecursive.end(), [state](const auto& elem){
-            return !elem.expired() && !elem.lock()->stateMachine.expired() && elem.lock()->stateMachine.lock()->hasState(state, false);
+            return !elem.expired() && !elem.lock()->hasState(state, false);
         });
-        return (itr != stateMachinesRecursive.end()) ? (*itr).lock()->stateMachine.lock() : nullptr;
+        return (itr != stateMachinesRecursive.end()) ? (*itr).lock() : nullptr;
     }
 
     std::shared_ptr<AnimatorTransition> AnimatorStateMachine::findTransition(const std::shared_ptr<AnimatorState>& dstState)
@@ -134,12 +134,12 @@ namespace ige::scene {
         return (itr != anyStateTransitions.end()) ? (*itr).lock() : nullptr;
     }
 
-    std::vector<std::weak_ptr<ChildState>> AnimatorStateMachine::getStatesRecursive()
+    std::vector<std::weak_ptr<AnimatorState>> AnimatorStateMachine::getStatesRecursive()
     {
-        auto ret = std::vector<std::weak_ptr<ChildState>>(states);
+        auto ret = std::vector<std::weak_ptr<AnimatorState>>(states);
         for(const auto& sm: stateMachines) {
-            if(!sm.expired() && !sm.lock()->stateMachine.expired()) {
-                auto childStates = sm.lock()->stateMachine.lock()->getStatesRecursive();
+            if(!sm.expired()) {
+                auto childStates = sm.lock()->getStatesRecursive();
                 ret.reserve(ret.size() + childStates.size());
                 std::copy(childStates.begin(), childStates.end(), std::back_inserter(ret));
             }
@@ -147,13 +147,13 @@ namespace ige::scene {
         return ret;
     }
 
-    std::vector<std::weak_ptr<ChildStateMachine>> AnimatorStateMachine::getStatesMachinesRecursive()
+    std::vector<std::weak_ptr<AnimatorStateMachine>> AnimatorStateMachine::getStatesMachinesRecursive()
     {
         auto childSM = StateMachineCache::getChildStateMachines(getSharedPtr());
-        auto ret = std::vector<std::weak_ptr<ChildStateMachine>>(childSM);
+        auto ret = std::vector<std::weak_ptr<AnimatorStateMachine>>(childSM);
         for(const auto& sm: childSM) {
-            if(!sm.expired() && !sm.lock()->stateMachine.expired()) {
-                auto childMachines = sm.lock()->stateMachine.lock()->getStatesMachinesRecursive();
+            if(!sm.expired()) {
+                auto childMachines = sm.lock()->getStatesMachinesRecursive();
                 ret.reserve(ret.size() + childMachines.size());
                 std::copy(childMachines.begin(), childMachines.end(), std::back_inserter(ret));
             }
@@ -165,92 +165,34 @@ namespace ige::scene {
     {
         auto ret = std::vector<std::weak_ptr<AnimatorTransition>>(anyStateTransitions);
         for(const auto& sm: stateMachines) {
-            if(!sm.expired() && !sm.lock()->stateMachine.expired()) {
-                auto childTransitions = sm.lock()->stateMachine.lock()->getTransitionsRecursive();
+            if(!sm.expired()) {
+                auto childTransitions = sm.lock()->getTransitionsRecursive();
                 ret.reserve(ret.size() + childTransitions.size());
                 std::copy(childTransitions.begin(), childTransitions.end(), std::back_inserter(ret));
             }
         }
         return ret;
     }
-
-    Vec3 AnimatorStateMachine::getStatePosition(const std::shared_ptr<AnimatorState>& state) const
-    {
-        for(const auto& s: states) {
-            if(!s.expired() && !s.lock()->state.expired()) {
-                if(state == s.lock()->state.lock()) {
-                    return s.lock()->position;
-                }
-            }
-        }
-        return Vec3();
-    }
-
-    void AnimatorStateMachine::setStatePosition(const std::shared_ptr<AnimatorState>& state, const Vec3& pos)
-    {
-        for(const auto& s: states) {
-            if(!s.expired() && !s.lock()->state.expired()) {
-                if(state == s.lock()->state.lock()) {
-                    s.lock()->position = pos;
-                    return;
-                }
-            }
-        }
-    }
-
-    Vec3 AnimatorStateMachine::getStateMachinePosition(const std::shared_ptr<AnimatorStateMachine>& stateMachine) const
-    {
-        for(const auto& sm: stateMachines) {
-            if(!sm.expired() && !sm.lock()->stateMachine.expired()) {
-                if(stateMachine == sm.lock()->stateMachine.lock()) {
-                    return sm.lock()->position;
-                }
-            }
-        }
-        return Vec3();
-    }
-
-    void AnimatorStateMachine::setStateMachinePosition(const std::shared_ptr<AnimatorStateMachine>& stateMachine, const Vec3& pos)
-    {
-        for(const auto& sm: stateMachines) {
-            if(!sm.expired() && !sm.lock()->stateMachine.expired()) {
-                if(stateMachine == sm.lock()->stateMachine.lock()) {
-                    sm.lock()->position = pos;
-                    return;
-                }
-            }
-        }
-    }
-
+   
     std::shared_ptr<AnimatorState> AnimatorStateMachine::addState(const std::string& name)
-    {
-        auto size = states.size();
-        auto pos = (size > 0 &&  !states[size - 1].expired()) ? states[size - 1].lock()->position + Vec3(30.f, 60.f, 0.f) : Vec3();
-        return addState(name, pos);
-    }
-
-    std::shared_ptr<AnimatorState> AnimatorStateMachine::addState(const std::string& name, const Vec3& pos)
     {
         auto state = std::make_shared<AnimatorState>();
         state->setName(name);
-        addState(state, pos);
+        addState(state);
         return state;
     }
 
-    void AnimatorStateMachine::addState(const std::shared_ptr<AnimatorState>& state, const Vec3& pos)
+    void AnimatorStateMachine::addState(const std::shared_ptr<AnimatorState>& state)
     {
         if(!hasState(state)) {
-            auto newState = std::make_shared<ChildState>();
-            newState->state = state;
-            newState->position = pos;
-            states.push_back(newState);
+            states.push_back(state);
         }
     }
 
     bool AnimatorStateMachine::removeState(const std::shared_ptr<AnimatorState>& state)
     {
         auto itr = std::find_if(states.begin(), states.end(), [state](const auto& elem){
-            return !elem.expired() && !elem.lock()->state.expired() && elem.lock()->state.lock() == state;
+            return !elem.expired() && !elem.lock() == state;
         });
 
         if(itr != states.end()) {
@@ -260,27 +202,24 @@ namespace ige::scene {
         return false;
     }
 
-    std::shared_ptr<AnimatorStateMachine> AnimatorStateMachine::addStateMachine(const std::string& name, const Vec3& pos)
+    std::shared_ptr<AnimatorStateMachine> AnimatorStateMachine::addStateMachine(const std::string& name)
     {
         auto machine = std::make_shared<AnimatorStateMachine>();
         machine->setName(name);
-        addStateMachine(machine, pos);
+        addStateMachine(machine);
         return machine;
     }
 
-    void AnimatorStateMachine::addStateMachine(const std::shared_ptr<AnimatorStateMachine>& machine, const Vec3& pos){
+    void AnimatorStateMachine::addStateMachine(const std::shared_ptr<AnimatorStateMachine>& machine){
         if(!hasStateMachine(machine)) {
-            auto newMachine = std::make_shared<ChildStateMachine>();
-            newMachine->stateMachine = machine;
-            newMachine->position = pos;
-            stateMachines.push_back(newMachine);
+            stateMachines.push_back(machine);
         }
     }
 
     bool AnimatorStateMachine::removeStateMachine(const std::shared_ptr<AnimatorStateMachine>& machine)
     {
         auto itr = std::find_if(stateMachines.begin(), stateMachines.end(), [machine](const auto& elem){
-            return !elem.expired() && !elem.lock()->stateMachine.expired() && elem.lock()->stateMachine.lock() == machine;
+            return !elem.expired() && !elem.lock() == machine;
         });
 
         if(itr != stateMachines.end()) {
@@ -327,7 +266,7 @@ namespace ige::scene {
         if(recursive) {
             auto stateMachinesRecursive = getStatesMachinesRecursive();
             for(auto& sm: stateMachinesRecursive) {
-                if(!sm.expired() && !sm.lock()->stateMachine.expired() && sm.lock()->stateMachine.lock()->removeAnyStateTransition(transition))
+                if(!sm.expired() && !sm.lock()->removeAnyStateTransition(transition))
                     return true;
             }
         }

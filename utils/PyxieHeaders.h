@@ -26,6 +26,7 @@ using Environment = pyxie::pyxieEnvironmentSet;
 using RenderContext = pyxie::pyxieRenderContext;
 using Figure = pyxie::pyxieFigure;
 using EditableFigure = pyxie::pyxieEditableFigure;
+using BaseFigure = pyxie::pyxieFigureBase;
 using RenderTarget = pyxie::pyxieRenderTarget;
 using Resource = pyxie::pyxieResource;
 using ResourceCreator = pyxie::pyxieResourceCreator;

@@ -20,7 +20,7 @@ namespace ige::scene
         AnimatorCondition(Mode mode, const std::string& param, float threshold);
 
         // Destructor
-        virtual ~AnimatorCondition();
+        virtual ~AnimatorCondition() {}
 
         // Members
         Mode mode;
