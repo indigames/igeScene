@@ -137,10 +137,10 @@ namespace ige::scene
             m_currScene->preRender(camera);
     }
 
-    void SceneManager::render(RenderTarget* fbo)
+    void SceneManager::render(RenderTarget* fbo, bool skipBeginEnd)
     {
         if (m_currScene) 
-            m_currScene->render(fbo);
+            m_currScene->render(fbo, skipBeginEnd);
     }
 
     void SceneManager::setProjectPath(const std::string& path)

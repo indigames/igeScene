@@ -317,35 +317,29 @@ namespace ige::scene
         }
     }
 
-    void Scene::render(RenderTarget* fbo)
+    void Scene::render(RenderTarget* fbo, bool skipBeginEnd)
     {
         // Render 3D scene
         {
-            if (fbo) {
+            if(!skipBeginEnd) 
                 RenderContext::InstancePtr()->BeginScene(fbo, !m_activeCamera.expired() ? m_activeCamera.lock()->getClearColor() : Vec4(1.f, 1.f, 1.f, 1.f), true, true);
-            }
 
             m_showcase->Render();
             for (int i = m_objects.size() - 1; i >= 0; i--) {
                 m_objects[i]->onRender();
             }
 
-            if (fbo) {
+            if (!skipBeginEnd)
                 RenderContext::InstancePtr()->EndScene();
-            }
         }
 
         // Render UI
-        renderUI(fbo);
+        renderUI(fbo, skipBeginEnd);
     }
 
-    void Scene::renderUI(RenderTarget* fbo) {
+    void Scene::renderUI(RenderTarget* fbo, bool skipBeginEnd) {
         if (SceneManager::getInstance()->isPlaying()) {
-            // already begin scene in other places
-            if(!fbo) {
-                RenderContext::InstancePtr()->EndScene();
-                RenderContext::InstancePtr()->ResetRenderStateAll();
-            }
+            RenderContext::InstancePtr()->ResetRenderStateAll();
 
             float dt = Time::Instance().GetElapsedTime();
             m_uiShowcase->Update(dt);
@@ -356,7 +350,8 @@ namespace ige::scene
                 getCanvas()->getCamera()->Render();
             }
 
-            RenderContext::InstancePtr()->BeginScene(fbo ? fbo : RenderContext::InstancePtr()->GetCurrentRenderTarget(), Vec4(1.f, 1.f, 1.f, 1.f), false, true);
+            if (!skipBeginEnd)
+                RenderContext::InstancePtr()->BeginScene(fbo, Vec4(1.f, 1.f, 1.f, 1.f), false, true);
         }
         m_uiShowcase->Render();
 
@@ -365,9 +360,8 @@ namespace ige::scene
         }
 
         if (SceneManager::getInstance()->isPlaying()) {
-            if (fbo) {
+            if (!skipBeginEnd)
                 RenderContext::InstancePtr()->EndScene();
-            }
         }
     }
 

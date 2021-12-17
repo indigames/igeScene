@@ -44,7 +44,7 @@ namespace ige::scene
         virtual void preRender(Camera* camera = nullptr);
 
         //! render
-        virtual void render(RenderTarget* fbo = nullptr);
+        virtual void render(RenderTarget* fbo = nullptr, bool skipBeginEnd = false);
 
         //! Create empty scene
         std::shared_ptr<Scene> createScene(const std::string& name = "Untitled", bool empty = false);

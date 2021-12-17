@@ -64,10 +64,10 @@ namespace ige::scene
         virtual void preRender(Camera* camera = nullptr);
 
         //! Render
-        virtual void render(RenderTarget* fbo = nullptr);
+        virtual void render(RenderTarget* fbo = nullptr, bool skipBeginEnd = false); // skipBeginEnd used for Editor render flow
 
         //! Canvas Render
-        virtual void renderUI(RenderTarget* fbo = nullptr);
+        virtual void renderUI(RenderTarget* fbo = nullptr, bool skipBeginEnd = false);
 
         //! Create scene object
         virtual std::shared_ptr<SceneObject> createObject(const std::string& name = "", const std::shared_ptr<SceneObject>& parent = nullptr, bool isGUI = false, const Vec2& size = { 64, 64 }, const std::string& prefabId = std::string(), const Vec3& position = Vec3(), const Quat& rotation = Quat(), const Vec3& scale = { 1,1,1 });
