@@ -454,6 +454,9 @@ namespace ige::scene
             m_bLocalDirty = true;
             break;
         }
+
+        // force update transform
+        onUpdate(0.f);
     }
 
     //! Serialize
