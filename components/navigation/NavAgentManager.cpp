@@ -48,7 +48,7 @@ namespace ige::scene
         //TODO: optimize
         auto agentPtr = std::dynamic_pointer_cast<NavAgent>(agent->getOwner()->getComponent(agent->getInstanceId()));
         m_agents.push_back(agentPtr);
-        if (agent->isEnabled() && isRunning()) {
+        if (agent->isEnabled() && isInitialized()) {
             onActivated(agent);
         }
     }

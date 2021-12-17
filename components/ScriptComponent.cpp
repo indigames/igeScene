@@ -113,7 +113,7 @@ namespace ige::scene
 
     void ScriptComponent::Reload()
     {
-        bool isLoad = isRunning();
+        bool isLoad = isInitialized();
         Clear();
         unloadPyModule();
         loadPyModule();
@@ -131,7 +131,6 @@ namespace ige::scene
     void ScriptComponent::Clear()
     {
         RuntimeComponent::Clear();
-        
         getOwner()->removeEventListener((int)EventType::Click, m_instanceId);
         getOwner()->removeEventListener((int)EventType::Changed, m_instanceId);
     }
@@ -448,8 +447,7 @@ namespace ige::scene
 
     void ScriptComponent::onRuntimeFixedUpdate(float dt)
     {
-        if (SceneManager::getInstance()->isEditor())
-            return;
+        if (!isInitialized()) return;
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onFixedUpdate"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onFixedUpdate", "(f)", dt);
@@ -460,8 +458,7 @@ namespace ige::scene
 
     void ScriptComponent::onRuntimeLateUpdate(float dt)
     {
-        if (SceneManager::getInstance()->isEditor())
-            return;
+        if (!isInitialized()) return;
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onLateUpdate"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onLateUpdate", "(f)", dt);
@@ -473,8 +470,7 @@ namespace ige::scene
     //! Render
     void ScriptComponent::onRender()
     {
-        if (SceneManager::getInstance()->isEditor())
-            return;
+        if (!isInitialized()) return;
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onRender"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onRender", NULL);
@@ -486,8 +482,7 @@ namespace ige::scene
     //! Render
     void ScriptComponent::onRenderUI()
     {
-        if (SceneManager::getInstance()->isEditor())
-            return;
+        if (!isInitialized()) return;
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onRenderUI"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onRenderUI", NULL);

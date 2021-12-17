@@ -147,8 +147,7 @@ namespace ige::scene
 
             // Add editor debug
         #if EDITOR_MODE
-            if (SceneManager::getInstance()->isEditor())
-            {
+            if (!SceneManager::getInstance()->isPlaying()) {
                 camObj->addComponent<FigureComponent>(GetEditorResource("figures/camera"))->setSkipSerialize(true);
                 directionalLight->addComponent<SpriteComponent>(GetEditorResource("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
             }
@@ -283,7 +282,7 @@ namespace ige::scene
         if (camera) {
             camera->Step(dt);
         }
-        else if (!SceneManager::getInstance()->isEditor() && !m_activeCamera.expired()) {
+        else if (SceneManager::getInstance()->isPlaying() && !m_activeCamera.expired()) {
             m_activeCamera.lock()->onUpdate(dt);
         } 
         m_showcase->Update(dt);
@@ -292,7 +291,7 @@ namespace ige::scene
             m_showcase->ZSort(camera);
             camera->Render();
         }
-        else if (!SceneManager::getInstance()->isEditor() && !m_activeCamera.expired()) {
+        else if (SceneManager::getInstance()->isPlaying() && !m_activeCamera.expired()) {
             m_showcase->ZSort(m_activeCamera.lock()->getCamera());
             m_activeCamera.lock()->onRender();
         }
@@ -305,7 +304,7 @@ namespace ige::scene
             if (camera) {
                 camera->Render();
             }
-            else if (!SceneManager::getInstance()->isEditor() && !m_activeCamera.expired()) {
+            else if (SceneManager::getInstance()->isPlaying() && !m_activeCamera.expired()) {
                 m_activeCamera.lock()->onRender();
             }
             m_showcase->Render(RenderPassFilter::ShadowPass);
@@ -338,7 +337,7 @@ namespace ige::scene
     }
 
     void Scene::renderUI(RenderTarget* fbo, bool skipBeginEnd) {
-        if (SceneManager::getInstance()->isPlaying()) {
+        if (SceneManager::getInstance()->isPlaying() && !skipBeginEnd) {
             RenderContext::InstancePtr()->ResetRenderStateAll();
 
             float dt = Time::Instance().GetElapsedTime();
@@ -350,8 +349,7 @@ namespace ige::scene
                 getCanvas()->getCamera()->Render();
             }
 
-            if (!skipBeginEnd)
-                RenderContext::InstancePtr()->BeginScene(fbo, Vec4(1.f, 1.f, 1.f, 1.f), false, true);
+            RenderContext::InstancePtr()->BeginScene(fbo, Vec4(1.f, 1.f, 1.f, 1.f), false, true);
         }
         m_uiShowcase->Render();
 
@@ -359,9 +357,8 @@ namespace ige::scene
             m_objects[i]->onRenderUI();
         }
 
-        if (SceneManager::getInstance()->isPlaying()) {
-            if (!skipBeginEnd)
-                RenderContext::InstancePtr()->EndScene();
+        if (SceneManager::getInstance()->isPlaying() && !skipBeginEnd) {
+            RenderContext::InstancePtr()->EndScene();
         }
     }
 

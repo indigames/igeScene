@@ -85,20 +85,8 @@ namespace ige::scene
         //! Set current scene by name
         void setCurrentScene(const std::string& name);
 
-        //! Check if this is editor mode
-        bool isEditor() const { return m_bIsEditor; }
-
-        //! Set editor mode
-        void setIsEditor(bool isEditor) { m_bIsEditor = isEditor; }
-
-        bool isIgeEditor() const { return m_bIsIgeEditor; }
-
-        void setIsIgeEditor(bool isEditor) { m_bIsIgeEditor = isEditor; }
-
-        //! Check if this is editor playing mode
+        //! Playing mode
         bool isPlaying() const { return m_bIsPlaying; }
-
-        //! Set editor playing mode
         void setIsPlaying(bool isPlaying) { m_bIsPlaying = isPlaying; }
 
         //! Project path
@@ -142,9 +130,7 @@ namespace ige::scene
         //! Map of prefabId and it paths
         std::map<std::string, std::string> m_prefabPaths;
 
-        //! Editor mode
-        bool m_bIsEditor = false;
-        bool m_bIsIgeEditor = false;
+        //! Playing mode
         bool m_bIsPlaying = false;
     };
 

@@ -1142,7 +1142,7 @@ namespace ige::scene
 
         // Add editor camera figure debug
 #if EDITOR_MODE
-        if (SceneManager::getInstance()->isEditor())
+        if (!SceneManager::getInstance()->isPlaying())
         {
             if (auto camera = getComponent<CameraComponent>())
             {

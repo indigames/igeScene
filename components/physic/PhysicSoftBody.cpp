@@ -425,17 +425,13 @@ namespace ige::scene
     //! Update Bullet transform
     void PhysicSoftBody::updateBtTransform()
     {
-        if (!SceneManager::getInstance()->isEditor())
-            return;
-
         auto newTrans = PhysicHelper::to_btTransform(getOwner()->getTransform()->getRotation(), getOwner()->getTransform()->getPosition());
         getSoftBody()->transformTo(newTrans);
 
         Vec3 scale = getOwner()->getTransform()->getScale();
         Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
         float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
-        if (scaleDelta >= 0.01f)
-        {
+        if (scaleDelta >= 0.01f) {
             setLocalScale(scale);
         }
     }
