@@ -475,20 +475,17 @@ namespace ige::scene
     //! Update IGE transform
     void PhysicObject::updateIgeTransform()
     {
-        if (m_bIsKinematic)
-        {
-            auto transform = getOwner()->getTransform();
-            const auto &result = m_body->getWorldTransform();
-            transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
-            transform->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
+        auto transform = getOwner()->getTransform();
+        const auto &result = m_body->getWorldTransform();
+        transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
+        transform->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
 
-            if (m_positionOffset.LengthSqr() > 0) {
-                auto matrix = Mat4::IdentityMat();
-                vmath_mat_from_quat(transform->getRotation().P(), 4, matrix.P());
-                vmath_mat_appendScale(matrix.P(), transform->getScale().P(), 4, 4, matrix.P());
-                auto offset = matrix * m_positionOffset;
-                transform->translate(-offset);
-            }
+        if (m_positionOffset.LengthSqr() > 0) {
+            auto matrix = Mat4::IdentityMat();
+            vmath_mat_from_quat(transform->getRotation().P(), 4, matrix.P());
+            vmath_mat_appendScale(matrix.P(), transform->getScale().P(), 4, 4, matrix.P());
+            auto offset = matrix * m_positionOffset;
+            transform->translate(-offset);
         }
     }
 
