@@ -475,7 +475,7 @@ namespace ige::scene
     //! Update IGE transform
     void PhysicObject::updateIgeTransform()
     {
-        if (!m_bIsKinematic)
+        if (m_bIsKinematic)
         {
             auto transform = getOwner()->getTransform();
             const auto &result = m_body->getWorldTransform();
