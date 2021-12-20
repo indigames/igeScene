@@ -1283,7 +1283,7 @@ namespace ige::scene
 
     bool Scene::isPrefab()
     {
-        return m_objects.size() > 0 && !m_objects[0]->getPrefabId().empty();
+        return m_objects.size() > 0 && m_objects[0] && !m_objects[0]->getPrefabId().empty();
     }
 
     std::string Scene::getPrefabId()

@@ -197,7 +197,7 @@ namespace ige::scene
         for (auto &element : m_collisionEvents)
             element.second = false;
 
-        // Update bullet transform
+        // Update object transform
         std::for_each(m_physicObjects.begin(), m_physicObjects.end(), std::mem_fn(&PhysicObject::updateBtTransform));
     }
 

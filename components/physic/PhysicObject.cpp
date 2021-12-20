@@ -41,7 +41,7 @@ namespace ige::scene
         if (m_transformEventId != (uint64_t)-1) {
             getOwner()->getTransformChangedEvent().removeListener(m_transformEventId);
             m_transformEventId = (uint64_t)-1;
-        }        
+        }
         destroy();
         m_manager.reset();
     }
@@ -72,11 +72,18 @@ namespace ige::scene
         return true;
     }
 
-    //! Transform changed: recreate body if this is kinematic object
+    //! Transform changed: update transform for kinematic object
     void PhysicObject::onTransformChanged(SceneObject& object) {
         if (isKinematic()) {
-            recreateBody();
+            updateBtTransform();
+            m_body->setInterpolationWorldTransform(m_body->getWorldTransform());
+            if (getBody() && getBody()->getMotionState()) {
+                getBody()->getMotionState()->setWorldTransform(m_body->getWorldTransform());
+            }
         }
+    #if EDITOR_MODE
+        getOwner()->updateAabb();
+    #endif
     }
 
     //! Add constraint
@@ -312,6 +319,7 @@ namespace ige::scene
                 setLinearVelocity({0.f, 0.f, 0.f});
                 setAngularVelocity({0.f, 0.f, 0.f});
                 addCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
+                setActivationState(DISABLE_DEACTIVATION);
             }
             else
             {
@@ -492,7 +500,6 @@ namespace ige::scene
         const auto &result = m_body->getWorldTransform();
         transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
         transform->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
-
         if (m_positionOffset.LengthSqr() > 0) {
             auto matrix = Mat4::IdentityMat();
             vmath_mat_from_quat(transform->getRotation().P(), 4, matrix.P());
