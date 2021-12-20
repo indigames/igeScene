@@ -41,7 +41,7 @@ namespace ige::scene
         if (m_transformEventId != (uint64_t)-1) {
             getOwner()->getTransformChangedEvent().removeListener(m_transformEventId);
             m_transformEventId = (uint64_t)-1;
-        }        
+        }
         destroy();
         m_manager.reset();
     }
@@ -74,9 +74,7 @@ namespace ige::scene
 
     //! Transform changed: recreate body if this is kinematic object
     void PhysicObject::onTransformChanged(SceneObject& object) {
-        if (isKinematic()) {
-            recreateBody();
-        }
+        updateBtTransform();
     }
 
     //! Add constraint
@@ -278,7 +276,6 @@ namespace ige::scene
         if(m_bIsDirty || m_positionOffset != offset) {
             m_positionOffset = offset;
             updateBtTransform();
-            getOwner()->updateAabb();
         }
     }
 
@@ -312,6 +309,7 @@ namespace ige::scene
                 setLinearVelocity({0.f, 0.f, 0.f});
                 setAngularVelocity({0.f, 0.f, 0.f});
                 addCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
+                setActivationState(DISABLE_DEACTIVATION);
             }
             else
             {
@@ -475,6 +473,16 @@ namespace ige::scene
             offset = matrix * m_positionOffset;
         }
         m_body->setWorldTransform(PhysicHelper::to_btTransform(transform->getRotation(), transform->getPosition() + offset));
+
+        if (isKinematic()) {
+            m_body->setInterpolationWorldTransform(m_body->getWorldTransform());
+            if (getBody() && getBody()->getMotionState()) {
+                getBody()->getMotionState()->setWorldTransform(m_body->getWorldTransform());
+            }
+            m_body->setInterpolationLinearVelocity(btVector3(0, 0, 0));
+            m_body->setInterpolationAngularVelocity(btVector3(0, 0, 0));
+        }
+
         Vec3 scale = transform->getScale();
         Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
         float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
@@ -482,6 +490,7 @@ namespace ige::scene
             setLocalScale({std::abs(scale[0]), std::abs(scale[1]), std::abs(scale[2])});
             recreateBody();
         }
+        getOwner()->updateAabb();
     }
 
     //! Update IGE transform
@@ -492,7 +501,6 @@ namespace ige::scene
         const auto &result = m_body->getWorldTransform();
         transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
         transform->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
-
         if (m_positionOffset.LengthSqr() > 0) {
             auto matrix = Mat4::IdentityMat();
             vmath_mat_from_quat(transform->getRotation().P(), 4, matrix.P());
