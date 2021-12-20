@@ -487,6 +487,7 @@ namespace ige::scene
     //! Update IGE transform
     void PhysicObject::updateIgeTransform()
     {
+        if (isKinematic()) return;
         auto transform = getOwner()->getTransform();
         const auto &result = m_body->getWorldTransform();
         transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
