@@ -32,11 +32,16 @@ namespace ige::scene
                 manager = getOwner()->getRoot()->addComponent<PhysicManager>();
             setManager(manager);
         }
+        m_transformEventId = getOwner()->getTransformChangedEvent().addListener(std::bind(&PhysicObject::onTransformChanged, this, std::placeholders::_1));
     }
 
     //! Destructor
     PhysicObject::~PhysicObject()
     {
+        if (m_transformEventId != (uint64_t)-1) {
+            getOwner()->getTransformChangedEvent().removeListener(m_transformEventId);
+            m_transformEventId = (uint64_t)-1;
+        }        
         destroy();
         m_manager.reset();
     }
@@ -65,6 +70,13 @@ namespace ige::scene
         destroyBody();
 
         return true;
+    }
+
+    //! Transform changed: recreate body if this is kinematic object
+    void PhysicObject::onTransformChanged(SceneObject& object) {
+        if (isKinematic()) {
+            recreateBody();
+        }
     }
 
     //! Add constraint
