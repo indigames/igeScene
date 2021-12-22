@@ -1,32 +1,6 @@
 #include "AnimatorStateMachine.h"
 
 namespace ige::scene {
-    std::map<std::weak_ptr<AnimatorStateMachine>, std::vector<std::weak_ptr<AnimatorStateMachine>>> StateMachineCache::childStateMachines = {};
-
-    void StateMachineCache::init()
-    {
-        clear();
-    }
-
-    void StateMachineCache::clear()
-    {
-        childStateMachines.clear();
-    }
-
-    const std::vector<std::weak_ptr<AnimatorStateMachine>>& StateMachineCache::getChildStateMachines(const std::shared_ptr<AnimatorStateMachine>& parent)
-    {
-        init();
-
-        auto itr = childStateMachines.find(parent);
-        if(itr != childStateMachines.end()) {
-            return (*itr).second;
-        }
-
-        const auto& children = parent->stateMachines;
-        childStateMachines.insert({parent, children});
-        return children;
-    }
-
 
     AnimatorStateMachine::AnimatorStateMachine() {}
 
@@ -149,7 +123,7 @@ namespace ige::scene {
 
     std::vector<std::weak_ptr<AnimatorStateMachine>> AnimatorStateMachine::getStatesMachinesRecursive()
     {
-        auto childSM = StateMachineCache::getChildStateMachines(getSharedPtr());
+        auto childSM = std::vector<std::weak_ptr<AnimatorStateMachine>>(stateMachines);
         auto ret = std::vector<std::weak_ptr<AnimatorStateMachine>>(childSM);
         for(const auto& sm: childSM) {
             if(!sm.expired()) {
@@ -291,6 +265,7 @@ namespace ige::scene {
         auto newTransition = std::make_shared<AnimatorTransition>();
         newTransition->destStateMachine = dstMachine;
         stateMachineTransitions.push_back(newTransition);
+        return newTransition;
     }
 
     bool AnimatorStateMachine::removeStateMachineTransition(const std::shared_ptr<AnimatorTransition>& transition)

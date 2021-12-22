@@ -4,9 +4,10 @@
 namespace ige::scene
 {    
     //! Constructor
-    AnimatorController::AnimatorController()
+    AnimatorController::AnimatorController(const std::string& path)
     {
         m_figure = nullptr;
+        setPath(path);
     }
 
     // Destructor

@@ -14,17 +14,6 @@ namespace ige::scene
     class AnimatorStateMachine;
     class AnimatorTransition;
 
-    class StateMachineCache {
-        public:
-            static void init();
-            static void clear();
-            static const std::vector<std::weak_ptr<AnimatorStateMachine>>& getChildStateMachines(const std::shared_ptr<AnimatorStateMachine>& parent);
-
-        protected:
-            static bool initialized;
-            static std::map<std::weak_ptr<AnimatorStateMachine>, std::vector<std::weak_ptr<AnimatorStateMachine>>> childStateMachines;
-    }; 
-    
     class AnimatorStateMachine : public std::enable_shared_from_this<AnimatorStateMachine> 
     {
     public:
