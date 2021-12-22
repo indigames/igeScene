@@ -23,7 +23,7 @@ namespace ige::scene
     class AnimatorController
     {
     public:
-        AnimatorController(const std::string& path = {});
+        AnimatorController();
         virtual ~AnimatorController();
 
         //! Path

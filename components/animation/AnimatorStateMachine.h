@@ -1,13 +1,19 @@
 #pragma once
 
-#include <string>
-
 #include "AnimatorState.h"
+
+#include "utils/Serialize.h"
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
+#include <string>
+
 namespace ige::scene
 {
+    class AnimatorState;
+    class AnimatorStateMachine;
+    class AnimatorTransition;
+
     class StateMachineCache {
         public:
             static void init();
@@ -71,6 +77,12 @@ namespace ige::scene
         virtual std::shared_ptr<AnimatorTransition> addEntryTransition(const std::shared_ptr<AnimatorState>& state);
         virtual std::shared_ptr<AnimatorTransition> addEntryTransition(const std::shared_ptr<AnimatorStateMachine>& machine);
         virtual bool removeEntryTransition(const std::shared_ptr<AnimatorTransition>& transition);
+        
+        //! Serialize
+        friend void to_json(json &j, const AnimatorStateMachine &obj);
+
+        //! Deserialize
+        friend void from_json(const json &j, AnimatorStateMachine &obj);
 
         std::vector<std::weak_ptr<AnimatorState>> states;
         std::vector<std::weak_ptr<AnimatorStateMachine>> stateMachines;
@@ -79,6 +91,11 @@ namespace ige::scene
         std::vector<std::weak_ptr<AnimatorTransition>> entryTransitions;
         std::vector<std::weak_ptr<AnimatorTransition>> stateMachineTransitions;
 
+        std::shared_ptr<AnimatorState> currentState = nullptr;
+
+    protected:
+        virtual std::shared_ptr<AnimatorState> findEntryState();
+        
     protected:
         std::string m_name;
     };

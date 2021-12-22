@@ -11,7 +11,7 @@ namespace ige::scene
 {
     //! Constructor
     AnimatorComponent::AnimatorComponent(SceneObject &owner)
-        : Component(owner), m_figure(nullptr)
+        : Component(owner)
     {
     }
 
@@ -58,7 +58,7 @@ namespace ige::scene
     }
 
     // Update
-    AnimatorComponent::onUpdate( float dt)
+    void AnimatorComponent::onUpdate( float dt)
     {
        if(m_updateMode == UpdateMode::Normal) {
            if(controller) controller->update(dt);
@@ -69,10 +69,22 @@ namespace ige::scene
     }
 
     // Fixed Update
-    AnimatorComponent::onFixedUpdate( float dt)
+    void AnimatorComponent::onFixedUpdate( float dt)
     {
         if(m_updateMode == UpdateMode::AnimatePhysic) {
             if(controller) controller->update(dt, true);
         }
+    }
+
+        //! Serialize
+    void AnimatorComponent::to_json(json &j) const
+    {
+        Component::to_json(j);
+    }
+
+    //! Deserialize
+    void AnimatorComponent::from_json(const json &j)
+    {
+        Component::from_json(j);
     }
 } // namespace ige::scene

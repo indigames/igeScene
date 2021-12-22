@@ -18,15 +18,19 @@ namespace ige::scene
         AnimatorState();
         virtual ~AnimatorState();
 
+        //! Path
+        virtual const std::string& getPath() const { return m_path; }
+        virtual void setPath(const std::string& path);
+
+        //! Name
         virtual const std::string& getName() const { return m_name; }
         virtual void setName(const std::string& name) { m_name = name; }
 
         // Helper to get shared pointer from 'this'
         std::shared_ptr<AnimatorState> getSharedPtr() { return shared_from_this(); }
 
-        virtual void onEnter() {}
-        virtual void onExit() {}
-        virtual void onUpdate(float dt) {}
+        //! Motion clip
+        Animator* getAnimator() { return m_animator; }
 
         virtual void addTransition(const std::shared_ptr<AnimatorTransition>& transition);
         virtual bool removeTransition(const std::shared_ptr<AnimatorTransition>& transition);
@@ -37,6 +41,12 @@ namespace ige::scene
 
         virtual std::shared_ptr<AnimatorTransition> findTransition(const std::shared_ptr<AnimatorState>& state);
         virtual std::shared_ptr<AnimatorStateMachine> findStateMachine(const std::shared_ptr<AnimatorStateMachine>& rootStateMachine);
+
+        //! Serialize
+        friend void to_json(json &j, const AnimatorState &obj);
+
+        //! Deserialize
+        friend void from_json(const json &j, AnimatorState &obj);
 
     protected:
         virtual std::shared_ptr<AnimatorTransition> createTransition(bool withExitTime = false);
@@ -49,8 +59,8 @@ namespace ige::scene
 
     protected:
         std::string m_name;
-        Animator* m_motionClip;
+        std::string m_path;
+        Animator* m_animator;
         float m_motionSpeed = 1.f;
-
     };
 }

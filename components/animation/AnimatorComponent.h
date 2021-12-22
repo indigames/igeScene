@@ -13,7 +13,7 @@ namespace ige::scene
     class AnimatorComponent : public Component
     {
     public:
-        enum class UpdateMode: int {
+        enum class UpdateMode {
             Normal = 0, // sync with onUpdate 
             AnimatePhysic, // sync with onFixedUpdate 
             UnscaledTime, // sync with onUpdate, but ignore timeScale factor
@@ -48,12 +48,18 @@ namespace ige::scene
         //! Override update functions
         virtual void onFixedUpdate(float dt) override;
 
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
     public:
         //! Animator controller instance
         std::shared_ptr<AnimatorController> controller = nullptr;
 
         //! Update mode
-        int m_updateMode = UpdateMode::Normal;
+        UpdateMode m_updateMode = UpdateMode::Normal;
 
         //! Controller path
         std::string m_controllerPath = {};

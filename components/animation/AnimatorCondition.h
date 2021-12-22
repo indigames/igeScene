@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "utils/Serialize.h"
+
 namespace ige::scene
 {
     struct AnimatorCondition 
@@ -21,6 +23,12 @@ namespace ige::scene
 
         // Destructor
         virtual ~AnimatorCondition() {}
+
+        //! Serialize
+        friend void to_json(json &j, const AnimatorCondition &obj);
+
+        //! Deserialize
+        friend void from_json(const json &j, AnimatorCondition &obj);
 
         // Members
         Mode mode;

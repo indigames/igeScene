@@ -1,7 +1,7 @@
 #include "AnimatorStateMachine.h"
 
 namespace ige::scene {
-    auto StateMachineCache::childStateMachines = std::map<std::weak_ptr<AnimatorStateMachine>, std::vector<AnimatorState>>();
+    std::map<std::weak_ptr<AnimatorStateMachine>, std::vector<std::weak_ptr<AnimatorStateMachine>>> StateMachineCache::childStateMachines = {};
 
     void StateMachineCache::init()
     {
@@ -10,7 +10,7 @@ namespace ige::scene {
 
     void StateMachineCache::clear()
     {
-        childStateMachines.swap({});
+        childStateMachines.clear();
     }
 
     const std::vector<std::weak_ptr<AnimatorStateMachine>>& StateMachineCache::getChildStateMachines(const std::shared_ptr<AnimatorStateMachine>& parent)
@@ -45,13 +45,13 @@ namespace ige::scene {
     bool AnimatorStateMachine::hasTransition(const std::shared_ptr<AnimatorState>& stateA, const std::shared_ptr<AnimatorState>& stateB)
     {
         auto itr = std::find_if(stateA->transitions.begin(), stateA->transitions.end(), [stateB](const auto& elem){
-            return (!elem.expired() && elem.lock()->destState == stateB);
+            return (!elem.expired() && !elem.lock()->destState.expired() && elem.lock()->destState.lock() == stateB);
         });
         if(itr != stateA->transitions.end())
             return true;
 
-        auto itr = std::find_if(stateB->transitions.begin(), stateB->transitions.end(), [stateA](const auto& elem){
-            return (!elem.expired() && elem.lock()->destState == stateA);
+        itr = std::find_if(stateB->transitions.begin(), stateB->transitions.end(), [stateA](const auto& elem){
+            return (!elem.expired() && !elem.lock()->destState.expired() && elem.lock()->destState.lock() == stateA);
         });
         return (itr != stateB->transitions.end());
     }
@@ -59,7 +59,7 @@ namespace ige::scene {
     std::shared_ptr<AnimatorState> AnimatorStateMachine::findState(const std::shared_ptr<AnimatorState>& state, bool recursive)
     {
         auto itr = std::find_if(states.begin(), states.end(), [state](const auto& elem){
-            return !elem.expired() && !elem.lock() == state;
+            return !elem.expired() && elem.lock() == state;
         });
 
         if(!recursive && itr != states.end())
@@ -67,7 +67,7 @@ namespace ige::scene {
 
         const auto& statesRecursive = getStatesRecursive();
         auto itr2 = std::find_if(statesRecursive.begin(), statesRecursive.end(), [state](const auto& elem){
-            return !elem.expired() && !elem.lock() == state;
+            return !elem.expired() && elem.lock() == state;
         });
 
         if(itr2 != statesRecursive.end())
@@ -99,7 +99,7 @@ namespace ige::scene {
     std::shared_ptr<AnimatorStateMachine> AnimatorStateMachine::findStateMachine(const std::shared_ptr<AnimatorStateMachine>& stateMachine, bool recursive)
     {
         auto itr = std::find_if(stateMachines.begin(), stateMachines.end(), [stateMachine](const auto& elem){
-            return !elem.expired() && !elem.lock() == stateMachine;
+            return !elem.expired() && elem.lock() == stateMachine;
         });
 
         if(!recursive && itr != stateMachines.end())
@@ -107,7 +107,7 @@ namespace ige::scene {
 
         const auto& stateMachinesRecursive = getStatesMachinesRecursive();
         auto itr2 = std::find_if(stateMachinesRecursive.begin(), stateMachinesRecursive.end(), [stateMachine](const auto& elem){
-            return !elem.expired() && !elem.lock() == stateMachine;
+            return !elem.expired() && elem.lock() == stateMachine;
         });
 
         if(itr2 != stateMachinesRecursive.end())
@@ -129,7 +129,7 @@ namespace ige::scene {
     std::shared_ptr<AnimatorTransition> AnimatorStateMachine::findTransition(const std::shared_ptr<AnimatorState>& dstState)
     {
         auto itr = std::find_if(anyStateTransitions.begin(), anyStateTransitions.end(), [dstState](const auto& elem){
-            return !elem.expired() && elem.lock()->destState == dstState;
+            return !elem.expired() && elem.lock()->destState.expired() && elem.lock()->destState.lock() == dstState;
         });
         return (itr != anyStateTransitions.end()) ? (*itr).lock() : nullptr;
     }
@@ -192,7 +192,7 @@ namespace ige::scene {
     bool AnimatorStateMachine::removeState(const std::shared_ptr<AnimatorState>& state)
     {
         auto itr = std::find_if(states.begin(), states.end(), [state](const auto& elem){
-            return !elem.expired() && !elem.lock() == state;
+            return !elem.expired() && elem.lock() == state;
         });
 
         if(itr != states.end()) {
@@ -219,7 +219,7 @@ namespace ige::scene {
     bool AnimatorStateMachine::removeStateMachine(const std::shared_ptr<AnimatorStateMachine>& machine)
     {
         auto itr = std::find_if(stateMachines.begin(), stateMachines.end(), [machine](const auto& elem){
-            return !elem.expired() && !elem.lock() == machine;
+            return !elem.expired() && elem.lock() == machine;
         });
 
         if(itr != stateMachines.end()) {
@@ -254,7 +254,7 @@ namespace ige::scene {
         return transition;
     }
 
-    bool AnimatorStateMachine::removeAnyStateTransition(const std::shared_ptr<AnimatorTransition>& transition, bool recursive = false)
+    bool AnimatorStateMachine::removeAnyStateTransition(const std::shared_ptr<AnimatorTransition>& transition, bool recursive)
     {
         auto itr = std::find_if(anyStateTransitions.begin(), anyStateTransitions.end(), [transition](const auto& elem){
             return !elem.expired() && elem.lock() == transition;
@@ -337,4 +337,59 @@ namespace ige::scene {
         return false;
     }
 
+    void AnimatorStateMachine::update(float dt)
+    {
+        if(currentState == nullptr) {
+            currentState = findEntryState();
+        }
+
+        if(currentState != nullptr) 
+        {
+            // currentState->update(dt);
+
+            // if(!currentState->destState.expired() && currentState->findTransition(currentState->destState.lock())) {
+            //     currentState->exit();
+                
+            //     currentState = currentState->destState.lock();
+            //     currentState->enter();
+            // }               
+        }
+
+        for(auto& machine: stateMachines) {
+            if(!machine.expired())
+                machine.lock()->update(dt);
+        }
+    }
+
+    std::shared_ptr<AnimatorState> AnimatorStateMachine::findEntryState()
+    {
+        // Find entry transitions
+        auto itr = std::find_if(entryTransitions.begin(), entryTransitions.end(), [](const auto& elem){
+            return !elem.expired() && !elem.lock()->isMute && !elem.lock()->destState.expired();
+        });
+        if(itr != entryTransitions.end())
+            return (*itr).lock()->destState.lock();
+        
+        // Find any transitions
+        itr = std::find_if(anyStateTransitions.begin(), anyStateTransitions.end(), [](const auto& elem){
+            return !elem.expired() && !elem.lock()->isMute && !elem.lock()->destState.expired();
+        });
+        if(itr != anyStateTransitions.end())
+            return (*itr).lock()->destState.lock();
+
+        // Not found
+        return nullptr;
+    }
+
+    //! Serialize component
+    void to_json(json &j, const AnimatorStateMachine &obj)
+    {
+        
+    }
+
+    //! Deserialize component
+    void from_json(const json &j, AnimatorStateMachine &obj)
+    {
+        
+    }
 }

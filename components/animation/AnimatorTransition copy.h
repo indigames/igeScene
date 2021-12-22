@@ -11,10 +11,6 @@
 
 namespace ige::scene
 {
-    class AnimatorState;
-    class AnimatorStateMachine;
-    class AnimatorCondition;
-
     class AnimatorTransition {
     public:
         AnimatorTransition();

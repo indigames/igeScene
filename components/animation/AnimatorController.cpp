@@ -1,5 +1,5 @@
-
 #include "AnimatorController.h"
+#include "AnimatorStateMachine.h"
 
 namespace ige::scene
 {    
@@ -36,6 +36,7 @@ namespace ige::scene
     void AnimatorController::update(float dt, bool ignoreTimeScale )
     {
         if(!m_figure) return;
+        stateMachine->update(dt);
     }
 
 
