@@ -117,6 +117,7 @@ namespace ige::scene
                 if (m_figure->ReferenceCount() == 0) {
                     ResourceManager::Instance().DeleteDaemon();
                 }
+                m_materials.clear();
                 m_figure = nullptr;
             }
 
@@ -425,15 +426,6 @@ namespace ige::scene
         if (relPath.size() == 0) relPath = fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
 
-        auto itr = std::find_if(m_materials.begin(), m_materials.end(), [index, hash](const auto& elem) {
-            return elem.idx == index && elem.hash == hash;
-        });
-        if (itr != m_materials.end()) {
-            (*itr).texPath = relPath;
-        }
-        else {
-            m_materials.push_back(FigureMaterial(index, hash, relPath));
-        }
         if (m_figure) {
             Sampler sampler;
             sampler.tex = pyxieResourceCreator::Instance().NewTexture(relPath.c_str());
@@ -444,7 +436,18 @@ namespace ige::scene
             sampler.samplerState.magfilter = SamplerState::LINEAR;
             sampler.samplerState.mipfilter = SamplerState::LINEAR_MIPMAP_LINEAR;
             sampler.samplerState.borderColor = 0;
-            m_figure->SetMaterialParam(index, hash, &sampler);
+            if (index > 0 && index < m_figure->NumMaterials()) {
+                m_figure->SetMaterialParam(index, hash, &sampler);
+                auto itr = std::find_if(m_materials.begin(), m_materials.end(), [index, hash](const auto& elem) {
+                    return elem.idx == index && elem.hash == hash;
+                });
+                if (itr != m_materials.end()) {
+                    (*itr).texPath = relPath;
+                }
+                else {
+                    m_materials.push_back(FigureMaterial(index, hash, relPath));
+                }
+            }
         }
     }
 
