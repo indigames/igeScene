@@ -436,7 +436,7 @@ namespace ige::scene
             sampler.samplerState.magfilter = SamplerState::LINEAR;
             sampler.samplerState.mipfilter = SamplerState::LINEAR_MIPMAP_LINEAR;
             sampler.samplerState.borderColor = 0;
-            if (index > 0 && index < m_figure->NumMaterials()) {
+            if (index >= 0 && index < m_figure->NumMaterials()) {
                 m_figure->SetMaterialParam(index, hash, &sampler);
                 auto itr = std::find_if(m_materials.begin(), m_materials.end(), [index, hash](const auto& elem) {
                     return elem.idx == index && elem.hash == hash;
