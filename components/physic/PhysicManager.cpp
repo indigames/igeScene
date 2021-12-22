@@ -182,7 +182,7 @@ namespace ige::scene
         if (!m_world) return;
 
         // Run simulation if not in edit mode
-        if (!SceneManager::getInstance()->isEditor())
+        if (SceneManager::getInstance()->isPlaying())
             if (m_world->stepSimulation(dt * m_frameUpdateRatio, m_frameMaxSubStep, m_fixedTimeStep))
                 postUpdate();
 
@@ -197,7 +197,7 @@ namespace ige::scene
         for (auto &element : m_collisionEvents)
             element.second = false;
 
-        // Update bullet transform
+        // Update object transform
         std::for_each(m_physicObjects.begin(), m_physicObjects.end(), std::mem_fn(&PhysicObject::updateBtTransform));
     }
 

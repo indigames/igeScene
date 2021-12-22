@@ -1141,7 +1141,8 @@ namespace ige::scene
         }
 
         // Add editor camera figure debug
-        if (SceneManager::getInstance()->isEditor())
+#if EDITOR_MODE
+        if (!SceneManager::getInstance()->isPlaying())
         {
             if (auto camera = getComponent<CameraComponent>())
             {
@@ -1161,6 +1162,7 @@ namespace ige::scene
                     addComponent<SpriteComponent>(GetEditorResource("sprites/point-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
             }
         }
+#endif
 
         auto jChildren = j.at("childs");
         auto thisObj = getSharedPtr();

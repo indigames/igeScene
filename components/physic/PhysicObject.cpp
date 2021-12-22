@@ -32,11 +32,16 @@ namespace ige::scene
                 manager = getOwner()->getRoot()->addComponent<PhysicManager>();
             setManager(manager);
         }
+        m_transformEventId = getOwner()->getTransformChangedEvent().addListener(std::bind(&PhysicObject::onTransformChanged, this, std::placeholders::_1));
     }
 
     //! Destructor
     PhysicObject::~PhysicObject()
     {
+        if (m_transformEventId != (uint64_t)-1) {
+            getOwner()->getTransformChangedEvent().removeListener(m_transformEventId);
+            m_transformEventId = (uint64_t)-1;
+        }
         destroy();
         m_manager.reset();
     }
@@ -65,6 +70,20 @@ namespace ige::scene
         destroyBody();
 
         return true;
+    }
+
+    //! Transform changed: update transform for kinematic object
+    void PhysicObject::onTransformChanged(SceneObject& object) {
+        if (isKinematic()) {
+            updateBtTransform();
+            m_body->setInterpolationWorldTransform(m_body->getWorldTransform());
+            if (getBody() && getBody()->getMotionState()) {
+                getBody()->getMotionState()->setWorldTransform(m_body->getWorldTransform());
+            }
+        }
+    #if EDITOR_MODE
+        getOwner()->updateAabb();
+    #endif
     }
 
     //! Add constraint
@@ -300,6 +319,7 @@ namespace ige::scene
                 setLinearVelocity({0.f, 0.f, 0.f});
                 setAngularVelocity({0.f, 0.f, 0.f});
                 addCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
+                setActivationState(DISABLE_DEACTIVATION);
             }
             else
             {
@@ -475,20 +495,17 @@ namespace ige::scene
     //! Update IGE transform
     void PhysicObject::updateIgeTransform()
     {
-        if (!m_bIsKinematic)
-        {
-            auto transform = getOwner()->getTransform();
-            const auto &result = m_body->getWorldTransform();
-            transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
-            transform->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
-
-            if (m_positionOffset.LengthSqr() > 0) {
-                auto matrix = Mat4::IdentityMat();
-                vmath_mat_from_quat(transform->getRotation().P(), 4, matrix.P());
-                vmath_mat_appendScale(matrix.P(), transform->getScale().P(), 4, 4, matrix.P());
-                auto offset = matrix * m_positionOffset;
-                transform->translate(-offset);
-            }
+        if (isKinematic()) return;
+        auto transform = getOwner()->getTransform();
+        const auto &result = m_body->getWorldTransform();
+        transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
+        transform->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
+        if (m_positionOffset.LengthSqr() > 0) {
+            auto matrix = Mat4::IdentityMat();
+            vmath_mat_from_quat(transform->getRotation().P(), 4, matrix.P());
+            vmath_mat_appendScale(matrix.P(), transform->getScale().P(), 4, 4, matrix.P());
+            auto offset = matrix * m_positionOffset;
+            transform->translate(-offset);
         }
     }
 

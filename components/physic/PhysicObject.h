@@ -36,6 +36,8 @@ namespace ige::scene
         //! Deinitialization
         virtual bool destroy();
 
+        void onTransformChanged(SceneObject& object);
+
         //! Get RigidBody
         virtual btRigidBody* getBody() const {
             if (isSoftBody())
@@ -338,6 +340,9 @@ namespace ige::scene
 
         //! Cache PhysicManager
         std::weak_ptr<PhysicManager> m_manager;
+
+        //! Cache transform event id
+        uint64_t m_transformEventId = (uint64_t)-1;
     };
 
     //! Add constraint by type

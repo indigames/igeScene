@@ -178,7 +178,13 @@ namespace ige::scene
         setScreenOffset(j.at("scrOff"));
         setScreenRadian(j.at("scrRad"));
         setUpAxis(j.at("up"));
-        setAspectRatio(SceneManager::getInstance()->isEditor() ? j.value("aspect", -1.f) : -1.f);
+
+    #ifdef EDITOR_MODE
+        setAspectRatio(j.value("aspect", -1.f));
+    #else
+        setAspectRatio(-1.f); // Auto detect based on screen size
+    #endif
+
         setClearColor(j.value("clearColor", Vec4(1.f, 1.f, 1.f, 1.f)));
 
         if (getLockOn())
