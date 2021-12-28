@@ -127,6 +127,13 @@ namespace ige::scene
         if (fPath.size() == 0) fPath = fsPath.string();
         std::replace(fPath.begin(), fPath.end(), '\\', '/');
 
+        auto figure = (Figure*)ResourceManager::Instance().GetResource(fPath.c_str(), FIGURETYPE);
+
+        // Backup the original figure for cloning later
+        if (figure == nullptr) {
+            ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton);
+        }
+
         // Initialize figure instance
         m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton);
 
