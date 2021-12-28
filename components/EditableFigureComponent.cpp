@@ -105,44 +105,41 @@ namespace ige::scene
         if(relPath.size() == 0) relPath = fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
 
-        if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
+        m_path = relPath;
+
+        if (m_figure != nullptr)
         {
-            m_path = relPath;
-
-            if (m_figure != nullptr)
-            {
-                onResourceRemoved(m_figure);
-                m_figure->DecReference();
-                m_figure = nullptr;
-            }
-
-            auto fsPath = fs::path(m_path);
-            auto fPath = fsPath.extension().compare(".pyxf") == 0 ? m_path : fsPath.parent_path().append(fsPath.stem().string() + ".pyxf").string();
-            if (fPath.size() == 0) fPath = fsPath.string();
-            std::replace(fPath.begin(), fPath.end(), '\\', '/');
-
-            // Use copy instance
-            m_figure = ResourceCreator::Instance().NewEditableFigure(fPath.c_str());
-
-            // Wait build
-            while(!m_figure->IsBuidSuccess()) m_figure->WaitBuild();
-
-            // Update transform from transform component
-            auto transform = getOwner()->getTransform();
-            m_figure->SetPosition(transform->getPosition());
-            m_figure->SetRotation(transform->getRotation());
-            m_figure->SetScale(transform->getScale());
-
-            // Cache mesh alpha for visibility setting
-            m_meshAlphaValues.clear();
-            m_disableMeshes.clear();
-            for (int i = 0; i < m_figure->NumMeshes(); ++i) {
-                m_meshAlphaValues.push_back(m_figure->GetMeshAlpha(i));
-            }
-
-            onResourceAdded(m_figure);
-            getOwner()->getTransform()->makeDirty();
+            onResourceRemoved(m_figure);
+            m_figure->DecReference();
+            m_figure = nullptr;
         }
+
+        fsPath = fs::path(m_path);
+        auto fPath = fsPath.extension().compare(".pyxf") == 0 ? m_path : fsPath.parent_path().append(fsPath.stem().string() + ".pyxf").string();
+        if (fPath.size() == 0) fPath = fsPath.string();
+        std::replace(fPath.begin(), fPath.end(), '\\', '/');
+
+        // Use copy instance
+        m_figure = ResourceCreator::Instance().NewEditableFigure(fPath.c_str());
+
+        // Wait build
+        while(!m_figure->IsBuidSuccess()) m_figure->WaitBuild();
+
+        // Update transform from transform component
+        auto transform = getOwner()->getTransform();
+        m_figure->SetPosition(transform->getPosition());
+        m_figure->SetRotation(transform->getRotation());
+        m_figure->SetScale(transform->getScale());
+
+        // Cache mesh alpha for visibility setting
+        m_meshAlphaValues.clear();
+        m_disableMeshes.clear();
+        for (int i = 0; i < m_figure->NumMeshes(); ++i) {
+            m_meshAlphaValues.push_back(m_figure->GetMeshAlpha(i));
+        }
+
+        onResourceAdded(m_figure);
+        getOwner()->getTransform()->makeDirty();
     }
 
     //! Set mesh alpha (use to disable rendering of mesh)
@@ -167,20 +164,17 @@ namespace ige::scene
     //! Enable fog
     void EditableFigureComponent::setFogEnabled(bool enable)
     {
-        if (m_bIsFogEnabled != enable)
-        {
-            m_bIsFogEnabled = enable;
+        m_bIsFogEnabled = enable;
 
-            if (m_figure)
+        if (m_figure)
+        {
+            // Setup point lights shader
+            for (int i = 0; i < m_figure->NumMaterials(); ++i)
             {
-                // Setup point lights shader
-                for (int i = 0; i < m_figure->NumMaterials(); ++i)
-                {
-                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                    shaderDesc->SetValue(m_figure->GetShaderName(i));
-                    shaderDesc->SetFog(m_bIsFogEnabled);
-                    m_figure->SetShaderName(i, shaderDesc->GetValue());
-                }
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(m_figure->GetShaderName(i));
+                shaderDesc->SetFog(m_bIsFogEnabled);
+                m_figure->SetShaderName(i, shaderDesc->GetValue());
             }
         }
     }
@@ -188,19 +182,16 @@ namespace ige::scene
     //! Enable double side
     void EditableFigureComponent::setDoubleSideEnable(bool enable)
     {
-        if (m_bIsDoubleSideEnable != enable)
+        m_bIsDoubleSideEnable = enable;
+        if (m_figure)
         {
-            m_bIsDoubleSideEnable = enable;
-            if (m_figure)
+            // Setup point lights shader
+            for (int i = 0; i < m_figure->NumMaterials(); ++i)
             {
-                // Setup point lights shader
-                for (int i = 0; i < m_figure->NumMaterials(); ++i)
-                {
-                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                    shaderDesc->SetValue(m_figure->GetShaderName(i));
-                    shaderDesc->SetDoubleside(m_bIsDoubleSideEnable);
-                    m_figure->SetShaderName(i, shaderDesc->GetValue());
-                }
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(m_figure->GetShaderName(i));
+                shaderDesc->SetDoubleside(m_bIsDoubleSideEnable);
+                m_figure->SetShaderName(i, shaderDesc->GetValue());
             }
         }
     }
@@ -208,19 +199,16 @@ namespace ige::scene
     //! Enable cull face
     void EditableFigureComponent::setCullFaceEnable(bool enable)
     {
-        if (m_bIsCullFaceEnable != enable)
+        m_bIsCullFaceEnable = enable;
+        if (m_figure)
         {
-            m_bIsCullFaceEnable = enable;
-            if (m_figure)
+            // Setup point lights shader
+            for (int i = 0; i < m_figure->NumMaterials(); ++i)
             {
-                // Setup point lights shader
-                for (int i = 0; i < m_figure->NumMaterials(); ++i)
-                {
-                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                    shaderDesc->SetValue(m_figure->GetShaderName(i));
-                    shaderDesc->SetFrontFaceCulling(m_bIsCullFaceEnable);
-                    m_figure->SetShaderName(i, shaderDesc->GetValue());
-                }
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(m_figure->GetShaderName(i));
+                shaderDesc->SetFrontFaceCulling(m_bIsCullFaceEnable);
+                m_figure->SetShaderName(i, shaderDesc->GetValue());
             }
         }
     }
@@ -228,19 +216,16 @@ namespace ige::scene
     //! Enable depth testing
     void EditableFigureComponent::setDepthTestEnable(bool enable)
     {
-        if (m_bIsDepthTestEnable != enable)
+        m_bIsDepthTestEnable = enable;
+        if (m_figure)
         {
-            m_bIsDepthTestEnable = enable;
-            if (m_figure)
+            // Setup point lights shader
+            for (int i = 0; i < m_figure->NumMaterials(); ++i)
             {
-                // Setup point lights shader
-                for (int i = 0; i < m_figure->NumMaterials(); ++i)
-                {
-                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                    shaderDesc->SetValue(m_figure->GetShaderName(i));
-                    shaderDesc->SetZTest(m_bIsDepthTestEnable);
-                    m_figure->SetShaderName(i, shaderDesc->GetValue());
-                }
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(m_figure->GetShaderName(i));
+                shaderDesc->SetZTest(m_bIsDepthTestEnable);
+                m_figure->SetShaderName(i, shaderDesc->GetValue());
             }
         }
     }
@@ -248,19 +233,16 @@ namespace ige::scene
     //! Enable depth testing
     void EditableFigureComponent::setDepthWriteEnable(bool enable)
     {
-        if (m_bIsDepthWriteEnable != enable)
+        m_bIsDepthWriteEnable = enable;
+        if (m_figure)
         {
-            m_bIsDepthWriteEnable = enable;
-            if (m_figure)
+            // Setup point lights shader
+            for (int i = 0; i < m_figure->NumMaterials(); ++i)
             {
-                // Setup point lights shader
-                for (int i = 0; i < m_figure->NumMaterials(); ++i)
-                {
-                    auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                    shaderDesc->SetValue(m_figure->GetShaderName(i));
-                    shaderDesc->SetZWritee(m_bIsDepthWriteEnable);
-                    m_figure->SetShaderName(i, shaderDesc->GetValue());
-                }
+                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+                shaderDesc->SetValue(m_figure->GetShaderName(i));
+                shaderDesc->SetZWritee(m_bIsDepthWriteEnable);
+                m_figure->SetShaderName(i, shaderDesc->GetValue());
             }
         }
     }

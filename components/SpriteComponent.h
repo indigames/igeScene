@@ -112,6 +112,12 @@ namespace ige::scene
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Deserialize
+        virtual void from_json(const json& j) override;
+
     protected:
         //! Utils to add/remove resouce from showcase
         void onResourceAdded(Resource* res);
@@ -121,14 +127,7 @@ namespace ige::scene
         const Vec4& getBorder() const { return m_sprite->getBorder(); }
         void setBorder(const Vec4& value);
 
-        //! Serialize
-        virtual void to_json(json& j) const override;
-
-        //! Deserialize
-        virtual void from_json(const json& j) override;
-
     protected:
-
         //! Path
         std::string m_path;
 

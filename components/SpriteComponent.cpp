@@ -121,40 +121,38 @@ namespace ige::scene
         if (relPath.size() == 0) relPath = fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
 
-        if (strcmp(m_path.c_str(), relPath.c_str()) != 0) {
-            m_path = relPath;
+        m_path = relPath;
 
-            auto fsPath = fs::path(m_path);
-            auto fPath = fsPath.extension().compare(".pyxi") == 0 ? m_path : fsPath.parent_path().append(fsPath.stem().string() + ".pyxi").string();
-            if (fPath.size() == 0) fPath = fsPath.string();
-            std::replace(fPath.begin(), fPath.end(), '\\', '/');
+        fsPath = fs::path(m_path);
+        auto fPath = fsPath.extension().compare(".pyxi") == 0 ? m_path : fsPath.parent_path().append(fsPath.stem().string() + ".pyxi").string();
+        if (fPath.size() == 0) fPath = fsPath.string();
+        std::replace(fPath.begin(), fPath.end(), '\\', '/');
             
-            auto texture = ResourceCreator::Instance().NewTexture(fPath.c_str());
+        auto texture = ResourceCreator::Instance().NewTexture(fPath.c_str());
 
-            auto oldFigure = m_sprite->getFigure();
-            m_sprite->setTexture(texture);
-            auto newFigure = m_sprite->getFigure();
+        auto oldFigure = m_sprite->getFigure();
+        m_sprite->setTexture(texture);
+        auto newFigure = m_sprite->getFigure();
 
-            if (oldFigure == nullptr && newFigure) {
-                onResourceAdded(newFigure);
-            }
-            if (oldFigure != nullptr && newFigure == nullptr) {
-                onResourceRemoved(oldFigure);
-            }
+        if (oldFigure == nullptr && newFigure) {
+            onResourceAdded(newFigure);
+        }
+        if (oldFigure != nullptr && newFigure == nullptr) {
+            onResourceRemoved(oldFigure);
+        }
 
-            if (newFigure)
-            {
-                bool isBillboard = m_bIsBillboard;
-                m_bIsBillboard = false;
-                setBillboard(isBillboard);
-            }
+        if (newFigure)
+        {
+            bool isBillboard = m_bIsBillboard;
+            m_bIsBillboard = false;
+            setBillboard(isBillboard);
+        }
 
-            if (getOwner()->getRectTransform()) {
-                getOwner()->getRectTransform()->setSize(m_sprite->getSize());
-            }
-            else {
-                getOwner()->getTransform()->makeDirty();
-            }
+        if (getOwner()->getRectTransform()) {
+            getOwner()->getRectTransform()->setSize(m_sprite->getSize());
+        }
+        else {
+            getOwner()->getTransform()->makeDirty();
         }
     }
 
@@ -190,17 +188,14 @@ namespace ige::scene
     //! Set billboard
     void SpriteComponent::setBillboard(bool isBillboard)
     {
-        if (m_bIsBillboard != isBillboard)
+        m_bIsBillboard = isBillboard;
+        auto figure = m_sprite->getFigure();
+        if (figure)
         {
-            m_bIsBillboard = isBillboard;
-            auto figure = m_sprite->getFigure();
-            if (figure)
-            {
-                auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
-                shaderDesc->SetValue(figure->GetShaderName(0));
-                shaderDesc->SetBillboard(m_bIsBillboard);
-                figure->SetShaderName(0, shaderDesc->GetValue());
-            }
+            auto shaderDesc = pyxieResourceCreator::Instance().NewShaderDescriptor();
+            shaderDesc->SetValue(figure->GetShaderName(0));
+            shaderDesc->SetBillboard(m_bIsBillboard);
+            figure->SetShaderName(0, shaderDesc->GetValue());
         }
     }
 
