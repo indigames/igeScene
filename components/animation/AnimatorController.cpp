@@ -16,13 +16,24 @@ namespace ige::scene
         m_figure = nullptr;
     }
 
+    void AnimatorController::initialize()
+    {
+
+    }
+
+    void AnimatorController::clear()
+    {
+
+    }
 
     void AnimatorController::setPath(const std::string& path)
     {
         if(m_path.compare(path) != 0) {
             //TODO: load state machines
-
             m_path = path;
+
+            clear();
+            initialize();
         }
     }
 
@@ -40,6 +51,16 @@ namespace ige::scene
         stateMachine->update(dt);
     }
 
+    //! Parameters
+    void AnimatorController::setParameter(const std::string& param, float value)
+    {
+        m_parameters[param] = value;
+    }
+
+    float AnimatorController::getParameter(const std::string& param)
+    {
+        return m_parameters.count(param) > 0 ? m_parameters[param] : -1.f;
+    }
 
     //! Serialize component
     void to_json(json &j, const AnimatorController &obj)

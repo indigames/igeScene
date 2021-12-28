@@ -1,13 +1,12 @@
 #include "AnimatorState.h"
-
-#include "utils/PyxieHeaders.h"
-using namespace pyxie;
+#include "AnimatorStateMachine.h"
+#include "AnimatorTransition.h"
 
 #include "utils/filesystem.h"
 namespace fs = ghc::filesystem;
 
 namespace ige::scene {
-    AnimatorState::AnimatorState() {}
+    AnimatorState::AnimatorState(): m_animator(nullptr) {}
 
     AnimatorState::~AnimatorState() {
         if(m_animator != nullptr) {
@@ -28,6 +27,9 @@ namespace ige::scene {
             m_name = fsPath.stem().string();
             if(m_animator != nullptr) m_animator->DecReference();
             m_animator = (Animator*)ResourceManager::Instance().GetResource(m_path.c_str(), ANIMATORTYPE);
+            if (m_animator) {
+                m_animator->SetSpeed(m_speed);
+            }
         }
     }        
 
@@ -56,35 +58,20 @@ namespace ige::scene {
         return transition;
     }
 
-    std::shared_ptr<AnimatorTransition> AnimatorState::addTransition(const std::shared_ptr<AnimatorStateMachine>& machine, bool withExitTime)
-    {
-        auto transition = createTransition(withExitTime);
-        transition->destStateMachine = machine;
-        addTransition(transition);
-        return transition;
-    }
-
     std::shared_ptr<AnimatorTransition> AnimatorState::addExitTransition(bool withExitTime)
     {
         auto transition = createTransition(withExitTime);
-        transition->isExit = true;
+        transition->destState = stateMachine.lock()->getExitState();
         addTransition(transition);
         return transition;
     }
 
-    std::shared_ptr<AnimatorTransition> AnimatorState::findTransition(const std::shared_ptr<AnimatorState>& state)
+    std::shared_ptr<AnimatorTransition> AnimatorState::findTransition(const std::shared_ptr<AnimatorState>& dstState)
     {
         auto itr = std::find_if(transitions.begin(), transitions.end(), [&](const auto& elem){
-            return (!elem.expired() && !elem.lock()->destState.expired() && elem.lock()->destState.lock() == state);
+            return (!elem.expired() && !elem.lock()->destState.expired() && elem.lock()->destState.lock() == dstState);
         });
         return (itr != transitions.end()) ? (*itr).lock() : nullptr;
-    }
-
-    std::shared_ptr<AnimatorStateMachine> AnimatorState::findStateMachine(const std::shared_ptr<AnimatorStateMachine>& root)
-    {
-        if (root->hasState(getSharedPtr(), false))
-            return root;
-        return root->findStateMachine(getSharedPtr());
     }
 
     std::shared_ptr<AnimatorTransition> AnimatorState::createTransition(bool withExitTime)
@@ -98,26 +85,46 @@ namespace ige::scene {
 
     void AnimatorState::setDefaultExitTime(std::shared_ptr<AnimatorTransition>& transition)
     {
-        // TODO: parse from animation clip
-        transition->hasExitTime = true;
-        transition->exitTime = 1.f;
-        transition->duration = 1.f;
 
-        if(m_animator) {
-            transition->exitTime = m_animator->GetEndTime();
-            transition->duration = m_animator->GetEndTime() - m_animator->GetStartTime();
+        transition->hasExitTime = true;
+        transition->exitTime = m_animator ? m_animator->GetEndTime() : 1.f;
+        transition->duration = m_animator ? m_animator->GetTotalEvalTime() : 1.f;
+    }
+
+    void AnimatorState::setSpeed(float speed)
+    {
+        if (m_speed != speed) {
+            m_speed = speed;
+
+            if (m_animator) {
+                m_animator->SetSpeed(m_speed);
+            }
+        }
+    }
+
+    void AnimatorState::update(float dt) {
+        if (m_animator) {
+            // check animation time and ending
+            if (m_animator->GetEvalTime() + 0.01f >= m_animator->GetEndTime()) {
+                //auto nextState = find
+            }
+            
         }
     }
 
     //! Serialize component
     void to_json(json &j, const AnimatorState &obj)
     {
-        
+        j["path"] = obj.getPath();
+        j["name"] = obj.getName();
+        j["speed"] = obj.getSpeed();
     }
 
     //! Deserialize component
     void from_json(const json &j, AnimatorState &obj)
     {
-        
+        obj.setPath(j.value("path", obj.getPath()));
+        obj.setName(j.value("name", obj.getName()));
+        obj.setSpeed(j.value("name", obj.getSpeed()));
     }
 }

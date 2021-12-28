@@ -34,6 +34,10 @@ namespace ige::scene
         BaseFigure* getFigure() { return m_figure; }
         void setFigure(BaseFigure* figure);
 
+        //! Parameters
+        void setParameter(const std::string& param, float value);
+        float getParameter(const std::string& param);
+
         //! Update
         virtual void update(float dt, bool ignoreTimeScale = false);
 
@@ -55,5 +59,6 @@ namespace ige::scene
         std::string m_path;
         float m_timeScale;
         BaseFigure* m_figure;
+        std::unordered_map<std::string, float> m_parameters;
     };
 } // namespace ige::scene

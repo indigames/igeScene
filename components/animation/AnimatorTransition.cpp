@@ -14,12 +14,18 @@ namespace ige::scene {
 
     bool AnimatorTransition::removeCondition(const std::shared_ptr<AnimatorCondition>& condition)
     {
-        auto itr = std::find_if(conditions.begin(), conditions.end(), [condition](const auto& elem) {
-            return (!elem.expired() && elem.lock() == condition);
-        });
+        auto itr = std::find(conditions.begin(), conditions.end(), condition);
         if(itr != conditions.end()) {
             conditions.erase(itr);
             return true;
+        }
+        return false;
+    }
+
+    bool AnimatorTransition::update(float dt)
+    {
+        for (auto& cond: conditions) {
+
         }
         return false;
     }

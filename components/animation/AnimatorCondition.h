@@ -8,7 +8,7 @@ namespace ige::scene
 {
     struct AnimatorCondition 
     {
-        enum class Mode: int {
+        enum class Mode {
             If = 0,
             IfNot,
             Greater,
@@ -17,11 +17,11 @@ namespace ige::scene
             NotEqual,
         };
 
-        // Constructor
-        AnimatorCondition() {}
+        //! Constructor
+        AnimatorCondition();
         AnimatorCondition(Mode mode, const std::string& param, float threshold);
 
-        // Destructor
+        //! Destructor
         virtual ~AnimatorCondition() {}
 
         //! Serialize

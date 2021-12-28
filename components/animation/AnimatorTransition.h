@@ -7,6 +7,7 @@
 #include "AnimatorCondition.h"
 #include "AnimatorState.h"
 
+#include "event/Event.h"
 #include "utils/Serialize.h"
 
 namespace ige::scene
@@ -26,27 +27,27 @@ namespace ige::scene
         virtual std::shared_ptr<AnimatorCondition> addCondition(AnimatorCondition::Mode mode, const std::string& parameter, float threshold);
         virtual bool removeCondition(const std::shared_ptr<AnimatorCondition>& condition);
 
+        //! Update, return true when ready for transit
+        virtual bool update(float dt);
+ 
         //! Serialize
         friend void to_json(json &j, const AnimatorTransition &obj);
 
         //! Deserialize
         friend void from_json(const json &j, AnimatorTransition &obj);
 
-        bool isExit = false;
         bool isMute = false;
-        
+
         bool hasExitTime = false;
         float exitTime = 0.f;
 
         bool hasFixedDuration = false;
-
         float duration = 0.f;
 
         std::weak_ptr<AnimatorState> destState;
-        std::weak_ptr<AnimatorStateMachine> destStateMachine;
-        std::vector<std::weak_ptr<AnimatorCondition>> conditions;
+        std::vector<std::shared_ptr<AnimatorCondition>> conditions;
 
     protected:
-        std::string m_name;        
+        std::string m_name;
     };
 }
