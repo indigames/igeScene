@@ -127,13 +127,13 @@ namespace ige::scene
         virtual void setMaterialParams(uint64_t index, const std::string& name, const std::string& texPath);
         virtual void setMaterialParams(FigureMaterial mat);
 
-    protected:
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
         virtual void from_json(const json& j) override;
 
+    protected:
         //! Utils to add/remove resource
         void onResourceAdded(Resource* figure);
         void onResourceRemoved(Resource* figure);

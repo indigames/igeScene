@@ -1025,11 +1025,6 @@ namespace ige::scene
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
 
         bool reloaded = false;
-
-        auto figures = std::vector<std::shared_ptr<FigureComponent>>();
-        auto efigures = std::vector<std::shared_ptr<EditableFigureComponent>>();
-        auto sprites = std::vector<std::shared_ptr<SpriteComponent>>();
-
         // Release old resouces
         for (auto& obj : m_objects) {
             if (!obj) continue;
@@ -1037,40 +1032,30 @@ namespace ige::scene
                 if (!comp) continue;
                 if (auto figComp = std::dynamic_pointer_cast<FigureComponent>(comp)) {
                     if (figComp->getPath().compare(relPath) == 0) {
-                        figComp->setPath(std::string());
-                        figures.push_back(figComp);
+                        json j;
+                        figComp->to_json(j);
+                        figComp->from_json(j);
+                        reloaded = true;
                     }
                 }
                 else if (auto efigComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp)) {
                     if (efigComp->getPath().compare(relPath) == 0) {
-                        efigComp->setPath(std::string());
-                        efigures.push_back(efigComp);
+                        json j;
+                        efigComp->to_json(j);
+                        efigComp->from_json(j);
+                        reloaded = true;
                     }
                 }
                 else if (auto spriteComp = std::dynamic_pointer_cast<SpriteComponent>(comp)) {
                     if (spriteComp->getPath().compare(relPath) == 0) {
-                        spriteComp->setPath(std::string());
-                        sprites.push_back(spriteComp);
+                        json j;
+                        spriteComp->to_json(j);
+                        spriteComp->from_json(j);
+                        reloaded = true;
                     }
                 }
             }
         }
-
-        // Clean up
-        ResourceManager::Instance().DeleteDaemon();
-
-        // Load new resources
-        for (auto& figComp : figures) figComp->setPath(relPath);
-        for (auto& efigComp : efigures) efigComp->setPath(relPath);
-        for (auto& spriteComp : sprites) spriteComp->setPath(relPath);
-
-        reloaded = !(figures.empty() || efigures.empty() || sprites.empty());
-
-        // Clear
-        figures.clear();
-        efigures.clear();
-        sprites.clear();
-
         return reloaded;
     }
 
