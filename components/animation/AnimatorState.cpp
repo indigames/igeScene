@@ -15,6 +15,23 @@ namespace ige::scene {
         }
     }
 
+    void AnimatorState::enter()
+    {
+        if (m_animator) {
+            m_animator->SetSpeed(m_speed);
+            m_animator->SetStartTime(m_startTime);
+            m_animator->SetEvalTime(m_evalTime);
+            m_animator->SetLoop(m_isLoop);
+            m_animator->Rewind();
+        }
+        getOnEnterEvent().invoke(*this);
+    }
+
+    void AnimatorState::exit()
+    {
+        getOnExitEvent().invoke(*this);
+    }
+
     void AnimatorState::setPath(const std::string& path)
     {
         auto fsPath = fs::path(path);
@@ -26,10 +43,7 @@ namespace ige::scene {
             m_path = relPath;
             m_name = fsPath.stem().string();
             if(m_animator != nullptr) m_animator->DecReference();
-            m_animator = (Animator*)ResourceManager::Instance().GetResource(m_path.c_str(), ANIMATORTYPE);
-            if (m_animator) {
-                m_animator->SetSpeed(m_speed);
-            }
+            m_animator = (Animator*)ResourceManager::Instance().GetResource(m_path.c_str(), ANIMATORTYPE);            
         }
     }        
 
@@ -40,9 +54,7 @@ namespace ige::scene {
 
     bool AnimatorState::removeTransition(const std::shared_ptr<AnimatorTransition>& transition)
     {
-        auto itr = std::find_if(transitions.begin(), transitions.end(), [transition](const auto& elem) {
-            return (!elem.expired() && elem.lock() == transition);
-        });
+        auto itr = std::find(transitions.begin(), transitions.end(), transition);
         if(itr != transitions.end()) {
             transitions.erase(itr);
             return true;
@@ -69,9 +81,9 @@ namespace ige::scene {
     std::shared_ptr<AnimatorTransition> AnimatorState::findTransition(const std::shared_ptr<AnimatorState>& dstState)
     {
         auto itr = std::find_if(transitions.begin(), transitions.end(), [&](const auto& elem){
-            return (!elem.expired() && !elem.lock()->destState.expired() && elem.lock()->destState.lock() == dstState);
+            return elem->destState.expired() && elem->destState.lock() == dstState;
         });
-        return (itr != transitions.end()) ? (*itr).lock() : nullptr;
+        return (itr != transitions.end()) ? (*itr) : nullptr;
     }
 
     std::shared_ptr<AnimatorTransition> AnimatorState::createTransition(bool withExitTime)
@@ -85,7 +97,6 @@ namespace ige::scene {
 
     void AnimatorState::setDefaultExitTime(std::shared_ptr<AnimatorTransition>& transition)
     {
-
         transition->hasExitTime = true;
         transition->exitTime = m_animator ? m_animator->GetEndTime() : 1.f;
         transition->duration = m_animator ? m_animator->GetTotalEvalTime() : 1.f;
@@ -93,22 +104,33 @@ namespace ige::scene {
 
     void AnimatorState::setSpeed(float speed)
     {
-        if (m_speed != speed) {
-            m_speed = speed;
-
-            if (m_animator) {
-                m_animator->SetSpeed(m_speed);
-            }
+        m_speed = speed;
+        if (m_animator) {
+            m_animator->SetSpeed(m_speed);
         }
     }
 
-    void AnimatorState::update(float dt) {
+    void AnimatorState::setStartTime(float st)
+    {
+        m_startTime = st;
         if (m_animator) {
-            // check animation time and ending
-            if (m_animator->GetEvalTime() + 0.01f >= m_animator->GetEndTime()) {
-                //auto nextState = find
-            }
-            
+            m_animator->SetStartTime(m_startTime);
+        }
+    }
+
+    void AnimatorState::setEvalTime(float et)
+    {
+        m_evalTime = et;
+        if (m_animator) {
+            m_animator->SetEvalTime(m_evalTime);
+        }
+    }
+   
+    void AnimatorState::setLoop(bool loop)
+    {
+        m_isLoop = loop;
+        if (m_animator) {
+            m_animator->SetLoop(m_isLoop);
         }
     }
 

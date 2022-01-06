@@ -9,6 +9,13 @@ namespace ige::scene
 {    
     class AnimatorStateMachine;
 
+    enum class AnimatorParameterType {
+        Bool = 0,
+        Float,
+        Int,
+        Trigger
+    };
+
     /**
      * Class AnimatorController
      * 1. Drag anim to create state, one - one
@@ -34,12 +41,18 @@ namespace ige::scene
         BaseFigure* getFigure() { return m_figure; }
         void setFigure(BaseFigure* figure);
 
+        //! TimeScale
+        float getTimeScale() { return m_timeScale; }
+        void setTimeScale(float ts);
+
         //! Parameters
-        void setParameter(const std::string& param, float value);
-        float getParameter(const std::string& param);
+        void setParameter(const std::string& param, int type, float value);
+        std::pair<AnimatorParameterType, float> getParameter(const std::string& param) const;
+        bool hasParameter(const std::string& param) const;
+        bool removeParameter(const std::string& param);
 
         //! Update
-        virtual void update(float dt, bool ignoreTimeScale = false);
+        virtual void update(float dt);
 
         //! Serialize
         friend void to_json(json &j, const AnimatorController &obj);
@@ -59,6 +72,6 @@ namespace ige::scene
         std::string m_path;
         float m_timeScale;
         BaseFigure* m_figure;
-        std::unordered_map<std::string, float> m_parameters;
+        std::unordered_map<std::string, std::pair<AnimatorParameterType, float>> m_parameters;
     };
 } // namespace ige::scene

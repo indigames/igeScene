@@ -25,6 +25,9 @@ namespace ige::scene
         virtual const std::string& getPath() const { return m_path; }
         virtual void setPath(const std::string& path);
 
+        virtual void enter();
+        virtual void exit();
+
         //! Name
         virtual const std::string& getName() const { return m_name; }
         virtual void setName(const std::string& name) { m_name = name; }
@@ -39,6 +42,18 @@ namespace ige::scene
         float getSpeed() const { return m_speed; }
         void setSpeed(float speed);
 
+        //! Motion start time
+        float getStartTime() const { return m_startTime; }
+        void setStartTime(float st);
+
+        //! Motion evaluation time
+        float getEvalTime() const { return m_evalTime; }
+        void setEvalTime(float et);
+
+        //! Motion loop
+        bool isLoop() const { return m_isLoop; }
+        void setLoop(bool loop);
+
         virtual void addTransition(const std::shared_ptr<AnimatorTransition>& transition);
         virtual bool removeTransition(const std::shared_ptr<AnimatorTransition>& transition);
 
@@ -50,8 +65,6 @@ namespace ige::scene
 
         Event<AnimatorState&>& getOnEnterEvent() { return m_onEnterEvent; }
         Event<AnimatorState&>& getOnExitEvent() { return m_onExitEvent; }
-
-        virtual void update(float dt);
 
         //! Serialize
         friend void to_json(json &j, const AnimatorState &obj);
@@ -65,8 +78,7 @@ namespace ige::scene
 
     public:
         std::weak_ptr<AnimatorStateMachine>stateMachine;
-        std::weak_ptr<AnimatorState> destState;        
-        std::vector<std::weak_ptr<AnimatorTransition>> transitions;
+        std::vector<std::shared_ptr<AnimatorTransition>> transitions;
 
         bool isEnter = false;
         bool isExit = false;
@@ -80,5 +92,8 @@ namespace ige::scene
         std::string m_path;
         Animator* m_animator;
         float m_speed = 1.f;
+        float m_startTime = 0.f;
+        float m_evalTime = 0.f;
+        bool m_isLoop = false;
     };
 }

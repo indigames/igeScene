@@ -11,6 +11,13 @@ using namespace pyxie;
 namespace ige::scene
 {
     class AnimatorState;
+    class AnimatorController;
+
+    enum class AnimationPart {
+        PartA = 0,
+        PartB,
+        PartC
+    };
 
     class AnimatorStateMachine : public std::enable_shared_from_this<AnimatorStateMachine> 
     {
@@ -44,7 +51,10 @@ namespace ige::scene
         std::shared_ptr<AnimatorState> addState(const std::string& name);
         void addState(const std::shared_ptr<AnimatorState>& state);
         bool removeState(const std::shared_ptr<AnimatorState>& state);
-                
+
+        std::shared_ptr<AnimatorController> getController();
+        void setController(const std::shared_ptr<AnimatorController>& controller);
+
         //! Serialize
         friend void to_json(json &j, const AnimatorStateMachine &obj);
 
@@ -59,11 +69,16 @@ namespace ige::scene
     protected:
         std::vector<std::shared_ptr<AnimatorState>> states;
         std::shared_ptr<AnimatorState> currentState = nullptr;
+        std::weak_ptr<AnimatorState> nextState;
 
         // Cache predefined states
         std::shared_ptr<AnimatorState> enterState = nullptr;
         std::shared_ptr<AnimatorState> exitState = nullptr;
         std::shared_ptr<AnimatorState> anyState = nullptr;
+
+        std::weak_ptr<AnimatorController> m_controller;
+        float transitionTime = 0.f;
+        float transitionDuration = 0.f;
 
         std::string m_name;
     };

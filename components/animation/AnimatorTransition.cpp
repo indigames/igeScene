@@ -22,14 +22,6 @@ namespace ige::scene {
         return false;
     }
 
-    bool AnimatorTransition::update(float dt)
-    {
-        for (auto& cond: conditions) {
-
-        }
-        return false;
-    }
-
     //! Serialize component
     void to_json(json &j, const AnimatorTransition &obj)
     {

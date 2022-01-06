@@ -64,7 +64,7 @@ namespace ige::scene
            if(controller) controller->update(dt);
        }
        else if(m_updateMode == UpdateMode::UnscaledTime) {
-           if(controller) controller->update(dt, true);
+           if(controller) controller->update(dt);
        }
     }
 
@@ -72,7 +72,7 @@ namespace ige::scene
     void AnimatorComponent::onFixedUpdate( float dt)
     {
         if(m_updateMode == UpdateMode::AnimatePhysic) {
-            if(controller) controller->update(dt, true);
+            if(controller) controller->update(dt);
         }
     }
 

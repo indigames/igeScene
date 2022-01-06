@@ -18,7 +18,6 @@ namespace ige::scene
 
     void AnimatorController::initialize()
     {
-
     }
 
     void AnimatorController::clear()
@@ -44,22 +43,38 @@ namespace ige::scene
         }
     }
 
+    void AnimatorController::setTimeScale(float ts)
+    {
+        m_timeScale = ts;
+    }
+
     //! Update
-    void AnimatorController::update(float dt, bool ignoreTimeScale )
+    void AnimatorController::update(float dt)
     {
         if(!m_figure) return;
         stateMachine->update(dt);
     }
 
     //! Parameters
-    void AnimatorController::setParameter(const std::string& param, float value)
+    void AnimatorController::setParameter(const std::string& param, int type, float value)
     {
-        m_parameters[param] = value;
+        type = std::clamp(type, (int)AnimatorParameterType::Bool, (int)AnimatorParameterType::Trigger);
+        m_parameters[param] = {(AnimatorParameterType)type, value};
     }
 
-    float AnimatorController::getParameter(const std::string& param)
+    std::pair<AnimatorParameterType, float> AnimatorController::getParameter(const std::string& param) const
     {
-        return m_parameters.count(param) > 0 ? m_parameters[param] : -1.f;
+        return hasParameter(param) ? m_parameters.at(param) : std::make_pair<AnimatorParameterType, float>(AnimatorParameterType::Float, 0.f);
+    }
+
+    bool AnimatorController::hasParameter(const std::string& param) const
+    {
+        return m_parameters.count(param) > 0;
+    }
+
+    bool AnimatorController::removeParameter(const std::string& param)
+    {
+        return m_parameters.erase(param);
     }
 
     //! Serialize component

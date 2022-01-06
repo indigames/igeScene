@@ -26,9 +26,6 @@ namespace ige::scene
 
         virtual std::shared_ptr<AnimatorCondition> addCondition(AnimatorCondition::Mode mode, const std::string& parameter, float threshold);
         virtual bool removeCondition(const std::shared_ptr<AnimatorCondition>& condition);
-
-        //! Update, return true when ready for transit
-        virtual bool update(float dt);
  
         //! Serialize
         friend void to_json(json &j, const AnimatorTransition &obj);
@@ -38,11 +35,16 @@ namespace ige::scene
 
         bool isMute = false;
 
+        //! Exit Time: consider the normalized time of the animation before the parameters
         bool hasExitTime = false;
         float exitTime = 0.f;
 
+        //! Fixed Duration: consider exit time in second
         bool hasFixedDuration = false;
         float duration = 0.f;
+
+        //! Transition offset
+        float offset = 0.f;
 
         std::weak_ptr<AnimatorState> destState;
         std::vector<std::shared_ptr<AnimatorCondition>> conditions;
