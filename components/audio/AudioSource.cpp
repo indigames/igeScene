@@ -43,7 +43,7 @@ namespace ige::scene
     AudioSource::~AudioSource()
     {
         m_onDestroyedEvent.invoke(*this);
-        m_audioSource = nullptr;
+        m_audioSource.release();
         m_manager.reset();
     }
 
