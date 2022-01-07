@@ -18,19 +18,27 @@ namespace ige::scene
     class AnimatorState : public std::enable_shared_from_this<AnimatorState>
     {
     public:
+        enum class Type {
+            Enter = 0,
+            Exit,
+            Any,
+            Normal
+        };
+
         AnimatorState();
         virtual ~AnimatorState();
 
-        //! Path
-        virtual const std::string& getPath() const { return m_path; }
-        virtual void setPath(const std::string& path);
-
-        virtual void enter();
-        virtual void exit();
+        //! UUID
+        virtual const std::string& getUUID() const { return m_uuid; }
+        void setUUID(const std::string& uuid) { m_uuid = uuid; }
 
         //! Name
         virtual const std::string& getName() const { return m_name; }
         virtual void setName(const std::string& name) { m_name = name; }
+
+        //! Path
+        virtual const std::string& getPath() const { return m_path; }
+        virtual void setPath(const std::string& path);
 
         // Helper to get shared pointer from 'this'
         std::shared_ptr<AnimatorState> getSharedPtr() { return shared_from_this(); }
@@ -54,6 +62,12 @@ namespace ige::scene
         bool isLoop() const { return m_isLoop; }
         void setLoop(bool loop);
 
+        //! Enter
+        virtual void enter();
+
+        //! Exit
+        virtual void exit();
+
         virtual void addTransition(const std::shared_ptr<AnimatorTransition>& transition);
         virtual bool removeTransition(const std::shared_ptr<AnimatorTransition>& transition);
 
@@ -66,11 +80,23 @@ namespace ige::scene
         Event<AnimatorState&>& getOnEnterEvent() { return m_onEnterEvent; }
         Event<AnimatorState&>& getOnExitEvent() { return m_onExitEvent; }
 
+        //! Type
+        Type getType() const { return m_type; }
+        void setType(int type) { m_type = (Type)type; }
+
+        //! Type check shortcut
+        bool isEnter() const { return m_type == Type::Enter; }
+        bool isExit() const { return m_type == Type::Exit; }
+        bool isAny() const { return m_type == Type::Any; }
+
         //! Serialize
         friend void to_json(json &j, const AnimatorState &obj);
 
         //! Deserialize
         friend void from_json(const json &j, AnimatorState &obj);
+        
+        //! Serialize finished handline
+        void onSerializeFinished();
 
     protected:
         virtual std::shared_ptr<AnimatorTransition> createTransition(bool withExitTime = false);
@@ -80,16 +106,16 @@ namespace ige::scene
         std::weak_ptr<AnimatorStateMachine>stateMachine;
         std::vector<std::shared_ptr<AnimatorTransition>> transitions;
 
-        bool isEnter = false;
-        bool isExit = false;
-        bool isAny = false;
-
     protected:
         Event<AnimatorState&> m_onEnterEvent;
         Event<AnimatorState&> m_onExitEvent;
 
         std::string m_name;
         std::string m_path;
+        std::string m_uuid;
+
+        Type m_type = Type::Normal;
+
         Animator* m_animator;
         float m_speed = 1.f;
         float m_startTime = 0.f;

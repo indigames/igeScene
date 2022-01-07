@@ -178,9 +178,6 @@ namespace ige::scene
         static Event<SceneObject&>& getDeselectedEvent() { return s_deselectedEvent; }
         static Event<SceneObject&>& getActivatedEvent() { return s_activatedEvent; }
 
-        //! Helper to generate UUID
-        static std::string generateUUID(unsigned int len = 16);
-
         //! Serialize
         virtual void to_json(json &j);
 

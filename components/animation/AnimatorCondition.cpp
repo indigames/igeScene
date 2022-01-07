@@ -12,12 +12,16 @@ namespace ige::scene {
     //! Serialize component
     void to_json(json &j, const AnimatorCondition &obj)
     {
-        
+        j["mode"] = (int)obj.mode;
+        j["param"] = obj.parameter;
+        j["threshold"] = obj.threshold;
     }
 
     //! Deserialize component
     void from_json(const json &j, AnimatorCondition &obj)
     {
-        
+        obj.mode = j.value("mode", AnimatorCondition::Mode::Equal);
+        obj.parameter = j.value("param", std::string());
+        obj.threshold = j.value("threshold", 0.f);
     }
 }

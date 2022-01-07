@@ -46,7 +46,13 @@ namespace ige::scene
         //! Transition offset
         float offset = 0.f;
 
+        //! Destination state
         std::weak_ptr<AnimatorState> destState;
+
+        //! Dest state uuid: only used for serialization
+        std::string destStateUUID = std::string();
+
+        //! Conditions
         std::vector<std::shared_ptr<AnimatorCondition>> conditions;
 
     protected:

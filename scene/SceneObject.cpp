@@ -1,12 +1,9 @@
-#include <algorithm>
-#include <sstream>
-#include <random>
-
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 #include "scene/SceneManager.h"
 
 #include "event/InputProcessor.h"
+#include "utils/GraphicsHelper.h"
 
 #include "components/Component.h"
 #include "components/TransformComponent.h"
@@ -112,18 +109,6 @@ namespace ige::scene
 
         removeAllComponents();
         m_scene = nullptr;
-    }
-
-    //! Generate UUID
-    std::string SceneObject::generateUUID(unsigned int len)
-    {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        static std::uniform_int_distribution<> dis(0, 15);
-        std::stringstream ss;
-        for (auto i = 0; i < len; i++)
-            ss << std::hex << dis(gen);
-        return ss.str();
     }
 
     //! Set Name

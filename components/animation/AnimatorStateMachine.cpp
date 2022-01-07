@@ -2,6 +2,10 @@
 #include "AnimatorTransition.h"
 #include "AnimatorController.h"
 
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
+
+#include <iomanip>
 
 namespace ige::scene {
     AnimatorStateMachine::AnimatorStateMachine() {
@@ -44,10 +48,10 @@ namespace ige::scene {
         return (itr != states.end()) ? (*itr) : nullptr;
     }
 
-    std::shared_ptr<AnimatorState> AnimatorStateMachine::findState(const std::string& name)
+    std::shared_ptr<AnimatorState> AnimatorStateMachine::findState(const std::string& uuid)
     {
-        auto itr = std::find_if(states.begin(), states.end(), [name](const auto& elem) {
-            return elem->getName().compare(name) == 0;
+        auto itr = std::find_if(states.begin(), states.end(), [&](const auto& elem) {
+            return elem->getUUID().compare(uuid) == 0;
         });
         return (itr != states.end()) ? (*itr) : nullptr;
     }
@@ -108,19 +112,19 @@ namespace ige::scene {
 
     std::shared_ptr<AnimatorState> AnimatorStateMachine::addEnterState() {
         auto state = addState("Enter");
-        state->isEnter = true;
+        state->setType((int)AnimatorState::Type::Enter);
         return state;
     }
 
     std::shared_ptr<AnimatorState> AnimatorStateMachine::addExitState() {
         auto state = addState("Exit");
-        state->isExit = true;
+        state->setType((int)AnimatorState::Type::Exit);
         return state;
     }
 
     std::shared_ptr<AnimatorState> AnimatorStateMachine::addAnyState() {
         auto state = addState("Any");
-        state->isAny = true;
+        state->setType((int)AnimatorState::Type::Any);
         return state;
     }
 
@@ -206,16 +210,47 @@ namespace ige::scene {
         }
     }
 
+    bool AnimatorStateMachine::save(const std::string& path) {
+        json jObj;
+        to_json(jObj, *this);
+        auto fsPath = path.empty() ? fs::path(std::string("anims/") + getName()) : fs::path(path);
+        if (fsPath.extension().string() != ".anim") fsPath = fsPath.replace_extension(".anim");
+        try {
+            std::ofstream file(fsPath.string());
+            file << std::setw(2) << jObj << std::endl;
+            file.close();
+        }
+        catch (std::exception e) {
+            return false;
+        }
+        return true;
+    }
 
     //! Serialize component
     void to_json(json &j, const AnimatorStateMachine &obj)
     {
-        
+        j["name"] = obj.getName();
+        auto jStates = json::array();
+        for (const auto& state : obj.states) {
+            jStates.push_back(json(*state.get()));
+        }
+        j["states"] = jStates;
     }
 
     //! Deserialize component
     void from_json(const json &j, AnimatorStateMachine &obj)
     {
-        
+        obj.setName(j.value("name", std::string()));
+        if (j.count("states") > 0) {
+            auto jStates = j.at("states");
+            for (auto jState : jStates) {
+                auto state = std::make_shared<AnimatorState>();
+                jState.get_to(*state);
+                obj.states.push_back(state);
+            }
+            for (const auto& state : obj.states) {
+                state->onSerializeFinished();
+            }
+        }
     }
 }

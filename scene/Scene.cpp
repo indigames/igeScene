@@ -58,7 +58,7 @@ namespace ige::scene
     {
         setWindowSize({-1.f, -1.f});
         setViewSize({ -1.f, -1.f });
-        m_uuid = SceneObject::generateUUID();
+        m_uuid = generateUUID();
     }
 
     Scene::~Scene()
@@ -590,7 +590,7 @@ namespace ige::scene
             }
 
             if(prefabId.empty())
-                prefabId = SceneObject::generateUUID();
+                prefabId = generateUUID();
 
             jObj["prefabId"] = prefabId;
             std::ofstream file(fsPath.string());
@@ -1308,7 +1308,7 @@ namespace ige::scene
         initialize(true);
         
         j.at("name").get_to(m_name);
-        m_uuid = j.value("uuid", SceneObject::generateUUID());
+        m_uuid = j.value("uuid", generateUUID());
         setPath(j.value("path", std::string()));
 
         if (j.contains("root"))

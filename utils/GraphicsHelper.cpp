@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <vmath.h>
 #include <bitmapHelper.h>
+#include <sstream>
+#include <random>
 
 #include "utils/GraphicsHelper.h"
 #include "core/BitmapFontHelper.h"
@@ -447,5 +449,17 @@ namespace ige::scene
     bool RectInside(const Vec4& r1, const Vec4& r2)
     {
         return (r2[0] >= r1[0] && r2[2] <= r1[2] && r2[1] >= r1[1] && r2[3] <= r1[3]);
+    }
+
+    //! Generate UUID
+    std::string generateUUID(unsigned int len)
+    {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        static std::uniform_int_distribution<> dis(0, 15);
+        std::stringstream ss;
+        for (auto i = 0; i < len; i++)
+            ss << std::hex << dis(gen);
+        return ss.str();
     }
 }

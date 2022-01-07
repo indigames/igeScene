@@ -1,6 +1,9 @@
 #include "AnimatorController.h"
 #include "AnimatorStateMachine.h"
 
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
+
 namespace ige::scene
 {    
     //! Constructor
@@ -18,20 +21,33 @@ namespace ige::scene
 
     void AnimatorController::initialize()
     {
+        clear();
+        stateMachine = std::make_shared<AnimatorStateMachine>();
+        if (!m_path.empty()) {
+            auto fsPath = fs::path(m_path);
+            if (fsPath.extension().string().compare(".anim") == 0) {
+                std::ifstream file(fsPath);
+                if (file.is_open()) {
+                    json jObj;
+                    file >> jObj;
+                    file.close();
+                    jObj.get_to(*(stateMachine.get()));
+                }
+            }
+        }
     }
 
     void AnimatorController::clear()
     {
-
+        m_path.clear();
+        stateMachine = nullptr;
+        m_figure = nullptr;
     }
 
     void AnimatorController::setPath(const std::string& path)
     {
         if(m_path.compare(path) != 0) {
-            //TODO: load state machines
             m_path = path;
-
-            clear();
             initialize();
         }
     }
@@ -52,7 +68,7 @@ namespace ige::scene
     void AnimatorController::update(float dt)
     {
         if(!m_figure) return;
-        stateMachine->update(dt);
+        stateMachine->update(dt * m_timeScale);
     }
 
     //! Parameters
@@ -80,13 +96,16 @@ namespace ige::scene
     //! Serialize component
     void to_json(json &j, const AnimatorController &obj)
     {
-        
+        j["path"] = obj.getPath();
+        j["timeScale"] = obj.getTimeScale();
+        j["params"] = obj.m_parameters;
     }
 
     //! Deserialize component
     void from_json(const json &j, AnimatorController &obj)
     {
-        
+        obj.setPath(j.value("path", std::string()));
+        obj.setTimeScale(j.value("timeScale", 1.f));
+        obj.m_parameters = j["params"].get<std::unordered_map<std::string, std::pair<AnimatorParameterType, float>>>();
     }
-   
 } // namespace ige::scene

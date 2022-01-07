@@ -31,4 +31,6 @@ namespace ige::scene
     Vec2 WorldToScreen(Vec3 world, const Vec2& windowSize, Camera* cam);
     Vec4 AabbToScreenRect(const AABBox& aabb, const Vec2& windowSize, Camera* cam);
     bool RectInside(const Vec4& r1, const Vec4& r2);
+
+    std::string generateUUID(unsigned int len = 16);
 }

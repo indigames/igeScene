@@ -42,7 +42,7 @@ namespace ige::scene
         void setFigure(BaseFigure* figure);
 
         //! TimeScale
-        float getTimeScale() { return m_timeScale; }
+        float getTimeScale() const { return m_timeScale; }
         void setTimeScale(float ts);
 
         //! Parameters
@@ -60,8 +60,7 @@ namespace ige::scene
         //! Deserialize
         friend void from_json(const json &j, AnimatorController &obj);
 
-        std::vector<std::shared_ptr<Animator>> animatorClips;
-
+        //! State machine
         std::shared_ptr<AnimatorStateMachine> stateMachine;
 
     protected:

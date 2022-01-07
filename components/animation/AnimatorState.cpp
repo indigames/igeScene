@@ -2,11 +2,15 @@
 #include "AnimatorStateMachine.h"
 #include "AnimatorTransition.h"
 
+#include "utils/GraphicsHelper.h"
+
 #include "utils/filesystem.h"
 namespace fs = ghc::filesystem;
 
 namespace ige::scene {
-    AnimatorState::AnimatorState(): m_animator(nullptr) {}
+    AnimatorState::AnimatorState(): m_animator(nullptr) {
+        m_uuid = generateUUID();
+    }
 
     AnimatorState::~AnimatorState() {
         if(m_animator != nullptr) {
@@ -137,16 +141,51 @@ namespace ige::scene {
     //! Serialize component
     void to_json(json &j, const AnimatorState &obj)
     {
+        j["uuid"] = obj.getUUID();
         j["path"] = obj.getPath();
         j["name"] = obj.getName();
+        j["type"] = (int)obj.getType();
         j["speed"] = obj.getSpeed();
+        j["startTime"] = obj.getStartTime();
+        j["evalTime"] = obj.getEvalTime();
+        j["loop"] = obj.isLoop();
+        auto jTrans = json::array();
+        for (const auto& tran : obj.transitions) {
+            jTrans.push_back(json(*tran.get()));
+        }
+        j["trans"] = jTrans;
     }
 
     //! Deserialize component
     void from_json(const json &j, AnimatorState &obj)
     {
-        obj.setPath(j.value("path", obj.getPath()));
-        obj.setName(j.value("name", obj.getName()));
-        obj.setSpeed(j.value("name", obj.getSpeed()));
+        obj.setUUID(j.value("uuid", obj.getUUID()));        
+        obj.setPath(j.value("path", std::string()));
+        obj.setName(j.value("name", std::string()));
+        obj.setType(j.value("type", (int)AnimatorState::Type::Normal));
+        obj.setSpeed(j.value("name", 1.f));
+        obj.setStartTime(j.value("startTime", 0.f));
+        obj.setEvalTime(j.value("evalTime", 0.f));
+        obj.setLoop(j.value("loop", true));
+
+        if (j.count("trans") > 0) {
+            auto jTrans = j.at("trans");
+            for (auto jTran : jTrans) {
+                auto tran = std::make_shared<AnimatorTransition>();
+                jTran.get_to(*tran);
+                obj.transitions.push_back(tran);
+            }
+        }
+    }
+
+    //! Serialize finished handline
+    void AnimatorState::onSerializeFinished() {
+        for (const auto& tran : transitions) {
+            if (!tran->destStateUUID.empty()) {
+                auto dstState = stateMachine.lock()->findState(tran->destStateUUID);
+                tran->destState = dstState;
+                tran->destStateUUID.clear(); // loaded, just clear it
+            }
+        }
     }
 }
