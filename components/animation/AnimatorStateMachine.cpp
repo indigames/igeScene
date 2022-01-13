@@ -8,6 +8,8 @@ namespace fs = ghc::filesystem;
 #include <iomanip>
 
 namespace ige::scene {
+    uint64_t AnimatorStateMachine::s_id = 0;
+
     AnimatorStateMachine::AnimatorStateMachine() {
         currentState = enterState = addEnterState();
         exitState = addExitState();
@@ -63,9 +65,10 @@ namespace ige::scene {
 
     std::shared_ptr<AnimatorState> AnimatorStateMachine::addState(const std::string& name)
     {
-        auto state = std::make_shared<AnimatorState>();
+        auto state = std::make_shared<AnimatorState>(s_id);
         state->setName(name);
         addState(state);
+        s_id += 3;
         return state;
     }
 
@@ -244,7 +247,7 @@ namespace ige::scene {
         if (j.count("states") > 0) {
             auto jStates = j.at("states");
             for (auto jState : jStates) {
-                auto state = std::make_shared<AnimatorState>();
+                auto state = std::make_shared<AnimatorState>(0); // dummy id
                 jState.get_to(*state);
                 obj.states.push_back(state);
             }

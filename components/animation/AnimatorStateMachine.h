@@ -84,5 +84,7 @@ namespace ige::scene
         float transitionDuration = 0.f;
 
         std::string m_name;
+
+        static uint64_t s_id;
     };
 }

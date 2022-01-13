@@ -61,13 +61,16 @@ namespace ige::scene
         friend void from_json(const json &j, AnimatorController &obj);
 
         //! State machine
-        std::shared_ptr<AnimatorStateMachine> stateMachine;
+        std::shared_ptr<AnimatorStateMachine>& getStateMachine() { return m_stateMachine; }
 
     protected:
         void initialize();
         void clear();
 
     protected:
+        //! State machine
+        std::shared_ptr<AnimatorStateMachine> m_stateMachine;
+
         std::string m_path;
         float m_timeScale;
         BaseFigure* m_figure;

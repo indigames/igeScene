@@ -22,7 +22,7 @@ namespace ige::scene
     void AnimatorController::initialize()
     {
         clear();
-        stateMachine = std::make_shared<AnimatorStateMachine>();
+        m_stateMachine = std::make_shared<AnimatorStateMachine>();
         if (!m_path.empty()) {
             auto fsPath = fs::path(m_path);
             if (fsPath.extension().string().compare(".anim") == 0) {
@@ -31,7 +31,7 @@ namespace ige::scene
                     json jObj;
                     file >> jObj;
                     file.close();
-                    jObj.get_to(*(stateMachine.get()));
+                    jObj.get_to(*(m_stateMachine.get()));
                 }
             }
         }
@@ -40,7 +40,7 @@ namespace ige::scene
     void AnimatorController::clear()
     {
         m_path.clear();
-        stateMachine = nullptr;
+        m_stateMachine = nullptr;
         m_figure = nullptr;
     }
 
@@ -48,8 +48,8 @@ namespace ige::scene
     {
         if(m_path.compare(path) != 0) {
             m_path = path;
-            initialize();
         }
+        initialize();
     }
 
     void AnimatorController::setFigure(BaseFigure* figure)
@@ -68,7 +68,7 @@ namespace ige::scene
     void AnimatorController::update(float dt)
     {
         if(!m_figure) return;
-        stateMachine->update(dt * m_timeScale);
+        getStateMachine()->update(dt * m_timeScale);
     }
 
     //! Parameters

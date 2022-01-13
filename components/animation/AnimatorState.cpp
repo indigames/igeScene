@@ -8,7 +8,7 @@
 namespace fs = ghc::filesystem;
 
 namespace ige::scene {
-    AnimatorState::AnimatorState(): m_animator(nullptr) {
+    AnimatorState::AnimatorState(uint64_t id): m_animator(nullptr), m_id(id) {
         m_uuid = generateUUID();
     }
 

@@ -25,8 +25,13 @@ namespace ige::scene
             Normal
         };
 
-        AnimatorState();
+        AnimatorState(uint64_t id);
         virtual ~AnimatorState();
+
+        //! ID
+        uint64_t getId() { return m_id; }
+        uint64_t getInputId() { return m_id + 1; }
+        uint64_t getOutputId() { return m_id + 2; }
 
         //! UUID
         virtual const std::string& getUUID() const { return m_uuid; }
@@ -61,6 +66,10 @@ namespace ige::scene
         //! Motion loop
         bool isLoop() const { return m_isLoop; }
         void setLoop(bool loop);
+
+        //! Position
+        const Vec2& getPosition() const { return m_position; }
+        void setPosition(const Vec2& pos) { m_position = pos; }
 
         //! Enter
         virtual void enter();
@@ -121,5 +130,7 @@ namespace ige::scene
         float m_startTime = 0.f;
         float m_evalTime = 0.f;
         bool m_isLoop = false;
+        uint64_t m_id;
+        Vec2 m_position;
     };
 }
