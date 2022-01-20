@@ -30,6 +30,14 @@ namespace ige::scene {
         return findState(state) != nullptr;
     }
 
+    bool AnimatorStateMachine::hasState(const std::string& name)
+    {
+        auto itr = std::find_if(states.begin(), states.end(), [&](const auto& elem) {
+            return elem->getName().compare(name) == 0;
+        });
+        return (itr != states.end());
+    }
+
     bool AnimatorStateMachine::hasTransition(const std::shared_ptr<AnimatorState>& stateA, const std::shared_ptr<AnimatorState>& stateB)
     {
         auto itr = std::find_if(stateA->transitions.begin(), stateA->transitions.end(), [stateB](const auto& elem){

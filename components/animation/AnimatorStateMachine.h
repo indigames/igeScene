@@ -37,6 +37,7 @@ namespace ige::scene
         virtual void setCurrentState(const std::shared_ptr<AnimatorState>& state);
 
         virtual bool hasState(const std::shared_ptr<AnimatorState>& state);
+        virtual bool hasState(const std::string& name);
         virtual std::shared_ptr<AnimatorState> findState(const std::string& uuid);
         virtual std::shared_ptr<AnimatorState> findState(const std::shared_ptr<AnimatorState>& state);
 
