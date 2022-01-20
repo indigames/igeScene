@@ -19,10 +19,10 @@ namespace ige::scene
     {
     public:
         enum class Type {
-            Enter = 0,
+            Normal,
+            Enter,
             Exit,
-            Any,
-            Normal
+            Any
         };
 
         AnimatorState(uint64_t id);
@@ -84,6 +84,7 @@ namespace ige::scene
         virtual std::shared_ptr<AnimatorTransition> addExitTransition(bool withExitTime = false);
 
         //! Find transition to dest state
+        const std::vector<std::shared_ptr<AnimatorTransition>>& getTransitions() const { return transitions; }
         virtual std::shared_ptr<AnimatorTransition> findTransition(const std::shared_ptr<AnimatorState>& dstState);
 
         Event<AnimatorState&>& getOnEnterEvent() { return m_onEnterEvent; }

@@ -252,12 +252,14 @@ namespace ige::scene {
     void from_json(const json &j, AnimatorStateMachine &obj)
     {
         obj.setName(j.value("name", std::string()));
+        obj.states.clear();
         if (j.count("states") > 0) {
             auto jStates = j.at("states");
             for (auto jState : jStates) {
                 auto state = std::make_shared<AnimatorState>(0); // dummy id
                 jState.get_to(*state);
                 obj.states.push_back(state);
+                state->stateMachine = obj.shared_from_this();
             }
             for (const auto& state : obj.states) {
                 state->onSerializeFinished();

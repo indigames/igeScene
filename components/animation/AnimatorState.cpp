@@ -163,7 +163,7 @@ namespace ige::scene {
         obj.setPath(j.value("path", std::string()));
         obj.setName(j.value("name", std::string()));
         obj.setType(j.value("type", (int)AnimatorState::Type::Normal));
-        obj.setSpeed(j.value("name", 1.f));
+        obj.setSpeed(j.value("speed", 1.f));
         obj.setStartTime(j.value("startTime", 0.f));
         obj.setEvalTime(j.value("evalTime", 0.f));
         obj.setLoop(j.value("loop", true));

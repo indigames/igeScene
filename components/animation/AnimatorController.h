@@ -37,6 +37,9 @@ namespace ige::scene
         const std::string& getPath() const { return m_path; }
         void setPath(const std::string& path);
 
+        //! Save
+        void save(const std::string& path);
+
         //! Figure
         BaseFigure* getFigure() { return m_figure; }
         void setFigure(BaseFigure* figure);

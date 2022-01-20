@@ -4,11 +4,15 @@
 #include "utils/filesystem.h"
 namespace fs = ghc::filesystem;
 
+#include <fstream>
+#include <iomanip>
+
 namespace ige::scene
 {    
     //! Constructor
     AnimatorController::AnimatorController(const std::string& path)
     {
+        m_stateMachine = std::make_shared<AnimatorStateMachine>();
         m_figure = nullptr;
         setPath(path);
     }
@@ -16,7 +20,7 @@ namespace ige::scene
     // Destructor
     AnimatorController::~AnimatorController()
     {
-        m_figure = nullptr;
+        clear();
     }
 
     void AnimatorController::initialize()
@@ -31,7 +35,7 @@ namespace ige::scene
                     json jObj;
                     file >> jObj;
                     file.close();
-                    jObj.get_to(*(m_stateMachine.get()));
+                    jObj.get_to(*this);
                 }
             }
         }
@@ -39,17 +43,38 @@ namespace ige::scene
 
     void AnimatorController::clear()
     {
-        m_path.clear();
         m_stateMachine = nullptr;
         m_figure = nullptr;
     }
 
     void AnimatorController::setPath(const std::string& path)
     {
-        if(m_path.compare(path) != 0) {
-            m_path = path;
+        auto fsPath = fs::path(path);
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        if (relPath.size() == 0) relPath = fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+        if(m_path.compare(relPath) != 0) {
+            m_path = relPath;
+            initialize();
         }
-        initialize();
+    }
+
+    void AnimatorController::save(const std::string& path)
+    {
+        auto fsPath = fs::path(path).replace_extension(".anim");
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        if (relPath.size() == 0) relPath = fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+        if (m_path.compare(relPath) != 0) {
+            m_path = relPath;
+        }
+
+        json jScene;
+        to_json(jScene, *this);
+        fs::create_directories(fsPath.parent_path());
+        std::ofstream file(fsPath.string());
+        file << std::setw(2) << jScene << std::endl;
+        file.close();
     }
 
     void AnimatorController::setFigure(BaseFigure* figure)
@@ -99,6 +124,7 @@ namespace ige::scene
         j["path"] = obj.getPath();
         j["timeScale"] = obj.getTimeScale();
         j["params"] = obj.m_parameters;
+        j["sm"] = (*obj.m_stateMachine.get());
     }
 
     //! Deserialize component
@@ -107,5 +133,6 @@ namespace ige::scene
         obj.setPath(j.value("path", std::string()));
         obj.setTimeScale(j.value("timeScale", 1.f));
         obj.m_parameters = j["params"].get<std::unordered_map<std::string, std::pair<AnimatorParameterType, float>>>();
+        j["sm"].get_to(*obj.m_stateMachine.get());
     }
 } // namespace ige::scene
