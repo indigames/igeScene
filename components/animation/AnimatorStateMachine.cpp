@@ -119,7 +119,7 @@ namespace ige::scene {
     }
 
     std::shared_ptr<AnimatorState> AnimatorStateMachine::addEnterState() {
-        auto state = addState("Enter");
+        auto state = addState("Entry");
         state->setType((int)AnimatorState::Type::Enter);
         return state;
     }
