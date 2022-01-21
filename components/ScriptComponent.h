@@ -66,6 +66,8 @@ namespace ige::scene
 
         //! Click
         virtual void onClick() override;
+        virtual void onTouchBegin();
+        virtual void onTouchEnd();
 
         //! Suspend
         virtual void onSuspend() override;
@@ -131,6 +133,9 @@ namespace ige::scene
         void unregisterEvents();
 
         void onClickEvent(EventContext* context);
+        void onTouchBeginEvent(EventContext* context);
+        void onTouchEndEvent(EventContext* context);
+
         void onChangedValueEvent(EventContext* context);
 
     protected:
