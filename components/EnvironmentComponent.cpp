@@ -114,6 +114,11 @@ namespace ige::scene
         getOwner()->getScene()->setShadowTextureSize(size);
     }
 
+    Environment* EnvironmentComponent::getEnvironment()
+    {
+        return getOwner()->getScene()->getEnvironment();
+    }
+
     //! Serialize
     void EnvironmentComponent::to_json(json &j) const
     {

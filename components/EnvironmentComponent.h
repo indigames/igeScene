@@ -59,6 +59,9 @@ namespace ige::scene
         const Vec2& getShadowTextureSize() const;
         void setShadowTextureSize(const Vec2& size);
 
+        //! Get environment instance
+        Environment* getEnvironment();
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
