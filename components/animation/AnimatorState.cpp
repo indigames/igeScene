@@ -149,6 +149,7 @@ namespace ige::scene {
         j["startTime"] = obj.getStartTime();
         j["evalTime"] = obj.getEvalTime();
         j["loop"] = obj.isLoop();
+        j["pos"] = obj.getPosition();
         auto jTrans = json::array();
         for (const auto& tran : obj.transitions) {
             jTrans.push_back(json(*tran.get()));
@@ -167,7 +168,7 @@ namespace ige::scene {
         obj.setStartTime(j.value("startTime", 0.f));
         obj.setEvalTime(j.value("evalTime", 0.f));
         obj.setLoop(j.value("loop", true));
-
+        obj.setPosition(j.value("pos", Vec2(0.f, 0.f)));
         if (j.count("trans") > 0) {
             auto jTrans = j.at("trans");
             for (auto jTran : jTrans) {
