@@ -70,7 +70,6 @@ namespace ige::scene
         }
     }
 
-
     void TransformComponent::localTranslate(const Vec3 &trans)
     {
         setLocalPosition(m_localPosition + trans);
@@ -400,6 +399,7 @@ namespace ige::scene
         else
             m_lockTransform ^= (1 << ((1) - 1));
     }
+
     void TransformComponent::lockRotate(bool active)
     {
         if (isLockRotate() == active) return;
@@ -408,6 +408,7 @@ namespace ige::scene
         else
             m_lockTransform ^= (1 << ((2) - 1));
     }
+    
     void TransformComponent::lockScale(bool active)
     {
         if (isLockScale() == active) return;
