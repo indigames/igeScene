@@ -8,8 +8,6 @@ namespace fs = ghc::filesystem;
 #include <iomanip>
 
 namespace ige::scene {
-    uint64_t AnimatorStateMachine::s_id = 0;
-
     AnimatorStateMachine::AnimatorStateMachine() {
         currentState = enterState = addEnterState();
         exitState = addExitState();
@@ -41,7 +39,7 @@ namespace ige::scene {
     bool AnimatorStateMachine::hasTransition(const std::shared_ptr<AnimatorState>& stateA, const std::shared_ptr<AnimatorState>& stateB)
     {
         auto itr = std::find_if(stateA->transitions.begin(), stateA->transitions.end(), [stateB](const auto& elem){
-            return elem->destState.expired() && elem->destState.lock() == stateB;
+            return !elem->destState.expired() && elem->destState.lock() == stateB;
         });
         if(itr != stateA->transitions.end())
             return true;
@@ -73,10 +71,9 @@ namespace ige::scene {
 
     std::shared_ptr<AnimatorState> AnimatorStateMachine::addState(const std::string& name)
     {
-        auto state = std::make_shared<AnimatorState>(s_id);
+        auto state = std::make_shared<AnimatorState>();
         state->setName(name);
         addState(state);
-        s_id += 3;
         return state;
     }
 
@@ -256,7 +253,7 @@ namespace ige::scene {
         if (j.count("states") > 0) {
             auto jStates = j.at("states");
             for (auto jState : jStates) {
-                auto state = std::make_shared<AnimatorState>(0); // dummy id
+                auto state = std::make_shared<AnimatorState>();
                 jState.get_to(*state);
                 obj.states.push_back(state);
                 state->stateMachine = obj.shared_from_this();

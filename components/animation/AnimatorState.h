@@ -25,13 +25,8 @@ namespace ige::scene
             Any
         };
 
-        AnimatorState(uint64_t id);
+        AnimatorState();
         virtual ~AnimatorState();
-
-        //! ID
-        uint64_t getId() { return m_id; }
-        uint64_t getInputId() { return m_id + 1; }
-        uint64_t getOutputId() { return m_id + 2; }
 
         //! UUID
         virtual const std::string& getUUID() const { return m_uuid; }
@@ -131,7 +126,6 @@ namespace ige::scene
         float m_startTime = 0.f;
         float m_evalTime = 0.f;
         bool m_isLoop = false;
-        uint64_t m_id;
         Vec2 m_position;
     };
 }

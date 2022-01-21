@@ -8,7 +8,7 @@
 namespace fs = ghc::filesystem;
 
 namespace ige::scene {
-    AnimatorState::AnimatorState(uint64_t id): m_animator(nullptr), m_id(id) {
+    AnimatorState::AnimatorState(): m_animator(nullptr) {
         m_uuid = generateUUID();
     }
 
@@ -85,7 +85,7 @@ namespace ige::scene {
     std::shared_ptr<AnimatorTransition> AnimatorState::findTransition(const std::shared_ptr<AnimatorState>& dstState)
     {
         auto itr = std::find_if(transitions.begin(), transitions.end(), [&](const auto& elem){
-            return elem->destState.expired() && elem->destState.lock() == dstState;
+            return !elem->destState.expired() && elem->destState.lock() == dstState;
         });
         return (itr != transitions.end()) ? (*itr) : nullptr;
     }
