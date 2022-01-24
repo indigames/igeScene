@@ -163,6 +163,19 @@ namespace ige::scene
         return -1;
     }
 
+    // Get environment instance
+    PyObject* EnvironmentComponent_getEnvironment(PyObject_EnvironmentComponent* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto env = std::dynamic_pointer_cast<EnvironmentComponent>(self->component.lock())->getEnvironment();
+        if (env) {
+            auto envObj = (environment_obj*)(&EnvironmentType)->tp_alloc(&EnvironmentType, 0);
+            envObj->envSet = env;
+            return (PyObject*)envObj;
+        }
+        Py_RETURN_NONE;
+    }
+
     PyGetSetDef EnvironmentComponent_getsets[] = {
         { "distanceFogColor", (getter)EnvironmentComponent_getDistanceFogColor, (setter)EnvironmentComponent_setDistanceFogColor, EnvironmentComponent_distanceFogColor_doc, NULL },
         { "distanceFogAlpha", (getter)EnvironmentComponent_getDistanceFogAlpha, (setter)EnvironmentComponent_setDistanceFogAlpha, EnvironmentComponent_distanceFogAlpha_doc, NULL },
@@ -171,6 +184,7 @@ namespace ige::scene
         { "shadowColor", (getter)EnvironmentComponent_getShadowColor, (setter)EnvironmentComponent_setShadowColor, EnvironmentComponent_shadowColor_doc, NULL },
         { "shadowDensity", (getter)EnvironmentComponent_getShadowDensity, (setter)EnvironmentComponent_setShadowDensity, EnvironmentComponent_shadowDensity_doc, NULL },
         { "shadowWideness", (getter)EnvironmentComponent_getShadowWideness, (setter)EnvironmentComponent_setShadowWideness, EnvironmentComponent_shadowWideness_doc, NULL },
+        { "environment", (getter)EnvironmentComponent_getEnvironment, NULL, EnvironmentComponent_environment_doc, NULL },
         { NULL, NULL }
     };
 

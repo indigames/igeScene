@@ -59,6 +59,9 @@ namespace ige::scene
     // Get Shadow Wideness
     PyObject* EnvironmentComponent_getShadowWideness(PyObject_EnvironmentComponent* self);
 
+    // Get environment instance
+    PyObject* EnvironmentComponent_getEnvironment(PyObject_EnvironmentComponent* self);
+
     // Set Shadow Wideness
     int EnvironmentComponent_setShadowWideness(PyObject_EnvironmentComponent* self, PyObject* value);
 

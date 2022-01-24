@@ -125,6 +125,8 @@ namespace ige::scene
     {
         RuntimeComponent::Initialize();
         getOwner()->addEventListener((int)EventType::Click, std::bind(&ScriptComponent::onClickEvent, this, std::placeholders::_1), m_instanceId);
+        getOwner()->addEventListener((int)EventType::TouchBegin, std::bind(&ScriptComponent::onTouchBeginEvent, this, std::placeholders::_1), m_instanceId);
+        getOwner()->addEventListener((int)EventType::TouchEnd, std::bind(&ScriptComponent::onTouchEndEvent, this, std::placeholders::_1), m_instanceId);
         getOwner()->addEventListener((int)EventType::Changed, std::bind(&ScriptComponent::onChangedValueEvent, this, std::placeholders::_1), m_instanceId);
     }
 
@@ -132,12 +134,24 @@ namespace ige::scene
     {
         RuntimeComponent::Clear();
         getOwner()->removeEventListener((int)EventType::Click, m_instanceId);
+        getOwner()->removeEventListener((int)EventType::TouchBegin, m_instanceId);
+        getOwner()->removeEventListener((int)EventType::TouchEnd, m_instanceId);
         getOwner()->removeEventListener((int)EventType::Changed, m_instanceId);
     }
 
     void ScriptComponent::onClickEvent(EventContext* context)
     {
         onClick();
+    }
+
+    void ScriptComponent::onTouchBeginEvent(EventContext* context)
+    {
+        onTouchBegin();
+    }
+
+    void ScriptComponent::onTouchEndEvent(EventContext* context)
+    {
+        onTouchEnd();
     }
 
     void ScriptComponent::onChangedValueEvent(EventContext* context)
@@ -508,6 +522,26 @@ namespace ige::scene
         if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onClick"))
         {
             auto ret = PyObject_CallMethod(m_pyInstance, "onClick", NULL);
+            Py_XDECREF(ret);
+        }
+        PyErr_CheckAndClear();
+    }
+
+    void ScriptComponent::onTouchBegin()
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onTouchBegin"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onTouchBegin", NULL);
+            Py_XDECREF(ret);
+        }
+        PyErr_CheckAndClear();
+    }
+
+    void ScriptComponent::onTouchEnd()
+    {
+        if (m_pyInstance && PyObject_HasAttrString(m_pyInstance, "onTouchEnd"))
+        {
+            auto ret = PyObject_CallMethod(m_pyInstance, "onTouchEnd", NULL);
             Py_XDECREF(ret);
         }
         PyErr_CheckAndClear();

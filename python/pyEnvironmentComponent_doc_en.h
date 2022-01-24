@@ -43,3 +43,9 @@ PyDoc_STRVAR(EnvironmentComponent_shadowWideness_doc,
     "Shadow Wideness.\n"\
     "Type: float\n"
 );
+
+// environment
+PyDoc_STRVAR(EnvironmentComponent_environment_doc,
+    "Environment instance.\n"\
+    "Type: pyxieEnvironment\n"
+);
