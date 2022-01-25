@@ -53,6 +53,7 @@ namespace ige::scene
         std::pair<AnimatorParameterType, float> getParameter(const std::string& param) const;
         bool hasParameter(const std::string& param) const;
         bool removeParameter(const std::string& param);
+        std::unordered_map<std::string, std::pair<AnimatorParameterType, float>>& getParameters() { return m_parameters; }
 
         //! Update
         virtual void update(float dt);
