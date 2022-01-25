@@ -338,8 +338,6 @@ namespace ige::scene
 
     void Scene::renderUI(RenderTarget* fbo, bool skipBeginEnd) {
         if (SceneManager::getInstance()->isPlaying() && !skipBeginEnd) {
-            RenderContext::InstancePtr()->ResetRenderStateAll();
-
             float dt = Time::Instance().GetElapsedTime();
             m_uiShowcase->Update(dt);
 
