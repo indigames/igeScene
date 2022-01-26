@@ -15,11 +15,24 @@ namespace ige::scene
             Less,
             Equal,
             NotEqual,
+            Count
         };
+
+        static std::string getMode(Mode mode) {
+            const std::vector<std::string> Modes = {
+                    "If",
+                    "IfNot", 
+                    "Greater",
+                    "Less",
+                    "Equal",
+                    "NotEqual"
+            };
+            return Modes[(int)mode];
+        }
 
         //! Constructor
         AnimatorCondition();
-        AnimatorCondition(Mode mode, const std::string& param, float threshold);
+        AnimatorCondition(const std::string& param, Mode mode, float threshold);
 
         //! Destructor
         virtual ~AnimatorCondition() {}
@@ -31,8 +44,8 @@ namespace ige::scene
         friend void from_json(const json &j, AnimatorCondition &obj);
 
         // Members
-        Mode mode;
         std::string parameter;
+        Mode mode;
         float threshold;
     };
 }

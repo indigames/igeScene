@@ -5,7 +5,7 @@ namespace ige::scene {
         :mode(Mode::Equal), parameter(std::string()), threshold(0.f) {
     }
 
-    AnimatorCondition::AnimatorCondition(Mode mode, const std::string& param, float threshold)
+    AnimatorCondition::AnimatorCondition(const std::string& param, Mode mode,float threshold)
         : mode(mode), parameter(param), threshold(threshold) {
     }
 

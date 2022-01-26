@@ -36,8 +36,18 @@ namespace ige::scene {
         getOnExitEvent().invoke(*this);
     }
 
+    void AnimatorState::setName(const std::string& name)
+    {
+        if (m_type != Type::Normal)
+            return;
+        m_name = name;
+    }
+
     void AnimatorState::setPath(const std::string& path)
     {
+        if (m_type != Type::Normal)
+            return;
+
         auto fsPath = fs::path(path);
         auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
         if (relPath.size() == 0) relPath = fsPath.string();
@@ -49,7 +59,7 @@ namespace ige::scene {
             if(m_animator != nullptr) m_animator->DecReference();
             m_animator = (Animator*)ResourceManager::Instance().GetResource(m_path.c_str(), ANIMATORTYPE);            
         }
-    }        
+    }
 
     void AnimatorState::addTransition(const std::shared_ptr<AnimatorTransition>& transition)
     {
@@ -70,6 +80,7 @@ namespace ige::scene {
     {
         auto transition = createTransition(withExitTime);
         transition->destState = state;
+        transition->setName(getName() + "_" + state->getName());
         addTransition(transition);
         return transition;
     }

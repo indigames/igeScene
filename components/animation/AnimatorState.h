@@ -34,7 +34,7 @@ namespace ige::scene
 
         //! Name
         virtual const std::string& getName() const { return m_name; }
-        virtual void setName(const std::string& name) { m_name = name; }
+        virtual void setName(const std::string& name);
 
         //! Path
         virtual const std::string& getPath() const { return m_path; }

@@ -24,8 +24,10 @@ namespace ige::scene
         virtual const std::string& getName() const { return m_name; }
         virtual void setName(const std::string& name) { m_name = name; }
 
-        virtual std::shared_ptr<AnimatorCondition> addCondition(AnimatorCondition::Mode mode, const std::string& parameter, float threshold);
+        virtual std::shared_ptr<AnimatorCondition> addCondition(const std::string& parameter, AnimatorCondition::Mode mode, float threshold);
+        virtual std::shared_ptr<AnimatorCondition> getCondition(const std::string& parameter);
         virtual bool removeCondition(const std::shared_ptr<AnimatorCondition>& condition);
+        virtual bool removeCondition(const std::string& param);
  
         //! Serialize
         friend void to_json(json &j, const AnimatorTransition &obj);

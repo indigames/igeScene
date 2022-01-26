@@ -5,16 +5,39 @@ namespace ige::scene {
 
     AnimatorTransition::~AnimatorTransition() {}
 
-    std::shared_ptr<AnimatorCondition> AnimatorTransition::addCondition(AnimatorCondition::Mode mode, const std::string& parameter, float threshold)
+    std::shared_ptr<AnimatorCondition> AnimatorTransition::addCondition(const std::string& parameter, AnimatorCondition::Mode mode, float threshold)
     {
-        auto condition = std::make_shared<AnimatorCondition>(mode, parameter, threshold);
-        conditions.push_back(condition);
+        auto condition = getCondition(parameter);
+        if (condition == nullptr) {
+            condition = std::make_shared<AnimatorCondition>(parameter, mode, threshold);
+            conditions.push_back(condition);
+        }
         return condition;
+    }
+
+    std::shared_ptr<AnimatorCondition> AnimatorTransition::getCondition(const std::string& param)
+    {
+        auto itr = std::find_if(conditions.begin(), conditions.end(), [param](const auto& elem) {
+            return elem->parameter.compare(param) == 0;
+        });
+        return (itr != conditions.end()) ? (*itr) : nullptr;
     }
 
     bool AnimatorTransition::removeCondition(const std::shared_ptr<AnimatorCondition>& condition)
     {
         auto itr = std::find(conditions.begin(), conditions.end(), condition);
+        if(itr != conditions.end()) {
+            conditions.erase(itr);
+            return true;
+        }
+        return false;
+    }
+
+    bool AnimatorTransition::removeCondition(const std::string& param)
+    {
+        auto itr = std::find_if(conditions.begin(), conditions.end(), [param](const auto& elem) {
+            return elem->parameter.compare(param) == 0;
+        });
         if(itr != conditions.end()) {
             conditions.erase(itr);
             return true;
