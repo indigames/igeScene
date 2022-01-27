@@ -6,6 +6,13 @@
 
 namespace ige::scene
 {
+    enum class AnimatorParameterType {
+        Bool = 0,
+        Float,
+        Int,
+        Trigger
+    };
+
     struct AnimatorCondition 
     {
         enum class Mode {
@@ -28,6 +35,13 @@ namespace ige::scene
                     "NotEqual"
             };
             return Modes[(int)mode];
+        }
+
+        static std::vector<Mode> getValidModes(AnimatorParameterType type) {
+            if (type == AnimatorParameterType::Bool || type == AnimatorParameterType::Trigger) {
+                return { Mode::If, Mode::IfNot, Mode::Equal, Mode::NotEqual};
+            }
+            return { Mode::If, Mode::IfNot, Mode::Equal, Mode::NotEqual, Mode::Greater, Mode::Less };
         }
 
         //! Constructor

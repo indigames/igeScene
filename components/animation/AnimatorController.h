@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AnimatorCondition.h"
+
 #include "utils/Serialize.h"
 
 #include "utils/PyxieHeaders.h"
@@ -8,13 +10,6 @@ using namespace pyxie;
 namespace ige::scene
 {    
     class AnimatorStateMachine;
-
-    enum class AnimatorParameterType {
-        Bool = 0,
-        Float,
-        Int,
-        Trigger
-    };
 
     /**
      * Class AnimatorController
