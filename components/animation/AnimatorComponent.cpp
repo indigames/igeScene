@@ -80,11 +80,29 @@ namespace ige::scene
     void AnimatorComponent::to_json(json &j) const
     {
         Component::to_json(j);
+        j["path"] = getControllerPath();
+        j["mode"] = (int)getUpdateMode();
     }
 
     //! Deserialize
     void AnimatorComponent::from_json(const json &j)
     {
         Component::from_json(j);
+        setControllerPath(j.value("path", std::string()));
+        setUpdateMode((UpdateMode)j.value("mode", (int)UpdateMode::Normal));
+    }
+
+    //! Update property by key value
+    void AnimatorComponent::setProperty(const std::string& key, const json& val)
+    {
+        if (key.compare("path") == 0) {
+            setControllerPath(val);
+        }
+        else if (key.compare("mode") == 0) {
+            setUpdateMode((UpdateMode)((int)val));
+        }
+        else {
+            Component::setProperty(key, val);
+        }
     }
 } // namespace ige::scene

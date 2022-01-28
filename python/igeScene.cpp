@@ -14,6 +14,7 @@
 #include "python/pyCameraComponent.h"
 #include "python/pyFigureComponent.h"
 #include "python/pyEditableFigureComponent.h"
+#include "python/pyAnimator.h"
 #include "python/pyEnvironmentComponent.h"
 #include "python/pyAmbientLight.h"
 #include "python/pyDirectionalLight.h"
@@ -125,6 +126,10 @@ PyMODINIT_FUNC PyInit_igeScene()
     if (PyType_Ready(&PyTypeObject_EditableFigureComponent) < 0) return NULL;
     Py_INCREF(&PyTypeObject_EditableFigureComponent);
     PyModule_AddObject(module, "EditableFigure", (PyObject*)&PyTypeObject_EditableFigureComponent);
+
+    if (PyType_Ready(&PyTypeObject_Animator) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_Animator);
+    PyModule_AddObject(module, "Animator", (PyObject*)&PyTypeObject_Animator);
     
     if (PyType_Ready(&PyTypeObject_EnvironmentComponent) < 0) return NULL;
     Py_INCREF(&PyTypeObject_EnvironmentComponent);

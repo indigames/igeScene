@@ -42,6 +42,10 @@ namespace ige::scene
         std::shared_ptr<AnimatorController> getController() { return controller; }
         void setController(const std::shared_ptr<AnimatorController>& controller);
 
+        //! Update mode
+        UpdateMode getUpdateMode() const { return m_updateMode; }
+        void setUpdateMode(UpdateMode mode) { m_updateMode = mode; }
+
         //! Override update functions
         virtual void onUpdate(float dt) override;
 
@@ -53,6 +57,9 @@ namespace ige::scene
 
         //! Deserialize
         virtual void from_json(const json& j) override;
+
+        //! Update property by key value
+        virtual void setProperty(const std::string& key, const json& val) override;
 
     public:
         //! Animator controller instance

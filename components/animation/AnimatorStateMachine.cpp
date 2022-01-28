@@ -121,18 +121,21 @@ namespace ige::scene {
     std::shared_ptr<AnimatorState> AnimatorStateMachine::addEnterState() {
         auto state = addState("Entry");
         state->setType((int)AnimatorState::Type::Enter);
+        state->setPosition({100.f, 100.f});
         return state;
     }
 
     std::shared_ptr<AnimatorState> AnimatorStateMachine::addExitState() {
         auto state = addState("Exit");
         state->setType((int)AnimatorState::Type::Exit);
+        state->setPosition({ 500.f, 100.f });
         return state;
     }
 
     std::shared_ptr<AnimatorState> AnimatorStateMachine::addAnyState() {
         auto state = addState("Any");
         state->setType((int)AnimatorState::Type::Any);
+        state->setPosition({ 100.f, 200.f });
         return state;
     }
 

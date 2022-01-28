@@ -9,6 +9,7 @@
 #include "python/pyCameraComponent.h"
 #include "python/pyFigureComponent.h"
 #include "python/pyEditableFigureComponent.h"
+#include "python/pyAnimator.h"
 #include "python/pyEnvironmentComponent.h"
 #include "python/pyAmbientLight.h"
 #include "python/pyDirectionalLight.h"
@@ -314,6 +315,11 @@ namespace ige::scene
                 compObj->component = self->sceneObject.lock()->addComponent<EditableFigureComponent>();
                 return (PyObject*)compObj;
             }
+            else if (type == "Animator") {
+                auto compObj = (PyObject_Animator*)(&PyTypeObject_Animator)->tp_alloc(&PyTypeObject_Animator, 0);
+                compObj->component = self->sceneObject.lock()->addComponent<AnimatorComponent>();
+                return (PyObject*)compObj;
+            }
             else if (type == "Sprite") {
                 auto compObj = (PyObject_SpriteComponent*)(&PyTypeObject_SpriteComponent)->tp_alloc(&PyTypeObject_SpriteComponent, 0);
                 compObj->component = self->sceneObject.lock()->addComponent<SpriteComponent>();
@@ -579,6 +585,14 @@ namespace ige::scene
             auto comp = sceneObject->getComponent<EditableFigureComponent>();
             if (comp) {
                 auto* compObj = (PyObject_EditableFigureComponent*)(&PyTypeObject_EditableFigureComponent)->tp_alloc(&PyTypeObject_EditableFigureComponent, 0);
+                compObj->component = comp;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "Animator") {
+            auto comp = sceneObject->getComponent<AnimatorComponent>();
+            if (comp) {
+                auto* compObj = (PyObject_Animator*)(&PyTypeObject_Animator)->tp_alloc(&PyTypeObject_Animator, 0);
                 compObj->component = comp;
                 return (PyObject*)compObj;
             }
