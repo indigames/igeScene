@@ -58,7 +58,7 @@ namespace ige::scene
     }
 
     // Update
-    void AnimatorComponent::onUpdate( float dt)
+    void AnimatorComponent::onUpdate(float dt)
     {
        if(m_updateMode == UpdateMode::Normal) {
            if(controller) controller->update(dt);
@@ -69,7 +69,7 @@ namespace ige::scene
     }
 
     // Fixed Update
-    void AnimatorComponent::onFixedUpdate( float dt)
+    void AnimatorComponent::onFixedUpdate(float dt)
     {
         if(m_updateMode == UpdateMode::AnimatePhysic) {
             if(controller) controller->update(dt);

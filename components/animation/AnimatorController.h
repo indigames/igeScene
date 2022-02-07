@@ -13,14 +13,6 @@ namespace ige::scene
 
     /**
      * Class AnimatorController
-     * 1. Drag anim to create state, one - one
-     *  - stateName = clipName
-     *  - stateDuration - clipDuration
-     * 2. Create transition
-     *  - add conditions
-     * 3. Update
-     *  - entry -> state machine -> exit
-     *  - using scripts
      */
     class AnimatorController
     {
