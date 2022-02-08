@@ -1,4 +1,6 @@
 #include "AnimatorTransition.h"
+#include "AnimatorState.h"
+#include "AnimatorStateMachine.h"
 
 namespace ige::scene {
     AnimatorTransition::AnimatorTransition() {}
@@ -50,6 +52,7 @@ namespace ige::scene {
     {
         j["name"] = obj.getName();
         j["mute"] = obj.isMute;
+        j["solo"] = obj.isSolo;
         j["hasExitTime"] = obj.hasExitTime;
         j["exitTime"] = obj.exitTime;
         j["hasFixedDuration"] = obj.hasFixedDuration;
@@ -70,6 +73,7 @@ namespace ige::scene {
     {
         obj.setName(j.value("name", std::string()));
         obj.isMute = j.value("mute", false);
+        obj.isSolo = j.value("solo", false);
         obj.hasExitTime = j.value("hasExitTime", true);
         obj.exitTime = j.value("exitTime", 1.f);
         obj.hasFixedDuration = j.value("hasFixedDuration", false);
@@ -85,5 +89,14 @@ namespace ige::scene {
                 obj.conditions.push_back(cond);
             }
         }        
+    }
+
+    //! Serialize finished handline
+    void AnimatorTransition::onSerializeFinished(AnimatorState& state) {
+        if (!destStateUUID.empty()) {
+            auto dstState = state.stateMachine.lock()->findState(destStateUUID);
+            destState = dstState;
+            destStateUUID.clear(); // loaded, just clear it
+        }
     }
 }

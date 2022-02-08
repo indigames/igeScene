@@ -35,6 +35,13 @@ namespace ige::scene
         //! Deserialize
         friend void from_json(const json &j, AnimatorTransition &obj);
 
+        //! Serialize finished
+        void onSerializeFinished(AnimatorState& state);
+
+        //! Solo
+        bool isSolo = false;
+
+        //! Mute
         bool isMute = false;
 
         //! Exit Time: consider the normalized time of the animation before the parameters

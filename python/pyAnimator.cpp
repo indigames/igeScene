@@ -206,11 +206,13 @@ namespace ige::scene
         if (self->component.expired()) Py_RETURN_FALSE;
         char* state = {};
         if (PyArg_ParseTuple(value, "s", &state)) {
-            auto animator = std::dynamic_pointer_cast<AnimatorComponent>(self->component.lock());
-            if (animator) {
-                auto controller = animator->getController();
-                if (controller) {
-                    return PyBool_FromLong(controller->getStateMachine()->hasState(std::string((const char*)state)));
+            if (state != nullptr && strlen(state) > 0) {
+                auto animator = std::dynamic_pointer_cast<AnimatorComponent>(self->component.lock());
+                if (animator) {
+                    auto controller = animator->getController();
+                    if (controller) {
+                        return PyBool_FromLong(controller->getStateMachine()->hasState(std::string((const char*)state)));
+                    }
                 }
             }
         }
@@ -223,13 +225,16 @@ namespace ige::scene
         if (self->component.expired()) Py_RETURN_FALSE;
         char* state = {};
         if (PyArg_ParseTuple(value, "s", &state)) {
-            auto animator = std::dynamic_pointer_cast<AnimatorComponent>(self->component.lock());
-            if (animator) {
-                auto controller = animator->getController();
-                if (controller) {
-                    auto statePtr = controller->getStateMachine()->findState(std::string((const char*)state));
-                    if (statePtr) {
-                        controller->getStateMachine()->setCurrentState(statePtr);
+            if (state != nullptr && strlen(state) > 0) {
+                auto animator = std::dynamic_pointer_cast<AnimatorComponent>(self->component.lock());
+                if (animator) {
+                    auto controller = animator->getController();
+                    if (controller) {
+                        auto statePtr = controller->getStateMachine()->findState(std::string((const char*)state));
+                        if (statePtr) {
+                            controller->getStateMachine()->setCurrentState(statePtr);
+                            Py_RETURN_TRUE;
+                        }
                     }
                 }
             }

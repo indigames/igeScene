@@ -193,11 +193,7 @@ namespace ige::scene {
     //! Serialize finished handline
     void AnimatorState::onSerializeFinished() {
         for (const auto& tran : transitions) {
-            if (!tran->destStateUUID.empty()) {
-                auto dstState = stateMachine.lock()->findState(tran->destStateUUID);
-                tran->destState = dstState;
-                tran->destStateUUID.clear(); // loaded, just clear it
-            }
+            tran->onSerializeFinished(*this);
         }
     }
 }

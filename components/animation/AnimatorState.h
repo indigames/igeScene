@@ -100,7 +100,7 @@ namespace ige::scene
         //! Deserialize
         friend void from_json(const json &j, AnimatorState &obj);
         
-        //! Serialize finished handline
+        //! Serialize finished
         void onSerializeFinished();
 
     protected:
