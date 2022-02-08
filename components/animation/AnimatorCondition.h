@@ -18,30 +18,36 @@ namespace ige::scene
         enum class Mode {
             If = 0,
             IfNot,
-            Greater,
-            Less,
             Equal,
             NotEqual,
-            Count
+            Greater,
+            GreaterOrEqual,
+            Less,
+            LessOrEqual
         };
 
         static std::string getMode(Mode mode) {
             const std::vector<std::string> Modes = {
                     "If",
                     "IfNot", 
-                    "Greater",
-                    "Less",
                     "Equal",
-                    "NotEqual"
+                    "NotEqual",
+                    "Greater",
+                    "GreaterOrEqual",
+                    "Less",
+                    "LessOrEqual"
             };
             return Modes[(int)mode];
         }
 
         static std::vector<Mode> getValidModes(AnimatorParameterType type) {
-            if (type == AnimatorParameterType::Bool || type == AnimatorParameterType::Trigger) {
+            if (type == AnimatorParameterType::Trigger) {
+                return { Mode::If };
+            }
+            if (type == AnimatorParameterType::Bool) {
                 return { Mode::If, Mode::IfNot, Mode::Equal, Mode::NotEqual};
             }
-            return { Mode::If, Mode::IfNot, Mode::Equal, Mode::NotEqual, Mode::Greater, Mode::Less };
+            return { Mode::If, Mode::IfNot, Mode::Equal, Mode::NotEqual, Mode::Greater, Mode::GreaterOrEqual, Mode::Less, Mode::LessOrEqual };
         }
 
         //! Constructor

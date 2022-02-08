@@ -174,7 +174,7 @@ namespace ige::scene {
                 if (!transition->destState.expired() && !transition->isMute) {
                     for (auto& condition : transition->conditions) {
                         if (getController()->hasParameter(condition->parameter)) {
-                            auto [type, defaultValue] = getController()->getParameter(condition->parameter);
+                            auto [type, value] = getController()->getParameter(condition->parameter);
 
                             // Transition with exit time go first
                             if (transition->hasExitTime) {
@@ -191,18 +191,20 @@ namespace ige::scene {
                             }
 
                             // Check conditions
-                            if ((condition->mode == AnimatorCondition::Mode::If && condition->threshold)
-                                || (condition->mode == AnimatorCondition::Mode::IfNot && !condition->threshold)
-                                || (condition->mode == AnimatorCondition::Mode::Equal && condition->threshold == defaultValue)
-                                || (condition->mode == AnimatorCondition::Mode::NotEqual && condition->threshold != defaultValue)
-                                || (condition->mode == AnimatorCondition::Mode::Greater && condition->threshold > defaultValue)
-                                || (condition->mode == AnimatorCondition::Mode::Less && condition->threshold < defaultValue)
+                            if ((condition->mode == AnimatorCondition::Mode::If && value)
+                                || (condition->mode == AnimatorCondition::Mode::IfNot && !value)
+                                || (condition->mode == AnimatorCondition::Mode::Equal && value == condition->threshold)
+                                || (condition->mode == AnimatorCondition::Mode::NotEqual && value != condition->threshold)
+                                || (condition->mode == AnimatorCondition::Mode::Greater && value > condition->threshold)
+                                || (condition->mode == AnimatorCondition::Mode::GreaterOrEqual && value >= condition->threshold)
+                                || (condition->mode == AnimatorCondition::Mode::Less && value < condition->threshold)
+                                || (condition->mode == AnimatorCondition::Mode::LessOrEqual && value <= condition->threshold)
                                 ) {
                                 activeTransition = transition;
 
                                 // Reset trigger state
                                 if (type == AnimatorParameterType::Trigger) {
-                                    condition->threshold = defaultValue;
+                                    getController()->setParameter(condition->parameter, (int)AnimatorParameterType::Trigger, 0.f);
                                 }
                                 break;
                             }
