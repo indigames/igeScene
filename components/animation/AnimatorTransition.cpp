@@ -5,7 +5,9 @@
 namespace ige::scene {
     AnimatorTransition::AnimatorTransition() {}
 
-    AnimatorTransition::~AnimatorTransition() {}
+    AnimatorTransition::~AnimatorTransition() {
+        linkId = (uint64_t)-1;
+    }
 
     std::shared_ptr<AnimatorCondition> AnimatorTransition::addCondition(const std::string& parameter, AnimatorCondition::Mode mode, float threshold)
     {

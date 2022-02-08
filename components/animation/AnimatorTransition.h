@@ -64,6 +64,9 @@ namespace ige::scene
         //! Conditions
         std::vector<std::shared_ptr<AnimatorCondition>> conditions;
 
+        //! Cache the link id for editor
+        uint64_t linkId = (uint64_t)-1;
+
     protected:
         std::string m_name;
     };
