@@ -1,12 +1,9 @@
-#include <algorithm>
-#include <sstream>
-#include <random>
-
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 #include "scene/SceneManager.h"
 
 #include "event/InputProcessor.h"
+#include "utils/GraphicsHelper.h"
 
 #include "components/Component.h"
 #include "components/TransformComponent.h"
@@ -14,6 +11,7 @@
 #include "components/EnvironmentComponent.h"
 #include "components/FigureComponent.h"
 #include "components/EditableFigureComponent.h"
+#include "components/animation/AnimatorComponent.h"
 #include "components/BoneTransform.h"
 #include "components/SpriteComponent.h"
 #include "components/TextComponent.h"
@@ -112,18 +110,6 @@ namespace ige::scene
 
         removeAllComponents();
         m_scene = nullptr;
-    }
-
-    //! Generate UUID
-    std::string SceneObject::generateUUID(unsigned int len)
-    {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        static std::uniform_int_distribution<> dis(0, 15);
-        std::stringstream ss;
-        for (auto i = 0; i < len; i++)
-            ss << std::hex << dis(gen);
-        return ss.str();
     }
 
     //! Set Name
@@ -328,6 +314,7 @@ namespace ige::scene
         if (name == "BoneTransform") return addComponent<BoneTransform>();
         if (name == "Figure") return addComponent<FigureComponent>();
         if (name == "EditableFigure") return addComponent<EditableFigureComponent>();
+        if (name == "Animator") return addComponent<AnimatorComponent>();
         if (name == "Sprite") return addComponent<SpriteComponent>();
         if (name == "Text") return addComponent<TextComponent>();
         if (name == "TextBitmap") return addComponent<TextBitmapComponent>();

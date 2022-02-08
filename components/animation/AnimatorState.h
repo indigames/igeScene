@@ -18,16 +18,27 @@ namespace ige::scene
     class AnimatorState : public std::enable_shared_from_this<AnimatorState>
     {
     public:
+        enum class Type {
+            Normal,
+            Enter,
+            Exit,
+            Any
+        };
+
         AnimatorState();
         virtual ~AnimatorState();
+
+        //! UUID
+        virtual const std::string& getUUID() const { return m_uuid; }
+        void setUUID(const std::string& uuid) { m_uuid = uuid; }
+
+        //! Name
+        virtual const std::string& getName() const { return m_name; }
+        virtual void setName(const std::string& name);
 
         //! Path
         virtual const std::string& getPath() const { return m_path; }
         virtual void setPath(const std::string& path);
-
-        //! Name
-        virtual const std::string& getName() const { return m_name; }
-        virtual void setName(const std::string& name) { m_name = name; }
 
         // Helper to get shared pointer from 'this'
         std::shared_ptr<AnimatorState> getSharedPtr() { return shared_from_this(); }
@@ -39,6 +50,28 @@ namespace ige::scene
         float getSpeed() const { return m_speed; }
         void setSpeed(float speed);
 
+        //! Motion start time
+        float getStartTime() const { return m_startTime; }
+        void setStartTime(float st);
+
+        //! Motion evaluation time
+        float getEvalTime() const { return m_evalTime; }
+        void setEvalTime(float et);
+
+        //! Motion loop
+        bool isLoop() const { return m_isLoop; }
+        void setLoop(bool loop);
+
+        //! Position
+        const Vec2& getPosition() const { return m_position; }
+        void setPosition(const Vec2& pos) { m_position = pos; }
+
+        //! Enter
+        virtual void enter();
+
+        //! Exit
+        virtual void exit();
+
         virtual void addTransition(const std::shared_ptr<AnimatorTransition>& transition);
         virtual bool removeTransition(const std::shared_ptr<AnimatorTransition>& transition);
 
@@ -46,18 +79,29 @@ namespace ige::scene
         virtual std::shared_ptr<AnimatorTransition> addExitTransition(bool withExitTime = false);
 
         //! Find transition to dest state
+        const std::vector<std::shared_ptr<AnimatorTransition>>& getTransitions() const { return transitions; }
         virtual std::shared_ptr<AnimatorTransition> findTransition(const std::shared_ptr<AnimatorState>& dstState);
 
         Event<AnimatorState&>& getOnEnterEvent() { return m_onEnterEvent; }
         Event<AnimatorState&>& getOnExitEvent() { return m_onExitEvent; }
 
-        virtual void update(float dt);
+        //! Type
+        Type getType() const { return m_type; }
+        void setType(int type) { m_type = (Type)type; }
+
+        //! Type check shortcut
+        bool isEnter() const { return m_type == Type::Enter; }
+        bool isExit() const { return m_type == Type::Exit; }
+        bool isAny() const { return m_type == Type::Any; }
 
         //! Serialize
         friend void to_json(json &j, const AnimatorState &obj);
 
         //! Deserialize
         friend void from_json(const json &j, AnimatorState &obj);
+        
+        //! Serialize finished
+        void onSerializeFinished();
 
     protected:
         virtual std::shared_ptr<AnimatorTransition> createTransition(bool withExitTime = false);
@@ -65,12 +109,7 @@ namespace ige::scene
 
     public:
         std::weak_ptr<AnimatorStateMachine>stateMachine;
-        std::weak_ptr<AnimatorState> destState;        
-        std::vector<std::weak_ptr<AnimatorTransition>> transitions;
-
-        bool isEnter = false;
-        bool isExit = false;
-        bool isAny = false;
+        std::vector<std::shared_ptr<AnimatorTransition>> transitions;
 
     protected:
         Event<AnimatorState&> m_onEnterEvent;
@@ -78,7 +117,15 @@ namespace ige::scene
 
         std::string m_name;
         std::string m_path;
+        std::string m_uuid;
+
+        Type m_type = Type::Normal;
+
         Animator* m_animator;
         float m_speed = 1.f;
+        float m_startTime = 0.f;
+        float m_evalTime = 0.f;
+        bool m_isLoop = false;
+        Vec2 m_position;
     };
 }
