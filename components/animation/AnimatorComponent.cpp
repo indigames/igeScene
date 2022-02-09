@@ -35,7 +35,8 @@ namespace ige::scene
         }
 
         if(figure) {
-            controller = std::make_shared<AnimatorController>(m_controllerPath);
+            controller = std::make_shared<AnimatorController>();
+            controller->setPath(m_controllerPath);
             controller->setFigure(figure);
         }
     }

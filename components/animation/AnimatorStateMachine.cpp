@@ -9,12 +9,17 @@ namespace fs = ghc::filesystem;
 
 namespace ige::scene {
     AnimatorStateMachine::AnimatorStateMachine() {
-        currentState = enterState = addEnterState();
-        exitState = addExitState();
-        anyState = addAnyState();
+        currentState = addEnterState();
+        addExitState();
+        addAnyState();
     }
 
     AnimatorStateMachine::~AnimatorStateMachine() 
+    {
+        clear();
+    }
+
+    void AnimatorStateMachine::clear()
     {
         currentState = nullptr;
         for (auto& state : states) {
@@ -60,6 +65,14 @@ namespace ige::scene {
     {
         auto itr = std::find_if(states.begin(), states.end(), [&](const auto& elem) {
             return elem->getUUID().compare(uuid) == 0;
+        });
+        return (itr != states.end()) ? (*itr) : nullptr;
+    }
+
+    std::shared_ptr<AnimatorState> AnimatorStateMachine::getExitState()
+    {
+        auto itr = std::find_if(states.begin(), states.end(), [&](const auto& elem) {
+            return elem->isExit();
         });
         return (itr != states.end()) ? (*itr) : nullptr;
     }
@@ -113,7 +126,7 @@ namespace ige::scene {
         return m_controller.expired() ? nullptr : m_controller.lock();
     }
 
-    void AnimatorStateMachine::setController(const std::shared_ptr<AnimatorController>& controller)
+    void AnimatorStateMachine::setController(std::shared_ptr<AnimatorController> controller)
     {
         m_controller = controller;
     }
@@ -144,17 +157,14 @@ namespace ige::scene {
         // Update states
         if (currentState != nullptr) {
             // Exit state
-            if (currentState == exitState) {
+            if (currentState->isExit()) {
                 currentState = nullptr;
                 return;
             }
 
             auto animator = currentState->getAnimator();
-            if (animator == nullptr)
-                return;
-
             // TODO: this is controled by Figure for now, should refactor
-            // animator->Step(dt);
+            // if (animator) animator->Step(dt);
 
             // Update transition blending
             if (!nextState.expired() && currentState != nextState.lock()) {
@@ -172,12 +182,16 @@ namespace ige::scene {
             std::shared_ptr<AnimatorTransition> activeTransition = nullptr;
             for (auto& transition : currentState->transitions) {
                 if (!transition->destState.expired() && !transition->isMute) {
+                    if (transition->conditions.empty()) {
+                        activeTransition = transition;
+                        break;
+                    }
                     for (auto& condition : transition->conditions) {
                         if (getController()->hasParameter(condition->parameter)) {
                             auto [type, value] = getController()->getParameter(condition->parameter);
 
                             // Transition with exit time go first
-                            if (transition->hasExitTime) {
+                            if (animator && transition->hasExitTime) {
                                 if (transition->hasFixedDuration) {
                                     if (animator->GetEvalTime() > transition->exitTime) {
                                         activeTransition = transition;
@@ -215,7 +229,8 @@ namespace ige::scene {
 
             if (activeTransition) {
                 nextState = activeTransition->destState.lock();
-                transitionDuration = activeTransition->hasFixedDuration ? activeTransition->duration : activeTransition->duration * nextState.lock()->getAnimator()->GetEndTime();
+                transitionTime = 0.f;
+                transitionDuration = activeTransition->offset + (activeTransition->hasExitTime ? activeTransition->hasFixedDuration ? activeTransition->duration : activeTransition->exitTime * nextState.lock()->getAnimator()->GetEndTime() : 0.f);
                 getController()->getFigure()->BindAnimator(BaseFigure::AnimatorSlot::SlotA1, nextState.lock()->getAnimator());
                 nextState.lock()->enter();
                 activeTransition = nullptr;
@@ -254,7 +269,7 @@ namespace ige::scene {
     void from_json(const json &j, AnimatorStateMachine &obj)
     {
         obj.setName(j.value("name", std::string()));
-        obj.states.clear();
+        obj.clear();
         if (j.count("states") > 0) {
             auto jStates = j.at("states");
             for (auto jState : jStates) {
@@ -267,5 +282,6 @@ namespace ige::scene {
                 state->onSerializeFinished();
             }
         }
+        obj.currentState = obj.states[0];
     }
 }

@@ -14,10 +14,10 @@ namespace ige::scene
     /**
      * Class AnimatorController
      */
-    class AnimatorController
+    class AnimatorController : public std::enable_shared_from_this<AnimatorController>
     {
     public:
-        AnimatorController(const std::string& path = {});
+        AnimatorController();
         virtual ~AnimatorController();
 
         //! Path
@@ -60,11 +60,11 @@ namespace ige::scene
 
     protected:
         //! State machine
-        std::shared_ptr<AnimatorStateMachine> m_stateMachine;
+        std::shared_ptr<AnimatorStateMachine> m_stateMachine = nullptr;
 
         std::string m_path;
-        float m_timeScale;
-        BaseFigure* m_figure;
+        float m_timeScale = 1.f;
+        BaseFigure* m_figure = nullptr;
         std::unordered_map<std::string, std::pair<AnimatorParameterType, float>> m_parameters;
     };
 } // namespace ige::scene

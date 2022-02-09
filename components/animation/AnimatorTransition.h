@@ -46,7 +46,7 @@ namespace ige::scene
 
         //! Exit Time: consider the normalized time of the animation before the parameters
         bool hasExitTime = false;
-        float exitTime = 0.f;
+        float exitTime = 1.f;
 
         //! Fixed Duration: consider exit time in second
         bool hasFixedDuration = false;

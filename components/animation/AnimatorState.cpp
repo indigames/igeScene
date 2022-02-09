@@ -57,7 +57,8 @@ namespace ige::scene {
             m_path = relPath;
             m_name = fsPath.stem().string();
             if(m_animator != nullptr) m_animator->DecReference();
-            m_animator = (Animator*)ResourceManager::Instance().GetResource(m_path.c_str(), ANIMATORTYPE);            
+            m_animator = (Animator*)ResourceCreator::Instance().NewAnimator(m_path.c_str());
+            m_animator->WaitInitialize();
         }
     }
 

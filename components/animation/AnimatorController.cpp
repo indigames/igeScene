@@ -10,11 +10,10 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {    
     //! Constructor
-    AnimatorController::AnimatorController(const std::string& path)
+    AnimatorController::AnimatorController()
     {
         m_stateMachine = std::make_shared<AnimatorStateMachine>();
         m_figure = nullptr;
-        setPath(path);
     }
 
     // Destructor
@@ -26,7 +25,7 @@ namespace ige::scene
     void AnimatorController::initialize()
     {
         clear();
-        m_stateMachine = std::make_shared<AnimatorStateMachine>();
+        
         if (!m_path.empty()) {
             auto fsPath = fs::path(m_path);
             if (fsPath.extension().string().compare(".anim") == 0) {
@@ -35,6 +34,9 @@ namespace ige::scene
                     json jObj;
                     file >> jObj;
                     file.close();
+
+                    m_stateMachine = std::make_shared<AnimatorStateMachine>();
+                    m_stateMachine->setController(shared_from_this());
                     jObj.get_to(*this);
                 }
             }

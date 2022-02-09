@@ -76,10 +76,10 @@ namespace ige::scene {
         obj.setName(j.value("name", std::string()));
         obj.isMute = j.value("mute", false);
         obj.isSolo = j.value("solo", false);
-        obj.hasExitTime = j.value("hasExitTime", true);
+        obj.hasExitTime = j.value("hasExitTime", false);
         obj.exitTime = j.value("exitTime", 1.f);
         obj.hasFixedDuration = j.value("hasFixedDuration", false);
-        obj.duration = j.value("duration", 1.f);
+        obj.duration = j.value("duration", 0.f);
         obj.offset = j.value("offset", 0.f);
         obj.destStateUUID = j.value("destState", std::string());
         
