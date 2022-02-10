@@ -104,12 +104,13 @@ namespace ige::scene {
         if (currentState != state) {
             if (currentState) currentState->exit();
             currentState = state;
+            if(currentState) currentState->enter();
             if (getController()) {
-                if(currentState) getController()->getFigure()->BindAnimator(BaseFigure::AnimatorSlot::SlotA0, currentState->getAnimator());
+                getController()->getFigure()->BindAnimator(BaseFigure::AnimatorSlot::SlotA0, currentState ? currentState->getAnimator() : (Animator*)nullptr);
                 getController()->getFigure()->BindAnimator(BaseFigure::AnimatorSlot::SlotA1, (Animator*)nullptr);
             }
         }
-        transitionDuration = 0.f;
+        transitionTime = transitionDuration = 0.f;
         nextState.reset();
     }
 
@@ -160,7 +161,7 @@ namespace ige::scene {
 
             // Update transition blending
             if (!nextState.expired() && currentState != nextState.lock()) {
-                if (transitionTime >= transitionDuration) {
+                if (transitionDuration <= 0.f || transitionTime >= transitionDuration) {
                     setCurrentState(nextState.lock());
                     return;
                 }
@@ -229,8 +230,12 @@ namespace ige::scene {
                 if (nextState.lock() != currentState) {
                     transitionTime = 0.f;
                     transitionDuration = activeTransition->offset + (activeTransition->hasExitTime ? activeTransition->hasFixedDuration ? activeTransition->duration : activeTransition->exitTime * nextState.lock()->getAnimator()->GetEndTime() : 0.f);
-                    getController()->getFigure()->BindAnimator(BaseFigure::AnimatorSlot::SlotA1, nextState.lock()->getAnimator());
-                    nextState.lock()->enter();
+                    if (transitionDuration > 0.f) {
+                        getController()->getFigure()->BindAnimator(BaseFigure::AnimatorSlot::SlotA1, nextState.lock()->getAnimator());
+                    }
+                    else {
+                        setCurrentState(nextState.lock());
+                    }
                 }
                 activeTransition = nullptr;
             }
