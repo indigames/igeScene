@@ -38,9 +38,6 @@ namespace ige::scene
         //! Serialize finished
         void onSerializeFinished(AnimatorState& state);
 
-        //! Solo
-        bool isSolo = false;
-
         //! Mute
         bool isMute = false;
 

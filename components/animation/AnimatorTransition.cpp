@@ -62,7 +62,6 @@ namespace ige::scene {
     {
         j["name"] = obj.getName();
         j["mute"] = obj.isMute;
-        j["solo"] = obj.isSolo;
         j["hasExitTime"] = obj.hasExitTime;
         j["exitTime"] = obj.exitTime;
         j["hasFixedDuration"] = obj.hasFixedDuration;
@@ -83,7 +82,6 @@ namespace ige::scene {
     {
         obj.setName(j.value("name", std::string()));
         obj.isMute = j.value("mute", false);
-        obj.isSolo = j.value("solo", false);
         obj.hasExitTime = j.value("hasExitTime", false);
         obj.exitTime = j.value("exitTime", 1.f);
         obj.hasFixedDuration = j.value("hasFixedDuration", false);
