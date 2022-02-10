@@ -69,14 +69,6 @@ namespace ige::scene {
         return (itr != states.end()) ? (*itr) : nullptr;
     }
 
-    std::shared_ptr<AnimatorState> AnimatorStateMachine::getExitState()
-    {
-        auto itr = std::find_if(states.begin(), states.end(), [&](const auto& elem) {
-            return elem->isExit();
-        });
-        return (itr != states.end()) ? (*itr) : nullptr;
-    }
-
     std::vector<std::shared_ptr<AnimatorState>>& AnimatorStateMachine::getStates()
     {
         return states;
@@ -178,34 +170,37 @@ namespace ige::scene {
                 return;
             }
             
-            // Update transitions
+            // Update transitions, which are from current state and Any state
             std::shared_ptr<AnimatorTransition> activeTransition = nullptr;
-            for (auto& transition : currentState->transitions) {
+            auto transitions = currentState->transitions;            
+            transitions.insert(transitions.end(), anyState->transitions.begin(), anyState->transitions.end());
+            for (auto& transition : transitions) {
                 if (!transition->destState.expired() && !transition->isMute) {
                     if (transition->conditions.empty()) {
                         activeTransition = transition;
                         break;
                     }
+
+                    // Transition with exit time go first
+                    if (animator && transition->hasExitTime) {
+                        if (transition->hasFixedDuration) {
+                            if (animator->GetEvalTime() > transition->exitTime) {
+                                activeTransition = transition;
+                                break;
+                            }
+                        }
+                        else if (animator->GetEvalTime() / animator->GetEndTime() > transition->exitTime) {
+                            activeTransition = transition;
+                            break;
+                        }
+                    }
+
+                    // Check conditions
+                    bool shouldActiveTransition = true;
                     for (auto& condition : transition->conditions) {
                         if (getController()->hasParameter(condition->parameter)) {
-                            auto [type, value] = getController()->getParameter(condition->parameter);
-
-                            // Transition with exit time go first
-                            if (animator && transition->hasExitTime) {
-                                if (transition->hasFixedDuration) {
-                                    if (animator->GetEvalTime() > transition->exitTime) {
-                                        activeTransition = transition;
-                                        break;
-                                    }
-                                }
-                                else if (animator->GetEvalTime() / animator->GetEndTime() > transition->exitTime) {
-                                    activeTransition = transition;
-                                    break;
-                                }
-                            }
-
-                            // Check conditions
-                            if ((condition->mode == AnimatorCondition::Mode::If && value)
+                            auto [type, value] = getController()->getParameter(condition->parameter);                            
+                            if (!((condition->mode == AnimatorCondition::Mode::If && value)
                                 || (condition->mode == AnimatorCondition::Mode::IfNot && !value)
                                 || (condition->mode == AnimatorCondition::Mode::Equal && value == condition->threshold)
                                 || (condition->mode == AnimatorCondition::Mode::NotEqual && value != condition->threshold)
@@ -213,26 +208,30 @@ namespace ige::scene {
                                 || (condition->mode == AnimatorCondition::Mode::GreaterOrEqual && value >= condition->threshold)
                                 || (condition->mode == AnimatorCondition::Mode::Less && value < condition->threshold)
                                 || (condition->mode == AnimatorCondition::Mode::LessOrEqual && value <= condition->threshold)
-                                ) {
-                                activeTransition = transition;
-
-                                // Reset trigger state
-                                if (type == AnimatorParameterType::Trigger) {
-                                    getController()->setParameter(condition->parameter, (int)AnimatorParameterType::Trigger, 0.f);
-                                }
-                                break;
+                                )) {
+                                shouldActiveTransition = false;
+                                break;                  
+                            }
+                            // Reset trigger state
+                            if (type == AnimatorParameterType::Trigger) {
+                                getController()->setParameter(condition->parameter, (int)AnimatorParameterType::Trigger, 0.f);
                             }
                         }
+                    }
+                    if (shouldActiveTransition) {
+                        activeTransition = transition;
                     }
                 }
             }
 
             if (activeTransition) {
                 nextState = activeTransition->destState.lock();
-                transitionTime = 0.f;
-                transitionDuration = activeTransition->offset + (activeTransition->hasExitTime ? activeTransition->hasFixedDuration ? activeTransition->duration : activeTransition->exitTime * nextState.lock()->getAnimator()->GetEndTime() : 0.f);
-                getController()->getFigure()->BindAnimator(BaseFigure::AnimatorSlot::SlotA1, nextState.lock()->getAnimator());
-                nextState.lock()->enter();
+                if (nextState.lock() != currentState) {
+                    transitionTime = 0.f;
+                    transitionDuration = activeTransition->offset + (activeTransition->hasExitTime ? activeTransition->hasFixedDuration ? activeTransition->duration : activeTransition->exitTime * nextState.lock()->getAnimator()->GetEndTime() : 0.f);
+                    getController()->getFigure()->BindAnimator(BaseFigure::AnimatorSlot::SlotA1, nextState.lock()->getAnimator());
+                    nextState.lock()->enter();
+                }
                 activeTransition = nullptr;
             }
         }
@@ -282,6 +281,12 @@ namespace ige::scene {
                 state->onSerializeFinished();
             }
         }
-        obj.currentState = obj.states[0];
+
+        // Should always contain Enter, Exit, and Any states
+        if (obj.states.size() >= 3) {
+            obj.currentState = obj.states[0];
+            obj.exitState = obj.states[1];
+            obj.anyState = obj.states[2];
+        }
     }
 }

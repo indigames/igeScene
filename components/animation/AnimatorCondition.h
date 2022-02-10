@@ -52,7 +52,7 @@ namespace ige::scene
 
         //! Constructor
         AnimatorCondition();
-        AnimatorCondition(const std::string& param, Mode mode, float threshold);
+        AnimatorCondition(uint64_t id, const std::string& param, Mode mode, float threshold);
 
         //! Destructor
         virtual ~AnimatorCondition() {}
@@ -64,6 +64,7 @@ namespace ige::scene
         friend void from_json(const json &j, AnimatorCondition &obj);
 
         // Members
+        uint64_t id;
         std::string parameter;
         Mode mode;
         float threshold;
