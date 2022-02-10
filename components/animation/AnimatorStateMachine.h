@@ -25,6 +25,8 @@ namespace ige::scene
         AnimatorStateMachine();
         virtual ~AnimatorStateMachine();
 
+        virtual void clear();
+
         virtual const std::string& getName() const { return m_name; }
         virtual void setName(const std::string& name) { m_name = name; }
 
@@ -46,16 +48,15 @@ namespace ige::scene
         std::vector<std::shared_ptr<AnimatorState>>& getStates();
 
         std::shared_ptr<AnimatorState>& getCurrentState() { return currentState; }
-        std::shared_ptr<AnimatorState>& getEnterState() { return enterState; }
-        std::shared_ptr<AnimatorState>& getExitState() { return exitState; }
-        std::shared_ptr<AnimatorState>& getAnyState() { return anyState; }
+        std::shared_ptr<AnimatorState> getExitState() { return exitState; }
+        std::shared_ptr<AnimatorState> getAnyState() { return anyState; }
 
         std::shared_ptr<AnimatorState> addState(const std::string& name);
         void addState(const std::shared_ptr<AnimatorState>& state);
         bool removeState(const std::shared_ptr<AnimatorState>& state);
 
         std::shared_ptr<AnimatorController> getController();
-        void setController(const std::shared_ptr<AnimatorController>& controller);
+        void setController(std::shared_ptr<AnimatorController> controller);
 
         //! Serialize
         friend void to_json(json &j, const AnimatorStateMachine &obj);
@@ -71,12 +72,9 @@ namespace ige::scene
     protected:
         std::vector<std::shared_ptr<AnimatorState>> states;
         std::shared_ptr<AnimatorState> currentState = nullptr;
-        std::weak_ptr<AnimatorState> nextState;
-
-        // Cache predefined states
-        std::shared_ptr<AnimatorState> enterState = nullptr;
         std::shared_ptr<AnimatorState> exitState = nullptr;
         std::shared_ptr<AnimatorState> anyState = nullptr;
+        std::weak_ptr<AnimatorState> nextState;
 
         std::weak_ptr<AnimatorController> m_controller;
 

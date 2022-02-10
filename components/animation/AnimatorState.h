@@ -125,7 +125,7 @@ namespace ige::scene
         float m_speed = 1.f;
         float m_startTime = 0.f;
         float m_evalTime = 0.f;
-        bool m_isLoop = false;
+        bool m_isLoop = true;
         Vec2 m_position;
     };
 }
