@@ -8,10 +8,10 @@ namespace fs = ghc::filesystem;
 #include <iomanip>
 
 namespace ige::scene {
-    AnimatorStateMachine::AnimatorStateMachine() {
+    AnimatorStateMachine::AnimatorStateMachine() : m_layer(-1) {
         currentState = addEnterState();
-        addExitState();
-        addAnyState();
+        exitState = addExitState();
+        anyState = addAnyState();
     }
 
     AnimatorStateMachine::~AnimatorStateMachine() 
@@ -21,6 +21,7 @@ namespace ige::scene {
 
     void AnimatorStateMachine::clear()
     {
+        m_layer = -1;
         currentState = nullptr;
         for (auto& state : states) {
             state = nullptr;
@@ -104,12 +105,13 @@ namespace ige::scene {
         if (currentState != state) {
             if (currentState) currentState->exit();
             currentState = state;
+            if(currentState) currentState->enter();
             if (getController()) {
-                if(currentState) getController()->getFigure()->BindAnimator(BaseFigure::AnimatorSlot::SlotA0, currentState->getAnimator());
-                getController()->getFigure()->BindAnimator(BaseFigure::AnimatorSlot::SlotA1, (Animator*)nullptr);
+                getController()->getFigure()->BindAnimator((BaseFigure::AnimatorSlot)(m_layer * 2 + 1), currentState ? currentState->getAnimator() : (Animator*)nullptr);
+                getController()->getFigure()->BindAnimator((BaseFigure::AnimatorSlot)(m_layer * 2 + 2), (Animator*)nullptr);
             }
         }
-        transitionDuration = 0.f;
+        transitionTime = transitionDuration = 0.f;
         nextState.reset();
     }
 
@@ -146,6 +148,10 @@ namespace ige::scene {
 
     void AnimatorStateMachine::update(float dt)
     {
+        // Layer A, B, C only, otherwise return
+        if (m_layer < 0 || m_layer > 3)
+            return;
+
         // Update states
         if (currentState != nullptr) {
             // Exit state
@@ -160,19 +166,19 @@ namespace ige::scene {
 
             // Update transition blending
             if (!nextState.expired() && currentState != nextState.lock()) {
-                if (transitionTime >= transitionDuration) {
+                if (transitionDuration <= 0.f || transitionTime >= transitionDuration) {
                     setCurrentState(nextState.lock());
                     return;
                 }
                 transitionTime += dt;
                 if(transitionTime > transitionDuration) transitionTime = transitionDuration;
-                getController()->getFigure()->SetBlendingWeight((uint32_t)AnimationPart::PartA, transitionTime / transitionDuration);
+                getController()->getFigure()->SetBlendingWeight(m_layer, transitionTime / transitionDuration);
                 return;
             }
             
             // Update transitions, which are from current state and Any state
             std::shared_ptr<AnimatorTransition> activeTransition = nullptr;
-            auto transitions = currentState->transitions;            
+            auto transitions = currentState->transitions;
             transitions.insert(transitions.end(), anyState->transitions.begin(), anyState->transitions.end());
             for (auto& transition : transitions) {
                 if (!transition->destState.expired() && !transition->isMute) {
@@ -229,8 +235,12 @@ namespace ige::scene {
                 if (nextState.lock() != currentState) {
                     transitionTime = 0.f;
                     transitionDuration = activeTransition->offset + (activeTransition->hasExitTime ? activeTransition->hasFixedDuration ? activeTransition->duration : activeTransition->exitTime * nextState.lock()->getAnimator()->GetEndTime() : 0.f);
-                    getController()->getFigure()->BindAnimator(BaseFigure::AnimatorSlot::SlotA1, nextState.lock()->getAnimator());
-                    nextState.lock()->enter();
+                    if (transitionDuration > 0.f) {
+                        getController()->getFigure()->BindAnimator((BaseFigure::AnimatorSlot)(m_layer * 2 + 2), nextState.lock()->getAnimator());
+                    }
+                    else {
+                        setCurrentState(nextState.lock());
+                    }
                 }
                 activeTransition = nullptr;
             }
@@ -238,25 +248,25 @@ namespace ige::scene {
     }
 
     bool AnimatorStateMachine::save(const std::string& path) {
+        if (path.empty())
+            return false;
         json jObj;
         to_json(jObj, *this);
-        auto fsPath = path.empty() ? fs::path(std::string("anims/") + getName()) : fs::path(path);
-        if (fsPath.extension().string() != ".anim") fsPath = fsPath.replace_extension(".anim");
+        auto fsPath = fs::path(path).replace_extension(".anim");
         try {
             std::ofstream file(fsPath.string());
             file << std::setw(2) << jObj << std::endl;
             file.close();
+            return true;
         }
-        catch (std::exception e) {
-            return false;
-        }
-        return true;
+        catch (std::exception e) {}
+        return false;
     }
 
     //! Serialize component
     void to_json(json &j, const AnimatorStateMachine &obj)
     {
-        j["name"] = obj.getName();
+        j["layer"] = obj.getLayer();
         auto jStates = json::array();
         for (const auto& state : obj.states) {
             jStates.push_back(json(*state.get()));
@@ -267,8 +277,8 @@ namespace ige::scene {
     //! Deserialize component
     void from_json(const json &j, AnimatorStateMachine &obj)
     {
-        obj.setName(j.value("name", std::string()));
         obj.clear();
+        obj.setLayer(j.value("layer", -1));
         if (j.count("states") > 0) {
             auto jStates = j.at("states");
             for (auto jState : jStates) {
