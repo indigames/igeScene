@@ -27,11 +27,11 @@ namespace ige::scene
 
         virtual void clear();
 
-        virtual const std::string& getName() const { return m_name; }
-        virtual void setName(const std::string& name) { m_name = name; }
-
         virtual void update(float dt);
         virtual bool save(const std::string& path);
+
+        int getLayer() const { return m_layer; }
+        void setLayer(int layer) { m_layer = layer; }
 
         // Helper to get shared pointer from 'this'
         std::shared_ptr<AnimatorStateMachine> getSharedPtr() { return shared_from_this(); }
@@ -75,13 +75,12 @@ namespace ige::scene
         std::shared_ptr<AnimatorState> exitState = nullptr;
         std::shared_ptr<AnimatorState> anyState = nullptr;
         std::weak_ptr<AnimatorState> nextState;
+        int m_layer;
 
         std::weak_ptr<AnimatorController> m_controller;
 
         //! Cache transition time and duration for state switching
         float transitionTime = 0.f;
         float transitionDuration = 0.f;
-
-        std::string m_name;
     };
 }

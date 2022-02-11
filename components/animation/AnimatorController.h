@@ -35,6 +35,10 @@ namespace ige::scene
         float getTimeScale() const { return m_timeScale; }
         void setTimeScale(float ts);
 
+        //! Layer
+        bool addLayer();
+        bool removeLayer(int layer);
+
         //! Parameters
         void setParameter(const std::string& param, int type, float value);
         std::pair<AnimatorParameterType, float> getParameter(const std::string& param) const;
@@ -52,7 +56,8 @@ namespace ige::scene
         friend void from_json(const json &j, AnimatorController &obj);
 
         //! State machine
-        std::shared_ptr<AnimatorStateMachine>& getStateMachine() { return m_stateMachine; }
+        std::vector<std::shared_ptr<AnimatorStateMachine>>& getStateMachines() { return m_stateMachines; }
+        std::shared_ptr<AnimatorStateMachine> getStateMachine(int layer = 0);
 
     protected:
         void initialize();
@@ -60,7 +65,7 @@ namespace ige::scene
 
     protected:
         //! State machine
-        std::shared_ptr<AnimatorStateMachine> m_stateMachine = nullptr;
+        std::vector<std::shared_ptr<AnimatorStateMachine>> m_stateMachines = {};
 
         std::string m_path;
         float m_timeScale = 1.f;
