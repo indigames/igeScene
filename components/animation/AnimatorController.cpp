@@ -71,6 +71,16 @@ namespace ige::scene
         return (layer >= 0 && layer < m_stateMachines.size()) ? m_stateMachines[layer] : nullptr;
     }
 
+    void AnimatorController::setBaseModelPath(const std::string& path)
+    {
+        auto fsPath = fs::path(path).replace_extension(".pyxf");
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+        if (m_baseModelPath.compare(relPath) != 0) {
+            m_baseModelPath = relPath;
+        }
+    }
+
     void AnimatorController::setPath(const std::string& path)
     {
         auto fsPath = fs::path(path);
@@ -146,6 +156,7 @@ namespace ige::scene
     //! Serialize component
     void to_json(json &j, const AnimatorController &obj)
     {
+        j["model"] = obj.getBaseModelPath();
         j["timeScale"] = obj.getTimeScale();
         j["params"] = obj.m_parameters;
         json jSms = json::array();
@@ -158,6 +169,7 @@ namespace ige::scene
     //! Deserialize component
     void from_json(const json &j, AnimatorController &obj)
     {
+        obj.setBaseModelPath(j.value("model", std::string()));
         obj.setTimeScale(j.value("timeScale", 1.f));
         obj.m_parameters = j["params"].get<std::unordered_map<std::string, std::pair<AnimatorParameterType, float>>>();
                 

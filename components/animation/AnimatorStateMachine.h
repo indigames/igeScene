@@ -48,6 +48,7 @@ namespace ige::scene
         std::vector<std::shared_ptr<AnimatorState>>& getStates();
 
         std::shared_ptr<AnimatorState>& getCurrentState() { return currentState; }
+        std::shared_ptr<AnimatorState> getEnterState() { return enterState; }
         std::shared_ptr<AnimatorState> getExitState() { return exitState; }
         std::shared_ptr<AnimatorState> getAnyState() { return anyState; }
 
@@ -72,6 +73,7 @@ namespace ige::scene
     protected:
         std::vector<std::shared_ptr<AnimatorState>> states;
         std::shared_ptr<AnimatorState> currentState = nullptr;
+        std::shared_ptr<AnimatorState> enterState = nullptr;
         std::shared_ptr<AnimatorState> exitState = nullptr;
         std::shared_ptr<AnimatorState> anyState = nullptr;
         std::weak_ptr<AnimatorState> nextState;

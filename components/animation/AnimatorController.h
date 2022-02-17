@@ -24,6 +24,10 @@ namespace ige::scene
         const std::string& getPath() const { return m_path; }
         void setPath(const std::string& path);
 
+        //! Base Model Path
+        const std::string& getBaseModelPath() const { return m_baseModelPath; }
+        void setBaseModelPath(const std::string& path);
+
         //! Save
         void save(const std::string& path);
 
@@ -68,6 +72,7 @@ namespace ige::scene
         std::vector<std::shared_ptr<AnimatorStateMachine>> m_stateMachines = {};
 
         std::string m_path;
+        std::string m_baseModelPath;
         float m_timeScale = 1.f;
         BaseFigure* m_figure = nullptr;
         std::unordered_map<std::string, std::pair<AnimatorParameterType, float>> m_parameters;

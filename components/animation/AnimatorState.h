@@ -51,15 +51,18 @@ namespace ige::scene
         void setSpeed(float speed);
 
         //! Motion start time
-        float getStartTime() const { return m_startTime; }
+        float getStartTime() const { return m_animator ? m_animator->GetStartTime() : m_startTime; }
         void setStartTime(float st);
 
+        //! Motion end time
+        float getEndTime() const { return m_animator ? m_animator->GetEndTime() : -1.f; }
+
         //! Motion evaluation time
-        float getEvalTime() const { return m_evalTime; }
+        float getEvalTime() const { return m_animator ? m_animator->GetEvalTime() : m_evalTime; }
         void setEvalTime(float et);
 
         //! Motion loop
-        bool isLoop() const { return m_isLoop; }
+        bool isLoop() const { return m_animator? m_animator->IsLoop() : m_isLoop; }
         void setLoop(bool loop);
 
         //! Position

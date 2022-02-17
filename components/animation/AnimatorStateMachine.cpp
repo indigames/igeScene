@@ -9,7 +9,7 @@ namespace fs = ghc::filesystem;
 
 namespace ige::scene {
     AnimatorStateMachine::AnimatorStateMachine() : m_layer(-1) {
-        currentState = addEnterState();
+        currentState = enterState = addEnterState();
         exitState = addExitState();
         anyState = addAnyState();
     }
@@ -294,7 +294,7 @@ namespace ige::scene {
 
         // Should always contain Enter, Exit, and Any states
         if (obj.states.size() >= 3) {
-            obj.currentState = obj.states[0];
+            obj.currentState = obj.enterState = obj.states[0];
             obj.exitState = obj.states[1];
             obj.anyState = obj.states[2];
         }
