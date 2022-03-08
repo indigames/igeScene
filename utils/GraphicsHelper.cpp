@@ -55,7 +55,7 @@ namespace ige::scene
             shader->SetBoneCondition(1, 1);
         }
 
-        auto efig = ResourceCreator::Instance().NewEditableFigure("sprite", true);
+        auto efig = ResourceCreator::Instance().NewEditableFigure(unique("sprite").c_str(), true);
         efig->Initialize();
         efig->Build();
 
@@ -112,7 +112,7 @@ namespace ige::scene
             shader->SetBoneCondition(1, 1);
         }
 
-        auto efig = ResourceCreator::Instance().NewEditableFigure("sprite", true);
+        auto efig = ResourceCreator::Instance().NewEditableFigure(unique("sprite").c_str(), true);
         efig->Initialize();
         efig->Build();
 
