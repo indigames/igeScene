@@ -248,6 +248,68 @@ namespace ige::scene
         return m_worldRotation * Vec3(0.f, 0.f, 1.f);
     }
 
+    void TransformComponent::lookAt(Vec3 position, Vec3 lookAtPos, Vec3 up)
+    {
+        Vec fwd = (lookAtPos - position);
+        fwd.Normalize();
+        Vec3 PlanarUp;
+        vmath_cross3D(up.P(), fwd.P(), PlanarUp.P());
+        PlanarUp.Normalize();
+        Vec3 Look;
+        vmath_cross3D(fwd.P(), PlanarUp.P(), Look.P());
+
+        auto m00 = PlanarUp.X();
+        auto m01 = PlanarUp.Y();
+        auto m02 = PlanarUp.Z();
+        auto m10 = Look.X();
+        auto m11 = Look.Y();
+        auto m12 = Look.Z();
+        auto m20 = fwd.X();
+        auto m21 = fwd.Y();
+        auto m22 = fwd.Z();
+
+
+        float num8 = (m00 + m11) + m22;
+        Quat quaternion;
+        if (num8 > 0.0f)
+        {
+            auto num = (float)std::sqrtf(num8 + 1.0f);
+            quaternion[3] = num * 0.5f;
+            num = 0.5f / num;
+            quaternion[0] = (m12 - m21) * num;
+            quaternion[1] = (m20 - m02) * num;
+            quaternion[2] = (m01 - m10) * num;
+        }
+        else if ((m00 >= m11) && (m00 >= m22))
+        {
+            auto num7 = (float)std::sqrtf(((1.0f + m00) - m11) - m22);
+            auto num4 = 0.5f / num7;
+            quaternion[0] = 0.5f * num7;
+            quaternion[1] = (m01 + m10) * num4;
+            quaternion[2] = (m02 + m20) * num4;
+            quaternion[3] = (m12 - m21) * num4;
+        }
+        else if (m11 > m22)
+        {
+            auto num6 = (float)std::sqrtf(((1.0f + m11) - m00) - m22);
+            auto num3 = 0.5f / num6;
+            quaternion[0] = (m10 + m01) * num3;
+            quaternion[1] = 0.5f * num6;
+            quaternion[2] = (m21 + m12) * num3;
+            quaternion[3] = (m20 - m02) * num3;
+        }
+        else
+        {
+            auto num5 = (float)std::sqrtf(((1.0f + m22) - m00) - m11);
+            auto num2 = 0.5f / num5;
+            quaternion[0] = (m20 + m02) * num2;
+            quaternion[1] = (m21 + m12) * num2;
+            quaternion[2] = 0.5f * num5;
+            quaternion[3] = (m01 - m10) * num2;
+        }
+        setRotation(quaternion);
+    }
+
     void TransformComponent::updateLocalToWorld()
     {
         // Update local matrix

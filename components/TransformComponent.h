@@ -123,6 +123,9 @@ namespace ige::scene
         //! Get world forward vector
         virtual Vec3 getWorldForward() const;
 
+        //! LookAt
+        virtual void lookAt(Vec3 position, Vec3 direction, Vec3 up);
+
         //! Should always update
         inline virtual bool shouldAlwaysUpdate() { return true; }
 

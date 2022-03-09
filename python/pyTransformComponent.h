@@ -72,4 +72,7 @@ namespace ige::scene
     PyObject* TransformComponent_getLocalForward(PyObject_TransformComponent* self);
     PyObject* TransformComponent_getLocalUp(PyObject_TransformComponent* self);
     PyObject* TransformComponent_getLocalRight(PyObject_TransformComponent* self);
+
+    //! LookAt
+    PyObject* TransformComponent_setLookAt(PyObject_TransformComponent* self, PyObject* value);
 }

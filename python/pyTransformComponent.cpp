@@ -240,6 +240,35 @@ namespace ige::scene
         return (PyObject*)vec3Obj;
     }
 
+    //! LookAt
+    PyObject* TransformComponent_setLookAt(PyObject_TransformComponent* self, PyObject* value)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        PyObject* p_position;
+        PyObject* p_diretion;
+        PyObject* p_up;
+        if (PyArg_ParseTuple(value, "OOO", &p_position, &p_diretion, &p_up)) {
+            int d;
+            float buff[4];
+            float* v1 = pyObjToFloat(p_position, buff, d);
+            if (!v1) Py_RETURN_FALSE;
+            float* v2 = pyObjToFloat(p_diretion, buff, d);
+            if (!v2) Py_RETURN_FALSE;
+            float* v3 = pyObjToFloat(p_up, buff, d);
+            if (!v3) Py_RETURN_FALSE;
+
+            std::dynamic_pointer_cast<TransformComponent>(self->component.lock())->lookAt(*(Vec3*)v1, *(Vec3*)v2, *(Vec3*)v3);
+            Py_RETURN_TRUE;
+        }
+        Py_RETURN_FALSE;
+    }
+
+    // Methods
+    PyMethodDef TransformComponent_methods[] = {
+        { "lookAt", (PyCFunction)TransformComponent_setLookAt, METH_VARARGS, NULL},
+        { NULL,	NULL }
+    };
+
     // Variable definition
     PyGetSetDef TransformComponent_getsets[] = {
         { "localPosition", (getter)TransformComponent_getLocalPosition, (setter)TransformComponent_setLocalPosition, TransformComponent_localPosition_doc, NULL },
@@ -288,7 +317,7 @@ namespace ige::scene
         0,                                           /* tp_weaklistoffset */
         0,                                           /* tp_iter */
         0,                                           /* tp_iternext */
-        0,                                           /* tp_methods */  //! [IGE]: no methods
+        TransformComponent_methods,                  /* tp_methods */  //! [IGE]: no methods
         0,                                           /* tp_members */
         TransformComponent_getsets,                  /* tp_getset */
         &PyTypeObject_Component,                     /* tp_base */  //! [IGE]: inheritance
