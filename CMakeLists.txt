@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15.0)
+cmake_minimum_required(VERSION 3.10.2)
 
 if (NOT DEFINED APP_STYLE)
     set(APP_STYLE STATIC)

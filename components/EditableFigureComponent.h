@@ -25,7 +25,7 @@ namespace ige::scene
         virtual Type getType() const override { return Type::EditableFigure; }
 
         //! Should always update
-        inline virtual bool shouldAlwaysUpdate() { return true; }
+        inline virtual bool shouldAlwaysUpdate() override { return true; }
 
         //! Update
         void onUpdate(float dt) override;

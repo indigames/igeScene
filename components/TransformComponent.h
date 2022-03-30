@@ -127,7 +127,7 @@ namespace ige::scene
         virtual void lookAt(Vec3 position, Vec3 direction, Vec3 up);
 
         //! Should always update
-        inline virtual bool shouldAlwaysUpdate() { return true; }
+        inline virtual bool shouldAlwaysUpdate() override { return true; }
 
         //! Update
         virtual void onUpdate(float dt) override;        
