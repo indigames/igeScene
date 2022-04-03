@@ -15,6 +15,8 @@
 #include "components/gui/Canvas.h"
 
 #include "utils/PyxieHeaders.h"
+#include "core/Object.h"
+
 using namespace pyxie;
 
 namespace ige::scene
@@ -23,7 +25,7 @@ namespace ige::scene
     /**
     * SceneObject represents an object in scene hierarchy
     */
-    class SceneObject
+    class SceneObject : Object
     {
     public:
         //! Constructor
@@ -32,6 +34,9 @@ namespace ige::scene
 
         //! Destructor
         virtual ~SceneObject();
+        
+        //! Object Type
+        std::string getType() const override { return "SceneObject"; }
 
         //! Get ID
         inline virtual uint64_t getId() const { return m_id; }

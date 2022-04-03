@@ -104,7 +104,7 @@ namespace ige::scene
         }
 
         json jScene;
-        to_json(jScene, *this);
+        to_json(jScene);
         fs::create_directories(fsPath.parent_path());
         std::ofstream file(fsPath.string());
         file << std::setw(2) << jScene << std::endl;
@@ -153,6 +153,62 @@ namespace ige::scene
         return m_parameters.erase(param);
     }
 
+    void AnimatorController::to_json(json& j)
+    {
+        j["model"] = getBaseModelPath();
+        j["timeScale"] = getTimeScale();
+        j["params"] = m_parameters;
+        json jSms = json::array();
+        for (const auto& sm : m_stateMachines) {
+            jSms.push_back((*sm.get()));
+        }
+        j["layers"] = jSms;
+    }
+
+    void AnimatorController::from_json(const json& j)
+    {
+        setBaseModelPath(j.value("model", std::string()));
+        setTimeScale(j.value("timeScale", 1.f));
+        m_parameters = j["params"].get<std::unordered_map<std::string, std::pair<AnimatorParameterType, float>>>();
+
+        if (j.contains("layers")) {
+            m_stateMachines.clear();
+            auto jSms = j.at("layers");
+            for (auto jSm : jSms) {
+                auto sm = std::make_shared<AnimatorStateMachine>();;
+                sm->setController(shared_from_this());
+                jSm.get_to(*sm.get());
+                m_stateMachines.push_back(sm);
+            }
+        }
+        else {
+            addLayer();
+        }
+    }
+
+    void AnimatorController::restore_from_json(const json& j) {
+        setBaseModelPath(j.value("model", std::string()));
+        setTimeScale(j.value("timeScale", 1.f));
+        m_parameters = j["params"].get<std::unordered_map<std::string, std::pair<AnimatorParameterType, float>>>();
+        if (j.contains("layers")) {
+            
+            m_stateMachines.clear();
+            auto jSms = j.at("layers");
+            for (auto jSm : jSms) {
+                std::shared_ptr< AnimatorStateMachine> sm = nullptr;
+                if(sm == nullptr)
+                    sm = std::make_shared<AnimatorStateMachine>();
+                sm->setController(shared_from_this());
+                sm->restore_from_json(jSm);
+                m_stateMachines.push_back(sm);
+            }
+        }
+        /*else {
+            addLayer();
+        }*/
+        m_dirty = true;
+    }
+
     //! Serialize component
     void to_json(json &j, const AnimatorController &obj)
     {
@@ -187,4 +243,6 @@ namespace ige::scene
             obj.addLayer();
         }
     }
+
+    
 } // namespace ige::scene

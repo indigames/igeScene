@@ -4,6 +4,7 @@
 
 #include "utils/Serialize.h"
 #include "utils/PyxieHeaders.h"
+
 using namespace pyxie;
 
 #include <string>
@@ -19,7 +20,7 @@ namespace ige::scene
         PartC
     };
 
-    class AnimatorStateMachine : public std::enable_shared_from_this<AnimatorStateMachine> 
+    class AnimatorStateMachine : public std::enable_shared_from_this<AnimatorStateMachine>
     {
     public:
         AnimatorStateMachine();
@@ -58,6 +59,8 @@ namespace ige::scene
 
         std::shared_ptr<AnimatorController> getController();
         void setController(std::shared_ptr<AnimatorController> controller);
+
+        void restore_from_json(const json& j);
 
         //! Serialize
         friend void to_json(json &j, const AnimatorStateMachine &obj);

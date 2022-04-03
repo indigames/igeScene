@@ -263,6 +263,31 @@ namespace ige::scene {
         return false;
     }
 
+    void AnimatorStateMachine::restore_from_json(const json& j)
+    {
+        clear();
+        setLayer(j.value("layer", -1));
+        if (j.count("states") > 0) {
+            auto jStates = j.at("states");
+            for (auto jState : jStates) {
+                auto state = std::make_shared<AnimatorState>();
+                jState.get_to(*state);
+                states.push_back(state);
+                state->stateMachine = shared_from_this();
+            }
+            for (const auto& state : states) {
+                state->onSerializeFinished();
+            }
+        }
+
+        // Should always contain Enter, Exit, and Any states
+        if (states.size() >= 3) {
+            currentState = enterState = states[0];
+            exitState = states[1];
+            anyState = states[2];
+        }
+    }
+
     //! Serialize component
     void to_json(json &j, const AnimatorStateMachine &obj)
     {

@@ -5,6 +5,8 @@
 #include "utils/Serialize.h"
 
 #include "utils/PyxieHeaders.h"
+
+#include "core/Object.h"
 using namespace pyxie;
 
 namespace ige::scene
@@ -14,11 +16,14 @@ namespace ige::scene
     /**
      * Class AnimatorController
      */
-    class AnimatorController : public std::enable_shared_from_this<AnimatorController>
+    class AnimatorController : public std::enable_shared_from_this<AnimatorController>, Object
     {
     public:
         AnimatorController();
         virtual ~AnimatorController();
+
+        //! Object Type
+        std::string getType() const override { return "AnimatorController"; }
 
         //! Path
         const std::string& getPath() const { return m_path; }
@@ -52,17 +57,24 @@ namespace ige::scene
 
         //! Update
         virtual void update(float dt);
-
+        
         //! Serialize
+        virtual void to_json(json& j);
         friend void to_json(json &j, const AnimatorController &obj);
 
         //! Deserialize
+        virtual void from_json(const json& j);
         friend void from_json(const json &j, AnimatorController &obj);
+
+        virtual void restore_from_json(const json& j);
+        
 
         //! State machine
         std::vector<std::shared_ptr<AnimatorStateMachine>>& getStateMachines() { return m_stateMachines; }
         std::shared_ptr<AnimatorStateMachine> getStateMachine(int layer = 0);
 
+        bool isDirty() const { return m_dirty; }
+        void resetDirty() { m_dirty = false; }
     protected:
         void initialize();
         void clear();
@@ -76,5 +88,6 @@ namespace ige::scene
         float m_timeScale = 1.f;
         BaseFigure* m_figure = nullptr;
         std::unordered_map<std::string, std::pair<AnimatorParameterType, float>> m_parameters;
+        bool m_dirty = false;
     };
 } // namespace ige::scene

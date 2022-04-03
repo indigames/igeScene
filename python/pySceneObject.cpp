@@ -485,6 +485,11 @@ namespace ige::scene
                 compObj->component = self->sceneObject.lock()->addComponent<DynamicNavMesh>();
                 return (PyObject*)compObj;
             }
+            else if (type == "Animator") {
+                auto compObj = (PyObject_Animator*)(&PyTypeObject_Animator)->tp_alloc(&PyTypeObject_Animator, 0);
+                compObj->component = self->sceneObject.lock()->addComponent<DynamicNavMesh>();
+                return (PyObject*)compObj;
+            }
         }
         Py_RETURN_NONE;
     }
