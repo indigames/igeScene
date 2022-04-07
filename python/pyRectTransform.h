@@ -27,6 +27,11 @@ namespace ige::scene
     // Set anchor
     int RectTransform_setAnchor(PyObject_RectTransform* self, PyObject* value);
 
+    // Get anchor Position
+    PyObject* RectTransform_getAnchorPosition(PyObject_RectTransform* self);
+    // Set anchor Position
+    int RectTransform_setAnchorPosition(PyObject_RectTransform* self, PyObject* value);
+
     // Get pivot
     PyObject* RectTransform_getPivot(PyObject_RectTransform* self);
 
@@ -49,20 +54,38 @@ namespace ige::scene
     PyObject* RectTransform_getRect(PyObject_RectTransform* self);
 
     // Get position
-    PyObject* RectTransform_getPosition(PyObject_RectTransform* self);
+    PyObject* RectTransform_getWorldPosition(PyObject_RectTransform* self);
 
     // Set position
-    int RectTransform_setPosition(PyObject_RectTransform* self, PyObject* value);
+    int RectTransform_setWorldPosition(PyObject_RectTransform* self, PyObject* value);
 
     // Get rotation
-    PyObject* RectTransform_getRotation(PyObject_RectTransform* self);
+    PyObject* RectTransform_getWorldRotation(PyObject_RectTransform* self);
 
     // Set rotation
-    int RectTransform_setRotation(PyObject_RectTransform* self, PyObject* value);
+    int RectTransform_setWorldRotation(PyObject_RectTransform* self, PyObject* value);
 
     // Get scale
-    PyObject* RectTransform_getScale(PyObject_RectTransform* self);
+    PyObject* RectTransform_getWorldScale(PyObject_RectTransform* self);
 
     // Set rotation
-    int RectTransform_setScale(PyObject_RectTransform* self, PyObject* value);
+    int RectTransform_setWorldScale(PyObject_RectTransform* self, PyObject* value);
+
+    // Get local position
+    PyObject* RectTransform_getLocalPosition(PyObject_RectTransform* self);
+
+    // Set local position
+    int RectTransform_setLocalPosition(PyObject_RectTransform* self, PyObject* value);
+
+    // Get local rotation
+    PyObject* RectTransform_getLocalRotation(PyObject_RectTransform* self);
+
+    // Set local rotation
+    int RectTransform_setLocalRotation(PyObject_RectTransform* self, PyObject* value);
+
+    // Get local scale
+    PyObject* RectTransform_getLocalScale(PyObject_RectTransform* self);
+
+    // Set local rotation
+    int RectTransform_setLocalScale(PyObject_RectTransform* self, PyObject* value);
 }

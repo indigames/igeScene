@@ -47,6 +47,28 @@ namespace ige::scene
         return 0;
     }
 
+    // Get anchor Position
+    PyObject* RectTransform_getAnchorPosition(PyObject_RectTransform* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getAnchoredPosition().P(), 2, vec2Obj->v);
+        vec2Obj->d = 2;
+        return (PyObject*)vec2Obj;
+    }
+
+    // Set anchor Position
+    int RectTransform_setAnchorPosition(PyObject_RectTransform* self, PyObject* value)
+    {
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v) return -1;
+        std::dynamic_pointer_cast<RectTransform>(self->component.lock())->setAnchoredPosition(*((Vec2*)v));
+        return 0;
+    }
+
     // Get pivot
     PyObject* RectTransform_getPivot(PyObject_RectTransform* self)
     {
@@ -123,14 +145,153 @@ namespace ige::scene
         return (PyObject*)vec4Obj;
     }
 
+    // Get world position
+    PyObject* RectTransform_getWorldPosition(PyObject_RectTransform* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getPosition().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
+    }
+
+    // Set world position
+    int RectTransform_setWorldPosition(PyObject_RectTransform* self, PyObject* value)
+    {
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v) return -1;
+        std::dynamic_pointer_cast<RectTransform>(self->component.lock())->setPosition(*((Vec3*)v));
+        return 0;
+    }
+
+    // Get world rotation
+    PyObject* RectTransform_getWorldRotation(PyObject_RectTransform* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto quatObj = PyObject_New(vec_obj, _QuatType);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getRotation().P(), 4, quatObj->v);
+        quatObj->d = 4;
+        return (PyObject*)quatObj;
+    }
+
+    // Set world rotation
+    int RectTransform_setWorldRotation(PyObject_RectTransform* self, PyObject* value)
+    {
+        if (self->component.expired()) return -1;
+        int d1;
+        float buff[4];
+        float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
+        if (!v1) return -1;
+        std::dynamic_pointer_cast<RectTransform>(self->component.lock())->setRotation(*((Quat*)v1));
+        return 0;
+    }
+
+    // Get world scale
+    PyObject* RectTransform_getWorldScale(PyObject_RectTransform* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getScale().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
+    }
+
+    // Set world scale
+    int RectTransform_setWorldScale(PyObject_RectTransform* self, PyObject* value)
+    {
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v) return -1;
+        std::dynamic_pointer_cast<RectTransform>(self->component.lock())->setScale(*((Vec3*)v));
+        return 0;
+    }
+
+    // Get local position
+    PyObject* RectTransform_getLocalPosition(PyObject_RectTransform* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getLocalPosition().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
+    }
+
+    // Set local position
+    int RectTransform_setLocalPosition(PyObject_RectTransform* self, PyObject* value)
+    {
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v) return -1;
+        std::dynamic_pointer_cast<RectTransform>(self->component.lock())->setLocalPosition(*((Vec3*)v));
+        return 0;
+    }
+
+    // Get local rotation
+    PyObject* RectTransform_getLocalRotation(PyObject_RectTransform* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto quatObj = PyObject_New(vec_obj, _QuatType);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getLocalRotation().P(), 4, quatObj->v);
+        quatObj->d = 4;
+        return (PyObject*)quatObj;
+    }
+
+    // Set local rotation
+    int RectTransform_setLocalRotation(PyObject_RectTransform* self, PyObject* value)
+    {
+        if (self->component.expired()) return -1;
+        int d1;
+        float buff[4];
+        float* v1 = pyObjToFloat((PyObject*)value, buff, d1);
+        if (!v1) return -1;
+        std::dynamic_pointer_cast<RectTransform>(self->component.lock())->setLocalRotation(*((Quat*)v1));
+        return 0;
+    }
+
+    // Get local scale
+    PyObject* RectTransform_getLocalScale(PyObject_RectTransform* self)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
+        vmath_cpy(std::dynamic_pointer_cast<RectTransform>(self->component.lock())->getScale().P(), 3, vec3Obj->v);
+        vec3Obj->d = 3;
+        return (PyObject*)vec3Obj;
+    }
+
+    // Set local scale
+    int RectTransform_setLocalScale(PyObject_RectTransform* self, PyObject* value)
+    {
+        if (self->component.expired()) return -1;
+        int d;
+        float buff[4];
+        auto v = pyObjToFloat((PyObject*)value, buff, d);
+        if (!v) return -1;
+        std::dynamic_pointer_cast<RectTransform>(self->component.lock())->setLocalScale(*((Vec3*)v));
+        return 0;
+    }
+
+
+
     PyGetSetDef RectTransform_getsets[] = {
         { "anchor", (getter)RectTransform_getAnchor, (setter)RectTransform_setAnchor, RectTransform_anchor_doc, NULL },
+        { "anchorPosition", (getter)RectTransform_getAnchorPosition, (setter)RectTransform_setAnchorPosition, NULL, NULL },
         { "offset", (getter)RectTransform_getOffset, (setter)RectTransform_setOffset, RectTransform_offset_doc, NULL },
         { "pivot", (getter)RectTransform_getPivot, (setter)RectTransform_setPivot, RectTransform_pivot_doc, NULL },
         { "rect", (getter)RectTransform_getRect, nullptr, RectTransform_rect_doc, NULL },
         { "size", (getter)RectTransform_getSize, (setter)RectTransform_setSize, RectTransform_offset_doc, NULL },
-        { "position", (getter)TransformComponent_getWorldPosition, (setter)TransformComponent_setWorldPosition, NULL, NULL },
-        { "localPosition", (getter)TransformComponent_getLocalPosition, (setter)TransformComponent_setLocalPosition, NULL, NULL },
+        { "position", (getter)RectTransform_getWorldPosition, (setter)RectTransform_setWorldPosition, NULL, NULL },
+        { "localPosition", (getter)RectTransform_getLocalPosition, (setter)RectTransform_setLocalPosition, NULL, NULL },
+        { "rotation", (getter)RectTransform_getWorldRotation, (setter)RectTransform_setWorldRotation, NULL, NULL },
+        { "localRotation", (getter)RectTransform_getLocalRotation, (setter)RectTransform_setLocalRotation, NULL, NULL },
+        { "scale", (getter)RectTransform_getWorldScale, (setter)RectTransform_setWorldScale, NULL, NULL },
+        { "localScale", (getter)RectTransform_getLocalScale, (setter)RectTransform_setLocalScale, NULL, NULL },
         { NULL, NULL }
     };
 
