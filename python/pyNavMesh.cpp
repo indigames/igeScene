@@ -413,7 +413,7 @@ namespace ige::scene
         {"edgeMaxLength", (getter)NavMesh_getEdgeMaxLength, (setter)NavMesh_setEdgeMaxLength, NavMesh_edgeMaxLength_doc, NULL},
         {"edgeMaxError", (getter)NavMesh_getEdgeMaxError, (setter)NavMesh_setEdgeMaxError, NavMesh_edgeMaxError_doc, NULL},
         {"detailSampleDistance", (getter)NavMesh_getDetailSampleDistance, (setter)NavMesh_setDetailSampleDistance, NavMesh_detailSampleDistance_doc, NULL},
-        {"detDetailSampleMaxError", (getter)NavMesh_getDetailSampleMaxError, (setter)NavMesh_setDetailSampleMaxError, NavMesh_detDetailSampleMaxError_doc, NULL},
+        {"detailSampleMaxError", (getter)NavMesh_getDetailSampleMaxError, (setter)NavMesh_setDetailSampleMaxError, NavMesh_detDetailSampleMaxError_doc, NULL},
         {"aabbPading", (getter)NavMesh_getPadding, (setter)NavMesh_setPadding, NavMesh_aabbPading_doc, NULL},
         {"partitionType", (getter)NavMesh_getPartitionType, (setter)NavMesh_setPartitionType, NavMesh_partitionType_doc, NULL},
         {NULL, NULL},
