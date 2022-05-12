@@ -282,7 +282,7 @@ namespace ige::scene
         if (camera) {
             camera->Step(dt);
         }
-        else if (SceneManager::getInstance()->isPlaying() && !m_activeCamera.expired()) {
+        else if (!m_activeCamera.expired()) {
             m_activeCamera.lock()->onUpdate(dt);
         } 
         m_showcase->Update(dt);
@@ -291,7 +291,7 @@ namespace ige::scene
             m_showcase->ZSort(camera);
             camera->Render();
         }
-        else if (SceneManager::getInstance()->isPlaying() && !m_activeCamera.expired()) {
+        else if (!m_activeCamera.expired()) {
             m_showcase->ZSort(m_activeCamera.lock()->getCamera());
             m_activeCamera.lock()->onRender();
         }
@@ -304,7 +304,7 @@ namespace ige::scene
             if (camera) {
                 camera->Render();
             }
-            else if (SceneManager::getInstance()->isPlaying() && !m_activeCamera.expired()) {
+            else if (!m_activeCamera.expired()) {
                 m_activeCamera.lock()->onRender();
             }
             m_showcase->Render(RenderPassFilter::ShadowPass);
