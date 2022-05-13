@@ -143,6 +143,6 @@ namespace ige::scene
         std::string m_name;
 
         //! Clear color
-        Vec4 m_clearColor = { 1.f, 1.f, 1.f, 1.f };
+        Vec4 m_clearColor = { 0.4f, 0.8f, 0.9f, 1.f };
     };
 } // namespace ige::scene
