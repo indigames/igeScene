@@ -526,13 +526,11 @@ namespace ige::scene
 
     void RectTransform::updateRect(bool only)
     {
-        auto parent = getOwner()->getParent();
-        if (parent == nullptr) return;
-        auto parentRect = parent->getRectTransform();
-        if (parentRect == nullptr) return;
+        if (!getOwner()->getParent() || !getOwner()->getParent()->getRectTransform()) return;
+        auto parentRect = getOwner()->getParent()->getRectTransform();
         auto parentSize = parentRect->getSize();
-
         auto parentPos = parentRect->getPosition();
+
         //! Update AnchorOffset
         m_anchorOffset[0] = parentPos[0] + parentSize[0] * (m_anchor[0] - 0.5f);
         m_anchorOffset[1] = parentPos[1] + parentSize[1] * (m_anchor[1] - 0.5f);
@@ -544,18 +542,20 @@ namespace ige::scene
         m_offset[1] = m_localPosition[1] - m_size[1] * 0.5f - (m_anchor[1] - 0.5f) * parentSize[1];
         m_offset[2] = -(m_localPosition[0] + m_size[0] * 0.5f) + (m_anchor[2] - 0.5f) * parentSize[0];
         m_offset[3] = -(m_localPosition[1] + m_size[1] * 0.5f) + (m_anchor[3] - 0.5f) * parentSize[1];
+
         //! Update AnchoredPosition
         auto centerOffset = getRectOffsetCenter(m_offset, parentSize, m_anchor);
         centerOffset[0] += (m_pivot[0] - 0.5f) * m_size[0];
-        centerOffset[1] += (m_pivot[1] - 0.5f) * m_size[1];        
+        centerOffset[1] += (m_pivot[1] - 0.5f) * m_size[1];
         setAnchoredPosition(centerOffset);
-        
+
         //! Update Rect
         m_rect[0] = -m_size[0] * 0.5f + (m_pivot[0] - 0.5f) * m_size[0];
         m_rect[1] = -m_size[1] * 0.5f + (m_pivot[1] - 0.5f) * m_size[1];
         m_rect[2] = m_size[0];
         m_rect[3] = m_size[1];
 
+        //! Update children
         if (!only) {
             for (auto& child : getOwner()->getChildren())
             {
@@ -569,6 +569,9 @@ namespace ige::scene
                 }
             }
         }
+
+        //! Update aabb
+        getOwner()->updateAabb();
     }
 
     const Vec4 &RectTransform::getRect()

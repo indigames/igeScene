@@ -1111,7 +1111,6 @@ namespace ige::scene
         std::pair<Vec3, Vec3> ray = RayOBBChecker::RayOBB(position, direction);
         for (const auto& obj : m_objects)
         {
-            if (obj->isGUIObject()) continue; // Skip GUI objects
             const auto& transform = obj->getTransform();
             auto tranMat = Mat4::IdentityMat();
             vmath_mat4_translation(transform->getPosition().P(), tranMat.P());
@@ -1141,7 +1140,6 @@ namespace ige::scene
         std::pair<Vec3, Vec3> ray = RayOBBChecker::RayOBB(position, direction);
         for (const auto& obj : m_objects)
         {
-            if (obj->isGUIObject()) continue; // Skip GUI objects
             const auto& transform = obj->getTransform();
             auto tranMat = Mat4::IdentityMat();
             vmath_mat4_translation(transform->getPosition().P(), tranMat.P());
