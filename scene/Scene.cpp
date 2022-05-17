@@ -1079,7 +1079,7 @@ namespace ige::scene
         auto ray = RayOBBChecker::screenPosToWorldRay(pos.X(), pos.Y(), wSize.X(), wSize.Y(), viewInv, proj);
         for (const auto& obj : m_objects)
         {
-            if (obj->isGUIObject()) continue; // Skip GUI objects
+            if (!camera->IsOrthographicProjection() && obj->isGUIObject()) continue; // Skip GUI objects
             const auto& transform = obj->getTransform();
             auto tranMat = Mat4::IdentityMat();
             vmath_mat4_translation(transform->getPosition().P(), tranMat.P());
