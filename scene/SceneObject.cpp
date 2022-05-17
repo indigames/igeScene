@@ -98,7 +98,6 @@ namespace ige::scene
         getTransformChangedEvent().removeAllListeners();
 
         setParent(nullptr);
-        m_canvas = nullptr;
 
         getDestroyedEvent().invoke(*this);
 
@@ -131,7 +130,6 @@ namespace ige::scene
             getDetachedEvent().invoke(*this);
 
             if (getTransform()) getTransform()->setParent(nullptr);
-            setCanvas(nullptr);
             m_parent.reset();
         }
 
@@ -141,7 +139,6 @@ namespace ige::scene
             getParent()->addChildById(getId());
             if (getTransform())
                 getTransform()->setParent(getParent()->getTransform());
-            setCanvas(getParent()->getCanvas());
             m_transform->setParent(getParent()->getTransform());
             if (isGUIObject()) {
                 if (parent->isInMask()) {
@@ -176,6 +173,11 @@ namespace ige::scene
         if (getParent() == nullptr) return false;
         if (getParent()->getId() == id) return true;
         return getParent()->isRelative(id);
+    }
+
+    //! Get canvas
+    std::shared_ptr<Canvas>& SceneObject::getCanvas() {
+        return getScene() ? getScene()->getCanvas() : nullptr;
     }
 
     //! Get all children
@@ -305,7 +307,6 @@ namespace ige::scene
         if (name == "Canvas")
         {
             auto comp = addComponent<Canvas>();
-            setCanvas(getComponent<Canvas>());
             return comp;
         }
 

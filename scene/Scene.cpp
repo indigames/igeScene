@@ -373,7 +373,6 @@ namespace ige::scene
                     m_canvas = canvasObject->addComponent<Canvas>();
                     m_canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
                     m_canvas->setTargetCanvasSize(Vec2(540.f, 960.f));
-                    canvasObject->setCanvas(m_canvas);
                     canvasObject->setParent(parentObject);
                     parentObject = canvasObject;
                 }

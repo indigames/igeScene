@@ -204,11 +204,7 @@ namespace ige::scene
         void setTransform(const std::shared_ptr<TransformComponent> &transform) { m_transform = transform; }
 
         //! Get canvas
-        std::shared_ptr<Canvas>& getCanvas() { return m_canvas; }
-
-        //! Set canvas
-        void setCanvas(const std::shared_ptr<Canvas>& canvas) { m_canvas = canvas; }
-
+        std::shared_ptr<Canvas>& getCanvas();
         //! Get scene
         Scene* getScene() const { return m_scene; }
 
@@ -316,9 +312,6 @@ namespace ige::scene
 
         //! Cache transform component
         std::shared_ptr<TransformComponent> m_transform = nullptr;
-
-        //! Cache Canvas component (GUI)
-        std::shared_ptr<Canvas> m_canvas = nullptr;
 
         //! Cache isGui
         bool m_bIsGui = false;
