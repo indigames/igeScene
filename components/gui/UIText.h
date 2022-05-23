@@ -18,7 +18,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        UIText(SceneObject &owner, const std::string &text = "", const std::string &fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4 &color = {1.f, 1.f, 1.f, 1.f});
+        UIText(SceneObject &owner, const std::string &text = "", const std::string &fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4 &color = {0.5f, 0.5f, 0.5f, 1.f});
 
         //! Destructor
         virtual ~UIText();
@@ -66,6 +66,10 @@ namespace ige::scene
         int getTextAlignVertical() const { return m_textAlignVertical; }
         void setTextAlignVertical(int val);
 
+        //! Get/Set rect scale
+        void setRectAutoScale(bool scale = true) { m_bRectAutoScale = scale; }
+        bool isRectAutoScale() const { return m_bRectAutoScale; }
+
         //! Figure
         EditableFigure *getFigure() { return m_text->getFigure(); }
 
@@ -81,8 +85,8 @@ namespace ige::scene
 
         virtual void generateText(const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color, int fontType);
 
-        void onResourceAdded(Resource* res);
-        void onResourceRemoved(Resource* res);
+        virtual void onResourceAdded(Resource* res);
+        virtual void onResourceRemoved(Resource* res);
 
         virtual void updatePosition();
 
@@ -100,10 +104,10 @@ namespace ige::scene
         std::string m_fontPath = "";
         int m_fontSize = 11;
         int m_fontType = 0;
-        Vec4 m_color = { 1.f, 1.f, 1.f, 1.f };
+        Vec4 m_color = { 0.5f, 0.5f, 0.5f, 1.f };
         bool m_bResAdded = false;
-        int m_textAlignHorizontal = 0;
-        int m_textAlignVertical = 0;
-
+        int m_textAlignHorizontal = 1;
+        int m_textAlignVertical = 1;
+        bool m_bRectAutoScale = false;
     };
 } // namespace ige::scene

@@ -306,16 +306,16 @@ namespace ige::scene
     //!===============================================
 
     void Sprite::releaseSprite() {
-        if (m_texture)
-        {
-            // m_texture->DecReference(); // [IGE]: decreased by figure instance
-            m_texture = nullptr;
-        }
-
         if (m_figure)
         {
             m_figure->DecReference();
             m_figure = nullptr;
+        }
+
+        if (m_texture)
+        {
+            m_texture->DecReference();
+            m_texture = nullptr;
         }
     }
 

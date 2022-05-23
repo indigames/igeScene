@@ -30,8 +30,18 @@ namespace ige::scene
         //! Click
         virtual void onClick() override;
 
+        //! Enable
+        virtual void onEnable() override;
+
+        //! Disable
+        virtual void onDisable() override;
+
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
+
+        //! Get/Set backgroud color
+        void setBackgroundColor(const Vec4& color = {1.f, 1.f, 1.f, 1.f});
+        const Vec4& getBackgroundColor() const { return m_bgColor; }
 
     protected:
         //! Serialize
@@ -40,6 +50,11 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j) override;
 
+        //! Sprite
+        std::shared_ptr<Sprite> m_sprite = nullptr;
+
+        Vec4 m_bgColor = { 1.f, 1.f, 1.f, 1.f };
         bool m_bIsInputing = false;
+        std::string m_lastInput = std::string();
     };
 } // namespace ige::scene

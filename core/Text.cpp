@@ -81,7 +81,7 @@ namespace ige::scene
 
     void Text::updateFigure()
     {
-        if (m_text != "" && m_fontPath != "")
+        if (m_fontPath != "")
         {
             Vec3 pos, scale(1.f, 1.f, 1.f);
             Quat rot;

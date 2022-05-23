@@ -101,70 +101,48 @@ namespace ige::scene
             m_flagMask = false;
         }
         
-        // Update transform from transform component
-        //auto transform = getOwner()->getRectTransform();
-
-        // Scale container to fit text size
-        /*auto containerSize = transform->getSize();
-        auto size = m_text->getSize();
-        auto sizeChanged = false;*/
-        /*if (size.X() > containerSize.X())
-        {
-            containerSize.X(size.X() + 1.f);
-            sizeChanged = true;
-        }
-        if (size.Y() > containerSize.Y())
-        {
-            containerSize.Y(size.Y() + 1.f);
-            sizeChanged = true;
-        }
-        if (sizeChanged)
-            transform->setSize(containerSize);*/
-
         updatePosition();
-
-        //getFigure()->SetPosition(transform->getPosition());
-        //getFigure()->SetRotation(transform->getRotation());
-        //getFigure()->SetScale(transform->getScale());
-
-        //// Update
-        //getFigure()->Pose();
     }
 
     //! Render
     void UIText::onRender()
     {
-        /*if (getFigure() == nullptr)
-            return;
-        getFigure()->Render();*/
     }
 
     void UIText::updatePosition()
     {
         auto transform = getOwner()->getRectTransform();
-        auto containerSize = transform->getSize();
         auto size = m_text->getSize();
+        auto containerSize = transform->getSize();
+
+        auto margin = (0.1f * size[1]);
+        auto rectSize = Vec2(std::max(size[0] + (0.6f * size[1]), 32.f), std::max(size[1] + (0.6f * size[1]), 32.f));
+
+        if (isRectAutoScale()) {
+            transform->setSize(rectSize);
+            containerSize = rectSize;
+        }
 
         auto center = Vec3(0, 0, 0);
         switch (m_textAlignHorizontal) {
         case 0:
-            center[0] -= (containerSize[0] - size[0]) * 0.5f;
+            center[0] -= (containerSize[0] - size[0]) * 0.5f - margin;
             break;
         case 1:
             break;
         case 2:
-            center[0] += (containerSize[0] - size[0]) * 0.5f;
+            center[0] += (containerSize[0] - size[0]) * 0.5f - margin;
             break;
         }
 
         switch (m_textAlignVertical) {
         case 0:
-            center[1] += (containerSize[1] - size[1]) * 0.5f;
+            center[1] += (containerSize[1] - size[1]) * 0.5f - margin;
             break;
         case 1:
             break;
         case 2:
-            center[1] -= (containerSize[1] - size[1]) * 0.5f;
+            center[1] -= (containerSize[1] - size[1]) * 0.5f - margin;
             break;
         }
         getFigure()->SetRotation(transform->getRotation());
@@ -193,8 +171,6 @@ namespace ige::scene
             updatePosition();
         }
     }
-
-
 
     void UIText::onResourceAdded(Resource* res) {
         if (m_bResAdded || res == nullptr) return;
@@ -236,6 +212,7 @@ namespace ige::scene
         j["color"] = getColor();
         j["alignhorizontal"] = getTextAlignHorizontal();
         j["alignvertical"] = getTextAlignVertical();
+        j["rectScale"] = isRectAutoScale();
     }
 
     //! Deserialize
@@ -244,10 +221,11 @@ namespace ige::scene
         m_fontType = 0;
         m_textAlignHorizontal = (j.value("alignhorizontal", 0));
         m_textAlignVertical = (j.value("alignvertical", 0));
-        setText(j.at("text"));
-        setFontPath(j.at("font"));
-        setFontSize(j.at("size"));
-        setColor(j.at("color"));
+        setText(j.value("text", std::string()));
+        setFontPath(j.value("font", "fonts/Manjari-Regular.ttf"));
+        setFontSize(j.value("size", 12));
+        setColor(j.value("color", Vec4(0.5f, 0.5f, 0.5f, 1.0f)));
+        setRectAutoScale(j.value("rectScale", false));
         Component::from_json(j);
     }
 
@@ -363,6 +341,10 @@ namespace ige::scene
         else if (key.compare("alignvertical") == 0)
         {
             setTextAlignVertical(val);
+        }
+        else if (key.compare("rectScale") == 0)
+        {
+            setRectAutoScale(val);
         }
         else
         {
