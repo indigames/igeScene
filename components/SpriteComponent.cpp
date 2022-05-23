@@ -137,22 +137,15 @@ namespace ige::scene
         if (oldFigure == nullptr && newFigure) {
             onResourceAdded(newFigure);
         }
+
         if (oldFigure != nullptr && newFigure == nullptr) {
             onResourceRemoved(oldFigure);
         }
 
-        if (newFigure)
-        {
+        if (newFigure) {
             bool isBillboard = m_bIsBillboard;
             m_bIsBillboard = false;
             setBillboard(isBillboard);
-        }
-
-        if (getOwner()->getRectTransform()) {
-            getOwner()->getRectTransform()->setSize(m_sprite->getSize());
-        }
-        else {
-            getOwner()->getTransform()->makeDirty();
         }
     }
 
@@ -311,17 +304,17 @@ namespace ige::scene
     //! Deserialize
     void SpriteComponent::from_json(const json &j)
     {
-        setSize(j.value("size", Vec2(0, 0)));
+        setSize(j.value("size", Vec2(64, 64)));
         setPath(j.value("path", ""));
         setBillboard(j.value("billboard", false));
-        setTiling(j.value("tiling", Vec2(0, 0)));
+        setTiling(j.value("tiling", Vec2(1, 1)));
         setOffset(j.value("offset", Vec2(0, 0)));
-        setWrapMode(j.value("wrapmode", 0));
-        setColor(j.value("color", Vec4(0, 0, 0, 0)));
-        setSpriteType(j.value("spritetype", 0));
+        setWrapMode(j.value("wrapmode", (int)SamplerState::CLAMP));
+        setColor(j.value("color", Vec4(1.f, 1.f, 1.f, 1.f)));
+        setSpriteType(j.value("spritetype", (int)SpriteType::Simple));
         setBorder(j.value("border", Vec4(0, 0, 0, 0)));
-        setFillMethod(j.value("fillmethod", 0));
-        setFillOrigin(j.value("fillorigin", 0));
+        setFillMethod(j.value("fillmethod", (int)FillMethod::None));
+        setFillOrigin(j.value("fillorigin", (int)FillOrigin::Bottom));
         setFillAmount(j.value("fillamount", 1.0f));
         setClockwise(j.value("clockwise", false));
         Component::from_json(j);

@@ -110,84 +110,24 @@ namespace ige::scene
     //! Serialize
     void UIImage::to_json(json &j) const
     {
-        Component::to_json(j);
-        j["path"] = getPath();
-        j["size"] = getSize();
-        j["fillmethod"] = getFillMethod();
-        j["fillorigin"] = getFillOrigin();
-        j["fillamount"] = getFillAmount();
-        j["clockwise"] = getClockwise();
-        j["color"] = getColor();
+        SpriteComponent::to_json(j);
         j["interactable"] = isInteractable();
-        j["spritetype"] = (int)getSpriteType();
-        j["border"] = getBorder();
     }
 
     //! Deserialize
     void UIImage::from_json(const json &j)
     {
-        setSize(j.at("size"));
-        setFillMethod(j.value("fillmethod", 0));
-        setFillOrigin(j.value("fillorigin", 0));
-        setFillAmount(j.value("fillamount", 1.0f));
-        setClockwise(j.value("clockwise", false));
-        setColor(j.at("color"));
-        setInteractable(j.at("interactable"));
-        setSpriteType(j.at("spritetype"));
-        setBorder(j.at("border"));
-        setPath(j.at("path"));
-        Component::from_json(j);
+        setInteractable(j.value("interactable", false));
+        SpriteComponent::from_json(j);
     }
 
     //! Update property by key value
     void UIImage::setProperty(const std::string& key, const json& val)
     {
-        if (key.compare("size") == 0)
-        {
-            setSize(val);
-        }
-        else if (key.compare("fillmethod") == 0)
-        {
-            setFillMethod(val);
-        }
-        else if (key.compare("fillorigin") == 0)
-        {
-            setFillOrigin(val);
-        }
-        else if (key.compare("fillamount") == 0)
-        {
-            setFillAmount(val);
-        }
-        else if (key.compare("clockwise") == 0)
-        {
-            setClockwise(val);
-        }
-        else if (key.compare("color") == 0)
-        {
-            setColor(val);
-        }
-        else if (key.compare("interactable") == 0)
-        {
+        if (key.compare("interactable") == 0) {
             setInteractable(val);
         }
-        else if (key.compare("spritetype") == 0)
-        {
-            setSpriteType(val);
-        }
-        else if (key.compare("border") == 0)
-        {
-            setBorder(val);
-        }
-        else if (key.compare("path") == 0)
-        {
-            setPath(val);
-        }
-        else if (key.compare("interactable") == 0)
-        {
-            setInteractable(val);
-        }
-        else
-        {
+        else {
             SpriteComponent::setProperty(key, val);
         }
     }

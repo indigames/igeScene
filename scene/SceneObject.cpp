@@ -176,7 +176,7 @@ namespace ige::scene
     }
 
     //! Get canvas
-    std::shared_ptr<Canvas>& SceneObject::getCanvas() {
+    std::shared_ptr<Canvas> SceneObject::getCanvas() {
         return getScene() ? getScene()->getCanvas() : nullptr;
     }
 

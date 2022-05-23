@@ -36,6 +36,9 @@ public:
 	//! Update property by key value
 	virtual void setProperty(const std::string& key, const json& val) override;
 
+	//! Path
+	virtual void setPath(const std::string& path) override;
+
 protected:
 	bool m_bUseMask;
 	bool m_maskDirty;

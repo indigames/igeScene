@@ -204,7 +204,8 @@ namespace ige::scene
         void setTransform(const std::shared_ptr<TransformComponent> &transform) { m_transform = transform; }
 
         //! Get canvas
-        std::shared_ptr<Canvas>& getCanvas();
+        std::shared_ptr<Canvas> getCanvas();
+
         //! Get scene
         Scene* getScene() const { return m_scene; }
 
