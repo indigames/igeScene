@@ -148,6 +148,17 @@ void UIMask::setPath(const std::string& path) {
     UIImage::setPath("");
 }
 
+//! Enable
+void UIMask::onEnable()
+{
+    setUseMask(true);
+}
+
+//! Disable
+void UIMask::onDisable() {
+    setUseMask(false);
+}
+
 //! Json 
 void UIMask::to_json(json& j) const
 {

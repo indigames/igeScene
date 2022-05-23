@@ -30,6 +30,12 @@ public:
 	//! Render
 	virtual void onRender() override;
 
+	//! Enable
+	virtual void onEnable() override;
+
+	//! Disable
+	virtual void onDisable() override;
+
 	void setUseMask(bool value);
 	bool isUseMask() const { return m_bUseMask; }
 
