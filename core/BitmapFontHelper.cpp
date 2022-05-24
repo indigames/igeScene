@@ -370,7 +370,6 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 	unsigned int state = 0;
 	struct ige_quad q;
 	short isize = (short)(size * 10.0f);
-	float* v;
 	struct ige_bitmap_font* fnt = NULL;
 	float x = 0, y = 0;
 
@@ -475,8 +474,6 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 		len++;
 	}
 
-	if (texture == nullptr) return nullptr;
-
 	float hw = std::abs(ax - ix) * 0.5f;
 	float hh = std::abs(ay - iy) * 0.5f;
 	outW = hw * 2;
@@ -502,13 +499,21 @@ EditableFigure* BitmapFontHelper::createText(const char* s, const std::string& f
 		fOffset += 12;
 	}
 
-	//Create Figure
+	// Create shader
 	auto shader = ResourceCreator::Instance().NewShaderDescriptor();
 	shader->SetColorTexture(true);
+	if (!texture || !texture->texture->isAlphaTexture()) {
+		shader->DiscardColorMapRGB(true);
+	}	
 	shader->SetBoneCondition(1, 1);
-	shader->DiscardColorMapRGB(true);
 
-	auto efig = GraphicsHelper::getInstance()->createMesh(points, trianglesIndices, texture->texture, uvs, shader);
+	//Create Figure
+	auto efig = GraphicsHelper::getInstance()->createMesh(points, trianglesIndices, texture ? texture->texture : nullptr, uvs, shader);
+
+	if (texture && texture->texture->isAlphaTexture()) {
+		efig->EnableAlphaModeByTexture(texture->texture->ResourceName());
+	}
+
 	return efig;
 }
 

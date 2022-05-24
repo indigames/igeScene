@@ -7,19 +7,6 @@ static std::wstring utf8toUtf16(const std::string& str)
 {
 	if (str.empty())
 		return std::wstring();
-
-	/*size_t charsNeeded = ::MultiByteToWideChar(CP_UTF8, 0,
-		str.data(), (int)str.size(), NULL, 0);
-	if (charsNeeded == 0)
-		return std::wstring();
-
-	std::vector<wchar_t> buffer(charsNeeded);
-	int charsConverted = ::MultiByteToWideChar(CP_UTF8, 0,
-		str.data(), (int)str.size(), &buffer[0], buffer.size());
-	if (charsConverted == 0)
-		return std::wstring();
-
-	return std::wstring(&buffer[0], charsConverted);*/
 	std::wstring wsTmp(str.begin(), str.end());
 	return wsTmp;
 }
@@ -29,31 +16,9 @@ static std::string utf16toUtf8(const std::wstring& wstr)
 	std::string retStr;
 	if (!wstr.empty())
 	{
-		/*int sizeRequired = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
-
-		if (sizeRequired > 0)
-		{
-			std::vector<char> utf8String(sizeRequired);
-			int bytesConverted = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(),
-				-1, &utf8String[0], utf8String.size(), NULL,
-				NULL);
-			if (bytesConverted != 0)
-			{
-				retStr = &utf8String[0];
-			}
-			else
-			{
-				std::stringstream err;
-				err << __FUNCTION__
-					<< " std::string WstrToUtf8Str failed to convert wstring '"
-					<< wstr.c_str() << L"'";
-				throw std::runtime_error(err.str());
-			}
-		}*/
-
 		std::transform(wstr.begin(), wstr.end(), std::back_inserter(retStr), [](wchar_t c) {
 			return (char)c;
-			});
+		});
 	}
 	return retStr;
 }

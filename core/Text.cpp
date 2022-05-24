@@ -41,7 +41,6 @@ namespace ige::scene
     {
         auto tmpPath = path;
         std::replace(tmpPath.begin(), tmpPath.end(), '\\', '/');
-        m_fontPath = tmpPath;
 
         if(m_fontPath != tmpPath)
         {

@@ -30,22 +30,11 @@ namespace ige::scene
         //! Returns the type of the component
         virtual Type getType() const override { return Type::UITextBitmap; }
 
-        virtual void setText(const std::string& text) override;
-
     protected:
-        //! Overide function UIMaskable
-        virtual EditableFigure* getCurrentFigure() override;
-        virtual SceneObject* getSceneObjectOwner() override;
-
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
         virtual void from_json(const json& j) override;
-
-        //! Text
-        std::shared_ptr<Text> m_text;
-
-        bool m_flagMask = false;
     };
 } // namespace ige::scene

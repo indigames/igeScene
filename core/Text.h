@@ -35,6 +35,7 @@ namespace ige::scene
 
         //! Font Type
         int getFontType() const { return m_fontType; }
+
         //! Figure
         EditableFigure* getFigure() { return m_figure; }
 
