@@ -572,7 +572,7 @@ namespace ige::scene
     //! Change Value
     void ScriptComponent::onChangedValue(Value value)
     {
-        Invoke("onChangedValue", value);
+        Invoke("onValueChanged", value);
     }
 
     //! Member value changed

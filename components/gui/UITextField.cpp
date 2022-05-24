@@ -73,6 +73,7 @@ namespace ige::scene
             }
             else {
                 UIText::setText(m_lastInput);
+                getOwner()->dispatchEvent((int)EventType::Changed, Value(m_lastInput));
                 m_lastInput.clear();
                 StopTextInput();
                 m_bIsInputing = false;
