@@ -35,7 +35,6 @@ namespace ige::scene
             Canvas,
             UIImage,
             UIText,
-            UITextBitmap,
             UITextField,
             UIButton,
             UISlider,

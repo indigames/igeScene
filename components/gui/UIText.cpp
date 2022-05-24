@@ -5,6 +5,9 @@
 #include "scene/SceneObject.h"
 #include "scene/Scene.h"
 
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
+
 #include "event/EventContext.h"
 
 namespace ige::scene
@@ -251,8 +254,10 @@ namespace ige::scene
     {
         auto tmpPath = path;
         std::replace(tmpPath.begin(), tmpPath.end(), '\\', '/');
-
+        auto ext = fs::path(tmpPath).extension().string();
+        m_fontType = (ext.compare(".pybm") == 0) ? 1 : 0;
         if (m_fontPath.compare(tmpPath) != 0) {
+            m_fontPath = tmpPath;
             if (m_text == nullptr) {
                 generateText(m_textData, m_fontPath, m_fontSize, m_color, m_fontType);
             }
@@ -260,7 +265,7 @@ namespace ige::scene
                 auto oldFigure = m_text->getFigure();
                 if (oldFigure)
                     onResourceRemoved(oldFigure);
-                m_text->setFontPath(tmpPath);
+                m_text->setFontPath(m_fontPath);
                 auto newFigure = m_text->getFigure();
                 if (newFigure)
                     onResourceAdded(newFigure);

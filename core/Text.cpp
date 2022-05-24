@@ -4,6 +4,9 @@
 #include <bitmapHelper.h>
 using namespace pyxie;
 
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
+
 #include <algorithm>
 
 namespace ige::scene
@@ -45,6 +48,8 @@ namespace ige::scene
         if(m_fontPath != tmpPath)
         {
             m_fontPath = tmpPath;
+            auto ext = fs::path(m_fontPath).extension().string();
+            m_fontType = (ext.compare(".pybm") == 0) ? 1 : 0;
             updateFigure();
         }
     }

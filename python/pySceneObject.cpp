@@ -17,12 +17,10 @@
 #include "python/pySpotLight.h"
 #include "python/pySpriteComponent.h"
 #include "python/pyTextComponent.h"
-#include "python/pyTextBitmapComponent.h"
 #include "python/pyRectTransform.h"
 #include "python/pyCanvas.h"
 #include "python/pyUIImage.h"
 #include "python/pyUIText.h"
-#include "python/pyUITextBitmap.h"
 #include "python/pyUITextField.h"
 #include "python/pyUIButton.h"
 #include "python/pyUISlider.h"
@@ -330,11 +328,6 @@ namespace ige::scene
                 compObj->component = self->sceneObject.lock()->addComponent<TextComponent>();
                 return (PyObject*)compObj;
             }
-            else if (type == "TextBitmap") {
-                auto compObj = (PyObject_TextBitmapComponent*)(&PyTypeObject_TextBitmapComponent)->tp_alloc(&PyTypeObject_TextBitmapComponent, 0);
-                compObj->component = self->sceneObject.lock()->addComponent<TextBitmapComponent>();
-                return (PyObject*)compObj;
-            }
             else if (type == "RectTransform") {
                 auto compObj = (PyObject_RectTransform*)(&PyTypeObject_RectTransform)->tp_alloc(&PyTypeObject_RectTransform, 0);
                 compObj->component = self->sceneObject.lock()->addComponent<RectTransform>();
@@ -353,11 +346,6 @@ namespace ige::scene
             else if (type == "UIText") {
                 auto compObj = (PyObject_UIText*)(&PyTypeObject_UIText)->tp_alloc(&PyTypeObject_UIText, 0);
                 compObj->component = self->sceneObject.lock()->addComponent<UIText>();
-                return (PyObject*)compObj;
-            }
-            else if (type == "UITextBitmap") {
-                auto compObj = (PyObject_UITextBitmap*)(&PyTypeObject_UITextBitmap)->tp_alloc(&PyTypeObject_UITextBitmap, 0);
-                compObj->component = self->sceneObject.lock()->addComponent<UITextBitmap>();
                 return (PyObject*)compObj;
             }
             else if (type == "UITextField") {
@@ -618,14 +606,6 @@ namespace ige::scene
                 return (PyObject*)compObj;
             }
         }
-        else if (type == "TextBitmap") {
-            auto comp = sceneObject->getComponent<TextBitmapComponent>();
-            if (comp) {
-                auto* compObj = (PyObject_TextBitmapComponent*)(&PyTypeObject_TextBitmapComponent)->tp_alloc(&PyTypeObject_TextBitmapComponent, 0);
-                compObj->component = comp;
-                return (PyObject*)compObj;
-            }
-        }
         else if (type == "RectTransform") {
             auto comp = sceneObject->getRectTransform();
             if (comp) {
@@ -654,14 +634,6 @@ namespace ige::scene
             auto comp = sceneObject->getComponent<UIText>();
             if (comp) {
                 auto* compObj = (PyObject_UIText*)(&PyTypeObject_UIText)->tp_alloc(&PyTypeObject_UIText, 0);
-                compObj->component = comp;
-                return (PyObject*)compObj;
-            }
-        }
-        else if (type == "UITextBitmap") {
-            auto comp = sceneObject->getComponent<UITextBitmap>();
-            if (comp) {
-                auto* compObj = (PyObject_UITextBitmap*)(&PyTypeObject_UITextBitmap)->tp_alloc(&PyTypeObject_UITextBitmap, 0);
                 compObj->component = comp;
                 return (PyObject*)compObj;
             }

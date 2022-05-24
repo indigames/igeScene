@@ -9,7 +9,6 @@
 #include "components/SpriteComponent.h"
 #include "components/TransformComponent.h"
 #include "components/TextComponent.h"
-#include "components/TextBitmapComponent.h"
 
 #include "components/audio/AudioListener.h"
 #include "components/audio/AudioSource.h"
@@ -40,5 +39,4 @@
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
 #include "components/gui/UIText.h"
-#include "components/gui/UITextBitmap.h"
 #endif

@@ -22,12 +22,10 @@
 #include "python/pySpotLight.h"
 #include "python/pySpriteComponent.h"
 #include "python/pyTextComponent.h"
-#include "python/pyTextBitmapComponent.h"
 #include "python/pyRectTransform.h"
 #include "python/pyCanvas.h"
 #include "python/pyUIImage.h"
 #include "python/pyUIText.h"
-#include "python/pyUITextBitmap.h"
 #include "python/pyUITextField.h"
 #include "python/pyUIButton.h"
 #include "python/pyUISlider.h"
@@ -159,10 +157,6 @@ PyMODINIT_FUNC PyInit_igeScene()
     Py_INCREF(&PyTypeObject_TextComponent);
     PyModule_AddObject(module, "Text", (PyObject*)&PyTypeObject_TextComponent);
 
-    if (PyType_Ready(&PyTypeObject_TextBitmapComponent) < 0) return NULL;
-    Py_INCREF(&PyTypeObject_TextBitmapComponent);
-    PyModule_AddObject(module, "TextBitmap", (PyObject*)&PyTypeObject_TextBitmapComponent);
-
     if (PyType_Ready(&PyTypeObject_RectTransform) < 0) return NULL;
     Py_INCREF(&PyTypeObject_RectTransform);
     PyModule_AddObject(module, "RectTransform", (PyObject*)&PyTypeObject_RectTransform);
@@ -178,10 +172,6 @@ PyMODINIT_FUNC PyInit_igeScene()
     if (PyType_Ready(&PyTypeObject_UIText) < 0) return NULL;
     Py_INCREF(&PyTypeObject_UIText);
     PyModule_AddObject(module, "UIText", (PyObject*)&PyTypeObject_UIText);
-
-    if (PyType_Ready(&PyTypeObject_UITextBitmap) < 0) return NULL;
-    Py_INCREF(&PyTypeObject_UITextBitmap);
-    PyModule_AddObject(module, "UITextBitmap", (PyObject*)&PyTypeObject_UITextBitmap);
 
     if (PyType_Ready(&PyTypeObject_UITextField) < 0) return NULL;
     Py_INCREF(&PyTypeObject_UITextField);
