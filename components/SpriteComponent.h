@@ -120,8 +120,8 @@ namespace ige::scene
 
     protected:
         //! Utils to add/remove resouce from showcase
-        void onResourceAdded(Resource* res);
-        void onResourceRemoved(Resource* res);
+        virtual void onResourceAdded(Resource* res);
+        virtual void onResourceRemoved(Resource* res);
         bool m_bResAdded = false;
 
         const Vec4& getBorder() const { return m_sprite->getBorder(); }

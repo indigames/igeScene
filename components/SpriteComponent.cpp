@@ -304,8 +304,8 @@ namespace ige::scene
     //! Deserialize
     void SpriteComponent::from_json(const json &j)
     {
-        setSize(j.value("size", Vec2(64, 64)));
         setPath(j.value("path", ""));
+        setSize(j.value("size", Vec2(64, 64)));
         setBillboard(j.value("billboard", false));
         setTiling(j.value("tiling", Vec2(1, 1)));
         setOffset(j.value("offset", Vec2(0, 0)));

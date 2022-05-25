@@ -20,14 +20,14 @@ namespace fs = ghc::filesystem;
 NS_IGE_SCENE_BEGIN
 
 UIMask::UIMask(SceneObject& owner, const std::string& texture, const Vec2& size) :
-	UIImage(owner, "", size, false, Vec4()), 
+	UIImage(owner, "sprites/white", size, false, Vec4()), 
     m_bUseMask(true), m_maskDirty(true)
 {
     m_bIsInteractable = false;
     getOwner()->setIsInteractable(m_bIsInteractable);
     getOwner()->setIsRaycastTarget(m_bIsInteractable);
-
     getOwner()->addEventListener((int)EventType::AddChild, std::bind(&UIMask::onAddChild, this, std::placeholders::_1), m_instanceId);
+    setAlpha(0.012f);
 }
 
 UIMask::~UIMask()
@@ -56,7 +56,6 @@ void UIMask::updateMask()
         figure->SetShaderName(0, shaderDesc->GetValue());
 
         int materialIdx = figure->GetMaterialIndex(GenerateNameHash("mate"));
-
         const ShaderParameterInfo* paramInfo = RenderContext::Instance().GetShaderParameterInfoByName("stencil_test_enable");
         uint32_t stencilEnableVal[4] = { 1,0,0,0 };
         figure->SetMaterialState(materialIdx, (ShaderParameterKey)paramInfo->key, stencilEnableVal);
@@ -69,15 +68,6 @@ void UIMask::updateMask()
         const ShaderParameterInfo* opInfo = RenderContext::Instance().GetShaderParameterInfoByName("stencil_op");
         uint32_t opVal[4] = { GL_REPLACE,GL_REPLACE,GL_REPLACE,0 };
         figure->SetMaterialState(materialIdx, (ShaderParameterKey)opInfo->key, opVal);
-        /*const ShaderParameterInfo* colorInfo = RenderContext::Instance().GetShaderParameterInfoByName("color_mask");
-        uint32_t colorVal[4] = { 0,0,0,1 };
-        figure->SetMaterialState(materialIdx, (ShaderParameterKey)colorInfo->key, colorVal);*/
-
-        
-    }
-    else
-    {
-
     }
 
     auto children = getOwner()->getChildren();
@@ -145,7 +135,7 @@ void UIMask::onRender()
 }
 
 void UIMask::setPath(const std::string& path) {
-    UIImage::setPath("");
+    UIImage::setPath(path);
 }
 
 //! Enable
@@ -169,8 +159,8 @@ void UIMask::to_json(json& j) const
 //! Deserialize
 void UIMask::from_json(const json& j)
 {
-    setUseMask((j.value("usemask", true)));
     UIImage::from_json(j);
+    setUseMask((j.value("usemask", true)));
 }
 
 //! Update property by key value

@@ -12,8 +12,8 @@ namespace ige::scene
     {
         setSpriteType(isSliced ? (int)SpriteType::Sliced : (int)SpriteType::Simple);
         setBorder(border);
-        setStencilMask(getOwner()->isInMask() ? 1 : -1);
         getOwner()->addEventListener((int)EventType::SetParent, std::bind(&UIImage::onSetParent, this, std::placeholders::_1), m_instanceId);
+        setStencilMask(getOwner()->isInMask() ? 1 : -1);
     }
 
     //! Destructor
@@ -107,6 +107,13 @@ namespace ige::scene
     EditableFigure* UIImage::getCurrentFigure() { return getFigure(); }
     SceneObject* UIImage::getSceneObjectOwner() { return getOwner(); }
 
+    void UIImage::onResourceAdded(Resource* res) {
+        SpriteComponent::onResourceAdded(res);
+        if (res != nullptr) {
+            setStencilMask(getOwner()->isInMask() ? 1 : -1);
+        }
+    }
+
     //! Serialize
     void UIImage::to_json(json &j) const
     {
@@ -117,8 +124,8 @@ namespace ige::scene
     //! Deserialize
     void UIImage::from_json(const json &j)
     {
-        setInteractable(j.value("interactable", false));
         SpriteComponent::from_json(j);
+        setInteractable(j.value("interactable", false));
     }
 
     //! Update property by key value

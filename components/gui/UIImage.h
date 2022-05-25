@@ -67,6 +67,8 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json &j) override;
 
+        //! Resource added event
+        virtual void onResourceAdded(Resource* res) override;
 
         //! Overide function UIMaskable
         virtual EditableFigure* getCurrentFigure() override;

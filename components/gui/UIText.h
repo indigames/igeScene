@@ -98,8 +98,6 @@ namespace ige::scene
 
         //! Text
         std::shared_ptr<Text> m_text;
-
-        bool m_flagMask = false;
         std::string m_textData = "";
         std::string m_fontPath = "";
         int m_fontSize = 11;
