@@ -39,7 +39,7 @@ UIScrollBar::UIScrollBar(SceneObject& owner, const std::string& texture, const V
     getOwner()->addEventListener((int)EventType::TouchEnd, std::bind(&UIScrollBar::_onTouchRelease, this, std::placeholders::_1), m_instanceId);
     getOwner()->addEventListener((int)EventType::TouchMove, std::bind(&UIScrollBar::_onTouchDrag, this, std::placeholders::_1), m_instanceId);
     getOwner()->addEventListener((int)EventType::Click, std::bind(&UIScrollBar::_onClick, this, std::placeholders::_1), m_instanceId);
-    
+
     m_rect = getOwner()->getRectTransform();
 }
 
@@ -214,21 +214,13 @@ void UIScrollBar::_update()
 {
     if (m_rectHandle == nullptr)
         return;
-    Vec2 anchorMin(0, 0);
-    Vec2 anchorMax(1, 1);
+    Vec2 anchorMin(0.f, 0.f);
+    Vec2 anchorMax(1.f, 1.f);
     auto offset = m_rectHandle->getOffset();
-    float movement = MATH_CLAMP(1 - m_value, 0, 1.0f) * (1 - m_size);
     AxisBar axis = getAxisBar();
-    if (isReverseValue())
-    {
-        anchorMin[(int)axis] = 1 - movement - m_size;
-        anchorMax[(int)axis] = 1 - movement;
-    }
-    else
-    {
-        anchorMin[(int)axis] = movement;
-        anchorMax[(int)axis] = movement + m_size;
-    }
+    float movement = MATH_CLAMP(isReverseValue() ? m_value : (1.f - m_value), 0.f, 1.f) * (1.f - m_size);
+    anchorMin[(int)axis] = movement;
+    anchorMax[(int)axis] = (movement + m_size);
     m_rectHandle->setAnchor(Vec4(anchorMin[0], anchorMin[1], anchorMax[0], anchorMax[1]));
     m_rectHandle->setOffset(offset);
 }
@@ -353,6 +345,11 @@ void UIScrollBar::setHandle(std::shared_ptr<SceneObject> obj)
         if (obj->getParent() != nullptr) {
             m_rectArea = std::dynamic_pointer_cast<RectTransform>(obj->getParent()->getTransform());
         }
+
+        // force update handle size and position
+        auto val = m_value;
+        m_value = -1.f;
+        setValue(val);
     }
     else
     {

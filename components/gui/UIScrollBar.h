@@ -61,6 +61,7 @@ public:
 
 	float getValue() const { return m_value; }
 	void setValue(float value);
+
 	//! not invoke onValueChanged
 	void setValueWithoutNotify(float value);
 

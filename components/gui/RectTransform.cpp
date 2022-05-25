@@ -412,6 +412,8 @@ namespace ige::scene
                     }
                 }
             }
+
+            updateRect();
         }
     }
 
