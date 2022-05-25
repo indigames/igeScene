@@ -174,7 +174,7 @@ namespace ige::scene
         m_activeCamera.reset();
         m_root = nullptr;
         m_rootUI = nullptr;
-        m_canvas = nullptr;
+        m_canvas.reset();
 
         removeAllObjects();
 
@@ -366,13 +366,15 @@ namespace ige::scene
         auto parentObject = parent ? parent : m_root;
         if (name.compare("Canvas") != 0) {
             if (isGUI) {
-                parentObject = parentObject->isGUIObject() ? parentObject : m_canvas ? m_canvas->getOwner()->getSharedPtr() : m_rootUI;
+                parentObject = parentObject->isGUIObject() ? parentObject : !m_canvas.expired() ? m_canvas.lock()->getOwner()->getSharedPtr() : m_rootUI;
                 if (parentObject == m_rootUI) {
-                    auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", true, size, prefabId);
+                    auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", true);
                     m_objects.push_back(canvasObject);
                     m_canvas = canvasObject->addComponent<Canvas>();
-                    m_canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
-                    m_canvas->setTargetCanvasSize(Vec2(540.f, 960.f));
+                    if (!m_canvas.expired()) {
+                        m_canvas.lock()->setDesignCanvasSize(Vec2(540.f, 960.f));
+                        m_canvas.lock()->setTargetCanvasSize(Vec2(540.f, 960.f));
+                    }
                     canvasObject->setParent(parentObject);
                     parentObject = canvasObject;
                 }
@@ -1185,12 +1187,12 @@ namespace ige::scene
         float distance, minDistance = 100.0f;
 
         bool m_isEnd = false;
-        std::shared_ptr<SceneObject> m_node = m_canvas->getOwner()->getSharedPtr();
-        hit = findIntersectInHierachy(m_node, ray);
-        if(hit.first != nullptr && hit.first->isInteractable() && hit.first->isActive()) m_raycastCapture = true;
-        else if (hit.first == nullptr) {
-            if (m_canvas) {
-                hit.first = m_canvas->getOwner()->getSharedPtr();
+        if (!m_canvas.expired()) {
+            std::shared_ptr<SceneObject> m_node = m_canvas.lock()->getOwner()->getSharedPtr();
+            hit = findIntersectInHierachy(m_node, ray);
+            if (hit.first != nullptr && hit.first->isInteractable() && hit.first->isActive()) m_raycastCapture = true;
+            else if (hit.first == nullptr) {
+                hit.first = m_canvas.lock()->getOwner()->getSharedPtr();
                 hit.second = raycastCanvas(screenPos);
             }
         }
@@ -1347,7 +1349,7 @@ namespace ige::scene
             }
         }
 
-        if (m_canvas == nullptr) {
+        if (m_canvas.expired()) {
             auto canvas = findObjectByName("Canvas");
             if (canvas != nullptr) {
                 m_canvas = canvas->getComponent<Canvas>();
