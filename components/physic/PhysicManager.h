@@ -12,8 +12,8 @@
 
 #include "scene/SceneObject.h"
 #include "components/Component.h"
-#include "components/physic/PhysicObject.h"
-#include "components/physic/PhysicSoftBody.h"
+#include "components/physic/Rigidbody.h"
+#include "components/physic/Softbody.h"
 #include "components/physic/PhysicConstraint.h"
 #include "components/physic/BulletDebugRender.h"
 
@@ -147,12 +147,12 @@ namespace ige::scene
         static bool collisionCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2);
 
         //! Create/Destroy event
-        void onCreated(PhysicObject* object);
-        void onDestroyed(PhysicObject* object);
+        void onCreated(Rigidbody* object);
+        void onDestroyed(Rigidbody* object);
 
         //! Activate/Deactivate event
-        void onActivated(PhysicObject* object);
-        void onDeactivated(PhysicObject* object);
+        void onActivated(Rigidbody* object);
+        void onDeactivated(Rigidbody* object);
 
         //! Constraint activated/deactivated event
         void onActivated(PhysicConstraint* constraint);
@@ -195,10 +195,10 @@ namespace ige::scene
         btVector3 m_gravity = {0.f, -9.81f, 0.f};
 
         //! Collision event map
-        static std::map< std::pair<PhysicObject*, PhysicObject*>, bool> m_collisionEvents;
+        static std::map< std::pair<Rigidbody*, Rigidbody*>, bool> m_collisionEvents;
 
         //! Physic objects list
-        std::vector<PhysicObject*> m_physicObjects;
+        std::vector<Rigidbody*> m_rigidbodys;
 
         //! Debug renderer
         std::unique_ptr<BulletDebugRender> m_debugRenderer = nullptr;

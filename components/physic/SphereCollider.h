@@ -3,25 +3,25 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "components/physic/PhysicObject.h"
+#include "components/physic/Collider.h"
 
 namespace ige::scene
 {
-    //! PhysicSphere
-    class PhysicSphere : public PhysicObject
+    //! SphereCollider
+    class SphereCollider : public Collider
     {
     public:
         //! Constructor
-        PhysicSphere(SceneObject &owner, float radius = 1.f);
+        SphereCollider(SceneObject &owner, float radius = 1.f);
 
         //! Destructor
-        virtual ~PhysicSphere();
+        virtual ~SphereCollider();
 
         //! Get name
-        std::string getName() const override { return "PhysicSphere"; }
+        std::string getName() const override { return "SphereCollider"; }
 
         //! Returns the type of the component
-        virtual Type getType() const override { return Type::PhysicSphere; }
+        virtual Type getType() const override { return Type::SphereCollider; }
 
         //! Get radius
         float getRadius() const;
@@ -40,13 +40,10 @@ namespace ige::scene
         virtual void from_json(const json& j) override;
 
         //! Create collision shape
-        void createCollisionShape(float radius);
-
-        //! Recreate collision shape once radius changed
-        void recreateCollisionShape(float radius);
+        virtual void createShape() override;
 
         //! Set local scale of the box
-        virtual void setLocalScale(const Vec3 &scale) override;
+        virtual void setScale(const Vec3 &scale) override;
 
     protected:
         float m_radius;

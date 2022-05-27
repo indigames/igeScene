@@ -3,25 +3,25 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "components/physic/PhysicObject.h"
+#include "components/physic/Collider.h"
 
 namespace ige::scene
 {
-    //! PhysicCapsule
-    class PhysicCapsule : public PhysicObject
+    //! CapsuleCollider
+    class CapsuleCollider : public Collider
     {
     public:
         //! Constructor
-        PhysicCapsule(SceneObject &owner, float radius = 1.f, float height = 1.f);
+        CapsuleCollider(SceneObject &owner, float radius = 1.f, float height = 1.f);
 
         //! Destructor
-        virtual ~PhysicCapsule();
+        virtual ~CapsuleCollider();
 
         //! Get name
-        std::string getName() const override { return "PhysicCapsule"; }
+        std::string getName() const override { return "CapsuleCollider"; }
 
         //! Returns the type of the component
-        virtual Type getType() const override { return Type::PhysicCapsule; }
+        virtual Type getType() const override { return Type::CapsuleCollider; }
 
         //! Get radius
         float getRadius() const;
@@ -46,10 +46,7 @@ namespace ige::scene
         virtual void from_json(const json& j) override;
 
         //! Create collision shape
-        void createCollisionShape(float radius, float height);
-
-        //! Recreate collision shape once size changed
-        void recreateCollisionShape(float radius, float height);
+        virtual void createShape() override;
 
     protected:
         //! Radius

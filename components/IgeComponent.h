@@ -19,11 +19,11 @@
 #include "components/light/PointLight.h"
 #include "components/light/SpotLight.h"
 
-#include "components/physic/PhysicObject.h"
-#include "components/physic/PhysicBox.h"
-#include "components/physic/PhysicCapsule.h"
-#include "components/physic/PhysicSphere.h"
-#include "components/physic/PhysicSoftBody.h"
+#include "components/physic/Rigidbody.h"
+#include "components/physic/BoxCollider.h"
+#include "components/physic/CapsuleCollider.h"
+#include "components/physic/SphereCollider.h"
+#include "components/physic/Softbody.h"
 
 #include "components/particle/Particle.h"
 
@@ -32,8 +32,8 @@
 #include "components/navigation/DynamicNavMesh.h"
 #include "components/navigation/NavAgent.h"
 #include "components/navigation/Navigable.h"
-#include "components/navigation/NavObstacle.h"
 #include "components/navigation/OffMeshLink.h"
+#include "components/navigation/NavObstacle.h"
 
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"

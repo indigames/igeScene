@@ -1,5 +1,5 @@
-#include "python/pyPhysicObject.h"
-#include "python/pyPhysicObject_doc_en.h"
+#include "python/pyRigidbody.h"
+#include "python/pyRigidbody_doc_en.h"
 #include "python/pyPhysicConstraint.h"
 #include "python/pyFixedConstraint.h"
 #include "python/pyHingeConstraint.h"
@@ -7,7 +7,7 @@
 #include "python/pySpringConstraint.h"
 #include "python/pyDof6Constraint.h"
 
-#include "components/physic/PhysicObject.h"
+#include "components/physic/Rigidbody.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"
@@ -18,7 +18,7 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    void PhysicObject_dealloc(PyObject_PhysicObject *self)
+    void Rigidbody_dealloc(PyObject_Rigidbody *self)
     {
         if (self) {
             self->component.reset();
@@ -26,13 +26,13 @@ namespace ige::scene
         }
     }
 
-    PyObject *PhysicObject_str(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_str(PyObject_Rigidbody *self)
     {
-        return PyUnicode_FromString("C++ PhysicObject object");
+        return PyUnicode_FromString("C++ Rigidbody object");
     }
 
     //! Apply torque
-    PyObject *PhysicObject_applyTorque(PyObject_PhysicObject *self, PyObject *value)
+    PyObject *Rigidbody_applyTorque(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) Py_RETURN_NONE;
         PyObject* pyObj;
@@ -41,14 +41,14 @@ namespace ige::scene
             float buff[4];
             auto v = pyObjToFloat((PyObject*)pyObj, buff, d);
             if (v && d >= 3) {
-                std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyTorque(PhysicHelper::to_btVector3(*((Vec3*)v)));
+                std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->applyTorque(PhysicHelper::to_btVector3(*((Vec3*)v)));
             }
         }
         Py_RETURN_NONE;
     }
 
     //! Apply torque impulse
-    PyObject *PhysicObject_applyTorqueImpulse(PyObject_PhysicObject *self, PyObject *value)
+    PyObject *Rigidbody_applyTorqueImpulse(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) Py_RETURN_NONE;
         PyObject* pyObj;
@@ -57,14 +57,14 @@ namespace ige::scene
             float buff[4];
             auto v = pyObjToFloat((PyObject*)pyObj, buff, d);
             if (v && d >= 3) {
-                std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyTorqueImpulse(PhysicHelper::to_btVector3(*((Vec3*)v)));
+                std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->applyTorqueImpulse(PhysicHelper::to_btVector3(*((Vec3*)v)));
             }
         }
         Py_RETURN_NONE;
     }
 
     //! Apply force
-    PyObject *PhysicObject_applyForce(PyObject_PhysicObject *self, PyObject *value)
+    PyObject *Rigidbody_applyForce(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) Py_RETURN_NONE;
         PyObject* pyObj, * pyPosObj = nullptr;
@@ -77,11 +77,11 @@ namespace ige::scene
                     if (pyPosObj) {
                         auto pos = pyObjToFloat((PyObject*)pyPosObj, buff, d);
                         if (pos && d >= 3) {
-                            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyForce(PhysicHelper::to_btVector3(*((Vec3*)v)), PhysicHelper::to_btVector3(*((Vec3*)pos)));
+                            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->applyForce(PhysicHelper::to_btVector3(*((Vec3*)v)), PhysicHelper::to_btVector3(*((Vec3*)pos)));
                             Py_RETURN_NONE;
                         }
                     }
-                    std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyForce(PhysicHelper::to_btVector3(*((Vec3*)v)));
+                    std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->applyForce(PhysicHelper::to_btVector3(*((Vec3*)v)));
                 }
             }
         }
@@ -89,7 +89,7 @@ namespace ige::scene
     }
 
     //! Apply impulse
-    PyObject *PhysicObject_applyImpulse(PyObject_PhysicObject *self, PyObject *value)
+    PyObject *Rigidbody_applyImpulse(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) Py_RETURN_NONE;
         PyObject* pyObj, * pyPosObj = nullptr;
@@ -102,11 +102,11 @@ namespace ige::scene
                     if (pyPosObj) {
                         auto pos = pyObjToFloat((PyObject*)pyPosObj, buff, d);
                         if (pos && d >= 3) {
-                            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyImpulse(PhysicHelper::to_btVector3(*((Vec3*)v)), PhysicHelper::to_btVector3(*((Vec3*)pos)));
+                            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->applyImpulse(PhysicHelper::to_btVector3(*((Vec3*)v)), PhysicHelper::to_btVector3(*((Vec3*)pos)));
                             Py_RETURN_NONE;
                         }
                     }
-                    std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->applyImpulse(PhysicHelper::to_btVector3(*((Vec3*)v)));
+                    std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->applyImpulse(PhysicHelper::to_btVector3(*((Vec3*)v)));
                 }
             }
         }
@@ -114,21 +114,21 @@ namespace ige::scene
     }
 
     //! Clear forces
-    PyObject *PhysicObject_clearForces(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_clearForces(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->clearForces();
+        std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->clearForces();
         Py_RETURN_NONE;
     }
 
     //! Add constraint
-    PyObject* PhysicObject_addConstraint(PyObject_PhysicObject* self, PyObject* value)
+    PyObject* Rigidbody_addConstraint(PyObject_Rigidbody* self, PyObject* value)
     {
         if (self->component.expired()) Py_RETURN_NONE;
         int type = -1;
         if (PyArg_ParseTuple(value, "i", &type))
         {
-            auto constraint = std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->addConstraint(type);
+            auto constraint = std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->addConstraint(type);
             if (constraint != nullptr)
             {
                 switch (type)
@@ -175,7 +175,7 @@ namespace ige::scene
     }
 
     //! Remove constraint
-    PyObject* PhysicObject_removeConstraint(PyObject_PhysicObject* self, PyObject* value)
+    PyObject* Rigidbody_removeConstraint(PyObject_Rigidbody* self, PyObject* value)
     {
         if (self->component.expired()) Py_RETURN_NONE;
         if (value->ob_type == &PyTypeObject_PhysicConstraint || value->ob_type == &PyTypeObject_FixedConstraint || value->ob_type == &PyTypeObject_HingeConstraint ||
@@ -184,7 +184,7 @@ namespace ige::scene
             auto pyConst = (PyObject_PhysicConstraint*)value;
             if (pyConst && pyConst->constraint)
             {
-                std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->removeConstraint(pyConst->constraint);
+                std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->removeConstraint(pyConst->constraint);
                 Py_RETURN_TRUE;
             }
         }
@@ -192,13 +192,13 @@ namespace ige::scene
     }
 
     //! Get all constraints
-    PyObject* PhysicObject_getConstraints(PyObject_PhysicObject* self)
+    PyObject* Rigidbody_getConstraints(PyObject_Rigidbody* self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        auto len = std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getContraints().size();
+        auto len = std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getContraints().size();
         if (len > 0)
         {
-            auto constraints = std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getContraints();
+            auto constraints = std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getContraints();
             auto compTuple = PyTuple_New(len);
             for (int i = 0; i < len; ++i)
             {
@@ -266,78 +266,78 @@ namespace ige::scene
     }
 
     //! Remove all constraints
-    PyObject* PhysicObject_removeConstraints(PyObject_PhysicObject* self)
+    PyObject* Rigidbody_removeConstraints(PyObject_Rigidbody* self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->removeAllConstraints();
+        std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->removeAllConstraints();
         Py_RETURN_TRUE;
     }
 
     //! Mass
-    PyObject *PhysicObject_getMass(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_getMass(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getMass());
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getMass());
     }
 
-    int PhysicObject_setMass(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setMass(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setMass(val);
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setMass(val);
             return 0;
         }
         return -1;
     }
 
     //! Friction
-    PyObject *PhysicObject_getFriction(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_getFriction(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getFriction());
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getFriction());
     }
 
-    int PhysicObject_setFriction(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setFriction(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setFriction(val);
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setFriction(val);
             return 0;
         }
         return -1;
     }
 
     //! Restitution
-    PyObject *PhysicObject_getRestitution(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_getRestitution(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getRestitution());
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getRestitution());
     }
 
-    int PhysicObject_setRestitution(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setRestitution(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setRestitution(val);
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setRestitution(val);
             return 0;
         }
         return -1;
     }
 
     //! Linear velocity
-    PyObject *PhysicObject_getLinearVelocity(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_getLinearVelocity(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getLinearVelocity()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getLinearVelocity()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
-    int PhysicObject_setLinearVelocity(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setLinearVelocity(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         int d;
@@ -345,21 +345,21 @@ namespace ige::scene
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setLinearVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setLinearVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         return 0;
     }
 
     //! Angular velocity
-    PyObject *PhysicObject_getAngularVelocity(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_getAngularVelocity(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getAngularVelocity()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getAngularVelocity()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
-    int PhysicObject_setAngularVelocity(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setAngularVelocity(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         int d;
@@ -367,21 +367,21 @@ namespace ige::scene
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setAngularVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setAngularVelocity(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         return 0;
     }
 
     //! Linear factor
-    PyObject *PhysicObject_getLinearFactor(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_getLinearFactor(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getLinearFactor()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getLinearFactor()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
-    int PhysicObject_setLinearFactor(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setLinearFactor(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         int d;
@@ -389,21 +389,21 @@ namespace ige::scene
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setLinearFactor(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setLinearFactor(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         return 0;
     }
 
     //! Angular factor
-    PyObject *PhysicObject_getAngularFactor(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_getAngularFactor(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getAngularFactor()).P(), 3, vec3Obj->v);
+        vmath_cpy(PhysicHelper::from_btVector3(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getAngularFactor()).P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject *)vec3Obj;
     }
 
-    int PhysicObject_setAngularFactor(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setAngularFactor(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         int d;
@@ -411,118 +411,118 @@ namespace ige::scene
         auto v = pyObjToFloat((PyObject *)value, buff, d);
         if (!v)
             return -1;
-        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setAngularFactor(PhysicHelper::to_btVector3(*((Vec3 *)v)));
+        std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setAngularFactor(PhysicHelper::to_btVector3(*((Vec3 *)v)));
         return 0;
     }
 
-    PyObject* PhysicObject_getLinearSleepingThreshold(PyObject_PhysicObject* self)
+    PyObject* Rigidbody_getLinearSleepingThreshold(PyObject_Rigidbody* self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getLinearSleepingThreshold());
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getLinearSleepingThreshold());
     }
 
-    int PhysicObject_setLinearSleepingThreshold(PyObject_PhysicObject* self, PyObject* value)
+    int Rigidbody_setLinearSleepingThreshold(PyObject_Rigidbody* self, PyObject* value)
     {
         if (self->component.expired()) return -1;
         if (PyLong_Check(value)) {
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setLinearSleepingThreshold((uint32_t)PyLong_AsLong(value));
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setLinearSleepingThreshold((uint32_t)PyLong_AsLong(value));
             return 0;
         }
         return -1;
     }
 
-    PyObject* PhysicObject_getAngularSleepingThreshold(PyObject_PhysicObject* self)
+    PyObject* Rigidbody_getAngularSleepingThreshold(PyObject_Rigidbody* self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getAngularSleepingThreshold());
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getAngularSleepingThreshold());
     }
 
-    int PhysicObject_setAngularSleepingThreshold(PyObject_PhysicObject* self, PyObject* value)
+    int Rigidbody_setAngularSleepingThreshold(PyObject_Rigidbody* self, PyObject* value)
     {
         if (self->component.expired()) return -1;
         if (PyLong_Check(value)) {
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setAngularSleepingThreshold((uint32_t)PyLong_AsLong(value));
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setAngularSleepingThreshold((uint32_t)PyLong_AsLong(value));
             return 0;
         }
         return -1;
     }
 
-    PyObject* PhysicObject_getActivationState(PyObject_PhysicObject* self)
+    PyObject* Rigidbody_getActivationState(PyObject_Rigidbody* self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyLong_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getActivationState());
+        return PyLong_FromLong(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getActivationState());
     }
 
-    int PhysicObject_setActivationState(PyObject_PhysicObject* self, PyObject* value)
+    int Rigidbody_setActivationState(PyObject_Rigidbody* self, PyObject* value)
     {
         if (self->component.expired()) return -1;
         if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setActivationState(val);
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setActivationState(val);
             return 0;
         }
         return -1;
     }
 
     //! Indicate object is a trigger object
-    PyObject *PhysicObject_isTrigger(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_isTrigger(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->isTrigger());
+        return PyBool_FromLong(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->isTrigger());
     }
 
-    int PhysicObject_setIsTrigger(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setIsTrigger(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setIsTrigger(val);
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setIsTrigger(val);
             return 0;
         }
         return -1;
     }
 
     //! Indicate object is a kinematic object
-    PyObject *PhysicObject_isKinematic(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_isKinematic(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->isKinematic());
+        return PyBool_FromLong(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->isKinematic());
     }
 
-    int PhysicObject_setIsKinematic(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setIsKinematic(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setIsKinematic(val);
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setIsKinematic(val);
             return 0;
         }
         return -1;
     }
 
     //! Enable/Disable physic component
-    PyObject *PhysicObject_isEnabled(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_isEnabled(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->isEnabled());
+        return PyBool_FromLong(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->isEnabled());
     }
 
-    int PhysicObject_setEnabled(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setEnabled(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setEnabled(val);
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setEnabled(val);
             return 0;
         }
         return -1;
     }
 
     //! Get AABB
-    PyObject *PhysicObject_getAABB(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_getAABB(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        auto aabb = std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getAABB();
+        auto aabb = std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getAABB();
 
         vec_obj *min = PyObject_New(vec_obj, _Vec3Type);
         vec_obj *max = PyObject_New(vec_obj, _Vec3Type);
@@ -543,70 +543,70 @@ namespace ige::scene
     }
 
     //! Collision group
-    PyObject *PhysicObject_getCollisionFilterGroup(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_getCollisionFilterGroup(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyLong_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getCollisionFilterGroup());
+        return PyLong_FromLong(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getCollisionFilterGroup());
     }
 
-    int PhysicObject_setCollisionFilterGroup(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setCollisionFilterGroup(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setCollisionFilterGroup(val);
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setCollisionFilterGroup(val);
             return 0;
         }
         return -1;
     }
 
     //! Collision mask
-    PyObject *PhysicObject_getCollisionFilterMask(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_getCollisionFilterMask(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyLong_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getCollisionFilterMask());
+        return PyLong_FromLong(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getCollisionFilterMask());
     }
 
-    int PhysicObject_setCollisionFilterMask(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setCollisionFilterMask(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setCollisionFilterMask(val);
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setCollisionFilterMask(val);
             return 0;
         }
         return -1;
     }
 
     //! Continuos Collision Detection mode
-    PyObject *PhysicObject_isCCD(PyObject_PhysicObject *self)
+    PyObject *Rigidbody_isCCD(PyObject_Rigidbody *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->isCCD());
+        return PyBool_FromLong(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->isCCD());
     }
 
-    int PhysicObject_setCCD(PyObject_PhysicObject *self, PyObject *value)
+    int Rigidbody_setCCD(PyObject_Rigidbody *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value) != 0;
-            std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setCCD(val);
+            std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setCCD(val);
             return 0;
         }
         return -1;
     }
 
     //! Position offset
-    PyObject* PhysicObject_getOffset(PyObject_PhysicObject* self)
+    PyObject* Rigidbody_getOffset(PyObject_Rigidbody* self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
         auto vec3Obj = PyObject_New(vec_obj, _Vec3Type);
-        vmath_cpy(std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->getPositionOffset().P(), 3, vec3Obj->v);
+        vmath_cpy(std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->getPositionOffset().P(), 3, vec3Obj->v);
         vec3Obj->d = 3;
         return (PyObject*)vec3Obj;
     }
 
-    int PhysicObject_setOffset(PyObject_PhysicObject* self, PyObject* value)
+    int Rigidbody_setOffset(PyObject_Rigidbody* self, PyObject* value)
     {
         if (self->component.expired()) return -1;
         int d;
@@ -614,52 +614,52 @@ namespace ige::scene
         auto v = pyObjToFloat((PyObject*)value, buff, d);
         if (!v || d < 3)
             return -1;
-        std::dynamic_pointer_cast<PhysicObject>(self->component.lock())->setPositionOffset(*((Vec3*)v));
+        std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->setPositionOffset(*((Vec3*)v));
         return 0;
     }
 
     // Methods definition
-    PyMethodDef PhysicObject_methods[] = {
-        {"applyTorque", (PyCFunction)PhysicObject_applyTorque, METH_VARARGS, PhysicObject_applyTorque_doc},
-        {"applyTorqueImpulse", (PyCFunction)PhysicObject_applyTorqueImpulse, METH_VARARGS, PhysicObject_applyTorqueImpulse_doc},
-        {"applyForce", (PyCFunction)PhysicObject_applyForce, METH_VARARGS, PhysicObject_applyForce_doc},
-        {"applyImpulse", (PyCFunction)PhysicObject_applyImpulse, METH_VARARGS, PhysicObject_applyImpulse_doc},
-        {"clearForces", (PyCFunction)PhysicObject_clearForces, METH_NOARGS, PhysicObject_clearForces_doc},
-        {"addConstraint", (PyCFunction)PhysicObject_addConstraint, METH_VARARGS, PhysicObject_addConstraint_doc},
-        {"removeConstraint", (PyCFunction)PhysicObject_removeConstraint, METH_VARARGS, PhysicObject_removeConstraint_doc},
-        {"getConstraints", (PyCFunction)PhysicObject_getConstraints, METH_NOARGS, PhysicObject_getConstraints_doc},
-        {"removeConstraints", (PyCFunction)PhysicObject_removeConstraints, METH_NOARGS, PhysicObject_removeConstraints_doc},
+    PyMethodDef Rigidbody_methods[] = {
+        {"applyTorque", (PyCFunction)Rigidbody_applyTorque, METH_VARARGS, Rigidbody_applyTorque_doc},
+        {"applyTorqueImpulse", (PyCFunction)Rigidbody_applyTorqueImpulse, METH_VARARGS, Rigidbody_applyTorqueImpulse_doc},
+        {"applyForce", (PyCFunction)Rigidbody_applyForce, METH_VARARGS, Rigidbody_applyForce_doc},
+        {"applyImpulse", (PyCFunction)Rigidbody_applyImpulse, METH_VARARGS, Rigidbody_applyImpulse_doc},
+        {"clearForces", (PyCFunction)Rigidbody_clearForces, METH_NOARGS, Rigidbody_clearForces_doc},
+        {"addConstraint", (PyCFunction)Rigidbody_addConstraint, METH_VARARGS, Rigidbody_addConstraint_doc},
+        {"removeConstraint", (PyCFunction)Rigidbody_removeConstraint, METH_VARARGS, Rigidbody_removeConstraint_doc},
+        {"getConstraints", (PyCFunction)Rigidbody_getConstraints, METH_NOARGS, Rigidbody_getConstraints_doc},
+        {"removeConstraints", (PyCFunction)Rigidbody_removeConstraints, METH_NOARGS, Rigidbody_removeConstraints_doc},
         {NULL, NULL},
     };
 
     // Get/set
-    PyGetSetDef PhysicObject_getsets[] = {
-        {"mass", (getter)PhysicObject_getMass, (setter)PhysicObject_setMass, PhysicObject_mass_doc, NULL},
-        {"friction", (getter)PhysicObject_getFriction, (setter)PhysicObject_setFriction, PhysicObject_friction_doc, NULL},
-        {"restitution", (getter)PhysicObject_getRestitution, (setter)PhysicObject_setRestitution, PhysicObject_restitution_doc, NULL},
-        {"linearVelocity", (getter)PhysicObject_getLinearVelocity, (setter)PhysicObject_setLinearVelocity, PhysicObject_linearVelocity_doc, NULL},
-        {"angularVelocity", (getter)PhysicObject_getAngularVelocity, (setter)PhysicObject_setAngularVelocity, PhysicObject_angularVelocity_doc, NULL},
-        {"linearFactor", (getter)PhysicObject_getLinearFactor, (setter)PhysicObject_setLinearFactor, PhysicObject_linearFactor_doc, NULL},
-        {"angularFactor", (getter)PhysicObject_getAngularFactor, (setter)PhysicObject_setAngularFactor, PhysicObject_angularFactor_doc, NULL},
-        {"linearSleepingThreshold", (getter)PhysicObject_getLinearSleepingThreshold, (setter)PhysicObject_setLinearSleepingThreshold, NULL, NULL},
-        {"angularSleepingThreshold", (getter)PhysicObject_getAngularSleepingThreshold, (setter)PhysicObject_setAngularSleepingThreshold, NULL, NULL},
-        {"isTrigger", (getter)PhysicObject_isTrigger, (setter)PhysicObject_setIsTrigger, PhysicObject_isTrigger_doc, NULL},
-        {"isKinematic", (getter)PhysicObject_isKinematic, (setter)PhysicObject_setIsKinematic, PhysicObject_isKinematic_doc, NULL},
-        {"isEnabled", (getter)PhysicObject_isEnabled, (setter)PhysicObject_setEnabled, PhysicObject_isEnabled_doc, NULL},
-        {"aabb", (getter)PhysicObject_getAABB, NULL, PhysicObject_isEnabled_doc, NULL},
-        {"collisionGroup", (getter)PhysicObject_getCollisionFilterGroup, (setter)PhysicObject_setCollisionFilterGroup, PhysicObject_collisionGroup_doc, NULL},
-        {"collisionMask", (getter)PhysicObject_getCollisionFilterMask, (setter)PhysicObject_setCollisionFilterMask, PhysicObject_collisionMask_doc, NULL},
-        {"continuousDetection", (getter)PhysicObject_isCCD, (setter)PhysicObject_setCCD, PhysicObject_continuousDetection_doc, NULL},
-        {"activationState", (getter)PhysicObject_getActivationState, (setter)PhysicObject_setActivationState, PhysicObject_activationState_doc, NULL},
-        {"offset", (getter)PhysicObject_getOffset, (setter)PhysicObject_setOffset, PhysicObject_offset_doc, NULL},
+    PyGetSetDef Rigidbody_getsets[] = {
+        {"mass", (getter)Rigidbody_getMass, (setter)Rigidbody_setMass, Rigidbody_mass_doc, NULL},
+        {"friction", (getter)Rigidbody_getFriction, (setter)Rigidbody_setFriction, Rigidbody_friction_doc, NULL},
+        {"restitution", (getter)Rigidbody_getRestitution, (setter)Rigidbody_setRestitution, Rigidbody_restitution_doc, NULL},
+        {"linearVelocity", (getter)Rigidbody_getLinearVelocity, (setter)Rigidbody_setLinearVelocity, Rigidbody_linearVelocity_doc, NULL},
+        {"angularVelocity", (getter)Rigidbody_getAngularVelocity, (setter)Rigidbody_setAngularVelocity, Rigidbody_angularVelocity_doc, NULL},
+        {"linearFactor", (getter)Rigidbody_getLinearFactor, (setter)Rigidbody_setLinearFactor, Rigidbody_linearFactor_doc, NULL},
+        {"angularFactor", (getter)Rigidbody_getAngularFactor, (setter)Rigidbody_setAngularFactor, Rigidbody_angularFactor_doc, NULL},
+        {"linearSleepingThreshold", (getter)Rigidbody_getLinearSleepingThreshold, (setter)Rigidbody_setLinearSleepingThreshold, NULL, NULL},
+        {"angularSleepingThreshold", (getter)Rigidbody_getAngularSleepingThreshold, (setter)Rigidbody_setAngularSleepingThreshold, NULL, NULL},
+        {"isTrigger", (getter)Rigidbody_isTrigger, (setter)Rigidbody_setIsTrigger, Rigidbody_isTrigger_doc, NULL},
+        {"isKinematic", (getter)Rigidbody_isKinematic, (setter)Rigidbody_setIsKinematic, Rigidbody_isKinematic_doc, NULL},
+        {"isEnabled", (getter)Rigidbody_isEnabled, (setter)Rigidbody_setEnabled, Rigidbody_isEnabled_doc, NULL},
+        {"aabb", (getter)Rigidbody_getAABB, NULL, Rigidbody_isEnabled_doc, NULL},
+        {"collisionGroup", (getter)Rigidbody_getCollisionFilterGroup, (setter)Rigidbody_setCollisionFilterGroup, Rigidbody_collisionGroup_doc, NULL},
+        {"collisionMask", (getter)Rigidbody_getCollisionFilterMask, (setter)Rigidbody_setCollisionFilterMask, Rigidbody_collisionMask_doc, NULL},
+        {"continuousDetection", (getter)Rigidbody_isCCD, (setter)Rigidbody_setCCD, Rigidbody_continuousDetection_doc, NULL},
+        {"activationState", (getter)Rigidbody_getActivationState, (setter)Rigidbody_setActivationState, Rigidbody_activationState_doc, NULL},
+        {"offset", (getter)Rigidbody_getOffset, (setter)Rigidbody_setOffset, Rigidbody_offset_doc, NULL},
         {NULL, NULL},
     };
 
-    PyTypeObject PyTypeObject_PhysicObject = {
-        PyVarObject_HEAD_INIT(NULL, 0) "igeScene.PhysicObject", /* tp_name */
-        sizeof(PyObject_PhysicObject),                          /* tp_basicsize */
+    PyTypeObject PyTypeObject_Rigidbody = {
+        PyVarObject_HEAD_INIT(NULL, 0) "igeScene.Rigidbody", /* tp_name */
+        sizeof(PyObject_Rigidbody),                          /* tp_basicsize */
         0,                                                      /* tp_itemsize */
-        (destructor)PhysicObject_dealloc,                       /* tp_dealloc */
+        (destructor)Rigidbody_dealloc,                       /* tp_dealloc */
         0,                                                      /* tp_print */
         0,                                                      /* tp_getattr */
         0,                                                      /* tp_setattr */
@@ -670,7 +670,7 @@ namespace ige::scene
         0,                                                      /* tp_as_mapping */
         0,                                                      /* tp_hash */
         0,                                                      /* tp_call */
-        (reprfunc)PhysicObject_str,                             /* tp_str */
+        (reprfunc)Rigidbody_str,                             /* tp_str */
         0,                                                      /* tp_getattro */
         0,                                                      /* tp_setattro */
         0,                                                      /* tp_as_buffer */
@@ -682,9 +682,9 @@ namespace ige::scene
         0,                                                      /* tp_weaklistoffset */
         0,                                                      /* tp_iter */
         0,                                                      /* tp_iternext */
-        PhysicObject_methods,                                   /* tp_methods */
+        Rigidbody_methods,                                   /* tp_methods */
         0,                                                      /* tp_members */
-        PhysicObject_getsets,                                   /* tp_getset */
+        Rigidbody_getsets,                                   /* tp_getset */
         &PyTypeObject_Component,                                /* tp_base */
         0,                                                      /* tp_dict */
         0,                                                      /* tp_descr_get */

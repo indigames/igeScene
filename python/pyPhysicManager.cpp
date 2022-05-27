@@ -1,16 +1,13 @@
 #include "python/pyPhysicManager.h"
 #include "python/pyPhysicManager_doc_en.h"
 #include "python/pySceneObject.h"
-#include "python/pyPhysicObject.h"
+#include "python/pyRigidbody.h"
 
 #include "components/physic/PhysicManager.h"
 #include "scene/SceneManager.h"
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
 #include "utils/PhysicHelper.h"
-
-#include "pyRigidBody.h"
-using namespace ige::bullet;
 
 #include <pyVectorMath.h>
 #include <pythonResource.h>
@@ -90,7 +87,7 @@ namespace ige::scene
             Py_RETURN_NONE;
 
         auto hitObj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
-        hitObj->sceneObject = reinterpret_cast<PhysicObject *>(hit.object->getUserPointer())->getOwner()->getSharedPtr();
+        hitObj->sceneObject = reinterpret_cast<Rigidbody *>(hit.object->getUserPointer())->getOwner()->getSharedPtr();
 
         auto hitPos = PyObject_New(vec_obj, _Vec3Type);
         vmath_cpy(PhysicHelper::from_btVector3(hit.position).P(), 3, hitPos->v);
@@ -144,7 +141,7 @@ namespace ige::scene
                 Py_RETURN_NONE;
 
             auto hitObj = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
-            hitObj->sceneObject = reinterpret_cast<PhysicObject *>(hits[i].object->getUserPointer())->getOwner()->getSharedPtr();
+            hitObj->sceneObject = reinterpret_cast<Rigidbody *>(hits[i].object->getUserPointer())->getOwner()->getSharedPtr();
 
             auto hitPos = PyObject_New(vec_obj, _Vec3Type);
             vmath_cpy(PhysicHelper::from_btVector3(hits[i].position).P(), 3, hitPos->v);
@@ -187,22 +184,16 @@ namespace ige::scene
         if (obj->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)obj;
-            auto physicComp = sceneObj->sceneObject.lock()->getComponent<PhysicObject>();
+            auto physicComp = sceneObj->sceneObject.lock()->getComponent<Rigidbody>();
             if (physicComp && physicComp->getBody())
             {
                 object = physicComp->getBody();
             }
         }
-        else if (obj->ob_type == &PyTypeObject_PhysicObject)
+        else if (obj->ob_type == &PyTypeObject_Rigidbody)
         {
-            auto physicObjectObj = (PyObject_PhysicObject*)obj;
-            object = std::dynamic_pointer_cast<PhysicObject>(physicObjectObj->component.lock())->getBody();
-        }
-        else if (obj->ob_type == &RigidBodyType)
-        {
-            auto rigidBodyObject = (rigidbody_obj*)obj;
-            if (rigidBodyObject->btbody)
-                object = (btCollisionObject*)rigidBodyObject->btbody;
+            auto RigidbodyObj = (PyObject_Rigidbody*)obj;
+            object = std::dynamic_pointer_cast<Rigidbody>(RigidbodyObj->component.lock())->getBody();
         }
 
         if (object == nullptr)
@@ -215,10 +206,10 @@ namespace ige::scene
             const auto &result = results[i];
 
             auto objectA = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
-            objectA->sceneObject = reinterpret_cast<PhysicObject *>(result.objectA->getUserPointer())->getOwner()->getSharedPtr();
+            objectA->sceneObject = reinterpret_cast<Rigidbody *>(result.objectA->getUserPointer())->getOwner()->getSharedPtr();
 
             auto objectB = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
-            objectB->sceneObject = reinterpret_cast<PhysicObject *>(result.objectB->getUserPointer())->getOwner()->getSharedPtr();
+            objectB->sceneObject = reinterpret_cast<Rigidbody *>(result.objectB->getUserPointer())->getOwner()->getSharedPtr();
 
             auto localPosA = PyObject_New(vec_obj, _Vec3Type);
             vmath_cpy(PhysicHelper::from_btVector3(result.localPosA).P(), 3, localPosA->v);
@@ -275,43 +266,31 @@ namespace ige::scene
         if (objA->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)objA;
-            auto physicComp = sceneObj->sceneObject.lock()->getComponent<PhysicObject>();
+            auto physicComp = sceneObj->sceneObject.lock()->getComponent<Rigidbody>();
             if (physicComp && physicComp->getBody())
             {
                 objectA = physicComp->getBody();
             }
         }
-        else if (objA->ob_type == &PyTypeObject_PhysicObject)
+        else if (objA->ob_type == &PyTypeObject_Rigidbody)
         {
-            auto physicObjectObj = (PyObject_PhysicObject*)objA;
-            objectA = std::dynamic_pointer_cast<PhysicObject>(physicObjectObj->component.lock())->getBody();
-        }
-        else if (objA->ob_type == &RigidBodyType)
-        {
-            auto rigidBodyObject = (rigidbody_obj*)objA;
-            if (rigidBodyObject->btbody)
-                objectA = (btCollisionObject*)rigidBodyObject->btbody;
+            auto RigidbodyObj = (PyObject_Rigidbody*)objA;
+            objectA = std::dynamic_pointer_cast<Rigidbody>(RigidbodyObj->component.lock())->getBody();
         }
 
         if (objB->ob_type == &PyTypeObject_SceneObject)
         {
             auto sceneObj = (PyObject_SceneObject*)objB;
-            auto physicComp = sceneObj->sceneObject.lock()->getComponent<PhysicObject>();
+            auto physicComp = sceneObj->sceneObject.lock()->getComponent<Rigidbody>();
             if (physicComp && physicComp->getBody())
             {
                 objectB = physicComp->getBody();
             }
         }
-        else if (objB->ob_type == &PyTypeObject_PhysicObject)
+        else if (objB->ob_type == &PyTypeObject_Rigidbody)
         {
-            auto physicObjectObj = (PyObject_PhysicObject*)objB;
-            objectB = std::dynamic_pointer_cast<PhysicObject>(physicObjectObj->component.lock())->getBody();            
-        }
-        else if (objB->ob_type == &RigidBodyType)
-        {
-            auto rigidBodyObject = (rigidbody_obj*)objB;
-            if (rigidBodyObject->btbody)
-                objectB = (btCollisionObject*)rigidBodyObject->btbody;
+            auto RigidbodyObj = (PyObject_Rigidbody*)objB;
+            objectB = std::dynamic_pointer_cast<Rigidbody>(RigidbodyObj->component.lock())->getBody();            
         }
 
         if (objectA == nullptr || objectB == nullptr)
@@ -325,10 +304,10 @@ namespace ige::scene
             const auto &result = results[i];
 
             auto objectA = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
-            objectA->sceneObject = reinterpret_cast<PhysicObject *>(result.objectA->getUserPointer())->getOwner()->getSharedPtr();
+            objectA->sceneObject = reinterpret_cast<Rigidbody *>(result.objectA->getUserPointer())->getOwner()->getSharedPtr();
 
             auto objectB = (PyObject_SceneObject*)(&PyTypeObject_SceneObject)->tp_alloc(&PyTypeObject_SceneObject, 0);
-            objectB->sceneObject = reinterpret_cast<PhysicObject *>(result.objectB->getUserPointer())->getOwner()->getSharedPtr();
+            objectB->sceneObject = reinterpret_cast<Rigidbody *>(result.objectB->getUserPointer())->getOwner()->getSharedPtr();
 
             auto localPosA = PyObject_New(vec_obj, _Vec3Type);
             vmath_cpy(PhysicHelper::from_btVector3(result.localPosA).P(), 3, localPosA->v);

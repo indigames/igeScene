@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    Dof6SpringConstraint::Dof6SpringConstraint(PhysicObject &owner)
+    Dof6SpringConstraint::Dof6SpringConstraint(Rigidbody &owner)
         : PhysicConstraint(owner)
     {
         setType(ConstraintType::Dof6Spring);

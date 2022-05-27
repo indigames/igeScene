@@ -13,7 +13,7 @@ namespace ige::scene
     Event<PhysicConstraint *> PhysicConstraint::m_onDeactivatedEvent;
 
     //! Constructor
-    PhysicConstraint::PhysicConstraint(PhysicObject &owner)
+    PhysicConstraint::PhysicConstraint(Rigidbody &owner)
         : m_owner(owner), m_other(nullptr)
     {
         m_serializeEventId = getOwner()->getOwner()->getScene()->getSerializeFinishedEvent().addListener(std::bind(&PhysicConstraint::onSerializeFinished, this, std::placeholders::_1));
@@ -56,13 +56,13 @@ namespace ige::scene
     }
 
     //! Get other object
-    PhysicObject *PhysicConstraint::getOther()
+    Rigidbody *PhysicConstraint::getOther()
     {
         return m_other;
     }
 
     //! Set other object
-    void PhysicConstraint::setOther(PhysicObject *other)
+    void PhysicConstraint::setOther(Rigidbody *other)
     {
         if(m_other != other)
         {
@@ -83,7 +83,7 @@ namespace ige::scene
         if (otherUUID != getOwner()->getOwner()->getUUID())
         {
             auto otherObject = getOwner()->getOwner()->getScene()->findObjectByUUID(otherUUID);
-            auto other = otherObject ? otherObject->getComponent<PhysicObject>().get() : nullptr;
+            auto other = otherObject ? otherObject->getComponent<Rigidbody>().get() : nullptr;
             setOther(other);
         }
     }

@@ -1,7 +1,7 @@
-#include "python/pyPhysicCapsule.h"
-#include "python/pyPhysicCapsule_doc_en.h"
+#include "python/pyCapsuleCollider.h"
+#include "python/pyCapsuleCollider_doc_en.h"
 
-#include "components/physic/PhysicCapsule.h"
+#include "components/physic/CapsuleCollider.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"
@@ -12,7 +12,7 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    void PhysicCapsule_dealloc(PyObject_PhysicCapsule *self)
+    void CapsuleCollider_dealloc(PyObject_CapsuleCollider *self)
     {
         if (self) {
             self->component.reset();
@@ -20,59 +20,59 @@ namespace ige::scene
         }
     }
 
-    PyObject *PhysicCapsule_str(PyObject_PhysicCapsule *self)
+    PyObject *CapsuleCollider_str(PyObject_CapsuleCollider *self)
     {
-        return PyUnicode_FromString("C++ PhysicCapsule object");
+        return PyUnicode_FromString("C++ CapsuleCollider object");
     }
 
     //! size
-    PyObject *PhysicCapsule_getRadius(PyObject_PhysicCapsule *self)
+    PyObject *CapsuleCollider_getRadius(PyObject_CapsuleCollider *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicCapsule>(self->component.lock())->getRadius());
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CapsuleCollider>(self->component.lock())->getRadius());
     }
 
-    int PhysicCapsule_setRadius(PyObject_PhysicCapsule *self, PyObject *value)
+    int CapsuleCollider_setRadius(PyObject_CapsuleCollider *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            std::dynamic_pointer_cast<PhysicCapsule>(self->component.lock())->setRadius(val);
+            std::dynamic_pointer_cast<CapsuleCollider>(self->component.lock())->setRadius(val);
             return 0;
         }
         return -1;
     }
 
     //! height
-    PyObject *PhysicCapsule_getHeight(PyObject_PhysicCapsule *self)
+    PyObject *CapsuleCollider_getHeight(PyObject_CapsuleCollider *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicCapsule>(self->component.lock())->getHeight());
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<CapsuleCollider>(self->component.lock())->getHeight());
     }
 
-    int PhysicCapsule_setHeight(PyObject_PhysicCapsule *self, PyObject *value)
+    int CapsuleCollider_setHeight(PyObject_CapsuleCollider *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            std::dynamic_pointer_cast<PhysicCapsule>(self->component.lock())->setHeight(val);
+            std::dynamic_pointer_cast<CapsuleCollider>(self->component.lock())->setHeight(val);
             return 0;
         }
         return -1;
     }
 
     // Get/set
-    PyGetSetDef PhysicCapsule_getsets[] = {
-        {"radius", (getter)PhysicCapsule_getRadius, (setter)PhysicCapsule_setRadius, PhysicCapsule_radius_doc, NULL},
-        {"height", (getter)PhysicCapsule_getHeight, (setter)PhysicCapsule_setHeight, PhysicCapsule_height_doc, NULL},
+    PyGetSetDef CapsuleCollider_getsets[] = {
+        {"radius", (getter)CapsuleCollider_getRadius, (setter)CapsuleCollider_setRadius, CapsuleCollider_radius_doc, NULL},
+        {"height", (getter)CapsuleCollider_getHeight, (setter)CapsuleCollider_setHeight, CapsuleCollider_height_doc, NULL},
         {NULL, NULL},
     };
 
-    PyTypeObject PyTypeObject_PhysicCapsule = {
-        PyVarObject_HEAD_INIT(NULL, 0) "igeScene.PhysicCapsule", /* tp_name */
-        sizeof(PyObject_PhysicCapsule),                          /* tp_basicsize */
+    PyTypeObject PyTypeObject_CapsuleCollider = {
+        PyVarObject_HEAD_INIT(NULL, 0) "igeScene.CapsuleCollider", /* tp_name */
+        sizeof(PyObject_CapsuleCollider),                          /* tp_basicsize */
         0,                                                       /* tp_itemsize */
-        (destructor)PhysicCapsule_dealloc,                       /* tp_dealloc */
+        (destructor)CapsuleCollider_dealloc,                     /* tp_dealloc */
         0,                                                       /* tp_print */
         0,                                                       /* tp_getattr */
         0,                                                       /* tp_setattr */
@@ -83,7 +83,7 @@ namespace ige::scene
         0,                                                       /* tp_as_mapping */
         0,                                                       /* tp_hash */
         0,                                                       /* tp_call */
-        (reprfunc)PhysicCapsule_str,                             /* tp_str */
+        (reprfunc)CapsuleCollider_str,                           /* tp_str */
         0,                                                       /* tp_getattro */
         0,                                                       /* tp_setattro */
         0,                                                       /* tp_as_buffer */
@@ -97,8 +97,8 @@ namespace ige::scene
         0,                                                       /* tp_iternext */
         0,                                                       /* tp_methods */
         0,                                                       /* tp_members */
-        PhysicCapsule_getsets,                                   /* tp_getset */
-        &PyTypeObject_PhysicObject,                              /* tp_base */
+        CapsuleCollider_getsets,                                 /* tp_getset */
+        &PyTypeObject_Component,                                 /* tp_base */
         0,                                                       /* tp_dict */
         0,                                                       /* tp_descr_get */
         0,                                                       /* tp_descr_set */

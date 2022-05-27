@@ -1,4 +1,5 @@
-#include "components/physic/PhysicObject.h"
+#include "components/physic/Rigidbody.h"
+#include "components/physic/MeshCollider.h"
 #include "components/physic/PhysicManager.h"
 #include "components/physic/PhysicConstraint.h"
 #include "components/physic/FixedConstraint.h"
@@ -15,13 +16,13 @@
 namespace ige::scene
 {
     //! Initialize static members
-    Event<PhysicObject *> PhysicObject::m_onCreatedEvent;
-    Event<PhysicObject *> PhysicObject::m_onDestroyedEvent;
-    Event<PhysicObject *> PhysicObject::m_onActivatedEvent;
-    Event<PhysicObject *> PhysicObject::m_onDeactivatedEvent;
+    Event<Rigidbody *> Rigidbody::m_onCreatedEvent;
+    Event<Rigidbody *> Rigidbody::m_onDestroyedEvent;
+    Event<Rigidbody *> Rigidbody::m_onActivatedEvent;
+    Event<Rigidbody *> Rigidbody::m_onDeactivatedEvent;
 
     //! Constructor
-    PhysicObject::PhysicObject(SceneObject &owner)
+    Rigidbody::Rigidbody(SceneObject &owner)
         : Component(owner)
     {
         // Register manager
@@ -32,11 +33,12 @@ namespace ige::scene
                 manager = getOwner()->getRoot()->addComponent<PhysicManager>();
             setManager(manager);
         }
-        m_transformEventId = getOwner()->getTransformChangedEvent().addListener(std::bind(&PhysicObject::onTransformChanged, this, std::placeholders::_1));
+        m_transformEventId = getOwner()->getTransformChangedEvent().addListener(std::bind(&Rigidbody::onTransformChanged, this, std::placeholders::_1));
+        init();
     }
 
     //! Destructor
-    PhysicObject::~PhysicObject()
+    Rigidbody::~Rigidbody()
     {
         if (m_transformEventId != (uint64_t)-1) {
             getOwner()->getTransformChangedEvent().removeListener(m_transformEventId);
@@ -47,7 +49,7 @@ namespace ige::scene
     }
 
     //! Initialization
-    bool PhysicObject::init()
+    bool Rigidbody::init()
     {
         getOnCreatedEvent().invoke(this);
         createBody();
@@ -55,7 +57,7 @@ namespace ige::scene
     }
 
     //! Initialization
-    bool PhysicObject::destroy()
+    bool Rigidbody::destroy()
     {
         // Deactivate
         deactivate();
@@ -73,7 +75,7 @@ namespace ige::scene
     }
 
     //! Transform changed: update transform for kinematic object
-    void PhysicObject::onTransformChanged(SceneObject& object) {
+    void Rigidbody::onTransformChanged(SceneObject& object) {
         if (isKinematic()) {
             updateBtTransform();
             m_body->setInterpolationWorldTransform(m_body->getWorldTransform());
@@ -87,13 +89,13 @@ namespace ige::scene
     }
 
     //! Add constraint
-    void PhysicObject::addConstraint(const std::shared_ptr<PhysicConstraint> &constraint)
+    void Rigidbody::addConstraint(const std::shared_ptr<PhysicConstraint> &constraint)
     {
         m_constraints.push_back(constraint);
     }
 
     //! Add constraint
-    std::shared_ptr<PhysicConstraint> PhysicObject::addConstraint(int type)
+    std::shared_ptr<PhysicConstraint> Rigidbody::addConstraint(int type)
     {
         switch (type)
         {
@@ -112,7 +114,7 @@ namespace ige::scene
     }
 
     //! Remove constraint
-    void PhysicObject::removeConstraint(const std::shared_ptr<PhysicConstraint> &constraint)
+    void Rigidbody::removeConstraint(const std::shared_ptr<PhysicConstraint> &constraint)
     {
         auto found = std::find_if(m_constraints.begin(), m_constraints.end(), [&constraint](const auto &element) {
             return constraint == element;
@@ -125,7 +127,7 @@ namespace ige::scene
     }
 
     //! Remove constraint
-    void PhysicObject::removeConstraint(PhysicConstraint *constraint)
+    void Rigidbody::removeConstraint(PhysicConstraint *constraint)
     {
         auto found = std::find_if(m_constraints.begin(), m_constraints.end(), [&constraint](const auto &element) {
             return constraint == element.get();
@@ -138,7 +140,7 @@ namespace ige::scene
     }
 
     //! Remove all constraints
-    void PhysicObject::removeAllConstraints()
+    void Rigidbody::removeAllConstraints()
     {
         for (auto &constraint : m_constraints)
             constraint = nullptr;
@@ -146,7 +148,7 @@ namespace ige::scene
     }
 
     //! Set enable
-    void PhysicObject::setEnabled(bool enable)
+    void Rigidbody::setEnabled(bool enable)
     {
         Component::setEnabled(enable);
         if (isEnabled())
@@ -156,7 +158,7 @@ namespace ige::scene
     }
 
     //! Set enable
-    void PhysicObject::setCCD(bool isCCD)
+    void Rigidbody::setCCD(bool isCCD)
     {
         m_bIsCCD = isCCD;
         if (m_bIsCCD)
@@ -174,20 +176,23 @@ namespace ige::scene
     }
 
     //! Set mass
-    void PhysicObject::setMass(float mass)
+    void Rigidbody::setMass(float mass)
     {
         if (m_bIsDirty || m_mass != mass)
         {
             m_mass = mass;
             btVector3 inertia = {0.f, 0.f, 0.f};
-            if (m_mass != 0.0f)
-                m_shape->calculateLocalInertia(m_mass, inertia);
+            if (m_mass != 0.0f) {
+                if (!m_collider.expired() && m_collider.lock()->getShape()) {
+                    m_collider.lock()->getShape()->calculateLocalInertia(m_mass, inertia);
+                }
+            }
             getBody()->setMassProps(mass, inertia);
             getBody()->updateInertiaTensor();
         }
     }
 
-    void PhysicObject::setFriction(float friction)
+    void Rigidbody::setFriction(float friction)
     {
         if (m_bIsDirty || m_friction != friction)
         {
@@ -196,7 +201,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setRestitution(float restitution)
+    void Rigidbody::setRestitution(float restitution)
     {
         if (m_bIsDirty || m_restitution != restitution)
         {
@@ -205,7 +210,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setLinearVelocity(const btVector3 &velocity)
+    void Rigidbody::setLinearVelocity(const btVector3 &velocity)
     {
         if (m_bIsDirty || m_linearVelocity != velocity)
         {
@@ -214,7 +219,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setAngularVelocity(const btVector3 &velocity)
+    void Rigidbody::setAngularVelocity(const btVector3 &velocity)
     {
         if (m_bIsDirty || m_angularVelocity != velocity)
         {
@@ -223,7 +228,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setLinearFactor(const btVector3 &factor)
+    void Rigidbody::setLinearFactor(const btVector3 &factor)
     {
         if (m_bIsDirty || m_linearFactor != factor)
         {
@@ -233,7 +238,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setAngularFactor(const btVector3 &factor)
+    void Rigidbody::setAngularFactor(const btVector3 &factor)
     {
         if (m_bIsDirty || m_angularFactor != factor)
         {
@@ -243,7 +248,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setLinearSleepingThreshold(float value) {
+    void Rigidbody::setLinearSleepingThreshold(float value) {
         if (m_bIsDirty || m_linearSleepingThreshold != value)
         {
             m_linearSleepingThreshold = value;
@@ -252,7 +257,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setAngularSleepingThreshold(float value) {
+    void Rigidbody::setAngularSleepingThreshold(float value) {
         if (m_bIsDirty || m_angularSleepingThreshold != value)
         {
             m_angularSleepingThreshold = value;
@@ -261,17 +266,17 @@ namespace ige::scene
         }
     }
 
-    int PhysicObject::getActivationState() const {
+    int Rigidbody::getActivationState() const {
         return m_activeState;
     }
 
-    void PhysicObject::setActivationState(int state) {
+    void Rigidbody::setActivationState(int state) {
         m_activeState = MATH_CLAMP(state, 0, 5);
         if (getBody())
             getBody()->setActivationState(m_activeState);
     }
 
-    void PhysicObject::setCollisionMargin(float margin)
+    void Rigidbody::setCollisionMargin(float margin)
     {
         if (m_bIsDirty || m_collisionMargin != margin)
         {
@@ -280,7 +285,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicObject::setPositionOffset(const Vec3& offset)
+    void Rigidbody::setPositionOffset(const Vec3& offset)
     {
         if(m_bIsDirty || m_positionOffset != offset) {
             m_positionOffset = offset;
@@ -290,7 +295,7 @@ namespace ige::scene
     }
 
     //! Set is trigger
-    void PhysicObject::setIsTrigger(bool isTrigger)
+    void Rigidbody::setIsTrigger(bool isTrigger)
     {
         if (m_bIsDirty || m_bIsTrigger != isTrigger)
         {
@@ -303,13 +308,21 @@ namespace ige::scene
     }
 
     //! Set is kinematic
-    void PhysicObject::setIsKinematic(bool isKinematic)
+    void Rigidbody::setIsKinematic(bool isKinematic)
     {
         if (m_bIsDirty || m_bIsKinematic != isKinematic)
         {
             if (m_bIsKinematic != isKinematic)
             {
                 m_bIsKinematic = isKinematic;
+
+                // Dynamic body -> force convex mesh collider
+                if (!this->isKinematic()) {
+                    auto meshCollider = getOwner()->getComponent<MeshCollider>();
+                    if (meshCollider && !meshCollider->isConvex()) {
+                        meshCollider->setConvex(true);
+                    }
+                }
                 recreateBody();
             }
             if (m_bIsKinematic)
@@ -334,22 +347,17 @@ namespace ige::scene
         }
     }
 
-    //! Set local scale
-    void PhysicObject::setLocalScale(const Vec3 &scale)
-    {
-        if (m_bIsDirty || m_previousScale != scale)
-        {
-            m_previousScale = scale;
-            if (m_shape)
-                m_shape->setLocalScaling(PhysicHelper::to_btVector3(m_previousScale));
-        }
-    }
-
     //! Create physic body
-    void PhysicObject::createBody()
+    void Rigidbody::createBody()
     {
+        destroyBody();
+
+        m_collider = getOwner()->getComponent<Collider>();
+        if (m_collider.expired() || m_collider.lock()->getShape() == nullptr)
+            return;
+
         m_motion = std::make_unique<btDefaultMotionState>(PhysicHelper::to_btTransform(*(getOwner()->getTransform())));
-        m_body = std::make_unique<btRigidBody>(btRigidBody::btRigidBodyConstructionInfo{0.0f, m_motion.get(), m_shape.get(), btVector3(0.0f, 0.0f, 0.0f)});
+        m_body = std::make_unique<btRigidBody>(btRigidBody::btRigidBodyConstructionInfo{0.0f, m_motion.get(),  m_collider.lock()->getShape().get(), btVector3(0.0f, 0.0f, 0.0f)});
         m_body->setUserPointer(this);
 
         m_bIsDirty = true;
@@ -392,7 +400,7 @@ namespace ige::scene
     }
 
     //! Create physic body
-    void PhysicObject::destroyBody()
+    void Rigidbody::destroyBody()
     {
         deactivate();
         if (m_body)
@@ -402,7 +410,7 @@ namespace ige::scene
     }
 
     //! Calculate and apply inertia
-    void PhysicObject::applyInertia()
+    void Rigidbody::applyInertia()
     {
         if (getBody())
         {
@@ -413,15 +421,18 @@ namespace ige::scene
             else
             {
                 btVector3 inertia = {0.f, 0.f, 0.f};
-                if (m_mass != 0.0f)
-                    m_shape->calculateLocalInertia(m_mass, inertia);
+                if (m_mass != 0.0f) {
+                    if (!m_collider.expired() && m_collider.lock()->getShape()) {
+                        m_collider.lock()->getShape()->calculateLocalInertia(m_mass, inertia);
+                    }
+                }
                 getBody()->setMassProps(std::max(0.0000001f, m_mass), inertia);
             }
         }
     }
 
     //! Collision filter group
-    void PhysicObject::setCollisionFilterGroup(int group)
+    void Rigidbody::setCollisionFilterGroup(int group)
     {
         if (m_collisionFilterGroup != group)
         {
@@ -432,7 +443,7 @@ namespace ige::scene
     }
 
     //! Collision filter mask
-    void PhysicObject::setCollisionFilterMask(int mask)
+    void Rigidbody::setCollisionFilterMask(int mask)
     {
         if (m_collisionFilterMask != mask)
         {
@@ -443,36 +454,29 @@ namespace ige::scene
     }
 
     //! Activate
-    void PhysicObject::activate()
+    void Rigidbody::activate()
     {
         if (!m_bIsActivated)
         {
             getOnActivatedEvent().invoke(this);
-            m_body->activate(true);
+            if(m_body) m_body->activate(true);
             m_bIsActivated = true;
         }
     }
 
     //! Deactivate
-    void PhysicObject::deactivate()
+    void Rigidbody::deactivate()
     {
         if (m_bIsActivated)
         {
             getOnDeactivatedEvent().invoke(this);
-            m_body->activate(false);
+            if(m_body) m_body->activate(false);
             m_bIsActivated = false;
         }
     }
 
-    //! Recreate Body
-    void PhysicObject::recreateBody()
-    {
-        destroyBody();
-        createBody();
-    }
-
     //! Update Bullet transform
-    void PhysicObject::updateBtTransform()
+    void Rigidbody::updateBtTransform()
     {
         auto offset = Vec3();
         const auto& transform = getOwner()->getTransform();
@@ -486,14 +490,17 @@ namespace ige::scene
         Vec3 scale = transform->getScale();
         Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
         float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
-        if (scaleDelta >= 0.01f) {
-            setLocalScale({std::abs(scale[0]), std::abs(scale[1]), std::abs(scale[2])});
+        if (scaleDelta >= 0.01f) {            
+            if (!m_collider.expired()) {
+                m_collider.lock()->setScale({ std::abs(scale[0]), std::abs(scale[1]), std::abs(scale[2]) });
+                m_previousScale = m_collider.lock()->getScale();
+            }
             recreateBody();
         }
     }
 
     //! Update IGE transform
-    void PhysicObject::updateIgeTransform()
+    void Rigidbody::updateIgeTransform()
     {
         if (isKinematic()) return;
         auto transform = getOwner()->getTransform();
@@ -510,7 +517,7 @@ namespace ige::scene
     }
 
     //! Get AABB
-    AABBox PhysicObject::getAABB()
+    AABBox Rigidbody::getAABB()
     {
         if (!getBody()) return {};
         btVector3 aabbMin, aabbMax;
@@ -520,7 +527,7 @@ namespace ige::scene
     }
 
     //! Serialize
-    void PhysicObject::to_json(json &j) const
+    void Rigidbody::to_json(json &j) const
     {
         Component::to_json(j);
         j["mass"] = getMass();
@@ -532,7 +539,6 @@ namespace ige::scene
         j["angularFactor"] = PhysicHelper::from_btVector3(getAngularFactor());
         j["isKinematic"] = isKinematic();
         j["isTrigger"] = isTrigger();
-        j["scale"] = getLocalScale();
         j["group"] = getCollisionFilterGroup();
         j["mask"] = getCollisionFilterMask();
         j["ccd"] = isCCD();
@@ -549,7 +555,7 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void PhysicObject::from_json(const json &j)
+    void Rigidbody::from_json(const json &j)
     {
         setMass(j.value("mass", 1.f));
         setRestitution(j.value("restitution", 1.f));
@@ -560,7 +566,6 @@ namespace ige::scene
         setAngularFactor(PhysicHelper::to_btVector3(j.value("angularFactor", Vec3(1.f, 1.f, 1.f))));
         setIsKinematic(j.value("isKinematic", false));
         setIsTrigger(j.value("isTrigger", false));
-        setLocalScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
         setCollisionFilterGroup(j.value("group", isKinematic() ? 2 : 1));
         setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
         setCCD(j.value("ccd", false));
@@ -605,7 +610,7 @@ namespace ige::scene
     }
 
     //! Update property by key value
-    void PhysicObject::setProperty(const std::string& key, const json& val)
+    void Rigidbody::setProperty(const std::string& key, const json& val)
     {
         if (key.compare("mass") == 0)
             setMass(val);
@@ -625,8 +630,6 @@ namespace ige::scene
             setIsKinematic(val);
         else if (key.compare("isTrigger") == 0)
             setIsTrigger(val);
-        else if (key.compare("scale") == 0)
-            setLocalScale(val);
         else if (key.compare("group") == 0)
             setCollisionFilterGroup(val);
         else if (key.compare("mask") == 0)

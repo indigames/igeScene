@@ -18,7 +18,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        HingeConstraint(PhysicObject &owner);
+        HingeConstraint(Rigidbody &owner);
 
         //! Destructor
         virtual ~HingeConstraint();

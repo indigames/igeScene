@@ -9,25 +9,25 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "components/physic/PhysicObject.h"
+#include "components/physic/Rigidbody.h"
 
 namespace ige::scene
 {
-    //! PhysicSoftBody
-    class PhysicSoftBody : public PhysicObject
+    //! Softbody
+    class Softbody : public Rigidbody
     {
     public:
         //! Constructor
-        PhysicSoftBody(SceneObject& owner);
+        Softbody(SceneObject& owner);
 
         //! Destructor
-        virtual ~PhysicSoftBody();
+        virtual ~Softbody();
 
         // Inherited via Component
-        virtual std::string getName() const override { return "PhysicSoftBody"; }
+        virtual std::string getName() const override { return "Softbody"; }
 
         //! Returns the type of the component
-        virtual Type getType() const override { return Type::PhysicSoftBody; }
+        virtual Type getType() const override { return Type::Softbody; }
 
         //! Mesh Index
         int getMeshIndex() const { return m_meshIndex; };
@@ -202,7 +202,7 @@ namespace ige::scene
         virtual void createBody() override;
 
         //! Set local scale
-        virtual void setLocalScale(const Vec3& scale) override;
+        virtual void setScale(const Vec3& scale);
 
         //! Optimize mesh
         void optimizeMesh(const std::vector<Vec3>&, int* indices, int numIndeces, float*& optPoss);

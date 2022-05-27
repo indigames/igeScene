@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    SliderConstraint::SliderConstraint(PhysicObject &owner)
+    SliderConstraint::SliderConstraint(Rigidbody &owner)
         : PhysicConstraint(owner)
     {
         setType(ConstraintType::Slider);

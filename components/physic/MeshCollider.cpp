@@ -1,7 +1,8 @@
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 
-#include "components/physic/PhysicMesh.h"
+#include "components/physic/MeshCollider.h"
+#include "components/physic/Rigidbody.h"
 #include "components/FigureComponent.h"
 #include "scene/SceneObject.h"
 #include "utils/PhysicHelper.h"
@@ -12,15 +13,14 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    PhysicMesh::PhysicMesh(SceneObject &owner)
-        : PhysicObject(owner)
+    MeshCollider::MeshCollider(SceneObject &owner)
+        : Collider(owner)
     {
-        createCollisionShape();
-        init();
+        createShape();
     }
 
     //! Destructor
-    PhysicMesh::~PhysicMesh()
+    MeshCollider::~MeshCollider()
     {
         if (m_shape != nullptr)
             m_shape.reset();
@@ -38,98 +38,54 @@ namespace ige::scene
         m_btPositions = nullptr;
     }
 
-    //! Path
-    const std::string &PhysicMesh::getPath() const
-    {
-        return m_path;
-    }
-
-    void PhysicMesh::setPath(const std::string &path)
-    {
-        auto fsPath = fs::path(path);
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
-        std::replace(relPath.begin(), relPath.end(), '\\', '/');
-
-        if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
-        {
-            m_path = relPath;
-            recreateCollisionShape();
-        }
-    }
-
     //! Set mesh index
-    void PhysicMesh::setMeshIndex(int idx)
+    void MeshCollider::setMeshIndex(int idx)
     {
-        if (m_bIsDirty || m_meshIndex != idx)
+        if (m_meshIndex != idx)
         {
             m_meshIndex = idx;
-            recreateCollisionShape();
+            recreateShape();
         }
     }
 
     //! Convex
-    bool PhysicMesh::isConvex() const
+    bool MeshCollider::isConvex() const
     {
         return m_bIsConvex;
     }
 
-    void PhysicMesh::setConvex(bool convex)
+    void MeshCollider::setConvex(bool convex)
     {
-        // Not support concave with non kinematic ridgid body
-        if (!isKinematic() && !convex)
-        {
-            convex = true;
-        }
-
         if (m_bIsConvex != convex)
         {
-            m_bIsConvex = convex;
-            recreateCollisionShape();
-        }
-    }
-
-    void PhysicMesh::setIsKinematic(bool isKinematic)
-    {
-        if (m_bIsKinematic != isKinematic)
-        {
-            // Not support concave with non kinematic ridgid body
-            if (!isKinematic && !m_bIsConvex)
-            {
-                setConvex(true);
+            // Dynamic body -> force to convex
+            auto body = getOwner()->getComponent<Rigidbody>();
+            if (body && !body->isKinematic() && !convex) {
+                convex = true;
             }
-            PhysicObject::setIsKinematic(isKinematic);
+            m_bIsConvex = convex;
+            recreateShape();
         }
     }
 
     //! Create collision shape
-    void PhysicMesh::createCollisionShape()
+    void MeshCollider::createShape()
     {
         // Create collision shape
         if (m_shape != nullptr)
             m_shape.reset();
 
         Figure* figure = nullptr;
-        bool figureCreated = false;
-        std::vector<Vec3> positions;
-
-        // Load from mesh file first
-        if (!m_path.empty() && fs::exists(m_path) && !fs::is_directory(m_path))
-        {
-            figure = ResourceCreator::Instance().NewFigure(m_path.c_str());
-            figureCreated = true;
-        }
-
-        // If failed, try with figure component
-        if (figure == nullptr)
-        {
-            auto figureComp = getOwner()->getComponent<FigureComponent>();
-            if (figureComp)
-                figure = figureComp->getFigure();
-        }
+        auto figureComp = getOwner()->getComponent<FigureComponent>();
+        if (figureComp)
+            figure = figureComp->getFigure();
+        
 
         // Load mesh from figure
         if (figure != nullptr)
         {
+            std::vector<Vec3> positions;
+
             figure->WaitInitialize();
             if (figure->NumMeshes() > 0 && m_meshIndex >= 0 && m_meshIndex < figure->NumMeshes())
             {
@@ -201,60 +157,39 @@ namespace ige::scene
                     triangleMeshShape = nullptr;
                 }
             }
-            if(figureCreated)
-                figure->DecReference();
             figure = nullptr;
         }
 
         if (m_shape == nullptr)
             m_shape = std::make_unique<btConvexHullShape>();
 
-        setLocalScale(m_previousScale);
-    }
-
-    //! Recreate collision shape
-    void PhysicMesh::recreateCollisionShape()
-    {
-        // Create collision shape
-        if (m_shape != nullptr)
-            m_shape.reset();
-
-        // Create collision shape
-        createCollisionShape();
-
-        // Create body
-        recreateBody();
+        setScale(m_scale);
     }
 
     //! Serialize
-    void PhysicMesh::to_json(json &j) const
+    void MeshCollider::to_json(json &j) const
     {
-        PhysicObject::to_json(j);
+        Collider::to_json(j);
         j["meshIdx"] = getMeshIndex();
         j["convex"] = isConvex();
-        j["path"] = getPath();
     }
 
     //! Deserialize
-    void PhysicMesh::from_json(const json &j)
+    void MeshCollider::from_json(const json &j)
     {
-        PhysicObject::from_json(j);
-
+        Collider::from_json(j);
         setMeshIndex(j.value("meshIdx", 0));
         setConvex(j.value("convex", false));
-        setPath(j.value("path", std::string()));
     }
 
     //! Update property by key value
-    void PhysicMesh::setProperty(const std::string& key, const json& val)
+    void MeshCollider::setProperty(const std::string& key, const json& val)
     {
         if (key.compare("meshIdx") == 0)
             setMeshIndex(val);
         else if (key.compare("convex") == 0)
             setConvex(val);
-        else if (key.compare("path") == 0)
-            setPath(val);
         else
-            PhysicObject::setProperty(key, val);
+            Collider::setProperty(key, val);
     }
 } // namespace ige::scene

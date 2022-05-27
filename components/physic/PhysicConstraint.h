@@ -10,7 +10,7 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "components/physic/PhysicObject.h"
+#include "components/physic/Rigidbody.h"
 #include "scene/Scene.h"
 
 namespace ige::scene
@@ -31,7 +31,7 @@ namespace ige::scene
 
     public:
         //! Constructor
-        PhysicConstraint(PhysicObject& owner);
+        PhysicConstraint(Rigidbody& owner);
 
         //! Destructor
         virtual ~PhysicConstraint();
@@ -40,7 +40,7 @@ namespace ige::scene
         ConstraintType getType() const { return m_type; }
 
         //! Get Owner
-        PhysicObject* getOwner() const { return &m_owner; }
+        Rigidbody* getOwner() const { return &m_owner; }
 
         //! Get Owner RigidBody
         virtual btRigidBody* getOwnerBody() const { return getOwner()->getBody(); }
@@ -50,8 +50,8 @@ namespace ige::scene
         void setOtherUUID(const std::string& other);
 
         //! Get other object
-        PhysicObject* getOther();
-        void setOther(PhysicObject* other);
+        Rigidbody* getOther();
+        void setOther(Rigidbody* other);
 
         //! Get Other RigidBody
         virtual btRigidBody* getOtherBody() { return getOther() ? getOther()->getBody() : nullptr; }
@@ -118,7 +118,7 @@ namespace ige::scene
 
     protected:
         //! Reference to owner object
-        PhysicObject &m_owner;
+        Rigidbody &m_owner;
 
         //! Bullet generic constraint
         std::unique_ptr<btGeneric6DofSpring2Constraint> m_constraint = nullptr;
@@ -127,7 +127,7 @@ namespace ige::scene
         bool m_bEnableCollisionBetweenBodies = true;
 
         //! Cache other object
-        PhysicObject *m_other = nullptr;
+        Rigidbody *m_other = nullptr;
 
         //! Cache json to serialize
         json m_json = {};

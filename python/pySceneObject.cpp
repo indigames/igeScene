@@ -28,11 +28,11 @@
 #include "python/pyUIScrollView.h"
 #include "python/pyUIScrollBar.h"
 #include "python/pyPhysicManager.h"
-#include "python/pyPhysicBox.h"
-#include "python/pyPhysicSphere.h"
-#include "python/pyPhysicCapsule.h"
-#include "python/pyPhysicMesh.h"
-#include "python/pyPhysicSoftBody.h"
+#include "python/pyBoxCollider.h"
+#include "python/pySphereCollider.h"
+#include "python/pyCapsuleCollider.h"
+#include "python/pyMeshCollider.h"
+#include "python/pySoftbody.h"
 #include "python/pyPhysicConstraint.h"
 #include "python/pyDof6Constraint.h"
 #include "python/pyFixedConstraint.h"
@@ -383,29 +383,34 @@ namespace ige::scene
                 compObj->component = self->sceneObject.lock()->addComponent<PhysicManager>();
                 return (PyObject*)compObj;
             }
-            else if (type == "PhysicBox") {
-                auto compObj = (PyObject_PhysicBox*)(&PyTypeObject_PhysicBox)->tp_alloc(&PyTypeObject_PhysicBox, 0);
-                compObj->component = self->sceneObject.lock()->addComponent<PhysicBox>();
+            else if (type == "BoxCollider") {
+                auto compObj = (PyObject_BoxCollider*)(&PyTypeObject_BoxCollider)->tp_alloc(&PyTypeObject_BoxCollider, 0);
+                compObj->component = self->sceneObject.lock()->addComponent<BoxCollider>();
                 return (PyObject*)compObj;
             }
-            else if (type == "PhysicSphere") {
-                auto compObj = (PyObject_PhysicSphere*)(&PyTypeObject_PhysicSphere)->tp_alloc(&PyTypeObject_PhysicSphere, 0);
-                compObj->component = self->sceneObject.lock()->addComponent<PhysicSphere>();
+            else if (type == "SphereCollider") {
+                auto compObj = (PyObject_SphereCollider*)(&PyTypeObject_SphereCollider)->tp_alloc(&PyTypeObject_SphereCollider, 0);
+                compObj->component = self->sceneObject.lock()->addComponent<SphereCollider>();
                 return (PyObject*)compObj;
             }
-            else if (type == "PhysicCapsule") {
-                auto compObj = (PyObject_PhysicCapsule*)(&PyTypeObject_PhysicCapsule)->tp_alloc(&PyTypeObject_PhysicCapsule, 0);
-                compObj->component = self->sceneObject.lock()->addComponent<PhysicCapsule>();
+            else if (type == "CapsuleCollider") {
+                auto compObj = (PyObject_CapsuleCollider*)(&PyTypeObject_CapsuleCollider)->tp_alloc(&PyTypeObject_CapsuleCollider, 0);
+                compObj->component = self->sceneObject.lock()->addComponent<CapsuleCollider>();
                 return (PyObject*)compObj;
             }
-            else if (type == "PhysicMesh") {
-                auto compObj = (PyObject_PhysicMesh*)(&PyTypeObject_PhysicMesh)->tp_alloc(&PyTypeObject_PhysicMesh, 0);
-                compObj->component = self->sceneObject.lock()->addComponent<PhysicMesh>();
+            else if (type == "MeshCollider") {
+                auto compObj = (PyObject_MeshCollider*)(&PyTypeObject_MeshCollider)->tp_alloc(&PyTypeObject_MeshCollider, 0);
+                compObj->component = self->sceneObject.lock()->addComponent<MeshCollider>();
                 return (PyObject*)compObj;
             }
-            else if (type == "PhysicSoftBody") {
-                auto compObj = (PyObject_PhysicSoftBody*)(&PyTypeObject_PhysicSoftBody)->tp_alloc(&PyTypeObject_PhysicSoftBody, 0);
-                compObj->component = self->sceneObject.lock()->addComponent<PhysicSoftBody>();
+            else if (type == "Rigidbody") {
+                auto compObj = (PyObject_Rigidbody*)(&PyTypeObject_Rigidbody)->tp_alloc(&PyTypeObject_Rigidbody, 0);
+                compObj->component = self->sceneObject.lock()->addComponent<Rigidbody>();
+                return (PyObject*)compObj;
+            }
+            else if (type == "Softbody") {
+                auto compObj = (PyObject_Softbody*)(&PyTypeObject_Softbody)->tp_alloc(&PyTypeObject_Softbody, 0);
+                compObj->component = self->sceneObject.lock()->addComponent<Softbody>();
                 return (PyObject*)compObj;
             }
             else if (type == "AudioManager") {
@@ -694,50 +699,58 @@ namespace ige::scene
                 return (PyObject*)compObj;
             }
         }
-        else if (type == "PhysicObject") {
-            auto comp = sceneObject->getComponent<PhysicObject>();
+        else if (type == "Rigidbody") {
+            auto comp = sceneObject->getComponent<Rigidbody>();
             if (comp) {
-                auto* compObj = (PyObject_PhysicObject*)(&PyTypeObject_PhysicObject)->tp_alloc(&PyTypeObject_PhysicObject, 0);
+                auto* compObj = (PyObject_Rigidbody*)(&PyTypeObject_Rigidbody)->tp_alloc(&PyTypeObject_Rigidbody, 0);
                 compObj->component = comp;
                 return (PyObject*)compObj;
             }
         }
-        else if (type == "PhysicBox") {
-            auto comp = sceneObject->getComponent<PhysicBox>();
+        else if (type == "BoxCollider") {
+            auto comp = sceneObject->getComponent<BoxCollider>();
             if (comp) {
-                auto* compObj = (PyObject_PhysicBox*)(&PyTypeObject_PhysicBox)->tp_alloc(&PyTypeObject_PhysicBox, 0);
+                auto* compObj = (PyObject_BoxCollider*)(&PyTypeObject_BoxCollider)->tp_alloc(&PyTypeObject_BoxCollider, 0);
                 compObj->component = comp;
                 return (PyObject*)compObj;
             }
         }
-        else if (type == "PhysicSphere") {
-            auto comp = sceneObject->getComponent<PhysicSphere>();
+        else if (type == "SphereCollider") {
+            auto comp = sceneObject->getComponent<SphereCollider>();
             if (comp) {
-                auto* compObj = (PyObject_PhysicSphere*)(&PyTypeObject_PhysicSphere)->tp_alloc(&PyTypeObject_PhysicSphere, 0);
+                auto* compObj = (PyObject_SphereCollider*)(&PyTypeObject_SphereCollider)->tp_alloc(&PyTypeObject_SphereCollider, 0);
                 compObj->component = comp; 
                 return (PyObject*)compObj;
             }
         }
-        else if (type == "PhysicCapsule") {
-            auto comp = sceneObject->getComponent<PhysicCapsule>();
+        else if (type == "CapsuleCollider") {
+            auto comp = sceneObject->getComponent<CapsuleCollider>();
             if (comp) {
-                auto* compObj = (PyObject_PhysicCapsule*)(&PyTypeObject_PhysicCapsule)->tp_alloc(&PyTypeObject_PhysicCapsule, 0);
+                auto* compObj = (PyObject_CapsuleCollider*)(&PyTypeObject_CapsuleCollider)->tp_alloc(&PyTypeObject_CapsuleCollider, 0);
                 compObj->component = comp;
                 return (PyObject*)compObj;
             }
         }
-        else if (type == "PhysicMesh") {
-            auto comp = sceneObject->getComponent<PhysicMesh>();
+        else if (type == "MeshCollider") {
+            auto comp = sceneObject->getComponent<MeshCollider>();
             if (comp) {
-                auto* compObj = (PyObject_PhysicMesh*)(&PyTypeObject_PhysicMesh)->tp_alloc(&PyTypeObject_PhysicMesh, 0);
+                auto* compObj = (PyObject_MeshCollider*)(&PyTypeObject_MeshCollider)->tp_alloc(&PyTypeObject_MeshCollider, 0);
                 compObj->component = comp;
                 return (PyObject*)compObj;
             }
         }
-        else if (type == "PhysicSoftBody") {
-            auto comp = sceneObject->getComponent<PhysicSoftBody>();
+        else if (type == "Rigidbody") {
+            auto comp = sceneObject->getComponent<Rigidbody>();
             if (comp) {
-                auto* compObj = (PyObject_PhysicSoftBody*)(&PyTypeObject_PhysicSoftBody)->tp_alloc(&PyTypeObject_PhysicSoftBody, 0);
+                auto* compObj = (PyObject_Rigidbody*)(&PyTypeObject_Rigidbody)->tp_alloc(&PyTypeObject_Rigidbody, 0);
+                compObj->component = comp; 
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "Softbody") {
+            auto comp = sceneObject->getComponent<Softbody>();
+            if (comp) {
+                auto* compObj = (PyObject_Softbody*)(&PyTypeObject_Softbody)->tp_alloc(&PyTypeObject_Softbody, 0);
                 compObj->component = comp; 
                 return (PyObject*)compObj;
             }

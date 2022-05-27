@@ -18,7 +18,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SliderConstraint(PhysicObject &owner);
+        SliderConstraint(Rigidbody &owner);
 
         //! Destructor
         virtual ~SliderConstraint();

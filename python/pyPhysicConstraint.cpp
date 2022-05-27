@@ -1,6 +1,6 @@
 #include "python/pyPhysicConstraint.h"
 #include "python/pyPhysicConstraint_doc_en.h"
-#include "python/pyPhysicObject.h"
+#include "python/pyRigidbody.h"
 
 #include "components/physic/PhysicConstraint.h"
 #include "scene/SceneObject.h"
@@ -65,7 +65,7 @@ namespace ige::scene
     PyObject *PhysicConstraint_getOwner(PyObject_PhysicConstraint *self)
     {
         if (!self->constraint) Py_RETURN_NONE;
-        auto *obj = (PyObject_PhysicObject*)(&PyTypeObject_PhysicObject)->tp_alloc(&PyTypeObject_PhysicObject, 0);
+        auto *obj = (PyObject_Rigidbody*)(&PyTypeObject_Rigidbody)->tp_alloc(&PyTypeObject_Rigidbody, 0);
         obj->component = self->constraint->getOther()->getOwner()->getComponent(self->constraint->getOther()->getInstanceId());
         return (PyObject *)obj;
     }
@@ -76,7 +76,7 @@ namespace ige::scene
         if (!self->constraint) Py_RETURN_NONE;
         if(self->constraint->getOther())
         {
-            auto *obj = (PyObject_PhysicObject*)(&PyTypeObject_PhysicObject)->tp_alloc(&PyTypeObject_PhysicObject, 0);
+            auto *obj = (PyObject_Rigidbody*)(&PyTypeObject_Rigidbody)->tp_alloc(&PyTypeObject_Rigidbody, 0);
             obj->component = self->constraint->getOther()->getOwner()->getComponent(self->constraint->getOther()->getInstanceId());
             return (PyObject *)obj;
         }
@@ -86,12 +86,12 @@ namespace ige::scene
     int PhysicConstraint_setOther(PyObject_PhysicConstraint* self, PyObject* value)
     {
         if (!self->constraint) return -1;
-        if (value->ob_type != &PyTypeObject_PhysicObject)
+        if (value->ob_type != &PyTypeObject_Rigidbody)
             return -1;
 
-        auto other = (PyObject_PhysicObject *)(value);
+        auto other = (PyObject_Rigidbody *)(value);
         if(!other->component.expired())
-            self->constraint->setOther(std::dynamic_pointer_cast<PhysicObject>(other->component.lock()).get());
+            self->constraint->setOther(std::dynamic_pointer_cast<Rigidbody>(other->component.lock()).get());
         return 1;
     }
 

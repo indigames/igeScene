@@ -26,11 +26,11 @@
 #include "components/gui/UIScrollBar.h"
 #include "components/gui/UIMask.h"
 #include "components/physic/PhysicManager.h"
-#include "components/physic/PhysicBox.h"
-#include "components/physic/PhysicCapsule.h"
-#include "components/physic/PhysicSphere.h"
-#include "components/physic/PhysicMesh.h"
-#include "components/physic/PhysicSoftBody.h"
+#include "components/physic/BoxCollider.h"
+#include "components/physic/CapsuleCollider.h"
+#include "components/physic/SphereCollider.h"
+#include "components/physic/MeshCollider.h"
+#include "components/physic/Softbody.h"
 #include "components/audio/AudioManager.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
@@ -318,11 +318,12 @@ namespace ige::scene
         if (name == "Text") return addComponent<TextComponent>();
         if (name == "Script") return addComponent<ScriptComponent>();
         if (name == "PhysicManager") return addComponent<PhysicManager>();
-        if (name == "PhysicBox") return addComponent<PhysicBox>();
-        if (name == "PhysicSphere") return addComponent<PhysicSphere>();
-        if (name == "PhysicCapsule") return addComponent<PhysicCapsule>();
-        if (name == "PhysicMesh") return addComponent<PhysicMesh>();
-        if (name == "PhysicSoftBody") return addComponent<PhysicSoftBody>();
+        if (name == "BoxCollider") return addComponent<BoxCollider>();
+        if (name == "SphereCollider") return addComponent<SphereCollider>();
+        if (name == "CapsuleCollider") return addComponent<CapsuleCollider>();
+        if (name == "MeshCollider") return addComponent<MeshCollider>();
+        if (name == "Rigidbody") return addComponent<Rigidbody>();
+        if (name == "Softbody") return addComponent<Softbody>();
         if (name == "UIImage") return addComponent<UIImage>();
         if (name == "UIText") return addComponent<UIText>();
         if (name == "UITextField") return addComponent<UITextField>();
@@ -915,8 +916,8 @@ namespace ige::scene
             }
         }
         else {
-            if (getComponent<PhysicObject>() != nullptr) {
-                m_aabb = getComponent<PhysicObject>()->getAABB();
+            if (getComponent<Rigidbody>() != nullptr) {
+                m_aabb = getComponent<Rigidbody>()->getAABB();
             }
             else  if (getComponent<FigureComponent>() != nullptr) {
                 auto figureComp = getComponent<FigureComponent>();

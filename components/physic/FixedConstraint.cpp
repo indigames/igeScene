@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    FixedConstraint::FixedConstraint(PhysicObject &owner)
+    FixedConstraint::FixedConstraint(Rigidbody &owner)
         : PhysicConstraint(owner)
     {
         setType(ConstraintType::Fixed);

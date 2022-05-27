@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    SpringConstraint::SpringConstraint(PhysicObject &owner)
+    SpringConstraint::SpringConstraint(Rigidbody &owner)
         : PhysicConstraint(owner)
     {
         setType(ConstraintType::Spring);

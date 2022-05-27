@@ -1,7 +1,7 @@
-#include "python/pyPhysicMesh.h"
-#include "python/pyPhysicMesh_doc_en.h"
+#include "python/pyMeshCollider.h"
+#include "python/pyMeshCollider_doc_en.h"
 
-#include "components/physic/PhysicMesh.h"
+#include "components/physic/MeshCollider.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
@@ -11,7 +11,7 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    void PhysicMesh_dealloc(PyObject_PhysicMesh *self)
+    void MeshCollider_dealloc(PyObject_MeshCollider *self)
     {
         if (self) {
             self->component.reset();
@@ -19,59 +19,38 @@ namespace ige::scene
         }
     }
 
-    PyObject *PhysicMesh_str(PyObject_PhysicMesh *self)
+    PyObject *MeshCollider_str(PyObject_MeshCollider *self)
     {
-        return PyUnicode_FromString("C++ PhysicMesh object");
-    }
-
-    //! Path
-    PyObject *PhysicMesh_getPath(PyObject_PhysicMesh *self)
-    {
-        if (self->component.expired()) Py_RETURN_NONE;
-        return PyUnicode_FromString(std::dynamic_pointer_cast<PhysicMesh>(self->component.lock())->getPath().c_str());
-    }
-
-    int PhysicMesh_setPath(PyObject_PhysicMesh *self, PyObject *value)
-    {
-        if (self->component.expired()) return -1;
-        if (PyUnicode_Check(value)) {
-            const char* val = PyUnicode_AsUTF8(value);
-            if (val != NULL) {
-                std::dynamic_pointer_cast<PhysicMesh>(self->component.lock())->setPath(std::string(val));
-                return 0;
-            }
-        }
-        return -1;
+        return PyUnicode_FromString("C++ MeshCollider object");
     }
 
     //! Convex
-    PyObject *PhysicMesh_isConvex(PyObject_PhysicMesh *self)
+    PyObject *MeshCollider_isConvex(PyObject_MeshCollider *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyBool_FromLong(std::dynamic_pointer_cast<PhysicMesh>(self->component.lock())->isConvex());
+        return PyBool_FromLong(std::dynamic_pointer_cast<MeshCollider>(self->component.lock())->isConvex());
     }
 
-    int PhysicMesh_setConvex(PyObject_PhysicMesh *self, PyObject *value)
+    int MeshCollider_setConvex(PyObject_MeshCollider *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyLong_Check(value)) {
             auto val = (uint32_t)PyLong_AsLong(value);
-            std::dynamic_pointer_cast<PhysicMesh>(self->component.lock())->setConvex(val);
+            std::dynamic_pointer_cast<MeshCollider>(self->component.lock())->setConvex(val);
             return 0;
         }
         return -1;
     }
 
-    PyGetSetDef PhysicMesh_getsets[] = {
-        {"meshPath", (getter)PhysicMesh_getPath, (setter)PhysicMesh_setPath, PhysicMesh_meshPath_doc, NULL},
-        {"isConvex", (getter)PhysicMesh_isConvex, (setter)PhysicMesh_setConvex, PhysicMesh_isConvex_doc, NULL},
+    PyGetSetDef MeshCollider_getsets[] = {
+        {"isConvex", (getter)MeshCollider_isConvex, (setter)MeshCollider_setConvex, MeshCollider_isConvex_doc, NULL},
         {NULL, NULL}};
 
-    PyTypeObject PyTypeObject_PhysicMesh = {
-        PyVarObject_HEAD_INIT(NULL, 1) "igeScene.PhysicMesh", /* tp_name */
-        sizeof(PyObject_PhysicMesh),                          /* tp_basicsize */
+    PyTypeObject PyTypeObject_MeshCollider = {
+        PyVarObject_HEAD_INIT(NULL, 1) "igeScene.MeshCollider", /* tp_name */
+        sizeof(PyObject_MeshCollider),                          /* tp_basicsize */
         0,                                                    /* tp_itemsize */
-        (destructor)PhysicMesh_dealloc,                       /* tp_dealloc */
+        (destructor)MeshCollider_dealloc,                       /* tp_dealloc */
         0,                                                    /* tp_print */
         0,                                                    /* tp_getattr */
         0,                                                    /* tp_setattr */
@@ -82,7 +61,7 @@ namespace ige::scene
         0,                                                    /* tp_as_mapping */
         0,                                                    /* tp_hash */
         0,                                                    /* tp_call */
-        (reprfunc)PhysicMesh_str,                             /* tp_str */
+        (reprfunc)MeshCollider_str,                           /* tp_str */
         0,                                                    /* tp_getattro */
         0,                                                    /* tp_setattro */
         0,                                                    /* tp_as_buffer */
@@ -96,8 +75,8 @@ namespace ige::scene
         0,                                                    /* tp_iternext */
         0,                                                    /* tp_methods */
         0,                                                    /* tp_members */
-        PhysicMesh_getsets,                                   /* tp_getset */
-        &PyTypeObject_PhysicObject,                           /* tp_base */
+        MeshCollider_getsets,                                 /* tp_getset */
+        &PyTypeObject_Component,                              /* tp_base */
         0,                                                    /* tp_dict */
         0,                                                    /* tp_descr_get */
         0,                                                    /* tp_descr_set */

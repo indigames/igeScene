@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    HingeConstraint::HingeConstraint(PhysicObject &owner)
+    HingeConstraint::HingeConstraint(Rigidbody &owner)
         : PhysicConstraint(owner)
     {
         setType(ConstraintType::Hinge);

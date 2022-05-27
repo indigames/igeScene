@@ -33,11 +33,11 @@
 #include "python/pyUIScrollView.h"
 #include "python/pyUIScrollBar.h"
 #include "python/pyPhysicManager.h"
-#include "python/pyPhysicBox.h"
-#include "python/pyPhysicSphere.h"
-#include "python/pyPhysicCapsule.h"
-#include "python/pyPhysicMesh.h"
-#include "python/pyPhysicSoftBody.h"
+#include "python/pyBoxCollider.h"
+#include "python/pySphereCollider.h"
+#include "python/pyCapsuleCollider.h"
+#include "python/pyMeshCollider.h"
+#include "python/pySoftbody.h"
 #include "python/pyPhysicConstraint.h"
 #include "python/pyDof6Constraint.h"
 #include "python/pyFixedConstraint.h"
@@ -201,29 +201,29 @@ PyMODINIT_FUNC PyInit_igeScene()
     Py_INCREF(&PyTypeObject_PhysicManager);
     PyModule_AddObject(module, "PhysicManager", (PyObject*)&PyTypeObject_PhysicManager);
 
-    if (PyType_Ready(&PyTypeObject_PhysicObject) < 0) return NULL;
-    Py_INCREF(&PyTypeObject_PhysicObject);
-    PyModule_AddObject(module, "PhysicObject", (PyObject*)&PyTypeObject_PhysicObject);
+    if (PyType_Ready(&PyTypeObject_Rigidbody) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_Rigidbody);
+    PyModule_AddObject(module, "Rigidbody", (PyObject*)&PyTypeObject_Rigidbody);
 
-    if (PyType_Ready(&PyTypeObject_PhysicBox) < 0) return NULL;
-    Py_INCREF(&PyTypeObject_PhysicBox);
-    PyModule_AddObject(module, "PhysicBox", (PyObject*)&PyTypeObject_PhysicBox);
+    if (PyType_Ready(&PyTypeObject_BoxCollider) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_BoxCollider);
+    PyModule_AddObject(module, "BoxCollider", (PyObject*)&PyTypeObject_BoxCollider);
 
-    if (PyType_Ready(&PyTypeObject_PhysicSphere) < 0) return NULL;
-    Py_INCREF(&PyTypeObject_PhysicSphere);
-    PyModule_AddObject(module, "PhysicSphere", (PyObject*)&PyTypeObject_PhysicSphere);
+    if (PyType_Ready(&PyTypeObject_SphereCollider) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_SphereCollider);
+    PyModule_AddObject(module, "SphereCollider", (PyObject*)&PyTypeObject_SphereCollider);
 
-    if (PyType_Ready(&PyTypeObject_PhysicCapsule) < 0) return NULL;
-    Py_INCREF(&PyTypeObject_PhysicCapsule);
-    PyModule_AddObject(module, "PhysicCapsule", (PyObject*)&PyTypeObject_PhysicCapsule);
+    if (PyType_Ready(&PyTypeObject_CapsuleCollider) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_CapsuleCollider);
+    PyModule_AddObject(module, "CapsuleCollider", (PyObject*)&PyTypeObject_CapsuleCollider);
 
-    if (PyType_Ready(&PyTypeObject_PhysicMesh) < 0) return NULL;
-    Py_INCREF(&PyTypeObject_PhysicMesh);
-    PyModule_AddObject(module, "PhysicMesh", (PyObject*)&PyTypeObject_PhysicMesh);
+    if (PyType_Ready(&PyTypeObject_MeshCollider) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_MeshCollider);
+    PyModule_AddObject(module, "MeshCollider", (PyObject*)&PyTypeObject_MeshCollider);
 
-    if (PyType_Ready(&PyTypeObject_PhysicSoftBody) < 0) return NULL;
-    Py_INCREF(&PyTypeObject_PhysicSoftBody);
-    PyModule_AddObject(module, "PhysicSoftBody", (PyObject*)&PyTypeObject_PhysicSoftBody);
+    if (PyType_Ready(&PyTypeObject_Softbody) < 0) return NULL;
+    Py_INCREF(&PyTypeObject_Softbody);
+    PyModule_AddObject(module, "Softbody", (PyObject*)&PyTypeObject_Softbody);
 
     if (PyType_Ready(&PyTypeObject_PhysicConstraint) < 0) return NULL;
     Py_INCREF(&PyTypeObject_PhysicConstraint);

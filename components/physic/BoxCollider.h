@@ -3,30 +3,28 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "components/physic/PhysicObject.h"
+#include "components/physic/Collider.h"
 
 namespace ige::scene
 {
-    //! PhysicBox
-    class PhysicBox : public PhysicObject
+    //! BoxCollider
+    class BoxCollider : public Collider
     {
     public:
         //! Constructor
-        PhysicBox(SceneObject &owner, const Vec3 &size = {1.f, 1.f, 1.f});
+        BoxCollider(SceneObject &owner, const Vec3 &size = {1.f, 1.f, 1.f});
 
         //! Destructor
-        virtual ~PhysicBox();
+        virtual ~BoxCollider();
 
         //! Get name
-        std::string getName() const override { return "PhysicBox"; }
+        std::string getName() const override { return "BoxCollider"; }
 
         //! Returns the type of the component
-        virtual Type getType() const override { return Type::PhysicBox; }
+        virtual Type getType() const override { return Type::BoxCollider; }
 
-        //! Get size
+        //! Size
         const Vec3 &getSize() const;
-
-        //! Set size
         void setSize(const Vec3 &size);
 
         //! Update property by key value
@@ -39,11 +37,8 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json &j) override;
 
-        //! Create collision shape
-        void createCollisionShape(const Vec3 &size);
-
-        //! Recreate collision shape once size changed
-        void recreateCollisionShape(const Vec3 &size);
+        //! Create shape
+        virtual void createShape() override;
 
     protected:
         //! Box size

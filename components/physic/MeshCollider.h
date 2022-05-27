@@ -3,40 +3,33 @@
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "components/physic/PhysicObject.h"
+#include "components/physic/Collider.h"
 
 namespace ige::scene
 {
-    //! PhysicMesh
-    class PhysicMesh : public PhysicObject
+    //! MeshCollider
+    class MeshCollider : public Collider
     {
     public:
         //! Constructor
-        PhysicMesh(SceneObject& owner);
+        MeshCollider(SceneObject& owner);
 
         //! Destructor
-        virtual ~PhysicMesh();
+        virtual ~MeshCollider();
 
         //! Get name
-        std::string getName() const override { return "PhysicMesh"; }
+        std::string getName() const override { return "MeshCollider"; }
 
         //! Returns the type of the component
-        virtual Type getType() const override { return Type::PhysicMesh; }
+        virtual Type getType() const override { return Type::MeshCollider; }
 
         //! Mesh Index
         int getMeshIndex() const { return m_meshIndex; };
         void setMeshIndex(int idx);
 
-        //! Path
-        const std::string& getPath() const;
-        void setPath(const std::string& path);
-
         //! Convex
         bool isConvex() const;
         void setConvex(bool convex = true);
-
-        //! Override
-        virtual void setIsKinematic(bool isKinematic = true) override;
 
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
@@ -49,17 +42,11 @@ namespace ige::scene
         virtual void from_json(const json& j) override;
 
         //! Create collision shape
-        void createCollisionShape();
-
-        //! Recreate collision shape once radius changed
-        void recreateCollisionShape();
+        virtual void createShape() override;
 
     protected:
         //! Mesh index
         int m_meshIndex = 0;
-
-        //! Path to the model file
-        std::string m_path = {};
 
         //! Convex or Concave
         bool m_bIsConvex = true;

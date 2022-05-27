@@ -11,13 +11,13 @@ PyDoc_STRVAR(PhysicConstraint_type_doc,
 // owner
 PyDoc_STRVAR(PhysicConstraint_owner_doc,
     "The physic object that own this constraint.\n"\
-    "Type: PhysicObject\n"
+    "Type: Rigidbody\n"
 );
 
 // other
 PyDoc_STRVAR(PhysicConstraint_other_doc,
     "The physic object that linked to this constraint.\n"\
-    "Type: PhysicObject\n"
+    "Type: Rigidbody\n"
 );
 
 // isEnabled

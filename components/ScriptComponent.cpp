@@ -5,7 +5,7 @@
 #include <pyVectorMath.h>
 
 #include "components/ScriptComponent.h"
-#include "components/physic/PhysicObject.h"
+#include "components/physic/Rigidbody.h"
 #include "components/particle/Particle.h"
 
 #include "python/pySceneObject.h"
@@ -315,7 +315,7 @@ namespace ige::scene
         if (getOwner() == nullptr)
             return;
 
-        auto physicComp = getOwner()->getComponent<PhysicObject>();
+        auto physicComp = getOwner()->getComponent<Rigidbody>();
         if (physicComp != nullptr)
         {
             physicComp->getTriggerStartEvent().addListener([this](auto other) {
@@ -363,7 +363,7 @@ namespace ige::scene
         if (getOwner() == nullptr)
             return;
 
-        auto physicComp = getOwner()->getComponent<PhysicObject>();
+        auto physicComp = getOwner()->getComponent<Rigidbody>();
         if (physicComp != nullptr)
         {
             physicComp->getTriggerStartEvent().removeAllListeners();

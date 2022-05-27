@@ -1,30 +1,36 @@
 #pragma once
 
-#include <btBulletCollisionCommon.h>
-#include <btBulletDynamicsCommon.h>
-#include <BulletSoftBody/btSoftBody.h>
-
 #include "event/Event.h"
+#include "components/Component.h"
+#include "components/physic/Collider.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;
 
-#include "components/Component.h"
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
+#include <BulletSoftBody/btSoftBody.h>
 
 namespace ige::scene
 {
     class PhysicConstraint;
     class PhysicManager;
 
-    //! PhysicObject
-    class PhysicObject : public Component
+    //! Rigidbody
+    class Rigidbody : public Component
     {
     public:
         //! Constructor
-        PhysicObject(SceneObject &owner);
+        Rigidbody(SceneObject& owner);
 
         //! Destructor
-        virtual ~PhysicObject();
+        virtual ~Rigidbody();
+
+        //! Get name
+        std::string getName() const override { return "Rigidbody"; }
+
+        //! Returns the type of the component
+        virtual Type getType() const override { return Type::Rigidbody; }
 
         //! Cache PhysicManager
         std::shared_ptr<PhysicManager> getManager() const { return m_manager.expired() ? nullptr : m_manager.lock(); }
@@ -47,7 +53,7 @@ namespace ige::scene
 
         //! Get SoftBody
         virtual btSoftBody* getSoftBody() const {
-            if(!isSoftBody())
+            if (!isSoftBody())
                 return nullptr;
             return (btSoftBody*)m_body.get();
         }
@@ -65,19 +71,19 @@ namespace ige::scene
         virtual void setRestitution(float restitution);
 
         //! Linear velocity
-        virtual const btVector3 &getLinearVelocity() const { return m_linearVelocity; }
+        virtual const btVector3& getLinearVelocity() const { return m_linearVelocity; }
         virtual void setLinearVelocity(const btVector3& velocity);
 
         //! Angular velocity
-        virtual const btVector3 &getAngularVelocity() const { return m_angularVelocity; }
+        virtual const btVector3& getAngularVelocity() const { return m_angularVelocity; }
         virtual void setAngularVelocity(const btVector3& velocity);
 
         //! Linear factor
-        virtual const btVector3 &getLinearFactor() const { return m_linearFactor; }
+        virtual const btVector3& getLinearFactor() const { return m_linearFactor; }
         virtual void setLinearFactor(const btVector3& factor);
 
         //! Angular factor
-        virtual const btVector3 &getAngularFactor() const { return m_angularFactor; }
+        virtual const btVector3& getAngularFactor() const { return m_angularFactor; }
         virtual void setAngularFactor(const btVector3& factor);
 
         //! Linear Sleeping Threshold
@@ -160,6 +166,9 @@ namespace ige::scene
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 
+        //! Recreate Body
+        virtual void recreateBody() { createBody(); }
+
     public:
         //! Apply torque
         virtual void applyTorque(const btVector3& torque) { if (getBody()) getBody()->applyTorque(torque); }
@@ -168,7 +177,7 @@ namespace ige::scene
         virtual void applyTorqueImpulse(const btVector3& torque) { if (getBody()) getBody()->applyTorqueImpulse(torque); }
 
         //! Apply force
-        virtual void applyForce(const btVector3& force) { if(getBody()) getBody()->applyCentralForce(force); }
+        virtual void applyForce(const btVector3& force) { if (getBody()) getBody()->applyCentralForce(force); }
         virtual void applyForce(const btVector3& force, const btVector3& pos) { getBody()->applyForce(force, pos); }
 
         //! Apply impulse
@@ -185,26 +194,26 @@ namespace ige::scene
         virtual void updateIgeTransform();
 
         //! Get onCreatedEvent
-        static Event<PhysicObject*> &getOnCreatedEvent() { return m_onCreatedEvent; }
+        static Event<Rigidbody*>& getOnCreatedEvent() { return m_onCreatedEvent; }
 
         //! Get onDestroyedEvent
-        static Event<PhysicObject*> &getOnDestroyedEvent() { return m_onDestroyedEvent; }
+        static Event<Rigidbody*>& getOnDestroyedEvent() { return m_onDestroyedEvent; }
 
         //! Get onActivatedEvent
-        static Event<PhysicObject*> &getOnActivatedEvent() { return m_onActivatedEvent; }
+        static Event<Rigidbody*>& getOnActivatedEvent() { return m_onActivatedEvent; }
 
         //! Get onDeactivatedEvent
-        static Event<PhysicObject*> &getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
+        static Event<Rigidbody*>& getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
 
         //! Collision events
-        Event<PhysicObject*> &getCollisionStartEvent() { return m_collisionStartEvent; }
-        Event<PhysicObject*> &getCollisionStayEvent() { return m_collisionStayEvent; }
-        Event<PhysicObject*> &getCollisionStopEvent() { return m_collisionStopEvent; }
+        Event<Rigidbody*>& getCollisionStartEvent() { return m_collisionStartEvent; }
+        Event<Rigidbody*>& getCollisionStayEvent() { return m_collisionStayEvent; }
+        Event<Rigidbody*>& getCollisionStopEvent() { return m_collisionStopEvent; }
 
         //! Trigger events
-        Event<PhysicObject*> &getTriggerStartEvent() { return m_triggerStartEvent; }
-        Event<PhysicObject*> &getTriggerStayEvent() { return m_triggerStayEvent; }
-        Event<PhysicObject*> &getTriggerStopEvent() { return m_triggerStopEvent; }
+        Event<Rigidbody*>& getTriggerStartEvent() { return m_triggerStartEvent; }
+        Event<Rigidbody*>& getTriggerStayEvent() { return m_triggerStayEvent; }
+        Event<Rigidbody*>& getTriggerStopEvent() { return m_triggerStopEvent; }
 
     protected:
         //! Serialize
@@ -228,43 +237,36 @@ namespace ige::scene
         //! Deactivate
         virtual void deactivate();
 
-        //! Recreate Body
-        virtual void recreateBody();
-
-        //! Local scale
-        virtual const Vec3& getLocalScale() const { return m_previousScale; }
-        virtual void setLocalScale(const Vec3& scale);
-
         //! Is SoftBody
         bool isSoftBody() const { return m_bIsSoftBody; }
         void setSoftBody(bool isSoftBody) { m_bIsSoftBody = isSoftBody; }
 
     protected:
         //! On created event
-        static Event<PhysicObject*> m_onCreatedEvent;
+        static Event<Rigidbody*> m_onCreatedEvent;
 
         //! On destroyed event
-        static Event<PhysicObject*> m_onDestroyedEvent;
+        static Event<Rigidbody*> m_onDestroyedEvent;
 
         //! On activated event
-        static Event<PhysicObject*> m_onActivatedEvent;
+        static Event<Rigidbody*> m_onActivatedEvent;
 
         //! On deactivated event
-        static Event<PhysicObject*> m_onDeactivatedEvent;
+        static Event<Rigidbody*> m_onDeactivatedEvent;
 
         //! Collision events
-        Event<PhysicObject*> m_collisionStartEvent;
-        Event<PhysicObject*> m_collisionStayEvent;
-        Event<PhysicObject*> m_collisionStopEvent;
+        Event<Rigidbody*> m_collisionStartEvent;
+        Event<Rigidbody*> m_collisionStayEvent;
+        Event<Rigidbody*> m_collisionStopEvent;
 
         //! Trigger events
-        Event<PhysicObject*> m_triggerStartEvent;
-        Event<PhysicObject*> m_triggerStayEvent;
-        Event<PhysicObject*> m_triggerStopEvent;
+        Event<Rigidbody*> m_triggerStartEvent;
+        Event<Rigidbody*> m_triggerStayEvent;
+        Event<Rigidbody*> m_triggerStopEvent;
 
     protected:
         //! Collision shape
-        std::unique_ptr<btCollisionShape> m_shape;
+        std::weak_ptr<Collider> m_collider;
 
         //! Rigid Body
         std::unique_ptr<btCollisionObject> m_body;
@@ -347,7 +349,7 @@ namespace ige::scene
 
     //! Add constraint by type
     template <typename T, typename... Args>
-    inline std::shared_ptr<T> PhysicObject::addConstraint(Args &&... args)
+    inline std::shared_ptr<T> Rigidbody::addConstraint(Args &&... args)
     {
         static_assert(std::is_base_of<PhysicConstraint, T>::value, "T should derive from PhysicConstraint");
         auto instance = std::make_shared<T>(*this, args...);

@@ -5,7 +5,7 @@
 #include "components/navigation/NavObstacle.h"
 #include "components/navigation/OffMeshLink.h"
 #include "components/navigation/NavAgentManager.h"
-#include "components/physic/PhysicMesh.h"
+#include "components/physic/MeshCollider.h"
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
 #include "scene/SceneObject.h"

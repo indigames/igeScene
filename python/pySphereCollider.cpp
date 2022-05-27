@@ -1,7 +1,7 @@
-#include "python/pyPhysicSphere.h"
-#include "python/pyPhysicSphere_doc_en.h"
+#include "python/pySphereCollider.h"
+#include "python/pySphereCollider_doc_en.h"
 
-#include "components/physic/PhysicSphere.h"
+#include "components/physic/SphereCollider.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"
@@ -12,7 +12,7 @@ using namespace pyxie;
 
 namespace ige::scene
 {
-    void PhysicSphere_dealloc(PyObject_PhysicSphere *self)
+    void SphereCollider_dealloc(PyObject_SphereCollider *self)
     {
         if (self) {
             self->component.reset();
@@ -20,40 +20,40 @@ namespace ige::scene
         }
     }
 
-    PyObject *PhysicSphere_str(PyObject_PhysicSphere *self)
+    PyObject *SphereCollider_str(PyObject_SphereCollider *self)
     {
-        return PyUnicode_FromString("C++ PhysicSphere object");
+        return PyUnicode_FromString("C++ SphereCollider object");
     }
 
     //! size
-    PyObject *PhysicSphere_getRadius(PyObject_PhysicSphere *self)
+    PyObject *SphereCollider_getRadius(PyObject_SphereCollider *self)
     {
         if (self->component.expired()) Py_RETURN_NONE;
-        return PyFloat_FromDouble(std::dynamic_pointer_cast<PhysicSphere>(self->component.lock())->getRadius());
+        return PyFloat_FromDouble(std::dynamic_pointer_cast<SphereCollider>(self->component.lock())->getRadius());
     }
 
-    int PhysicSphere_setRadius(PyObject_PhysicSphere *self, PyObject *value)
+    int SphereCollider_setRadius(PyObject_SphereCollider *self, PyObject *value)
     {
         if (self->component.expired()) return -1;
         if (PyFloat_Check(value)) {
             float val = (float)PyFloat_AsDouble(value);
-            std::dynamic_pointer_cast<PhysicSphere>(self->component.lock())->setRadius(val);
+            std::dynamic_pointer_cast<SphereCollider>(self->component.lock())->setRadius(val);
             return 0;
         }
         return -1;
     }
 
     // Get/set
-    PyGetSetDef PhysicSphere_getsets[] = {
-        {"radius", (getter)PhysicSphere_getRadius, (setter)PhysicSphere_setRadius, PhysicSphere_radius_doc, NULL},
+    PyGetSetDef SphereCollider_getsets[] = {
+        {"radius", (getter)SphereCollider_getRadius, (setter)SphereCollider_setRadius, SphereCollider_radius_doc, NULL},
         {NULL, NULL},
     };
 
-    PyTypeObject PyTypeObject_PhysicSphere = {
-        PyVarObject_HEAD_INIT(NULL, 0) "igeScene.PhysicSphere", /* tp_name */
-        sizeof(PyObject_PhysicSphere),                          /* tp_basicsize */
+    PyTypeObject PyTypeObject_SphereCollider = {
+        PyVarObject_HEAD_INIT(NULL, 0) "igeScene.SphereCollider", /* tp_name */
+        sizeof(PyObject_SphereCollider),                          /* tp_basicsize */
         0,                                                      /* tp_itemsize */
-        (destructor)PhysicSphere_dealloc,                       /* tp_dealloc */
+        (destructor)SphereCollider_dealloc,                     /* tp_dealloc */
         0,                                                      /* tp_print */
         0,                                                      /* tp_getattr */
         0,                                                      /* tp_setattr */
@@ -64,7 +64,7 @@ namespace ige::scene
         0,                                                      /* tp_as_mapping */
         0,                                                      /* tp_hash */
         0,                                                      /* tp_call */
-        (reprfunc)PhysicSphere_str,                             /* tp_str */
+        (reprfunc)SphereCollider_str,                           /* tp_str */
         0,                                                      /* tp_getattro */
         0,                                                      /* tp_setattro */
         0,                                                      /* tp_as_buffer */
@@ -78,8 +78,8 @@ namespace ige::scene
         0,                                                      /* tp_iternext */
         0,                                                      /* tp_methods */
         0,                                                      /* tp_members */
-        PhysicSphere_getsets,                                   /* tp_getset */
-        &PyTypeObject_PhysicObject,                             /* tp_base */
+        SphereCollider_getsets,                                 /* tp_getset */
+        &PyTypeObject_Component,                                /* tp_base */
         0,                                                      /* tp_dict */
         0,                                                      /* tp_descr_get */
         0,                                                      /* tp_descr_set */

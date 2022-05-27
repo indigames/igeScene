@@ -149,7 +149,7 @@ namespace ige::scene
     };
 
 
-    //! PhysicMesh
+    //! MeshCollider
     class NavMesh : public Component
     {
     public:

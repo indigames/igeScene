@@ -18,7 +18,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SpringConstraint(PhysicObject &owner);
+        SpringConstraint(Rigidbody &owner);
 
         //! Destructor
         virtual ~SpringConstraint();

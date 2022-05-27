@@ -1,4 +1,4 @@
-#include "components/physic/PhysicSoftBody.h"
+#include "components/physic/Softbody.h"
 #include "components/physic/PhysicManager.h"
 #include "components/TransformComponent.h"
 #include "components/FigureComponent.h"
@@ -16,15 +16,15 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    PhysicSoftBody::PhysicSoftBody(SceneObject &owner)
-        : PhysicObject(owner)
+    Softbody::Softbody(SceneObject &owner)
+        : Rigidbody(owner)
     {
         m_mass = -1.f;
         init();
     }
 
     //! Destructor
-    PhysicSoftBody::~PhysicSoftBody()
+    Softbody::~Softbody()
     {
         if (m_indicesMap != nullptr)
             delete[] m_indicesMap;
@@ -32,7 +32,7 @@ namespace ige::scene
     }
 
     //! Get AABB
-    AABBox PhysicSoftBody::getAABB()
+    AABBox Softbody::getAABB()
     {
         btVector3 aabbMin, aabbMax;
         getSoftBody()->getAabb(aabbMin, aabbMax);
@@ -41,7 +41,7 @@ namespace ige::scene
 
 
     //! Set mesh index
-    void PhysicSoftBody::setMeshIndex(int idx)
+    void Softbody::setMeshIndex(int idx)
     {
         if (m_bIsDirty || m_meshIndex != idx)
         {
@@ -51,7 +51,7 @@ namespace ige::scene
     }
 
     //! Linear velocity
-    void PhysicSoftBody::setLinearVelocity(const btVector3 &velocity)
+    void Softbody::setLinearVelocity(const btVector3 &velocity)
     {
         if (m_bIsDirty || m_linearVelocity != velocity)
         {
@@ -61,7 +61,7 @@ namespace ige::scene
     }
 
     //! Angular velocity
-    void PhysicSoftBody::setAngularVelocity(const btVector3 &velocity)
+    void Softbody::setAngularVelocity(const btVector3 &velocity)
     {
         if (m_bIsDirty || m_angularVelocity != velocity)
         {
@@ -70,7 +70,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setDampingCoeff(float coeff)
+    void Softbody::setDampingCoeff(float coeff)
     {
         if (m_bIsDirty || m_dampingCoeff != coeff)
         {
@@ -79,7 +79,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setPressureCoeff(float coeff)
+    void Softbody::setPressureCoeff(float coeff)
     {
         if (m_bIsDirty || m_pressureCoeff != coeff)
         {
@@ -88,7 +88,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setVolumeConvCoeff(float coeff)
+    void Softbody::setVolumeConvCoeff(float coeff)
     {
         if (m_bIsDirty || m_volumeConvCoeff != coeff)
         {
@@ -97,7 +97,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setDynamicFrictionCoeff(float coeff)
+    void Softbody::setDynamicFrictionCoeff(float coeff)
     {
         if (m_bIsDirty || m_dynamicFrictionCoeff != coeff)
         {
@@ -106,7 +106,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setPoseMatchCoeff(float coeff)
+    void Softbody::setPoseMatchCoeff(float coeff)
     {
         if (m_bIsDirty || m_poseMatchCoeff != coeff)
         {
@@ -115,7 +115,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setVelocityFactor(float coeff)
+    void Softbody::setVelocityFactor(float coeff)
     {
         if (m_bIsDirty || m_velocityFactor != coeff)
         {
@@ -124,7 +124,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setRepulsionStiffness(float repulsionStiffness)
+    void Softbody::setRepulsionStiffness(float repulsionStiffness)
     {
         if (m_bIsDirty || m_repulsionStiffness != repulsionStiffness)
         {
@@ -133,7 +133,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setSleepingThreshold(float threshold)
+    void Softbody::setSleepingThreshold(float threshold)
     {
         if (m_bIsDirty || m_sleepingThreshold != threshold)
         {
@@ -142,7 +142,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setRestLengthScale(float scale)
+    void Softbody::setRestLengthScale(float scale)
     {
         if (m_bIsDirty || m_restLengthScale != scale)
         {
@@ -151,7 +151,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setGravityFactor(float factor)
+    void Softbody::setGravityFactor(float factor)
     {
         if (m_bIsDirty || m_gravityFactor != factor)
         {
@@ -160,7 +160,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setRigidContactHardness(float factor)
+    void Softbody::setRigidContactHardness(float factor)
     {
         if (m_bIsDirty || m_rigidContactHardness != factor)
         {
@@ -169,7 +169,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setKineticContactHardness(float factor)
+    void Softbody::setKineticContactHardness(float factor)
     {
         if (m_bIsDirty || m_kineticContactHardness != factor)
         {
@@ -178,7 +178,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setSoftContactHardness(float factor)
+    void Softbody::setSoftContactHardness(float factor)
     {
         if (m_bIsDirty || m_softContactHardness != factor)
         {
@@ -187,7 +187,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setAnchorHardness(float factor)
+    void Softbody::setAnchorHardness(float factor)
     {
         if (m_bIsDirty || m_anchorHardness != factor)
         {
@@ -196,7 +196,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setPosIterationNumber(int number)
+    void Softbody::setPosIterationNumber(int number)
     {
         if (m_bIsDirty || m_positionIterNumber != number)
         {
@@ -205,7 +205,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setAeroModel(int model)
+    void Softbody::setAeroModel(int model)
     {
         if (model < btSoftBody::eAeroModel::V_Point || model > btSoftBody::eAeroModel::F_OneSided)
         {
@@ -219,7 +219,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setSelfCollision(bool selfCollision)
+    void Softbody::setSelfCollision(bool selfCollision)
     {
         if (m_bIsDirty || m_bUseSelfCollision != selfCollision)
         {
@@ -228,7 +228,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setSoftSoftCollision(bool soft)
+    void Softbody::setSoftSoftCollision(bool soft)
     {
         if (m_bIsDirty || m_softSoftCollision != soft)
         {
@@ -237,7 +237,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicSoftBody::setWindVelocity(const btVector3 &velocity)
+    void Softbody::setWindVelocity(const btVector3 &velocity)
     {
         if (m_bIsDirty || m_windVelocity != velocity)
         {
@@ -247,7 +247,7 @@ namespace ige::scene
     }
 
     //! Create physic body
-    void PhysicSoftBody::createBody()
+    void Softbody::createBody()
     {
         // Create collision shape
         if (m_body)
@@ -321,7 +321,7 @@ namespace ige::scene
         setSoftBody(true);
         getSoftBody()->generateBendingConstraints(2);
 
-        // Apply pre-configurated values to PhysicObject
+        // Apply pre-configurated values to Rigidbody
         setMass(m_mass);
         setFriction(m_friction);
         setRestitution(m_restitution);
@@ -334,7 +334,7 @@ namespace ige::scene
         // Recalculate scale
         auto scale = m_previousScale;
         m_previousScale = Vec3(1.f, 1.f, 1.f);
-        setLocalScale(scale);
+        setScale(scale);
 
         // Apply pre-configurated values
         setDampingCoeff(m_dampingCoeff);
@@ -375,7 +375,7 @@ namespace ige::scene
     }
 
     //! Set local scale
-    void PhysicSoftBody::setLocalScale(const Vec3 &scale)
+    void Softbody::setScale(const Vec3 &scale)
     {
         if (m_bIsDirty || m_previousScale != scale)
         {
@@ -386,7 +386,7 @@ namespace ige::scene
     }
 
     //! Get nearest node
-    int PhysicSoftBody::getNearestNodeIndex(const btVector3 &pos)
+    int Softbody::getNearestNodeIndex(const btVector3 &pos)
     {
         int nearestNo = -1;
         float dist = FLT_MAX;
@@ -407,7 +407,7 @@ namespace ige::scene
     }
 
     //! Get node position
-    btVector3 PhysicSoftBody::getNodePosition(int idx)
+    btVector3 Softbody::getNodePosition(int idx)
     {
         if (idx < 0 || idx >= getSoftBody()->m_nodes.size())
             return btVector3(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -415,7 +415,7 @@ namespace ige::scene
     }
 
     //! Get node normal
-    btVector3 PhysicSoftBody::getNodeNormal(int idx)
+    btVector3 Softbody::getNodeNormal(int idx)
     {
         if (idx < 0 || idx >= getSoftBody()->m_nodes.size())
             return btVector3(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -423,7 +423,7 @@ namespace ige::scene
     }
 
     //! Update Bullet transform
-    void PhysicSoftBody::updateBtTransform()
+    void Softbody::updateBtTransform()
     {
         auto newTrans = PhysicHelper::to_btTransform(getOwner()->getTransform()->getRotation(), getOwner()->getTransform()->getPosition());
         getSoftBody()->transformTo(newTrans);
@@ -432,12 +432,12 @@ namespace ige::scene
         Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
         float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
         if (scaleDelta >= 0.01f) {
-            setLocalScale(scale);
+            setScale(scale);
         }
     }
 
     //! Update IGE transform
-    void PhysicSoftBody::updateIgeTransform()
+    void Softbody::updateIgeTransform()
     {
         // Update transform
         if (getOwner()->getTransform())
@@ -579,7 +579,7 @@ namespace ige::scene
     }
 
     //! Optimize mesh
-    void PhysicSoftBody::optimizeMesh(const std::vector<Vec3> &orgPoss, int *indices, int numIndeces, float *&optPoss)
+    void Softbody::optimizeMesh(const std::vector<Vec3> &orgPoss, int *indices, int numIndeces, float *&optPoss)
     {
         if (m_indicesMap != nullptr)
             delete[] m_indicesMap;
@@ -617,9 +617,9 @@ namespace ige::scene
     }
 
     //! Serialize
-    void PhysicSoftBody::to_json(json &j) const
+    void Softbody::to_json(json &j) const
     {
-        PhysicObject::to_json(j);
+        Rigidbody::to_json(j);
         j["meshIdx"] = getMeshIndex();
         j["dampCoeff"] = getDampingCoeff();
         j["presCoeff"] = getPressureCoeff();
@@ -643,9 +643,9 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void PhysicSoftBody::from_json(const json &j)
+    void Softbody::from_json(const json &j)
     {
-        PhysicObject::from_json(j);
+        Rigidbody::from_json(j);
         setMeshIndex(j.value("meshIdx", 0));
         setDampingCoeff(j.value("dampCoeff", 0.4f));
         setPressureCoeff(j.value("presCoeff", 0.f));
@@ -669,7 +669,7 @@ namespace ige::scene
     }
 
     //! Update property by key value
-    void PhysicSoftBody::setProperty(const std::string& key, const json& val)
+    void Softbody::setProperty(const std::string& key, const json& val)
     {
         if (key.compare("meshIdx") == 0)
             setMeshIndex(val);
@@ -712,7 +712,7 @@ namespace ige::scene
         else if (key.compare("ahr") == 0)
             setAnchorHardness(val);
         else
-            PhysicObject::setProperty(key, val);
+            Rigidbody::setProperty(key, val);
     }
 
 } // namespace ige::scene

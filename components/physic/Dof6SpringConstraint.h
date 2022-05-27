@@ -18,7 +18,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        Dof6SpringConstraint(PhysicObject &owner);
+        Dof6SpringConstraint(Rigidbody &owner);
 
         //! Destructor
         virtual ~Dof6SpringConstraint();
