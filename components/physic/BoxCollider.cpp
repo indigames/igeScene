@@ -2,6 +2,8 @@
 #include <btBulletDynamicsCommon.h>
 
 #include "components/physic/BoxCollider.h"
+#include "components/physic/Rigidbody.h"
+#include "scene/SceneObject.h"
 #include "utils/PhysicHelper.h"
 
 namespace ige::scene
@@ -10,7 +12,6 @@ namespace ige::scene
     BoxCollider::BoxCollider(SceneObject &owner, const Vec3 &size)
         : Collider(owner), m_size(size)
     {
-        createShape();
     }
 
     //! Destructor
@@ -43,6 +44,10 @@ namespace ige::scene
             m_shape.reset();
         m_shape = std::make_unique<btBoxShape>(PhysicHelper::to_btVector3(m_size));
         setScale(m_scale);
+        auto body = getOwner()->getComponent<Rigidbody>();
+        if (body) {
+            body->recreateBody();
+        }
     }
 
     //! Serialize

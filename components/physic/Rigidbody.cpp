@@ -76,16 +76,16 @@ namespace ige::scene
 
     //! Transform changed: update transform for kinematic object
     void Rigidbody::onTransformChanged(SceneObject& object) {
-        if (isKinematic()) {
+        if (m_body && isKinematic()) {
             updateBtTransform();
             m_body->setInterpolationWorldTransform(m_body->getWorldTransform());
             if (getBody() && getBody()->getMotionState()) {
                 getBody()->getMotionState()->setWorldTransform(m_body->getWorldTransform());
             }
+#if EDITOR_MODE
+            getOwner()->updateAabb();
+#endif
         }
-    #if EDITOR_MODE
-        getOwner()->updateAabb();
-    #endif
     }
 
     //! Add constraint
@@ -478,6 +478,7 @@ namespace ige::scene
     //! Update Bullet transform
     void Rigidbody::updateBtTransform()
     {
+        if (!m_body) return;
         auto offset = Vec3();
         const auto& transform = getOwner()->getTransform();
         if (m_positionOffset.LengthSqr() > 0) {
@@ -494,15 +495,15 @@ namespace ige::scene
             if (!m_collider.expired()) {
                 m_collider.lock()->setScale({ std::abs(scale[0]), std::abs(scale[1]), std::abs(scale[2]) });
                 m_previousScale = m_collider.lock()->getScale();
+                // recreateBody();
             }
-            recreateBody();
         }
     }
 
     //! Update IGE transform
     void Rigidbody::updateIgeTransform()
     {
-        if (isKinematic()) return;
+        if (!m_body || isKinematic()) return;
         auto transform = getOwner()->getTransform();
         const auto &result = m_body->getWorldTransform();
         transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
@@ -523,7 +524,8 @@ namespace ige::scene
         btVector3 aabbMin, aabbMax;
         getBody()->getAabb(aabbMin, aabbMax);
         auto box = AABBox(PhysicHelper::from_btVector3(aabbMin), PhysicHelper::from_btVector3(aabbMax));
-        return box.Transform(getOwner()->getTransform()->getWorldMatrix().Inverse());
+        box = box.Transform(getOwner()->getTransform()->getWorldMatrix().Inverse());
+        return box;
     }
 
     //! Serialize

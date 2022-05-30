@@ -24,6 +24,7 @@ namespace ige::scene
         virtual Type getType() const override { return Type::MeshCollider; }
 
         //! Mesh Index
+        int getMeshCount() const { return m_numMesh; }
         int getMeshIndex() const { return m_meshIndex; };
         void setMeshIndex(int idx);
 
@@ -33,6 +34,9 @@ namespace ige::scene
 
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
+
+        //! Not support scale
+        virtual void setScale(const Vec3& scale) override;
 
     protected:
         //! Serialize
@@ -45,19 +49,26 @@ namespace ige::scene
         virtual void createShape() override;
 
     protected:
+        //! Helper to create single mesh shape
+        void createSingleShape(int index);
+
+    protected:
         //! Mesh index
-        int m_meshIndex = 0;
+        int m_meshIndex = -1;
+
+        //! Mesh counter
+        int m_numMesh = 0;
 
         //! Convex or Concave
         bool m_bIsConvex = true;
 
         //! Cache btTriangleIndexVertexArray
-        btTriangleIndexVertexArray* m_indexVertexArrays = nullptr;
+        std::vector<btTriangleIndexVertexArray*> m_indexVertexArrays;
 
         //! Cache indices
-        int* m_indices = nullptr;
+        std::vector<int*> m_indices;
 
         //! Cache btPosition
-        btVector3* m_btPositions = nullptr;
+        std::vector<btVector3*> m_btPositions;
     };
 } // namespace ige::scene

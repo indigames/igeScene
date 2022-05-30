@@ -17,6 +17,10 @@ namespace ige::scene
     //! Destructor
     Collider::~Collider()
     {
+        auto rigidBody = getOwner()->getComponent<Rigidbody>();
+        if (rigidBody) {
+            rigidBody->destroyBody();
+        }
     }
 
     //! Set local scale
@@ -37,6 +41,11 @@ namespace ige::scene
         }
     }
 
+    std::unique_ptr<btCollisionShape>& Collider::getShape() {
+        if (!m_shape) createShape();
+        return m_shape;
+    }
+
     //! Serialize
     void Collider::to_json(json &j) const
     {
@@ -48,6 +57,7 @@ namespace ige::scene
     void Collider::from_json(const json &j)
     {
         Component::from_json(j);
+        getShape(); // create shape just in case
         setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
     }
 

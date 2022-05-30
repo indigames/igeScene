@@ -2,6 +2,8 @@
 #include <btBulletDynamicsCommon.h>
 
 #include "components/physic/SphereCollider.h"
+#include "components/physic/Rigidbody.h"
+#include "scene/SceneObject.h"
 #include "utils/PhysicHelper.h"
 
 namespace ige::scene
@@ -10,7 +12,6 @@ namespace ige::scene
     SphereCollider::SphereCollider(SceneObject &owner, float radius)
         : Collider(owner), m_radius(radius)
     {
-        createShape();
     }
 
     //! Destructor
@@ -43,14 +44,18 @@ namespace ige::scene
             m_shape.reset();
         m_shape = std::make_unique<btSphereShape>(m_radius);
         setScale(m_scale);
+        auto body = getOwner()->getComponent<Rigidbody>();
+        if (body) {
+            body->recreateBody();
+        }
     }
 
     //! Set local scale of the box
     void SphereCollider::setScale(const Vec3 &scale)
     {
+        m_scale = scale;
         float radiusScale = std::max(std::max(scale[0], scale[1]), scale[2]);
         if(m_shape) m_shape->setLocalScaling({radiusScale, radiusScale, radiusScale});
-        m_scale = scale;
     }
 
     //! Serialize

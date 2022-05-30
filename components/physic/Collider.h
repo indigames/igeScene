@@ -28,7 +28,7 @@ namespace ige::scene
         virtual void setProperty(const std::string& key, const json& val) override;
     
         //! Get collision shape
-        std::unique_ptr<btCollisionShape>& getShape() { return m_shape; }
+        std::unique_ptr<btCollisionShape>& getShape();
 
     protected:
         //! Serialize
@@ -46,6 +46,9 @@ namespace ige::scene
     protected:
         //! Collision shape
         std::unique_ptr<btCollisionShape> m_shape = nullptr;
+
+        //! Collision shapes for compound collider
+        std::vector<std::shared_ptr<btCollisionShape>> m_shapes;
 
         //! Cache scale value
         Vec3 m_scale = {1.f, 1.f, 1.f};

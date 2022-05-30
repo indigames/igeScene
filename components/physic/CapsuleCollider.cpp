@@ -2,6 +2,8 @@
 #include <btBulletDynamicsCommon.h>
 
 #include "components/physic/CapsuleCollider.h"
+#include "components/physic/Rigidbody.h"
+#include "scene/SceneObject.h"
 #include "utils/PhysicHelper.h"
 
 namespace ige::scene
@@ -10,7 +12,6 @@ namespace ige::scene
     CapsuleCollider::CapsuleCollider(SceneObject &owner, float radius, float height)
         : Collider(owner), m_radius(radius), m_height(height)
     {
-        createShape();
     }
 
     //! Destructor
@@ -58,6 +59,10 @@ namespace ige::scene
             m_shape.reset();
         m_shape = std::make_unique<btCapsuleShape>(m_radius, m_height);
         setScale(m_scale);
+        auto body = getOwner()->getComponent<Rigidbody>();
+        if (body) {
+            body->recreateBody();
+        }
     }
 
 

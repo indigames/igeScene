@@ -16,7 +16,6 @@ namespace ige::scene
     MeshCollider::MeshCollider(SceneObject &owner)
         : Collider(owner)
     {
-        createShape();
     }
 
     //! Destructor
@@ -24,25 +23,25 @@ namespace ige::scene
     {
         if (m_shape != nullptr)
             m_shape.reset();
+        m_shapes.clear();
 
-        if (m_indexVertexArrays != nullptr)
-            delete m_indexVertexArrays;
-        m_indexVertexArrays = nullptr;
+        for (auto* indexArray : m_indexVertexArrays)
+            if (indexArray) delete indexArray;
+        m_indexVertexArrays.clear();
 
-        if (m_indices != nullptr)
-            delete[] m_indices;
-        m_indices = nullptr;
+        for (auto* index : m_indices)
+            if (index) delete[] index;
+        m_indices.clear();
 
-        if (m_btPositions != nullptr)
-            delete[] m_btPositions;
-        m_btPositions = nullptr;
+        for (auto* pos : m_btPositions)
+            if (pos) delete[] pos;
+        m_btPositions.clear();
     }
 
     //! Set mesh index
     void MeshCollider::setMeshIndex(int idx)
     {
-        if (m_meshIndex != idx)
-        {
+        if (m_meshIndex != idx) {
             m_meshIndex = idx;
             recreateShape();
         }
@@ -56,15 +55,108 @@ namespace ige::scene
 
     void MeshCollider::setConvex(bool convex)
     {
-        if (m_bIsConvex != convex)
+        // Dynamic body -> force to convex
+        auto body = getOwner()->getComponent<Rigidbody>();
+        if (body && !body->isKinematic() && !convex) {
+            convex = true;
+        }
+        m_bIsConvex = convex;
+        recreateShape();
+    }
+
+    //! Create single shape
+    void MeshCollider::createSingleShape(int index) {
+        if (index < 0 || index >= getMeshCount())
+            return;
+        std::vector<Vec3> positions;
+        auto* figure = getOwner()->getComponent<FigureComponent>()->getFigure();
+        if (figure->NumMeshes() > 0 && index >= 0 && index < figure->NumMeshes())
         {
-            // Dynamic body -> force to convex
-            auto body = getOwner()->getComponent<Rigidbody>();
-            if (body && !body->isKinematic() && !convex) {
-                convex = true;
+            int offset = 0;
+            int size = 100000000;
+            int space = Space::LocalSpace;
+
+            auto mesh = figure->GetMesh(index);
+            auto attIdx = -1;
+            for (uint16_t i = 0; i < mesh->numVertexAttributes; ++i)
+            {
+                if (mesh->vertexAttributes[i].id == AttributeID::ATTRIBUTE_ID_POSITION)
+                {
+                    attIdx = i;
+                    break;
+                }
             }
-            m_bIsConvex = convex;
-            recreateShape();
+
+            if (attIdx != -1)
+            {
+                if (size + offset > mesh->numVerticies)
+                    size = mesh->numVerticies - offset;
+
+                if (size > 0)
+                {
+                    float* palettebuffer = nullptr;
+                    float* inbindSkinningMatrices = nullptr;
+                    figure->AllocTransformBuffer(space, palettebuffer, inbindSkinningMatrices);
+                    figure->ReadPositions(index, offset, size, space, palettebuffer, inbindSkinningMatrices, &positions);
+                    if (inbindSkinningMatrices)
+                        PYXIE_FREE_ALIGNED(inbindSkinningMatrices);
+                    if (palettebuffer)
+                        PYXIE_FREE_ALIGNED(palettebuffer);
+                }
+            }
+            auto numPoints = positions.size();
+            auto btPositions = new btVector3[numPoints];
+            m_btPositions.push_back(btPositions);
+            for (size_t i = 0; i < numPoints; ++i)
+                btPositions[i] = PhysicHelper::to_btVector3(positions[i]);
+            positions.clear();
+
+            if (m_bIsConvex)
+            {
+                if (m_meshIndex == -1 && m_numMesh > 1) {
+                    auto* compoundShape = (btCompoundShape*)m_shape.get();
+                    if (compoundShape) {
+                        auto convexHull = std::make_shared<btConvexHullShape>((btScalar*)btPositions, numPoints);
+                        convexHull->optimizeConvexHull();
+                        btTransform transform;
+                        transform.setIdentity();
+                        compoundShape->addChildShape(transform, convexHull.get());
+                        m_shapes.push_back(convexHull);
+                    }
+                }
+                else {
+                    auto convexHull = std::make_unique<btConvexHullShape>((btScalar*)btPositions, numPoints);
+                    convexHull->optimizeConvexHull();
+                    m_shape = std::move(convexHull);                    
+                }
+            }
+            else
+            {
+                auto mesh = figure->GetMesh(index);
+                auto indices = new int[mesh->numIndices];
+                for (uint32_t i = 0; i < mesh->numIndices; ++i)
+                    indices[i] = (int)mesh->indices[i];
+                m_indices.push_back(indices);
+
+                auto indexVertexArrays = new btTriangleIndexVertexArray(mesh->numIndices / 3, indices, 3 * 4, numPoints, (btScalar*)btPositions, sizeof(btVector3));
+                m_indexVertexArrays.push_back(indexVertexArrays);
+
+                bool useQuantizedAabbCompression = true;
+                if (m_meshIndex == -1 && m_numMesh > 1) {
+                    auto* compoundShape = (btCompoundShape*)m_shape.get();
+                    if (compoundShape) {
+                        auto triangleMeshShape = std::make_shared<btBvhTriangleMeshShape>(indexVertexArrays, useQuantizedAabbCompression);
+                        btTransform transform;
+                        transform.setIdentity();
+                        compoundShape->addChildShape(transform, triangleMeshShape.get());
+                        m_shapes.push_back(triangleMeshShape);
+                    }
+                }
+                else {
+                    auto triangleMeshShape = std::make_unique<btBvhTriangleMeshShape>(indexVertexArrays, useQuantizedAabbCompression);
+                    m_shape = std::move(triangleMeshShape);
+                }
+            }
         }
     }
 
@@ -74,96 +166,65 @@ namespace ige::scene
         // Create collision shape
         if (m_shape != nullptr)
             m_shape.reset();
+        m_shapes.clear();
+
+        for (auto* indexArray : m_indexVertexArrays)
+            if (indexArray) delete indexArray;
+        m_indexVertexArrays.clear();
+
+        for (auto* index : m_indices)
+            if (index) delete[] index;
+        m_indices.clear();
+
+        for(auto* pos: m_btPositions)
+            if (pos) delete[] pos;
+        m_btPositions.clear();
 
         Figure* figure = nullptr;
         auto figureComp = getOwner()->getComponent<FigureComponent>();
         if (figureComp)
             figure = figureComp->getFigure();
         
-
         // Load mesh from figure
         if (figure != nullptr)
         {
-            std::vector<Vec3> positions;
-
             figure->WaitInitialize();
-            if (figure->NumMeshes() > 0 && m_meshIndex >= 0 && m_meshIndex < figure->NumMeshes())
-            {
-                int offset = 0;
-                int size = 100000000;
-                int space = Space::LocalSpace;
+            m_numMesh = figure->NumMeshes();
+            if (m_numMesh <= 0) return;
 
-                auto mesh = figure->GetMesh(m_meshIndex);
-                auto attIdx = -1;
-                for (uint16_t i = 0; i < mesh->numVertexAttributes; ++i)
-                {
-                    if (mesh->vertexAttributes[i].id == AttributeID::ATTRIBUTE_ID_POSITION)
-                    {
-                        attIdx = i;
-                        break;
-                    }
-                }
-
-                if (attIdx != -1)
-                {
-                    if (size + offset > mesh->numVerticies)
-                        size = mesh->numVerticies - offset;
-
-                    if (size > 0)
-                    {
-                        float *palettebuffer = nullptr;
-                        float *inbindSkinningMatrices = nullptr;
-                        figure->AllocTransformBuffer(space, palettebuffer, inbindSkinningMatrices);
-                        figure->ReadPositions(m_meshIndex, offset, size, space, palettebuffer, inbindSkinningMatrices, &positions);
-                        if (inbindSkinningMatrices)
-                            PYXIE_FREE_ALIGNED(inbindSkinningMatrices);
-                        if (palettebuffer)
-                            PYXIE_FREE_ALIGNED(palettebuffer);
-                    }
-                }
-                auto numPoints = positions.size();
-                if (m_btPositions != nullptr)
-                    delete[] m_btPositions;
-                m_btPositions = new btVector3[numPoints];
-                for (size_t i = 0; i < numPoints; ++i)
-                    m_btPositions[i] = PhysicHelper::to_btVector3(positions[i]);
-                positions.clear();
-
-                if (m_bIsConvex)
-                {
-                    auto convexHull = std::make_unique<btConvexHullShape>((btScalar *)m_btPositions, numPoints);
-                    convexHull->optimizeConvexHull();
-                    m_shape = std::move(convexHull);
-                    convexHull = nullptr;
-                }
-                else
-                {
-                    int index = 0;
-                    auto mesh = figure->GetMesh(index);
-
-                    if (m_indices != nullptr)
-                        delete[] m_indices;
-                    m_indices = new int[mesh->numIndices];
-                    for (uint32_t i = 0; i < mesh->numIndices; ++i)
-                        m_indices[i] = (int)mesh->indices[i];
-
-                    if (m_indexVertexArrays != nullptr)
-                        delete m_indexVertexArrays;
-                    m_indexVertexArrays = new btTriangleIndexVertexArray(mesh->numIndices / 3, m_indices, 3 * 4, numPoints, (btScalar *)m_btPositions, sizeof(btVector3));
-
-                    bool useQuantizedAabbCompression = true;
-                    auto triangleMeshShape = std::make_unique<btBvhTriangleMeshShape>(m_indexVertexArrays, useQuantizedAabbCompression);
-                    m_shape = std::move(triangleMeshShape);
-                    triangleMeshShape = nullptr;
+            if (m_meshIndex == -1 && m_numMesh > 1) {
+                auto compoundShape = std::make_unique<btCompoundShape>();
+                m_shape = std::move(compoundShape);
+                for (int i = 0; i < getMeshCount(); ++i) {
+                    createSingleShape(i);
                 }
             }
-            figure = nullptr;
+            else {
+                createSingleShape(m_meshIndex >= 0 ? m_meshIndex : 0);
+            }
         }
 
         if (m_shape == nullptr)
             m_shape = std::make_unique<btConvexHullShape>();
 
         setScale(m_scale);
+
+        auto body = getOwner()->getComponent<Rigidbody>();
+        if (body) {
+            body->recreateBody();
+        }
+    }
+
+    void MeshCollider::setScale(const Vec3& scale) {
+        m_scale = scale;
+        if (m_meshIndex == -1 && m_numMesh > 1) {
+            for (auto& shape : m_shapes) {
+                shape->setLocalScaling(PhysicHelper::to_btVector3(m_scale));
+            }
+        }
+        else {
+            m_shape->setLocalScaling(PhysicHelper::to_btVector3(m_scale));
+        }
     }
 
     //! Serialize
@@ -172,6 +233,7 @@ namespace ige::scene
         Collider::to_json(j);
         j["meshIdx"] = getMeshIndex();
         j["convex"] = isConvex();
+        j["maxIdx"] = getMeshCount();
     }
 
     //! Deserialize

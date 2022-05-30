@@ -166,6 +166,12 @@ namespace ige::scene
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 
+        //! Create physic body
+        virtual void createBody();
+
+        //! Destroy physic body
+        virtual void destroyBody();
+
         //! Recreate Body
         virtual void recreateBody() { createBody(); }
 
@@ -221,12 +227,6 @@ namespace ige::scene
 
         //! Deserialize
         virtual void from_json(const json& j) override;
-
-        //! Create physic body
-        virtual void createBody();
-
-        //! Destroy physic body
-        virtual void destroyBody();
 
         //! Calculate and apply inertia
         virtual void applyInertia();
