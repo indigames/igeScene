@@ -1,7 +1,7 @@
 #include "python/pyMeshCollider.h"
 #include "python/pyMeshCollider_doc_en.h"
 
-#include "components/physic/MeshCollider.h"
+#include "components/physic/collider/MeshCollider.h"
 
 #include "utils/PyxieHeaders.h"
 using namespace pyxie;

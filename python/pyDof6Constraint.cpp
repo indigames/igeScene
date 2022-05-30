@@ -1,7 +1,7 @@
 #include "python/pyDof6Constraint.h"
 #include "python/pyDof6Constraint_doc_en.h"
 
-#include "components/physic/Dof6SpringConstraint.h"
+#include "components/physic/constraint/Dof6SpringConstraint.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"

@@ -1,4 +1,4 @@
-#include "components/physic/Dof6SpringConstraint.h"
+#include "components/physic/constraint/Dof6SpringConstraint.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
 

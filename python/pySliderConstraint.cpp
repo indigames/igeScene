@@ -1,7 +1,7 @@
 #include "python/pySliderConstraint.h"
 #include "python/pySliderConstraint_doc_en.h"
 
-#include "components/physic/SliderConstraint.h"
+#include "components/physic/constraint/SliderConstraint.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"

@@ -1,4 +1,4 @@
-#include "components/physic/SliderConstraint.h"
+#include "components/physic/constraint/SliderConstraint.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
 

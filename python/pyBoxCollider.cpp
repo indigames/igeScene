@@ -1,7 +1,7 @@
 #include "python/pyBoxCollider.h"
 #include "python/pyBoxCollider_doc_en.h"
 
-#include "components/physic/BoxCollider.h"
+#include "components/physic/collider/BoxCollider.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"

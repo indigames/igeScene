@@ -3,7 +3,7 @@
 #include <Python.h>
 
 #include "components/Component.h"
-#include "components/physic/SphereCollider.h"
+#include "components/physic/collider/SphereCollider.h"
 
 #include "python/pyComponent.h"
 #include "python/pyRigidbody.h"

@@ -1,7 +1,7 @@
 #include "python/pySpringConstraint.h"
 #include "python/pySpringConstraint_doc_en.h"
 
-#include "components/physic/SpringConstraint.h"
+#include "components/physic/constraint/SpringConstraint.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"

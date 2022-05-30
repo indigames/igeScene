@@ -1,4 +1,4 @@
-#include "components/physic/FixedConstraint.h"
+#include "components/physic/constraint/FixedConstraint.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
 

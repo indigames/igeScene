@@ -1,7 +1,7 @@
 #include "python/pyCapsuleCollider.h"
 #include "python/pyCapsuleCollider_doc_en.h"
 
-#include "components/physic/CapsuleCollider.h"
+#include "components/physic/collider/CapsuleCollider.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"

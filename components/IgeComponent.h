@@ -20,9 +20,9 @@
 #include "components/light/SpotLight.h"
 
 #include "components/physic/Rigidbody.h"
-#include "components/physic/BoxCollider.h"
-#include "components/physic/CapsuleCollider.h"
-#include "components/physic/SphereCollider.h"
+#include "components/physic/collider/BoxCollider.h"
+#include "components/physic/collider/CapsuleCollider.h"
+#include "components/physic/collider/SphereCollider.h"
 #include "components/physic/Softbody.h"
 
 #include "components/particle/Particle.h"

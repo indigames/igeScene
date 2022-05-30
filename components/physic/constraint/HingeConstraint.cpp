@@ -1,4 +1,4 @@
-#include "components/physic/HingeConstraint.h"
+#include "components/physic/constraint/HingeConstraint.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
 

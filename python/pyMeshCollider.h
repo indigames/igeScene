@@ -3,7 +3,7 @@
 #include <Python.h>
 
 #include "components/Component.h"
-#include "components/physic/MeshCollider.h"
+#include "components/physic/collider/MeshCollider.h"
 
 #include "python/pyRigidbody.h"
 

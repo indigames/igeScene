@@ -1,7 +1,7 @@
 #include "python/pyFixedConstraint.h"
 #include "python/pyFixedConstraint_doc_en.h"
 
-#include "components/physic/FixedConstraint.h"
+#include "components/physic/constraint/FixedConstraint.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"

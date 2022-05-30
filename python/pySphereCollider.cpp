@@ -1,7 +1,7 @@
 #include "python/pySphereCollider.h"
 #include "python/pySphereCollider_doc_en.h"
 
-#include "components/physic/SphereCollider.h"
+#include "components/physic/collider/SphereCollider.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"

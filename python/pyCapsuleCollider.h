@@ -3,7 +3,7 @@
 #include <Python.h>
 
 #include "components/Component.h"
-#include "components/physic/CapsuleCollider.h"
+#include "components/physic/collider/CapsuleCollider.h"
 
 #include "python/pyComponent.h"
 #include "python/pyRigidbody.h"

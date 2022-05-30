@@ -1,4 +1,4 @@
-#include "components/physic/SpringConstraint.h"
+#include "components/physic/constraint/SpringConstraint.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
 

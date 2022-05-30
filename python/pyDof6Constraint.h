@@ -3,7 +3,7 @@
 #include <Python.h>
 
 #include "components/Component.h"
-#include "components/physic/Dof6SpringConstraint.h"
+#include "components/physic/constraint/Dof6SpringConstraint.h"
 
 #include "python/pyComponent.h"
 #include "python/pyPhysicConstraint.h"

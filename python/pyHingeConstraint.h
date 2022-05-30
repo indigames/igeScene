@@ -3,7 +3,7 @@
 #include <Python.h>
 
 #include "components/Component.h"
-#include "components/physic/HingeConstraint.h"
+#include "components/physic/constraint/HingeConstraint.h"
 
 #include "python/pyComponent.h"
 #include "python/pyPhysicConstraint.h"

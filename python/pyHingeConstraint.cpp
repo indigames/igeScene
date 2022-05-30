@@ -1,7 +1,7 @@
 #include "python/pyHingeConstraint.h"
 #include "python/pyHingeConstraint_doc_en.h"
 
-#include "components/physic/HingeConstraint.h"
+#include "components/physic/constraint/HingeConstraint.h"
 
 #include "utils/PhysicHelper.h"
 #include "utils/PyxieHeaders.h"

@@ -1,7 +1,7 @@
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 
-#include "components/physic/MeshCollider.h"
+#include "components/physic/collider/MeshCollider.h"
 #include "components/physic/Rigidbody.h"
 #include "components/FigureComponent.h"
 #include "scene/SceneObject.h"
