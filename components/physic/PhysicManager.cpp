@@ -173,8 +173,7 @@ namespace ige::scene
     void PhysicManager::onRender()
     {
         // Show debug
-        if (isShowDebug())
-            getWorld()->debugDrawWorld();
+        if (isShowDebug()) getWorld()->debugDrawWorld();
     }    
 
     void PhysicManager::onPhysicUpdate(float dt)

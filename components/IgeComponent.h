@@ -23,6 +23,7 @@
 #include "components/physic/collider/BoxCollider.h"
 #include "components/physic/collider/CapsuleCollider.h"
 #include "components/physic/collider/SphereCollider.h"
+#include "components/physic/collider/CompoundCollider.h"
 #include "components/physic/Softbody.h"
 
 #include "components/particle/Particle.h"

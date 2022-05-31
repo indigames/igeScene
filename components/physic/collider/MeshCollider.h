@@ -48,6 +48,9 @@ namespace ige::scene
         //! Create collision shape
         virtual void createShape() override;
 
+        //! Destroy shape
+        virtual void destroyShape() override;
+
     protected:
         //! Helper to create single mesh shape
         void createSingleShape(int index);

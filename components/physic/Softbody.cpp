@@ -20,7 +20,6 @@ namespace ige::scene
         : Rigidbody(owner)
     {
         m_mass = -1.f;
-        init();
     }
 
     //! Destructor

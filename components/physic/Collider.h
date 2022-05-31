@@ -9,6 +9,8 @@ using namespace pyxie;
 
 namespace ige::scene
 {
+    class Rigidbody;
+    class CompoundCollider;
 
     //! Collider
     class Collider : public Component
@@ -20,6 +22,9 @@ namespace ige::scene
         //! Destructor
         virtual ~Collider();
 
+        //! Init
+        virtual void init();
+
         //! Local scale
         virtual const Vec3& getScale() const { return m_scale; }
         virtual void setScale(const Vec3& scale);
@@ -27,8 +32,15 @@ namespace ige::scene
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
     
+        //! Set/get compound collider
+        virtual std::shared_ptr<CompoundCollider> getCompoundCollider() const { return m_compoundCollider.expired() ? nullptr : m_compoundCollider.lock(); }
+        virtual void setCompoundCollider(std::shared_ptr<CompoundCollider> body);
+
         //! Get collision shape
         std::unique_ptr<btCollisionShape>& getShape();
+
+        //! Recreate shape, also recreate body
+        virtual void recreateShape();
 
     protected:
         //! Serialize
@@ -37,11 +49,14 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json& j) override;
 
+        //! Serialize finished event
+        virtual void onSerializeFinished(Scene* scene) override;
+
         //! Create shape
         virtual void createShape() = 0;
 
-        //! Recreate shape, also recreate body
-        virtual void recreateShape();
+        //! Destroy shape
+        virtual void destroyShape();
 
     protected:
         //! Collision shape
@@ -52,6 +67,12 @@ namespace ige::scene
 
         //! Cache scale value
         Vec3 m_scale = {1.f, 1.f, 1.f};
+
+        //! Cache compound collider instance
+        std::weak_ptr<CompoundCollider> m_compoundCollider;
+
+        //! Cache serialize data
+        json m_json;
     };
 
 } // namespace ige::scene

@@ -17,8 +17,7 @@ namespace ige::scene
     //! Destructor
     CapsuleCollider::~CapsuleCollider()
     {
-        if (m_shape != nullptr)
-            m_shape.reset();
+        destroyShape();
     }
 
     //! Get radius
@@ -55,14 +54,9 @@ namespace ige::scene
     void CapsuleCollider::createShape()
     {
         // Create collision shape
-        if (m_shape != nullptr)
-            m_shape.reset();
+        destroyShape();
         m_shape = std::make_unique<btCapsuleShape>(m_radius, m_height);
         setScale(m_scale);
-        auto body = getOwner()->getComponent<Rigidbody>();
-        if (body) {
-            body->recreateBody();
-        }
     }
 
 

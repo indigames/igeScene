@@ -21,21 +21,7 @@ namespace ige::scene
     //! Destructor
     MeshCollider::~MeshCollider()
     {
-        if (m_shape != nullptr)
-            m_shape.reset();
-        m_shapes.clear();
-
-        for (auto* indexArray : m_indexVertexArrays)
-            if (indexArray) delete indexArray;
-        m_indexVertexArrays.clear();
-
-        for (auto* index : m_indices)
-            if (index) delete[] index;
-        m_indices.clear();
-
-        for (auto* pos : m_btPositions)
-            if (pos) delete[] pos;
-        m_btPositions.clear();
+        destroyShape();
     }
 
     //! Set mesh index
@@ -104,7 +90,7 @@ namespace ige::scene
                         PYXIE_FREE_ALIGNED(palettebuffer);
                 }
             }
-            auto numPoints = positions.size();
+            auto numPoints = (int)positions.size();
             auto btPositions = new btVector3[numPoints];
             m_btPositions.push_back(btPositions);
             for (size_t i = 0; i < numPoints; ++i)
@@ -160,13 +146,9 @@ namespace ige::scene
         }
     }
 
-    //! Create collision shape
-    void MeshCollider::createShape()
-    {
-        // Create collision shape
-        if (m_shape != nullptr)
-            m_shape.reset();
-        m_shapes.clear();
+    //! Destroy collision shape
+    void MeshCollider::destroyShape() {
+        Collider::destroyShape();
 
         for (auto* indexArray : m_indexVertexArrays)
             if (indexArray) delete indexArray;
@@ -176,10 +158,18 @@ namespace ige::scene
             if (index) delete[] index;
         m_indices.clear();
 
-        for(auto* pos: m_btPositions)
+        for (auto* pos : m_btPositions)
             if (pos) delete[] pos;
         m_btPositions.clear();
+    }
 
+    //! Create collision shape
+    void MeshCollider::createShape()
+    {
+        // Destroy old instance
+        destroyShape();
+
+        // Load figure for meshes
         Figure* figure = nullptr;
         auto figureComp = getOwner()->getComponent<FigureComponent>();
         if (figureComp)
@@ -208,23 +198,11 @@ namespace ige::scene
             m_shape = std::make_unique<btConvexHullShape>();
 
         setScale(m_scale);
-
-        auto body = getOwner()->getComponent<Rigidbody>();
-        if (body) {
-            body->recreateBody();
-        }
     }
 
     void MeshCollider::setScale(const Vec3& scale) {
         m_scale = scale;
-        if (m_meshIndex == -1 && m_numMesh > 1) {
-            for (auto& shape : m_shapes) {
-                shape->setLocalScaling(PhysicHelper::to_btVector3(m_scale));
-            }
-        }
-        else {
-            m_shape->setLocalScaling(PhysicHelper::to_btVector3(m_scale));
-        }
+        if(m_shape) m_shape->setLocalScaling(PhysicHelper::to_btVector3(m_scale));
     }
 
     //! Serialize

@@ -34,7 +34,6 @@ namespace ige::scene
             setManager(manager);
         }
         m_transformEventId = getOwner()->getTransformChangedEvent().addListener(std::bind(&Rigidbody::onTransformChanged, this, std::placeholders::_1));
-        init();
     }
 
     //! Destructor
@@ -161,6 +160,7 @@ namespace ige::scene
     void Rigidbody::setCCD(bool isCCD)
     {
         m_bIsCCD = isCCD;
+        if (!m_body) return;
         if (m_bIsCCD)
         {
             // Continuos detection
@@ -181,6 +181,7 @@ namespace ige::scene
         if (m_bIsDirty || m_mass != mass)
         {
             m_mass = mass;
+            if (!m_body) return;
             btVector3 inertia = {0.f, 0.f, 0.f};
             if (m_mass != 0.0f) {
                 if (!m_collider.expired() && m_collider.lock()->getShape()) {
@@ -197,6 +198,7 @@ namespace ige::scene
         if (m_bIsDirty || m_friction != friction)
         {
             m_friction = friction;
+            if (!m_body) return;
             m_body->setFriction(m_friction);
         }
     }
@@ -206,6 +208,7 @@ namespace ige::scene
         if (m_bIsDirty || m_restitution != restitution)
         {
             m_restitution = restitution;
+            if (!m_body) return;
             m_body->setRestitution(m_restitution);
         }
     }
@@ -215,6 +218,7 @@ namespace ige::scene
         if (m_bIsDirty || m_linearVelocity != velocity)
         {
             m_linearVelocity = velocity;
+            if (!m_body) return;
             getBody()->setLinearVelocity(m_linearVelocity);
         }
     }
@@ -224,6 +228,7 @@ namespace ige::scene
         if (m_bIsDirty || m_angularVelocity != velocity)
         {
             m_angularVelocity = velocity;
+            if (!m_body) return;
             getBody()->setAngularVelocity(m_angularVelocity);
         }
     }
@@ -281,6 +286,7 @@ namespace ige::scene
         if (m_bIsDirty || m_collisionMargin != margin)
         {
             m_collisionMargin = margin;
+            if (!m_body) return;
             m_body->getCollisionShape()->setMargin(m_collisionMargin);
         }
     }
@@ -339,7 +345,7 @@ namespace ige::scene
                 removeCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
             }
 
-            if (m_body->getBroadphaseHandle())
+            if (m_body && m_body->getBroadphaseHandle())
             {
                 m_body->getBroadphaseHandle()->m_collisionFilterGroup = m_collisionFilterGroup;
                 m_body->getBroadphaseHandle()->m_collisionFilterMask = m_collisionFilterMask;
@@ -353,10 +359,10 @@ namespace ige::scene
         destroyBody();
 
         m_collider = getOwner()->getComponent<Collider>();
-        if (m_collider.expired() || m_collider.lock()->getShape() == nullptr)
+        if (m_collider.expired() ||! m_collider.lock()->getShape())
             return;
 
-        m_motion = std::make_unique<btDefaultMotionState>(PhysicHelper::to_btTransform(*(getOwner()->getTransform())));
+        m_motion = std::make_unique<btDefaultMotionState>(PhysicHelper::to_btTransform(getOwner()->getTransform()->getLocalRotation(), getOwner()->getTransform()->getLocalPosition()));
         m_body = std::make_unique<btRigidBody>(btRigidBody::btRigidBodyConstructionInfo{0.0f, m_motion.get(),  m_collider.lock()->getShape().get(), btVector3(0.0f, 0.0f, 0.0f)});
         m_body->setUserPointer(this);
 
@@ -437,7 +443,7 @@ namespace ige::scene
         if (m_collisionFilterGroup != group)
         {
             m_collisionFilterGroup = group;
-            if (m_body->getBroadphaseHandle())
+            if (m_body && m_body->getBroadphaseHandle())
                 m_body->getBroadphaseHandle()->m_collisionFilterGroup = m_collisionFilterGroup;
         }
     }
@@ -448,7 +454,7 @@ namespace ige::scene
         if (m_collisionFilterMask != mask)
         {
             m_collisionFilterMask = mask;
-            if (m_body->getBroadphaseHandle())
+            if (m_body && m_body->getBroadphaseHandle())
                 m_body->getBroadphaseHandle()->m_collisionFilterMask = m_collisionFilterMask;
         }
     }
@@ -495,7 +501,6 @@ namespace ige::scene
             if (!m_collider.expired()) {
                 m_collider.lock()->setScale({ std::abs(scale[0]), std::abs(scale[1]), std::abs(scale[2]) });
                 m_previousScale = m_collider.lock()->getScale();
-                // recreateBody();
             }
         }
     }
@@ -559,6 +564,14 @@ namespace ige::scene
     //! Deserialize
     void Rigidbody::from_json(const json &j)
     {
+        Component::from_json(j);
+        m_json = json(j); // copy data
+    }
+
+    void Rigidbody::onSerializeFinished(Scene* scene) {
+
+        init();
+        auto j = m_json;
         setMass(j.value("mass", 1.f));
         setRestitution(j.value("restitution", 1.f));
         setFriction(j.value("friction", 0.5f));
@@ -576,11 +589,6 @@ namespace ige::scene
         setAngularSleepingThreshold(j.value("angularSleepingThreshold", 1.0f));
         setActivationState(j.value("activeState", 1));
         setPositionOffset(j.value("offset", Vec3(0.f, 0.f, 0.f)));
-
-        // Recrease body from updated values
-        recreateBody();
-
-        Component::from_json(j);
 
         auto jConstraints = j.value("consts", json());
         for (auto it : jConstraints)
@@ -609,6 +617,7 @@ namespace ige::scene
             if (constraint)
                 val.get_to(*constraint);
         }
+        m_json.clear();
     }
 
     //! Update property by key value

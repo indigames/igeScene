@@ -46,14 +46,14 @@ namespace ige::scene
 
         //! Get RigidBody
         virtual btRigidBody* getBody() const {
-            if (isSoftBody())
+            if (!m_body || isSoftBody())
                 return nullptr;
             return (btRigidBody*)m_body.get();
         }
 
         //! Get SoftBody
         virtual btSoftBody* getSoftBody() const {
-            if (!isSoftBody())
+            if (!m_body || !isSoftBody())
                 return nullptr;
             return (btSoftBody*)m_body.get();
         }
@@ -117,12 +117,12 @@ namespace ige::scene
 
         //! Add collision flag
         virtual void addCollisionFlag(int flag) {
-            m_body->setCollisionFlags(m_body->getCollisionFlags() | flag);
+            if(m_body) m_body->setCollisionFlags(m_body->getCollisionFlags() | flag);
         }
 
         //! Remove collision flag
         virtual void removeCollisionFlag(int flag) {
-            m_body->setCollisionFlags(m_body->getCollisionFlags() & ~flag);
+            if (m_body) m_body->setCollisionFlags(m_body->getCollisionFlags() & ~flag);
         }
 
         //! Collision filter group
@@ -187,8 +187,8 @@ namespace ige::scene
         virtual void applyForce(const btVector3& force, const btVector3& pos) { getBody()->applyForce(force, pos); }
 
         //! Apply impulse
-        virtual void applyImpulse(const btVector3& impulse) { getBody()->applyCentralImpulse(impulse); }
-        virtual void applyImpulse(const btVector3& impulse, const btVector3& pos) { getBody()->applyImpulse(impulse, pos); }
+        virtual void applyImpulse(const btVector3& impulse) { if (getBody()) getBody()->applyCentralImpulse(impulse); }
+        virtual void applyImpulse(const btVector3& impulse, const btVector3& pos) { if (getBody()) getBody()->applyImpulse(impulse, pos); }
 
         //! Clear forces
         virtual void clearForces() { if (getBody()) getBody()->clearForces(); }
@@ -227,6 +227,9 @@ namespace ige::scene
 
         //! Deserialize
         virtual void from_json(const json& j) override;
+
+        //! Serialize finished event
+        virtual void onSerializeFinished(Scene* scene) override;
 
         //! Calculate and apply inertia
         virtual void applyInertia();
@@ -345,6 +348,9 @@ namespace ige::scene
 
         //! Cache transform event id
         uint64_t m_transformEventId = (uint64_t)-1;
+
+        //! Cache serialize data
+        json m_json;
     };
 
     //! Add constraint by type

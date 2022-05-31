@@ -46,6 +46,7 @@ namespace ige::scene
             SphereCollider,
             CapsuleCollider,
             MeshCollider,
+            CompoundCollider,
             Rigidbody,
             Softbody,
             AudioManager,

@@ -121,14 +121,23 @@ namespace ige::scene
         //! Get component by name
         std::shared_ptr<Component> getComponent(const std::string& name) const;
 
+        //! Get component by type
+        std::shared_ptr<Component> getComponent(Component::Type type) const;
+
         //! Get component by id
         std::shared_ptr<Component> getComponent(const uint64_t id) const;
 
         //! Get components by type recursively
         void getComponentsRecursive(std::vector<Component*>& components, const std::string& type) const;
 
+        //! Get components by type recursively
+        void getComponentsRecursive(std::vector<Component*>& components, Component::Type type) const;
+
         //! Get first component in hierarchy
         std::shared_ptr<Component> getFirstComponentRecursive(const std::string& type) const;
+
+        //! Get first component in hierarchy
+        std::shared_ptr<Component> getFirstComponentRecursive(Component::Type type) const;
 
         //! Get components count
         virtual size_t getComponentsCount();
@@ -140,6 +149,14 @@ namespace ige::scene
         //! Get component by type
         template <typename T>
         inline std::shared_ptr<T> getComponent();
+
+        //! Get component recursive by type
+        template <typename T>
+        inline void getComponentsRecursive(std::vector<std::shared_ptr<T>>& components);
+
+        //! Get parent component recursive by type
+        template <typename T>
+        inline std::shared_ptr<T> getFirstParentComponents();
 
         //! Add component by type
         template <typename T, typename... Args>
@@ -378,6 +395,20 @@ namespace ige::scene
         return nullptr;
     }
 
+    //! Get component by type
+    template <typename T>
+    inline void SceneObject::getComponentsRecursive(std::vector<std::shared_ptr<T>>& components)
+    {        
+        auto comp = getComponent<T>();
+        if (comp != nullptr)
+            components.push_back(comp);
+
+        for (const auto& child : m_children) {
+            if (!child.expired())
+                child.lock()->getComponentsRecursive<T>(components);
+        }
+    }
+
     //! Add component by type
     template <typename T, typename... Args>
     inline std::shared_ptr<T> SceneObject::addComponent(Args &&... args)
@@ -387,4 +418,14 @@ namespace ige::scene
         addComponent(instance);
         return instance;
     }
+
+    //! Get parent component recursive by type
+    template <typename T>
+    inline std::shared_ptr<T> SceneObject::getFirstParentComponents() {
+        auto comp = getComponent<T>();
+        if(comp) return comp;
+        if (getParent() == nullptr) return nullptr;
+        return getParent()->getFirstParentComponents<T>();
+    }
+
 } // namespace ige::scene

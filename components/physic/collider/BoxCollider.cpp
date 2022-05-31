@@ -17,8 +17,7 @@ namespace ige::scene
     //! Destructor
     BoxCollider::~BoxCollider()
     {
-        if (m_shape != nullptr)
-            m_shape.reset();
+        destroyShape();
     }
 
     //! Get size
@@ -40,14 +39,9 @@ namespace ige::scene
     void BoxCollider::createShape()
     {
         // Create collision shape
-        if (m_shape != nullptr)
-            m_shape.reset();
+        destroyShape();
         m_shape = std::make_unique<btBoxShape>(PhysicHelper::to_btVector3(m_size));
         setScale(m_scale);
-        auto body = getOwner()->getComponent<Rigidbody>();
-        if (body) {
-            body->recreateBody();
-        }
     }
 
     //! Serialize

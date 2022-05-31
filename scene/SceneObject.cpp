@@ -30,6 +30,7 @@
 #include "components/physic/collider/CapsuleCollider.h"
 #include "components/physic/collider/SphereCollider.h"
 #include "components/physic/collider/MeshCollider.h"
+#include "components/physic/collider/CompoundCollider.h"
 #include "components/physic/Softbody.h"
 #include "components/audio/AudioManager.h"
 #include "components/audio/AudioSource.h"
@@ -321,6 +322,7 @@ namespace ige::scene
         if (name == "BoxCollider") return addComponent<BoxCollider>();
         if (name == "SphereCollider") return addComponent<SphereCollider>();
         if (name == "CapsuleCollider") return addComponent<CapsuleCollider>();
+        if (name == "CompoundCollider") return addComponent<CompoundCollider>();
         if (name == "MeshCollider") return addComponent<MeshCollider>();
         if (name == "Rigidbody") return addComponent<Rigidbody>();
         if (name == "Softbody") return addComponent<Softbody>();
@@ -423,9 +425,18 @@ namespace ige::scene
     //! Get component by name
     std::shared_ptr<Component> SceneObject::getComponent(const std::string& name) const
     {
-        for (int i = 0; i < m_components.size(); ++i)
-        {
+        for (int i = 0; i < m_components.size(); ++i) {
             if (m_components[i]->getName().compare(name) == 0)
+                return m_components[i];
+        }
+        return nullptr;
+    }
+
+    //! Get component by name
+    std::shared_ptr<Component> SceneObject::getComponent(Component::Type type) const
+    {
+        for (int i = 0; i < m_components.size(); ++i) {
+            if (m_components[i]->getType() == type)
                 return m_components[i];
         }
         return nullptr;
@@ -457,14 +468,42 @@ namespace ige::scene
     }
 
     //! Get components by type recursively
+    void SceneObject::getComponentsRecursive(std::vector<Component*>& components, Component::Type type) const
+    {
+        auto comp = getComponent(type);
+        if(comp != nullptr)
+            components.push_back(comp.get());
+
+        for (const auto &child : m_children) {
+            if (!child.expired())
+                child.lock()->getComponentsRecursive(components, type);
+        }
+    }
+
+    //! Get components by type recursively
     std::shared_ptr<Component> SceneObject::getFirstComponentRecursive(const std::string& type) const
     {
         auto comp = getComponent(type);
         if(comp != nullptr)
             return comp;
 
-        for (const auto &child : m_children)
-        {
+        for (const auto &child : m_children) {
+            if (!child.expired()) {
+                auto comp = child.lock()->getFirstComponentRecursive(type);
+                if (comp != nullptr)
+                    return comp;
+            }
+        }
+        return nullptr;
+    }
+    //! Get components by type recursively
+    std::shared_ptr<Component> SceneObject::getFirstComponentRecursive(Component::Type type) const
+    {
+        auto comp = getComponent(type);
+        if(comp != nullptr)
+            return comp;
+
+        for (const auto &child : m_children) {
             if (!child.expired()) {
                 auto comp = child.lock()->getFirstComponentRecursive(type);
                 if (comp != nullptr)

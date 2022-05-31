@@ -1,5 +1,6 @@
 #include "components/physic/Collider.h"
 #include "components/physic/Rigidbody.h"
+#include "components/physic/collider/CompoundCollider.h"
 #include "components/TransformComponent.h"
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
@@ -17,9 +18,27 @@ namespace ige::scene
     //! Destructor
     Collider::~Collider()
     {
+        destroyShape();
+
+        if (!m_compoundCollider.expired()) {
+            getCompoundCollider()->recreateShape();
+        }
+        m_compoundCollider.reset();
+    }
+    
+    void Collider::init() {
+        createShape();
         auto rigidBody = getOwner()->getComponent<Rigidbody>();
         if (rigidBody) {
-            rigidBody->destroyBody();
+            rigidBody->recreateBody();
+        }
+        else {
+            if (getType() != Component::Type::MeshCollider && getType() != Component::Type::CompoundCollider) {
+                auto compoundCollider = getOwner()->getFirstParentComponents<CompoundCollider>();
+                if (compoundCollider) {
+                    compoundCollider->recreateShape();
+                }
+            }
         }
     }
 
@@ -34,11 +53,34 @@ namespace ige::scene
 
     void Collider::recreateShape() {
         createShape();
-
-        auto body = getOwner()->getComponent<Rigidbody>();
-        if (body) {
-            body->recreateBody();
+        if (m_shape) {
+            if (getCompoundCollider()) {
+                getCompoundCollider()->recreateShape();
+            }
+            else {
+                auto rigidBody = getOwner()->getComponent<Rigidbody>();
+                if (rigidBody) {
+                    rigidBody->recreateBody();
+                }
+            }
         }
+    }
+    void Collider::destroyShape() {
+        if (!getCompoundCollider()) {
+            auto rigidBody = getOwner()->getComponent<Rigidbody>();
+            if (rigidBody) {
+                rigidBody->destroyBody();
+            }
+        }
+        for (auto& shape : m_shapes) {
+            shape = nullptr;
+        }
+        m_shapes.clear();
+        m_shape.reset();
+    }
+
+    void Collider::setCompoundCollider(std::shared_ptr<CompoundCollider> collider) {
+        m_compoundCollider = collider;
     }
 
     std::unique_ptr<btCollisionShape>& Collider::getShape() {
@@ -57,8 +99,12 @@ namespace ige::scene
     void Collider::from_json(const json &j)
     {
         Component::from_json(j);
-        getShape(); // create shape just in case
-        setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
+        m_json = json(j);
+    }
+
+    void Collider::onSerializeFinished(Scene* scene) {
+        Component::onSerializeFinished(scene);
+        setScale(m_json.value("scale", Vec3(1.f, 1.f, 1.f)));
     }
 
     //! Update property by key value
