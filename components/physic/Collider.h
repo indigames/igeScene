@@ -29,6 +29,10 @@ namespace ige::scene
         virtual const Vec3& getScale() const { return m_scale; }
         virtual void setScale(const Vec3& scale);
 
+        //! Collision Margin
+        float getMargin() const { return m_margin; }
+        void setMargin(float margin);
+
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
     
@@ -67,6 +71,9 @@ namespace ige::scene
 
         //! Cache scale value
         Vec3 m_scale = {1.f, 1.f, 1.f};
+
+        //! Collision margin
+        float m_margin = 0.025f;
 
         //! Cache compound collider instance
         std::weak_ptr<CompoundCollider> m_compoundCollider;

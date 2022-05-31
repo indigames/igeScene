@@ -328,7 +328,6 @@ namespace ige::scene
         setAngularVelocity(m_angularVelocity);
         setLinearFactor(m_linearFactor);
         setAngularFactor(m_angularFactor);
-        setCollisionMargin(m_collisionMargin);
 
         // Recalculate scale
         auto scale = m_previousScale;

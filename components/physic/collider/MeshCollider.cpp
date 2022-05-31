@@ -198,6 +198,7 @@ namespace ige::scene
             m_shape = std::make_unique<btConvexHullShape>();
 
         setScale(m_scale);
+        setMargin(m_margin);
     }
 
     void MeshCollider::setScale(const Vec3& scale) {

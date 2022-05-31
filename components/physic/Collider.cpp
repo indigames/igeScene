@@ -51,6 +51,14 @@ namespace ige::scene
         }
     }
 
+    void Collider::setMargin(float margin)
+    {
+        m_margin = margin;
+        if (m_shape) {
+            m_shape->setMargin(m_margin);
+        }
+    }
+
     void Collider::recreateShape() {
         createShape();
         if (m_shape) {
@@ -93,6 +101,7 @@ namespace ige::scene
     {
         Component::to_json(j);
         j["scale"] = getScale();
+        j["margin"] = getMargin();
     }
 
     //! Deserialize
@@ -105,6 +114,8 @@ namespace ige::scene
     void Collider::onSerializeFinished(Scene* scene) {
         Component::onSerializeFinished(scene);
         setScale(m_json.value("scale", Vec3(1.f, 1.f, 1.f)));
+        setMargin(m_json.value("margin", 0.025f));
+        m_json.clear();
     }
 
     //! Update property by key value
@@ -112,6 +123,8 @@ namespace ige::scene
     {
         if (key.compare("scale") == 0)
             setScale(val);
+        else if (key.compare("margin") == 0)
+            setMargin(val);
         else
             Component::setProperty(key, val);
     }

@@ -133,10 +133,6 @@ namespace ige::scene
         virtual int getCollisionFilterMask() const { return m_collisionFilterMask; }
         virtual void setCollisionFilterMask(int mask);
 
-        //! Collision Margin
-        float getCollisionMargin() const { return m_collisionMargin; }
-        void setCollisionMargin(float margin);
-
         //! Position offset
         const Vec3& getPositionOffset() const { return m_positionOffset; }
         void setPositionOffset(const Vec3& offset);
@@ -321,9 +317,6 @@ namespace ige::scene
 
         //! Cache activated status
         bool m_bIsActivated = false;
-
-        //! Collision margin
-        float m_collisionMargin = 0.025f;
 
         //! Associated constraints
         std::vector<std::shared_ptr<PhysicConstraint>> m_constraints;

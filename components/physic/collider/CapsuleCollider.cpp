@@ -57,6 +57,7 @@ namespace ige::scene
         destroyShape();
         m_shape = std::make_unique<btCapsuleShape>(m_radius, m_height);
         setScale(m_scale);
+        setMargin(m_margin);
     }
 
 

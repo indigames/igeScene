@@ -42,6 +42,7 @@ namespace ige::scene
         destroyShape();
         m_shape = std::make_unique<btBoxShape>(PhysicHelper::to_btVector3(m_size));
         setScale(m_scale);
+        setMargin(m_margin);
     }
 
     //! Serialize

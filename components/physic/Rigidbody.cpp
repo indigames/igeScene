@@ -281,16 +281,6 @@ namespace ige::scene
             getBody()->setActivationState(m_activeState);
     }
 
-    void Rigidbody::setCollisionMargin(float margin)
-    {
-        if (m_bIsDirty || m_collisionMargin != margin)
-        {
-            m_collisionMargin = margin;
-            if (!m_body) return;
-            m_body->getCollisionShape()->setMargin(m_collisionMargin);
-        }
-    }
-
     void Rigidbody::setPositionOffset(const Vec3& offset)
     {
         if(m_bIsDirty || m_positionOffset != offset) {
@@ -381,7 +371,6 @@ namespace ige::scene
         setCollisionFilterGroup(getCollisionFilterGroup());
         setCollisionFilterMask(getCollisionFilterMask());
         setCCD(isCCD());
-        setCollisionMargin(getCollisionMargin());
         setLinearSleepingThreshold(getLinearSleepingThreshold());
         setAngularSleepingThreshold(getAngularSleepingThreshold());
         setActivationState(getActivationState());
@@ -549,7 +538,6 @@ namespace ige::scene
         j["group"] = getCollisionFilterGroup();
         j["mask"] = getCollisionFilterMask();
         j["ccd"] = isCCD();
-        j["margin"] = getCollisionMargin();
         j["linearSleepingThreshold"] = getLinearSleepingThreshold();
         j["angularSleepingThreshold"] = getAngularSleepingThreshold();
         j["activeState"] = getActivationState();
@@ -584,7 +572,6 @@ namespace ige::scene
         setCollisionFilterGroup(j.value("group", isKinematic() ? 2 : 1));
         setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
         setCCD(j.value("ccd", false));
-        setCollisionMargin(j.value("margin", 0.025f));
         setLinearSleepingThreshold(j.value("linearSleepingThreshold", 0.8f));
         setAngularSleepingThreshold(j.value("angularSleepingThreshold", 1.0f));
         setActivationState(j.value("activeState", 1));
@@ -647,8 +634,6 @@ namespace ige::scene
             setCollisionFilterMask(val);
         else if (key.compare("ccd") == 0)
             setCCD(val);
-        else if (key.compare("margin") == 0)
-            setCollisionMargin(val);
         else if (key.compare("linearSleepingThreshold") == 0)
             setLinearSleepingThreshold(val);
         else if (key.compare("angularSleepingThreshold") == 0)

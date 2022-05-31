@@ -42,6 +42,7 @@ namespace ige::scene
         destroyShape();
         m_shape = std::make_unique<btSphereShape>(m_radius);
         setScale(m_scale);
+        setMargin(m_margin);
     }
 
     //! Set local scale of the box

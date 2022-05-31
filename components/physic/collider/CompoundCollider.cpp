@@ -46,6 +46,7 @@ namespace ige::scene
 
             if (m_shape) {
                 setScale(m_scale);
+                setMargin(m_margin);
             }
         }
     }
