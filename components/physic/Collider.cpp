@@ -115,7 +115,6 @@ namespace ige::scene
         Component::onSerializeFinished(scene);
         setScale(m_json.value("scale", Vec3(1.f, 1.f, 1.f)));
         setMargin(m_json.value("margin", 0.025f));
-        m_json.clear();
     }
 
     //! Update property by key value

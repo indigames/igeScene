@@ -30,15 +30,6 @@ namespace ige::scene
         m_indicesMap = nullptr;
     }
 
-    //! Get AABB
-    AABBox Softbody::getAABB()
-    {
-        btVector3 aabbMin, aabbMax;
-        getSoftBody()->getAabb(aabbMin, aabbMax);
-        return AABBox(PhysicHelper::from_btVector3(aabbMin), PhysicHelper::from_btVector3(aabbMax));
-    }
-
-
     //! Set mesh index
     void Softbody::setMeshIndex(int idx)
     {
@@ -262,6 +253,7 @@ namespace ige::scene
         if (figure != nullptr)
         {
             figure->WaitInitialize();
+            getOwner()->onUpdate(0.f); // force update transform
             if (figure->NumMeshes() > 0 && m_meshIndex >= 0 && m_meshIndex < figure->NumMeshes())
             {
                 int offset = 0;

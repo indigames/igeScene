@@ -93,7 +93,7 @@ namespace ige::scene
             auto numPoints = (int)positions.size();
             auto btPositions = new btVector3[numPoints];
             m_btPositions.push_back(btPositions);
-            for (size_t i = 0; i < numPoints; ++i)
+            for (auto i = 0; i < numPoints; ++i)
                 btPositions[i] = PhysicHelper::to_btVector3(positions[i]);
             positions.clear();
 
@@ -172,13 +172,16 @@ namespace ige::scene
         // Load figure for meshes
         Figure* figure = nullptr;
         auto figureComp = getOwner()->getComponent<FigureComponent>();
-        if (figureComp)
+        if (figureComp) {
             figure = figureComp->getFigure();
+        }           
         
         // Load mesh from figure
         if (figure != nullptr)
         {
             figure->WaitInitialize();
+            getOwner()->onUpdate(0.f); // force update transform
+
             m_numMesh = figure->NumMeshes();
             if (m_numMesh <= 0) return;
 
@@ -194,11 +197,10 @@ namespace ige::scene
             }
         }
 
-        if (m_shape == nullptr)
-            m_shape = std::make_unique<btConvexHullShape>();
-
-        setScale(m_scale);
-        setMargin(m_margin);
+        if (m_shape != nullptr) {
+            setScale(m_scale);
+            setMargin(m_margin);
+        }
     }
 
     void MeshCollider::setScale(const Vec3& scale) {
@@ -215,12 +217,13 @@ namespace ige::scene
         j["maxIdx"] = getMeshCount();
     }
 
-    //! Deserialize
-    void MeshCollider::from_json(const json &j)
+    //! Serialize finished event
+    void MeshCollider::onSerializeFinished(Scene* scene)
     {
-        Collider::from_json(j);
-        setMeshIndex(j.value("meshIdx", 0));
-        setConvex(j.value("convex", false));
+        Collider::onSerializeFinished(scene);
+        setMeshIndex(m_json.value("meshIdx", 0));
+        setConvex(m_json.value("convex", false));
+        m_json.clear();
     }
 
     //! Update property by key value

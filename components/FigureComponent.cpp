@@ -131,11 +131,11 @@ namespace ige::scene
 
         // Backup the original figure for cloning later
         if (figure == nullptr) {
-            ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton);
+            ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton | Figure::CloneMesh);
         }
 
         // Initialize figure instance
-        m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton);
+        m_figure = ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton | Figure::CloneMesh);
 
         // Update transform from transform component
         auto transform = getOwner()->getTransform();

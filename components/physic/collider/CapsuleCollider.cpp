@@ -69,12 +69,13 @@ namespace ige::scene
        j["radius"] = getRadius();
     }
 
-    //! Deserialize
-    void CapsuleCollider::from_json(const json &j)
+    //! Serialize finished event
+    void CapsuleCollider::onSerializeFinished(Scene* scene)
     {
-        Collider::from_json(j);
-        setHeight(j.at("height"));
-        setRadius(j.at("radius"));
+        Collider::onSerializeFinished(scene);
+        setHeight(m_json.value("height", 1.f));
+        setRadius(m_json.value("radius", 1.f));
+        m_json.clear();
     }
 
     //! Update property by key value

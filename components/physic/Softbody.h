@@ -50,9 +50,6 @@ namespace ige::scene
         //! Angular velocity
         virtual void setAngularVelocity(const btVector3& velocity) override;
 
-        //! Get AABB
-        virtual AABBox getAABB() override;
-
         //! Damping coefficient
         virtual float getDampingCoeff() const { return m_dampingCoeff; }
         virtual void setDampingCoeff(float coeff);

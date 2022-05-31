@@ -36,8 +36,8 @@ namespace ige::scene
         //! Serialize
         virtual void to_json(json& j) const override;
 
-        //! Deserialize
-        virtual void from_json(const json& j) override;
+        //! Serialize finished event
+        virtual void onSerializeFinished(Scene* scene) override;
 
         //! Create collision shape
         virtual void createShape() override;

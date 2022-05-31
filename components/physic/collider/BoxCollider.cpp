@@ -51,12 +51,13 @@ namespace ige::scene
         Collider::to_json(j);
         j["size"] = getSize();
     }
-
-    //! Deserialize
-    void BoxCollider::from_json(const json &j)
+    
+    //! Serialize finished event
+    void BoxCollider::onSerializeFinished(Scene* scene)
     {
-        Collider::from_json(j);
-        setSize(j.value("size", Vec3(1.f, 1.f, 1.f)));
+        Collider::onSerializeFinished(scene);
+        setSize(m_json.value("size", Vec3(1.f, 1.f, 1.f)));
+        m_json.clear();
     }
 
     //! Update property by key value

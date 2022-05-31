@@ -58,10 +58,11 @@ namespace ige::scene
        Collider::to_json(j);
     }
 
-    //! Deserialize
-    void CompoundCollider::from_json(const json &j)
+    //! Serialize finished event
+    void CompoundCollider::onSerializeFinished(Scene* scene)
     {
-        Collider::from_json(j);
+        Collider::onSerializeFinished(scene);
+        m_json.clear();
     }
 
     //! Update property by key value
