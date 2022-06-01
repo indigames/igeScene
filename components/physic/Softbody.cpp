@@ -26,6 +26,11 @@ namespace ige::scene
         : Rigidbody(owner)
     {
         m_mass = -1.f;
+        if (m_transformEventId != (uint64_t)-1) {
+            getOwner()->getTransformChangedEvent().removeListener(m_transformEventId);
+            m_transformEventId = (uint64_t)-1;
+        }
+        m_transformEventId = getOwner()->getTransformChangedEvent().addListener(std::bind(&Softbody::onTransformChanged, this, std::placeholders::_1));
     }
 
     //! Destructor
@@ -34,6 +39,15 @@ namespace ige::scene
         if (m_indicesMap != nullptr)
             delete[] m_indicesMap;
         m_indicesMap = nullptr;
+    }
+
+    //! Transform changed: update transform for kinematic object
+    void Softbody::onTransformChanged(SceneObject& object) {
+#if EDITOR_MODE
+        getOwner()->updateAabb();
+        if (!object.getScene() || !object.getScene()->getRoot() || SceneManager::getInstance()->isPlaying()) return;
+        recreateBody();
+#endif
     }
 
     //! Get AABB
@@ -261,8 +275,10 @@ namespace ige::scene
         Figure *figure = nullptr;
         std::vector<Vec3> positions;
         auto figureComp = getOwner()->getComponent<FigureComponent>();
-        if (figureComp && figureComp->getFigure())
+        if (figureComp && figureComp->getFigure()) {
             figure = figureComp->getFigure();
+        }
+
         if (figure != nullptr)
         {
             figure->WaitInitialize();
@@ -270,7 +286,7 @@ namespace ige::scene
             {
                 int offset = 0;
                 int size = 100000000;
-                int space = Space::LocalSpace;
+                int space = Space::WorldSpace;
 
                 auto mesh = figure->GetMesh(m_meshIndex);
                 auto attIdx = -1;
@@ -369,6 +385,9 @@ namespace ige::scene
         // Add custom material callback for collision events
         addCollisionFlag(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 
+        // Update transform
+        updateBtTransform();
+
         m_bIsDirty = false;
 
         // Activate
@@ -427,30 +446,14 @@ namespace ige::scene
     //! Update Bullet transform
     void Softbody::updateBtTransform()
     {
-        auto newTrans = PhysicHelper::to_btTransform(getOwner()->getTransform()->getRotation(), getOwner()->getTransform()->getPosition());
-        getSoftBody()->transformTo(newTrans);
-
-        Vec3 scale = getOwner()->getTransform()->getScale();
-        Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
-        float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
-        if (scaleDelta >= 0.01f) {
-            setScale(scale);
-        }
+        // DO NOTHING, we manipulate mesh data directly
     }
 
     //! Update IGE transform
     void Softbody::updateIgeTransform()
     {
         // Update transform
-        if (getOwner()->getTransform())
-        {
-            getOwner()->getTransform()->setPosition(PhysicHelper::from_btVector3(getSoftBody()->m_pose.m_com));
-
-            // Update rotation
-            auto xform = btTransform(getSoftBody()->m_pose.m_rot * getSoftBody()->m_pose.m_scl);
-            getOwner()->getTransform()->setRotation(PhysicHelper::from_btQuaternion(xform.getRotation()));
-        }
-
+        auto transform = getOwner()->getTransform();
         // Update position and normal
         auto figureComp = getOwner()->getComponent<FigureComponent>();
         if (!figureComp || !figureComp->getFigure())
@@ -495,22 +498,22 @@ namespace ige::scene
                 int idx = m_indicesMap[i];
                 auto *buffer = (uint8_t *)PYXIE_MALLOC(3 * elemSize);
                 MemoryCleaner cleaner(buffer);
-
+                auto pos = transform->getWorldMatrix().Inverse() * (PhysicHelper::from_btVector3(nodes[idx].m_x));
                 for (int j = 0; j < 3; ++j)
                 {
                     switch (mesh->vertexAttributes[attIdx].type)
                     {
                     case GL_FLOAT:
-                        ((float *)buffer)[j] = nodes[idx].m_x[j];
+                        ((float *)buffer)[j] = pos[j];
                         break;
                     case GL_SHORT:
-                        ((int16_t *)buffer)[j] = F32toS16(nodes[idx].m_x[j]);
+                        ((int16_t *)buffer)[j] = F32toS16(pos[j]);
                         break;
                     case GL_HALF_FLOAT:
-                        ((uint16_t *)buffer)[j] = F32toF16(nodes[idx].m_x[j]);
+                        ((uint16_t *)buffer)[j] = F32toF16(pos[j]);
                         break;
                     case GL_UNSIGNED_BYTE:
-                        ((uint8_t *)buffer)[j] = F32toU8(nodes[idx].m_x[j]);
+                        ((uint8_t *)buffer)[j] = F32toU8(pos[j]);
                         break;
                     }
                 }

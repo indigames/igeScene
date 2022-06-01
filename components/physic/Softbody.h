@@ -207,6 +207,9 @@ namespace ige::scene
         //! Optimize mesh
         void optimizeMesh(const std::vector<Vec3>&, int* indices, int numIndeces, float*& optPoss);
 
+        //! Transform changed event
+        void onTransformChanged(SceneObject& object);
+
     protected:
         //! Mesh index
         int m_meshIndex = 0;
