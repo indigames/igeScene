@@ -230,7 +230,7 @@ namespace ige::scene
     {
         if (model < btSoftBody::eAeroModel::V_Point || model > btSoftBody::eAeroModel::F_OneSided)
         {
-            model = btSoftBody::eAeroModel::V_TwoSided;
+            model = btSoftBody::eAeroModel::V_Point;
         }
 
         if (m_bIsDirty || m_aeroModel != model)
@@ -355,25 +355,28 @@ namespace ige::scene
         setScale(scale);
 
         // Apply pre-configurated values
+        setSelfCollision(m_bUseSelfCollision);
+        setSoftSoftCollision(m_softSoftCollision);
+
+        setRepulsionStiffness(m_repulsionStiffness);
+        setRestLengthScale(m_restLengthScale);
+        setPosIterationNumber(m_positionIterNumber);
+        setSleepingThreshold(m_sleepingThreshold);
+        setGravityFactor(m_gravityFactor);
+        setVelocityFactor(m_gravityFactor);
+
         setDampingCoeff(m_dampingCoeff);
         setPressureCoeff(m_pressureCoeff);
         setVolumeConvCoeff(m_volumeConvCoeff);
         setDynamicFrictionCoeff(m_dynamicFrictionCoeff);
         setPoseMatchCoeff(m_poseMatchCoeff);
-        setRepulsionStiffness(m_repulsionStiffness);
-        setSleepingThreshold(m_sleepingThreshold);
-        setRestLengthScale(m_restLengthScale);
-        setGravityFactor(m_gravityFactor);
-        setVelocityFactor(m_gravityFactor);
-        setSelfCollision(m_bUseSelfCollision);
-        setSoftSoftCollision(m_softSoftCollision);
-        setWindVelocity(m_windVelocity);
-        setAeroModel(m_aeroModel);
-        setPosIterationNumber(m_positionIterNumber);
         setRigidContactHardness(m_rigidContactHardness);
         setKineticContactHardness(m_kineticContactHardness);
         setSoftContactHardness(m_softContactHardness);
         setAnchorHardness(m_anchorHardness);
+
+        setAeroModel(m_aeroModel);
+        setWindVelocity(m_windVelocity);
 
         // Apply collision filter group and mask
         setCollisionFilterGroup(m_collisionFilterGroup);

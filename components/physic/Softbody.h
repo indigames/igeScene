@@ -260,7 +260,7 @@ namespace ige::scene
         int m_positionIterNumber = 1;
 
         //! Aero model
-        int m_aeroModel = (int)btSoftBody::eAeroModel::V_TwoSided;
+        int m_aeroModel = (int)btSoftBody::eAeroModel::V_Point;
 
         //! Use Self Collision
         bool m_bUseSelfCollision = false;
