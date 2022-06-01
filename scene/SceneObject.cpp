@@ -45,6 +45,7 @@
 #include "components/navigation/NavAgent.h"
 #include "components/navigation/NavAgentManager.h"
 #include "components/navigation/Navigable.h"
+#include "components/navigation/NavArea.h"
 #include "components/navigation/NavMesh.h"
 #include "components/navigation/NavObstacle.h"
 #include "components/navigation/OffMeshLink.h"
@@ -347,6 +348,7 @@ namespace ige::scene
         if (name == "NavAgent") return addComponent<NavAgent>();
         if (name == "NavAgentManager") return addComponent<NavAgentManager>();
         if (name == "Navigable") return addComponent<Navigable>();
+        if (name == "NavArea") return addComponent<NavArea>();
         if (name == "NavMesh") return addComponent<NavMesh>();
         if (name == "NavObstacle") return addComponent<NavObstacle>();
         if (name == "OffMeshLink") return addComponent<OffMeshLink>();

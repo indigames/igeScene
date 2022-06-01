@@ -458,6 +458,11 @@ namespace ige::scene
                 compObj->component = self->sceneObject.lock()->addComponent<Navigable>();
                 return (PyObject*)compObj;
             }
+            else if (type == "NavArea") {
+                auto compObj = (PyObject_Navigable*)(&PyTypeObject_NavArea)->tp_alloc(&PyTypeObject_NavArea, 0);
+                compObj->component = self->sceneObject.lock()->addComponent<NavArea>();
+                return (PyObject*)compObj;
+            }
             else if (type == "NavMesh") {
                 auto compObj = (PyObject_NavMesh*)(&PyTypeObject_NavMesh)->tp_alloc(&PyTypeObject_NavMesh, 0);
                 compObj->component = self->sceneObject.lock()->addComponent<NavMesh>();
@@ -823,6 +828,14 @@ namespace ige::scene
             auto comp = sceneObject->getComponent<Navigable>();
             if (comp) {
                 auto* compObj = (PyObject_Navigable*)(&PyTypeObject_Navigable)->tp_alloc(&PyTypeObject_Navigable, 0);
+                compObj->component = comp;
+                return (PyObject*)compObj;
+            }
+        }
+        else if (type == "NavArea") {
+            auto comp = sceneObject->getComponent<NavArea>();
+            if (comp) {
+                auto* compObj = (PyObject_NavArea*)(&PyTypeObject_NavArea)->tp_alloc(&PyTypeObject_NavArea, 0);
                 compObj->component = comp;
                 return (PyObject*)compObj;
             }

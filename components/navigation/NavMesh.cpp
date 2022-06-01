@@ -211,6 +211,14 @@ namespace ige::scene
             // Build tiles
             buildTiles(geometryList, Vec2(0.f, 0.f), Vec2(getNumTilesX() - 1.f, getNumTilesZ() - 1.f));
         }
+
+        // Apply area cost for all filter types
+        for (const auto& area : m_areas) {
+            for (int i = 0; i < navAgentManager->getNumQueryFilterTypes(); ++i) {
+                navAgentManager->setAreaCost(i, area->getAreaId(), area->getAreaCost());
+            }
+        }
+
         navAgentManager->reactivateAllAgents();
         return true;
     }

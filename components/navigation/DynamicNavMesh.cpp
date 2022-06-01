@@ -1,5 +1,6 @@
 #include "components/navigation/DynamicNavMesh.h"
 #include "components/navigation/NavObstacle.h"
+#include "components/navigation/NavArea.h"
 #include "components/navigation/OffMeshLink.h"
 #include "components/navigation/NavAgentManager.h"
 #include "components/TransformComponent.h"
@@ -334,6 +335,13 @@ namespace ige::scene
                 if (obstacle && obstacle->isEnabled())
                 {
                     onActivated(obstacle);
+                }
+            }
+
+            // Apply area cost for all filter types
+            for (const auto& area : m_areas) {
+                for (int i = 0; i < navAgentManager->getNumQueryFilterTypes(); ++i) {
+                    navAgentManager->setAreaCost(i, area->getAreaId(), area->getAreaCost());
                 }
             }
 
