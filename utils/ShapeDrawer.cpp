@@ -16,7 +16,7 @@
 #  include <GLES3/gl3ext.h>
 #endif
 
-#define MAX_LINES 16384
+#define MAX_LINES 10 * 16384
 
 namespace ige::scene
 {

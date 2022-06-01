@@ -7,6 +7,12 @@
 #include "scene/SceneManager.h"
 
 #include "utils/PhysicHelper.h"
+#include "components/physic/PhysicConstraint.h"
+#include "components/physic/constraint/FixedConstraint.h"
+#include "components/physic/constraint/HingeConstraint.h"
+#include "components/physic/constraint/SliderConstraint.h"
+#include "components/physic/constraint/SpringConstraint.h"
+#include "components/physic/constraint/Dof6SpringConstraint.h"
 
 #include <BulletSoftBody/btSoftBodyHelpers.h>
 
@@ -28,6 +34,17 @@ namespace ige::scene
         if (m_indicesMap != nullptr)
             delete[] m_indicesMap;
         m_indicesMap = nullptr;
+    }
+
+    //! Get AABB
+    AABBox Softbody::getAABB()
+    {
+        if (!getSoftBody()) return {};
+        btVector3 aabbMin, aabbMax;
+        getSoftBody()->getAabb(aabbMin, aabbMax);
+        auto box = AABBox(PhysicHelper::from_btVector3(aabbMin), PhysicHelper::from_btVector3(aabbMax));
+        box = box.Transform(getOwner()->getTransform()->getWorldMatrix().Inverse());
+        return box;
     }
 
     //! Set mesh index
@@ -239,12 +256,8 @@ namespace ige::scene
     //! Create physic body
     void Softbody::createBody()
     {
-        // Create collision shape
-        if (m_body)
-            m_body.reset();
-
+        destroyBody();
         auto world = getManager()->getDeformableWorld();
-
         Figure *figure = nullptr;
         std::vector<Vec3> positions;
         auto figureComp = getOwner()->getComponent<FigureComponent>();
@@ -253,7 +266,6 @@ namespace ige::scene
         if (figure != nullptr)
         {
             figure->WaitInitialize();
-            getOwner()->onUpdate(0.f); // force update transform
             if (figure->NumMeshes() > 0 && m_meshIndex >= 0 && m_meshIndex < figure->NumMeshes())
             {
                 int offset = 0;
@@ -360,7 +372,7 @@ namespace ige::scene
         m_bIsDirty = false;
 
         // Activate
-        if (m_bIsEnabled)
+        if (isEnabled())
             activate();
     }
 
@@ -632,10 +644,55 @@ namespace ige::scene
         j["ahr"] = getAnchorHardness();
     }
 
-    //! Deserialize
-    void Softbody::from_json(const json &j)
-    {
-        Rigidbody::from_json(j);
+    //! Serialize finished event
+    void Softbody::onSerializeFinished(Scene* scene) {
+        init();
+        auto j = m_json;
+        setMass(j.value("mass", 1.f));
+        setRestitution(j.value("restitution", 1.f));
+        setFriction(j.value("friction", 0.5f));
+        setLinearVelocity(PhysicHelper::to_btVector3(j.value("linearVelocity", Vec3())));
+        setAngularVelocity(PhysicHelper::to_btVector3(j.value("angularVelocity", Vec3())));
+        setLinearFactor(PhysicHelper::to_btVector3(j.value("linearFactor", Vec3(1.f, 1.f, 1.f))));
+        setAngularFactor(PhysicHelper::to_btVector3(j.value("angularFactor", Vec3(1.f, 1.f, 1.f))));
+        setIsKinematic(j.value("isKinematic", false));
+        setIsTrigger(j.value("isTrigger", false));
+        setCollisionFilterGroup(j.value("group", isKinematic() ? 2 : 1));
+        setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
+        setCCD(j.value("ccd", false));
+        setLinearSleepingThreshold(j.value("linearSleepingThreshold", 0.8f));
+        setAngularSleepingThreshold(j.value("angularSleepingThreshold", 1.0f));
+        setActivationState(j.value("activeState", 1));
+        setPositionOffset(j.value("offset", Vec3(0.f, 0.f, 0.f)));
+
+        auto jConstraints = j.value("consts", json());
+        for (auto it : jConstraints)
+        {
+            auto key = (int)it.at(0);
+            auto val = it.at(1);
+            std::shared_ptr<PhysicConstraint> constraint = nullptr;
+            switch (key)
+            {
+            case (int)PhysicConstraint::ConstraintType::Fixed:
+                constraint = addConstraint<FixedConstraint>();
+                break;
+            case (int)PhysicConstraint::ConstraintType::Hinge:
+                constraint = addConstraint<HingeConstraint>();
+                break;
+            case (int)PhysicConstraint::ConstraintType::Slider:
+                constraint = addConstraint<SliderConstraint>();
+                break;
+            case (int)PhysicConstraint::ConstraintType::Spring:
+                constraint = addConstraint<SpringConstraint>();
+                break;
+            case (int)PhysicConstraint::ConstraintType::Dof6Spring:
+                constraint = addConstraint<Dof6SpringConstraint>();
+                break;
+            }
+            if (constraint)
+                val.get_to(*constraint);
+        }
+
         setMeshIndex(j.value("meshIdx", 0));
         setDampingCoeff(j.value("dampCoeff", 0.4f));
         setPressureCoeff(j.value("presCoeff", 0.f));
@@ -656,6 +713,7 @@ namespace ige::scene
         setKineticContactHardness(j.value("kch", 0.1f));
         setSoftContactHardness(j.value("sch", 1.f));
         setAnchorHardness(j.value("ahr", 1.f));
+        m_json.clear();
     }
 
     //! Update property by key value

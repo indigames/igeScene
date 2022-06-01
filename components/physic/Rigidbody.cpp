@@ -81,10 +81,10 @@ namespace ige::scene
             if (getBody() && getBody()->getMotionState()) {
                 getBody()->getMotionState()->setWorldTransform(m_body->getWorldTransform());
             }
-#if EDITOR_MODE
-            getOwner()->updateAabb();
-#endif
         }
+#if EDITOR_MODE
+        getOwner()->updateAabb();
+#endif
     }
 
     //! Add constraint

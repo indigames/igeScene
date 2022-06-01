@@ -193,11 +193,11 @@ namespace ige::scene
     void PhysicManager::preUpdate()
     {
         // Reset collision events
-        for (auto &element : m_collisionEvents)
+        for (auto element : m_collisionEvents)
             element.second = false;
 
         // Update object transform
-        for (auto& body : m_rigidbodys) {
+        for (auto body : m_rigidbodys) {
             body->updateBtTransform();
         }
     }
@@ -229,7 +229,7 @@ namespace ige::scene
         }
 
         // Update object transform
-        for (auto& body : m_rigidbodys) {
+        for (auto body : m_rigidbodys) {
             body->updateIgeTransform();
         }
     }
