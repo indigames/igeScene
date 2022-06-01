@@ -3,6 +3,7 @@
 #include "components/physic/collider/CompoundCollider.h"
 #include "components/TransformComponent.h"
 #include "scene/Scene.h"
+#include "scene/SceneManager.h"
 #include "scene/SceneObject.h"
 
 #include "utils/PhysicHelper.h"
@@ -71,6 +72,7 @@ namespace ige::scene
 
     //! Transform changed: update transform for kinematic object
     void Collider::onTransformChanged(SceneObject& object) {
+        if (!object.getScene() || !object.getScene()->getRoot() || SceneManager::getInstance()->isPlaying()) return;
         if (getType() != Component::Type::MeshCollider && getType() != Component::Type::CompoundCollider) {
             auto compoundCollider = getOwner()->getFirstParentComponents<CompoundCollider>();
             if (compoundCollider) {
