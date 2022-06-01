@@ -37,10 +37,43 @@ namespace ige::scene
 
             std::vector<std::shared_ptr<Collider>> colliders;
             getOwner()->getComponentsRecursive<Collider>(colliders);
+
+            auto transform = getOwner()->getTransform();
+            
+
             for (auto& collider : colliders) {
                 if (collider->getType() != Component::Type::CompoundCollider && collider->getType() != Component::Type::MeshCollider && !collider->getOwner()->getComponent<Rigidbody>()) {
                     collider->setCompoundCollider(compoundCollider);
-                    shape->addChildShape(PhysicHelper::to_btTransform(collider->getOwner()->getTransform()->getLocalRotation(), collider->getOwner()->getTransform()->getLocalPosition()), collider->getShape().get());
+
+                    auto localMatrix = transform->getWorldMatrix().Inverse() * collider->getOwner()->getTransform()->getWorldMatrix();
+
+                    // Update local position
+                    Vec3 localPosition;
+                    localPosition.X(localMatrix[3][0]);
+                    localPosition.Y(localMatrix[3][1]);
+                    localPosition.Z(localMatrix[3][2]);
+
+                    Vec3 columns[3] = {
+                        {localMatrix[0][0], localMatrix[0][1], localMatrix[0][2]},
+                        {localMatrix[1][0], localMatrix[1][1], localMatrix[1][2]},
+                        {localMatrix[2][0], localMatrix[2][1], localMatrix[2][2]}
+                    };
+
+                    // Update local scale
+                    Vec3 localScale;
+                    localScale.X(columns[0].Length());
+                    localScale.Y(columns[1].Length());
+                    localScale.Z(columns[2].Length());
+
+                    if (localScale.X()) columns[0] /= localScale.X();
+                    if (localScale.Y()) columns[1] /= localScale.Y();
+                    if (localScale.Z()) columns[2] /= localScale.Z();
+
+                    // Update local rotation
+                    Mat3 rotationMatrix(columns[0], columns[1], columns[2]);
+                    auto localRotation = Quat(rotationMatrix);
+
+                    shape->addChildShape(PhysicHelper::to_btTransform(localRotation, localPosition), collider->getShape().get());
                 }
             }
 

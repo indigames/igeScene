@@ -62,6 +62,10 @@ namespace ige::scene
         //! Destroy shape
         virtual void destroyShape();
 
+        //! Catch transform changed event
+        uint64_t m_transformEventId = (uint64_t)-1;
+        void onTransformChanged(SceneObject& object);
+
     protected:
         //! Collision shape
         std::unique_ptr<btCollisionShape> m_shape = nullptr;
