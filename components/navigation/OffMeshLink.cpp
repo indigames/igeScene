@@ -33,8 +33,8 @@ namespace ige::scene
         setEndPoint(getOwner()->getScene()->findObjectByUUID(uuid));
         setRadius(j.value("radius", 1.f));
         setBidirectional(j.value("2way", true));
-        setMask(j.value("mask", 0));
-        setAreaId(j.value("areaId", 0));
+        setMask(j.value("mask", 1));
+        setAreaId(j.value("areaId", 63));
         Component::from_json(j);
     }
 

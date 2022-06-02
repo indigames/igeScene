@@ -67,7 +67,7 @@ namespace ige::scene
         uint32_t m_mask = 1;
 
         //! Area id to be used for this off mesh connection's internal poly
-        uint32_t m_areaId = 1;
+        uint32_t m_areaId = 63;
 
         //! Cache endpoint changed flag
         bool m_bEndPointDirty = false;
