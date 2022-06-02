@@ -24,10 +24,6 @@ namespace ige::scene
     PyObject *NavArea_getAreaId(PyObject_NavArea *self);
     int NavArea_setAreaId(PyObject_NavArea *self, PyObject *value);
 
-    //! Area cost
-    PyObject *NavArea_getAreaCost(PyObject_NavArea *self);
-    int NavArea_setAreaCost(PyObject_NavArea *self, PyObject *value);
-
     //! Bounding box
     PyObject *NavArea_getBoundingBox(PyObject_NavArea *self);
     int NavArea_setBoundingBox(PyObject_NavArea *self, PyObject *value);

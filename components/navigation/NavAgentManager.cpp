@@ -355,6 +355,22 @@ namespace ige::scene
         }
     }
 
+    //! The params for the specified obstacle avoidance type.
+    const NavAgentManager::ObstacleParams& NavAgentManager::getObstacleAvoidanceParams(uint32_t obstacleAvoidanceType) const {
+        static const ObstacleParams EMPTY_PARAMS = ObstacleParams();
+        const dtObstacleAvoidanceParams* params = m_crowd ? m_crowd->getObstacleAvoidanceParams(obstacleAvoidanceType) : nullptr;
+        return params ? *reinterpret_cast<const ObstacleParams*>(params) : EMPTY_PARAMS;
+    }
+
+    void NavAgentManager::setObstacleAvoidanceParams(uint32_t obstacleAvoidanceType, const ObstacleParams& params) {
+        if (m_crowd && obstacleAvoidanceType < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS) {
+            m_crowd->setObstacleAvoidanceParams(obstacleAvoidanceType, reinterpret_cast<const dtObstacleAvoidanceParams*>(&params));
+            if (m_numObstacleAvoidanceTypes < obstacleAvoidanceType + 1) {
+                m_numObstacleAvoidanceTypes = obstacleAvoidanceType + 1;
+            }
+        }
+    }
+
     //! Serialize
     void NavAgentManager::to_json(json &j) const
     {

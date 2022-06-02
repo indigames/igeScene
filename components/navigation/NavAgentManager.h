@@ -102,7 +102,7 @@ namespace ige::scene
         void setNumObstacleAvoidanceType(uint32_t num) { m_numObstacleAvoidanceTypes = num; }
 
         //! The params for the specified obstacle avoidance type.
-        ObstacleParams getObstacleAvoidanceParams(uint32_t obstacleAvoidanceType) const;
+        const ObstacleParams& getObstacleAvoidanceParams(uint32_t obstacleAvoidanceType) const;
         void setObstacleAvoidanceParams(uint32_t obstacleAvoidanceType, const ObstacleParams& params);
 
         //! Agents

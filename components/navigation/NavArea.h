@@ -27,10 +27,6 @@ namespace ige::scene
         uint8_t getAreaId() const { return m_areaId; }
         void setAreaId(uint8_t id);
 
-        //! Area cost
-        float getAreaCost() const { return m_areaCost; }
-        void setAreaCost(float cost);
-
         //! Bounding box
         const AABBox& getBoundingBox() const { return m_boundingBox; }
         void setBoundingBox(const AABBox& aabb);
@@ -54,8 +50,5 @@ namespace ige::scene
 
         //! AreaID
         uint8_t m_areaId = 0;
-
-        //! Area Cost
-        float m_areaCost = 1.f;
     };
 } // namespace ige::scene

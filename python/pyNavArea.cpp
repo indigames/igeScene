@@ -42,24 +42,6 @@ namespace ige::scene
         return -1;
     }
 
-    // AreaCost
-    PyObject *NavArea_getAreaCost(PyObject_NavArea *self)
-    {
-        if (self->component.expired()) Py_RETURN_NONE;
-        return PyFloat_FromDouble(std::dynamic_pointer_cast<NavArea>(self->component.lock())->getAreaCost());
-    }
-
-    int NavArea_setAreaCost(PyObject_NavArea *self, PyObject *value)
-    {
-        if (self->component.expired()) return -1;
-        if (PyFloat_Check(value)) {
-            float val = (float)PyFloat_AsDouble(value);
-            std::dynamic_pointer_cast<NavArea>(self->component.lock())->setAreaCost(val);
-            return 0;
-        }
-        return -1;
-    }
-
     // Bounding box
     PyObject *NavArea_getBoundingBox(PyObject_NavArea *self)
     {
@@ -116,7 +98,6 @@ namespace ige::scene
 
     PyGetSetDef NavArea_getsets[] = {
         {"id", (getter)NavArea_getAreaId, (setter)NavArea_setAreaId, NavArea_id_doc, NULL},
-        {"cost", (getter)NavArea_getAreaCost, (setter)NavArea_setAreaCost, NavArea_cost_doc, NULL},
         {"aabb", (getter)NavArea_getBoundingBox, (setter)NavArea_setBoundingBox, NavArea_aabb_doc, NULL},
         {"worldAabb", (getter)NavArea_getWorldBoundingBox, NULL, NavArea_aabb_doc, NULL},
         {NULL, NULL}};

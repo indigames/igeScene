@@ -338,13 +338,6 @@ namespace ige::scene
                 }
             }
 
-            // Apply area cost for all filter types
-            for (const auto& area : m_areas) {
-                for (int i = 0; i < navAgentManager->getNumQueryFilterTypes(); ++i) {
-                    navAgentManager->setAreaCost(i, area->getAreaId(), area->getAreaCost());
-                }
-            }
-
             navAgentManager->reactivateAllAgents();
         }
 
