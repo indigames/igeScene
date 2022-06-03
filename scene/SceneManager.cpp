@@ -337,11 +337,6 @@ namespace ige::scene
 
             if (path.find(".tmp") == std::string::npos)
             {
-                if (m_currScene->getName() == "Untitled")
-                {
-                    m_currScene->setName(fsPath.filename().stem());
-                }
-
                 auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()).string() : fsPath.string();
                 std::replace(relPath.begin(), relPath.end(), '\\', '/');
                 m_currScene->setPath(relPath);

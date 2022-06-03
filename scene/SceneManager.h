@@ -47,7 +47,7 @@ namespace ige::scene
         virtual void render(RenderTarget* fbo = nullptr, bool skipBeginEnd = false);
 
         //! Create empty scene
-        std::shared_ptr<Scene> createScene(const std::string& name = "Untitled", bool empty = false);
+        std::shared_ptr<Scene> createScene(const std::string& name = "main", bool empty = false);
 
         //! Creator function: create a scene from prefab file
         std::shared_ptr<Scene> createSceneFromPrefab(const std::string& file);
