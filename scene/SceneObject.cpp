@@ -1058,26 +1058,6 @@ namespace ige::scene
         m_bIsInMask = value;
     }
 
-    void SceneObject::reloadScripts(bool includeChild)
-    {
-        if (includeChild) {
-            for (auto& child : m_children) {
-                if(!child.expired())
-                    child.lock()->reloadScripts(includeChild);
-            }
-        }
-
-        int c_size = getComponentsCount();
-        for (int i = 0; i < c_size; i++) {
-            if (m_components[i]->getType() == Component::Type::Script) {
-                std::shared_ptr<ScriptComponent> Script = std::dynamic_pointer_cast<ScriptComponent>(m_components[i]);
-                if (Script != nullptr) {
-                    Script->Reload();
-                }
-            }
-        }
-    }
-
     // Check if this object is a prefab
     bool SceneObject::isPrefab() const
     {
