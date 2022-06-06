@@ -226,6 +226,7 @@ namespace ige::scene {
                     }
                     if (shouldActiveTransition) {
                         activeTransition = transition;
+                        break;
                     }
                 }
             }

@@ -1166,6 +1166,7 @@ namespace ige::scene
         {
             auto child = getScene()->createObject(it.at("name"), thisObj, it.value("gui", false), {});
             child->from_json(it);
+            child->setParent(thisObj);
         }
     }
 
