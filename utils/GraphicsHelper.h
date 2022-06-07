@@ -23,8 +23,7 @@ namespace ige::scene
         //! Texture utilities
         void texture_setText(Texture* texture, const std::string& word, const std::string& font, int size, int startX = 0, int startY = 0, int clear = 0);
 
-    protected:
-        std::string unique(const std::string& str);
+        static std::string unique(const std::string& str);
     };
 
     Vec3 ScreenToWorld(const Vec2& screenPos, const Vec2& windowSize, Camera* cam = nullptr, float wZ = 0.f);
