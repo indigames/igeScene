@@ -9,9 +9,10 @@
 namespace ige::scene
 {
     //! Constructor
-    BoxCollider::BoxCollider(SceneObject &owner, const Vec3 &size)
-        : Collider(owner), m_size(size)
+    BoxCollider::BoxCollider(SceneObject &owner)
+        : Collider(owner)
     {
+        m_size = getOwner()->getAABB().getExtent() * 0.5f;
     }
 
     //! Destructor

@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        BoxCollider(SceneObject &owner, const Vec3 &size = {1.f, 1.f, 1.f});
+        BoxCollider(SceneObject &owner);
 
         //! Destructor
         virtual ~BoxCollider();
@@ -42,6 +42,6 @@ namespace ige::scene
 
     protected:
         //! Box size
-        Vec3 m_size;
+        Vec3 m_size = { 0.f, 0.f, 0.f };
     };
 } // namespace ige::scene

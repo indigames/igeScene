@@ -9,9 +9,11 @@
 namespace ige::scene
 {
     //! Constructor
-    SphereCollider::SphereCollider(SceneObject &owner, float radius)
-        : Collider(owner), m_radius(radius)
+    SphereCollider::SphereCollider(SceneObject &owner)
+        : Collider(owner)
     {
+        auto size = getOwner()->getAABB().getExtent() * 0.5f;
+        m_radius = std::max({ size.X(), size.Y(), size.Z() });
     }
 
     //! Destructor

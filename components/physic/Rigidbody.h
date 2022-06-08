@@ -301,7 +301,7 @@ namespace ige::scene
         float m_angularSleepingThreshold = 1.0f;
 
         //! isKinematic
-        bool m_bIsKinematic = false;
+        bool m_bIsKinematic = true;
 
         //! isTrigger
         bool m_bIsTrigger = false;

@@ -9,9 +9,12 @@
 namespace ige::scene
 {
     //! Constructor
-    CapsuleCollider::CapsuleCollider(SceneObject &owner, float radius, float height)
-        : Collider(owner), m_radius(radius), m_height(height)
+    CapsuleCollider::CapsuleCollider(SceneObject &owner)
+        : Collider(owner)
     {
+        auto size = getOwner()->getAABB().getExtent() * 0.5f;
+        if (m_radius <= 0.f) m_radius = size.X();
+        if (m_height <= 0.f) m_height = size.Y();
     }
 
     //! Destructor

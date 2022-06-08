@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        CapsuleCollider(SceneObject &owner, float radius = 1.f, float height = 1.f);
+        CapsuleCollider(SceneObject &owner);
 
         //! Destructor
         virtual ~CapsuleCollider();
@@ -50,9 +50,9 @@ namespace ige::scene
 
     protected:
         //! Radius
-        float m_radius;
+        float m_radius = 0.f;
 
         //! Height
-        float m_height;
+        float m_height = 0.f;
     };
 }

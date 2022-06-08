@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SphereCollider(SceneObject &owner, float radius = 1.f);
+        SphereCollider(SceneObject &owner);
 
         //! Destructor
         virtual ~SphereCollider();
@@ -46,6 +46,6 @@ namespace ige::scene
         virtual void setScale(const Vec3 &scale) override;
 
     protected:
-        float m_radius;
+        float m_radius = 0.f;
     };
 } // namespace ige::scene

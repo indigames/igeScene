@@ -51,6 +51,10 @@ namespace ige::scene
     bool Rigidbody::init()
     {
         getOnCreatedEvent().invoke(this);
+        if (m_positionOffset.LengthSqr() <= 0.f) {
+            auto aabbCenter = getOwner()->getWorldAABB().getCenter();
+            m_positionOffset = aabbCenter - getOwner()->getTransform()->getPosition();
+        }
         createBody();
         return true;
     }
@@ -278,7 +282,7 @@ namespace ige::scene
     void Rigidbody::setActivationState(int state) {
         m_activeState = MATH_CLAMP(state, 0, 5);
         if (getBody())
-            getBody()->setActivationState(m_activeState);
+            getBody()->forceActivationState(m_activeState);
     }
 
     void Rigidbody::setPositionOffset(const Vec3& offset)
@@ -332,6 +336,7 @@ namespace ige::scene
             }
             else
             {
+                setActivationState(ACTIVE_TAG);
                 removeCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
             }
 
@@ -387,6 +392,10 @@ namespace ige::scene
 
         // Update transform
         updateBtTransform();
+
+#if EDITOR_MODE
+        getOwner()->updateAabb();
+#endif
 
         m_bIsDirty = false;
 
