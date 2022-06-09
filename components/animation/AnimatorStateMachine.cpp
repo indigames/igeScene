@@ -205,9 +205,9 @@ namespace ige::scene {
                     bool shouldActiveTransition = true;
                     for (auto& condition : transition->conditions) {
                         if (getController()->hasParameter(condition->parameter)) {
-                            auto [type, value] = getController()->getParameter(condition->parameter);                            
-                            if (!((condition->mode == AnimatorCondition::Mode::If && value)
-                                || (condition->mode == AnimatorCondition::Mode::IfNot && !value)
+                            auto [type, value] = getController()->getParameter(condition->parameter);
+                            if (!((condition->mode == AnimatorCondition::Mode::If && value != 0.f)
+                                || (condition->mode == AnimatorCondition::Mode::IfNot && value == 0.f)
                                 || (condition->mode == AnimatorCondition::Mode::Equal && value == condition->threshold)
                                 || (condition->mode == AnimatorCondition::Mode::NotEqual && value != condition->threshold)
                                 || (condition->mode == AnimatorCondition::Mode::Greater && value > condition->threshold)

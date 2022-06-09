@@ -210,7 +210,8 @@ namespace ige::scene
             Py_ssize_t pos = 0;
             while (PyDict_Next(dict, &pos, &key, &value))
             {
-                if (PyObject_HasAttrString(value, "onUpdate") && PyObject_IsSubclass(value, (PyObject *)&PyTypeObject_Script))
+                if ((PyObject_HasAttrString(value, "onUpdate") || PyObject_HasAttrString(value, "onStart")) 
+                    && PyObject_IsSubclass(value, (PyObject *)&PyTypeObject_Script))
                 {
                     pyClass = value;
                     break;
@@ -245,29 +246,24 @@ namespace ige::scene
             while (PyDict_Next(dict, &pos, &key, &value))
             {
                 auto key_str = std::string(PyUnicode_AsUTF8(key));
-                if (!PyObject_IsInstance(value, (PyObject*)&PyFunction_Type))
-                {
-                    if (m_members.count(key_str) > 0)
-                    {
+                if (key_str.size() > 0 && key_str[0] != '_' 
+                    && !PyObject_IsInstance(value, (PyObject*)&PyFunction_Type)
+                    && !PyObject_IsInstance(value, (PyObject*)&PyModule_Type)) {
+                    if (m_members.count(key_str) > 0) {
                         members[key_str] = m_members[key_str];
                         onMemberValueChanged(key_str, m_members[key_str]);
                     }
-                    else
-                    {
-                        if (PyUnicode_Check(value))
-                        {
+                    else {
+                        if (PyUnicode_Check(value)) {
                             members[key_str] = std::string(PyUnicode_AsUTF8(value));
                         }
-                        else if (PyBool_Check(value))
-                        {
+                        else if (PyBool_Check(value)) {
                             members[key_str] = (bool)(PyLong_AsLong(value));
                         }
-                        else if (PyLong_Check(value))
-                        {
+                        else if (PyLong_Check(value)) {
                             members[key_str] = (int)PyLong_AsLong(value);
                         }
-                        else if (PyFloat_Check(value))
-                        {
+                        else if (PyFloat_Check(value)) {
                             members[key_str] = PyFloat_AsDouble(value);
                         }
                         else if (value->ob_type == _Vec2Type || value->ob_type == _Vec3Type || value->ob_type == _Vec4Type || value->ob_type == _QuatType) {
@@ -280,8 +276,7 @@ namespace ige::scene
                                 else if (d > 3) members[key_str] = *((Vec4*)v);
                             }
                         }
-                        else
-                        {
+                        else {
                             members[key_str] = std::string();
                         }
                     }
