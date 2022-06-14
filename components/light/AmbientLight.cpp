@@ -5,7 +5,7 @@
 namespace ige::scene
 {
     //! Constructor
-    AmbientLight::AmbientLight(SceneObject &owner)
+    AmbientLight::AmbientLight(SceneObject& owner)
         : Component(owner)
     {
     }

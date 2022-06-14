@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    CameraComponent::CameraComponent(SceneObject &owner, const std::string &name)
+    CameraComponent::CameraComponent(SceneObject& owner, const std::string &name)
         : Component(owner), m_name(name)
     {
         static int name_count = 0;

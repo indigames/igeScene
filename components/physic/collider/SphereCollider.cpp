@@ -9,7 +9,7 @@
 namespace ige::scene
 {
     //! Constructor
-    SphereCollider::SphereCollider(SceneObject &owner)
+    SphereCollider::SphereCollider(SceneObject& owner)
         : Collider(owner)
     {
         auto size = getOwner()->getAABB().getExtent() * 0.5f;

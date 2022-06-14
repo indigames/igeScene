@@ -51,7 +51,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        FigureComponent(SceneObject &owner, const std::string &path = "");
+        FigureComponent(SceneObject& owner, const std::string &path = "");
 
         //! Destructor
         virtual ~FigureComponent();

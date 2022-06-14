@@ -65,7 +65,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        PhysicManager(SceneObject& owner, int numIteration = 10, bool deformable = true);
+        PhysicManager(SceneObject& owner, bool deformable = true);
 
         //! Destructor
         virtual ~PhysicManager();
@@ -180,16 +180,16 @@ namespace ige::scene
         bool m_bDeformable = false;
 
         //! Numer of iteration per frame
-        int m_numIteration = 10;
+        int m_numIteration = 1;
 
         //! Frame update ratio (speedup/slower effects)
         float m_frameUpdateRatio = 1.f;
 
         //! Frame max simulation sub step
-        int m_frameMaxSubStep = 4;
+        int m_frameMaxSubStep = 1;
 
         //! Fixed time steps
-        float m_fixedTimeStep = 1 / 240.f;
+        float m_fixedTimeStep = 1 / 60.f;
 
         //! Gravity
         btVector3 m_gravity = {0.f, -9.81f, 0.f};

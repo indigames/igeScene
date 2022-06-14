@@ -161,7 +161,7 @@ namespace ige::scene
 
     public:
         //! Constructor
-        NavMesh(SceneObject &owner);
+        NavMesh(SceneObject& owner);
 
         //! Destructor
         virtual ~NavMesh();

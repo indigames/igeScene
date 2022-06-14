@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        DirectionalLight(SceneObject &owner);
+        DirectionalLight(SceneObject& owner);
 
         //! Destructor
         virtual ~DirectionalLight();

@@ -12,7 +12,7 @@
 
 namespace ige::scene
 {
-    TransformComponent::TransformComponent(SceneObject &owner, const Vec3 &pos, const Quat &rot, const Vec3 &scale)
+    TransformComponent::TransformComponent(SceneObject& owner, const Vec3 &pos, const Quat &rot, const Vec3 &scale)
         : Component(owner), m_localPosition(pos), m_localRotation(rot), m_localScale(scale)
     {
         m_bLocalDirty = true;
@@ -360,7 +360,7 @@ namespace ige::scene
         notifyObservers(ETransformMessage::TRANSFORM_CHANGED);
 
         // Fire transform changed event
-        getOwner()->getTransformChangedEvent().invoke(*getOwner());
+        if (getParent()) getOwner()->getTransformChangedEvent().invoke(*getOwner());
     }
 
     void TransformComponent::updateWorldToLocal()
@@ -369,6 +369,11 @@ namespace ige::scene
         m_worldMatrix.Identity();
         vmath_mat4_from_rottrans(m_worldRotation.P(), m_worldPosition.P(), m_worldMatrix.P());
         vmath_mat_appendScale(m_worldMatrix.P(), m_worldScale.P(), 4, 4, m_worldMatrix.P());
+
+        // World rotation and scale vector
+        m_worldRotationScaleMatrix.Identity();
+        vmath_mat_from_quat(m_worldRotation.P(), 4, m_worldRotationScaleMatrix.P());
+        vmath_mat_appendScale(m_worldRotationScaleMatrix.P(), m_worldScale.P(), 4, 4, m_worldRotationScaleMatrix.P());
 
         // Update local matrix
         m_localMatrix = getParent() ? getParent()->getWorldMatrix().Inverse() * m_worldMatrix : m_worldMatrix;
@@ -413,7 +418,7 @@ namespace ige::scene
         notifyObservers(ETransformMessage::TRANSFORM_CHANGED);
 
         // Fire transform changed event
-        getOwner()->getTransformChangedEvent().invoke(*getOwner());
+        if(getParent()) getOwner()->getTransformChangedEvent().invoke(*getOwner());
     }
 
     Vec3 TransformComponent::localToGlobal(Vec3 point) const
@@ -547,7 +552,8 @@ namespace ige::scene
         setRotation(j.value("wrot", Vec3(0.f, 0.f, 0.f)));
         setScale(j.value("wscale", Vec3(1.f, 1.f, 1.f)));
         Component::from_json(j);
-        onUpdate(0.f); // pre-warm
+        updateLocalToWorld(); // pre-warm
+        updateWorldToLocal(); // pre-warm
     }
 
     //! Update property by key value

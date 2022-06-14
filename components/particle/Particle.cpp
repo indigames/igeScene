@@ -14,7 +14,7 @@ namespace ige::scene
     Event<Particle *> Particle::m_onDestroyedEvent;
 
     //! Constructor
-    Particle::Particle(SceneObject &owner, const std::string &path)
+    Particle::Particle(SceneObject& owner, const std::string &path)
         : Component(owner)
     {
         // Register manager

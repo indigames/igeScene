@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        PointLight(SceneObject &owner);
+        PointLight(SceneObject& owner);
 
         //! Destructor
         virtual ~PointLight();

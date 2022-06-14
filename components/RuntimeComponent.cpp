@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    RuntimeComponent::RuntimeComponent(SceneObject &owner)
+    RuntimeComponent::RuntimeComponent(SceneObject& owner)
         : Component(owner)
     {
         m_bIsInit = false;

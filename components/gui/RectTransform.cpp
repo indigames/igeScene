@@ -65,7 +65,7 @@ namespace ige::scene
         vec[3] = std::clamp(vec[3], 0.0f, 1.0f);
     }
 
-    RectTransform::RectTransform(SceneObject &owner, const Vec3 &pos, const Vec2 &size)
+    RectTransform::RectTransform(SceneObject& owner, const Vec3 &pos, const Vec2 &size)
         : TransformComponent(owner, pos)
     {
         m_offset = Vec4(0.f, 0.f, 0.f, 0.f);

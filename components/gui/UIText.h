@@ -18,7 +18,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        UIText(SceneObject &owner, const std::string &text = "", const std::string &fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4 &color = {0.5f, 0.5f, 0.5f, 1.f});
+        UIText(SceneObject& owner, const std::string &text = "", const std::string &fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4 &color = {0.5f, 0.5f, 0.5f, 1.f});
 
         //! Destructor
         virtual ~UIText();

@@ -17,7 +17,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        Collider(SceneObject &owner);
+        Collider(SceneObject& owner);
 
         //! Destructor
         virtual ~Collider();
@@ -46,6 +46,9 @@ namespace ige::scene
         //! Recreate shape, also recreate body
         virtual void recreateShape();
 
+        //! Transform changed event
+        void onTransformChanged();
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -61,10 +64,6 @@ namespace ige::scene
 
         //! Destroy shape
         virtual void destroyShape();
-
-        //! Catch transform changed event
-        uint64_t m_transformEventId = (uint64_t)-1;
-        void onTransformChanged(SceneObject& object);
 
     protected:
         //! Collision shape

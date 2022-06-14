@@ -10,7 +10,7 @@
 namespace ige::scene
 {
     //! Constructor
-    AnimatorComponent::AnimatorComponent(SceneObject &owner)
+    AnimatorComponent::AnimatorComponent(SceneObject& owner)
         : Component(owner)
     {
     }

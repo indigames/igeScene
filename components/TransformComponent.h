@@ -25,7 +25,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        TransformComponent(SceneObject &owner, const Vec3 &pos = Vec3(), const Quat &rot = Quat(), const Vec3 &scale = Vec3(1.f, 1.f, 1.f));
+        TransformComponent(SceneObject& owner, const Vec3 &pos = Vec3(), const Quat &rot = Quat(), const Vec3 &scale = Vec3(1.f, 1.f, 1.f));
 
         //! Destructor
         virtual ~TransformComponent();
@@ -104,6 +104,9 @@ namespace ige::scene
 
         //! Get world transform matrix
         virtual const Mat4 &getWorldMatrix() const;
+
+        //! Get world transform matrix without position
+        virtual const Mat4& getWorldRotationScaleMatrix() const { return m_worldRotationScaleMatrix; }
 
         //! Get local right vector
         virtual Vec3 getLocalRight() const;
@@ -186,6 +189,7 @@ namespace ige::scene
         Quat m_worldRotation;
         Vec3 m_worldScale;
         Mat4 m_worldMatrix;
+        Mat4 m_worldRotationScaleMatrix;
 
         //! Transform observers
         std::set<TransformComponent*> m_observers;

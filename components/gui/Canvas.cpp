@@ -9,7 +9,7 @@
 namespace ige::scene
 {
     //! Constructor
-    Canvas::Canvas(SceneObject &owner)
+    Canvas::Canvas(SceneObject& owner)
         : Component(owner)
     {
         // Canvas camera

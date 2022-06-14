@@ -1062,8 +1062,8 @@ namespace ige::scene
     std::pair<std::shared_ptr<SceneObject>, Vec3> Scene::raycast(const Vec2& screenPos, Camera* camera, float maxDistance, bool forceRaycast)
     {
         auto hit = std::pair<std::shared_ptr<SceneObject>, Vec3>(nullptr, Vec3());
-        if(!camera)
-            return hit;
+        if (!camera) camera = getActiveCamera()->getCamera();
+        if (!camera) return hit;
 
         if (m_raycastCapture && !forceRaycast)
             return hit;

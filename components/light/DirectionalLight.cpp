@@ -5,7 +5,7 @@
 namespace ige::scene
 {
     //! Constructor
-    DirectionalLight::DirectionalLight(SceneObject &owner)
+    DirectionalLight::DirectionalLight(SceneObject& owner)
         : Component(owner)
     {
         m_index = getOwner()->getScene()->acquireDirectionalLight();

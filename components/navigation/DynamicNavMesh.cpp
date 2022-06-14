@@ -185,7 +185,7 @@ namespace ige::scene
     };
 
     //! Constructor
-    DynamicNavMesh::DynamicNavMesh(SceneObject &owner)
+    DynamicNavMesh::DynamicNavMesh(SceneObject& owner)
         : NavMesh(owner)
     {
         m_allocator = std::make_unique<LinearAllocator>(32000); //32kb

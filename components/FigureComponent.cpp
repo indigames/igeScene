@@ -3,6 +3,7 @@
 #include "components/FigureComponent.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
+#include "scene/SceneManager.h"
 #include "scene/Scene.h"
 
 #include "utils/filesystem.h"
@@ -11,7 +12,7 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    FigureComponent::FigureComponent(SceneObject &owner, const std::string &path)
+    FigureComponent::FigureComponent(SceneObject& owner, const std::string &path)
         : Component(owner), m_figure(nullptr)
     {
         setPath(path);
@@ -43,12 +44,9 @@ namespace ige::scene
         m_figure->SetScale(transform->getScale());
 
         // Update
-        m_figure->Step(dt * getFrameUpdateRatio());
-
-        // Update transform back to transform component
-        transform->setPosition(m_figure->GetPosition());
-        transform->setRotation(m_figure->GetRotation());
-        transform->setScale(m_figure->GetScale());
+        if (SceneManager::getInstance()->isPlaying()) {
+            m_figure->Step(dt * getFrameUpdateRatio());
+        }
     }
 
     //! Render

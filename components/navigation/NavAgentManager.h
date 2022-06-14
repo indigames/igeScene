@@ -39,7 +39,7 @@ namespace ige::scene
         };
 
     public:
-        NavAgentManager(SceneObject &owner);
+        NavAgentManager(SceneObject& owner);
         virtual ~NavAgentManager();
 
         //! Get name

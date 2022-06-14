@@ -89,7 +89,7 @@ namespace ige::scene
     }
 
     //! Constructor
-    ScriptComponent::ScriptComponent(SceneObject &owner, const std::string &path)
+    ScriptComponent::ScriptComponent(SceneObject& owner, const std::string &path)
         : RuntimeComponent(owner), m_path(path), m_pyModule(nullptr), m_pyInstance(nullptr)
     {
         loadPyModule();

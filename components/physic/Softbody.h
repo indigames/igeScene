@@ -133,9 +133,6 @@ namespace ige::scene
         virtual void setProperty(const std::string& key, const json& val) override;
 
     public:
-        //! Update Bullet transform
-        virtual void updateBtTransform() override;
-
         //! Update IGE transform
         virtual void updateIgeTransform() override;
 
@@ -206,9 +203,6 @@ namespace ige::scene
 
         //! Optimize mesh
         void optimizeMesh(const std::vector<Vec3>&, int* indices, int numIndeces, float*& optPoss);
-
-        //! Transform changed event
-        void onTransformChanged(SceneObject& object);
 
     protected:
         //! Mesh index

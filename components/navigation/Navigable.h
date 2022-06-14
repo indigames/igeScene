@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        Navigable(SceneObject &owner);
+        Navigable(SceneObject& owner);
 
         //! Destructor
         virtual ~Navigable();

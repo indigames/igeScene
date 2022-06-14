@@ -13,7 +13,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        EditableFigureComponent(SceneObject &owner, const std::string &path = "");
+        EditableFigureComponent(SceneObject& owner, const std::string &path = "");
 
         //! Destructor
         virtual ~EditableFigureComponent();

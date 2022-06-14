@@ -13,7 +13,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        UITextField(SceneObject &owner, const std::string &text = "");
+        UITextField(SceneObject& owner, const std::string &text = "");
 
         //! Destructor
         virtual ~UITextField();

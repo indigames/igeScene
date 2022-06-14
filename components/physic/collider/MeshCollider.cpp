@@ -13,7 +13,7 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    MeshCollider::MeshCollider(SceneObject &owner)
+    MeshCollider::MeshCollider(SceneObject& owner)
         : Collider(owner)
     {
     }

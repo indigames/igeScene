@@ -11,24 +11,14 @@
 namespace ige::scene
 {
     //! Constructor
-    Collider::Collider(SceneObject &owner)
+    Collider::Collider(SceneObject& owner)
         : Component(owner)
     {
-    #if EDITOR_MODE
-        m_transformEventId = getOwner()->getTransformChangedEvent().addListener(std::bind(&Collider::onTransformChanged, this, std::placeholders::_1));
-    #endif
     }
 
     //! Destructor
     Collider::~Collider()
     {
-    #if EDITOR_MODE
-        if (m_transformEventId != (uint64_t)-1) {
-            getOwner()->getTransformChangedEvent().removeListener(m_transformEventId);
-            m_transformEventId = (uint64_t)-1;
-        }
-    #endif
-
         destroyShape();
 
         if (!m_compoundCollider.expired()) {
@@ -71,8 +61,8 @@ namespace ige::scene
     }
 
     //! Transform changed: update transform for kinematic object
-    void Collider::onTransformChanged(SceneObject& object) {
-        if (!object.getScene() || !object.getScene()->getRoot() || SceneManager::getInstance()->isPlaying()) return;
+    void Collider::onTransformChanged() {
+        if (!SceneManager::hasInstance() || SceneManager::getInstance()->isPlaying()) return;
         if (getType() != Component::Type::MeshCollider && getType() != Component::Type::CompoundCollider) {
             auto compoundCollider = getOwner()->getFirstParentComponents<CompoundCollider>();
             if (compoundCollider) {

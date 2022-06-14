@@ -21,7 +21,7 @@ namespace ige::scene
         };
 
     public:
-        Particle(SceneObject &owner, const std::string &path = {});
+        Particle(SceneObject& owner, const std::string &path = {});
         virtual ~Particle();
 
         //! Get name

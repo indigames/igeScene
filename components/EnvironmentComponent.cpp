@@ -6,7 +6,7 @@
 namespace ige::scene
 {
     //! Constructor
-    EnvironmentComponent::EnvironmentComponent(SceneObject &owner)
+    EnvironmentComponent::EnvironmentComponent(SceneObject& owner)
         : Component(owner)
     {
     }

@@ -14,7 +14,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        ScriptComponent(SceneObject &owner, const std::string &path = "");
+        ScriptComponent(SceneObject& owner, const std::string &path = "");
 
         //! Destructor
         virtual ~ScriptComponent();

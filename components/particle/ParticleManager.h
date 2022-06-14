@@ -26,7 +26,7 @@ namespace ige::scene
     class ParticleManager : public Component
     {
     public:
-        ParticleManager(SceneObject &owner, int maxParticlesNumber = 2000, bool enableCulling = true, int threadsNumber = 2);
+        ParticleManager(SceneObject& owner, int maxParticlesNumber = 2000, bool enableCulling = true, int threadsNumber = 2);
         virtual ~ParticleManager();
 
         //! Get name

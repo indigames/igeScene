@@ -11,7 +11,7 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    EditableFigureComponent::EditableFigureComponent(SceneObject &owner, const std::string &path)
+    EditableFigureComponent::EditableFigureComponent(SceneObject& owner, const std::string &path)
         : Component(owner), m_figure(nullptr)
     {
         setPath(path);

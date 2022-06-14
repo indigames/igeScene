@@ -14,7 +14,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        TextComponent(SceneObject &owner, const std::string& text = "", const std::string& fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4& color = { 1.f, 1.f, 1.f, 1.f }, bool isBillboard = false, bool isGUI = false);
+        TextComponent(SceneObject& owner, const std::string& text = "", const std::string& fontPath = "fonts/Manjari-Regular.ttf", int fontSize = 12, const Vec4& color = { 1.f, 1.f, 1.f, 1.f }, bool isBillboard = false, bool isGUI = false);
 
         //! Destructor
         virtual ~TextComponent();

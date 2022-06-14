@@ -5,7 +5,7 @@
 namespace ige::scene
 {
     //! Constructor
-    NavArea::NavArea(SceneObject &owner)
+    NavArea::NavArea(SceneObject& owner)
         : Component(owner)
     {
     }

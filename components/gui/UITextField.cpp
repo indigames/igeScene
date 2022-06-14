@@ -11,7 +11,7 @@ namespace pyxie
 
 namespace ige::scene
 {
-    UITextField::UITextField(SceneObject &owner, const std::string &text)
+    UITextField::UITextField(SceneObject& owner, const std::string &text)
         : UIText(owner)
     {
         auto texture = ResourceCreator::Instance().NewTexture("sprites/background");

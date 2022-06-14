@@ -7,7 +7,7 @@
 
 namespace ige::scene
 {
-    NavAgentManager::NavAgentManager(SceneObject &owner)
+    NavAgentManager::NavAgentManager(SceneObject& owner)
         : RuntimeComponent(owner)
     {
         m_navMesh.reset();

@@ -9,7 +9,7 @@
 namespace ige::scene
 {
     //! Constructor
-    CompoundCollider::CompoundCollider(SceneObject &owner)
+    CompoundCollider::CompoundCollider(SceneObject& owner)
         : Collider(owner)
     {
     }

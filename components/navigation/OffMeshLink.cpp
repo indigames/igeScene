@@ -5,7 +5,7 @@
 namespace ige::scene
 {
     //! Constructor
-    OffMeshLink::OffMeshLink(SceneObject &owner)
+    OffMeshLink::OffMeshLink(SceneObject& owner)
         : Component(owner)
     {
     }

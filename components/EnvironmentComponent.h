@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        EnvironmentComponent(SceneObject &owner);
+        EnvironmentComponent(SceneObject& owner);
 
         //! Destructor
         virtual ~EnvironmentComponent();

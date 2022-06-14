@@ -15,7 +15,7 @@ namespace ige::scene
     Event<NavAgent *> NavAgent::m_onDeactivatedEvent;
 
     //! Constructor
-    NavAgent::NavAgent(SceneObject &owner)
+    NavAgent::NavAgent(SceneObject& owner)
         : RuntimeComponent(owner)
     {
         getCreatedEvent().invoke(this);

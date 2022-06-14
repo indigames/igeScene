@@ -276,6 +276,7 @@ namespace ige::scene
         void setInMask(bool value);
 
         std::shared_ptr<ScriptComponent> getScript(const std::string& path) const;
+
     protected:
         //! Event
         void doDispatch(int eventType, EventContext* context, bool includeChild = false);
@@ -283,6 +284,9 @@ namespace ige::scene
 
         //! Active children components
         void activeChildren(bool active);
+
+        //! Transform changed event
+        void onTransformChanged();
 
     protected:
         //! Node ID

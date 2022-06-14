@@ -12,7 +12,7 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    SpriteComponent::SpriteComponent(SceneObject &owner, const std::string &path, const Vec2 &size, bool isBillboard)
+    SpriteComponent::SpriteComponent(SceneObject& owner, const std::string &path, const Vec2 &size, bool isBillboard)
         : Component(owner), m_path(path)
     {
         if (path.empty()) {

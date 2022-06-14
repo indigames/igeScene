@@ -11,7 +11,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SpotLight(SceneObject &owner);
+        SpotLight(SceneObject& owner);
 
         //! Destructor
         virtual ~SpotLight();

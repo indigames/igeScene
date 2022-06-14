@@ -7,7 +7,7 @@ namespace ige::scene
     std::atomic<uint64_t> Component::s_instanceID;
 
     //! Constructor
-    Component::Component(SceneObject &owner)
+    Component::Component(SceneObject& owner)
         : m_owner(owner) , m_instanceId(++s_instanceID)
     {
         m_serializeEventId = getOwner()->getScene()->getSerializeFinishedEvent().addListener(std::bind(&Component::onSerializeFinished, this, std::placeholders::_1));

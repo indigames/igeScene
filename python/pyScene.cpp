@@ -415,11 +415,11 @@ namespace ige::scene
     PyObject* Scene_raycastFromCamera(PyObject_Scene *self, PyObject* args)
     {
         if (self->scene.expired()) Py_RETURN_NONE;
-        PyObject *screenPosObj;
-        PyObject *cameraObj;
+        PyObject *screenPosObj = nullptr;
+        PyObject *cameraObj = nullptr;
         float distance = 10000.f;
 
-        if (!PyArg_ParseTuple(args, "OO|f", &screenPosObj, &cameraObj, &distance))
+        if (!PyArg_ParseTuple(args, "O|Of", &screenPosObj, &cameraObj, &distance))
             return NULL;
 
         int d;
@@ -430,31 +430,30 @@ namespace ige::scene
 
         Vec2 screenPos = Vec2(v[0], v[1]);
         Camera* camera = nullptr;
-        if(cameraObj->ob_type == &CameraType)
-        {
-            auto camObj = (camera_obj*)cameraObj;
-            camera = camObj->camera;
-        }
-        else if(cameraObj->ob_type == &PyTypeObject_CameraComponent)
-        {
-            auto cameraCompObj = (PyObject_CameraComponent*)cameraObj;
-            if (!cameraCompObj->component.expired()) {
-                camera = std::dynamic_pointer_cast<CameraComponent>(cameraCompObj->component.lock())->getCamera();
+        if (cameraObj != nullptr) {
+            if (cameraObj->ob_type == &CameraType)
+            {
+                auto camObj = (camera_obj*)cameraObj;
+                camera = camObj->camera;
             }
-        }
-        else if(cameraObj->ob_type == &PyTypeObject_SceneObject)
-        {
-            auto sceneObj = (PyObject_SceneObject*)cameraObj;
-            if (!sceneObj->sceneObject.expired()) {
-                auto cameraComp = sceneObj->sceneObject.lock()->getComponent<CameraComponent>();
-                if (cameraComp) {
-                    camera = cameraComp->getCamera();
+            else if (cameraObj->ob_type == &PyTypeObject_CameraComponent)
+            {
+                auto cameraCompObj = (PyObject_CameraComponent*)cameraObj;
+                if (!cameraCompObj->component.expired()) {
+                    camera = std::dynamic_pointer_cast<CameraComponent>(cameraCompObj->component.lock())->getCamera();
+                }
+            }
+            else if (cameraObj->ob_type == &PyTypeObject_SceneObject)
+            {
+                auto sceneObj = (PyObject_SceneObject*)cameraObj;
+                if (!sceneObj->sceneObject.expired()) {
+                    auto cameraComp = sceneObj->sceneObject.lock()->getComponent<CameraComponent>();
+                    if (cameraComp) {
+                        camera = cameraComp->getCamera();
+                    }
                 }
             }
         }
-
-        if (!camera)
-            return NULL;
 
         auto hit = self->scene.lock()->raycast(screenPos, camera, distance);
         if(hit.first == nullptr)

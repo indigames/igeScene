@@ -27,8 +27,8 @@ namespace ige::scene
     std::map< std::pair<Rigidbody*, Rigidbody*>, bool> PhysicManager::m_collisionEvents;
 
     //! Constructor
-    PhysicManager::PhysicManager(SceneObject& owner, int numIteration, bool deformable)
-        : Component(owner), m_numIteration(numIteration), m_bDeformable(deformable)
+    PhysicManager::PhysicManager(SceneObject& owner, bool deformable)
+        : Component(owner), m_bDeformable(deformable)
     {
     }
 
@@ -195,11 +195,6 @@ namespace ige::scene
         // Reset collision events
         for (auto element : m_collisionEvents)
             element.second = false;
-
-        // Update object transform
-        for (auto body : m_rigidbodys) {
-            body->updateBtTransform();
-        }
     }
 
     void PhysicManager::postUpdate()
@@ -487,9 +482,9 @@ namespace ige::scene
     void PhysicManager::from_json(const json &j)
     {
         setDeformable(j.value("deform", false));
-        setNumIteration(j.value("numIter", 10.f));
-        setFixedTimeStep(j.value("timeStep", 1 / 240.f));
-        setFrameMaxSubStep(j.value("maxSupStep", 4));
+        setNumIteration(j.value("numIter", 1));
+        setFixedTimeStep(j.value("timeStep", 1 / 60.f));
+        setFrameMaxSubStep(j.value("maxSupStep", 1));
         setFrameUpdateRatio(j.value("timeRatio", 1.f));
         setGravity(PhysicHelper::to_btVector3(j.value("gravity", Vec3(0.f, -9.81f, 0.f))));
         setShowDebug(j.value("debug", false));

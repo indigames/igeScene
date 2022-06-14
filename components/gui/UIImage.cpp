@@ -7,7 +7,7 @@
 namespace ige::scene
 {
     //! Constructor
-    UIImage::UIImage(SceneObject &owner, const std::string &path, const Vec2 &size, const bool isSliced, const Vec4& border)
+    UIImage::UIImage(SceneObject& owner, const std::string &path, const Vec2 &size, const bool isSliced, const Vec4& border)
         : SpriteComponent(owner, path, size, false), UIMaskable(), m_bIsInteractable(false)
     {
         setSpriteType(isSliced ? (int)SpriteType::Sliced : (int)SpriteType::Simple);

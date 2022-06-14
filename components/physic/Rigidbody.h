@@ -42,7 +42,8 @@ namespace ige::scene
         //! Deinitialization
         virtual bool destroy();
 
-        void onTransformChanged(SceneObject& object);
+        //! Transform changed event
+        virtual void onTransformChanged();
 
         //! Get RigidBody
         virtual btRigidBody* getBody() const {
@@ -111,6 +112,10 @@ namespace ige::scene
         //! Enable/Disable continuos collision detection
         virtual bool isCCD() const { return m_bIsCCD; }
         virtual void setCCD(bool isCCD = true);
+
+        //! Enable/Disable gravity
+        virtual bool isGravityEnabled() const { return m_bEnableGravity; }
+        virtual void setGravityEnabled(bool enable = true);
 
         //! Get AABB
         virtual AABBox getAABB();
@@ -185,6 +190,10 @@ namespace ige::scene
         //! Apply impulse
         virtual void applyImpulse(const btVector3& impulse) { if (getBody()) getBody()->applyCentralImpulse(impulse); }
         virtual void applyImpulse(const btVector3& impulse, const btVector3& pos) { if (getBody()) getBody()->applyImpulse(impulse, pos); }
+
+        //! Move Ridgidbody
+        virtual void movePosition(const btVector3& pos);
+        virtual void moveRotation(const btQuaternion& quat);
 
         //! Clear forces
         virtual void clearForces() { if (getBody()) getBody()->clearForces(); }
@@ -277,10 +286,10 @@ namespace ige::scene
         float m_mass = 1.f;
 
         //! Restuitution
-        float m_restitution = 1.f;
+        float m_restitution = 0.f;
 
         //! Friction
-        float m_friction = 0.5f;
+        float m_friction = 0.2f;
 
         //! Linear velocity
         btVector3 m_linearVelocity = {0.f, 0.f, 0.f};
@@ -295,19 +304,19 @@ namespace ige::scene
         btVector3 m_angularFactor = { 1.f, 1.f, 1.f };
 
         //! Linear sleeping threshold
-        float m_linearSleepingThreshold = 0.8f;
+        float m_linearSleepingThreshold = 0.f;
 
         //! Angular sleeping threshold
-        float m_angularSleepingThreshold = 1.0f;
+        float m_angularSleepingThreshold = 0.f;
 
         //! isKinematic
-        bool m_bIsKinematic = true;
+        bool m_bIsKinematic = false;
 
         //! isTrigger
         bool m_bIsTrigger = false;
 
         //! Continuous collision detection
-        bool m_bIsCCD = false;
+        bool m_bIsCCD = true;
 
         //! Collision filter group
         int m_collisionFilterGroup = 1;
@@ -336,11 +345,11 @@ namespace ige::scene
         //! Cache activeState
         int m_activeState = 1;
 
+        //! Enable gravity
+        bool m_bEnableGravity = true;
+
         //! Cache PhysicManager
         std::weak_ptr<PhysicManager> m_manager;
-
-        //! Cache transform event id
-        uint64_t m_transformEventId = (uint64_t)-1;
 
         //! Cache serialize data
         json m_json;

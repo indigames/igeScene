@@ -87,6 +87,9 @@ namespace ige::scene
 
         // Invoke created event
         getCreatedEvent().invoke(*this);
+
+        // Register transform changed event
+        getTransformChangedEvent().addListener(std::bind(&SceneObject::onTransformChanged, this));
     }
 
     //! Destructor
@@ -104,10 +107,10 @@ namespace ige::scene
         m_dispatching = 0;
         removeEventListeners();
 
+        removeAllComponents();
+
         getTransform()->setParent(nullptr);
         m_transform = nullptr;
-
-        removeAllComponents();
         m_scene = nullptr;
     }
 
@@ -650,6 +653,20 @@ namespace ige::scene
                 }
             }
         }
+    }
+
+    //! Transform changed event
+    void SceneObject::onTransformChanged() {
+#if EDITOR_MODE
+        auto collider = getComponent<Collider>();
+        if (collider) {
+            collider->onTransformChanged();
+        }
+        auto rigidbody = getComponent<Rigidbody>();
+        if (rigidbody) {
+            rigidbody->onTransformChanged();
+        }
+#endif
     }
 
     //! Check active

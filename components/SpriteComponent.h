@@ -14,7 +14,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        SpriteComponent(SceneObject &owner, const std::string &texture = "", const Vec2 &size = {0.f, 0.f}, bool isBillboard = false);
+        SpriteComponent(SceneObject& owner, const std::string &texture = "", const Vec2 &size = {0.f, 0.f}, bool isBillboard = false);
 
         //! Destructor
         virtual ~SpriteComponent();

@@ -10,6 +10,7 @@
 #include "components/TransformComponent.h"
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
+#include "scene/SceneManager.h"
 
 #include "utils/PhysicHelper.h"
 
@@ -22,7 +23,7 @@ namespace ige::scene
     Event<Rigidbody *> Rigidbody::m_onDeactivatedEvent;
 
     //! Constructor
-    Rigidbody::Rigidbody(SceneObject &owner)
+    Rigidbody::Rigidbody(SceneObject& owner)
         : Component(owner)
     {
         // Register manager
@@ -33,16 +34,11 @@ namespace ige::scene
                 manager = getOwner()->getRoot()->addComponent<PhysicManager>();
             setManager(manager);
         }
-        m_transformEventId = getOwner()->getTransformChangedEvent().addListener(std::bind(&Rigidbody::onTransformChanged, this, std::placeholders::_1));
     }
 
     //! Destructor
     Rigidbody::~Rigidbody()
     {
-        if (m_transformEventId != (uint64_t)-1) {
-            getOwner()->getTransformChangedEvent().removeListener(m_transformEventId);
-            m_transformEventId = (uint64_t)-1;
-        }
         destroy();
         m_manager.reset();
     }
@@ -78,17 +74,11 @@ namespace ige::scene
     }
 
     //! Transform changed: update transform for kinematic object
-    void Rigidbody::onTransformChanged(SceneObject& object) {
-        if (m_body && isKinematic()) {
-            updateBtTransform();
-            m_body->setInterpolationWorldTransform(m_body->getWorldTransform());
-            if (getBody() && getBody()->getMotionState()) {
-                getBody()->getMotionState()->setWorldTransform(m_body->getWorldTransform());
-            }
+    void Rigidbody::onTransformChanged() {
+        // Recreate body at new position
+        if (SceneManager::hasInstance() && !SceneManager::getInstance()->isPlaying()) {
+            recreateBody();
         }
-#if EDITOR_MODE
-        getOwner()->updateAabb();
-#endif
     }
 
     //! Add constraint
@@ -177,6 +167,22 @@ namespace ige::scene
             m_body->setCcdMotionThreshold(std::numeric_limits<float>::max());
             m_body->setCcdSweptSphereRadius(0.0f);
         }
+    }
+
+    void Rigidbody::setGravityEnabled(bool enable) {
+        if (m_body == nullptr) return;
+        int flags = getBody()->getFlags();
+        m_bEnableGravity = enable;
+        if (enable) {
+            flags &= ~BT_DISABLE_WORLD_GRAVITY;
+            auto physicManager = getOwner()->getRoot()->getComponent<PhysicManager>();
+            getBody()->setGravity(physicManager->getGravity());
+        }
+        else {
+            flags |= BT_DISABLE_WORLD_GRAVITY;
+            getBody()->setGravity(btVector3(0.f, 0.f, 0.f));
+        }
+        getBody()->setFlags(flags);
     }
 
     //! Set mass
@@ -289,8 +295,7 @@ namespace ige::scene
     {
         if(m_bIsDirty || m_positionOffset != offset) {
             m_positionOffset = offset;
-            updateBtTransform();
-            getOwner()->updateAabb();
+            createBody();
         }
     }
 
@@ -333,11 +338,15 @@ namespace ige::scene
                 setAngularVelocity({0.f, 0.f, 0.f});
                 addCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
                 setActivationState(DISABLE_DEACTIVATION);
+                setCollisionFilterGroup(2);
+                setCollisionFilterMask(3);
             }
             else
             {
-                setActivationState(ACTIVE_TAG);
                 removeCollisionFlag(btCollisionObject::CF_KINEMATIC_OBJECT);
+                setActivationState(ISLAND_SLEEPING);
+                setCollisionFilterGroup(1);
+                setCollisionFilterMask(-1);
             }
 
             if (m_body && m_body->getBroadphaseHandle())
@@ -356,8 +365,10 @@ namespace ige::scene
         m_collider = getOwner()->getComponent<Collider>();
         if (m_collider.expired() ||! m_collider.lock()->getShape())
             return;
-
-        m_motion = std::make_unique<btDefaultMotionState>(PhysicHelper::to_btTransform(getOwner()->getTransform()->getLocalRotation(), getOwner()->getTransform()->getLocalPosition()));
+        
+        const auto& transform = getOwner()->getTransform();
+        auto offset = transform->getWorldRotationScaleMatrix() * m_positionOffset;
+        m_motion = std::make_unique<btDefaultMotionState>(PhysicHelper::to_btTransform(getOwner()->getTransform()->getRotation(), getOwner()->getTransform()->getPosition() + offset));
         m_body = std::make_unique<btRigidBody>(btRigidBody::btRigidBodyConstructionInfo{0.0f, m_motion.get(),  m_collider.lock()->getShape().get(), btVector3(0.0f, 0.0f, 0.0f)});
         m_body->setUserPointer(this);
 
@@ -376,6 +387,7 @@ namespace ige::scene
         setCollisionFilterGroup(getCollisionFilterGroup());
         setCollisionFilterMask(getCollisionFilterMask());
         setCCD(isCCD());
+        setGravityEnabled(isGravityEnabled());
         setLinearSleepingThreshold(getLinearSleepingThreshold());
         setAngularSleepingThreshold(getAngularSleepingThreshold());
         setActivationState(getActivationState());
@@ -462,8 +474,8 @@ namespace ige::scene
     {
         if (!m_bIsActivated)
         {
+            if (m_body) m_body->activate(true);
             getOnActivatedEvent().invoke(this);
-            if(m_body) m_body->activate(true);
             m_bIsActivated = true;
         }
     }
@@ -483,41 +495,29 @@ namespace ige::scene
     void Rigidbody::updateBtTransform()
     {
         if (!m_body) return;
-        auto offset = Vec3();
         const auto& transform = getOwner()->getTransform();
-        if (m_positionOffset.LengthSqr() > 0) {
-            auto matrix = Mat4::IdentityMat();
-            vmath_mat_from_quat(transform->getRotation().P(), 4, matrix.P());
-            vmath_mat_appendScale(matrix.P(), transform->getScale().P(), 4, 4, matrix.P());
-            offset = matrix * m_positionOffset;
-        }
-        m_body->setWorldTransform(PhysicHelper::to_btTransform(transform->getRotation(), transform->getPosition() + offset));
         Vec3 scale = transform->getScale();
         Vec3 dScale = {scale[0] - m_previousScale[0], scale[1] - m_previousScale[1], scale[2] - m_previousScale[2]};
         float scaleDelta = vmath_lengthSqr(dScale.P(), 3);
-        if (scaleDelta >= 0.01f) {            
+        if (scaleDelta >= 0.01f) {
             if (!m_collider.expired()) {
                 m_collider.lock()->setScale({ std::abs(scale[0]), std::abs(scale[1]), std::abs(scale[2]) });
                 m_previousScale = m_collider.lock()->getScale();
             }
         }
+        movePosition(PhysicHelper::to_btVector3(transform->getPosition()));
+        moveRotation(PhysicHelper::to_btQuaternion(transform->getRotation()));
     }
 
     //! Update IGE transform
     void Rigidbody::updateIgeTransform()
     {
-        if (!m_body || isKinematic()) return;
+        if (!m_body) return;
         auto transform = getOwner()->getTransform();
         const auto &result = m_body->getWorldTransform();
-        transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()));
+        auto offset = transform->getWorldRotationScaleMatrix() * m_positionOffset;
         transform->setRotation(PhysicHelper::from_btQuaternion(result.getRotation()));
-        if (m_positionOffset.LengthSqr() > 0) {
-            auto matrix = Mat4::IdentityMat();
-            vmath_mat_from_quat(transform->getRotation().P(), 4, matrix.P());
-            vmath_mat_appendScale(matrix.P(), transform->getScale().P(), 4, 4, matrix.P());
-            auto offset = matrix * m_positionOffset;
-            transform->translate(-offset);
-        }
+        transform->setPosition(PhysicHelper::from_btVector3(result.getOrigin()) - offset);
     }
 
     //! Get AABB
@@ -529,6 +529,22 @@ namespace ige::scene
         auto box = AABBox(PhysicHelper::from_btVector3(aabbMin), PhysicHelper::from_btVector3(aabbMax));
         box = box.Transform(getOwner()->getTransform()->getWorldMatrix().Inverse());
         return box;
+    }
+
+    void Rigidbody::movePosition(const btVector3& pos) {
+        if (!m_body) return;        
+        const auto& transform = getOwner()->getTransform();
+        auto worldTrans = m_body->getWorldTransform();
+        auto offset = transform->getWorldRotationScaleMatrix() * m_positionOffset;
+        worldTrans.setOrigin(pos + PhysicHelper::to_btVector3(offset));
+        m_body->setWorldTransform(worldTrans);
+    }
+
+    void Rigidbody::moveRotation(const btQuaternion& quat) {
+        if (!m_body) return;
+        auto worldTrans = m_body->getWorldTransform();
+        worldTrans.setRotation(quat);
+        m_body->setWorldTransform(worldTrans);
     }
 
     //! Serialize
@@ -547,6 +563,7 @@ namespace ige::scene
         j["group"] = getCollisionFilterGroup();
         j["mask"] = getCollisionFilterMask();
         j["ccd"] = isCCD();
+        j["gravity"] = isGravityEnabled();
         j["linearSleepingThreshold"] = getLinearSleepingThreshold();
         j["angularSleepingThreshold"] = getAngularSleepingThreshold();
         j["activeState"] = getActivationState();
@@ -566,12 +583,10 @@ namespace ige::scene
     }
 
     void Rigidbody::onSerializeFinished(Scene* scene) {
-
-        init();
         auto j = m_json;
         setMass(j.value("mass", 1.f));
-        setRestitution(j.value("restitution", 1.f));
-        setFriction(j.value("friction", 0.5f));
+        setRestitution(j.value("restitution", 0.f));
+        setFriction(j.value("friction", 0.2f));
         setLinearVelocity(PhysicHelper::to_btVector3(j.value("linearVelocity", Vec3())));
         setAngularVelocity(PhysicHelper::to_btVector3(j.value("angularVelocity", Vec3())));
         setLinearFactor(PhysicHelper::to_btVector3(j.value("linearFactor", Vec3(1.f, 1.f, 1.f))));
@@ -581,10 +596,12 @@ namespace ige::scene
         setCollisionFilterGroup(j.value("group", isKinematic() ? 2 : 1));
         setCollisionFilterMask(j.value("mask", isKinematic() ? 3 : -1));
         setCCD(j.value("ccd", false));
-        setLinearSleepingThreshold(j.value("linearSleepingThreshold", 0.8f));
-        setAngularSleepingThreshold(j.value("angularSleepingThreshold", 1.0f));
+        setGravityEnabled(j.value("gravity", true));
+        setLinearSleepingThreshold(j.value("linearSleepingThreshold", 0.f));
+        setAngularSleepingThreshold(j.value("angularSleepingThreshold", 0.f));
         setActivationState(j.value("activeState", 1));
         setPositionOffset(j.value("offset", Vec3(0.f, 0.f, 0.f)));
+        init();
 
         auto jConstraints = j.value("consts", json());
         for (auto it : jConstraints)
@@ -641,6 +658,8 @@ namespace ige::scene
             setCollisionFilterGroup(val);
         else if (key.compare("mask") == 0)
             setCollisionFilterMask(val);
+        else if (key.compare("gravity") == 0)
+            setGravityEnabled(val);
         else if (key.compare("ccd") == 0)
             setCCD(val);
         else if (key.compare("linearSleepingThreshold") == 0)

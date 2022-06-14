@@ -15,7 +15,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        BoneTransform(SceneObject &owner);
+        BoneTransform(SceneObject& owner);
 
         //! Destructor
         virtual ~BoneTransform();

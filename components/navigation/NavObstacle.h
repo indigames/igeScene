@@ -15,7 +15,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        NavObstacle(SceneObject &owner);
+        NavObstacle(SceneObject& owner);
 
         //! Destructor
         virtual ~NavObstacle();

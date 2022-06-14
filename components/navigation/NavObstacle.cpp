@@ -9,7 +9,7 @@ namespace ige::scene
     Event<NavObstacle*> NavObstacle::m_onDeactivatedEvent;
 
     //! Constructor
-    NavObstacle::NavObstacle(SceneObject &owner)
+    NavObstacle::NavObstacle(SceneObject& owner)
         : Component(owner)
     {
         getCreatedEvent().invoke(this);

@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        NavArea(SceneObject &owner);
+        NavArea(SceneObject& owner);
 
         //! Destructor
         virtual ~NavArea();

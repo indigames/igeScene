@@ -56,7 +56,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        DynamicNavMesh(SceneObject &owner);
+        DynamicNavMesh(SceneObject& owner);
 
         //! Destructor
         virtual ~DynamicNavMesh();

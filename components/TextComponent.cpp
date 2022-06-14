@@ -12,7 +12,7 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    TextComponent::TextComponent(SceneObject &owner, const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color,  bool isBillboard, bool isGUI)
+    TextComponent::TextComponent(SceneObject& owner, const std::string& text, const std::string& fontPath, int fontSize, const Vec4& color,  bool isBillboard, bool isGUI)
         : Component(owner), m_bIsGUI(isGUI)
     {
         m_textData = text;

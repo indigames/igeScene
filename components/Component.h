@@ -70,13 +70,13 @@ namespace ige::scene
 
     public:
         //! Constructor
-        Component(SceneObject &owner);
+        Component(SceneObject& owner);
 
         //! Destructor
         virtual ~Component();
 
         //! Get owner object
-        virtual SceneObject *getOwner() const { return &m_owner; }
+        virtual SceneObject* getOwner() const { return &m_owner; }
 
         //! Returns the name of the component
         virtual std::string getName() const = 0;
@@ -155,7 +155,7 @@ namespace ige::scene
         virtual void onSerializeFinished(Scene* scene);
 
         //! Reference to owner object
-        SceneObject &m_owner;
+        SceneObject& m_owner;
 
         //! Enable/Disable
         bool m_bIsEnabled = true;

@@ -22,15 +22,10 @@ namespace fs = ghc::filesystem;
 namespace ige::scene
 {
     //! Constructor
-    Softbody::Softbody(SceneObject &owner)
+    Softbody::Softbody(SceneObject& owner)
         : Rigidbody(owner)
     {
         m_mass = -1.f;
-        if (m_transformEventId != (uint64_t)-1) {
-            getOwner()->getTransformChangedEvent().removeListener(m_transformEventId);
-            m_transformEventId = (uint64_t)-1;
-        }
-        m_transformEventId = getOwner()->getTransformChangedEvent().addListener(std::bind(&Softbody::onTransformChanged, this, std::placeholders::_1));
     }
 
     //! Destructor
@@ -39,15 +34,6 @@ namespace ige::scene
         if (m_indicesMap != nullptr)
             delete[] m_indicesMap;
         m_indicesMap = nullptr;
-    }
-
-    //! Transform changed: update transform for kinematic object
-    void Softbody::onTransformChanged(SceneObject& object) {
-#if EDITOR_MODE
-        getOwner()->updateAabb();
-        if (!object.getScene() || !object.getScene()->getRoot() || SceneManager::getInstance()->isPlaying()) return;
-        recreateBody();
-#endif
     }
 
     //! Get AABB
@@ -444,12 +430,6 @@ namespace ige::scene
         if (idx < 0 || idx >= getSoftBody()->m_nodes.size())
             return btVector3(FLT_MAX, FLT_MAX, FLT_MAX);
         return getSoftBody()->m_nodes[idx].m_n;
-    }
-
-    //! Update Bullet transform
-    void Softbody::updateBtTransform()
-    {
-        // DO NOTHING, we manipulate mesh data directly
     }
 
     //! Update IGE transform

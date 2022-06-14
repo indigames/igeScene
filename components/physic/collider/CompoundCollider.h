@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        CompoundCollider(SceneObject &owner);
+        CompoundCollider(SceneObject& owner);
 
         //! Destructor
         virtual ~CompoundCollider();

@@ -29,6 +29,11 @@ namespace ige::scene
             return m_instance;
         }
 
+        static bool hasInstance()
+        {
+            return m_instance != nullptr;
+        }
+
         static void destroy() {
             m_instance = nullptr;
         }

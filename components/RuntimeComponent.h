@@ -22,7 +22,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        RuntimeComponent(SceneObject &owner);
+        RuntimeComponent(SceneObject& owner);
 
         //! Destructor
         virtual ~RuntimeComponent();

@@ -88,7 +88,7 @@ namespace ige::scene
     }
 
     //! Constructor
-    NavMesh::NavMesh(SceneObject &owner)
+    NavMesh::NavMesh(SceneObject& owner)
         : Component(owner),
           m_tileSize(DEFAULT_TILE_SIZE),
           m_cellSize(DEFAULT_CELL_SIZE),

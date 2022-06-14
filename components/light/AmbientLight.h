@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        AmbientLight(SceneObject &owner);
+        AmbientLight(SceneObject& owner);
 
         //! Destructor
         virtual ~AmbientLight();

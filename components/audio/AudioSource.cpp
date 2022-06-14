@@ -3,6 +3,7 @@
 #include "components/audio/AudioManager.h"
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
+#include "scene/SceneManager.h"
 
 #include <soloud.h>
 #include <soloud_wav.h>
@@ -18,7 +19,7 @@ namespace ige::scene
     Event<AudioSource &> AudioSource::m_onDestroyedEvent;
 
     //! Constructor
-    AudioSource::AudioSource(SceneObject &owner, const std::string &path, bool stream)
+    AudioSource::AudioSource(SceneObject& owner, const std::string &path, bool stream)
         : Component(owner), m_bIsStream(stream)
     {
         // Register audio manager
@@ -52,9 +53,10 @@ namespace ige::scene
     {
         Component::setEnabled(enable);
 
-        if (isEnabled() && m_bPlayOnEnabled)
-        {
-            play();
+        if (SceneManager::getInstance()->isPlaying()) {
+            if (isEnabled() && m_bPlayOnEnabled) {
+                play();
+            }
         }
 
         if (!isEnabled())

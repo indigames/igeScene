@@ -24,7 +24,7 @@ namespace ige::scene
     {
     public:
         //! Constructor/destructor
-        Canvas(SceneObject &owner);
+        Canvas(SceneObject& owner);
         virtual ~Canvas();
 
         //! Get component name

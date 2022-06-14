@@ -63,7 +63,7 @@ namespace ige::scene
 
     public:
         //! Constructor
-        NavAgent(SceneObject &owner);
+        NavAgent(SceneObject& owner);
 
         //! Destructor
         virtual ~NavAgent();

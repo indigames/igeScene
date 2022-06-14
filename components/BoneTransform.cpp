@@ -9,7 +9,7 @@
 namespace ige::scene
 {
     //! Constructor
-    BoneTransform::BoneTransform(SceneObject &owner)
+    BoneTransform::BoneTransform(SceneObject& owner)
         : Component(owner)
     {
         m_sceneObjectDeleteEventId = SceneObject::getDestroyedEvent().addListener(std::bind(&BoneTransform::onSceneObjectDeleted, this, std::placeholders::_1));

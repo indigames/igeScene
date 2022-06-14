@@ -113,6 +113,42 @@ namespace ige::scene
         Py_RETURN_NONE;
     }
 
+    //! Move Position
+    PyObject *Rigidbody_movePosition(PyObject_Rigidbody *self, PyObject *value)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        PyObject* pyObj = nullptr;
+        if (PyArg_ParseTuple(value, "O", &pyObj)) {
+            if (pyObj) {
+                int d;
+                float buff[4];
+                auto v = pyObjToFloat((PyObject*)pyObj, buff, d);
+                if (v && d >= 3) {
+                    std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->movePosition(PhysicHelper::to_btVector3(*((Vec3*)v)));
+                }
+            }
+        }
+        Py_RETURN_NONE;
+    }
+
+    //! Move Rotation
+    PyObject *Rigidbody_moveRotation(PyObject_Rigidbody *self, PyObject *value)
+    {
+        if (self->component.expired()) Py_RETURN_NONE;
+        PyObject* pyObj = nullptr;
+        if (PyArg_ParseTuple(value, "O", &pyObj)) {
+            if (pyObj) {
+                int d;
+                float buff[4];
+                auto v = pyObjToFloat((PyObject*)pyObj, buff, d);
+                if (v && d == 4) {
+                    std::dynamic_pointer_cast<Rigidbody>(self->component.lock())->moveRotation(PhysicHelper::to_btQuaternion(*((Quat*)v)));
+                }
+            }
+        }
+        Py_RETURN_NONE;
+    }
+
     //! Clear forces
     PyObject *Rigidbody_clearForces(PyObject_Rigidbody *self)
     {
@@ -624,6 +660,8 @@ namespace ige::scene
         {"applyTorqueImpulse", (PyCFunction)Rigidbody_applyTorqueImpulse, METH_VARARGS, Rigidbody_applyTorqueImpulse_doc},
         {"applyForce", (PyCFunction)Rigidbody_applyForce, METH_VARARGS, Rigidbody_applyForce_doc},
         {"applyImpulse", (PyCFunction)Rigidbody_applyImpulse, METH_VARARGS, Rigidbody_applyImpulse_doc},
+        {"movePosition", (PyCFunction)Rigidbody_movePosition, METH_VARARGS, NULL},
+        {"moveRotation", (PyCFunction)Rigidbody_moveRotation, METH_VARARGS, NULL},
         {"clearForces", (PyCFunction)Rigidbody_clearForces, METH_NOARGS, Rigidbody_clearForces_doc},
         {"addConstraint", (PyCFunction)Rigidbody_addConstraint, METH_VARARGS, Rigidbody_addConstraint_doc},
         {"removeConstraint", (PyCFunction)Rigidbody_removeConstraint, METH_VARARGS, Rigidbody_removeConstraint_doc},

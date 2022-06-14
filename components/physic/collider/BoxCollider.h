@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        BoxCollider(SceneObject &owner);
+        BoxCollider(SceneObject& owner);
 
         //! Destructor
         virtual ~BoxCollider();

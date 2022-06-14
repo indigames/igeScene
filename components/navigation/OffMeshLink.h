@@ -12,7 +12,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        OffMeshLink(SceneObject &owner);
+        OffMeshLink(SceneObject& owner);
 
         //! Destructor
         virtual ~OffMeshLink();

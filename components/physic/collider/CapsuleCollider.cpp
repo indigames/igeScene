@@ -9,7 +9,7 @@
 namespace ige::scene
 {
     //! Constructor
-    CapsuleCollider::CapsuleCollider(SceneObject &owner)
+    CapsuleCollider::CapsuleCollider(SceneObject& owner)
         : Collider(owner)
     {
         auto size = getOwner()->getAABB().getExtent() * 0.5f;

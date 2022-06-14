@@ -31,7 +31,7 @@ namespace ige::scene
             }, m_instanceId);
     }
 
-    UIText::UIText(SceneObject &owner, const std::string &text, const std::string &fontPath, int fontSize, const Vec4 &color, int fontType)
+    UIText::UIText(SceneObject& owner, const std::string &text, const std::string &fontPath, int fontSize, const Vec4 &color, int fontType)
         : Component(owner), UIMaskable()
     {
         m_textData = text;

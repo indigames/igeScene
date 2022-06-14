@@ -5,7 +5,7 @@
 namespace ige::scene
 {
     //! Constructor
-    SpotLight::SpotLight(SceneObject &owner)
+    SpotLight::SpotLight(SceneObject& owner)
         : Component(owner)
     {
         m_index = getOwner()->getScene()->acquireSpotLight();

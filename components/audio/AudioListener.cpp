@@ -12,7 +12,7 @@ namespace ige::scene
     Event<AudioListener &> AudioListener::m_onDestroyedEvent;
 
     //! Constructor
-    AudioListener::AudioListener(SceneObject &owner)
+    AudioListener::AudioListener(SceneObject& owner)
         : Component(owner)
     {
         // Ensure manager was added in the root node of the scene

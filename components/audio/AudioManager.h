@@ -20,7 +20,7 @@ namespace ige::scene
     class AudioManager : public Component
     {
     public:
-        AudioManager(SceneObject &owner);
+        AudioManager(SceneObject& owner);
         virtual ~AudioManager();
 
         //! Get name

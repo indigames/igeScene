@@ -7,7 +7,7 @@
 
 namespace ige::scene
 {
-    AudioManager::AudioManager(SceneObject &owner)
+    AudioManager::AudioManager(SceneObject& owner)
         : Component(owner)
     {
         m_engine = std::make_unique<SoLoud::Soloud>();

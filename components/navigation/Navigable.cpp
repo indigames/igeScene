@@ -3,7 +3,7 @@
 namespace ige::scene
 {
     //! Constructor
-    Navigable::Navigable(SceneObject &owner)
+    Navigable::Navigable(SceneObject& owner)
         : Component(owner)
     {
     }
