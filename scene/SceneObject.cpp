@@ -95,21 +95,17 @@ namespace ige::scene
     //! Destructor
     SceneObject::~SceneObject()
     {
-        removeChildren();
-
-        dispatchEvent((int)EventType::Delete);
         getTransformChangedEvent().removeAllListeners();
 
+        removeChildren();
+        dispatchEvent((int)EventType::Delete);
         setParent(nullptr);
-
         getDestroyedEvent().invoke(*this);
 
         m_dispatching = 0;
         removeEventListeners();
-
         removeAllComponents();
 
-        getTransform()->setParent(nullptr);
         m_transform = nullptr;
         m_scene = nullptr;
     }
