@@ -27,6 +27,10 @@ namespace ige::scene
     // Get owner
     PyObject* Component_getOwner(PyObject_Component* self);
 
+    // Enable
+    PyObject* Component_isEnabled(PyObject_Component* self);
+    int Component_setEnabled(PyObject_Component* self, PyObject* value);
+
     // Update
     PyObject* Component_onUpdate(PyObject_Component* self, PyObject* args);
 }

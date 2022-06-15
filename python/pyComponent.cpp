@@ -102,6 +102,21 @@ namespace ige::scene
         Py_RETURN_FALSE;
     }
 
+    PyObject* Component_isEnabled(PyObject_Component* self) {
+        if (self->component.expired()) Py_RETURN_NONE;
+        return PyBool_FromLong(std::dynamic_pointer_cast<Component>(self->component.lock())->isEnabled());
+    }
+
+    int Component_setEnabled(PyObject_Component* self, PyObject* value) {
+        if (self->component.expired()) return -1;
+        if (PyLong_Check(value)) {
+            auto isActive = (uint32_t)PyLong_AsLong(value) != 0;
+            std::dynamic_pointer_cast<Component>(self->component.lock())->setEnabled(isActive);
+            return 0;
+        }
+        return -1;
+    }
+
     // Methods definition
     PyMethodDef Component_methods[] = {
         { "onUpdate", (PyCFunction)Component_onUpdate, METH_VARARGS, Component_onUpdate_doc },
@@ -112,6 +127,7 @@ namespace ige::scene
     PyGetSetDef Component_getsets[] = {
         { "name", (getter)Component_getName, NULL, Component_name_doc, NULL },
         { "owner", (getter)Component_getOwner, NULL, Component_owner_doc, NULL },
+        { "enable", (getter)Component_isEnabled, (setter)Component_setEnabled, Component_enable_doc, NULL },
         { NULL, NULL }
     };
 

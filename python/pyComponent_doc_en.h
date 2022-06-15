@@ -14,6 +14,12 @@ PyDoc_STRVAR(Component_owner_doc,
     "Type: SceneObject\n"
 );
 
+// enable
+PyDoc_STRVAR(Component_enable_doc,
+    "Enable/disable this component.\n"\
+    "Type: bool\n"
+);
+
 // onUpdate
 PyDoc_STRVAR(Component_onUpdate_doc,
 	"Utility to force update component, eg transform...\n"

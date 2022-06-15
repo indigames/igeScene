@@ -35,8 +35,8 @@ namespace ige::scene
     {
         if (self->component.expired()) return -1;
         if (PyLong_Check(value)) {
-            auto isActive = (uint32_t)PyLong_AsLong(value) != 0;
-            std::dynamic_pointer_cast<AudioListener>(self->component.lock())->setEnabled(isActive);
+            auto isEnabled = (uint32_t)PyLong_AsLong(value) != 0;
+            std::dynamic_pointer_cast<AudioListener>(self->component.lock())->setEnabled(isEnabled);
             return 0;
         }
         return -1;

@@ -512,7 +512,7 @@ namespace ige::scene
     //! Update IGE transform
     void Rigidbody::updateIgeTransform()
     {
-        if (!m_body) return;
+        if (!m_body || isKinematic()) return;
         auto transform = getOwner()->getTransform();
         const auto &result = m_body->getWorldTransform();
         auto offset = transform->getWorldRotationScaleMatrix() * m_positionOffset;
