@@ -20,6 +20,7 @@ class dtQueryFilter;
 namespace ige::scene
 {
     class NavArea;
+    class NavAgentManager;
 
     //! Path finding data
     struct FindPathData
@@ -320,10 +321,10 @@ namespace ige::scene
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 
-    protected:
         //! Release the navigation mesh and the mesh query
         virtual void releaseNavMesh();
 
+    protected:
         //! Collect geometry from under Navigable components
         void collectGeometries(std::vector<NavGeoInfo> &geometryList);
 
@@ -432,5 +433,8 @@ namespace ige::scene
 
         //! Debug
         bool m_bShowDebug = false;
+
+        //! Cache NavAgentManager
+        std::weak_ptr<NavAgentManager> m_navAgentManager;
     };
 } // namespace ige::scene

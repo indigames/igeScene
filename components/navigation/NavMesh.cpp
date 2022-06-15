@@ -13,7 +13,7 @@
 
 #define DEFAULT_TILE_SIZE 64
 #define DEFAULT_CELL_SIZE 0.3f
-#define DEFAULT_CELL_HEIGHT 0.2f
+#define DEFAULT_CELL_HEIGHT 0.05f
 #define DEFAULT_AGENT_HEIGHT 2.0f
 #define DEFAULT_AGENT_RADIUS 0.6f
 #define DEFAULT_AGENT_MAX_CLIMB 0.9f
@@ -108,9 +108,9 @@ namespace ige::scene
         m_pathData = std::make_unique<FindPathData>();
 
         // Create navigation agent manager for this mesh
-        auto navAgentManager = getOwner()->getComponent<NavAgentManager>();
-        if (!navAgentManager)
-            navAgentManager = getOwner()->addComponent<NavAgentManager>();
+        m_navAgentManager = getOwner()->getRoot()->getComponent<NavAgentManager>();
+        if (m_navAgentManager.expired())
+            m_navAgentManager = getOwner()->getRoot()->addComponent<NavAgentManager>();
     }
 
     NavMesh::~NavMesh()
@@ -120,13 +120,13 @@ namespace ige::scene
         m_navMesh = nullptr;
         m_navMeshQuery = nullptr;
         m_pathData.reset();
+        m_navAgentManager.reset();
     }
 
     void NavMesh::releaseNavMesh()
     {
-        auto navAgentManager = getOwner()->getComponent<NavAgentManager>();
-        if (navAgentManager)
-            navAgentManager->deactivateAllAgents();
+        if (!m_navAgentManager.expired())
+            m_navAgentManager.lock()->deactivateAllAgents();
 
         if (m_navMesh)
         {
@@ -150,10 +150,12 @@ namespace ige::scene
         if(!isEnabled())
             return false;
 
+        if (m_navMesh != nullptr)
+            return true;
+
         // Create navigation agent manager for this mesh
-        auto navAgentManager = getOwner()->getComponent<NavAgentManager>();
-        if (!navAgentManager)
-            navAgentManager = getOwner()->addComponent<NavAgentManager>();
+        if (m_navAgentManager.expired()) return false;
+        m_navAgentManager.lock()->deactivateAllAgents();
 
         // Release old data
         releaseNavMesh();
@@ -212,7 +214,7 @@ namespace ige::scene
             buildTiles(geometryList, Vec2(0.f, 0.f), Vec2(getNumTilesX() - 1.f, getNumTilesZ() - 1.f));
         }
 
-        navAgentManager->reactivateAllAgents();
+        m_navAgentManager.lock()->reactivateAllAgents();
         return true;
     }
 
@@ -329,8 +331,8 @@ namespace ige::scene
             info.component = figure.get();
             node->getTransform()->onUpdate(0.f);
             node->updateAabb();
-            info.transform = inverse * node->getTransform()->getWorldMatrix();
-            info.boundingBox = node->getWorldAABB().Transform(inverse);
+            info.transform = Mat4::IdentityMat();
+            info.boundingBox = node->getWorldAABB();
             geometryList.push_back(info);
         }
 
@@ -393,7 +395,7 @@ namespace ige::scene
 
         if (figure->NumMeshes() > 0)
         {
-            int space = Space::LocalSpace;
+            int space = Space::WorldSpace;
             std::vector<Vec3> positions;
 
             for (int i = 0; i < figure->NumMeshes(); ++i)
@@ -414,8 +416,7 @@ namespace ige::scene
                 auto destVertexStart = build->vertices.size();
                 for (auto pos : positions)
                 {
-                    auto relPos = transform * pos;
-                    build->vertices.push_back({ relPos[0], relPos[1], relPos[2]});
+                    build->vertices.push_back({ pos[0], pos[1], pos[2]});
                 }
                 positions.clear();
 
@@ -1064,8 +1065,6 @@ namespace ige::scene
                 return;
 
             const dtNavMesh* mesh = getNavMesh();
-            const auto& worldTransform = getOwner()->getRoot()->getTransform()->getWorldMatrix();
-
             for (int i = 0; i < mesh->getMaxTiles(); ++i)
             {
                 const auto* tile = mesh->getTile(i);
@@ -1077,8 +1076,8 @@ namespace ige::scene
                     auto poly = tile->polys + j;
                     for (int k = 0; k < poly->vertCount; ++k)
                     {
-                        auto start = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[k] * 3]);
-                        auto end = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(k + 1) % poly->vertCount] * 3]);
+                        auto start = *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[k] * 3]);
+                        auto end = *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(k + 1) % poly->vertCount] * 3]);
                         ShapeDrawer::drawLine(start, end, { 1.f, 1.f, 0.f });
                     }
                 }

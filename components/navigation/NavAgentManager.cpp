@@ -48,7 +48,7 @@ namespace ige::scene
         //TODO: optimize
         auto agentPtr = std::dynamic_pointer_cast<NavAgent>(agent->getOwner()->getComponent(agent->getInstanceId()));
         m_agents.push_back(agentPtr);
-        if (agent->isEnabled() && isInitialized()) {
+        if (agent->isEnabled()) {
             onActivated(agent);
         }
     }
@@ -181,19 +181,21 @@ namespace ige::scene
         {
             if (m_navMesh.expired())
             {
-                auto dynNavMesh = getOwner()->getComponent<DynamicNavMesh>();
-                if (dynNavMesh)
-                {
+                auto dynNavMesh = std::dynamic_pointer_cast<DynamicNavMesh>(getOwner()->getFirstComponentRecursive(Component::Type::DynamicNavMesh));
+                if (dynNavMesh) {
                     m_navMesh = dynNavMesh;
                 }
-                else
-                {
-                    auto navMesh = getOwner()->getComponent<NavMesh>();
+                else {
+                    auto navMesh = std::dynamic_pointer_cast<NavMesh>(getOwner()->getFirstComponentRecursive(Component::Type::NavMesh));
                     m_navMesh = navMesh;
                 }
 
                 if (m_navMesh.expired())
                     return false;
+
+                if (m_navMesh.lock()->getNavMesh() == nullptr) {
+                    m_navMesh.lock()->build();
+                }
             }
 
             if (!m_navMesh.lock()->initializeQuery())

@@ -1,7 +1,9 @@
 #include "components/navigation/NavAgent.h"
 #include "components/navigation/NavAgentManager.h"
+#include "components/physic/Rigidbody.h"
 #include "components/TransformComponent.h"
 #include "scene/SceneObject.h"
+#include "utils/PhysicHelper.h"
 
 #include <DetourCommon.h>
 #include <DetourCrowd.h>
@@ -18,7 +20,6 @@ namespace ige::scene
     NavAgent::NavAgent(SceneObject& owner)
         : RuntimeComponent(owner)
     {
-        getCreatedEvent().invoke(this);
     }
 
     NavAgent::~NavAgent()
@@ -30,6 +31,7 @@ namespace ige::scene
 
     void NavAgent::Initialize() {
         RuntimeComponent::Initialize();
+        getCreatedEvent().invoke(this);
         if (m_bIsEnabled) {
             requestMove();
         }
@@ -53,7 +55,13 @@ namespace ige::scene
             if (m_bUpdateNodePosition)
             {
                 m_bIgnoreTransformChanges = true;
-                getOwner()->getTransform()->setPosition(newPos);
+                auto rigidbody = getOwner()->getComponent<Rigidbody>();
+                if (rigidbody != nullptr) {
+                    rigidbody->movePosition(PhysicHelper::to_btVector3(newPos));
+                }
+                else {
+                    getOwner()->getTransform()->setPosition(newPos);
+                }
                 m_bIgnoreTransformChanges = false;
             }
         }
@@ -361,6 +369,7 @@ namespace ige::scene
     //! Deserialize
     void NavAgent::from_json(const json &j)
     {
+        Initialize();
         setTargetPosition(j.value("targetPos", Vec3(0.f, 0.f, 0.f)));
         setUpdateNodePosition(j.value("syncPos", true));
         setMaxAcceleration(j.value("maxAcc", 5.f));
@@ -369,8 +378,8 @@ namespace ige::scene
         setHeight(j.value("height", 0.f));
         setQueryFilterType(j.value("filter", 0));
         setObstacleAvoidanceType(j.value("obsAvoid", 0));
-        setNavigationQuality((NavQuality)j.value("navQuality", 0));
-        setNavigationPushiness((NavPushiness)j.value("navPushiness", 0));
+        setNavigationQuality((NavQuality)j.value("navQuality", NavQuality::HIGH));
+        setNavigationPushiness((NavPushiness)j.value("navPushiness", NavPushiness::HIGH));
         Component::from_json(j);
     }
 

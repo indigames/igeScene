@@ -212,10 +212,12 @@ namespace ige::scene
     bool DynamicNavMesh::build()
     {
         // Create navigation agent manager for this mesh
-        auto navAgentManager = getOwner()->getComponent<NavAgentManager>();
-        if (!navAgentManager)
-            navAgentManager = getOwner()->addComponent<NavAgentManager>();
-        navAgentManager->deactivateAllAgents();
+        if (m_navAgentManager.expired()) return false;
+
+        if (m_navMesh != nullptr)
+            return true;
+
+        m_navAgentManager.lock()->deactivateAllAgents();
 
         // Release old data
         releaseNavMesh();
@@ -338,7 +340,7 @@ namespace ige::scene
                 }
             }
 
-            navAgentManager->reactivateAllAgents();
+            m_navAgentManager.lock()->reactivateAllAgents();
         }
 
         // TODO: Save/load the built data using filesystem

@@ -222,7 +222,7 @@ namespace ige::scene
         NavQuality m_navQuality = NavQuality::HIGH;
 
         //! Agent's navigation pushiness. The higher the setting, the stronger the agent pushes its colliding neighbors around.
-        NavPushiness m_navPushiness = NavPushiness::MEDIUM;
+        NavPushiness m_navPushiness = NavPushiness::HIGH;
 
         //! Agent's previous position used to check for position changes.
         Vec3 m_previousPosition = {0.f, 0.f, 0.f};
