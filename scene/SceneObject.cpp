@@ -662,6 +662,9 @@ namespace ige::scene
         if (rigidbody) {
             rigidbody->onTransformChanged();
         }
+        if (SceneManager::hasInstance() && !SceneManager::getInstance()->isPlaying()) {
+            updateAabb();
+        }
 #endif
     }
 

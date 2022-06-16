@@ -59,7 +59,31 @@ namespace ige::scene
     }
 
     void Canvas::updateCanvas() {
-        
+        auto transform = getOwner()->getRectTransform();
+        if (SceneManager::hasInstance() && !SceneManager::getInstance()->isPlaying()) {
+            transform->lockMove(false);
+            transform->lockRotate(false);
+            transform->lockScale(false);
+
+            Vec3 worldPosition = Vec3(m_canvasSize[0] * 0.5f, m_canvasSize[1] * 0.5f, 0);
+            transform->setLocalPosition(worldPosition);
+
+            transform->setSize(m_canvasSize);
+            transform->setPosition(worldPosition);
+            transform->setRotation({0.f, 0.f, 0.f, 0.f});
+            transform->setScale({1.f, 1.f, 1.f});
+
+            m_camera->SetPosition({ worldPosition.X(), worldPosition.Y(), worldPosition.Z() + 10.0f });
+            m_camera->SetAspectRate(m_canvasSize.X() / m_canvasSize.Y());
+            m_camera->SetOrthoWidth(m_canvasSize.X() * 0.5f);
+            m_camera->SetOrthoHeight(m_canvasSize.Y() * 0.5f);
+
+            transform->lockMove(true);
+            transform->lockRotate(true);
+            transform->lockScale(true);
+            return;
+        }
+
         if (m_canvasSize[0] < 0 || m_canvasSize[1] < 0 || (m_canvasSize[0] == 0 && m_canvasSize[1] == 0)) return;
         m_deviceScale.X(m_targetCanvasSize.X() / m_canvasSize.X());
         m_deviceScale.Y(m_targetCanvasSize.Y() / m_canvasSize.Y());
@@ -80,7 +104,7 @@ namespace ige::scene
             break;
         }
         if (m_scaleFactor <= 0) m_scaleFactor = 0.001f;
-        auto transform = getOwner()->getRectTransform();
+        
         if (transform) {
             transform->lockMove(false);
             transform->lockRotate(false);

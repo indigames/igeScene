@@ -151,6 +151,5 @@ namespace ige::scene
         //! Cached transform to viewport space
         Mat4 m_viewportTransform;
         bool m_viewportTransformDirty = true;
-        uint64_t m_SelectedListenerID = 0;
     };
 } // namespace ige::scene

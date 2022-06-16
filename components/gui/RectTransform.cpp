@@ -76,13 +76,10 @@ namespace ige::scene
         setAnchor(m_anchor);
         setRectDirty();
         setTransformDirty();
-        m_SelectedListenerID = SceneObject::getSelectedEvent().addListener(std::bind(&RectTransform::onSceneObjectSelected, this, std::placeholders::_1));
     }
 
     RectTransform::~RectTransform()
     {
-        SceneObject::getSelectedEvent().removeListener(m_SelectedListenerID);
-        m_SelectedListenerID = 0;
     }
 
     Vec2 RectTransform::getPivotInCanvasSpace()
@@ -772,14 +769,6 @@ namespace ige::scene
             m_anchorOffset[1] = parentPos[1] + parentSize[1] * (m_anchor[1] - 0.5f);
             m_anchorOffset[2] = parentPos[0] + parentSize[0] * (m_anchor[2] - 0.5f);
             m_anchorOffset[3] = parentPos[1] + parentSize[1] * (m_anchor[3] - 0.5f);
-        }
-    }
-
-    void RectTransform::onSceneObjectSelected(SceneObject& sceneObject)
-    {
-        auto rectTransform = sceneObject.getComponent<RectTransform>();
-        if (rectTransform) {
-            rectTransform->setLocalToRectDirty();
         }
     }
 

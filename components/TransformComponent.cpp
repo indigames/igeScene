@@ -461,28 +461,19 @@ namespace ige::scene
     void TransformComponent::lockMove(bool active)
     {
         if (isLockMove() == active) return;
-        if (active)
-            m_lockTransform |= (1 << ((1) - 1));
-        else
-            m_lockTransform ^= (1 << ((1) - 1));
+        m_bLockPosition = active;
     }
 
     void TransformComponent::lockRotate(bool active)
     {
         if (isLockRotate() == active) return;
-        if (active)
-            m_lockTransform |= (1 << ((2) - 1));
-        else
-            m_lockTransform ^= (1 << ((2) - 1));
+        m_bLockRotation = active;
     }
     
     void TransformComponent::lockScale(bool active)
     {
         if (isLockScale() == active) return;
-        if (active)
-            m_lockTransform |= (1 << ((3) - 1));
-        else
-            m_lockTransform ^= (1 << ((3) - 1));
+        m_bLockScale = active;
     }
 
     void TransformComponent::addObserver(TransformComponent *observer)

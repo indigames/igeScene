@@ -147,6 +147,11 @@ namespace ige::scene
         //! Update property by key value
         virtual void setProperty(const std::string& key, const json& val) override;
 
+        //! Lock handler
+        bool isLockMove() { return m_bLockPosition; }
+        bool isLockRotate() { return m_bLockRotation; }
+        bool isLockScale() { return m_bLockScale; }
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
@@ -172,11 +177,6 @@ namespace ige::scene
         //! Handle notification from parent
         virtual void onNotified(const ETransformMessage &message);
 
-        //! Lock handler
-        bool isLockMove() { return ((m_lockTransform & 1) == 1); }
-        bool isLockRotate() { return ((m_lockTransform & 2) == 2); }
-        bool isLockScale() { return ((m_lockTransform & 3) == 3); }
-
     protected:
         //! Local transform
         Vec3 m_localPosition;
@@ -200,7 +200,9 @@ namespace ige::scene
         //! Dirty flag
         bool m_bLocalDirty = false;
 
-        //! Lock transform mask
-        int m_lockTransform = 0;
+        //! Lock transform
+        bool m_bLockPosition = false;
+        bool m_bLockRotation = false;
+        bool m_bLockScale = false;
     };
 } // namespace ige::scene
