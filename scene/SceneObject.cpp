@@ -954,6 +954,10 @@ namespace ige::scene
     {
         m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
 
+        // Ignore Canvas and root object
+        if (getComponent<Canvas>() != nullptr || (!getScene()->isPrefab() && getParent() == nullptr))
+            return;
+
         if (isGUIObject()) {
             if (getComponent<RectTransform>() != nullptr) {
                 auto rect = getComponent<RectTransform>();
