@@ -93,7 +93,10 @@ namespace ige::scene
 
         //! Path
         void setPath(const std::string &path, bool forceReload = false);
-        const std::string &getPath() { return m_path; }
+        const std::string &getPath() const { return m_path; }
+
+        //! Class
+        const std::string& getClassName() const { return m_className; }
 
         //! Script changed event
         Event<const std::string &> &getOnScriptChangedEvent() { return m_onScriptChangedEvent; }
@@ -142,6 +145,9 @@ namespace ige::scene
 
         //! Path to figure file
         std::string m_path;
+
+        //! Cache the class name
+        std::string m_className;
 
         //! Flags for onAwake() event
         bool m_bOnAwakeCalled = false;

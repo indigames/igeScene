@@ -209,11 +209,12 @@ namespace ige::scene
             PyObject *key = nullptr, *value = nullptr, *pyClass = nullptr;
             Py_ssize_t pos = 0;
             while (PyDict_Next(dict, &pos, &key, &value))
-            {
+            {   
                 if ((PyObject_HasAttrString(value, "onUpdate") || PyObject_HasAttrString(value, "onStart")) 
                     && PyObject_IsSubclass(value, (PyObject *)&PyTypeObject_Script))
                 {
                     pyClass = value;
+                    m_className = std::string(PyUnicode_AsUTF8(PyObject_GetAttrString(value, "__name__")));
                     break;
                 }
             }
@@ -251,7 +252,6 @@ namespace ige::scene
                     && !PyObject_IsInstance(value, (PyObject*)&PyModule_Type)) {
                     if (m_members.count(key_str) > 0) {
                         members[key_str] = m_members[key_str];
-                        onMemberValueChanged(key_str, m_members[key_str]);
                     }
                     else {
                         if (PyUnicode_Check(value)) {
@@ -294,6 +294,7 @@ namespace ige::scene
     void ScriptComponent::unloadPyModule()
     {
         m_pyInstance = nullptr;
+        m_className.clear();
 
         if (m_pyModule != nullptr)
         {
@@ -436,6 +437,7 @@ namespace ige::scene
 
             m_bOnAwakeCalled = true;
             m_bOnStartCalled = false;
+            return;
         }
 
         // Check call onStart()
@@ -443,6 +445,7 @@ namespace ige::scene
         {
             onStart();
             m_bOnStartCalled = true;
+            return;
         }
 
         // Check call onUpdate()
@@ -891,9 +894,17 @@ namespace ige::scene
 
         if (forceReload || strcmp(m_path.c_str(), scriptName.c_str()) != 0)
         {
-            m_path = scriptName;
+            const auto& components = getOwner()->getComponents();
+            auto itr = std::find_if(components.begin(), components.end(), [scriptName](const auto& elem) {
+                auto scriptComp = std::dynamic_pointer_cast<ScriptComponent>(elem);
+                return (scriptComp && scriptComp->getPath().compare(scriptName) == 0);
+            });
 
-            loadPyModule();
+            // DON'T allow duplicated Script with the same path
+            if (itr == components.end()) {
+                m_path = scriptName;
+                loadPyModule();
+            }
         }
     }
 
