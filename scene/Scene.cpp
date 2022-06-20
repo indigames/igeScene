@@ -623,13 +623,15 @@ namespace ige::scene
 
         auto transform = obj->getTransform();
         if (transform != nullptr) {
-            transform->lockMove(true);
-            transform->lockRotate(true);
+            transform->lockMove((Vec3)pos != Vec3(0.f, 0.f, 0.f));
+            transform->lockRotate((Quat)rot != Quat(0.f, 0.f, 0.f, 0.f));
+            transform->lockScale((Vec3)scale != Vec3(1.f, 1.f, 1.f, 1.f));
         }
         obj->from_json(jObj);
         if (transform != nullptr && obj->getComponent<Canvas>() == nullptr) {
             transform->lockMove(false);
             transform->lockRotate(false);
+            transform->lockScale(false);
         }
         if (parent) obj->setParent(parent);
         

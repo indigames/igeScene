@@ -147,7 +147,7 @@ namespace ige::scene
         //! Prefab save/load
         bool isSavingPrefab() { return m_bIsSavingPrefab; }
         bool savePrefab(uint64_t objectId, const std::string& file);
-        std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file, const Vec3& pos = Vec3(), const Quat& rot = Quat(), const Vec3& scale = { 1.f, 1.f, 1.f });
+        std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file, const Vec3& pos = { 0.f, 0.f, 0.f }, const Quat& rot = {0.f, 0.f, 0.f, 0.f}, const Vec3& scale = { 1.f, 1.f, 1.f });
 
         bool reloadAllPrefabs();
         bool reloadPrefabs(const std::string& prefabId);
