@@ -1135,9 +1135,8 @@ namespace ige::scene
         setName(j.value("name", ""));
         setActive(j.value("active", false));
         setPrefabId(j.value("prefabId", m_prefabId));
-        if (!isInPrefab()) {
-            setUUID(j.value("uuid", getUUID()));
-        }
+        setUUID(j.value("uuid", getUUID()));
+
         m_bIsGui = j.value("gui", false);
         m_bIsRaycastTarget = j.value("raycast", false);
         m_bIsInteractable = j.value("interactable", false);
