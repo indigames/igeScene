@@ -319,20 +319,14 @@ namespace ige::scene
 
         processedNodes.insert(node);
 
-        getOwner()->getTransform()->onUpdate(0.f);
-        getOwner()->updateAabb();
-        auto inverse = getOwner()->getTransform()->getLocalMatrix().Inverse();
-
         // Get figure component
         auto figure = node->getComponent<FigureComponent>();
         if (figure && figure->isEnabled() && !figure->isSkipSerialize())
         {
             NavGeoInfo info;
             info.component = figure.get();
-            node->getTransform()->onUpdate(0.f);
-            node->updateAabb();
-            info.transform = inverse * node->getTransform()->getWorldMatrix();
-            info.boundingBox = node->getWorldAABB().Transform(inverse);
+            info.transform = Mat4::IdentityMat();
+            info.boundingBox = node->getWorldAABB();
             geometryList.push_back(info);
         }
 
@@ -395,7 +389,7 @@ namespace ige::scene
 
         if (figure->NumMeshes() > 0)
         {
-            int space = Space::LocalSpace;
+            int space = Space::WorldSpace;
             std::vector<Vec3> positions;
 
             for (int i = 0; i < figure->NumMeshes(); ++i)
@@ -416,8 +410,7 @@ namespace ige::scene
                 auto destVertexStart = build->vertices.size();
                 for (const auto& pos : positions)
                 {
-                    auto relPos = transform* pos;
-                    build->vertices.push_back({ relPos[0], relPos[1], relPos[2] });
+                    build->vertices.push_back({ pos[0], pos[1], pos[2] });
                 }
                 positions.clear();
 
