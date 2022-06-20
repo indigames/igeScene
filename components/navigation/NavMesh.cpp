@@ -321,7 +321,7 @@ namespace ige::scene
 
         getOwner()->getTransform()->onUpdate(0.f);
         getOwner()->updateAabb();
-        auto inverse = getOwner()->getTransform()->getWorldMatrix().Inverse();
+        auto inverse = getOwner()->getTransform()->getLocalMatrix().Inverse();
 
         // Get figure component
         auto figure = node->getComponent<FigureComponent>();
@@ -331,8 +331,8 @@ namespace ige::scene
             info.component = figure.get();
             node->getTransform()->onUpdate(0.f);
             node->updateAabb();
-            info.transform = Mat4::IdentityMat();
-            info.boundingBox = node->getWorldAABB();
+            info.transform = inverse * node->getTransform()->getWorldMatrix();
+            info.boundingBox = node->getWorldAABB().Transform(inverse);
             geometryList.push_back(info);
         }
 
@@ -395,7 +395,7 @@ namespace ige::scene
 
         if (figure->NumMeshes() > 0)
         {
-            int space = Space::WorldSpace;
+            int space = Space::LocalSpace;
             std::vector<Vec3> positions;
 
             for (int i = 0; i < figure->NumMeshes(); ++i)
@@ -414,9 +414,10 @@ namespace ige::scene
                 figure->ReadPositions(i, 0, mesh->numVerticies, space, palettebuffer, inbindSkinningMatrices, &positions);
 
                 auto destVertexStart = build->vertices.size();
-                for (auto pos : positions)
+                for (const auto& pos : positions)
                 {
-                    build->vertices.push_back({ pos[0], pos[1], pos[2]});
+                    auto relPos = transform* pos;
+                    build->vertices.push_back({ relPos[0], relPos[1], relPos[2] });
                 }
                 positions.clear();
 
@@ -1065,6 +1066,8 @@ namespace ige::scene
                 return;
 
             const dtNavMesh* mesh = getNavMesh();
+            const auto& worldTransform = getOwner()->getRoot()->getTransform()->getWorldMatrix();
+
             for (int i = 0; i < mesh->getMaxTiles(); ++i)
             {
                 const auto* tile = mesh->getTile(i);
@@ -1076,8 +1079,8 @@ namespace ige::scene
                     auto poly = tile->polys + j;
                     for (int k = 0; k < poly->vertCount; ++k)
                     {
-                        auto start = *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[k] * 3]);
-                        auto end = *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(k + 1) % poly->vertCount] * 3]);
+                        auto start = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[k] * 3]);
+                        auto end = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(k + 1) % poly->vertCount] * 3]);
                         ShapeDrawer::drawLine(start, end, { 1.f, 1.f, 0.f });
                     }
                 }
