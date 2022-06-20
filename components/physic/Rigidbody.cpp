@@ -173,10 +173,10 @@ namespace ige::scene
         if (m_body == nullptr) return;
         int flags = getBody()->getFlags();
         m_bEnableGravity = enable;
+        if (!m_body || m_manager.expired()) return;
         if (enable) {
             flags &= ~BT_DISABLE_WORLD_GRAVITY;
-            auto physicManager = getOwner()->getRoot()->getComponent<PhysicManager>();
-            getBody()->setGravity(physicManager->getGravity());
+           getBody()->setGravity(getManager()->getGravity());
         }
         else {
             flags |= BT_DISABLE_WORLD_GRAVITY;
@@ -578,12 +578,8 @@ namespace ige::scene
     //! Deserialize
     void Rigidbody::from_json(const json &j)
     {
+        m_json = j;
         Component::from_json(j);
-        m_json = json(j); // copy data
-    }
-
-    void Rigidbody::onSerializeFinished(Scene* scene) {
-        auto j = m_json;
         setMass(j.value("mass", 1.f));
         setRestitution(j.value("restitution", 0.f));
         setFriction(j.value("friction", 0.2f));
@@ -601,9 +597,12 @@ namespace ige::scene
         setAngularSleepingThreshold(j.value("angularSleepingThreshold", 0.f));
         setActivationState(j.value("activeState", 1));
         setPositionOffset(j.value("offset", Vec3(0.f, 0.f, 0.f)));
+    }
+
+    void Rigidbody::onSerializeFinished(Scene* scene) {
         init();
 
-        auto jConstraints = j.value("consts", json());
+        auto jConstraints = m_json.value("consts", json());
         for (auto it : jConstraints)
         {
             auto key = (int)it.at(0);

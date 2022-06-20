@@ -120,13 +120,13 @@ namespace ige::scene
     void Collider::from_json(const json &j)
     {
         Component::from_json(j);
-        m_json = json(j);
+        setScale(j.value("scale", Vec3(1.f, 1.f, 1.f)));
+        setMargin(j.value("margin", 0.025f));
     }
 
     void Collider::onSerializeFinished(Scene* scene) {
         Component::onSerializeFinished(scene);
-        setScale(m_json.value("scale", Vec3(1.f, 1.f, 1.f)));
-        setMargin(m_json.value("margin", 0.025f));
+        recreateShape();
     }
 
     //! Update property by key value

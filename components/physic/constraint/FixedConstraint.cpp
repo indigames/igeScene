@@ -39,18 +39,6 @@ namespace ige::scene
         PhysicConstraint::create();
     }
 
-    //! Serialize
-    void FixedConstraint::to_json(json &j) const
-    {
-        PhysicConstraint::to_json(j);
-    }
-
-    //! Deserialize
-    void FixedConstraint::onSerializeFinished(Scene *scene)
-    {
-        PhysicConstraint::onSerializeFinished(scene);
-    }
-
     //! Update property by key value
     void FixedConstraint::setProperty(const std::string& key, const json& val)
     {

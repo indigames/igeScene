@@ -27,11 +27,6 @@ namespace ige::scene
         virtual void setProperty(const std::string& key, const json& val) override;
 
     protected:
-        //! Serialize
-        virtual void to_json(json& j) const override;
-
-        //! Serialize finished event
-        virtual void onSerializeFinished(Scene* scene) override;
 
         //! Create collision shape
         virtual void createShape() override;

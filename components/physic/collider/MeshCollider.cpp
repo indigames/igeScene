@@ -217,13 +217,11 @@ namespace ige::scene
         j["maxIdx"] = getMeshCount();
     }
 
-    //! Serialize finished event
-    void MeshCollider::onSerializeFinished(Scene* scene)
+    void MeshCollider::from_json(const json& j)
     {
-        Collider::onSerializeFinished(scene);
-        setMeshIndex(m_json.value("meshIdx", 0));
-        setConvex(m_json.value("convex", false));
-        m_json.clear();
+        Collider::from_json(j);
+        setMeshIndex(j.value("meshIdx", 0));
+        setConvex(j.value("convex", false));
     }
 
     //! Update property by key value

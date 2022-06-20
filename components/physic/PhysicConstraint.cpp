@@ -119,20 +119,17 @@ namespace ige::scene
     //! Deserialize
     void PhysicConstraint::from_json(const json &j)
     {
-        m_json = j;
-    }
-
-    //! Serialization finished event
-    void PhysicConstraint::onSerializeFinished(Scene *scene)
-    {
         setType((ConstraintType)m_json.value("type", -1));
         setEnableCollisionBetweenBodies(m_json.value("enableCol", true));
         setOtherUUID(m_json.value("otherId", std::string()));
         setEnabled(m_json.value("enable", true));
         setBreakingImpulseThreshold(m_json.value("breakTs", std::numeric_limits<float>().max()));
+    }
 
-        // Serialization done, clear json
-        m_json.clear();
+    //! Serialization finished event
+    void PhysicConstraint::onSerializeFinished(Scene *scene)
+    {
+        recreate();
     }
 
     //! Update property by key value

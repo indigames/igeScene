@@ -80,9 +80,6 @@ namespace ige::scene
 
         //! Cache compound collider instance
         std::weak_ptr<CompoundCollider> m_compoundCollider;
-
-        //! Cache serialize data
-        json m_json;
     };
 
 } // namespace ige::scene

@@ -62,12 +62,10 @@ namespace ige::scene
         j["radius"] = getRadius();
     }
 
-    //! Serialize finished event
-    void SphereCollider::onSerializeFinished(Scene* scene)
+    void SphereCollider::from_json(const json& j)
     {
-        Collider::onSerializeFinished(scene);
-        setRadius(m_json.value("radius", 1.f));
-        m_json.clear();
+        Collider::from_json(j);
+        setRadius(j.value("radius", 1.f));
     }
 
     //! Update property by key value
