@@ -570,7 +570,7 @@ namespace ige::scene
         }
 
         //! Update aabb
-        getOwner()->updateAabb();
+        getOwner()->setAabbDirty();
     }
 
     const Vec4 &RectTransform::getRect()

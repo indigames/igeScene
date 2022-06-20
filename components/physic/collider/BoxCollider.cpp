@@ -12,7 +12,6 @@ namespace ige::scene
     BoxCollider::BoxCollider(SceneObject& owner)
         : Collider(owner)
     {
-        m_size = getOwner()->getAABB().getExtent() * 0.5f;
     }
 
     //! Destructor
@@ -41,6 +40,9 @@ namespace ige::scene
     {
         // Create collision shape
         destroyShape();
+        if (m_size.LengthSqr() <= 0) {
+            m_size = getOwner()->getAABB().getExtent() * 0.5f;
+        }
         m_shape = std::make_unique<btBoxShape>(PhysicHelper::to_btVector3(m_size));
         setScale(m_scale);
         setMargin(m_margin);

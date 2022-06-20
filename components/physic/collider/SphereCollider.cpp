@@ -12,8 +12,6 @@ namespace ige::scene
     SphereCollider::SphereCollider(SceneObject& owner)
         : Collider(owner)
     {
-        auto size = getOwner()->getAABB().getExtent() * 0.5f;
-        m_radius = std::max({ size.X(), size.Y(), size.Z() });
     }
 
     //! Destructor
@@ -42,6 +40,10 @@ namespace ige::scene
     {
         // Create collision shape
         destroyShape();
+        if (m_radius == 0.f) {
+            auto size = getOwner()->getAABB().getExtent() * 0.5f;
+            m_radius = std::max({ size.X(), size.Y(), size.Z() });
+        }
         m_shape = std::make_unique<btSphereShape>(m_radius);
         setScale(m_scale);
         setMargin(m_margin);

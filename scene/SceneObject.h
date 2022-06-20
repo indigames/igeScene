@@ -245,10 +245,10 @@ namespace ige::scene
         bool bubbleInputEvent(int eventType, const Value& dataValue = Value::Null);
 
         //! Aabb
-        const AABBox& getAABB() const { return m_aabb; }
+        const AABBox& getAABB() { updateAabb();  return m_aabb; }
 
         //! AABB in world space
-        AABBox getWorldAABB() { return m_aabb.Transform(getTransform()->getWorldMatrix()); }
+        AABBox getWorldAABB() { updateAabb();  return m_aabb.Transform(getTransform()->getWorldMatrix()); }
 
         //! Get Frame AABB in world space (use for )
         AABBox getFrameAABB() { return m_bLockedFrameAABB ? m_aabb : getWorldAABB(); }
@@ -257,6 +257,7 @@ namespace ige::scene
         void setLockedFrameAABB(bool locked = true) { m_bLockedFrameAABB = locked; }
 
         //! Update AABB
+        void setAabbDirty();
         virtual void updateAabb();
 
         //! Set prefab Id
@@ -353,7 +354,8 @@ namespace ige::scene
         //! Prefab ID (In the root node of prefab)
         std::string m_prefabId;
 
-        int m_aabbDirty = 2;
+        //! aabb flag
+        bool m_aabbDirty = true;
 
         //Event Dispatch
         struct EventCallbackItem

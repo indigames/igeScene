@@ -406,7 +406,7 @@ namespace ige::scene
         updateBtTransform();
 
 #if EDITOR_MODE
-        getOwner()->updateAabb();
+        getOwner()->setAabbDirty();
 #endif
 
         m_bIsDirty = false;

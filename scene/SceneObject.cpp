@@ -530,10 +530,7 @@ namespace ige::scene
     //! Update function
     void SceneObject::onUpdate(float dt)
     {
-        if (m_aabbDirty > 0) {
-            updateAabb();
-            m_aabbDirty--;
-        }
+        updateAabb();
 
         for (int i = m_components.size() - 1; i >= 0; i--) {
             if (!m_transform) break; // Which mean object being deleted
@@ -663,7 +660,7 @@ namespace ige::scene
             rigidbody->onTransformChanged();
         }
         if (SceneManager::hasInstance() && !SceneManager::getInstance()->isPlaying()) {
-            updateAabb();
+            setAabbDirty();
         }
 #endif
     }
@@ -950,59 +947,67 @@ namespace ige::scene
     }
 
     //! Update AABB
+    void SceneObject::setAabbDirty()
+    {
+       m_aabbDirty = true;
+    }
+
     void SceneObject::updateAabb()
     {
-        m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
+        if (m_aabbDirty) {
+            m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
 
-        // Ignore Canvas and root object
-        if (getComponent<Canvas>() != nullptr || (!getScene()->isPrefab() && getParent() == nullptr))
-            return;
+            // Ignore Canvas and root object
+            if (getComponent<Canvas>() != nullptr || (!getScene()->isPrefab() && getParent() == nullptr))
+                return;
 
-        if (isGUIObject()) {
-            if (getComponent<RectTransform>() != nullptr) {
-                auto rect = getComponent<RectTransform>();
-                if (rect) {
-                    auto size = rect->getSize();
-                    Vec3 min(-size[0] * 0.5f, -size[1] * 0.5f, -0.5f);
-                    Vec3 max(size[0] * 0.5f, size[1] * 0.5f, 0.5f);
-                    m_aabb = { min, max };
+            if (isGUIObject()) {
+                if (getComponent<RectTransform>() != nullptr) {
+                    auto rect = getComponent<RectTransform>();
+                    if (rect) {
+                        auto size = rect->getSize();
+                        Vec3 min(-size[0] * 0.5f, -size[1] * 0.5f, -0.5f);
+                        Vec3 max(size[0] * 0.5f, size[1] * 0.5f, 0.5f);
+                        m_aabb = { min, max };
+                    }
                 }
             }
-        }
-        else {
-            if (getComponent<Rigidbody>() != nullptr) {
-                m_aabb = getComponent<Rigidbody>()->getAABB();
-            }
-            else  if (getComponent<FigureComponent>() != nullptr) {
-                auto figureComp = getComponent<FigureComponent>();
-                if (figureComp->getFigure()) {
-                    Vec3 aabbMin, aabbMax;
-                    figureComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P(), LocalSpace);
-                    m_aabb = { aabbMin, aabbMax };
-                    if (m_aabb.getVolume() == 0) {
-                        if ((aabbMax[0] - aabbMin[0]) == 0) aabbMax[0] = 0.01f;
-                        if ((aabbMax[1] - aabbMin[1]) == 0) aabbMax[1] = 0.01f;
-                        if ((aabbMax[2] - aabbMin[2]) == 0) aabbMax[2] = 0.01f;
+            else {
+                if (getComponent<Rigidbody>() != nullptr) {
+                    m_aabb = getComponent<Rigidbody>()->getAABB();
+                }
+                else  if (getComponent<FigureComponent>() != nullptr) {
+                    auto figureComp = getComponent<FigureComponent>();
+                    if (figureComp->getFigure()) {
+                        Vec3 aabbMin, aabbMax;
+                        figureComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P(), LocalSpace);
+                        m_aabb = { aabbMin, aabbMax };
+                        if (m_aabb.getVolume() == 0) {
+                            if ((aabbMax[0] - aabbMin[0]) == 0) aabbMax[0] = 0.01f;
+                            if ((aabbMax[1] - aabbMin[1]) == 0) aabbMax[1] = 0.01f;
+                            if ((aabbMax[2] - aabbMin[2]) == 0) aabbMax[2] = 0.01f;
+                            m_aabb = { aabbMin, aabbMax };
+                        }
+                    }
+                }
+                else if (getComponent<SpriteComponent>() != nullptr) {
+                    auto spriteComp = getComponent<SpriteComponent>();
+                    if (spriteComp->getFigure()) {
+                        Vec3 aabbMin, aabbMax;
+                        spriteComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
+                        m_aabb = { aabbMin, aabbMax };
+                    }
+                }
+                else if (getComponent<TextComponent>() != nullptr) {
+                    auto comp = getComponent<TextComponent>();
+                    if (comp->getFigure()) {
+                        Vec3 aabbMin, aabbMax;
+                        comp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
                         m_aabb = { aabbMin, aabbMax };
                     }
                 }
             }
-            else if (getComponent<SpriteComponent>() != nullptr) {
-                auto spriteComp = getComponent<SpriteComponent>();
-                if (spriteComp->getFigure()) {
-                    Vec3 aabbMin, aabbMax;
-                    spriteComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
-                    m_aabb = { aabbMin, aabbMax };
-                }
-            }
-            else if (getComponent<TextComponent>() != nullptr) {
-                auto comp = getComponent<TextComponent>();
-                if (comp->getFigure()) {
-                    Vec3 aabbMin, aabbMax;
-                    comp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
-                    m_aabb = { aabbMin, aabbMax };
-                }
-            }
+            m_aabbDirty = false;
         }
     }
 

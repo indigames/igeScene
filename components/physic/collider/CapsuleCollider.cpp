@@ -12,9 +12,6 @@ namespace ige::scene
     CapsuleCollider::CapsuleCollider(SceneObject& owner)
         : Collider(owner)
     {
-        auto size = getOwner()->getAABB().getExtent() * 0.5f;
-        if (m_radius <= 0.f) m_radius = size.X();
-        if (m_height <= 0.f) m_height = size.Y();
     }
 
     //! Destructor
@@ -58,6 +55,11 @@ namespace ige::scene
     {
         // Create collision shape
         destroyShape();
+        if (m_radius <= 0.f || m_height <= 0.f) {
+            auto size = getOwner()->getAABB().getExtent() * 0.5f;
+            if (m_radius <= 0.f) m_radius = size.X();
+            if (m_height <= 0.f) m_height = size.Y();
+        }
         m_shape = std::make_unique<btCapsuleShape>(m_radius, m_height);
         setScale(m_scale);
         setMargin(m_margin);
