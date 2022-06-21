@@ -636,7 +636,9 @@ namespace ige::scene
         if (parent) obj->setParent(parent);
         
         // Notify serialize finished
-        getSerializeFinishedEvent().invoke(this);
+        if (obj->getScene()->isPrefab()) {
+            getSerializeFinishedEvent().invoke(this);
+        }            
 
         return obj;
     }
