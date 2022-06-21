@@ -17,10 +17,10 @@
 namespace ige::scene
 {
     //! Initialize static members
-    Event<Rigidbody *> Rigidbody::m_onCreatedEvent;
-    Event<Rigidbody *> Rigidbody::m_onDestroyedEvent;
-    Event<Rigidbody *> Rigidbody::m_onActivatedEvent;
-    Event<Rigidbody *> Rigidbody::m_onDeactivatedEvent;
+    Event<const std::shared_ptr<Rigidbody>&> Rigidbody::m_onCreatedEvent;
+    Event<const std::shared_ptr<Rigidbody>&> Rigidbody::m_onDestroyedEvent;
+    Event<const std::shared_ptr<Rigidbody>&> Rigidbody::m_onActivatedEvent;
+    Event<const std::shared_ptr<Rigidbody>&> Rigidbody::m_onDeactivatedEvent;
 
     //! Constructor
     Rigidbody::Rigidbody(SceneObject& owner)
@@ -46,7 +46,7 @@ namespace ige::scene
     //! Initialization
     bool Rigidbody::init()
     {
-        getOnCreatedEvent().invoke(this);
+        getOnCreatedEvent().invoke(getOwner()->getComponent<Rigidbody>());
         if (m_positionOffset.LengthSqr() <= 0.f) {
             auto aabbCenter = getOwner()->getWorldAABB().getCenter();
             m_positionOffset = aabbCenter - getOwner()->getTransform()->getPosition();
@@ -62,7 +62,7 @@ namespace ige::scene
         deactivate();
 
         // Notify destroyed
-        getOnDestroyedEvent().invoke(this);
+        getOnDestroyedEvent().invoke(getOwner()->getComponent<Rigidbody>());
 
         // Remove all constraints
         removeAllConstraints();
@@ -475,7 +475,7 @@ namespace ige::scene
         if (!m_bIsActivated)
         {
             if (m_body) m_body->activate(true);
-            getOnActivatedEvent().invoke(this);
+            getOnActivatedEvent().invoke(getOwner()->getComponent<Rigidbody>());
             m_bIsActivated = true;
         }
     }
@@ -485,7 +485,7 @@ namespace ige::scene
     {
         if (m_bIsActivated)
         {
-            getOnDeactivatedEvent().invoke(this);
+            getOnDeactivatedEvent().invoke(getOwner()->getComponent<Rigidbody>());
             if(m_body) m_body->activate(false);
             m_bIsActivated = false;
         }

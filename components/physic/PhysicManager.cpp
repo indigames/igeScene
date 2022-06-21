@@ -75,10 +75,10 @@ namespace ige::scene
         m_world->setDebugDrawer(m_debugRenderer.get());
 
         // Register event listeners
-        Rigidbody::getOnCreatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody*)>(&PhysicManager::onCreated), this, std::placeholders::_1));
-        Rigidbody::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody*)>(&PhysicManager::onDestroyed), this, std::placeholders::_1));
-        Rigidbody::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody*)>(&PhysicManager::onActivated), this, std::placeholders::_1));
-        Rigidbody::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody*)>(&PhysicManager::onDeactivated), this, std::placeholders::_1));
+        Rigidbody::getOnCreatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(const std::shared_ptr<Rigidbody>&)>(&PhysicManager::onCreated), this, std::placeholders::_1));
+        Rigidbody::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(const std::shared_ptr<Rigidbody>&)>(&PhysicManager::onDestroyed), this, std::placeholders::_1));
+        Rigidbody::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(const std::shared_ptr<Rigidbody>&)>(&PhysicManager::onActivated), this, std::placeholders::_1));
+        Rigidbody::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(const std::shared_ptr<Rigidbody>&)>(&PhysicManager::onDeactivated), this, std::placeholders::_1));
 
         // Constraint event listeners
         PhysicConstraint::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicConstraint*)>(&PhysicManager::onActivated), this, std::placeholders::_1));
@@ -223,30 +223,31 @@ namespace ige::scene
         }
 
         // Update object transform
-        for (auto body : m_rigidbodys) {
-            body->updateIgeTransform();
+        for (auto& body :m_rigidbodys) {
+            if(!body.expired()) body.lock()->updateIgeTransform();
         }
     }
 
     //! Create/Destroy event
-    void PhysicManager::onCreated(Rigidbody *object)
+    void PhysicManager::onCreated(const std::shared_ptr<Rigidbody>& object)
     {
         m_rigidbodys.push_back(object);
     }
 
-    void PhysicManager::onDestroyed(Rigidbody *object)
+    void PhysicManager::onDestroyed(const std::shared_ptr<Rigidbody>& object)
     {
         // Find and remove object from the objects list
-        auto found = std::find_if(m_rigidbodys.begin(), m_rigidbodys.end(), [&object](Rigidbody* element) {
-            return object == element;
+        auto found = std::find_if(m_rigidbodys.begin(), m_rigidbodys.end(), [&object](const auto& element) {
+            return !element.expired() && object == element.lock();
         });
 
-        if (found != m_rigidbodys.end())
+        if (found != m_rigidbodys.end()) {
             m_rigidbodys.erase(found);
+        }           
 
         // Find and remove collision events
         auto evFound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [&object](auto pair) {
-            return object == pair.first.first || object == pair.first.second;
+            return object.get() == pair.first.first || object.get() == pair.first.second;
         });
 
         // Find and remove all collision events
@@ -255,13 +256,13 @@ namespace ige::scene
             m_collisionEvents.erase(evFound);
 
             evFound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [&object](auto pair) {
-                return object == pair.first.first || object == pair.first.second;
+                return object.get() == pair.first.first || object.get() == pair.first.second;
             });
         }
     }
 
     //! Activate/Deactivate event
-    void PhysicManager::onActivated(Rigidbody *object)
+    void PhysicManager::onActivated(const std::shared_ptr<Rigidbody>& object)
     {
         if (isDeformable())
         {
@@ -277,7 +278,7 @@ namespace ige::scene
         }
     }
 
-    void PhysicManager::onDeactivated(Rigidbody *object)
+    void PhysicManager::onDeactivated(const std::shared_ptr<Rigidbody>& object)
     {
         if (isDeformable())
         {
