@@ -1141,9 +1141,9 @@ namespace ige::scene
         Component::from_json(j);
     }
 
-    void NavMesh::onSerializeFinished(Scene* scene)
+    void NavMesh::onSerializeFinished()
     {
-        Component::onSerializeFinished(scene);
+        Component::onSerializeFinished();
 
         // Ensure transform updated
         getOwner()->getTransform()->onUpdate(0.f);

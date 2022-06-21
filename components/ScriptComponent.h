@@ -117,15 +117,15 @@ namespace ige::scene
         //! PyObject: instance of Python class
         _object* getPyInstance() { return m_pyInstance; }
 
+        //! Serialize finished event
+        virtual void onSerializeFinished() override;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
         virtual void from_json(const json& j) override;
-
-        //! Serialize finished event
-        virtual void onSerializeFinished(Scene* scene) override;
 
         //! Load/unload modules
         void loadPyModule();

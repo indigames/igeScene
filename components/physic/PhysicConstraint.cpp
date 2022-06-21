@@ -16,14 +16,11 @@ namespace ige::scene
     PhysicConstraint::PhysicConstraint(Rigidbody &owner)
         : m_owner(owner), m_other(nullptr)
     {
-        m_serializeEventId = getOwner()->getOwner()->getScene()->getSerializeFinishedEvent().addListener(std::bind(&PhysicConstraint::onSerializeFinished, this, std::placeholders::_1));
     }
 
     //! Destructor
     PhysicConstraint::~PhysicConstraint()
     {
-        if(getOwner()->getOwner()->getScene())
-            getOwner()->getOwner()->getScene()->getSerializeFinishedEvent().removeListener(m_serializeEventId);
         destroy();
     }
 
@@ -127,7 +124,7 @@ namespace ige::scene
     }
 
     //! Serialization finished event
-    void PhysicConstraint::onSerializeFinished(Scene *scene)
+    void PhysicConstraint::onSerializeFinished()
     {
         recreate();
     }

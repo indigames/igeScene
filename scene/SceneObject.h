@@ -203,7 +203,8 @@ namespace ige::scene
         //! Deserialize
         virtual void from_json(const json &j);
 
-        virtual void restore_json(const json& j);
+        //! Serialize finished event
+        virtual void onSerializeFinished();
 
         //! Check whether it's a GUI object
         bool isGUIObject() const { return m_bIsGui; }

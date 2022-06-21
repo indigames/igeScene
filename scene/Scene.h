@@ -136,7 +136,6 @@ namespace ige::scene
         Event<Resource*>& getResourceRemovedEvent() { return m_resourceRemovedEvent; }
         Event<Resource*>& getUIResourceAddedEvent() { return m_uiResourceAddedEvent; }
         Event<Resource*>& getUIResourceRemovedEvent() { return m_uiResourceRemovedEvent; }
-        Event<Scene*>& getSerializeFinishedEvent() { return m_serializeFinishedEvent; }
 
         //! Resource added/removed event
         void onResourceAdded(Resource* resource);
@@ -264,9 +263,6 @@ namespace ige::scene
         //! UI ShowCase
         Event<Resource*> m_uiResourceAddedEvent;
         Event<Resource*> m_uiResourceRemovedEvent;
-
-        //! Serialize event
-        Event<Scene*> m_serializeFinishedEvent;
 
         //! Cache active camera
         std::weak_ptr<CameraComponent> m_activeCamera;

@@ -168,7 +168,6 @@ namespace ige::scene
         getResourceRemovedEvent().removeAllListeners();
         getUIResourceAddedEvent().removeAllListeners();
         getUIResourceRemovedEvent().removeAllListeners();
-        getSerializeFinishedEvent().removeAllListeners();
 
         m_nextObjectID = 1;
         m_activeCamera.reset();
@@ -636,9 +635,7 @@ namespace ige::scene
         if (parent) obj->setParent(parent);
         
         // Notify serialize finished
-        if (obj->getScene()->isPrefab()) {
-            getSerializeFinishedEvent().invoke(this);
-        }            
+        obj->onSerializeFinished();
 
         return obj;
     }
@@ -1283,8 +1280,8 @@ namespace ige::scene
                 m_nextObjectID = nextId;
         }
 
-        // Notify serialize finished
-        getSerializeFinishedEvent().invoke(this);
+        if (m_root) m_root->onSerializeFinished();
+        if (m_rootUI) m_rootUI->onSerializeFinished();
 
         // Set active camera
         if (getActiveCamera() == nullptr)

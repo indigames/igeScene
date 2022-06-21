@@ -797,13 +797,13 @@ void UIScrollView::from_json(const json& j)
     m_dirtySetObj = true;
 }
 
-void UIScrollView::onSerializeFinished(Scene* scene)
+void UIScrollView::onSerializeFinished()
 {
     if (m_dirtySetObj) {
         m_dirtySetObj = false;
         if (!m_contentUUID.empty()) 
         {
-            auto obj = scene->findObjectByUUID(m_contentUUID);
+            auto obj = getOwner()->getScene()->findObjectByUUID(m_contentUUID);
             if (obj) {
                 setContent(obj);
             }
@@ -811,7 +811,7 @@ void UIScrollView::onSerializeFinished(Scene* scene)
 
         if (!m_viewportUUID.empty())
         {
-            auto obj = scene->findObjectByUUID(m_viewportUUID);
+            auto obj = getOwner()->getScene()->findObjectByUUID(m_viewportUUID);
             if (obj) {
                 setViewport(obj);
             }
@@ -819,7 +819,7 @@ void UIScrollView::onSerializeFinished(Scene* scene)
 
         if (!m_horizontalUUID.empty())
         {
-            auto obj = scene->findObjectByUUID(m_horizontalUUID);
+            auto obj = getOwner()->getScene()->findObjectByUUID(m_horizontalUUID);
             if (obj) {
                 auto uiHorizontalBar = obj->getComponent<UIScrollBar>();
                 if(uiHorizontalBar)
@@ -829,7 +829,7 @@ void UIScrollView::onSerializeFinished(Scene* scene)
 
         if (!m_verticalUUID.empty())
         {
-            auto obj = scene->findObjectByUUID(m_verticalUUID);
+            auto obj = getOwner()->getScene()->findObjectByUUID(m_verticalUUID);
             if (obj) {
                 auto uiVerticalBar = obj->getComponent<UIScrollBar>();
                 if(uiVerticalBar)

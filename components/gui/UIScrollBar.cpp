@@ -556,12 +556,12 @@ void UIScrollBar::from_json(const json& j)
     _update();
 }
 
-void UIScrollBar::onSerializeFinished(Scene* scene)
+void UIScrollBar::onSerializeFinished()
 {
     if (m_dirtySetObj) {
         m_dirtySetObj = false;
         if (!m_contentUUID.empty()) {
-            auto obj = scene->findObjectByUUID(m_contentUUID);
+            auto obj = getOwner()->getScene()->findObjectByUUID(m_contentUUID);
             if (obj) {
                 setHandle(obj);
             }

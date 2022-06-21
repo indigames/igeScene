@@ -49,15 +49,15 @@ namespace ige::scene
         //! Transform changed event
         void onTransformChanged();
 
+        //! Serialize finished event
+        virtual void onSerializeFinished() override;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
         virtual void from_json(const json& j) override;
-
-        //! Serialize finished event
-        virtual void onSerializeFinished(Scene* scene) override;
 
         //! Create shape
         virtual void createShape() = 0;

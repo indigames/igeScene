@@ -874,7 +874,7 @@ namespace ige::scene
     }
 
     //! Serialize finished event
-    void ScriptComponent::onSerializeFinished(Scene* scene)
+    void ScriptComponent::onSerializeFinished()
     {
         // Check and set object UUID to object reference once load done
         for (const auto& pair : m_members)
@@ -883,7 +883,7 @@ namespace ige::scene
             auto value = pair.second;
             onMemberValueChanged(key, value);
         }
-        Component::onSerializeFinished(scene);
+        Component::onSerializeFinished();
     }
 
     //! Path

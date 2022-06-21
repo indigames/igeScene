@@ -64,6 +64,8 @@ namespace ige::scene
         float getMatchWidthOrHeight() const { return m_MatchWidthOrHeight; }
         void setMatchWidthOrHeight(float value);
 
+        //! Serialize finished event
+        virtual void onSerializeFinished() override;
 
     protected:
         virtual void updateCanvas();
@@ -73,9 +75,6 @@ namespace ige::scene
 
         //! Deserialize
         virtual void from_json(const json& j) override;
-
-        //! Serialize finished event
-        virtual void onSerializeFinished(Scene* scene) override;
 
         //! Default canvas size
         static Vec2 s_defaultCanvasSize;

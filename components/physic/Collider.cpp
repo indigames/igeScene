@@ -124,8 +124,8 @@ namespace ige::scene
         setMargin(j.value("margin", 0.025f));
     }
 
-    void Collider::onSerializeFinished(Scene* scene) {
-        Component::onSerializeFinished(scene);
+    void Collider::onSerializeFinished() {
+        Component::onSerializeFinished();
         recreateShape();
     }
 

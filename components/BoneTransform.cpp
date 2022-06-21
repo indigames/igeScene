@@ -160,9 +160,9 @@ namespace ige::scene
     }
 
     //! Serialize finished event
-    void BoneTransform::onSerializeFinished(Scene* scene)
+    void BoneTransform::onSerializeFinished()
     {
-        Component::onSerializeFinished(scene);
+        Component::onSerializeFinished();
         initialize();
     }
 } // namespace ige::scene

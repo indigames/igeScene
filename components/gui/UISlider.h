@@ -76,7 +76,7 @@ public:
 	void setDirection(Direction value);
 	const Direction& getDirection() const { return m_direction; }
 
-	virtual void onSerializeFinished(Scene* scene) override;
+	virtual void onSerializeFinished() override;
 
 	//! Update property by key value
 	virtual void setProperty(const std::string& key, const json& val) override;

@@ -17,10 +17,10 @@
 namespace ige::scene
 {
     //! Initialize static members
-    Event<const std::shared_ptr<Rigidbody>&> Rigidbody::m_onCreatedEvent;
-    Event<const std::shared_ptr<Rigidbody>&> Rigidbody::m_onDestroyedEvent;
-    Event<const std::shared_ptr<Rigidbody>&> Rigidbody::m_onActivatedEvent;
-    Event<const std::shared_ptr<Rigidbody>&> Rigidbody::m_onDeactivatedEvent;
+    Event<std::shared_ptr<Rigidbody>> Rigidbody::m_onCreatedEvent;
+    Event<std::shared_ptr<Rigidbody>> Rigidbody::m_onDestroyedEvent;
+    Event<std::shared_ptr<Rigidbody>> Rigidbody::m_onActivatedEvent;
+    Event<std::shared_ptr<Rigidbody>> Rigidbody::m_onDeactivatedEvent;
 
     //! Constructor
     Rigidbody::Rigidbody(SceneObject& owner)
@@ -599,7 +599,7 @@ namespace ige::scene
         setPositionOffset(j.value("offset", Vec3(0.f, 0.f, 0.f)));
     }
 
-    void Rigidbody::onSerializeFinished(Scene* scene) {
+    void Rigidbody::onSerializeFinished() {
         init();
 
         auto jConstraints = m_json.value("consts", json());

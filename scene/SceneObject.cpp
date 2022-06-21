@@ -1186,24 +1186,17 @@ namespace ige::scene
         }
     }
 
-    void SceneObject::restore_json(const json& j) {
-        setName(j.value("name", ""));
-        setActive(j.value("active", false));
-        m_bIsRaycastTarget = j.value("raycast", false);
-        m_bIsInteractable = j.value("interactable", false);
-
-        auto jComps = j.at("comps");
-        for (auto it : jComps)
-        {
-            std::string key = it.at(0);
-            auto val = it.at(1);
-            std::shared_ptr<Component> comp = getComponent(key);
-            if(comp == nullptr)
-                comp = createComponent(key);
-            if (comp) {
-                val.get_to(*comp);
+    //! Serialize finished event
+    void SceneObject::onSerializeFinished() {
+        for (auto& comp : m_components) {
+            if (!comp->isSkipSerialize()) {
+                comp->onSerializeFinished();
+            }
+        }
+        for (auto& child : m_children) {
+            if (!child.expired()) {
+                child.lock()->onSerializeFinished();
             }
         }
     }
-
 } // namespace ige::scene
