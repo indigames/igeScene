@@ -161,12 +161,6 @@ namespace ige::scene
     //! Update
     void PhysicManager::onUpdate(float dt)
     {
-        if (!m_world)
-            initialize();
-
-        if (!m_world) return;
-
-        preUpdate();
     }
 
     //! Draw debug
@@ -178,7 +172,12 @@ namespace ige::scene
 
     void PhysicManager::onPhysicUpdate(float dt)
     {
+        if (!m_world)
+            initialize();
+
         if (!m_world) return;
+
+        preUpdate();
 
         // Run simulation if not in edit mode
         if (SceneManager::getInstance()->isPlaying())
@@ -193,7 +192,7 @@ namespace ige::scene
     void PhysicManager::preUpdate()
     {
         // Reset collision events
-        for (auto element : m_collisionEvents)
+        for (auto& element : m_collisionEvents)
             element.second = false;
     }
 
@@ -205,7 +204,7 @@ namespace ige::scene
             auto objects = it->first;
             if (!it->second)
             {
-                if (!objects.first->isTrigger() && !objects.second->isTrigger())
+w                if (!objects.first->isTrigger() && !objects.second->isTrigger())
                 {
                     objects.first->getCollisionStopEvent().invoke(objects.second);
                     objects.second->getCollisionStopEvent().invoke(objects.first);
