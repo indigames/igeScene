@@ -2,6 +2,10 @@
 
 #include <Python.h>
 
+// root
+PyDoc_STRVAR(Scene_root_doc,
+	"[Readonly] The root object in the scene.\n");
+
 // createObject
 PyDoc_STRVAR(Scene_createObject_doc,
 			 "Create new scene object.\n"

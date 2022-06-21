@@ -743,6 +743,7 @@ namespace ige::scene
     // Variable definition
     PyGetSetDef Scene_getsets[] = {
         { "name", (getter)Scene_getName, (setter)Scene_setName, Scene_name_doc, NULL },
+        { "root", (getter)Scene_getRoot, NULL, Scene_root_doc, NULL },
         { "activeCamera", (getter)Scene_getActiveCamera, (setter)Scene_setActiveCamera, Scene_activeCamera_doc, NULL },
         { NULL, NULL }
     };
