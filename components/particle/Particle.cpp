@@ -49,10 +49,14 @@ namespace ige::scene
     {
         Component::setEnabled(enable);
 
-        if (isEnabled())
-            play();
-        else
+        if (isEnabled()) {
+            if (isAutoDrawing()) {
+                play();
+            }
+        }
+        else {
             stop();
+        }
     }
 
     //! Set path
@@ -75,9 +79,7 @@ namespace ige::scene
                 // Create new effect
                 m_effect.Reset();
                 m_effect = Effekseer::Effect::Create(getManager()->getEffekseerManager(), (const EFK_CHAR*)path);
-
-                if (isEnabled())
-                    play();
+                if (isEnabled() && m_bIsAutoDrawing) play();
             }
         }
     }
@@ -185,7 +187,7 @@ namespace ige::scene
                 setGroupMask(m_groupMask);
                 setSpeed(m_speed);
                 setTimeScale(m_timeScale);
-                setAutoDrawing(m_bIsAutoDrawing);
+                setAutoDrawing(true);
                 setLoop(m_bIsLooped);
                 setTargetLocation(m_targetLocation);
                 setDynamicInputParameter(m_dynamicInputParameter);
