@@ -204,7 +204,7 @@ namespace ige::scene
             auto objects = it->first;
             if (!it->second)
             {
-w                if (!objects.first->isTrigger() && !objects.second->isTrigger())
+                if (!objects.first->isTrigger() && !objects.second->isTrigger())
                 {
                     objects.first->getCollisionStopEvent().invoke(objects.second);
                     objects.second->getCollisionStopEvent().invoke(objects.first);
