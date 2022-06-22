@@ -147,12 +147,12 @@ namespace ige::scene
         static bool collisionCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2);
 
         //! Create/Destroy event
-        void onCreated(std::shared_ptr<Rigidbody> object);
-        void onDestroyed(std::shared_ptr<Rigidbody> object);
+        void onCreated(Rigidbody& object);
+        void onDestroyed(Rigidbody& object);
 
         //! Activate/Deactivate event
-        void onActivated(std::shared_ptr<Rigidbody> object);
-        void onDeactivated(std::shared_ptr<Rigidbody> object);
+        void onActivated(Rigidbody& object);
+        void onDeactivated(Rigidbody& object);
 
         //! Constraint activated/deactivated event
         void onActivated(PhysicConstraint* constraint);
@@ -198,7 +198,7 @@ namespace ige::scene
         static std::map< std::pair<Rigidbody*, Rigidbody*>, bool> m_collisionEvents;
 
         //! Physic objects list
-        std::vector<std::weak_ptr<Rigidbody>> m_rigidbodys;
+        std::vector<std::reference_wrapper<Rigidbody>> m_rigidbodys;
 
         //! Debug renderer
         std::unique_ptr<BulletDebugRender> m_debugRenderer = nullptr;

@@ -140,7 +140,8 @@ namespace ige::scene
         bool m_bResAdded = false;
 
         //! Associated figure object
-        Figure *m_figure;
+        Figure* m_backupFigure = nullptr;
+        Figure* m_figure;
 
         //! Path to figure file
         std::string m_path;

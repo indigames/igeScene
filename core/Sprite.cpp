@@ -172,7 +172,6 @@ namespace ige::scene
                 releaseSprite();
             }
             else {
-                m_texture->IncReference();
                 m_texSize.X(m_texture->GetTextureWidth());
                 m_texSize.Y(m_texture->GetTextureHeight());
 

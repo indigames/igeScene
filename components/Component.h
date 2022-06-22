@@ -135,7 +135,7 @@ namespace ige::scene
         //! Deserialize
         friend void from_json(const json &j, Component &obj);
 
-        uint64_t getInstanceId() { return m_instanceId; }
+        uint64_t getInstanceId() const { return m_instanceId; }
 
         //! Serialize
         virtual void to_json(json& j) const;

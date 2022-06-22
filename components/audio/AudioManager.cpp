@@ -24,21 +24,19 @@ namespace ige::scene
 
     AudioManager::~AudioManager()
     {
-        // Clear audio sources
-        for (AudioSource& audioSrc : m_audioSources)
-            audioSrc.stop();
-        m_audioSources.clear();
-
         // Unregister AudioListener events
         AudioListener::getCreatedEvent().removeAllListeners();
         AudioListener::getDestroyedEvent().removeAllListeners();
 
-        // Clear audio listeners
-        m_audioListeners.clear();
-
         // Unregister AudioSource events
         AudioSource::getCreatedEvent().removeAllListeners();
         AudioSource::getDestroyedEvent().removeAllListeners();
+
+        // Clear audio sources
+        m_audioSources.clear();
+
+        // Clear audio listeners
+        m_audioListeners.clear();
 
         // Stop audio engine
         m_engine->stopAll();

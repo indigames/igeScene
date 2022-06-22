@@ -205,16 +205,10 @@ namespace ige::scene
         virtual void updateIgeTransform();
 
         //! Get onCreatedEvent
-        static Event<std::shared_ptr<Rigidbody>>& getOnCreatedEvent() { return m_onCreatedEvent; }
-
-        //! Get onDestroyedEvent
-        static Event<std::shared_ptr<Rigidbody>>& getOnDestroyedEvent() { return m_onDestroyedEvent; }
-
-        //! Get onActivatedEvent
-        static Event<std::shared_ptr<Rigidbody>>& getOnActivatedEvent() { return m_onActivatedEvent; }
-
-        //! Get onDeactivatedEvent
-        static Event<std::shared_ptr<Rigidbody>>& getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
+        static Event<Rigidbody&>& getOnCreatedEvent() { return m_onCreatedEvent; }
+        static Event<Rigidbody&>& getOnDestroyedEvent() { return m_onDestroyedEvent; }
+        static Event<Rigidbody&>& getOnActivatedEvent() { return m_onActivatedEvent; }
+        static Event<Rigidbody&>& getOnDeactivatedEvent() { return m_onDeactivatedEvent; }
 
         //! Collision events
         Event<Rigidbody*>& getCollisionStartEvent() { return m_collisionStartEvent; }
@@ -250,17 +244,11 @@ namespace ige::scene
         void setSoftBody(bool isSoftBody) { m_bIsSoftBody = isSoftBody; }
 
     protected:
-        //! On created event
-        static Event<std::shared_ptr<Rigidbody>> m_onCreatedEvent;
-
-        //! On destroyed event
-        static Event<std::shared_ptr<Rigidbody>> m_onDestroyedEvent;
-
-        //! On activated event
-        static Event<std::shared_ptr<Rigidbody>> m_onActivatedEvent;
-
-        //! On deactivated event
-        static Event<std::shared_ptr<Rigidbody>> m_onDeactivatedEvent;
+        //! Events
+        static Event<Rigidbody&> m_onCreatedEvent;
+        static Event<Rigidbody&> m_onDestroyedEvent;
+        static Event<Rigidbody&> m_onActivatedEvent;
+        static Event<Rigidbody&> m_onDeactivatedEvent;
 
         //! Collision events
         Event<Rigidbody*> m_collisionStartEvent;

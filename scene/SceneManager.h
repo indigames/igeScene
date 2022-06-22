@@ -72,6 +72,7 @@ namespace ige::scene
 
         //! Get current scene
         const std::shared_ptr<Scene>& getCurrentScene() const { return m_currScene; }
+        std::shared_ptr<Scene> getCurrentScene() { return m_currScene; }
 
         //! Get scene
         std::shared_ptr<Scene> getScene(const std::string& uuid);

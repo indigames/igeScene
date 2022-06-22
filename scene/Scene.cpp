@@ -169,6 +169,10 @@ namespace ige::scene
         getUIResourceAddedEvent().removeAllListeners();
         getUIResourceRemovedEvent().removeAllListeners();
 
+        for(int i = 0; i < MAX_DIRECTIONAL_LIGHT_NUMBER; ++i) releaseDirectionalLight(i);
+        for(int i = 0; i < MAX_POINT_LIGHT_NUMBER; ++i) releasePointLight(i); 
+        for(int i = 0; i < MAX_SPOT_LIGHT_NUMBER; ++i) releaseSpotLight(i);
+
         m_nextObjectID = 1;
         m_activeCamera.reset();
         m_root = nullptr;

@@ -1133,7 +1133,6 @@ namespace ige::scene
     void SceneObject::from_json(const json &j)
     {
         setName(j.value("name", ""));
-        setActive(j.value("active", false));
         setPrefabId(j.value("prefabId", m_prefabId));
         setUUID(j.value("uuid", getUUID()));
 
@@ -1184,6 +1183,7 @@ namespace ige::scene
             child->from_json(it);
             child->setParent(thisObj);
         }
+        setActive(j.value("active", false));
     }
 
     //! Serialize finished event
@@ -1198,5 +1198,6 @@ namespace ige::scene
                 child.lock()->onSerializeFinished();
             }
         }
+        if(!isActive()) activeChildren(false);
     }
 } // namespace ige::scene

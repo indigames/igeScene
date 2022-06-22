@@ -112,8 +112,6 @@ namespace ige::scene
     void Particle::setAutoDrawing(bool autoDraw)
     {
         m_bIsAutoDrawing = autoDraw;
-        if (m_handle != -1 && getManager())
-            getManager()->getEffekseerManager()->SetAutoDrawing(m_handle, autoDraw);
     }
 
     //! Dynamic input parameter
@@ -187,14 +185,13 @@ namespace ige::scene
                 setGroupMask(m_groupMask);
                 setSpeed(m_speed);
                 setTimeScale(m_timeScale);
-                setAutoDrawing(true);
                 setLoop(m_bIsLooped);
                 setTargetLocation(m_targetLocation);
                 setDynamicInputParameter(m_dynamicInputParameter);
                 setColor(m_color);
-
                 auto layer = (int)(getOwner()->isGUIObject() ? Layer::_2D : Layer::_3D);
                 manager->SetLayer(m_handle, layer);
+                manager->SetAutoDrawing(m_handle, true);
                 m_lastMatrix = {};
                 onUpdate(0.f);
             }
@@ -292,7 +289,7 @@ namespace ige::scene
         setGroupMask(j.value("mask", 0));
         setSpeed(j.value("speed", 1.f));
         setTimeScale(j.value("timeScale", 1.f));
-        setAutoDrawing(j.value("autoDraw", true));
+        setAutoDrawing(j.value("autoDraw", false));
         setLoop(j.value("loop", false));
         setTargetLocation(j.value("target", Vec3(0.f, 0.f, 0.f)));
         setDynamicInputParameter(j.value("param", Vec4(0.f, 0.f, 0.f, 0.f)));

@@ -74,6 +74,8 @@ namespace ige::scene
 
         if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
         {
+            stop();
+
             m_path = relPath;
             m_audioSource = nullptr;
 
@@ -422,8 +424,8 @@ namespace ige::scene
         setVolume(j.value("volume", 1.f));
         setPan(j.value("pan", 0.f));
         setVelocity(j.value("velocity", Vec3()));
-        setMinDistance(j.value("minDist", 0.f));
-        setMaxDistance(j.value("maxDist", 10000.f));
+        setMinDistance(j.value("minDist", 0.1f));
+        setMaxDistance(j.value("maxDist", 1000.f));
         setAttenuationModel(j.value("attModel", SoLoud::AudioSource::LINEAR_DISTANCE));
         setAttenuationRollOffFactor(j.value("attFactor", 0.5f));
         setDopplerFactor(j.value("dopFactor", 1.f));
