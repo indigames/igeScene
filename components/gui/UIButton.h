@@ -112,6 +112,7 @@ protected:
 	float m_fadeDuration;
 
 	//! Sprite Swap
+	Texture* m_normalTexture;
 	Texture* m_pressedTexture;
 	Texture* m_selectedTexture;
 	Texture* m_disabledTexture;

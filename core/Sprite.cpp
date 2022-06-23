@@ -168,6 +168,7 @@ namespace ige::scene
                 }
             }
             m_texture = value;
+            if (m_texture) m_texture->IncReference();
             if (value == nullptr) {
                 releaseSprite();
             }
