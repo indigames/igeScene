@@ -99,7 +99,7 @@ namespace ige::scene
 
         removeChildren();
         dispatchEvent((int)EventType::Delete);
-        setParent(nullptr);
+        m_parent.reset();
         getDestroyedEvent().invoke(*this);
 
         m_dispatching = 0;

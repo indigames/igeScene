@@ -44,8 +44,14 @@ namespace ige::scene
     AudioSource::~AudioSource()
     {
         m_onDestroyedEvent.invoke(*this);
-        m_audioSource.release();
-        m_manager.reset();
+
+        if (!m_manager.expired()) {
+            auto engine = getManager()->getEngine();
+            engine->stop(m_handle);
+            m_handle = 0;
+            m_audioSource.reset(); // LEAK: it crash here with mutex lock
+            m_manager.reset();
+        }
     }
 
     //! Set enabled
@@ -77,21 +83,19 @@ namespace ige::scene
             stop();
 
             m_path = relPath;
-            m_audioSource = nullptr;
+            m_audioSource.reset();
 
             if (getManager() == nullptr) return;
             auto engine = getManager()->getEngine();
             if (m_bIsStream)
             {
-                auto source = std::make_unique<SoLoud::WavStream>();
-                source->load(m_path.c_str());
-                m_audioSource = std::move(source);
+                m_audioSource = std::make_unique<SoLoud::WavStream>();
+                ((SoLoud::WavStream*)m_audioSource.get())->load(m_path.c_str());
             }
             else
             {
-                auto source = std::make_unique<SoLoud::Wav>();
-                source->load(m_path.c_str());
-                m_audioSource = std::move(source);
+                m_audioSource = std::make_unique<SoLoud::Wav>();
+                ((SoLoud::Wav*)m_audioSource.get())->load(m_path.c_str());
             }
 
             if (m_audioSource)

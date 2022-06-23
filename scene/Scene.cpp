@@ -423,11 +423,10 @@ namespace ige::scene
 
     bool Scene::removeAllObjects()
     {
-        for (auto& obj : m_objects) {
-            if (obj) obj->setParent(nullptr);
-            obj = nullptr;
+        for (auto itr = m_objects.end() - 1; itr >= m_objects.begin(); itr--) {
+            m_objects.erase(itr);
+            *itr = nullptr;
         }
-        m_objects.clear();
         return true;
     }
 

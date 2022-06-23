@@ -39,7 +39,6 @@ namespace ige::scene
         m_audioListeners.clear();
 
         // Stop audio engine
-        m_engine->stopAll();
         m_engine->deinit();
         m_engine = nullptr;
     }
