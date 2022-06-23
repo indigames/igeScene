@@ -101,10 +101,10 @@ namespace ige::scene
         virtual void from_json(const json& j);
 
         //! Get root of scene
-        std::shared_ptr<SceneObject>& getRoot() { return m_root; };
+        std::shared_ptr<SceneObject> getRoot() { return m_root.expired() ? nullptr : m_root.lock(); };
 
         //! Get root UI scene
-        std::shared_ptr<SceneObject>& getRootUI() { return m_rootUI; };
+        std::shared_ptr<SceneObject> getRootUI() { return m_rootUI.expired() ? nullptr : m_rootUI.lock(); };
 
         //! Get Canvas
         std::shared_ptr<Canvas> getCanvas() { return m_canvas.expired() ? nullptr : m_canvas.lock(); };
@@ -236,10 +236,10 @@ namespace ige::scene
 
     protected:
         //! Scene root node
-        std::shared_ptr<SceneObject> m_root;
+        std::weak_ptr<SceneObject> m_root;
 
         //! UI root node
-        std::shared_ptr<SceneObject> m_rootUI;
+        std::weak_ptr<SceneObject> m_rootUI;
 
         //! Canvas
         std::weak_ptr<Canvas> m_canvas;

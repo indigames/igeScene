@@ -124,10 +124,10 @@ namespace ige::scene
             m_root = createRootObject(m_name);
 
             // Set ambient color
-            m_root->addComponent<AmbientLight>()->setSkyColor({ 0.75f, 0.75f, 0.75f });
+            getRoot()->addComponent<AmbientLight>()->setSkyColor({ 0.75f, 0.75f, 0.75f });
 
             // Set general environment
-            m_root->addComponent<EnvironmentComponent>();
+            getRoot()->addComponent<EnvironmentComponent>();
 
             // Create Canvas Object
             m_rootUI = createRootObject("UI");
@@ -175,8 +175,8 @@ namespace ige::scene
 
         m_nextObjectID = 1;
         m_activeCamera.reset();
-        m_root = nullptr;
-        m_rootUI = nullptr;
+        m_root.reset();
+        m_rootUI.reset();
         m_canvas.reset();
 
         removeAllObjects();
@@ -231,13 +231,9 @@ namespace ige::scene
 
     void Scene::setName(const std::string& name)
     {
-        if (m_name.compare(name) != 0)
-        {
+        if (m_name.compare(name) != 0) {
             m_name = name;
-            if (m_root)
-            {
-                m_root->setName(name);
-            }
+            if (getRoot()) getRoot()->setName(name);
         }
     }
 
@@ -366,11 +362,11 @@ namespace ige::scene
     std::shared_ptr<SceneObject> Scene::createObject(const std::string& name, const std::shared_ptr<SceneObject>& parent, bool isGUI, const Vec2& size, const std::string& prefabId,
         const Vec3& position, const Quat& rotation, const Vec3& scale)
     {
-        auto parentObject = parent ? parent : m_root;
+        auto parentObject = parent ? parent : getRoot();
         if (name.compare("Canvas") != 0) {
             if (isGUI) {
-                parentObject = parentObject->isGUIObject() ? parentObject : !m_canvas.expired() ? m_canvas.lock()->getOwner()->getSharedPtr() : m_rootUI;
-                if (parentObject == m_rootUI) {
+                parentObject = parentObject->isGUIObject() ? parentObject : !m_canvas.expired() ? m_canvas.lock()->getOwner()->getSharedPtr() : getRootUI();
+                if (parentObject == getRootUI()) {
                     auto canvasObject = std::make_shared<SceneObject>(this, m_nextObjectID++, "Canvas", true);
                     m_objects.push_back(canvasObject);
                     m_canvas = canvasObject->addComponent<Canvas>();
@@ -390,7 +386,7 @@ namespace ige::scene
         auto sceneObject = std::make_shared<SceneObject>(this, m_nextObjectID++, name, isGUI, size, prefabId, position, rotation, scale);
         m_objects.push_back(sceneObject);
         sceneObject->setParent(parentObject);
-        if (m_root == nullptr) m_root = sceneObject;
+        if (m_root.expired()) m_root = sceneObject;
         return sceneObject;
     }
 
@@ -449,15 +445,6 @@ namespace ige::scene
             auto activeCam = getActiveCamera();
             if (activeCam && activeCam->getInstanceId() == camera->getInstanceId())
                 setActiveCamera(nullptr);
-        }
-
-        // Remove root object
-        if (obj == m_root) {
-            m_root = nullptr;
-        }
-
-        if (obj == m_rootUI) {
-            m_rootUI = nullptr;
         }
 
         // Remove from objects list
@@ -1236,17 +1223,17 @@ namespace ige::scene
             {"objId", m_nextObjectID},
         };
 
-        if (m_root)
+        if (!m_root.expired())
         {
             json jRoot;
-            m_root->to_json(jRoot);
+            m_root.lock()->to_json(jRoot);
             j["root"] = jRoot;
         }
 
-        if (m_rootUI)
+        if (!m_rootUI.expired())
         {
             json jUI;
-            m_rootUI->to_json(jUI);
+            m_rootUI.lock()->to_json(jUI);
             j["ui"] = jUI;
         }
     }
@@ -1265,14 +1252,14 @@ namespace ige::scene
         {
             auto jRoot = j.at("root");
             m_root = createRootObject(m_name);
-            m_root->from_json(jRoot);
+            m_root.lock()->from_json(jRoot);
         }
 
         if(j.contains("ui")) 
         {
             auto jUI = j.at("ui");
             m_rootUI = createRootObject("UI");
-            m_rootUI->from_json(jUI);
+            m_rootUI.lock()->from_json(jUI);
         }
 
         if (j.contains("objId")) 
@@ -1283,8 +1270,8 @@ namespace ige::scene
                 m_nextObjectID = nextId;
         }
 
-        if (m_root) m_root->onSerializeFinished();
-        if (m_rootUI) m_rootUI->onSerializeFinished();
+        if (getRoot()) getRoot()->onSerializeFinished();
+        if (getRootUI()) getRootUI()->onSerializeFinished();
 
         // Set active camera
         if (getActiveCamera() == nullptr)

@@ -131,13 +131,13 @@ namespace ige::scene
         m_vehicles.clear();
         m_collisionEvents.clear();
 
-        m_collisionConfiguration = nullptr;
-        m_dispatcher = nullptr;
-        m_broadphase = nullptr;
-        m_solver = nullptr;
-        m_ghostPairCallback = nullptr;
-        m_world = nullptr;
-        m_debugRenderer = nullptr;
+        m_collisionConfiguration.reset();
+        m_dispatcher.reset();
+        m_broadphase.reset();
+        m_solver.reset();
+        m_ghostPairCallback.reset();
+        m_world.reset();
+        m_debugRenderer.reset();
     }
 
 

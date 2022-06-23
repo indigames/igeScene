@@ -314,7 +314,8 @@ namespace ige::scene
             scene->setPath(relPath);
         }
 
-        m_scenes.push_back(scene);
+        auto it = std::find(m_scenes.begin(), m_scenes.end(), scene);
+        if (it == m_scenes.end()) m_scenes.push_back(scene);
 
         return true;
     }

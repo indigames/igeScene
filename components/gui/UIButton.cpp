@@ -210,6 +210,7 @@ void UIButton::setTexturePath(const std::string& path, ButtonState setState)
         m_path = relPath;
         if (relPath.length() > 0)
             m_normalTexture = ResourceCreator::Instance().NewTexture(relPath.c_str());
+        setPath(path);
         break;
     case ButtonState::PRESSED:
         if (m_pressedTexture) {
