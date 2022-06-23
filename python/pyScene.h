@@ -83,6 +83,9 @@ namespace ige::scene
     // Screen size
     PyObject* Scene_getScreenSize(PyObject_Scene* self);
 
+    // View size
+    PyObject* Scene_getViewSize(PyObject_Scene* self);
+
     // Capture
     PyObject* Scene_capture(PyObject_Scene* self, PyObject* args);
 }
