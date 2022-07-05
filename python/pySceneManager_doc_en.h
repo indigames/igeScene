@@ -63,6 +63,20 @@ PyDoc_STRVAR(SceneManager_unloadScene_doc,
     "        Fail\n"
 );
 
+// reloadScene
+PyDoc_STRVAR(SceneManager_reloadScene_doc,
+    "Reload current scene.\n"\
+    "\n"\
+    "SceneManager.reloadScene()\n"\
+    "\n"\
+    "Return:\n"\
+    "----------\n"\
+    "    True:\n"\
+    "        Success\n"\
+    "    False:\n"\
+    "        Fail\n"
+);
+
 // saveScene
 PyDoc_STRVAR(SceneManager_saveScene_doc,
     "Save scene to file system.\n"\

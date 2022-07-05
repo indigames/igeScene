@@ -44,8 +44,14 @@ namespace ige::scene
     AudioSource::~AudioSource()
     {
         m_onDestroyedEvent.invoke(*this);
-        m_audioSource.release();
-        m_manager.reset();
+
+        if (!m_manager.expired()) {
+            auto engine = getManager()->getEngine();
+            engine->stop(m_handle);
+            m_handle = 0;
+            m_audioSource.reset(); // LEAK: it crash here with mutex lock
+            m_manager.reset();
+        }
     }
 
     //! Set enabled
@@ -74,22 +80,22 @@ namespace ige::scene
 
         if (strcmp(m_path.c_str(), relPath.c_str()) != 0)
         {
+            stop();
+
             m_path = relPath;
-            m_audioSource = nullptr;
+            m_audioSource.reset();
 
             if (getManager() == nullptr) return;
             auto engine = getManager()->getEngine();
             if (m_bIsStream)
             {
-                auto source = std::make_unique<SoLoud::WavStream>();
-                source->load(m_path.c_str());
-                m_audioSource = std::move(source);
+                m_audioSource = std::make_unique<SoLoud::WavStream>();
+                ((SoLoud::WavStream*)m_audioSource.get())->load(m_path.c_str());
             }
             else
             {
-                auto source = std::make_unique<SoLoud::Wav>();
-                source->load(m_path.c_str());
-                m_audioSource = std::move(source);
+                m_audioSource = std::make_unique<SoLoud::Wav>();
+                ((SoLoud::Wav*)m_audioSource.get())->load(m_path.c_str());
             }
 
             if (m_audioSource)
@@ -422,8 +428,8 @@ namespace ige::scene
         setVolume(j.value("volume", 1.f));
         setPan(j.value("pan", 0.f));
         setVelocity(j.value("velocity", Vec3()));
-        setMinDistance(j.value("minDist", 0.f));
-        setMaxDistance(j.value("maxDist", 10000.f));
+        setMinDistance(j.value("minDist", 0.1f));
+        setMaxDistance(j.value("maxDist", 1000.f));
         setAttenuationModel(j.value("attModel", SoLoud::AudioSource::LINEAR_DISTANCE));
         setAttenuationRollOffFactor(j.value("attFactor", 0.5f));
         setDopplerFactor(j.value("dopFactor", 1.f));

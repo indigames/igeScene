@@ -159,10 +159,10 @@ namespace ige::scene
         Vec3 m_velocity = {};
 
         //! Min distance
-        float m_minDistance = 0.f;
+        float m_minDistance = 0.1f;
 
         //! Max distance
-        float m_maxDistance = 10000.f;
+        float m_maxDistance = 1000.f;
 
         //! Attenuation model
         int m_attenuationModel = SoLoud::AudioSource::LINEAR_DISTANCE;

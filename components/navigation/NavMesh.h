@@ -324,6 +324,9 @@ namespace ige::scene
         //! Release the navigation mesh and the mesh query
         virtual void releaseNavMesh();
 
+        //! Serialize finished event
+        virtual void onSerializeFinished() override;
+
     protected:
         //! Collect geometry from under Navigable components
         void collectGeometries(std::vector<NavGeoInfo> &geometryList);
@@ -354,9 +357,6 @@ namespace ige::scene
 
         //! Deserialize
         virtual void from_json(const json& j) override;
-
-        //! Serialize finished event
-        virtual void onSerializeFinished(Scene* scene) override;
 
         //! Update
         virtual void onUpdate(float dt) override;

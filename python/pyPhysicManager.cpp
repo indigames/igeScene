@@ -66,7 +66,7 @@ namespace ige::scene
         PyObject *startObj;
         PyObject *endObj;
         int mask = -1;
-        int group = -1;
+        int group = 1;
         if (!PyArg_ParseTuple(value, "OO|ii", &startObj, &endObj, &mask, &group))
             return NULL;
 
@@ -115,7 +115,7 @@ namespace ige::scene
         PyObject *startObj;
         PyObject *endObj;
         int mask = -1;
-        int group = -1;
+        int group = 1;
         if (!PyArg_ParseTuple(value, "OO|ii", &startObj, &endObj, &mask, &group))
             return NULL;
 

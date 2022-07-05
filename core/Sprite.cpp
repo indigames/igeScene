@@ -168,11 +168,11 @@ namespace ige::scene
                 }
             }
             m_texture = value;
+            if (m_texture) m_texture->IncReference();
             if (value == nullptr) {
                 releaseSprite();
             }
             else {
-                m_texture->IncReference();
                 m_texSize.X(m_texture->GetTextureWidth());
                 m_texSize.Y(m_texture->GetTextureHeight());
 

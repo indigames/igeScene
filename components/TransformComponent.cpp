@@ -539,7 +539,7 @@ namespace ige::scene
     //! Deserialize
     void TransformComponent::from_json(const json &j)
     {
-        setPosition(j.value("wpos", Vec3()));
+        setPosition(j.value("wpos", Vec3(0.f, 0.f, 0.f)));
         setRotation(j.value("wrot", Vec3(0.f, 0.f, 0.f)));
         setScale(j.value("wscale", Vec3(1.f, 1.f, 1.f)));
         Component::from_json(j);

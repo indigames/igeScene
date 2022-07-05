@@ -643,6 +643,15 @@ namespace ige::scene
         return (PyObject*)vec2Obj;
     }
 
+    PyObject* Scene_getViewSize(PyObject_Scene* self)
+    {
+        if (self->scene.expired()) Py_RETURN_NONE;
+        auto vec2Obj = PyObject_New(vec_obj, _Vec2Type);
+        vmath_cpy(self->scene.lock()->getViewSize().P(), 2, vec2Obj->v);
+        vec2Obj->d = 2;
+        return (PyObject*)vec2Obj;
+    }
+
     PyObject* Scene_capture(PyObject_Scene* self, PyObject* args)
     {
         if (self->scene.expired()) Py_RETURN_FALSE;
@@ -736,6 +745,7 @@ namespace ige::scene
         { "worldToScreenPoint", (PyCFunction)Scene_worldToScreenPoint, METH_VARARGS, NULL },
         { "convertScreenPoint", (PyCFunction)Scene_convertScreenPoint, METH_VARARGS, NULL },
         { "getScreenSize", (PyCFunction)Scene_getScreenSize, METH_NOARGS, NULL },
+        { "getViewSize", (PyCFunction)Scene_getViewSize, METH_NOARGS, NULL },
         { "capture", (PyCFunction)Scene_capture, METH_VARARGS, Scene_capture_doc },
         { NULL, NULL }
     };
@@ -743,6 +753,7 @@ namespace ige::scene
     // Variable definition
     PyGetSetDef Scene_getsets[] = {
         { "name", (getter)Scene_getName, (setter)Scene_setName, Scene_name_doc, NULL },
+        { "root", (getter)Scene_getRoot, NULL, Scene_root_doc, NULL },
         { "activeCamera", (getter)Scene_getActiveCamera, (setter)Scene_setActiveCamera, Scene_activeCamera_doc, NULL },
         { NULL, NULL }
     };

@@ -99,7 +99,7 @@ namespace ige::scene
 
         removeChildren();
         dispatchEvent((int)EventType::Delete);
-        setParent(nullptr);
+        m_parent.reset();
         getDestroyedEvent().invoke(*this);
 
         m_dispatching = 0;
@@ -530,10 +530,7 @@ namespace ige::scene
     //! Update function
     void SceneObject::onUpdate(float dt)
     {
-        if (m_aabbDirty > 0) {
-            updateAabb();
-            m_aabbDirty--;
-        }
+        updateAabb();
 
         for (int i = m_components.size() - 1; i >= 0; i--) {
             if (!m_transform) break; // Which mean object being deleted
@@ -663,7 +660,7 @@ namespace ige::scene
             rigidbody->onTransformChanged();
         }
         if (SceneManager::hasInstance() && !SceneManager::getInstance()->isPlaying()) {
-            updateAabb();
+            setAabbDirty();
         }
 #endif
     }
@@ -950,55 +947,67 @@ namespace ige::scene
     }
 
     //! Update AABB
+    void SceneObject::setAabbDirty()
+    {
+       m_aabbDirty = true;
+    }
+
     void SceneObject::updateAabb()
     {
-        m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
+        if (m_aabbDirty) {
+            m_aabb = AABBox({ 0.f, 0.f, 0.f }, { -1.f, -1.f, -1.f });
 
-        if (isGUIObject()) {
-            if (getComponent<RectTransform>() != nullptr) {
-                auto rect = getComponent<RectTransform>();
-                if (rect) {
-                    auto size = rect->getSize();
-                    Vec3 min(-size[0] * 0.5f, -size[1] * 0.5f, -0.5f);
-                    Vec3 max(size[0] * 0.5f, size[1] * 0.5f, 0.5f);
-                    m_aabb = { min, max };
+            // Ignore Canvas and root object
+            if (getComponent<Canvas>() != nullptr || (!getScene()->isPrefab() && getParent() == nullptr))
+                return;
+
+            if (isGUIObject()) {
+                if (getComponent<RectTransform>() != nullptr) {
+                    auto rect = getComponent<RectTransform>();
+                    if (rect) {
+                        auto size = rect->getSize();
+                        Vec3 min(-size[0] * 0.5f, -size[1] * 0.5f, -0.5f);
+                        Vec3 max(size[0] * 0.5f, size[1] * 0.5f, 0.5f);
+                        m_aabb = { min, max };
+                    }
                 }
             }
-        }
-        else {
-            if (getComponent<Rigidbody>() != nullptr) {
-                m_aabb = getComponent<Rigidbody>()->getAABB();
-            }
-            else  if (getComponent<FigureComponent>() != nullptr) {
-                auto figureComp = getComponent<FigureComponent>();
-                if (figureComp->getFigure()) {
-                    Vec3 aabbMin, aabbMax;
-                    figureComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P(), LocalSpace);
-                    m_aabb = { aabbMin, aabbMax };
-                    if (m_aabb.getVolume() == 0) {
-                        if ((aabbMax[0] - aabbMin[0]) == 0) aabbMax[0] = 0.01f;
-                        if ((aabbMax[1] - aabbMin[1]) == 0) aabbMax[1] = 0.01f;
-                        if ((aabbMax[2] - aabbMin[2]) == 0) aabbMax[2] = 0.01f;
+            else {
+                if (getComponent<Rigidbody>() != nullptr) {
+                    m_aabb = getComponent<Rigidbody>()->getAABB();
+                }
+                else  if (getComponent<FigureComponent>() != nullptr) {
+                    auto figureComp = getComponent<FigureComponent>();
+                    if (figureComp->getFigure()) {
+                        Vec3 aabbMin, aabbMax;
+                        figureComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P(), LocalSpace);
+                        m_aabb = { aabbMin, aabbMax };
+                        if (m_aabb.getVolume() == 0) {
+                            if ((aabbMax[0] - aabbMin[0]) == 0) aabbMax[0] = 0.01f;
+                            if ((aabbMax[1] - aabbMin[1]) == 0) aabbMax[1] = 0.01f;
+                            if ((aabbMax[2] - aabbMin[2]) == 0) aabbMax[2] = 0.01f;
+                            m_aabb = { aabbMin, aabbMax };
+                        }
+                    }
+                }
+                else if (getComponent<SpriteComponent>() != nullptr) {
+                    auto spriteComp = getComponent<SpriteComponent>();
+                    if (spriteComp->getFigure()) {
+                        Vec3 aabbMin, aabbMax;
+                        spriteComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
+                        m_aabb = { aabbMin, aabbMax };
+                    }
+                }
+                else if (getComponent<TextComponent>() != nullptr) {
+                    auto comp = getComponent<TextComponent>();
+                    if (comp->getFigure()) {
+                        Vec3 aabbMin, aabbMax;
+                        comp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
                         m_aabb = { aabbMin, aabbMax };
                     }
                 }
             }
-            else if (getComponent<SpriteComponent>() != nullptr) {
-                auto spriteComp = getComponent<SpriteComponent>();
-                if (spriteComp->getFigure()) {
-                    Vec3 aabbMin, aabbMax;
-                    spriteComp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
-                    m_aabb = { aabbMin, aabbMax };
-                }
-            }
-            else if (getComponent<TextComponent>() != nullptr) {
-                auto comp = getComponent<TextComponent>();
-                if (comp->getFigure()) {
-                    Vec3 aabbMin, aabbMax;
-                    comp->getFigure()->CalcAABBox(-1, aabbMin.P(), aabbMax.P());
-                    m_aabb = { aabbMin, aabbMax };
-                }
-            }
+            m_aabbDirty = false;
         }
     }
 
@@ -1124,11 +1133,9 @@ namespace ige::scene
     void SceneObject::from_json(const json &j)
     {
         setName(j.value("name", ""));
-        setActive(j.value("active", false));
         setPrefabId(j.value("prefabId", m_prefabId));
-        if (!isInPrefab()) {
-            setUUID(j.value("uuid", getUUID()));
-        }
+        setUUID(j.value("uuid", getUUID()));
+
         m_bIsGui = j.value("gui", false);
         m_bIsRaycastTarget = j.value("raycast", false);
         m_bIsInteractable = j.value("interactable", false);
@@ -1176,26 +1183,21 @@ namespace ige::scene
             child->from_json(it);
             child->setParent(thisObj);
         }
+        setActive(j.value("active", false));
     }
 
-    void SceneObject::restore_json(const json& j) {
-        setName(j.value("name", ""));
-        setActive(j.value("active", false));
-        m_bIsRaycastTarget = j.value("raycast", false);
-        m_bIsInteractable = j.value("interactable", false);
-
-        auto jComps = j.at("comps");
-        for (auto it : jComps)
-        {
-            std::string key = it.at(0);
-            auto val = it.at(1);
-            std::shared_ptr<Component> comp = getComponent(key);
-            if(comp == nullptr)
-                comp = createComponent(key);
-            if (comp) {
-                val.get_to(*comp);
+    //! Serialize finished event
+    void SceneObject::onSerializeFinished() {
+        for (auto& comp : m_components) {
+            if (!comp->isSkipSerialize()) {
+                comp->onSerializeFinished();
             }
         }
+        for (auto& child : m_children) {
+            if (!child.expired()) {
+                child.lock()->onSerializeFinished();
+            }
+        }
+        if(!isActive()) activeChildren(false);
     }
-
 } // namespace ige::scene

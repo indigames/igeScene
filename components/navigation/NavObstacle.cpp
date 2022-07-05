@@ -80,7 +80,7 @@ namespace ige::scene
     }
 
     //! Serialize finished event
-    void NavObstacle::onSerializeFinished(Scene* scene)
+    void NavObstacle::onSerializeFinished()
     {
         if (isEnabled()) {
             getActivatedEvent().invoke(this);

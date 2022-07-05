@@ -515,18 +515,18 @@ void UISlider::onRotateDirection(std::shared_ptr<SceneObject> obj)
 	}
 }
 
-void UISlider::onSerializeFinished(Scene* scene) 
+void UISlider::onSerializeFinished() 
 {
 	if (m_dirtySetObj) {
 		m_dirtySetObj = false;
 		if (!m_fillUUID.empty()) {
-			auto obj = scene->findObjectByUUID(m_fillUUID);
+			auto obj = getOwner()->getScene()->findObjectByUUID(m_fillUUID);
 			if (obj) {
 				setFillObject(obj);
 			}
 		}
 		if (!m_handleUUID.empty()) {
-			auto obj = scene->findObjectByUUID(m_handleUUID);
+			auto obj = getOwner()->getScene()->findObjectByUUID(m_handleUUID);
 			if (obj) {
 				setHandleObject(obj);
 			}

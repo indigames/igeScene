@@ -51,7 +51,8 @@ public:
 	//! Render
 	virtual void onRender() override;
 
-	virtual void onSerializeFinished(Scene* scene) override;
+	//! Serialized event
+	virtual void onSerializeFinished() override;
 
 	//! Update property by key value
 	virtual void setProperty(const std::string& key, const json& val) override;

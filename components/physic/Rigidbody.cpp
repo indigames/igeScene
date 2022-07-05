@@ -17,10 +17,10 @@
 namespace ige::scene
 {
     //! Initialize static members
-    Event<Rigidbody *> Rigidbody::m_onCreatedEvent;
-    Event<Rigidbody *> Rigidbody::m_onDestroyedEvent;
-    Event<Rigidbody *> Rigidbody::m_onActivatedEvent;
-    Event<Rigidbody *> Rigidbody::m_onDeactivatedEvent;
+    Event<Rigidbody&> Rigidbody::m_onCreatedEvent;
+    Event<Rigidbody&> Rigidbody::m_onDestroyedEvent;
+    Event<Rigidbody&> Rigidbody::m_onActivatedEvent;
+    Event<Rigidbody&> Rigidbody::m_onDeactivatedEvent;
 
     //! Constructor
     Rigidbody::Rigidbody(SceneObject& owner)
@@ -46,7 +46,7 @@ namespace ige::scene
     //! Initialization
     bool Rigidbody::init()
     {
-        getOnCreatedEvent().invoke(this);
+        getOnCreatedEvent().invoke(*this);
         if (m_positionOffset.LengthSqr() <= 0.f) {
             auto aabbCenter = getOwner()->getWorldAABB().getCenter();
             m_positionOffset = aabbCenter - getOwner()->getTransform()->getPosition();
@@ -62,7 +62,7 @@ namespace ige::scene
         deactivate();
 
         // Notify destroyed
-        getOnDestroyedEvent().invoke(this);
+        getOnDestroyedEvent().invoke(*this);
 
         // Remove all constraints
         removeAllConstraints();
@@ -173,10 +173,10 @@ namespace ige::scene
         if (m_body == nullptr) return;
         int flags = getBody()->getFlags();
         m_bEnableGravity = enable;
+        if (!m_body || m_manager.expired()) return;
         if (enable) {
             flags &= ~BT_DISABLE_WORLD_GRAVITY;
-            auto physicManager = getOwner()->getRoot()->getComponent<PhysicManager>();
-            getBody()->setGravity(physicManager->getGravity());
+           getBody()->setGravity(getManager()->getGravity());
         }
         else {
             flags |= BT_DISABLE_WORLD_GRAVITY;
@@ -406,7 +406,7 @@ namespace ige::scene
         updateBtTransform();
 
 #if EDITOR_MODE
-        getOwner()->updateAabb();
+        getOwner()->setAabbDirty();
 #endif
 
         m_bIsDirty = false;
@@ -475,7 +475,7 @@ namespace ige::scene
         if (!m_bIsActivated)
         {
             if (m_body) m_body->activate(true);
-            getOnActivatedEvent().invoke(this);
+            getOnActivatedEvent().invoke(*this);
             m_bIsActivated = true;
         }
     }
@@ -485,7 +485,7 @@ namespace ige::scene
     {
         if (m_bIsActivated)
         {
-            getOnDeactivatedEvent().invoke(this);
+            getOnDeactivatedEvent().invoke(*this);
             if(m_body) m_body->activate(false);
             m_bIsActivated = false;
         }
@@ -578,12 +578,8 @@ namespace ige::scene
     //! Deserialize
     void Rigidbody::from_json(const json &j)
     {
+        m_json = j;
         Component::from_json(j);
-        m_json = json(j); // copy data
-    }
-
-    void Rigidbody::onSerializeFinished(Scene* scene) {
-        auto j = m_json;
         setMass(j.value("mass", 1.f));
         setRestitution(j.value("restitution", 0.f));
         setFriction(j.value("friction", 0.2f));
@@ -601,9 +597,12 @@ namespace ige::scene
         setAngularSleepingThreshold(j.value("angularSleepingThreshold", 0.f));
         setActivationState(j.value("activeState", 1));
         setPositionOffset(j.value("offset", Vec3(0.f, 0.f, 0.f)));
+    }
+
+    void Rigidbody::onSerializeFinished() {
         init();
 
-        auto jConstraints = j.value("consts", json());
+        auto jConstraints = m_json.value("consts", json());
         for (auto it : jConstraints)
         {
             auto key = (int)it.at(0);

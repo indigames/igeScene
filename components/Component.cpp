@@ -10,22 +10,13 @@ namespace ige::scene
     Component::Component(SceneObject& owner)
         : m_owner(owner) , m_instanceId(++s_instanceID)
     {
-        m_serializeEventId = getOwner()->getScene()->getSerializeFinishedEvent().addListener(std::bind(&Component::onSerializeFinished, this, std::placeholders::_1));
     }
 
     //! Destructor
     Component::~Component()
-    {
-        if (getOwner())
-        {
-            if (getOwner()->isActive())
-            {
-                onDisable();
-                onDestroy();
-            }
-            if (getOwner()->getScene())
-                getOwner()->getScene()->getSerializeFinishedEvent().removeListener(m_serializeEventId);
-        }
+    {       
+        onDisable();
+        onDestroy();
     }
 
     void Component::setEnabled(bool enable)
@@ -85,7 +76,7 @@ namespace ige::scene
     }
 
     //! Serialize finished event
-    void Component::onSerializeFinished(Scene* scene)
+    void Component::onSerializeFinished()
     {
         setEnabled(m_bIsEnabled);
     }

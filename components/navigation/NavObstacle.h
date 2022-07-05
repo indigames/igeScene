@@ -60,7 +60,7 @@ namespace ige::scene
         virtual void from_json(const json& j) override;
 
         //! Serialize finished event
-        virtual void onSerializeFinished(Scene* scene) override;
+        virtual void onSerializeFinished() override;
 
     protected:
         //! Radius of this obstacle.

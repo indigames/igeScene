@@ -107,7 +107,7 @@ namespace ige::scene
         virtual void from_json(const json &j);
 
         //! Serialize finished event
-        virtual void onSerializeFinished(Scene *scene);
+        virtual void onSerializeFinished();
 
     protected:
         //! On created event
@@ -131,9 +131,6 @@ namespace ige::scene
 
         //! Cache json to serialize
         json m_json = {};
-
-        //! Cache serialize event id
-        uint64_t m_serializeEventId = (uint64_t)(-1);
 
         //! Dirty flag
         bool m_bIsDirty = true;

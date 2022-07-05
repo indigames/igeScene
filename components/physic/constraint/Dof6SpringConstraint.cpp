@@ -404,46 +404,45 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void Dof6SpringConstraint::onSerializeFinished(Scene *scene)
+    void Dof6SpringConstraint::from_json(const json& j)
     {
+        PhysicConstraint::from_json(j);
+
         // Linear limit
-        setLinearLowerLimit(PhysicHelper::to_btVector3(m_json.value("lLow", Vec3(0.f, 0.f, 0.f))));
-        setLinearUpperLimit(PhysicHelper::to_btVector3(m_json.value("lUp", Vec3(0.f, 0.f, 0.f))));
-        setLinearTargetVelocity(PhysicHelper::to_btVector3(m_json.value("lVel", Vec3(0.f, 0.f, 0.f))));
+        setLinearLowerLimit(PhysicHelper::to_btVector3(j.value("lLow", Vec3(0.f, 0.f, 0.f))));
+        setLinearUpperLimit(PhysicHelper::to_btVector3(j.value("lUp", Vec3(0.f, 0.f, 0.f))));
+        setLinearTargetVelocity(PhysicHelper::to_btVector3(j.value("lVel", Vec3(0.f, 0.f, 0.f))));
 
         // Angular limit
-        setAngularLowerLimit(PhysicHelper::to_btVector3(m_json.value("aLow", Vec3(0.f, 0.f, 0.f))));
-        setAngularUpperLimit(PhysicHelper::to_btVector3(m_json.value("aUp", Vec3(0.f, 0.f, 0.f))));
-        setAngularTargetVelocity(PhysicHelper::to_btVector3(m_json.value("aVel", Vec3(0.f, 0.f, 0.f))));
+        setAngularLowerLimit(PhysicHelper::to_btVector3(j.value("aLow", Vec3(0.f, 0.f, 0.f))));
+        setAngularUpperLimit(PhysicHelper::to_btVector3(j.value("aUp", Vec3(0.f, 0.f, 0.f))));
+        setAngularTargetVelocity(PhysicHelper::to_btVector3(j.value("aVel", Vec3(0.f, 0.f, 0.f))));
 
         // Bounce
-        setLinearBounce(PhysicHelper::to_btVector3(m_json.value("lBounce", Vec3(0.f, 0.f, 0.f))));
-        setAngularBounce(PhysicHelper::to_btVector3(m_json.value("aBounce", Vec3(0.f, 0.f, 0.f))));
+        setLinearBounce(PhysicHelper::to_btVector3(j.value("lBounce", Vec3(0.f, 0.f, 0.f))));
+        setAngularBounce(PhysicHelper::to_btVector3(j.value("aBounce", Vec3(0.f, 0.f, 0.f))));
 
         // Linear spring
-        setLinearSpringEnabled(PhysicHelper::to_btVector3(m_json.value("lSpring", Vec3(0.f, 0.f, 0.f))));
-        setLinearStiffness(PhysicHelper::to_btVector3(m_json.value("lStiff", Vec3(0.f, 0.f, 0.f))));
-        setLinearDamping(PhysicHelper::to_btVector3(m_json.value("lDamp", Vec3(0.f, 0.f, 0.f))));
+        setLinearSpringEnabled(PhysicHelper::to_btVector3(j.value("lSpring", Vec3(0.f, 0.f, 0.f))));
+        setLinearStiffness(PhysicHelper::to_btVector3(j.value("lStiff", Vec3(0.f, 0.f, 0.f))));
+        setLinearDamping(PhysicHelper::to_btVector3(j.value("lDamp", Vec3(0.f, 0.f, 0.f))));
 
         // Angular spring
-        setAngularSpringEnabled(PhysicHelper::to_btVector3(m_json.value("aSpring", Vec3(0.f, 0.f, 0.f))));
-        setAngularStiffness(PhysicHelper::to_btVector3(m_json.value("aStiff", Vec3(0.f, 0.f, 0.f))));
-        setAngularDamping(PhysicHelper::to_btVector3(m_json.value("aDamp", Vec3(0.f, 0.f, 0.f))));
+        setAngularSpringEnabled(PhysicHelper::to_btVector3(j.value("aSpring", Vec3(0.f, 0.f, 0.f))));
+        setAngularStiffness(PhysicHelper::to_btVector3(j.value("aStiff", Vec3(0.f, 0.f, 0.f))));
+        setAngularDamping(PhysicHelper::to_btVector3(j.value("aDamp", Vec3(0.f, 0.f, 0.f))));
 
         // Linear Motor
-        setLinearMotorEnabled(PhysicHelper::to_btVector3(m_json.value("lMotor", Vec3(0.f, 0.f, 0.f))));
-        setLinearMaxMotorForce(PhysicHelper::to_btVector3(m_json.value("lMForce", Vec3(0.f, 0.f, 0.f))));
-        setLinearServoEnabled(PhysicHelper::to_btVector3(m_json.value("lServo", Vec3(0.f, 0.f, 0.f))));
-        setLinearServoTarget(PhysicHelper::to_btVector3(m_json.value("lSTarget", Vec3(0.f, 0.f, 0.f))));
+        setLinearMotorEnabled(PhysicHelper::to_btVector3(j.value("lMotor", Vec3(0.f, 0.f, 0.f))));
+        setLinearMaxMotorForce(PhysicHelper::to_btVector3(j.value("lMForce", Vec3(0.f, 0.f, 0.f))));
+        setLinearServoEnabled(PhysicHelper::to_btVector3(j.value("lServo", Vec3(0.f, 0.f, 0.f))));
+        setLinearServoTarget(PhysicHelper::to_btVector3(j.value("lSTarget", Vec3(0.f, 0.f, 0.f))));
 
         // Angular Motor
-        setAngularMotorEnabled(PhysicHelper::to_btVector3(m_json.value("aMotor", Vec3(0.f, 0.f, 0.f))));
-        setAngularMaxMotorForce(PhysicHelper::to_btVector3(m_json.value("aMForce", Vec3(0.f, 0.f, 0.f))));
-        setAngularServoEnabled(PhysicHelper::to_btVector3(m_json.value("aServo", Vec3(0.f, 0.f, 0.f))));
-        setAngularServoTarget(PhysicHelper::to_btVector3(m_json.value("aSTarget", Vec3(0.f, 0.f, 0.f))));
-
-        // Serialization done
-        PhysicConstraint::onSerializeFinished(scene);
+        setAngularMotorEnabled(PhysicHelper::to_btVector3(j.value("aMotor", Vec3(0.f, 0.f, 0.f))));
+        setAngularMaxMotorForce(PhysicHelper::to_btVector3(j.value("aMForce", Vec3(0.f, 0.f, 0.f))));
+        setAngularServoEnabled(PhysicHelper::to_btVector3(j.value("aServo", Vec3(0.f, 0.f, 0.f))));
+        setAngularServoTarget(PhysicHelper::to_btVector3(j.value("aSTarget", Vec3(0.f, 0.f, 0.f))));
     }
 
     //! Update property by key value

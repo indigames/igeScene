@@ -882,6 +882,21 @@ namespace ige::scene
                 }
             }
         }
+        else {
+            auto components = sceneObject->getComponents();
+            auto itr = std::find_if(components.begin(), components.end(), [type](const auto& elem) {
+                auto scriptComp = std::dynamic_pointer_cast<ScriptComponent>(elem);
+                return (scriptComp && scriptComp->getClassName().compare(type) == 0);
+            });
+            if (itr != components.end())
+            {
+                auto pyObj = std::dynamic_pointer_cast<ScriptComponent>(*itr)->getPyInstance();
+                if (pyObj) {
+                    Py_XINCREF(pyObj);
+                    return pyObj;
+                }
+            }
+        }
         Py_RETURN_NONE;
     }
 
@@ -921,42 +936,6 @@ namespace ige::scene
         if (self->sceneObject.expired()) Py_RETURN_NONE;
         self->sceneObject.lock()->removeAllComponents();
         Py_RETURN_TRUE;
-    }
-
-    PyObject* SceneObject_getScript(PyObject_SceneObject* self, PyObject* args)
-    {
-        if (self->sceneObject.expired()) Py_RETURN_NONE;
-
-        PyObject* obj = nullptr;
-        if (PyArg_ParseTuple(args, "|O", &obj)) {
-            if (obj && PyUnicode_Check(obj)) {
-                auto scriptName = std::string(PyUnicode_AsUTF8(obj));
-                auto components = self->sceneObject.lock()->getComponents();
-                auto itr = std::find_if(components.begin(), components.end(), [scriptName](const auto& elem) {
-                    auto scriptComp = std::dynamic_pointer_cast<ScriptComponent>(elem);
-                    return (scriptComp && scriptComp->getPath().find(scriptName) != std::string::npos);
-                });
-                if (itr != components.end())
-                {
-                    auto pyObj = std::dynamic_pointer_cast<ScriptComponent>(*itr)->getPyInstance();
-                    if (pyObj) {
-                        Py_XINCREF(pyObj);
-                        return pyObj;
-                    }
-                }
-            }
-            else {
-                auto comp = self->sceneObject.lock()->getComponent<ScriptComponent>();
-                if (comp) {
-                    auto pyObj = comp->getPyInstance();
-                    if (pyObj) {
-                        Py_XINCREF(pyObj);
-                        return pyObj;
-                    }
-                }
-            }
-        }
-        Py_RETURN_NONE;
     }
 
     // Get/set child index
@@ -1071,7 +1050,6 @@ namespace ige::scene
         {"getComponent", (PyCFunction)SceneObject_getComponent, METH_VARARGS, SceneObject_getComponent_doc},
         {"getComponents", (PyCFunction)SceneObject_getComponents, METH_NOARGS, SceneObject_getComponents_doc},
         {"removeComponents", (PyCFunction)SceneObject_removeComponents, METH_VARARGS, SceneObject_removeComponents_doc},
-        {"getScript", (PyCFunction)SceneObject_getScript, METH_VARARGS, SceneObject_getScript_doc},
         {"getScene", (PyCFunction)SceneObject_getScene, METH_NOARGS, SceneObject_getScene_doc},
         {"findChildByName", (PyCFunction)SceneObject_findChildByName, METH_VARARGS, SceneObject_getChildren_doc},
         {"getChildIndex", (PyCFunction)SceneObject_getChildIndex, METH_VARARGS, SceneObject_getChildIndex_doc},

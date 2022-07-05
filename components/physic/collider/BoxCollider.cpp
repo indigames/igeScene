@@ -12,7 +12,6 @@ namespace ige::scene
     BoxCollider::BoxCollider(SceneObject& owner)
         : Collider(owner)
     {
-        m_size = getOwner()->getAABB().getExtent() * 0.5f;
     }
 
     //! Destructor
@@ -41,6 +40,9 @@ namespace ige::scene
     {
         // Create collision shape
         destroyShape();
+        if (m_size.LengthSqr() <= 0) {
+            m_size = getOwner()->getAABB().getExtent() * 0.5f;
+        }
         m_shape = std::make_unique<btBoxShape>(PhysicHelper::to_btVector3(m_size));
         setScale(m_scale);
         setMargin(m_margin);
@@ -52,13 +54,12 @@ namespace ige::scene
         Collider::to_json(j);
         j["size"] = getSize();
     }
-    
-    //! Serialize finished event
-    void BoxCollider::onSerializeFinished(Scene* scene)
+
+    //! Serialize
+    void BoxCollider::from_json(const json &j)
     {
-        Collider::onSerializeFinished(scene);
-        setSize(m_json.value("size", Vec3(1.f, 1.f, 1.f)));
-        m_json.clear();
+        Collider::from_json(j);
+        setSize(j.value("size", Vec3(1.f, 1.f, 1.f)));
     }
 
     //! Update property by key value

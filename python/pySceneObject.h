@@ -82,9 +82,6 @@ namespace ige::scene
     // Remove components
     PyObject* SceneObject_removeComponents(PyObject_SceneObject* self);
 
-    // Get Python Script
-    PyObject* SceneObject_getScript(PyObject_SceneObject* self, PyObject* args);
-
     // Get/set child index
     PyObject* SceneObject_getChildIndex(PyObject_SceneObject* self, PyObject* value);
     PyObject* SceneObject_setChildIndex(PyObject_SceneObject* self, PyObject* value);

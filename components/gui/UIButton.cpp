@@ -17,7 +17,7 @@ NS_IGE_SCENE_BEGIN
 
 UIButton::UIButton(SceneObject& owner, const std::string& texture, const Vec2& size, const bool isSliced, const Vec4& border) :
 	UIImage(owner, texture, size, isSliced, border),
-    m_pressedTexture(nullptr), m_selectedTexture(nullptr), m_disabledTexture(nullptr),
+    m_normalTexture(nullptr), m_pressedTexture(nullptr), m_selectedTexture(nullptr), m_disabledTexture(nullptr),
 	m_normalColor(1.0f, 1.0f, 1.0f, 1.0f), m_pressedColor(0.78f, 0.78f, 0.78f, 1.0f), 
     m_selectedColor(0.98f, 0.98f, 0.98f, 1.0f), m_disableColor(0.78f, 0.78f, 0.78f, 0.5f),
 	m_fadeDuration(0.1f)
@@ -40,6 +40,10 @@ UIButton::~UIButton()
     getOwner()->removeEventListener((int)EventType::TouchEnd, m_instanceId);
     getOwner()->removeEventListener((int)EventType::Click, m_instanceId);
 
+    if (m_normalTexture) {
+        m_normalTexture->DecReference();
+        m_normalTexture = nullptr;
+    }
     if (m_pressedTexture) {
         m_pressedTexture->DecReference();
         m_pressedTexture = nullptr;
@@ -149,7 +153,7 @@ void UIButton::changeState(ButtonState state, bool forced)
 Texture* UIButton::getTextureByState(ButtonState state) const {
     switch (state) {
     case ButtonState::NORMAL:
-        return getTexture();
+        return m_normalTexture;
     case ButtonState::PRESSED:
         return m_pressedTexture;
     case ButtonState::SELECTED:
@@ -199,6 +203,13 @@ void UIButton::setTexturePath(const std::string& path, ButtonState setState)
     switch (setState)
     {
     case ButtonState::NORMAL:
+        if (m_normalTexture) {
+            m_normalTexture->DecReference();
+            m_normalTexture = nullptr;
+        }
+        m_path = relPath;
+        if (relPath.length() > 0)
+            m_normalTexture = ResourceCreator::Instance().NewTexture(relPath.c_str());
         setPath(path);
         break;
     case ButtonState::PRESSED:
@@ -346,6 +357,7 @@ void UIButton::from_json(const json& j)
     setSpriteType(j.at("spritetype"));
     setBorder(j.at("border"));
     setInteractable(j.value("interactable", true));
+    changeState(ButtonState::NORMAL, true);
     Component::from_json(j);
 }
 

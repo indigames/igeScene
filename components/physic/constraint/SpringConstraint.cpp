@@ -118,16 +118,14 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void SpringConstraint::onSerializeFinished(Scene *scene)
+    void SpringConstraint::from_json(const json& j)
     {
-        setLowerLimit(PhysicHelper::to_btVector3(m_json.value("low", Vec3(1.f, 1.f, 1.f))));
-        setUpperLimit(PhysicHelper::to_btVector3(m_json.value("up", Vec3(0.f, 0.f, 0.f))));
-        setEnable(PhysicHelper::to_btVector3(m_json.value("enableV", Vec3(1.f, 0.f, 0.f))));
-        setStiffness(PhysicHelper::to_btVector3(m_json.value("stiff", Vec3(10.f, 0.f, 0.f))));
-        setDamping(PhysicHelper::to_btVector3(m_json.value("damp", Vec3(0.5f, 0.f, 0.f))));
-
-        // Serialization done, clear json
-        PhysicConstraint::onSerializeFinished(scene);
+        PhysicConstraint::from_json(j);
+        setLowerLimit(PhysicHelper::to_btVector3(j.value("low", Vec3(1.f, 1.f, 1.f))));
+        setUpperLimit(PhysicHelper::to_btVector3(j.value("up", Vec3(0.f, 0.f, 0.f))));
+        setEnable(PhysicHelper::to_btVector3(j.value("enableV", Vec3(1.f, 0.f, 0.f))));
+        setStiffness(PhysicHelper::to_btVector3(j.value("stiff", Vec3(10.f, 0.f, 0.f))));
+        setDamping(PhysicHelper::to_btVector3(j.value("damp", Vec3(0.5f, 0.f, 0.f))));
     }
 
     //! Update property by key value

@@ -135,7 +135,7 @@ namespace ige::scene
         //! Deserialize
         friend void from_json(const json &j, Component &obj);
 
-        uint64_t getInstanceId() { return m_instanceId; }
+        uint64_t getInstanceId() const { return m_instanceId; }
 
         //! Serialize
         virtual void to_json(json& j) const;
@@ -150,10 +150,10 @@ namespace ige::scene
         //! Update json value
         virtual void setProperty(const std::string& key, const json& val);
 
-    protected:
         //! Serialize finished event
-        virtual void onSerializeFinished(Scene* scene);
+        virtual void onSerializeFinished();
 
+    protected:
         //! Reference to owner object
         SceneObject& m_owner;
 
@@ -163,9 +163,7 @@ namespace ige::scene
         //! Skip serialize (editor properties)
         bool m_bSkipSerialize = false;
 
-        //! Cache serialize event id
-        uint64_t m_serializeEventId = (uint64_t)(-1);
-        
+        //! Cache instance id
         uint64_t m_instanceId;
         static std::atomic<uint64_t> s_instanceID;
     };

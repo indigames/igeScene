@@ -75,10 +75,10 @@ namespace ige::scene
         m_world->setDebugDrawer(m_debugRenderer.get());
 
         // Register event listeners
-        Rigidbody::getOnCreatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody*)>(&PhysicManager::onCreated), this, std::placeholders::_1));
-        Rigidbody::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody*)>(&PhysicManager::onDestroyed), this, std::placeholders::_1));
-        Rigidbody::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody*)>(&PhysicManager::onActivated), this, std::placeholders::_1));
-        Rigidbody::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody*)>(&PhysicManager::onDeactivated), this, std::placeholders::_1));
+        Rigidbody::getOnCreatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody&)>(&PhysicManager::onCreated), this, std::placeholders::_1));
+        Rigidbody::getOnDestroyedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody&)>(&PhysicManager::onDestroyed), this, std::placeholders::_1));
+        Rigidbody::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody&)>(&PhysicManager::onActivated), this, std::placeholders::_1));
+        Rigidbody::getOnDeactivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(Rigidbody&)>(&PhysicManager::onDeactivated), this, std::placeholders::_1));
 
         // Constraint event listeners
         PhysicConstraint::getOnActivatedEvent().addListener(std::bind(static_cast<void(PhysicManager::*)(PhysicConstraint*)>(&PhysicManager::onActivated), this, std::placeholders::_1));
@@ -131,13 +131,13 @@ namespace ige::scene
         m_vehicles.clear();
         m_collisionEvents.clear();
 
-        m_collisionConfiguration = nullptr;
-        m_dispatcher = nullptr;
-        m_broadphase = nullptr;
-        m_solver = nullptr;
-        m_ghostPairCallback = nullptr;
-        m_world = nullptr;
-        m_debugRenderer = nullptr;
+        m_collisionConfiguration.reset();
+        m_dispatcher.reset();
+        m_broadphase.reset();
+        m_solver.reset();
+        m_ghostPairCallback.reset();
+        m_world.reset();
+        m_debugRenderer.reset();
     }
 
 
@@ -161,12 +161,6 @@ namespace ige::scene
     //! Update
     void PhysicManager::onUpdate(float dt)
     {
-        if (!m_world)
-            initialize();
-
-        if (!m_world) return;
-
-        preUpdate();
     }
 
     //! Draw debug
@@ -178,11 +172,16 @@ namespace ige::scene
 
     void PhysicManager::onPhysicUpdate(float dt)
     {
+        if (!m_world)
+            initialize();
+
         if (!m_world) return;
+
+        preUpdate();
 
         // Run simulation if not in edit mode
         if (SceneManager::getInstance()->isPlaying())
-            if (m_world->stepSimulation(dt * m_frameUpdateRatio, m_frameMaxSubStep, m_fixedTimeStep))
+              if (m_world->stepSimulation(dt * m_frameUpdateRatio, m_frameMaxSubStep, m_fixedTimeStep))
                 postUpdate();
 
         // Do GC
@@ -193,7 +192,7 @@ namespace ige::scene
     void PhysicManager::preUpdate()
     {
         // Reset collision events
-        for (auto element : m_collisionEvents)
+        for (auto& element : m_collisionEvents)
             element.second = false;
     }
 
@@ -224,30 +223,33 @@ namespace ige::scene
         }
 
         // Update object transform
-        for (auto body : m_rigidbodys) {
-            body->updateIgeTransform();
+        for (auto& body : m_rigidbodys) {
+            body.get().updateIgeTransform();
         }
     }
 
     //! Create/Destroy event
-    void PhysicManager::onCreated(Rigidbody *object)
+    void PhysicManager::onCreated(Rigidbody& object)
     {
-        m_rigidbodys.push_back(object);
+        m_rigidbodys.push_back(std::ref(object));
     }
 
-    void PhysicManager::onDestroyed(Rigidbody *object)
+    void PhysicManager::onDestroyed(Rigidbody& object)
     {
+        auto bodyId = object.getInstanceId();
+
         // Find and remove object from the objects list
-        auto found = std::find_if(m_rigidbodys.begin(), m_rigidbodys.end(), [&object](Rigidbody* element) {
-            return object == element;
+        auto found = std::find_if(m_rigidbodys.begin(), m_rigidbodys.end(), [bodyId](const auto& element) {
+            return element.get().getInstanceId() == bodyId;
         });
 
-        if (found != m_rigidbodys.end())
+        if (found != m_rigidbodys.end()) {
             m_rigidbodys.erase(found);
+        }           
 
         // Find and remove collision events
-        auto evFound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [&object](auto pair) {
-            return object == pair.first.first || object == pair.first.second;
+        auto evFound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [bodyId](auto pair) {
+            return pair.first.first->getInstanceId() == bodyId || pair.first.second->getInstanceId() == bodyId;
         });
 
         // Find and remove all collision events
@@ -255,42 +257,42 @@ namespace ige::scene
         {
             m_collisionEvents.erase(evFound);
 
-            evFound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [&object](auto pair) {
-                return object == pair.first.first || object == pair.first.second;
+            evFound = std::find_if(m_collisionEvents.begin(), m_collisionEvents.end(), [bodyId](auto pair) {
+                return pair.first.first->getInstanceId() == bodyId || pair.first.second->getInstanceId() == bodyId;
             });
         }
     }
 
     //! Activate/Deactivate event
-    void PhysicManager::onActivated(Rigidbody *object)
+    void PhysicManager::onActivated(Rigidbody& object)
     {
         if (isDeformable())
         {
-            if (object->getBody())
-                getDeformableWorld()->addRigidBody(object->getBody());
-            else if (object->getSoftBody())
-                getDeformableWorld()->addSoftBody(object->getSoftBody(), object->getCollisionFilterGroup(), object->getCollisionFilterMask());
+            if (object.getBody())
+                getDeformableWorld()->addRigidBody(object.getBody());
+            else if (object.getSoftBody())
+                getDeformableWorld()->addSoftBody(object.getSoftBody(), object.getCollisionFilterGroup(), object.getCollisionFilterMask());
         }
         else
         {
-            if (object->getBody())
-                getWorld()->addRigidBody(object->getBody());
+            if (object.getBody())
+                getWorld()->addRigidBody(object.getBody());
         }
     }
 
-    void PhysicManager::onDeactivated(Rigidbody *object)
+    void PhysicManager::onDeactivated(Rigidbody& object)
     {
         if (isDeformable())
         {
-            if (object->getBody())
-                getDeformableWorld()->removeRigidBody(object->getBody());
-            else if (object->getSoftBody())
-                getDeformableWorld()->removeSoftBody(object->getSoftBody());
+            if (object.getBody())
+                getDeformableWorld()->removeRigidBody(object.getBody());
+            else if (object.getSoftBody())
+                getDeformableWorld()->removeSoftBody(object.getSoftBody());
         }
         else
         {
-            if (object->getBody())
-                getWorld()->removeRigidBody(object->getBody());
+            if (object.getBody())
+                getWorld()->removeRigidBody(object.getBody());
         }
     }
 

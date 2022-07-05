@@ -21,6 +21,11 @@ namespace ige::scene
     //! Destructor
     FigureComponent::~FigureComponent()
     {
+        if (m_backupFigure)
+        {
+            m_backupFigure->DecReference();
+            m_backupFigure = nullptr;
+        }
         if (m_figure)
         {
             onResourceRemoved(m_figure);
@@ -129,7 +134,8 @@ namespace ige::scene
 
         // Backup the original figure for cloning later
         if (figure == nullptr) {
-            ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton | Figure::CloneMesh);
+            if (m_backupFigure) m_backupFigure->DecReference();
+            m_backupFigure = ResourceCreator::Instance().NewFigure(fPath.c_str(), Figure::CloneSkeleton | Figure::CloneMesh);
         }
 
         // Initialize figure instance

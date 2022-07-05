@@ -42,6 +42,7 @@ namespace ige::scene
         destroyManager();
 
         // Destroy renderer
+        m_renderer.Reset();
         m_renderer = nullptr;
     }
 
@@ -104,6 +105,7 @@ namespace ige::scene
                     particle->stop();
                 }
             }
+            m_manager.Reset();
             m_manager = nullptr;
         }
     }

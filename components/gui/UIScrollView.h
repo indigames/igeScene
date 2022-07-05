@@ -73,7 +73,7 @@ public:
 
 	void scrollTo(Vec2 delta);
 
-	virtual void onSerializeFinished(Scene* scene) override;
+	virtual void onSerializeFinished() override;
 	
 	//! Update property by key value
 	virtual void setProperty(const std::string& key, const json& val) override;

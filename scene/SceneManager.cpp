@@ -260,10 +260,6 @@ namespace ige::scene
                 auto path = fs::absolute(entry.path());
                 auto pyc = path.parent_path().append("__pycache__").append(path.stem().string() + ".cpython-39.pyc");
                 if (fs::exists(pyc)) fs::remove(pyc);
-
-                PyObject* sysModule = PyImport_ImportModule("sys");
-                PyObject* modules = PyObject_GetAttrString(sysModule, "modules");
-
                 PyObject* key = nullptr, * value = nullptr;
                 Py_ssize_t pos = 0;
                 while (PyDict_Next(modules, &pos, &key, &value)) {
@@ -318,7 +314,8 @@ namespace ige::scene
             scene->setPath(relPath);
         }
 
-        m_scenes.push_back(scene);
+        auto it = std::find(m_scenes.begin(), m_scenes.end(), scene);
+        if (it == m_scenes.end()) m_scenes.push_back(scene);
 
         return true;
     }

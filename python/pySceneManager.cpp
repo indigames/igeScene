@@ -70,7 +70,7 @@ namespace ige::scene
     {
         if (!self->sceneManager) Py_RETURN_NONE;
         PyObject* obj = nullptr;
-		if (PyArg_ParseTuple(value, "O", &obj))
+		if (PyArg_ParseTuple(value, "|O", &obj))
         {
             if (obj)
             {
@@ -89,8 +89,19 @@ namespace ige::scene
                     }
                 }
             }
+            else {
+                self->sceneManager->unloadScene(self->sceneManager->getCurrentScene());
+            }
         }
         Py_RETURN_FALSE;
+    }
+
+    // Reload scene
+    PyObject* SceneManager_reloadScene(PyObject_SceneManager* self, PyObject* value)
+    {
+        if (!self->sceneManager) Py_RETURN_FALSE;
+        self->sceneManager->reloadScene();
+        Py_RETURN_TRUE;
     }
 
     // Save scene
@@ -137,6 +148,7 @@ namespace ige::scene
         { "createScene", (PyCFunction)SceneManager_createScene, METH_VARARGS, SceneManager_createScene_doc },
         { "loadScene", (PyCFunction)SceneManager_loadScene, METH_VARARGS, SceneManager_loadScene_doc },
         { "unloadScene", (PyCFunction)SceneManager_unloadScene, METH_VARARGS, SceneManager_unloadScene_doc },
+        { "reloadScene", (PyCFunction)SceneManager_reloadScene, METH_VARARGS, SceneManager_reloadScene_doc },
         { "saveScene", (PyCFunction)SceneManager_saveScene, METH_VARARGS, SceneManager_saveScene_doc },
         { NULL, NULL }
     };

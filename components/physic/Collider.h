@@ -49,15 +49,15 @@ namespace ige::scene
         //! Transform changed event
         void onTransformChanged();
 
+        //! Serialize finished event
+        virtual void onSerializeFinished() override;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
         virtual void from_json(const json& j) override;
-
-        //! Serialize finished event
-        virtual void onSerializeFinished(Scene* scene) override;
 
         //! Create shape
         virtual void createShape() = 0;
@@ -80,9 +80,6 @@ namespace ige::scene
 
         //! Cache compound collider instance
         std::weak_ptr<CompoundCollider> m_compoundCollider;
-
-        //! Cache serialize data
-        json m_json;
     };
 
 } // namespace ige::scene

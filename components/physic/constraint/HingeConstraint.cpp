@@ -101,14 +101,14 @@ namespace ige::scene
     }
 
     //! Deserialize
-    void HingeConstraint::onSerializeFinished(Scene *scene)
+    void HingeConstraint::from_json(const json& j)
     {
-        setAnchor(PhysicHelper::to_btVector3(m_json.value("anchor", Vec3(0.f, 0.f, 0.f))));
-        setAxis1(PhysicHelper::to_btVector3(m_json.value("axis1", Vec3(0.f, 1.f, 0.f))));
-        setAxis2(PhysicHelper::to_btVector3(m_json.value("axis2", Vec3(1.f, 0.f, 0.f))));
-        setLowerLimit(m_json.value("low", -SIMD_PI));
-        setUpperLimit(m_json.value("up", SIMD_PI));
-        PhysicConstraint::onSerializeFinished(scene);
+        PhysicConstraint::from_json(j);
+        setAnchor(PhysicHelper::to_btVector3(j.value("anchor", Vec3(0.f, 0.f, 0.f))));
+        setAxis1(PhysicHelper::to_btVector3(j.value("axis1", Vec3(0.f, 1.f, 0.f))));
+        setAxis2(PhysicHelper::to_btVector3(j.value("axis2", Vec3(1.f, 0.f, 0.f))));
+        setLowerLimit(j.value("low", -SIMD_PI));
+        setUpperLimit(j.value("up", SIMD_PI));
     }
 
     //! Update property by key value

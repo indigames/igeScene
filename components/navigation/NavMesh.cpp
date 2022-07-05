@@ -319,18 +319,12 @@ namespace ige::scene
 
         processedNodes.insert(node);
 
-        getOwner()->getTransform()->onUpdate(0.f);
-        getOwner()->updateAabb();
-        auto inverse = getOwner()->getTransform()->getWorldMatrix().Inverse();
-
         // Get figure component
         auto figure = node->getComponent<FigureComponent>();
         if (figure && figure->isEnabled() && !figure->isSkipSerialize())
         {
             NavGeoInfo info;
             info.component = figure.get();
-            node->getTransform()->onUpdate(0.f);
-            node->updateAabb();
             info.transform = Mat4::IdentityMat();
             info.boundingBox = node->getWorldAABB();
             geometryList.push_back(info);
@@ -414,9 +408,9 @@ namespace ige::scene
                 figure->ReadPositions(i, 0, mesh->numVerticies, space, palettebuffer, inbindSkinningMatrices, &positions);
 
                 auto destVertexStart = build->vertices.size();
-                for (auto pos : positions)
+                for (const auto& pos : positions)
                 {
-                    build->vertices.push_back({ pos[0], pos[1], pos[2]});
+                    build->vertices.push_back({ pos[0], pos[1], pos[2] });
                 }
                 positions.clear();
 
@@ -1065,6 +1059,8 @@ namespace ige::scene
                 return;
 
             const dtNavMesh* mesh = getNavMesh();
+            const auto& worldTransform = getOwner()->getRoot()->getTransform()->getWorldMatrix();
+
             for (int i = 0; i < mesh->getMaxTiles(); ++i)
             {
                 const auto* tile = mesh->getTile(i);
@@ -1076,8 +1072,8 @@ namespace ige::scene
                     auto poly = tile->polys + j;
                     for (int k = 0; k < poly->vertCount; ++k)
                     {
-                        auto start = *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[k] * 3]);
-                        auto end = *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(k + 1) % poly->vertCount] * 3]);
+                        auto start = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[k] * 3]);
+                        auto end = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(k + 1) % poly->vertCount] * 3]);
                         ShapeDrawer::drawLine(start, end, { 1.f, 1.f, 0.f });
                     }
                 }
@@ -1145,9 +1141,9 @@ namespace ige::scene
         Component::from_json(j);
     }
 
-    void NavMesh::onSerializeFinished(Scene* scene)
+    void NavMesh::onSerializeFinished()
     {
-        Component::onSerializeFinished(scene);
+        Component::onSerializeFinished();
 
         // Ensure transform updated
         getOwner()->getTransform()->onUpdate(0.f);

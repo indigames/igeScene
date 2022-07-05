@@ -16,14 +16,11 @@ namespace ige::scene
     PhysicConstraint::PhysicConstraint(Rigidbody &owner)
         : m_owner(owner), m_other(nullptr)
     {
-        m_serializeEventId = getOwner()->getOwner()->getScene()->getSerializeFinishedEvent().addListener(std::bind(&PhysicConstraint::onSerializeFinished, this, std::placeholders::_1));
     }
 
     //! Destructor
     PhysicConstraint::~PhysicConstraint()
     {
-        if(getOwner()->getOwner()->getScene())
-            getOwner()->getOwner()->getScene()->getSerializeFinishedEvent().removeListener(m_serializeEventId);
         destroy();
     }
 
@@ -119,20 +116,17 @@ namespace ige::scene
     //! Deserialize
     void PhysicConstraint::from_json(const json &j)
     {
-        m_json = j;
-    }
-
-    //! Serialization finished event
-    void PhysicConstraint::onSerializeFinished(Scene *scene)
-    {
         setType((ConstraintType)m_json.value("type", -1));
         setEnableCollisionBetweenBodies(m_json.value("enableCol", true));
         setOtherUUID(m_json.value("otherId", std::string()));
         setEnabled(m_json.value("enable", true));
         setBreakingImpulseThreshold(m_json.value("breakTs", std::numeric_limits<float>().max()));
+    }
 
-        // Serialization done, clear json
-        m_json.clear();
+    //! Serialization finished event
+    void PhysicConstraint::onSerializeFinished()
+    {
+        recreate();
     }
 
     //! Update property by key value

@@ -99,31 +99,6 @@ PyDoc_STRVAR(SceneObject_removeComponents_doc,
     "    False: if not removed\n"\
 );
 
-PyDoc_STRVAR(SceneObject_invoke_doc,
-	"Invoke scripts\'s method from current scene object.\n"\
-	"\n"\
-	"SceneObject().invoke(param: string|ScriptPath, param: string|FunctionName, param: Object|PyObject)\n"\
-	"\n"\
-	"Return:\n"\
-	"----------\n"\
-	"    0: if worked\n"\
-	"    -1: if not worked\n"\
-);
-
-PyDoc_STRVAR(SceneObject_getScript_doc,
-	"Get script from current scene object.\n"\
-	"\n"\
-	"SceneObject().getScript(path: string)\n"\
-	"\n"\
-	"Parameters\n"\
-	"----------\n"\
-	"    path : string\n"\
-	"        [Optional] Will return the Script specified by path, or the first Script if path is not specified.\n"\
-	"Return:\n"\
-	"    script: Script\n"\
-	"----------\n"\
-);
-
 PyDoc_STRVAR(SceneObject_getScene_doc,
 	"Get scene which contain the current object.\n"\
 	"\n"\

@@ -101,10 +101,10 @@ namespace ige::scene
         virtual void from_json(const json& j);
 
         //! Get root of scene
-        std::shared_ptr<SceneObject>& getRoot() { return m_root; };
+        std::shared_ptr<SceneObject> getRoot() { return m_root.expired() ? nullptr : m_root.lock(); };
 
         //! Get root UI scene
-        std::shared_ptr<SceneObject>& getRootUI() { return m_rootUI; };
+        std::shared_ptr<SceneObject> getRootUI() { return m_rootUI.expired() ? nullptr : m_rootUI.lock(); };
 
         //! Get Canvas
         std::shared_ptr<Canvas> getCanvas() { return m_canvas.expired() ? nullptr : m_canvas.lock(); };
@@ -136,7 +136,6 @@ namespace ige::scene
         Event<Resource*>& getResourceRemovedEvent() { return m_resourceRemovedEvent; }
         Event<Resource*>& getUIResourceAddedEvent() { return m_uiResourceAddedEvent; }
         Event<Resource*>& getUIResourceRemovedEvent() { return m_uiResourceRemovedEvent; }
-        Event<Scene*>& getSerializeFinishedEvent() { return m_serializeFinishedEvent; }
 
         //! Resource added/removed event
         void onResourceAdded(Resource* resource);
@@ -147,10 +146,7 @@ namespace ige::scene
         //! Prefab save/load
         bool isSavingPrefab() { return m_bIsSavingPrefab; }
         bool savePrefab(uint64_t objectId, const std::string& file);
-
-        std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file);
-        std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file, const Vec3& pos);
-        std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file, const Vec3& pos, const Quat& rot);
+        std::shared_ptr<SceneObject> loadPrefab(uint64_t parentId, const std::string& file, const Vec3& pos = { 0.f, 0.f, 0.f }, const Quat& rot = {0.f, 0.f, 0.f, 0.f}, const Vec3& scale = { 1.f, 1.f, 1.f });
 
         bool reloadAllPrefabs();
         bool reloadPrefabs(const std::string& prefabId);
@@ -240,10 +236,10 @@ namespace ige::scene
 
     protected:
         //! Scene root node
-        std::shared_ptr<SceneObject> m_root;
+        std::weak_ptr<SceneObject> m_root;
 
         //! UI root node
-        std::shared_ptr<SceneObject> m_rootUI;
+        std::weak_ptr<SceneObject> m_rootUI;
 
         //! Canvas
         std::weak_ptr<Canvas> m_canvas;
@@ -267,9 +263,6 @@ namespace ige::scene
         //! UI ShowCase
         Event<Resource*> m_uiResourceAddedEvent;
         Event<Resource*> m_uiResourceRemovedEvent;
-
-        //! Serialize event
-        Event<Scene*> m_serializeFinishedEvent;
 
         //! Cache active camera
         std::weak_ptr<CameraComponent> m_activeCamera;

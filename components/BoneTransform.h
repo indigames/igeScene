@@ -53,15 +53,15 @@ namespace ige::scene
         //! Can multiple edit
         inline virtual bool canMultiEdit() override { return false; }
 
+        //! Serialize finished event
+        virtual void onSerializeFinished() override;
+
     protected:
         //! Serialize
         virtual void to_json(json& j) const override;
 
         //! Deserialize
         virtual void from_json(const json& j) override;
-
-        //! Serialize finished event
-        virtual void onSerializeFinished(Scene* scene) override;
 
         //! SceneObject deleted event
         void onSceneObjectDeleted(SceneObject& sceneObject);

@@ -165,7 +165,7 @@ namespace ige::scene
     }
 
     //! Serialize finished event
-    void Canvas::onSerializeFinished(Scene* scene)
+    void Canvas::onSerializeFinished()
     {
         m_canvasSize = m_json.value("size", Vec2(560.f, 940.f));
         m_ScreenMatchMode = (ScreenMatchMode)m_json.value("screenmatchmode", (int)ScreenMatchMode::Expand);
@@ -179,7 +179,7 @@ namespace ige::scene
 
         updateCanvas();
 
-        Component::onSerializeFinished(scene);
+        Component::onSerializeFinished();
         m_json.clear();
     }
 

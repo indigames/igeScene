@@ -782,9 +782,9 @@ namespace ige::scene
     }
 
     //! Serialize finished event
-    void DynamicNavMesh::onSerializeFinished(Scene* scene)
+    void DynamicNavMesh::onSerializeFinished()
     {
-        NavMesh::onSerializeFinished(scene);
+        NavMesh::onSerializeFinished();
     }
 
     //! Update property by key value

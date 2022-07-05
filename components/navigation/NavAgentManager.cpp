@@ -198,7 +198,7 @@ namespace ige::scene
                 }
             }
 
-            if (!m_navMesh.lock()->initializeQuery())
+            if (m_navMesh.expired() || !m_navMesh.lock()->initializeQuery())
                 return false;
 
             // Initialize the crowd
