@@ -1,10 +1,14 @@
 import os
 import shutil
 import platform
-from conanfile import IgeConan
+from pathlib import Path
+import multiprocessing
+
+cpu_count = multiprocessing.cpu_count()
+project_dir = os.path.abspath(os.path.dirname(__file__))
 
 def setEnv(name, value):
-    if platform.system() == 'Windows':
+    if os.name == 'nt':
         os.system(f'set {name}={value}')
     else:
         os.system(f'export {name}={value}')
@@ -19,28 +23,55 @@ def safeRemove(rm_path):
     except:
         pass
 
+def _generateCMakeProject(platform, arch):
+    cmake_cmd = f'cmake {project_dir} -DCMAKE_BUILD_TYPE=Release '
+    if platform == "windows":
+        if arch == "x86":
+            cmake_cmd += f' -A Win32'
+        else:
+            cmake_cmd += f' -A X64'
+    elif platform == "android":
+        toolchain = Path(os.environ.get("ANDROID_NDK_ROOT")).absolute().as_posix() + '/build/cmake/android.toolchain.cmake'
+        if arch == "armv7":
+            cmake_cmd += f' -G Ninja -DCMAKE_TOOLCHAIN_FILE={toolchain} -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-21'
+        else:
+            cmake_cmd += f' -G Ninja -DCMAKE_TOOLCHAIN_FILE={toolchain} -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-21'
+    elif platform == "ios":
+        toolchain = Path(self.source_folder).absolute().as_posix() + '/cmake/ios.toolchain.cmake'
+        cmake_cmd += f' -G Xcode -DCMAKE_TOOLCHAIN_FILE={toolchain} -DIOS_DEPLOYMENT_TARGET=11.0 -DPLATFORM=OS64'
+    elif platform == "macos":
+        cmake_cmd += f' -G Xcode -DOSX=1'
+    elif platform == "emscripten":
+        toolchain = Path(os.environ.get("EMSCRIPTEN_ROOT_PATH")).absolute().as_posix() + '/cmake/Modules/Platform/Emscripten.cmake'
+        cmake_cmd += f' -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE={toolchain}'
+    else:
+        print(f'Configuration not supported: platform = {platform}, arch = {arch}')
+        exit(1)
+
+    os.system(cmake_cmd)
+
+def _buildCMakeProject(platform, arch):
+    platform_flags = f"-- -m" if platform == "windows" else "--parallel"
+    os.system(f'cmake --build . --config Release --target install {platform_flags}')
+
 def build(platform, arch):
-    safeRemove('build')
-    try:
-        os.mkdir('build')
-    except:
-        pass
-    os.chdir('build')
-    ret_code = os.system(f'conan install --update .. --profile ../cmake/profiles/{platform}_{arch}')
-    if ret_code != 0:
-        exit(1)
-
-    os.chdir('..')
-    ret_code = os.system('conan build . --build-folder build')
-    if ret_code != 0:
-        exit(1)
-
-    ret_code = os.system(f'conan export-pkg . {IgeConan.name}/{IgeConan.version}@ige/test --build-folder build --force')
-    if ret_code != 0:
-        exit(1)
+    os.chdir(project_dir)
+    build_dir = Path(os.path.join('build', platform, arch)).as_posix()
+    safeRemove(build_dir)
+    os.makedirs(build_dir)
+    os.chdir(build_dir)
+    _generateCMakeProject(platform, arch)
+    _buildCMakeProject(platform, arch)
+    os.chdir(project_dir)
+    prebuilt_dir = Path(os.path.join('prebuilt', platform, arch)).as_posix()
+    safeRemove(prebuilt_dir)
+    os.makedirs(prebuilt_dir)
+    install_dir = os.path.join(build_dir, 'install')
+    fnames = os.listdir(install_dir)
+    for fname in fnames:
+        shutil.move(os.path.join(install_dir, fname), prebuilt_dir)
 
 def main():
-    setEnv('CONAN_REVISIONS_ENABLED', '1')
     if platform.system() == 'Windows':
         build('windows', 'x86')
         build('windows', 'x86_64')
@@ -48,12 +79,10 @@ def main():
         build('android', 'x86_64')
         build('android', 'armv7')
         build('android', 'armv8')
+        build('emscripten', 'wasm')
     elif platform.system() == 'Darwin':
         build('macos', 'x86_64')
         build('ios', 'armv8')
-    ret_code = os.system(f'conan upload {IgeConan.name}/{IgeConan.version}@ige/test --remote ige-center  --all --check --confirm --retry 3 --retry-wait 60 --force')
-    if ret_code != 0:
-        exit(1)
 
 if __name__ == "__main__":
     main()

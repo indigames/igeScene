@@ -7,7 +7,7 @@ endif()
 if(${APP_STYLE} MATCHES "SHARED")
     set(TARGET_NAME igeScene)
     if (NOT DEFINED PYTHON_VERSION)
-        set(PYTHON_VERSION 3.7)
+        set(PYTHON_VERSION 3.9)
     endif()
 else()
     set(TARGET_NAME igeScene-static)
@@ -15,14 +15,17 @@ endif()
 
 project(${TARGET_NAME})
 
+OPTION(USE_PREBUILT_LIBS "Use prebuilt libraries" ON) # Enabled by default
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 # Modules and install path (required by conan)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
-set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
 
+# [IGE]: tweaks for platforms
 if(DEFINED ANDROID_PLATFORM)
     set (ANDROID 1)
     if(ANDROID_ABI STREQUAL "armeabi-v7a")
@@ -40,90 +43,87 @@ if(DEFINED ANDROID_PLATFORM)
         add_compile_options(-Og)
     endif()
 elseif(MSVC)
-    if(${APP_STYLE} MATCHES "SHARED")
-        set(CMAKE_CXX_FLAGS "/MD ${CMAKE_CXX_FLAGS}")
-        set(CMAKE_CXX_FLAGS_RELEASE "/MD /O2 /Ob2 /Zc:inline")
-        set(CMAKE_CXX_FLAGS_DEBUG "/MD /JMC /ZI /Od")
-    endif()
-    add_compile_options(/MP /std:c++17)
-elseif(APPLE)
+    add_compile_options(/MP)
+elseif(IOS)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         add_compile_options(-g0 -Ofast)
     endif()
+elseif(EMSCRIPTEN)
+    add_compile_options(-m32 -pthread -s USE_PTHREADS=1)
 endif()
+# [/IGE]
 
 if(${APP_STYLE} MATCHES "SHARED")
     find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
 else()
-    find_package(Python REQUIRED)
+    include(FindPython)
     set (Python3_INCLUDE_DIRS ${Python_INCLUDE_DIRS})
+    set (Python3_LIB_DIRS ${Python_LIB_DIRS})
     set (Python3_LIBRARIES ${Python_LIBRARIES})
 endif()
 
-find_package(taskflow REQUIRED)
-find_package(json REQUIRED)
-find_package(stb REQUIRED)
-find_package(SDL REQUIRED)
-find_package(numpy REQUIRED)
-find_package(pyxCore REQUIRED)
-find_package(igeCore REQUIRED)
-find_package(bullet REQUIRED)
-find_package(igeSound REQUIRED)
-find_package(igeEffekseer REQUIRED)
-find_package(igeNavigation REQUIRED)
+include(igeCore)
+include(igeVmath)
+include(igeBullet)
+include(igeEffekseer)
+include(igeNavigation)
+include(igeSound)
+
+include(Findtaskflow)
+include(Findstb)
+include(Findjson)
 
 
 file(GLOB_RECURSE SRC
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
-
-if(MSVC)
-    set (EXCLUDE_DIR
-        "/build"
-    )
-    foreach (TMP_PATH ${SRC})
-        foreach (TMP_DIR ${EXCLUDE_DIR})
-            string (FIND ${TMP_PATH} ${TMP_DIR} EXCLUDE_DIR_FOUND)
-            if (NOT ${EXCLUDE_DIR_FOUND} EQUAL -1)
-                list (REMOVE_ITEM SRC ${TMP_PATH})
-            endif ()
-        endforeach(TMP_DIR)
-    endforeach(TMP_PATH)
-endif()
 
 set(INCLUDES
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${Python3_INCLUDE_DIRS}"
-    "${numpy_INCLUDE_DIRS}"
-    "${bullet_INCLUDE_DIRS}"
-    "${igeBullet_INCLUDE_DIRS}"
-    "${igeVmath_INCLUDE_DIRS}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
     "${taskflow_INCLUDE_DIRS}"
+    "${Python3_INCLUDE_DIRS}"
+    "${igeBullet_INCLUDE_DIRS}"
+    "${igeCore_INCLUDE_DIRS}"
+    "${pyxCore_INCLUDE_DIRS}"
+    "${igeVmath_INCLUDE_DIRS}"
+    "${igeSound_INCLUDE_DIRS}"
+    "${igeEffekseer_INCLUDE_DIRS}"
+    "${igeNavigation_INCLUDE_DIRS}"
     "${stb_INCLUDE_DIRS}"
     "${json_INCLUDE_DIRS}"
-    "${pyxCore_INCLUDE_DIRS}"
-    "${pyxCore_INCLUDE_DIRS}/pyxcore"
-    "${pyxCore_INCLUDE_DIRS}/ThirdParty/GLEW"
-    "${igeCore_INCLUDE_DIRS}"
-    "${igeSound_INCLUDE_DIRS}"
-    "${igeSound_INCLUDE_DIRS}/ThirdParty/soloud/include"
-    "${igeEffekseer_INCLUDE_DIRS}"
-    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp"
-    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp/Effekseer"
-    "${igeNavigation_INCLUDE_DIRS}"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Detour/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourCrowd/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourTileCache/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
 )
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC})
 add_library(${TARGET_NAME} ${APP_STYLE} ${SRC})
-target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDES})
-target_compile_definitions(${TARGET_NAME} PRIVATE ${DEFINES} ${pyxCore_DEFINES})
+target_include_directories(${TARGET_NAME} PUBLIC ${INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${DEFINES} ${pyxCore_DEFINES})
 
+target_link_directories(${TARGET_NAME} PUBLIC
+    ${Python3_LIB_DIRS}
+    ${igeCore_LIB_DIRS}
+    ${pyxCore_LIB_DIRS}
+    ${igeVmath_LIB_DIRS}
+    ${igeBullet_LIB_DIRS}
+    ${igeEffekseer_LIB_DIRS}
+    ${igeNavigation_LIB_DIRS}
+    ${igeSound_LIB_DIRS}
+    ${stb_LIB_DIRS}
+)
+
+target_link_libraries(${TARGET_NAME}
+    ${Python3_LIBRARIES}
+    ${igeCore_LIBRARIES}
+    ${pyxCore_LIBRARIES}
+    ${igeVmath_LIBRARIES}
+    ${igeBullet_LIBRARIES}
+    ${igeEffekseer_LIBRARIES}
+    ${igeNavigation_LIBRARIES}
+    ${igeSound_LIBRARIES}
+    ${stb_LIBRARIES}
+)
 
 if(IOS OR ANDROID)
     target_compile_definitions(${TARGET_NAME} PRIVATE __EFFEKSEER_RENDERER_GLES3__)
@@ -153,19 +153,6 @@ if(${APP_STYLE} MATCHES "SHARED")
     endif()
 
     target_link_libraries(${TARGET_NAME}
-      ${Python3_LIBRARIES}
-      ${pyxCore_LIBRARIES}
-      ${igeCore_LIBRARIES}
-      ${numpy_LIBRARIES}
-      ${tracy_LIBRARIES}
-      ${bullet_LIBRARIES}
-      ${igeBullet_LIBRARIES}
-      ${igeVmath_LIBRARIES}
-      ${stb_LIBRARIES}
-      ${SDL_LIBRARIES}
-      ${igeSound_LIBRARIES}
-      ${igeEffekseer_LIBRARIES}
-      ${igeNavigation_LIBRARIES}
       user32
       Gdi32
       Crypt32
@@ -191,9 +178,9 @@ install(TARGETS
     PUBLIC_HEADER DESTINATION include
 )
 
-file(GLOB_RECURSE PUBLIC_INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h*")
+file(GLOB_RECURSE PUBLIC_INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*")
 foreach(HEADER ${PUBLIC_INCLUDE_FILES})
-    file(RELATIVE_PATH HEADER_RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/" "${HEADER}")
+    file(RELATIVE_PATH HEADER_RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src" "${HEADER}")
     get_filename_component(DIR ${HEADER_RELATIVE} DIRECTORY)
     install(FILES ${HEADER} DESTINATION include/${DIR})
 endforeach()

@@ -1,11 +1,3 @@
-import importlib
-
-try:
-    importlib.import_module('conans')
-except ImportError:
-    from pip._internal import main as _main
-    _main(['install', 'conan'])
-
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext as build_ext_orig
 import pathlib
@@ -17,8 +9,6 @@ import shutil
 
 from os import path
 here = path.abspath(path.dirname(__file__))
-
-from conanfile import IgeConan
 
 class CMakeExtension(Extension):
     def __init__(self, name):
@@ -56,31 +46,21 @@ class build_ext(build_ext_orig):
             os.makedirs(self.build_temp)
         os.chdir(str(build_temp))
 
-        conanProfile = None
         cmake_arch = None
-
         if sys.platform == 'win32':
             if sys.maxsize > 2 ** 32:
-                conanProfile = os.path.join(str(cwd), 'cmake', 'profiles', 'windows_x86_64')
                 cmake_arch = 'x64'
             else:
-                conanProfile = os.path.join(str(cwd), 'cmake', 'profiles', 'windows_x86')
                 cmake_arch = 'Win32'
-
-        if conanProfile:
-            self.spawn(['conan', 'install', f'--profile={conanProfile}', str(cwd), '--update', '--remote', 'ige-center'])
-        else:
-            self.spawn(['conan', 'install', '--update', '--remote', 'ige-center'])
-
-        if cmake_arch:
             self.spawn(['cmake', '-A', cmake_arch, str(cwd)] + cmake_args)
-        else:
-            self.spawn(['cmake', str(cwd)] + cmake_args)
+        elif sys.platform == "darwin":
+            return
+
+        if not self.dry_run:
+            self.spawn(['cmake', '--build', '.'] + build_args)
 
         ext_name = str(ext.name).split('.')[-1]
-        if not self.dry_run:
-            self.spawn(['cmake', '--build', '.', '--target', ext_name] + build_args)
-        pyd_path = os.path.join(build_temp, config, f'{ext_name}.pyd')
+        pyd_path = os.path.join(build_temp, 'Release', f'{ext_name}.pyd')
         extension_path = os.path.join(cwd, self.get_ext_fullpath(ext.name))
         extension_dir = os.path.dirname(extension_path)
         if not os.path.exists(extension_dir):
@@ -92,8 +72,8 @@ class build_ext(build_ext_orig):
         os.chdir(str(cwd))
 
 
-setup(name=IgeConan.name, version=IgeConan.version,
-      description='C++ Notification extension for 3D and 2D games.',
+setup(name='igeScene', version='0.1.0',
+      description='C++ Scene management extension for 3D and 2D games.',
       author=u'Indigames',
       author_email='dev@indigames.net',
       packages=find_packages(),
@@ -114,6 +94,6 @@ setup(name=IgeConan.name, version=IgeConan.version,
           'Operating System :: Microsoft :: Windows',
           'Topic :: Games/Entertainment',
       ],
-      keywords='Notification IAP IAB 3D game Indigames',
+      keywords='3D game Indigames',
       setup_requires=['wheel']
       )
