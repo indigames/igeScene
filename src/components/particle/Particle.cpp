@@ -63,7 +63,7 @@ namespace ige::scene
     void Particle::setPath(const std::string &path)
     {
         auto fsPath = fs::path(path);
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path)).string() : fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
 
         if (strcmp(m_path.c_str(), relPath.c_str()) != 0)

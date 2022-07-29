@@ -74,7 +74,7 @@ namespace ige::scene
     void AnimatorController::setBaseModelPath(const std::string& path)
     {
         auto fsPath = fs::path(path).replace_extension(".pyxf");
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path)).string() : fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
         if (m_baseModelPath.compare(relPath) != 0) {
             m_baseModelPath = relPath;
@@ -84,7 +84,7 @@ namespace ige::scene
     void AnimatorController::setPath(const std::string& path)
     {
         auto fsPath = fs::path(path);
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path)).string() : fsPath.string();
         if (relPath.size() == 0) relPath = fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
         if(m_path.compare(relPath) != 0) {
@@ -96,7 +96,7 @@ namespace ige::scene
     void AnimatorController::save(const std::string& path)
     {
         auto fsPath = fs::path(path).replace_extension(".anim");
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path)).string() : fsPath.string();
         if (relPath.size() == 0) relPath = fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
         if (m_path.compare(relPath) != 0) {

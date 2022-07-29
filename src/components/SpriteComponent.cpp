@@ -117,7 +117,7 @@ namespace ige::scene
     void SpriteComponent::setPath(const std::string &path)
     {
         auto fsPath = fs::path(path);
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path)).string() : fsPath.string();
         if (relPath.size() == 0) relPath = fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
 

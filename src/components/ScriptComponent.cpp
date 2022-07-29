@@ -166,7 +166,7 @@ namespace ige::scene
         if (!m_path.empty())
         {
             // Load the module from python source file
-            auto path = fs::absolute(fs::path(m_path));
+            auto path = fs::relative(fs::path(m_path));
             auto appendCmd = std::string("import sys\nsys.path.append('") + path.parent_path().string() + "')";
             std::replace(appendCmd.begin(), appendCmd.end(), '\\', '/');
             PyRun_SimpleString(appendCmd.c_str());
@@ -608,7 +608,9 @@ namespace ige::scene
             case json::value_t::array:
                 {
                     if (value.size() == 2) {
+                    #ifdef __cpp_exceptions
                         try {
+                    #endif
                             Vec2 vec;
                             value.get_to<Vec2>(vec);
                             auto vecObj = PyObject_New(vec_obj, _Vec2Type);
@@ -617,11 +619,15 @@ namespace ige::scene
                                 vecObj->d = 2;
                                 pyValue = (PyObject*)vecObj;
                             }
+                    #ifdef __cpp_exceptions
                         }
                         catch (std::exception ex) {}
+                    #endif
                     }
                     else if (value.size() == 3) {
+                    #ifdef __cpp_exceptions
                         try {
+                    #endif
                             Vec3 vec;
                             value.get_to<Vec3>(vec);
                             auto vecObj = PyObject_New(vec_obj, _Vec3Type);
@@ -630,11 +636,15 @@ namespace ige::scene
                                 vecObj->d = 3;
                                 pyValue = (PyObject*)vecObj;
                             }
+                    #ifdef __cpp_exceptions
                         }
                         catch (std::exception ex) {}
+                    #endif
                     }
                     else if (value.size() > 3) {
+                    #ifdef __cpp_exceptions
                         try {
+                    #endif
                             Vec4 vec;
                             value.get_to<Vec4>(vec);
                             auto vecObj = PyObject_New(vec_obj, _Vec4Type);
@@ -643,8 +653,10 @@ namespace ige::scene
                                 vecObj->d = 4;
                                 pyValue = (PyObject*)vecObj;
                             }
+                    #ifdef __cpp_exceptions
                         }
                         catch (std::exception ex) {}
+                    #endif
                     }
                 }
                 break;

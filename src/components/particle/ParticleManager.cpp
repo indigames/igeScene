@@ -15,7 +15,7 @@ namespace ige::scene
     ParticleManager::ParticleManager(SceneObject& owner, int maxParticlesNumber, bool enableCulling, int threadsNumber)
         : Component(owner), m_maxParticleNumber(maxParticlesNumber), m_bIsCullingEnabled(enableCulling), m_numThreads(threadsNumber)
     {
-    #if defined(_MOBILE)
+    #if defined(_MOBILE) || defined(__EMSCRIPTEN__)
         m_renderer = EffekseerRendererGL::Renderer::Create(m_maxParticleNumber, EffekseerRendererGL::OpenGLDeviceType::OpenGLES3);
     #else
         m_renderer = EffekseerRendererGL::Renderer::Create(m_maxParticleNumber, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
@@ -75,11 +75,13 @@ namespace ige::scene
             m_manager->CreateCullingWorld(m_cullingWorldSize.X(), m_cullingWorldSize.Y(), m_cullingWorldSize.Y(), m_cullingLayerNumber);
         }
 
+    #ifndef __EMSCRIPTEN__
         // Set worker threads
         if(m_numThreads > 1)
         {
             m_manager->LaunchWorkerThreads(m_numThreads);
         }
+    #endif
 
         // Replay particles
         for (auto& particle : m_particles)

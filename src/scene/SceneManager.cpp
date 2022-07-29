@@ -45,14 +45,13 @@ namespace ige::scene
         // Initialize python runtime
         auto root = m_projectPath;
         std::replace(root.begin(), root.end(), '\\', '/');
+        FileIO::Instance().SetRoot(root.c_str());
+        fs::current_path(m_projectPath);
+
         std::string path = root;
         wchar_t pathw[1024];
         mbstowcs(pathw, path.c_str(), 1024);
         Py_SetPythonHome(pathw);
-
-        FileIO::Instance().SetRoot(path.c_str());
-        path.append(DELIMITER);
-        path.append(root);
 
 #if EDITOR_MODE
         root = m_editorPath;
@@ -65,7 +64,7 @@ namespace ige::scene
 
         path.append(DELIMITER);
         path.append(root);
-        path.append("/PyLib/site-packages");
+        path.append("/site-packages");
 
         mbstowcs(pathw, path.c_str(), 1024);
         Py_SetPath(pathw);
@@ -133,8 +132,9 @@ namespace ige::scene
 
     void SceneManager::preRender(Camera* camera)
     {
-        if (m_currScene)
+        if (m_currScene) {
             m_currScene->preRender(camera);
+        }
     }
 
     void SceneManager::render(RenderTarget* fbo, bool skipBeginEnd)
@@ -228,13 +228,7 @@ namespace ige::scene
 
     void SceneManager::setCurrentScene(const std::shared_ptr<Scene>& scene)
     {
-        if (m_currScene == scene) return;
-
-        auto it = std::find(m_scenes.begin(), m_scenes.end(), scene);
-        if (it != m_scenes.end())
-        {
-            m_currScene = scene;
-        }
+        m_currScene = scene;
     }
 
     void SceneManager::setCurrentScene(const std::string& name)
@@ -257,7 +251,7 @@ namespace ige::scene
         PyObject* modules = PyObject_GetAttrString(sysModule, "modules");
         for (const auto& entry : fs::recursive_directory_iterator(m_projectPath + "/scripts")) {
             if (entry.is_regular_file() && entry.path().extension().string().compare(".py") == 0) {
-                auto path = fs::absolute(entry.path());
+                auto path = fs::relative(entry.path());
                 auto pyc = path.parent_path().append("__pycache__").append(path.stem().string() + ".cpython-39.pyc");
                 if (fs::exists(pyc)) fs::remove(pyc);
                 PyObject* key = nullptr, * value = nullptr;
@@ -278,7 +272,7 @@ namespace ige::scene
                         }
                         break;
                     }
-                } 
+                }
             }
         }
 
@@ -309,7 +303,7 @@ namespace ige::scene
 
         if (ext.string() != ".tmp")
         {
-            auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+            auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path)).string() : fsPath.string();
             std::replace(relPath.begin(), relPath.end(), '\\', '/');
             scene->setPath(relPath);
         }
@@ -334,7 +328,7 @@ namespace ige::scene
 
             if (path.find(".tmp") == std::string::npos)
             {
-                auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()).string() : fsPath.string();
+                auto relPath = fsPath.is_absolute() ? fs::relative(fsPath).string() : fsPath.string();
                 std::replace(relPath.begin(), relPath.end(), '\\', '/');
                 m_currScene->setPath(relPath);
             }

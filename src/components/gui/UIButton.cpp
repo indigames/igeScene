@@ -198,7 +198,7 @@ void UIButton::setAnimationMode(AnimationMode value)
 void UIButton::setTexturePath(const std::string& path, ButtonState setState)
 {
     auto fsPath = fs::path(path);
-    auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+    auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path)).string() : fsPath.string();
     std::replace(relPath.begin(), relPath.end(), '\\', '/');
     switch (setState)
     {

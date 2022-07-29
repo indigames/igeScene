@@ -101,7 +101,7 @@ namespace ige::scene
     void EditableFigureComponent::setPath(const std::string &path)
     {
         auto fsPath = fs::path(path);
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path)).string() : fsPath.string();
         if(relPath.size() == 0) relPath = fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
 
@@ -396,7 +396,7 @@ namespace ige::scene
         auto fsPath = fs::path(texPath);
         fsPath = fsPath.extension().compare(".pyxi") == 0 ? fsPath : fsPath.parent_path().append(fsPath.stem().string() + ".pyxi");
 
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(texPath), fs::current_path()).string() : fsPath.string();
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(texPath)).string() : fsPath.string();
         if (relPath.size() == 0) relPath = fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
 

@@ -239,10 +239,13 @@ namespace ige::scene
 
     void Scene::update(float dt)
     {
-        for(int i = m_objects.size() - 1; i >= 0; i--)
+        for (int i = m_objects.size() - 1; i >= 0; i--) {
             m_objects[i]->onUpdate(dt);
+        }
 
-        if(m_tweenManager) m_tweenManager->update(dt);
+        if (m_tweenManager) {
+            m_tweenManager->update(dt);
+        }
 
         resetFlag();
 
@@ -296,22 +299,24 @@ namespace ige::scene
         }
 
         // Render shadow before actually render objects
-        auto renderContext = RenderContext::InstancePtr();
-        if (renderContext) {
-            renderContext->BeginScene(m_shadowFBO, Vec4(1.f, 1.f, 1.f, 1.f), true, true);
-            m_showcase->Update(0.f);
-            if (camera) {
-                camera->Render();
-            }
-            else if (!m_activeCamera.expired()) {
-                m_activeCamera.lock()->onRender();
-            }
-            m_showcase->Render(RenderPassFilter::ShadowPass);
+        if (m_shadowFBO) {
+            auto renderContext = RenderContext::InstancePtr();
+            if (renderContext) {
+                renderContext->BeginScene(m_shadowFBO, Vec4(1.f, 1.f, 1.f, 1.f), true, true);
+                m_showcase->Update(0.f);
+                if (camera) {
+                    camera->Render();
+                }
+                else if (!m_activeCamera.expired()) {
+                    m_activeCamera.lock()->onRender();
+                }
+                m_showcase->Render(RenderPassFilter::ShadowPass);
 
-            renderContext->BeginPass(TransparentPass);
-            m_shadowEdgeMask->Pose();
-            m_shadowEdgeMask->Render();
-            renderContext->EndScene();
+                renderContext->BeginPass(TransparentPass);
+                m_shadowEdgeMask->Pose();
+                m_shadowEdgeMask->Render();
+                renderContext->EndScene();
+            }
         }
     }
 
@@ -515,7 +520,7 @@ namespace ige::scene
     void Scene::setPath(const std::string& path)
     {
         auto fsPath = fs::path(path);
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path)).string() : fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
         m_path = relPath;
     }
@@ -788,7 +793,7 @@ namespace ige::scene
         if (m_shadowTextureSize != size)
         {
             m_shadowTextureSize = size;
-            m_shadowFBO->Resize(size[0], size[1]);
+            if(m_shadowFBO) m_shadowFBO->Resize(size[0], size[1]);
         }
     }
 
@@ -957,7 +962,7 @@ namespace ige::scene
     bool Scene::reloadResource(const std::string& path) {
 
         auto fsPath = fs::path(path);
-        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path)).string() : fsPath.string();
         if (relPath.size() == 0) relPath = fsPath.string();
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
 

@@ -254,13 +254,17 @@ namespace ige::scene {
         json jObj;
         to_json(jObj, *this);
         auto fsPath = fs::path(path).replace_extension(".anim");
+#ifdef __cpp_exceptions
         try {
+#endif
             std::ofstream file(fsPath.string());
             file << std::setw(2) << jObj << std::endl;
             file.close();
             return true;
+#ifdef __cpp_exceptions
         }
         catch (std::exception e) {}
+#endif
         return false;
     }
 

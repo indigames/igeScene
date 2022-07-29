@@ -55,8 +55,10 @@ float TweenValue::operator[](int index) const
         return z;
     case 3:
         return w;
+#ifdef __cpp_exceptions
     default:
         throw "Index out of bounds: " + std::to_string(index);
+#endif
     }
 }
 
@@ -72,8 +74,10 @@ float& TweenValue::operator[](int index)
         return z;
     case 3:
         return w;
+#ifdef __cpp_exceptions
     default:
         throw "Index out of bounds: " + std::to_string(index);
+#endif
     }
 }
 

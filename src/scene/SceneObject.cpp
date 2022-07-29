@@ -1141,13 +1141,13 @@ namespace ige::scene
         m_bIsInteractable = j.value("interactable", false);
 
         auto jComps = j.at("comps");
-        for (auto it : jComps)
+        for (const auto& it : jComps)
         {
             auto key = it.at(0);
             auto val = it.at(1);
             auto comp = createComponent(key);
             if (comp) {
-                val.get_to(*comp);
+                comp->from_json(val);
             }
         }
 

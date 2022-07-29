@@ -25,33 +25,7 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
 
-# [IGE]: tweaks for platforms
-if(DEFINED ANDROID_PLATFORM)
-    set (ANDROID 1)
-    if(ANDROID_ABI STREQUAL "armeabi-v7a")
-        add_compile_options(-marm -march=armv7-a -mtune=cortex-a15 -mfpu=neon-fp16 -mfloat-abi=softfp)
-    elseif(ANDROID_ABI STREQUAL "x86")
-        add_compile_options(-march=atom -m32 -msse -msse2 -msse3 -mssse3 -mfpmath=sse -mstackrealign)
-    elseif(ANDROID_ABI STREQUAL "arm64-v8a")
-        add_compile_options(-march=armv8-a+simd+sve -mtune=cortex-a53 -D__ARM_NEON -D__ARM_NEON__)
-    elseif(ANDROID_ABI STREQUAL "x86_64")
-        add_compile_options(-march=atom -m64 -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mfpmath=sse)
-    endif()
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        add_compile_options(-g0 -Ofast)
-    else(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        add_compile_options(-Og)
-    endif()
-elseif(MSVC)
-    add_compile_options(/MP)
-elseif(IOS)
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        add_compile_options(-g0 -Ofast)
-    endif()
-elseif(EMSCRIPTEN)
-    add_compile_options(-m32 -pthread -s USE_PTHREADS=1)
-endif()
-# [/IGE]
+include(compiler_options)
 
 if(${APP_STYLE} MATCHES "SHARED")
     find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
@@ -62,17 +36,15 @@ else()
     set (Python3_LIBRARIES ${Python_LIBRARIES})
 endif()
 
+include(Findstb)
+include(Findjson)
+
 include(igeCore)
 include(igeVmath)
 include(igeBullet)
 include(igeEffekseer)
 include(igeNavigation)
 include(igeSound)
-
-include(Findtaskflow)
-include(Findstb)
-include(Findjson)
-
 
 file(GLOB_RECURSE SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
@@ -83,7 +55,6 @@ file(GLOB_RECURSE SRC
 
 set(INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
-    "${taskflow_INCLUDE_DIRS}"
     "${Python3_INCLUDE_DIRS}"
     "${igeBullet_INCLUDE_DIRS}"
     "${igeCore_INCLUDE_DIRS}"
