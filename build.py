@@ -37,7 +37,7 @@ def _generateCMakeProject(target, arch):
         else:
             cmake_cmd += f' -G Ninja -DCMAKE_TOOLCHAIN_FILE={toolchain} -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-21'
     elif target == "ios":
-        toolchain = Path(self.source_folder).absolute().as_posix() + '/cmake/ios.toolchain.cmake'
+        toolchain = Path(project_dir).absolute().as_posix() + '/../cmake/ios.toolchain.cmake'
         cmake_cmd += f' -G Xcode -DCMAKE_TOOLCHAIN_FILE={toolchain} -DIOS_DEPLOYMENT_TARGET=11.0 -DPLATFORM=OS64'
     elif target == "macos":
         cmake_cmd += f' -G Xcode -DOSX=1'
@@ -72,7 +72,6 @@ def build(target, arch):
         shutil.move(os.path.join(install_dir, fname), prebuilt_dir)
 
 def main():
-    safeRemove('prebuilt')
     if platform.system() == 'Windows':
         build('windows', 'x86_64')
         build('android', 'armv7')
