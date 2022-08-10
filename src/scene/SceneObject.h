@@ -418,7 +418,7 @@ namespace ige::scene
     inline std::shared_ptr<T> SceneObject::addComponent(Args &&... args)
     {
         static_assert(std::is_base_of<Component, T>::value, "T should derive from Component");
-        auto instance = std::make_shared<T>(*this, args...);
+        auto instance = std::make_shared<T>(*this, std::forward<Args>(args)...);
         addComponent(instance);
         return instance;
     }

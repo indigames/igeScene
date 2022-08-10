@@ -23,8 +23,12 @@
 
 namespace ige::scene
 {
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__) || TARGET_OS_IPHONE
+    constexpr auto GLSL_VERSION = "#version 300 es";
+#else
+    constexpr auto GLSL_VERSION = "#version 330";
+#endif
     auto line_VShader = R"(
-#version 300 es
 precision mediump float;
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 color;
@@ -38,7 +42,6 @@ void main()
 )";
 
     auto line_FShader = R"(
-#version 300 es
 precision mediump float;
 in vec4 vcolor;
 out vec4 frag_color;
@@ -68,7 +71,9 @@ void main()
         GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
         // Compile Vertex Shader
-        glShaderSource(vertexShaderID, 1, &vertexShaderCode, NULL);
+        auto code = std::string(GLSL_VERSION) + vertexShaderCode;
+        auto vsh = code.c_str();
+        glShaderSource(vertexShaderID, 1, &vsh, NULL);
         glCompileShader(vertexShaderID);
 
         // Check Vertex Shader
@@ -82,7 +87,9 @@ void main()
         }
 
         // Compile Fragment Shader
-        glShaderSource(fragmentShaderID, 1, &fragmentShaderCode, NULL);
+        code = std::string(GLSL_VERSION) + fragmentShaderCode;
+        auto fsh = code.c_str();
+        glShaderSource(fragmentShaderID, 1, &fsh, NULL);
         glCompileShader(fragmentShaderID);
 
         // Check Fragment Shader

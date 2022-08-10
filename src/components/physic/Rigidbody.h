@@ -348,7 +348,7 @@ namespace ige::scene
     inline std::shared_ptr<T> Rigidbody::addConstraint(Args &&... args)
     {
         static_assert(std::is_base_of<PhysicConstraint, T>::value, "T should derive from PhysicConstraint");
-        auto instance = std::make_shared<T>(*this, args...);
+        auto instance = std::make_shared<T>(*this, std::forward<Args>(args)...);
         m_constraints.push_back(instance);
         return instance;
     }

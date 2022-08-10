@@ -89,7 +89,7 @@ namespace ige::scene
     PyObject* Scene_createObject(PyObject_Scene *self, PyObject* args)
     {
         if (self->scene.expired()) Py_RETURN_NONE;
-        char* name = "";
+        char* name = nullptr;
         PyObject* parentObj = nullptr;
         if (PyArg_ParseTuple(args, "sO", &name, &parentObj)) {
             if (parentObj && parentObj->ob_type == &PyTypeObject_SceneObject) {
@@ -105,8 +105,8 @@ namespace ige::scene
     // Create object from Prefab
     PyObject* Scene_loadPrefab(PyObject_Scene* self, PyObject* args) {
         if (self->scene.expired()) Py_RETURN_NONE;
-        char* path = "";
-        char* name = "";
+        char* path = nullptr;
+        char* name = nullptr;
         PyObject* parentObj = nullptr;
         PyObject* position = nullptr;
         PyObject* rotation = nullptr;

@@ -80,7 +80,7 @@ namespace ige::scene
         virtual bool removeAllObjects();
 
         //! Remove scene object
-        virtual bool removeObject(std::shared_ptr<SceneObject>& obj);
+        virtual bool removeObject(std::shared_ptr<SceneObject> obj);
 
         //! Remove scene object by its name
         virtual bool removeObjectById(uint64_t id);

@@ -1,4 +1,4 @@
-﻿#include <algorithm>
+#include <algorithm>
 #include <cstdlib>
 #include <ctime>
 #include <iomanip>
@@ -424,15 +424,11 @@ namespace ige::scene
 
     bool Scene::removeAllObjects()
     {
-        while (!m_objects.empty()) {
-            auto& obj = m_objects.back();
-            m_objects.pop_back();
-            obj = nullptr;
-        }
+        m_objects.clear();
         return true;
     }
 
-    bool Scene::removeObject(std::shared_ptr<SceneObject>& obj)
+    bool Scene::removeObject(std::shared_ptr<SceneObject> obj)
     {
         if (!obj) return false;
         obj->setParent(nullptr);
