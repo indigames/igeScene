@@ -424,7 +424,8 @@ namespace ige::scene
 
     bool Scene::removeAllObjects()
     {
-        m_objects.clear();
+        while (!m_objects.empty()) 
+            m_objects.pop_back();
         return true;
     }
 

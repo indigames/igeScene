@@ -46,10 +46,9 @@ namespace ige::scene
         m_onDestroyedEvent.invoke(*this);
 
         if (!m_manager.expired()) {
-            auto engine = getManager()->getEngine();
-            engine->stop(m_handle);
+            getManager()->getEngine()->stop(m_handle);
             m_handle = 0;
-            m_audioSource.reset(); // LEAK: it crash here with mutex lock
+            m_audioSource.reset();
             m_manager.reset();
         }
     }
