@@ -60,7 +60,7 @@ class build_ext(build_ext_orig):
             self.spawn(['cmake', '--build', '.'] + build_args)
 
         ext_name = str(ext.name).split('.')[-1]
-        pyd_path = os.path.join(build_temp, 'Release', f'{ext_name}.pyd')
+        pyd_path = os.path.join(build_temp, 'bin' if sys.platform == "win32" else 'lib', config, f'{ext_name}.pyd')
         extension_path = os.path.join(cwd, self.get_ext_fullpath(ext.name))
         extension_dir = os.path.dirname(extension_path)
         if not os.path.exists(extension_dir):
@@ -72,7 +72,7 @@ class build_ext(build_ext_orig):
         os.chdir(str(cwd))
 
 
-setup(name='igeScene', version='0.1.0',
+setup(name='igeScene', version='0.2.0',
       description='C++ Scene management extension for 3D and 2D games.',
       author=u'Indigames',
       author_email='dev@indigames.net',
