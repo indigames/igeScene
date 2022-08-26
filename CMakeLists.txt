@@ -119,33 +119,74 @@ if(${APP_STYLE} MATCHES "SHARED")
         ${TARGET_NAME}
         PROPERTIES
             PREFIX ""
+            SUFFIX ".pyd"
             OUTPUT_NAME ${TARGET_NAME}
             LINKER_LANGUAGE C
     )
 
     if(MSVC)
-        set_target_properties(
-            ${TARGET_NAME}
-            PROPERTIES
-            SUFFIX ".pyd"
+        target_link_libraries(${TARGET_NAME}
+            user32
+            Gdi32
+            Crypt32
+            dinput8
+            dxguid
+            winmm
+            imm32
+            ole32
+            oleaut32
+            shell32
+            version
+            uuid
+            Setupapi
+        )
+    elseif(APPLE)
+        target_link_libraries(${TARGET_NAME} z c++abi c++ iconv)
+        find_library(AUDIOTOOLBOX AudioToolBox)
+        find_library(COREAUDIO CoreAudio)
+        find_library(COREBLUETOOTH CoreBluetooth)
+        find_library(COREFOUNDATION CoreFoundation)
+        find_library(COREVIDEO CoreVideo)
+        find_library(COREHAPTICS CoreHaptics)
+        find_library(GAMECONTROLLER GameController)
+        find_library(OPENGL OpenGL)
+        find_library(CARBON Carbon)
+        find_library(COCOA Cocoa)
+        find_library(IOKIT IOKit)
+        find_library(FORCEFEEDBACK ForceFeedback)
+        find_library(METAL Metal)
+        target_link_libraries(${TARGET_NAME} 
+            ${AUDIOTOOLBOX}
+            ${COREAUDIO}
+            ${COREBLUETOOTH}
+            ${COREFOUNDATION}
+            ${COREVIDEO}
+            ${COREHAPTICS}
+            ${GAMECONTROLLER}
+            ${OPENGL}
+            ${CARBON}
+            ${COCOA}
+            ${IOKIT}
+            ${FORCEFEEDBACK}
+            ${METAL}
         )
     endif()
-
-    target_link_libraries(${TARGET_NAME}
-      user32
-      Gdi32
-      Crypt32
-      dinput8
-      dxguid
-      winmm
-      imm32
-      ole32
-      oleaut32
-      shell32
-      version
-      uuid
-      Setupapi
-    )
+    file(GLOB DLLS "${PVRTEXLIB_LIB_DIRS}/*.d*")
+    foreach(dll IN LISTS DLLS)
+        add_custom_command(
+            TARGET ${TARGET_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${dll}" $<TARGET_FILE_DIR:${TARGET_NAME}>
+        )
+        if(OSX)
+            get_filename_component(DYLIB ${dll} NAME)
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+                COMMAND ${CMAKE_INSTALL_NAME_TOOL} -id @loader_path/${DYLIB} $<TARGET_FILE_DIR:${TARGET_NAME}>/${DYLIB})
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+                COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @executable_path/../lib/${DYLIB} @loader_path/${DYLIB} $<TARGET_FILE:${TARGET_NAME}>)
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+                COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @executable_path/${DYLIB} @loader_path/${DYLIB} $<TARGET_FILE:${TARGET_NAME}>)
+        endif()
+    endforeach()
 endif()
 
 # Install Targets

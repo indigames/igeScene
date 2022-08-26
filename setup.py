@@ -54,12 +54,11 @@ class build_ext(build_ext_orig):
                 cmake_arch = 'Win32'
             self.spawn(['cmake', '-A', cmake_arch, str(cwd)] + cmake_args)
         elif sys.platform == "darwin":
-            return
-
-        if not self.dry_run:
-            self.spawn(['cmake', '--build', '.'] + build_args)
+            self.spawn(['cmake', '-G', 'Xcode', '-DOSX=1', '-DCMAKE_OSX_ARCHITECTURE=x86_64', str(cwd)] + cmake_args)
 
         ext_name = str(ext.name).split('.')[-1]
+        if not self.dry_run:
+            self.spawn(['cmake', '--build', '.', '--target', ext_name] + build_args)
         pyd_path = os.path.join(build_temp, 'bin' if sys.platform == "win32" else 'lib', config, f'{ext_name}.pyd')
         extension_path = os.path.join(cwd, self.get_ext_fullpath(ext.name))
         extension_dir = os.path.dirname(extension_path)
@@ -67,12 +66,19 @@ class build_ext(build_ext_orig):
             os.makedirs(extension_dir)
         shutil.move(pyd_path, extension_path)
 
+        # Copy additional dlls
+        for root, dirs, files in os.walk(os.path.join(build_temp, 'lib', config)):
+            for file in files:
+                if file.endswith(".dll") or file.endswith(".dylib"):
+                    if not os.path.exists(os.path.join(extension_dir, os.path.basename(file))):
+                        shutil.copy(os.path.join(root, file), extension_dir)
+
         # Troubleshooting: if fail on line above then delete all possible
         # temporary CMake files including "CMakeCache.txt" in top level dir.
         os.chdir(str(cwd))
 
 
-setup(name='igeScene', version='0.2.0',
+setup(name='igeScene', version='0.2.1',
       description='C++ Scene management extension for 3D and 2D games.',
       author=u'Indigames',
       author_email='dev@indigames.net',
@@ -95,5 +101,7 @@ setup(name='igeScene', version='0.2.0',
           'Topic :: Games/Entertainment',
       ],
       keywords='3D game Indigames',
+      package_data={'igeScene': ['*.dll', '*.dylib']},
+      include_package_data=True,
       setup_requires=['wheel']
       )
