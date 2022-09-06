@@ -33,17 +33,29 @@ def _generateCMakeProject(target, arch):
     elif target == "android":
         toolchain = Path(os.environ.get("ANDROID_NDK_ROOT")).absolute().as_posix() + '/build/cmake/android.toolchain.cmake'
         if arch == "armv7":
-            cmake_cmd += f' -G Ninja -DCMAKE_TOOLCHAIN_FILE={toolchain} -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-21'
+            cmake_cmd += f' -G Ninja -DCMAKE_TOOLCHAIN_FILE="{toolchain}" -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-21'
         else:
-            cmake_cmd += f' -G Ninja -DCMAKE_TOOLCHAIN_FILE={toolchain} -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-21'
+            cmake_cmd += f' -G Ninja -DCMAKE_TOOLCHAIN_FILE="{toolchain}" -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-21'
     elif target == "ios":
         toolchain = Path(project_dir).absolute().as_posix() + '/../cmake/ios.toolchain.cmake'
-        cmake_cmd += f' -G Xcode -DCMAKE_TOOLCHAIN_FILE={toolchain} -DIOS_DEPLOYMENT_TARGET=11.0 -DPLATFORM=OS64'
+        cmake_cmd += f' -G Xcode -DCMAKE_TOOLCHAIN_FILE="{toolchain}" -DIOS_DEPLOYMENT_TARGET=11.0 -DPLATFORM=OS64'
     elif target == "macos":
         cmake_cmd += f' -G Xcode -DOSX=1'
     elif target == "emscripten":
+        if os.name == 'nt':
+            if os.environ['EMSDK'] is not None and os.path.exists(os.environ['EMSDK']):
+                os.environ['EMSCRIPTEN_ROOT_PATH'] = os.path.join(os.environ['EMSDK'], 'upstream/emscripten')
+            else:
+                print('EMSDK is not found, please run "conan install emscripten"')
+                os._exit(-1)
+        else:
+            os.environ['PATH'] = os.environ['PATH'] + ':/usr/local/bin'
+            os.environ['EMSCRIPTEN_ROOT_PATH'] = '/usr/local/opt/emscripten/libexec'
+            if not os.path.exists(os.environ['EMSCRIPTEN_ROOT_PATH']):
+                print('EMSDK is not found, please run "brew install emscripten"')
+                os._exit(-1)
         toolchain = Path(os.environ.get("EMSCRIPTEN_ROOT_PATH")).absolute().as_posix() + '/cmake/Modules/Platform/Emscripten.cmake'
-        cmake_cmd += f' -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE={toolchain}'
+        cmake_cmd += f' -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE="{toolchain}"'
     else:
         print(f'Configuration not supported: platform = {target}, arch = {arch}')
         exit(1)
@@ -73,9 +85,9 @@ def build(target, arch):
 
 def main():
     if platform.system() == 'Windows':
-        build('windows', 'x86_64')
-        build('android', 'armv7')
-        build('android', 'armv8')
+        # build('windows', 'x86_64')
+        # build('android', 'armv7')
+        # build('android', 'armv8')
         build('emscripten', 'wasm')
     elif platform.system() == 'Darwin':
         build('macos', 'x86_64')
