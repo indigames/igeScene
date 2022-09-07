@@ -85,9 +85,9 @@ def build(target, arch):
 
 def main():
     if platform.system() == 'Windows':
-        # build('windows', 'x86_64')
-        # build('android', 'armv7')
-        # build('android', 'armv8')
+        build('windows', 'x86_64')
+        build('android', 'armv7')
+        build('android', 'armv8')
         build('emscripten', 'wasm')
     elif platform.system() == 'Darwin':
         build('macos', 'x86_64')
